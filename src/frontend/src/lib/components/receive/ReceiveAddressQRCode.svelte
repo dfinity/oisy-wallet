@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,6 +25,6 @@
 	<ReceiveQRCode address={address ?? ''} />
 </div>
 
-<button class="secondary full center mt-8 text-center" on:click={() => dispatch('icBack')}
-	>{$i18n.core.text.back}</button
+<Button colorStyle="secondary" fullWidth styleClass="mt-8" on:click={() => dispatch('icBack')}
+	>{$i18n.core.text.back}</Button
 >

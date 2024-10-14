@@ -1,15 +1,12 @@
 @use '../mixins/media';
 @use '../mixins/button';
 
-button {
+button,
+a.as-button {
 	display: flex;
 	align-items: center;
 
 	gap: var(--padding-1_5x);
-
-	&:not([disabled]) {
-		cursor: pointer;
-	}
 
 	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
@@ -23,23 +20,30 @@ button {
 
 	--button-padding: var(--padding-2x) var(--padding-3x);
 
+	&:not([disabled]) {
+		cursor: pointer;
+	}
+
 	&.primary,
 	&.secondary,
-	&.secondary-alt {
-		justify-content: flex-start;
+	&.tertiary {
+		justify-content: center;
 
 		padding: var(--button-padding);
-	}
 
-	// TODO: check with Design team if this class is still needed
-	&.secondary-alt,
-	&.user {
-		border: 1px solid var(--color-blue);
+		&.icon {
+			--button-border-radius: var(--border-radius-sm-1_5x);
+			--button-padding: var(--padding);
+		}
+
+		&.padding-sm {
+			--button-padding: var(--padding-1_5x) var(--padding-2x);
+		}
 	}
 
 	&.primary,
 	&.secondary,
-	&.secondary-alt {
+	&.tertiary {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -49,10 +53,9 @@ button {
 			opacity: 1;
 			cursor: not-allowed;
 
-			&:hover,
-			&:active {
-				background: var(--color-grey);
-				color: var(--color-white);
+			&.tertiary {
+				background: var(--color-white);
+				color: var(--color-grey);
 			}
 		}
 
@@ -63,9 +66,23 @@ button {
 				0 0 0 2px var(--color-white),
 				0 0 0 4px var(--color-blue-ribbon);
 		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+			box-shadow: none;
+		}
+
+		&[active],
+		&:active {
+			&[focus],
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
+		}
 	}
 
-	&.primary {
+	&.primary:not([disabled]):not(.disabled) {
 		background: var(--color-blue-ribbon);
 		color: var(--color-white);
 
@@ -78,7 +95,7 @@ button {
 		}
 	}
 
-	&.secondary {
+	&.secondary:not([disabled]):not(.disabled) {
 		background: var(--color-zumthor);
 		color: var(--color-primary);
 
@@ -91,77 +108,38 @@ button {
 		}
 	}
 
-	&.secondary-alt {
-		background: var(--color-cetacean-blue);
-		color: var(--color-white);
-	}
+	&.tertiary:not([disabled]):not(.disabled) {
+		background: var(--color-white);
 
-	&.hero {
-		justify-content: center;
+		&:hover {
+			color: var(--color-primary);
+		}
 
-		background: var(--color-off-white);
-		color: var(--color-blue);
+		&:active {
+			background: var(--color-onahau);
+			color: currentColor;
+		}
 
-		padding: var(--padding-1_5x) var(--padding-3x);
+		&.link {
+			color: var(--color-primary);
 
-		font-weight: var(--font-weight-bold);
+			&:hover {
+				color: var(--color-secondary);
+			}
+		}
 	}
 
 	&.primary,
-	&.secondary,
-	&.secondary-alt {
+	&.secondary {
 		&.full {
 			width: 100%;
-		}
-
-		&.center {
-			justify-content: center;
 		}
 	}
 
 	&.text {
 		&:hover,
 		&:active {
-			color: var(--color-blue);
-		}
-	}
-
-	&.wallet-connect {
-		background: var(--color-wallet-connect);
-		border: 1px solid var(--color-wallet-connect);
-
-		padding: var(--button-padding);
-	}
-
-	&.wallet-connect {
-		&.icon {
-			padding: 0;
-			border-radius: 50%;
-
-			width: var(--padding-6x);
-			height: var(--padding-6x);
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			span:not(.block) {
-				display: none;
-			}
-
-			@include media.min-width(medium) {
-				&.desktop-wide {
-					padding: var(--button-padding);
-					border-radius: var(--button-border-radius);
-
-					width: inherit;
-					height: inherit;
-
-					span {
-						display: block;
-					}
-				}
-			}
+			color: var(--color-blue-ribbon);
 		}
 	}
 

@@ -20,8 +20,6 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import type { IcToken } from '$icp/types/ic';
 	import type { IcTransferParams } from '$icp/types/ic-send';
-	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -53,16 +51,19 @@
 		trackTimedEventError
 	} from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	/**
 	 * Props
 	 */
 
+	export let source: string;
 	export let currentStep: WizardStep | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
@@ -219,11 +220,11 @@
 <EthereumFeeContext {networkId}>
 	<BitcoinFeeContext {amount} {networkId}>
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
-			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} />
+			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} {source} />
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan>
+			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan {source}>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
 						<ButtonBack on:click={back} />
@@ -237,7 +238,7 @@
 				expectedToken={$sendToken}
 				bind:destination
 				bind:amount
-				decodeQrCode={icDecodeQrCode}
+				{decodeQrCode}
 				on:icQRCodeBack
 			/>
 		{:else}

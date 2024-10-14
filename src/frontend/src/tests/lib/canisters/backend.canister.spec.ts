@@ -2,23 +2,37 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
+	Result_1,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
-import type { AddUserCredentialParams } from '$lib/types/api';
+import { CanisterInternalError } from '$lib/canisters/errors';
+import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mockedAgent } from '$tests/mocks/agents.mock';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
+import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { mockIdentity, mockPrincipal } from '../../mocks/identity.mock';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
 		LOCAL: false
+	};
+});
+
+vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getAgent: async () => mockedAgent
 	};
 });
 
@@ -52,6 +66,44 @@ describe('backend.canister', () => {
 		issuer_canister_id: addUserCredentialParams.issuerCanisterId,
 		current_user_version: toNullable(addUserCredentialParams.currentUserVersion),
 		credential_spec: addUserCredentialParams.credentialSpec
+	};
+
+	const btcAddPendingTransactionParams = {
+		txId: [1, 2, 3],
+		network: { testnet: null },
+		address: mockBtcAddress,
+		utxos: [
+			{
+				height: 1000,
+				value: 1n,
+				outpoint: {
+					txid: [1, 2, 3],
+					vout: 1
+				}
+			}
+		]
+	};
+	const btcAddPendingTransactionEndpointParams = {
+		txid: btcAddPendingTransactionParams.txId,
+		network: btcAddPendingTransactionParams.network,
+		address: btcAddPendingTransactionParams.address,
+		utxos: btcAddPendingTransactionParams.utxos
+	};
+
+	const btcGetPendingTransactionParams = {
+		network: btcAddPendingTransactionParams.network,
+		address: btcAddPendingTransactionParams.address
+	};
+
+	const btcSelectUserUtxosFeeParams = {
+		network: btcAddPendingTransactionParams.network,
+		minConfirmations: [100],
+		amountSatoshis: 100n
+	} as BtcSelectUserUtxosFeeParams;
+	const btcSelectUserUtxosFeeEndpointParams = {
+		network: btcSelectUserUtxosFeeParams.network,
+		min_confirmations: btcSelectUserUtxosFeeParams.minConfirmations,
+		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis
 	};
 
 	const mockedUserProfile = {
@@ -88,6 +140,8 @@ describe('backend.canister', () => {
 		enabled: false
 	} as CustomToken;
 	const customTokens = [mockedCustomToken];
+
+	const errorResponse = { Err: { InternalError: { msg: 'Test error' } } };
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -352,5 +406,287 @@ describe('backend.canister', () => {
 		const res = addUserCredential(addUserCredentialParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
+	});
+
+	describe('btc_add_pending_transaction', () => {
+		it('adds btc pending transactions with success response', async () => {
+			const response = { Ok: null };
+
+			service.btc_add_pending_transaction.mockResolvedValue(response);
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
+				btcAddPendingTransactionEndpointParams
+			);
+			expect(res).toEqual(true);
+		});
+
+		it('should throw an error if btc_add_pending_transaction returns an internal error', async () => {
+			service.btc_add_pending_transaction.mockResolvedValue(errorResponse);
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(errorResponse.Err.InternalError.msg)
+			);
+		});
+
+		it('should throw an error if btc_add_pending_transaction throws', async () => {
+			service.btc_add_pending_transaction.mockImplementation(async () => {
+				throw mockResponseError;
+			});
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_add_pending_transaction returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_add_pending_transaction.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('btc_get_pending_transactions', () => {
+		it('should return pending btc transactions with success response', async () => {
+			const response = {
+				Ok: {
+					transactions: [
+						{
+							utxos: btcAddPendingTransactionParams.utxos,
+							txid: btcAddPendingTransactionParams.txId
+						}
+					]
+				}
+			};
+
+			service.btc_get_pending_transactions.mockResolvedValue(response);
+
+			const { btcGetPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetPendingTransaction(btcGetPendingTransactionParams);
+
+			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
+				btcGetPendingTransactionParams
+			);
+			expect(res).toEqual(response.Ok.transactions);
+		});
+
+		it('should throw an error if btc_get_pending_transactions returns an internal error', async () => {
+			service.btc_get_pending_transactions.mockResolvedValue(errorResponse);
+
+			const { btcGetPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(errorResponse.Err.InternalError.msg)
+			);
+		});
+
+		it('should throw an error if btc_get_pending_transactions throws', async () => {
+			service.btc_get_pending_transactions.mockImplementation(async () => {
+				throw mockResponseError;
+			});
+
+			const { btcGetPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_get_pending_transactions returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_get_pending_transactions.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcGetPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('btc_select_user_utxos_fee', () => {
+		it('should return user utxos fee with success response', async () => {
+			const response = {
+				Ok: {
+					fee_satoshis: 1n,
+					utxos: btcAddPendingTransactionParams.utxos
+				}
+			};
+
+			service.btc_select_user_utxos_fee.mockResolvedValue(response);
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
+				btcSelectUserUtxosFeeEndpointParams
+			);
+			expect(res).toEqual(response.Ok);
+		});
+
+		it('should throw an error if btc_select_user_utxos_fee returns an internal error', async () => {
+			service.btc_select_user_utxos_fee.mockResolvedValue(errorResponse);
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(errorResponse.Err.InternalError.msg)
+			);
+		});
+
+		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
+			service.btc_select_user_utxos_fee.mockImplementation(async () => {
+				throw mockResponseError;
+			});
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_select_user_utxos_fee returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_select_user_utxos_fee.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('allowSigning', () => {
+		it('should allow signing', async () => {
+			const response = { Ok: null };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await allowSigning();
+
+			expect(service.allow_signing).toHaveBeenCalledTimes(1);
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if allowSigning throws', async () => {
+			service.allow_signing.mockImplementation(async () => {
+				throw mockResponseError;
+			});
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = allowSigning();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		// We do not test all types of ApproveError:
+		// - for simplicity
+		// - because the utility mapIcrc2ApproveError, we are using to map those error types, is already covered by tests in ic-js
+		// - and we do not differentiate the error in Oisy anyway
+		it('should throw an ApproveError if allowSigning returns ApproveError', async () => {
+			const response = { Err: { ApproveError: { TemporarilyUnavailable: null } } };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
+		});
+
+		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
+			const response = { Err: { FailedToContactCyclesLedger: null } };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(
+				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
+			);
+		});
+
+		it('should throw a CanisterInternalError if Other error is returned', async () => {
+			const errorMsg = 'Test error';
+			const response = { Err: { Other: errorMsg } };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
+		});
+
+		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
+			const response = { Err: { UnrecognizedError: 'Some unknown error' } };
+
+			service.allow_signing.mockResolvedValue(response as unknown as Result_1);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(
+				new CanisterInternalError('Unknown AllowSigningError')
+			);
+		});
 	});
 });

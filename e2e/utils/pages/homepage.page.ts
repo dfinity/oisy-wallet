@@ -6,6 +6,7 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
@@ -131,12 +132,15 @@ abstract class Homepage {
 		}
 
 		await this.goto();
-		await this.waitForLoginButton();
+		await this.waitForLoggedOutIndicator();
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
@@ -152,6 +156,18 @@ abstract class Homepage {
 
 	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
 		return this.#page.getByTestId(testId);
+	}
+
+	async waitForTimeout(timeout: number): Promise<void> {
+		await this.#page.waitForTimeout(timeout);
+	}
+
+	async waitForLoggedOutIndicator(): Promise<void> {
+		await this.waitForLoginButton();
+	}
+
+	async waitForLoggedInIndicator(): Promise<void> {
+		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
 	}
 
 	async testModalSnapshot({
@@ -207,10 +223,18 @@ export class HomepageLoggedIn extends Homepage {
 		await this.#iiPage.signInWithNewIdentity();
 	}
 
+	async checkIfStillLoggedIn(timeout = 10000): Promise<void> {
+		await this.waitForLoggedInIndicator();
+
+		await this.waitForTimeout(timeout);
+
+		await this.waitForLoggedInIndicator();
+	}
+
 	async waitForLogout(): Promise<void> {
 		await this.clickMenuItem({ menuItemTestId: LOGOUT_BUTTON });
 
-		await this.waitForLoginButton();
+		await this.waitForLoggedOutIndicator();
 	}
 
 	async testReceiveModalQrCode({

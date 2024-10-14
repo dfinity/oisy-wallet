@@ -1,22 +1,35 @@
 import type {
 	_SERVICE as BackendService,
 	CustomToken,
+	PendingTransaction,
+	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
+import {
+	mapAllowSigningError,
+	mapBtcPendingTransactionError,
+	mapBtcSelectUserUtxosFeeError
+} from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
+	BtcAddPendingTransactionParams,
+	BtcGetPendingTransactionParams,
+	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
-	static async create({ identity, ...options }: CreateCanisterOptions<BackendService>) {
+	static async create({
+		identity,
+		...options
+	}: CreateCanisterOptions<BackendService>): Promise<BackendCanister> {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<BackendService>({
@@ -93,5 +106,76 @@ export class BackendCanister extends Canister<BackendService> {
 			current_user_version: toNullable(currentUserVersion),
 			credential_spec: credentialSpec
 		});
+	};
+
+	btcAddPendingTransaction = async ({
+		txId,
+		...rest
+	}: BtcAddPendingTransactionParams): Promise<boolean> => {
+		const { btc_add_pending_transaction } = this.caller({ certified: true });
+
+		const response = await btc_add_pending_transaction({
+			txid: txId,
+			...rest
+		});
+
+		if ('Ok' in response) {
+			return true;
+		}
+
+		throw mapBtcPendingTransactionError(response.Err);
+	};
+
+	// TODO: rename to plural
+	btcGetPendingTransaction = async ({
+		network,
+		address
+	}: BtcGetPendingTransactionParams): Promise<PendingTransaction[]> => {
+		const { btc_get_pending_transactions } = this.caller({ certified: true });
+
+		const response = await btc_get_pending_transactions({
+			network,
+			address
+		});
+
+		if ('Ok' in response) {
+			const {
+				Ok: { transactions }
+			} = response;
+			return transactions;
+		}
+
+		throw mapBtcPendingTransactionError(response.Err);
+	};
+
+	btcSelectUserUtxosFee = async ({
+		network,
+		minConfirmations,
+		amountSatoshis
+	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
+		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
+
+		const response = await btc_select_user_utxos_fee({
+			network,
+			min_confirmations: minConfirmations,
+			amount_satoshis: amountSatoshis
+		});
+
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
+		}
+
+		throw mapBtcSelectUserUtxosFeeError(response.Err);
+	};
+
+	allowSigning = async (): Promise<void> => {
+		const { allow_signing } = this.caller({ certified: true });
+
+		const response = await allow_signing();
+
+		if ('Err' in response) {
+			throw mapAllowSigningError(response.Err);
+		}
 	};
 }

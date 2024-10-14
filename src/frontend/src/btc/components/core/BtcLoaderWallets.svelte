@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
-	import {
-		isNetworkIdBTCMainnet,
-		isNetworkIdBTCRegtest,
-		isNetworkIdBTCTestnet
-	} from '$icp/utils/ic-send.utils.js';
-	import LoaderWallets from '$lib/components/core/LoaderWallets.svelte';
+	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
@@ -16,6 +11,11 @@
 	import { enabledBtcTokens } from '$lib/derived/tokens.derived';
 	import type { InitWalletWorkerFn } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
+	import {
+		isNetworkIdBTCMainnet,
+		isNetworkIdBTCRegtest,
+		isNetworkIdBTCTestnet
+	} from '$lib/utils/network.utils';
 
 	let tokens: Token[];
 
@@ -31,6 +31,6 @@
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) => initBtcWalletWorker(token);
 </script>
 
-<LoaderWallets {tokens} {initWalletWorker}>
+<WalletWorkers {tokens} {initWalletWorker}>
 	<slot />
-</LoaderWallets>
+</WalletWorkers>

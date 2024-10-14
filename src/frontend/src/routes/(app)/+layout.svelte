@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
+	import Footer from '$lib/components/core/Footer.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
+	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
+	import SplitPane from '$lib/components/ui/SplitPane.svelte';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -17,17 +23,36 @@
 	$: token.set($pageToken);
 </script>
 
-<Hero
-	usdTotal={route === 'tokens'}
-	summary={route === 'transactions'}
-	actions={route !== 'settings'}
-	back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
-/>
+<div
+	class="relative min-h-[640px] md:flex md:h-full md:flex-col"
+	class:overflow-hidden={$authNotSignedIn}
+	class:flex={$authSignedIn}
+	class:h-full={$authSignedIn}
+	class:flex-col={$authSignedIn}
+>
+	<Header back={route === 'settings'} />
 
-<main class="pb-5 pt-8 sm:pb-12">
-	<LoadersGuard>
-		<slot />
-	</LoadersGuard>
-</main>
+	<AuthGuard>
+		<SplitPane>
+			<div class="pl-4 sm:pl-8" slot="menu">
+				<NavigationMenu />
+			</div>
 
-<Modals />
+			{#if route !== 'settings'}
+				<Hero
+					usdTotal={route === 'tokens'}
+					summary={route === 'transactions'}
+					back={route === 'transactions'}
+				/>
+			{/if}
+
+			<LoadersGuard>
+				<slot />
+			</LoadersGuard>
+		</SplitPane>
+
+		<Modals />
+	</AuthGuard>
+
+	<Footer />
+</div>

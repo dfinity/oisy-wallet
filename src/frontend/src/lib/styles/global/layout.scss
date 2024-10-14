@@ -1,15 +1,5 @@
 @use '../mixins/media';
 
-main,
-.main {
-	margin: 0 auto;
-	padding-inline: var(--padding-2_5x);
-
-	max-width: media.$breakpoint-small;
-}
-
 header {
 	margin: 0 auto;
-
-	max-width: media.$breakpoint-extra-large;
 }

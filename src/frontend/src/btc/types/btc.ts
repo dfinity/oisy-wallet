@@ -1,17 +1,12 @@
-import type { TransactionType } from '$lib/types/transaction';
+import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 
 export type BtcTransactionStatus = 'confirmed' | 'pending';
 
-export interface BtcTransactionUi {
+export interface BtcTransactionUi extends TransactionUiCommon {
 	id: string;
-	timestamp: number;
-	value?: bigint;
 	type: TransactionType;
 	status: BtcTransactionStatus;
-	from: string;
-	to?: string;
-	// The block number available only if a transaction has been confirmed
-	blockNumber?: number;
+	value?: bigint;
 
 	/* TODO: add one more field "confirmations", a number that represents the acceptance of a new block by the blockchain network.
 	 1. Use https://blockchain.info/latestblock to get info about the latest block height.

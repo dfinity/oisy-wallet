@@ -28,6 +28,8 @@ pub struct InitArg {
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
+    /// Chain Fussion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    pub cfs_canister_id: Option<Principal>,
 }
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
@@ -70,6 +72,8 @@ pub struct Config {
     pub ic_root_key_raw: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
+    /// Chain Fussion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    pub cfs_canister_id: Option<Principal>,
 }
 
 pub mod transaction {
@@ -168,7 +172,6 @@ pub mod bitcoin {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct SelectedUtxosFeeRequest {
         pub amount_satoshis: u64,
-        pub source_address: String,
         pub network: BitcoinNetwork,
         pub min_confirmations: Option<u32>,
     }
@@ -181,6 +184,42 @@ pub mod bitcoin {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum SelectedUtxosFeeError {
+        InternalError { msg: String },
+        PendingTransactions,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct BtcAddPendingTransactionRequest {
+        pub txid: Vec<u8>,
+        pub utxos: Vec<Utxo>,
+        pub address: String,
+        pub network: BitcoinNetwork,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum BtcAddPendingTransactionError {
+        InternalError { msg: String },
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct BtcGetPendingTransactionsRequest {
+        pub address: String,
+        pub network: BitcoinNetwork,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct PendingTransaction {
+        pub txid: Vec<u8>,
+        pub utxos: Vec<Utxo>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct BtcGetPendingTransactionsReponse {
+        pub transactions: Vec<PendingTransaction>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum BtcGetPendingTransactionsError {
         InternalError { msg: String },
     }
 }

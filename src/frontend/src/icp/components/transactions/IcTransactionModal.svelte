@@ -4,6 +4,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -150,8 +151,6 @@
 			</Value>
 		{/if}
 
-		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
-			>{$i18n.core.text.close}</button
-		>
+		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>

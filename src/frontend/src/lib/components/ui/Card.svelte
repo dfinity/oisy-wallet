@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
+	import CardAmountDescription from '$lib/components/ui/CardAmountDescription.svelte';
 
 	export let noMargin = false;
 	export let testId: string | undefined = undefined;
@@ -10,6 +11,9 @@
 
 	let amount = true;
 	$: amount = nonNullish($$slots.amount);
+
+	let amountDescription = true;
+	$: amountDescription = nonNullish($$slots.amountDescription);
 
 	let action = true;
 	$: action = nonNullish($$slots.action);
@@ -29,9 +33,15 @@
 				<CardAmount><slot name="amount" /></CardAmount>
 			{/if}
 		</div>
-		<span class="inline-flex items-center text-left text-misty-rose">
-			<slot name="description" />
-		</span>
+		<div class="flex gap-1 text-misty-rose" class:items-center={!description}>
+			<span class="inline-flex items-center text-left">
+				<slot name="description" />
+			</span>
+
+			{#if amountDescription}
+				<CardAmountDescription><slot name="amountDescription" /></CardAmountDescription>
+			{/if}
+		</div>
 	</div>
 	{#if action}
 		<div class="flex min-w-14 flex-shrink">

@@ -1,7 +1,8 @@
-import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.did';
+import type { BitcoinNetwork, SendBtcResponse, SignRequest } from '$declarations/signer/signer.did';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
+import type { SendBtcParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -30,13 +31,15 @@ export const getEthAddress = async ({
 export const getBtcBalance = async ({
 	identity,
 	network,
-	canisterId
+	canisterId,
+	minConfirmations
 }: CanisterApiFunctionParams<{
 	network: BitcoinNetwork;
+	minConfirmations?: number;
 }>): Promise<bigint> => {
 	const { getBtcBalance } = await signerCanister({ identity, canisterId });
 
-	return getBtcBalance({ network });
+	return getBtcBalance({ network, minConfirmations });
 };
 
 export const signTransaction = async ({
@@ -68,6 +71,15 @@ export const signPrehash = async ({
 	const { signPrehash } = await signerCanister({ identity });
 
 	return signPrehash({ hash });
+};
+
+export const sendBtc = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SendBtcParams>): Promise<SendBtcResponse> => {
+	const { sendBtc } = await signerCanister({ identity });
+
+	return sendBtc(params);
 };
 
 const signerCanister = async ({

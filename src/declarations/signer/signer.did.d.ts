@@ -13,6 +13,14 @@ export interface BtcTxOutput {
 	destination_address: string;
 	sent_satoshis: bigint;
 }
+export type BuildP2wpkhTxError =
+	| {
+			NotEnoughFunds: { available: bigint; required: bigint };
+	  }
+	| { WrongBitcoinNetwork: null }
+	| { NotP2WPKHSourceAddress: null }
+	| { InvalidDestinationAddress: GetAddressResponse }
+	| { InvalidSourceAddress: GetAddressResponse };
 export interface CallerPaysIcrc2Tokens {
 	ledger: Principal;
 }
@@ -54,11 +62,37 @@ export interface EcdsaPublicKeyResponse {
 	public_key: Uint8Array | number[];
 	chain_code: Uint8Array | number[];
 }
-export type GenericSigningError =
-	| {
-			SigningError: [RejectionCode_1, string];
-	  }
+export type EthAddressError =
+	| { SigningError: [RejectionCode_1, string] }
 	| { PaymentError: PaymentError };
+export interface EthAddressRequest {
+	principal: [] | [Principal];
+}
+export interface EthAddressResponse {
+	address: string;
+}
+export interface EthPersonalSignRequest {
+	message: string;
+}
+export interface EthPersonalSignResponse {
+	signature: string;
+}
+export interface EthSignPrehashRequest {
+	hash: string;
+}
+export interface EthSignPrehashResponse {
+	signature: string;
+}
+export interface EthSignTransactionRequest {
+	to: string;
+	gas: bigint;
+	value: bigint;
+	max_priority_fee_per_gas: bigint;
+	data: [] | [string];
+	max_fee_per_gas: bigint;
+	chain_id: bigint;
+	nonce: bigint;
+}
 export type GetAddressError = { InternalError: { msg: string } } | { PaymentError: PaymentError };
 export interface GetAddressRequest {
 	network: BitcoinNetwork;
@@ -66,6 +100,11 @@ export interface GetAddressRequest {
 }
 export interface GetAddressResponse {
 	address: string;
+}
+export interface GetBalanceRequest {
+	network: BitcoinNetwork;
+	address_type: BitcoinAddressType;
+	min_confirmations: [] | [number];
 }
 export interface GetBalanceResponse {
 	balance: bigint;
@@ -135,10 +174,15 @@ export type RejectionCode_1 =
 export type Result = { Ok: GetAddressResponse } | { Err: GetAddressError };
 export type Result_1 = { Ok: GetBalanceResponse } | { Err: GetAddressError };
 export type Result_2 = { Ok: SendBtcResponse } | { Err: SendBtcError };
-export type Result_3 = { Ok: string } | { Err: GenericSigningError };
-export type Result_4 = { Ok: [EcdsaPublicKeyResponse] } | { Err: GenericSigningError };
-export type Result_5 = { Ok: [SignWithEcdsaResponse] } | { Err: GenericSigningError };
-export type SendBtcError = { InternalError: { msg: string } } | { PaymentError: PaymentError };
+export type Result_3 = { Ok: EthAddressResponse } | { Err: EthAddressError };
+export type Result_4 = { Ok: EthPersonalSignResponse } | { Err: EthAddressError };
+export type Result_5 = { Ok: EthSignPrehashResponse } | { Err: EthAddressError };
+export type Result_6 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
+export type Result_7 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
+export type SendBtcError =
+	| { BuildP2wpkhError: BuildP2wpkhTxError }
+	| { InternalError: { msg: string } }
+	| { PaymentError: PaymentError };
 export interface SendBtcRequest {
 	fee_satoshis: [] | [bigint];
 	network: BitcoinNetwork;
@@ -206,20 +250,21 @@ export type WithdrawFromError =
 	| { InsufficientFunds: { balance: bigint } };
 export interface _SERVICE {
 	btc_caller_address: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result>;
-	btc_caller_balance: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result_1>;
+	btc_caller_balance: ActorMethod<[GetBalanceRequest, [] | [PaymentType]], Result_1>;
 	btc_caller_send: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_2>;
 	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
+	eth_address: ActorMethod<[EthAddressRequest, [] | [PaymentType]], Result_3>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result_3>;
-	eth_address_of_principal: ActorMethod<[Principal, [] | [PaymentType]], Result_3>;
-	eth_personal_sign: ActorMethod<[string, [] | [PaymentType]], Result_3>;
-	eth_sign_transaction: ActorMethod<[SignRequest, [] | [PaymentType]], Result_3>;
+	eth_personal_sign: ActorMethod<[EthPersonalSignRequest, [] | [PaymentType]], Result_4>;
+	eth_sign_prehash: ActorMethod<[EthSignPrehashRequest, [] | [PaymentType]], Result_5>;
+	eth_sign_transaction: ActorMethod<[EthSignTransactionRequest, [] | [PaymentType]], Result_5>;
 	generic_caller_ecdsa_public_key: ActorMethod<
 		[EcdsaPublicKeyArgument, [] | [PaymentType]],
-		Result_4
+		Result_6
 	>;
-	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_5>;
+	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_7>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	personal_sign: ActorMethod<[string], string>;

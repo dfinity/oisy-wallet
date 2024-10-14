@@ -20,6 +20,7 @@ export const idlFactory = ({ IDL }) => {
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
+		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
@@ -71,12 +72,6 @@ export const idlFactory = ({ IDL }) => {
 		regtest: IDL.Null,
 		testnet: IDL.Null
 	});
-	const SelectedUtxosFeeRequest = IDL.Record({
-		network: BitcoinNetwork,
-		amount_satoshis: IDL.Nat64,
-		source_address: IDL.Text,
-		min_confirmations: IDL.Opt(IDL.Nat32)
-	});
 	const Outpoint = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
 		vout: IDL.Nat32
@@ -86,20 +81,59 @@ export const idlFactory = ({ IDL }) => {
 		value: IDL.Nat64,
 		outpoint: Outpoint
 	});
+	const BtcAddPendingTransactionRequest = IDL.Record({
+		txid: IDL.Vec(IDL.Nat8),
+		network: BitcoinNetwork,
+		address: IDL.Text,
+		utxos: IDL.Vec(Utxo)
+	});
+	const BtcAddPendingTransactionError = IDL.Variant({
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const Result_2 = IDL.Variant({
+		Ok: IDL.Null,
+		Err: BtcAddPendingTransactionError
+	});
+	const BtcGetPendingTransactionsRequest = IDL.Record({
+		network: BitcoinNetwork,
+		address: IDL.Text
+	});
+	const PendingTransaction = IDL.Record({
+		txid: IDL.Vec(IDL.Nat8),
+		utxos: IDL.Vec(Utxo)
+	});
+	const BtcGetPendingTransactionsReponse = IDL.Record({
+		transactions: IDL.Vec(PendingTransaction)
+	});
+	const Result_3 = IDL.Variant({
+		Ok: BtcGetPendingTransactionsReponse,
+		Err: BtcAddPendingTransactionError
+	});
+	const SelectedUtxosFeeRequest = IDL.Record({
+		network: BitcoinNetwork,
+		amount_satoshis: IDL.Nat64,
+		min_confirmations: IDL.Opt(IDL.Nat32)
+	});
 	const SelectedUtxosFeeResponse = IDL.Record({
 		fee_satoshis: IDL.Nat64,
 		utxos: IDL.Vec(Utxo)
 	});
 	const SelectedUtxosFeeError = IDL.Variant({
+		PendingTransactions: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
+<<<<<<< HEAD
 	const Result_2 = IDL.Variant({
+=======
+	const Result_4 = IDL.Variant({
+>>>>>>> origin/main
 		Ok: SelectedUtxosFeeResponse,
 		Err: SelectedUtxosFeeError
 	});
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
+		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
@@ -139,7 +173,11 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
+<<<<<<< HEAD
 	const Result_3 = IDL.Variant({
+=======
+	const Result_5 = IDL.Variant({
+>>>>>>> origin/main
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -220,8 +258,13 @@ export const idlFactory = ({ IDL }) => {
 		to: IDL.Principal,
 		progress: MigrationProgress
 	});
+<<<<<<< HEAD
 	const Result_4 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
 	const Result_5 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
+=======
+	const Result_6 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
+	const Result_7 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
+>>>>>>> origin/main
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -229,19 +272,35 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		allow_signing: IDL.Func([], [Result_1], []),
+<<<<<<< HEAD
 		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_2], []),
+=======
+		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
+		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
+		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
+>>>>>>> origin/main
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
+<<<<<<< HEAD
 		get_user_profile: IDL.Func([], [Result_3]),
+=======
+		get_user_profile: IDL.Func([], [Result_5]),
+>>>>>>> origin/main
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse]),
+<<<<<<< HEAD
 		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_4], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)]),
 		migration_stop_timer: IDL.Func([], [Result_5], []),
+=======
+		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_6], []),
+		migration: IDL.Func([], [IDL.Opt(MigrationReport)]),
+		migration_stop_timer: IDL.Func([], [Result_7], []),
+>>>>>>> origin/main
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
@@ -274,6 +333,7 @@ export const init = ({ IDL }) => {
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
+		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))

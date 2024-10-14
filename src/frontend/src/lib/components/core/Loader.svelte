@@ -7,7 +7,7 @@
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
-	import Img from '$lib/components/ui/Img.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { btcAddressTestnet } from '$lib/derived/address.derived';
@@ -21,8 +21,10 @@
 		loadIdbAddresses
 	} from '$lib/services/address.services';
 	import { signOut } from '$lib/services/auth.services';
+	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { emit } from '$lib/utils/events.utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -83,6 +85,8 @@
 		}
 	}
 
+	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
+
 	onMount(async () => {
 		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
 
@@ -91,11 +95,20 @@
 
 			await progressAndLoad();
 
+			validateAddresses();
+
 			return;
 		}
 
 		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 		progressModal = true;
+
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 
 		const { success: addressSuccess } = await loadAddresses(
 			err?.map(({ tokenId }) => tokenId) ?? []
@@ -115,11 +128,7 @@
 		<div in:fade={{ delay: 0, duration: 250 }}>
 			<Modal>
 				<div class="stretch">
-					<div
-						style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
-					>
-						<Img width="100%" src={banner} />
-					</div>
+					<ImgBanner width="100%" src={banner} size="small" />
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
 

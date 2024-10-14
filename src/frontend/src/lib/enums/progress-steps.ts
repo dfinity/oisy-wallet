@@ -47,6 +47,13 @@ export enum ProgressStepsSendIc {
 	DONE = 'done'
 }
 
+export enum ProgressStepsSendBtc {
+	INITIALIZATION = 'initialization',
+	SEND = 'send',
+	RELOAD = 'reload',
+	DONE = 'done'
+}
+
 export enum ProgressStepsUpdateBalanceCkBtc {
 	INITIALIZATION = 'initialization',
 	RETRIEVE = 'retrieve',

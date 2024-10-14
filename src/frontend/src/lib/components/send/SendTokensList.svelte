@@ -4,6 +4,7 @@
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
@@ -37,7 +38,13 @@
 		{/if}
 	</TokensSkeletons>
 
-	<button class="secondary full center mb-2 text-center" on:click={modalStore.close} slot="toolbar">
+	<Button
+		colorStyle="secondary"
+		fullWidth
+		styleClass="mb-2"
+		on:click={modalStore.close}
+		slot="toolbar"
+	>
 		{$i18n.core.text.close}
-	</button>
+	</Button>
 </ContentWithToolbar>

@@ -3,7 +3,7 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
+	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { ICP_TOKEN } from '$env/tokens.env';
@@ -230,7 +230,7 @@
 	>
 		<span class="text-7xl">🤔</span>
 
-		<span class="py-4 text-center font-bold text-blue no-underline"
+		<span class="py-4 text-center font-bold text-blue-ribbon no-underline"
 			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
@@ -262,7 +262,7 @@
 	<Hr />
 
 	<button
-		class="flex w-full justify-center pb-5 pt-4 text-center font-bold text-blue no-underline"
+		class="flex w-full justify-center pb-5 pt-4 text-center font-bold text-blue-ribbon no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 

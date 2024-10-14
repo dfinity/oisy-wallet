@@ -3,6 +3,7 @@
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { networkEthereum } from '$lib/derived/network.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
@@ -30,8 +31,8 @@
 </script>
 
 {#if $metamaskAvailable && $networkEthereum && tokenStandardEth}
-	<button class="secondary-alt full center my-4" on:click={receiveModal}>
+	<Button fullWidth styleClass="my-4" on:click={receiveModal}>
 		<IconMetamask />
 		<span class="text-dark-slate-blue font-bold">{$i18n.receive.ethereum.text.metamask}</span>
-	</button>
+	</Button>
 {/if}

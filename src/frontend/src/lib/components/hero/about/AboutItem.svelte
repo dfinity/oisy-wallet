@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconInfo from '$lib/components/icons/IconInfo.svelte';
+	import { IconInfo } from '@dfinity/gix-components';
 
 	export let asMenuItem = false;
 	export let testId: string | undefined = undefined;

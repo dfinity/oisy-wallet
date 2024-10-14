@@ -1,9 +1,18 @@
-import type { CustomToken, UserProfile, UserToken } from '$declarations/backend/backend.did';
+import type {
+	CustomToken,
+	PendingTransaction,
+	SelectedUtxosFeeResponse,
+	UserProfile,
+	UserToken
+} from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
+	BtcAddPendingTransactionParams,
+	BtcGetPendingTransactionParams,
+	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -88,6 +97,7 @@ export const getUserProfile = async ({
 
 	return getUserProfile({ certified });
 };
+
 export const addUserCredential = async ({
 	identity,
 	...params
@@ -95,6 +105,39 @@ export const addUserCredential = async ({
 	const { addUserCredential } = await backendCanister({ identity });
 
 	return addUserCredential(params);
+};
+
+export const addPendingBtcTransaction = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcAddPendingTransactionParams>): Promise<boolean> => {
+	const { btcAddPendingTransaction } = await backendCanister({ identity });
+
+	return btcAddPendingTransaction(params);
+};
+
+export const getPendingBtcTransactions = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcGetPendingTransactionParams>): Promise<PendingTransaction[]> => {
+	const { btcGetPendingTransaction } = await backendCanister({ identity });
+
+	return btcGetPendingTransaction(params);
+};
+
+export const selectUserUtxosFee = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeResponse> => {
+	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
+
+	return btcSelectUserUtxosFee(params);
+};
+
+export const allowSigning = async ({ identity }: CanisterApiFunctionParams): Promise<void> => {
+	const { allowSigning } = await backendCanister({ identity });
+
+	return allowSigning();
 };
 
 const backendCanister = async ({

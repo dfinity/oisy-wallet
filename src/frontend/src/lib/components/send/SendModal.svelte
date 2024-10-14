@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
@@ -64,6 +65,10 @@
 		};
 		await loadTokenAndRun({ token, callback });
 	};
+
+	// TODO: Use network id to get the address to support bitcoin.
+	let source: string;
+	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <WizardModal
@@ -79,6 +84,7 @@
 		<SendTokensList on:icSendToken={nextStep} />
 	{:else}
 		<SendWizard
+			{source}
 			{currentStep}
 			bind:destination
 			bind:networkId

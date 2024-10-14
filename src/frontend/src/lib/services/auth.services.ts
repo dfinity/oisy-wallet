@@ -60,6 +60,14 @@ export const signIn = async (
 
 export const signOut = (): Promise<void> => logout({});
 
+export const errorSignOut = (text: string): Promise<void> =>
+	logout({
+		msg: {
+			text,
+			level: 'error'
+		}
+	});
+
 export const warnSignOut = (text: string): Promise<void> =>
 	logout({
 		msg: {

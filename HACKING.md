@@ -67,13 +67,13 @@ Translations are handled in JSON file - for example [en.json](src/frontend/src/l
 
 To add support for an additional language, proceed as following:
 
-> Note that Oisy's repo **does not** accept external contributions yet.
+> Note that OISY's repo **does not** accept external contributions yet.
 
 1. Copy `en.json` to a new filename reflecting the language ISO code (such as for example `zh-cn.json` for simplified Chinese).
 2. Translate each key of the newly created file.
 3. Replace the file imported in [i18n.store.ts](src/frontend/src/lib/stores/i18n.store.ts).
 
-In the future, Oisy might be extended to support multiple languages on production.
+In the future, OISY might be extended to support multiple languages on production.
 
 ### Adding additional keys
 
@@ -116,11 +116,11 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 ## Integrate ckERC20 Tokens
 
-While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.mjs] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within Oisy.
+While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.mjs] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
 
 The steps are as follows:
 
-1. **Collect the Ethereum logo** for the specific token as an SVG, ideally from an official source. Ensure using the logo in Oisy respects brand/trade guidelines.
+1. **Collect the Ethereum logo** for the specific token as an SVG, ideally from an official source. Ensure using the logo in OISY respects brand/trade guidelines.
 2. **Verify the SVG asset size** is acceptable (small) and **copy** it into [src/frontend/src/icp-eth/assets].
 3. Create a new source environment file in [src/frontend/src/env] by cloning [src/frontend/src/env/tokens.usdc.env.ts] and renaming `usdc` to the token's name.
 4. **Adapt the content of the tokens:**
@@ -147,11 +147,11 @@ There are three necessary items before starting to develop locally:
 
 ### Bitcoin Environment Variables
 
-You need to set the following variables to `true` in the file `.env.development`.
+You need to set the following variables in the file `.env.development`.
 
 ```
 VITE_NETWORK_BITCOIN_ENABLED=true
-VITE_BITCOIN_MAINNET=true
+VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
 ```
 
 ### Bitcoin Development
