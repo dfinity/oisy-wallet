@@ -2,7 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount } from '$lib/utils/input.utils';

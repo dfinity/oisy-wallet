@@ -6,7 +6,7 @@
 		ckEthereumNativeTokenBalance,
 		ckEthereumTwinToken
 	} from '$icp-eth/derived/cketh.derived';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';

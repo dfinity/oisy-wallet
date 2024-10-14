@@ -2,7 +2,7 @@
 	import { setContext } from 'svelte';
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 	import eth from '$icp-eth/assets/eth.svg';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalHowToConvertToTwinTokenEth } from '$lib/derived/modal.derived';

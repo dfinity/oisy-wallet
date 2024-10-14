@@ -3,7 +3,7 @@
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';

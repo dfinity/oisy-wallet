@@ -7,7 +7,7 @@
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { sendBtc } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';

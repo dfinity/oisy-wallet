@@ -5,7 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
