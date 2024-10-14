@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
@@ -8,22 +8,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	$: calculateMax = (): number | undefined =>
-		isNullish($sendToken)
-			? undefined
-			: // TODO: Add fee to the calculation
-				getMaxTransactionAmount({
-					balance: $sendBalance ?? undefined,
-					tokenDecimals: $sendToken.decimals,
-					tokenStandard: $sendToken.standard
-				});
+	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
@@ -41,6 +32,5 @@
 	bind:amount
 	tokenDecimals={$tokenDecimals}
 	bind:error={amountError}
-	{calculateMax}
 	{customValidate}
 />
