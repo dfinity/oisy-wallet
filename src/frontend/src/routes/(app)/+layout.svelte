@@ -38,7 +38,9 @@
 
 	<AuthGuard>
 		<SplitPane>
-			<NavigationMenu slot="menu" />
+			<div class="pl-4 sm:pl-8" slot="menu">
+				<NavigationMenu />
+			</div>
 
 			{#if route !== 'settings'}
 				<Hero
