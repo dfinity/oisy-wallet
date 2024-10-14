@@ -53,10 +53,9 @@ a.as-button {
 			opacity: 1;
 			cursor: not-allowed;
 
-			&:hover,
-			&:active {
-				background: var(--color-grey);
-				color: var(--color-white);
+			&.tertiary {
+				background: var(--color-white);
+				color: var(--color-grey);
 			}
 		}
 
@@ -83,7 +82,7 @@ a.as-button {
 		}
 	}
 
-	&.primary {
+	&.primary:not([disabled]):not(.disabled) {
 		background: var(--color-blue-ribbon);
 		color: var(--color-white);
 
@@ -96,7 +95,7 @@ a.as-button {
 		}
 	}
 
-	&.secondary {
+	&.secondary:not([disabled]):not(.disabled) {
 		background: var(--color-zumthor);
 		color: var(--color-primary);
 
@@ -109,7 +108,7 @@ a.as-button {
 		}
 	}
 
-	&.tertiary {
+	&.tertiary:not([disabled]):not(.disabled) {
 		background: var(--color-white);
 
 		&:hover {
