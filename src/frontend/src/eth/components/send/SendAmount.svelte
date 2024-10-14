@@ -5,11 +5,11 @@
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';

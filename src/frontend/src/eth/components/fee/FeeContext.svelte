@@ -16,7 +16,6 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
@@ -24,6 +23,7 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import Info from '$lib/components/ui/Info.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const { sendToken, sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);

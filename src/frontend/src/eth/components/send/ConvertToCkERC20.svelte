@@ -7,11 +7,11 @@
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 

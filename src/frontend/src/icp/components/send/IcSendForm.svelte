@@ -5,12 +5,12 @@
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { balance } from '$lib/derived/balances.derived';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
