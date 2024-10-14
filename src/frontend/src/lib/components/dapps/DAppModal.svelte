@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import type { DApp } from '$lib/types/dapp';
-	import Button from '$lib/components/ui/Button.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { DApp } from '$lib/types/dapp';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dApp: DApp;
 </script>

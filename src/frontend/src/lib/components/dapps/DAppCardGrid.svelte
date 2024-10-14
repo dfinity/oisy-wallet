@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import Card from '$lib/components/dapps/Card.svelte';
+	import DAppCard from '$lib/components/dapps/DAppCard.svelte';
+	import DAppModal from '$lib/components/dapps/DAppModal.svelte';
+	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { DApp } from '$lib/types/dapp';
-	import { modalDAppDetails } from '$lib/derived/modal.derived';
-	import DAppModal from '$lib/components/dapps/DAppModal.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import DAppCard from '$lib/components/dapps/DAppCard.svelte';
-	import Card from '$lib/components/dapps/Card.svelte';
 
 	export let dApps: DApp[];
 

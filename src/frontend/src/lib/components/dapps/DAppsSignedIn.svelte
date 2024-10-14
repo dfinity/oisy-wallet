@@ -1,7 +1,7 @@
 <script lang="ts">
+	import dApps from '$lib/../data/dapps.json';
 	import DAppCardGrid from '$lib/components/dapps/DAppCardGrid.svelte';
 	import FilterButtons from '$lib/components/dapps/DAppsFilterButtons.svelte';
-	import dApps from '$lib/../data/dapps.json';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ALL_DAPPS_CATEGORY } from '$lib/types/dapp';
 

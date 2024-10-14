@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import IconGlasses from '$lib/components/icons/IconGlasses.svelte';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
@@ -11,7 +12,6 @@
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
-	import IconGlasses from '$lib/components/icons/IconGlasses.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
 	$: route = isRouteSettings($page)

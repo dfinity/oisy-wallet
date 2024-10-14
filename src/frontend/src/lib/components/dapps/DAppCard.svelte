@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { DApp } from '$lib/types/dapp';
 	import Card from '$lib/components/dapps/Card.svelte';
+	import type { DApp } from '$lib/types/dapp';
 
 	export let dApp: DApp;
 </script>

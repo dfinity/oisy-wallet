@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let label: string;
-	export let isActive: boolean = false;
+	export let isActive = false;
 </script>
 
 <button
