@@ -16,5 +16,6 @@
 	<div class="py-4">
 		<Alpha />
 	</div>
+
 	<HeroContent {usdTotal} {summary} {back} />
 </article>
