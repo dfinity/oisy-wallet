@@ -11,11 +11,11 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 
 	export let networkId: NetworkId | undefined = undefined;
