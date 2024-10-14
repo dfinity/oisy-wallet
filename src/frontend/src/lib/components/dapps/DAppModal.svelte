@@ -12,33 +12,36 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-
 	<div slot="title">
-
 		<h5 class="text-center text-xl">{dApp.name}</h5>
-		<p class="text-center text-sm text-gray-500 text-misty-rose m-0">{dApp.categories[0]}</p>
+		<p class="text-gray-500 m-0 text-center text-sm text-misty-rose">{dApp.categories[0]}</p>
 	</div>
 
-	<div class="flex flex-col flex-1 justify-between">
-
+	<div class="flex flex-1 flex-col justify-between">
 		<div>
-			<div class="w-full bg-light-blue p-6 mt-6 rounded-lg">
-				<h4 class="font-bold mb-1.5">{$i18n.dapps.text.about}</h4>
-				<p class="text-misty-rose m-0">{dApp.description}</p>
+			<div class="mt-6 w-full rounded-lg bg-light-blue p-6">
+				<h4 class="mb-1.5 font-bold">{$i18n.dapps.text.about}</h4>
+				<p class="m-0 text-misty-rose">{dApp.description}</p>
 			</div>
 			{#if dApp.channels}
-				<div class="p-6 flex justify-between items-center">
+				<div class="flex items-center justify-between p-6">
 					<span class="text-misty-rose">{$i18n.dapps.text.official_channels}</span>
 					<div class="flex gap-4">
 						{#if dApp.channels?.github}
-							<a href={dApp.channels.github} target="_blank"
-								 class="rounded-full h-10 w-10 bg-dust flex justify-center items-center">
+							<a
+								href={dApp.channels.github}
+								target="_blank"
+								class="flex h-10 w-10 items-center justify-center rounded-full bg-dust"
+							>
 								<IconGitHub />
 							</a>
 						{/if}
 						{#if dApp.channels?.twitter}
-							<a href={dApp.channels.twitter} target="_blank"
-								 class="rounded-full h-10 w-10 bg-dust flex justify-center items-center">
+							<a
+								href={dApp.channels.twitter}
+								target="_blank"
+								class="flex h-10 w-10 items-center justify-center rounded-full bg-dust"
+							>
 								<IconTwitter />
 							</a>
 						{/if}
@@ -55,5 +58,4 @@
 			</a>
 		</div>
 	</div>
-
 </Modal>

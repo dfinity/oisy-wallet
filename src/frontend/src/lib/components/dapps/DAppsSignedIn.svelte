@@ -7,21 +7,20 @@
 
 	let selectedFilter = ALL_DAPPS_CATEGORY;
 
-	const categories = Array.from(
-		new Set(dApps.flatMap(dApp => dApp.categories))
-	);
+	const categories = Array.from(new Set(dApps.flatMap((dApp) => dApp.categories)));
 
 	const handleFilterChange = (filter: string) => {
 		selectedFilter = filter;
 	};
 
-	$: filteredDapps = selectedFilter !== ALL_DAPPS_CATEGORY ? dApps.filter(dApp => dApp.categories.includes(selectedFilter)) : dApps;
-
+	$: filteredDapps =
+		selectedFilter !== ALL_DAPPS_CATEGORY
+			? dApps.filter((dApp) => dApp.categories.includes(selectedFilter))
+			: dApps;
 </script>
 
-<h6 class="text-misty-rose text-center m-0">{$i18n.dapps.text.sub_headline}</h6>
-<h1 class="text-center text-3xl font-bold mt-2 mb-5">{$i18n.dapps.text.headline}</h1>
-
+<h6 class="m-0 text-center text-misty-rose">{$i18n.dapps.text.sub_headline}</h6>
+<h1 class="mb-5 mt-2 text-center text-3xl font-bold">{$i18n.dapps.text.headline}</h1>
 
 <FilterButtons class="mx-auto" {selectedFilter} {categories} onFilterChange={handleFilterChange} />
 

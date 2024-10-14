@@ -5,7 +5,7 @@
 
 <button
 	on:click
-	class="px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-300"
+	class="rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-300"
 	class:bg-blue-ribbon={isActive}
 	class:text-white={isActive}
 >

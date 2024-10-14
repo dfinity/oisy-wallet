@@ -1,36 +1,36 @@
 [
-  {
-    "name": "Kong Swap",
-    "description": "The one stop token shop - Trade tokens across all chains with ease using KongSwap",
-    "tags": ["DEX", "Finance"],
-    "categories": ["Signer Standard Supported", "Staking"],
-    "imageUrl": "/images/kong_swap_logo.svg",
-    "url": "https://www.kongswap.io/",
-    "channels": {
-      "twitter": "https://x.com/kongswap"
-    }
-  },
-  {
-    "name": "OpenChat",
-    "description": "OpenChat is a fully decentralized real-time messaging service",
-    "tags": ["Social"],
-    "categories": ["Staking"],
-    "imageUrl": "/images/open_chat_logo.svg",
-    "url": "https://oc.app/communities",
-    "channels": {
-      "github": "https://github.com/open-chat-labs/open-chat",
-      "twitter": "https://x.com/OpenChat"
-    }
-  },
-  {
-    "name": "DecideAI",
-    "description": "DecideAI is an ecosystem that consists of three products, Decide Protocol...",
-    "tags": ["AI", "Security"],
-    "categories": ["Other"],
-    "imageUrl": "/images/decide_ai_logo.svg",
-    "url": "https://decideai.xyz/",
-    "channels": {
-      "twitter": "https://x.com/decideai_"
-    }
-  }
+	{
+		"name": "Kong Swap",
+		"description": "The one stop token shop - Trade tokens across all chains with ease using KongSwap",
+		"tags": ["DEX", "Finance"],
+		"categories": ["Signer Standard Supported", "Staking"],
+		"imageUrl": "/images/kong_swap_logo.svg",
+		"url": "https://www.kongswap.io/",
+		"channels": {
+			"twitter": "https://x.com/kongswap"
+		}
+	},
+	{
+		"name": "OpenChat",
+		"description": "OpenChat is a fully decentralized real-time messaging service",
+		"tags": ["Social"],
+		"categories": ["Staking"],
+		"imageUrl": "/images/open_chat_logo.svg",
+		"url": "https://oc.app/communities",
+		"channels": {
+			"github": "https://github.com/open-chat-labs/open-chat",
+			"twitter": "https://x.com/OpenChat"
+		}
+	},
+	{
+		"name": "DecideAI",
+		"description": "DecideAI is an ecosystem that consists of three products, Decide Protocol...",
+		"tags": ["AI", "Security"],
+		"categories": ["Other"],
+		"imageUrl": "/images/decide_ai_logo.svg",
+		"url": "https://decideai.xyz/",
+		"channels": {
+			"twitter": "https://x.com/decideai_"
+		}
+	}
 ]

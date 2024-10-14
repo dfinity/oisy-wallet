@@ -158,7 +158,7 @@ interface I18nSettings {
 	error: { loading_profile: string };
 }
 
-interface I18nDApps{
+interface I18nDApps {
 	text: {
 		about: string;
 		sub_heading: string;
