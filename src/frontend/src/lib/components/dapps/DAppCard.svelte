@@ -8,7 +8,7 @@
 <Card>
 	<div slot="content">
 		<img
-			src={dApp.imageUrl || '/default-dapp-icon.png'}
+			src={dApp.imageUrl}
 			alt={dApp.name}
 			class="absolute -top-9 left-4 w-20 h-20 rounded-full"
 		/>

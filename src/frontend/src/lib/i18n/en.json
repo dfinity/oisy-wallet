@@ -188,7 +188,10 @@
 	"dapps": {
 		"text": {
 			"title": "DApps Explorer",
-			"launch": "Launch dApp"
+			"headline": "Discover DApps",
+			"launch": "Launch dApp",
+			"submit": "Submit your dApp",
+			"dex": "Decentralized Exchange"
 		}
 	},
 	"networks": {

@@ -3,7 +3,7 @@ export type DApp = {
 	description: string,
 	tags: string[],
 	categories: string[],
-	imageUrl?: string
+	imageUrl: string
 	channels?: {
 		github?: string;
 	};

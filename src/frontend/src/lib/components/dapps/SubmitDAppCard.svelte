@@ -1,4 +1,6 @@
 <script>
+	import { i18n } from '$lib/stores/i18n.store';
+
 	const handleClick = () => {
 		window.location.href = 'https://github.com/dfinity/oisy-wallet';
 	};
@@ -10,6 +12,6 @@
 >
 	<div class="text-center">
 		<span class="block text-2xl font-semibold">+</span>
-		<p class="mt-2">Submit your dApp</p>
+		<p class="mt-2">{$i18n.dapps.text.submit}</p>
 	</div>
 </div>
