@@ -5,6 +5,7 @@
 	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import DAppModal from '$lib/components/dapps/DAppModal.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import SubmitDAppCard from '$lib/components/dapps/SubmitDAppCard.svelte';
 
 	export let dApps: DApp[];
 
@@ -26,7 +27,7 @@
 		{#each filteredDApps as dApp (dApp.name)}
 			<div class="rounded-lg shadow-md bg-white p-6 hover:shadow-lg transition-shadow cursor-pointer" on:click={() => modalStore.openDAppDetails(dApp)}>
 				<img
-					src={dApp.imageUrl || '/default-dapp-icon.png'}
+					src={dApp.imageUrl}
 					alt={dApp.name}
 					class="w-16 h-16 rounded-full mx-auto mb-4"
 				/>
@@ -40,12 +41,7 @@
 			</div>
 		{/each}
 
-		<div class="rounded-lg shadow-md bg-blue-500 p-6 flex items-center justify-center text-white cursor-pointer hover:bg-blue-600 transition-colors">
-			<a href="/submit-dapp" class="text-center">
-				<span class="block text-2xl font-semibold">+</span>
-				<p class="mt-2">Submit your DApp</p>
-			</a>
-		</div>
+		<SubmitDAppCard />
 	</div>
 </div>
 

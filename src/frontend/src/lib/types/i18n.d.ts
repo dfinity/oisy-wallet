@@ -161,7 +161,10 @@ interface I18nSettings {
 interface I18nDApps{
 	text: {
 		title: string;
+		headline: string;
 		launch: string;
+		submit: string;
+		dex: string;
 	};
 }
 

@@ -6,7 +6,7 @@
 
 <div class="rounded-lg shadow-md bg-white p-6 hover:shadow-lg transition-shadow">
 	<img
-		src={dApp.imageUrl || '/default-dapp-icon.png'}
+		src={dApp.imageUrl}
 		alt={dApp.name}
 		class="w-16 h-16 rounded-full mx-auto mb-4"
 	/>
