@@ -14,7 +14,7 @@
 </script>
 
 <footer
-	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-6 sm:flex-1 sm:flex-grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:absolute lg:bottom-0 lg:left-1/2 lg:-translate-x-1/2 lg:transform"
+	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-6 sm:flex-1 sm:flex-grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:sticky lg:bottom-0"
 	class:sm:sticky={$authNotSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}
 	class:md:h-md:grid-cols-4={$authNotSignedIn}
@@ -34,7 +34,7 @@
 	</div>
 
 	<div
-		class="item flex flex-row items-center justify-end gap-2 text-sm sm:max-w-48 xl:max-w-none"
+		class="item flex flex-row items-center justify-end gap-2 text-sm lg:max-w-48 xl:max-w-none"
 		class:sm:max-w-none={$authNotSignedIn}
 	>
 		<IconDfinity />
