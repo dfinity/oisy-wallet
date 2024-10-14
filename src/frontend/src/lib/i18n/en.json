@@ -185,6 +185,7 @@
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",
+		"test_networks": "Test networks",
 		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
 		"chain_fusion": "Chain Fusion (all networks)"

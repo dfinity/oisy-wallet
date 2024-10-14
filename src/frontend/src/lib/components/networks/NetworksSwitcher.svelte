@@ -47,9 +47,8 @@
 			{/each}
 		</ul>
 
-		<div class="mb-4 mt-8 flex items-center justify-between">
-			<span class="px-4.5 font-bold">{$i18n.networks.show_testnets}</span>
-			<NetworksTestnetsToggle />
+		<div class="mb-5 mt-8 flex items-center justify-between">
+			<span class="px-4.5 font-bold">{$i18n.networks.test_networks}</span>
 		</div>
 
 		{#if $testnetsEnabled}

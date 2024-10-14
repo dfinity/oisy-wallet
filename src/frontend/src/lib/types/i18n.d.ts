@@ -158,6 +158,7 @@ interface I18nSettings {
 
 interface I18nNetworks {
 	title: string;
+	test_networks: string;
 	show_testnets: string;
 	more: string;
 	chain_fusion: string;
