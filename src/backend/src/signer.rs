@@ -1,11 +1,9 @@
 //! Code for inetracting with the chain fusion signer.
-use crate::state::{CYCLES_LEDGER, SIGNER};
 use crate::{
     read_config,
     state::{CYCLES_LEDGER, SIGNER},
 };
 use bitcoin::{Address, CompressedPublicKey, Network};
-use candid::{CandidType, Deserialize, Nat, Principal};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ic_cdk::api::management_canister::{
     bitcoin::BitcoinNetwork,
