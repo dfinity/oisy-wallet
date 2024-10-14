@@ -8,6 +8,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -32,7 +33,11 @@
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />
-		<Button {disabled} on:click={() => dispatch('icSend')}>
+		<Button
+			{disabled}
+			testId={REVIEW_FORM_SEND_BUTTON}
+			on:click={() => dispatch('icSend')}
+		>
 			{$i18n.send.text.send}
 		</Button>
 	</ButtonGroup>

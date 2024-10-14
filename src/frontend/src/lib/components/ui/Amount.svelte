@@ -22,4 +22,4 @@
 	});
 </script>
 
-<data data-tid={AMOUNT_DATA} value={detailedValue}>{displayValue}</data>
+<data data-tid={AMOUNT_DATA} value={"1.0"}>{"1.0"}</data>
