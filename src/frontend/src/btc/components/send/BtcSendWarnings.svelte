@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
+	import type { UtxosFee } from '$btc/types/btc-send';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { UtxosFee } from '$btc/types/btc-send';
 
 	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
 	export let utxosFee: UtxosFee | undefined = undefined;
