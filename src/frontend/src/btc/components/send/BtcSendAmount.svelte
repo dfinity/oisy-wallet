@@ -14,6 +14,8 @@
 
 	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
+
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
 		if (invalidAmount(userAmount.toNumber()) || userAmount.isZero()) {
