@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DApp } from '$lib/types/dapp'; // Adjust the import path according to your project structure
+	import type { DApp } from '$lib/types/dapp';
 
 	export let dApp: DApp;
 </script>

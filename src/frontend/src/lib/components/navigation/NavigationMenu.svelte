@@ -5,14 +5,17 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteSettings, isRouteTransactions, networkParam } from '$lib/utils/nav.utils.js';
+	import { isRouteSettings, isRouteDApps, isRouteTransactions, networkParam } from '$lib/utils/nav.utils.js';
+	import IconGlasses from '$lib/components/icons/IconGlasses.svelte';
 
-	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
+	let route: 'transactions' | 'tokens' | 'settings' | 'dapps'  = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
-		: isRouteTransactions($page)
-			? 'transactions'
-			: 'tokens';
+		: isRouteDApps($page)
+			? 'dapps'
+			: isRouteTransactions($page)
+				? 'transactions'
+				: 'tokens';
 </script>
 
 <div class=" flex w-full flex-col gap-3 py-3">
@@ -32,5 +35,14 @@
 	>
 		<IconSettings />
 		{$i18n.navigation.text.settings}
+	</NavigationItem>
+
+	<NavigationItem
+		href={`/dapps`}
+		ariaLabel={$i18n.navigation.alt.dapps}
+		selected={route === 'dapps'}
+	>
+		<IconGlasses />
+		{$i18n.navigation.text.dapps}
 	</NavigationItem>
 </div>

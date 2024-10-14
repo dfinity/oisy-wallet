@@ -34,6 +34,7 @@ interface I18nNavigation {
 		source_code: string;
 		changelog: string;
 		submit_ticket: string;
+		dapps: string;
 	};
 	alt: {
 		tokens: string;
@@ -43,6 +44,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		open_twitter: string;
+		dapps: string;
 	};
 }
 

@@ -40,7 +40,7 @@
 				<NavigationMenu />
 			</div>
 
-			{#if route !== 'settings'}
+			{#if route !== 'settings' && route !== 'dapps'}
 				<Hero
 					usdTotal={route === 'tokens'}
 					summary={route === 'transactions'}

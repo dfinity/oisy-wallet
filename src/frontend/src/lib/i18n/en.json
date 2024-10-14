@@ -37,7 +37,8 @@
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"submit_ticket": "Submit a ticket"
+			"submit_ticket": "Submit a ticket",
+			"dapps": "Discover"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -46,7 +47,8 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"submit_ticket": "Report an issue or request a feature on GitHub",
-			"open_twitter": "Open the DFINITY X/Twitter feed"
+			"open_twitter": "Open the DFINITY X/Twitter feed",
+			"dapps": "Discover and launch dApps"
 		}
 	},
 	"auth": {
