@@ -187,11 +187,13 @@
 	},
 	"dapps": {
 		"text": {
+			"about": "About",
 			"title": "DApps Explorer",
-			"headline": "Discover DApps",
+			"sub_headline": "Supported dApps",
+			"headline": "DISCOVER",
 			"launch": "Launch dApp",
 			"submit": "Submit your dApp",
-			"dex": "Decentralized Exchange"
+			"official_channels": "Official channels"
 		}
 	},
 	"networks": {

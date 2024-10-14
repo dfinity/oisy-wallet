@@ -160,11 +160,13 @@ interface I18nSettings {
 
 interface I18nDApps{
 	text: {
+		about: string;
+		sub_heading: string;
 		title: string;
 		headline: string;
 		launch: string;
 		submit: string;
-		dex: string;
+		official_channels: string;
 	};
 }
 
