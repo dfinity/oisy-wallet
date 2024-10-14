@@ -6,5 +6,8 @@ export type DApp = {
 	imageUrl: string
 	channels?: {
 		github?: string;
+		twitter?: string;
 	};
 }
+
+export const ALL_DAPPS_CATEGORY = 'All dApps'
