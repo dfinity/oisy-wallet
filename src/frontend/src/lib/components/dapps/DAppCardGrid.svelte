@@ -2,21 +2,24 @@
 	import { createEventDispatcher } from 'svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { DApp } from '$lib/types/dapp';
+	import { modalDAppDetails } from '$lib/derived/modal.derived';
+	import DAppModal from '$lib/components/dapps/DAppModal.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let dApps: DApp[];
 
 	const dispatch = createEventDispatcher();
 
-	const openModal = (dApp: DApp) => {
-		dispatch('openDAppDetails');
-		modalStore.openDAppDetails(dApp);
-	};
+	let selectedDApp: DApp | undefined;
+	$: selectedDApp = $modalDAppDetails
+		? ($modalStore?.data as DApp | undefined)
+		: undefined;
 </script>
 
 <div class="container mx-auto py-8">
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 		{#each dApps as dApp (dApp.name)}
-			<div class="rounded-lg shadow-md bg-white p-6 hover:shadow-lg transition-shadow cursor-pointer" on:click={() => openModal(dApp)}>
+			<div class="rounded-lg shadow-md bg-white p-6 hover:shadow-lg transition-shadow cursor-pointer" on:click={() => modalStore.openDAppDetails(dApp)}>
 				<img
 					src={dApp.imageUrl || '/default-dapp-icon.png'}
 					alt={dApp.name}
@@ -40,3 +43,7 @@
 		</div>
 	</div>
 </div>
+
+{#if $modalDAppDetails && nonNullish(selectedDApp)}
+	<DAppModal dApp={selectedDApp} />
+{/if}

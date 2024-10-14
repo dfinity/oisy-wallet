@@ -3,8 +3,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { DApp } from '$lib/types/dapp';
 
-	export let dApp = null;
+	export let dApp: DApp = null;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -17,12 +18,12 @@
 		<p class="text-center text-sm text-gray-500 mb-4">Decentralized Exchange</p>
 
 		<div class="w-full bg-blue-50 p-4 rounded-lg mb-4">
-			<h3 class="font-bold mb-2">{replaceOisyPlaceholders($i18n.core.text.about)}</h3>
+			<h3 class="font-bold mb-2">{replaceOisyPlaceholders(dApp?.name)}</h3>
 			<Html text={dApp ? dApp.description : ''} />
 		</div>
 
 		<button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg w-full">
-			{replaceOisyPlaceholders($i18n.core.text.launch_dapp)}
+			{replaceOisyPlaceholders($i18n.dapps.text.launch)}
 		</button>
 	</div>
 

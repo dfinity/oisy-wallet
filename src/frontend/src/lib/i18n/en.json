@@ -181,14 +181,8 @@
 	},
 	"dapps": {
 		"text": {
-			"title": "DApps Explorer"
-		},
-		"alt": {
-			"testnets_toggle": "Toggle to show or hide testnets",
-			"github_release": "OISY release notes on GitHub"
-		},
-		"error": {
-			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
+			"title": "DApps Explorer",
+			"launch": "Launch dApp"
 		}
 	},
 	"networks": {

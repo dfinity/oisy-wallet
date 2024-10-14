@@ -155,9 +155,8 @@ interface I18nSettings {
 interface I18nDApps{
 	text: {
 		title: string;
+		launch: string;
 	};
-	alt: { testnets_toggle: string; github_release: string };
-	error: { loading_profile: string };
 }
 
 interface I18nNetworks {

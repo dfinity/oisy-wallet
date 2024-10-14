@@ -30,7 +30,7 @@ export interface Modal<T> {
 		| 'about-what'
 		| 'about-how'
 		| 'btc-transaction'
-		| 'dapp-details'; // Added new type for dApp details modal
+		| 'dapp-details';
 	data?: T;
 }
 
