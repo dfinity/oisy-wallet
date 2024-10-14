@@ -1,4 +1,4 @@
-export type DApp = {
+export interface DApp {
 	name: string;
 	description: string;
 	tags: string[];
