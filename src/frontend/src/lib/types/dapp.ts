@@ -8,6 +8,7 @@ export type DApp = {
 		github?: string;
 		twitter?: string;
 	};
+	url: string;
 }
 
 export const ALL_DAPPS_CATEGORY = 'All dApps'
