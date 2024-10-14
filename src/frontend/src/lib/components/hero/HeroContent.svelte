@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { quintOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -12,13 +11,13 @@
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let usdTotal = false;
 	export let summary = false;
-	export let actions = true;
 	export let back = false;
 
 	let displayTokenSymbol = false;
@@ -30,7 +29,7 @@
 >
 	{#if summary}
 		<div
-			transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
+			transition:slide={SLIDE_PARAMS}
 			class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-start justify-between"
 		>
 			{#if back}
@@ -61,19 +60,14 @@
 	{/if}
 
 	{#if usdTotal}
-		<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+		<div transition:slide={SLIDE_PARAMS}>
 			<ExchangeBalance />
 		</div>
 	{/if}
 
-	{#if actions}
-		<div
-			transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
-			class="flex w-full justify-center text-left"
-		>
-			<Actions />
-		</div>
-	{/if}
+	<div transition:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
+		<Actions />
+	</div>
 
 	{#if isErc20Icp($token)}
 		<Erc20Icp />

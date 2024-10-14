@@ -48,6 +48,9 @@ export default {
 			water: '#d1e3ff'
 		},
 		extend: {
+			width: {
+				sm: '576px'
+			},
 			screens: {
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
