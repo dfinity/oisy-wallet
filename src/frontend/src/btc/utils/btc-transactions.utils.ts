@@ -26,7 +26,7 @@ export const mapBtcTransaction = ({
 		: undefined;
 
 	const status =
-		isNullish(confirmations) || confirmations === PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
+		isNullish(confirmations) || confirmations <= PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
 			? 'pending'
 			: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 				? 'confirmed'
