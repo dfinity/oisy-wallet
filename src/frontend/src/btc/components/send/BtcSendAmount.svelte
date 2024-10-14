@@ -7,6 +7,7 @@
 	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { invalidAmount } from '$lib/utils/input.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
@@ -25,6 +26,11 @@
 				});
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
+		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
+		if (invalidAmount(userAmount.toNumber()) || userAmount.isZero()) {
+			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
+		}
+
 		if (nonNullish($sendBalance) && userAmount.gt($sendBalance)) {
 			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
