@@ -6,9 +6,9 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isDestinationContractAddress } from '$eth/utils/send.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 

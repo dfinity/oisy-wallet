@@ -3,7 +3,7 @@
 	import SendNetwork from '$eth/components/send/SendNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 
 	export let network: Network | undefined = undefined;

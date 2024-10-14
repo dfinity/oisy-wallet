@@ -19,12 +19,12 @@
 	} from '$icp/utils/cketh.utils';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
