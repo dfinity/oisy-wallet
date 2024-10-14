@@ -166,13 +166,6 @@ export interface PendingTransaction {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AllowSigningError };
-<<<<<<< HEAD
-export type Result_2 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
-export type Result_3 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_4 = { Ok: MigrationReport } | { Err: string };
-export type Result_5 = { Ok: null } | { Err: string };
-export type SelectedUtxosFeeError = { InternalError: { msg: string } };
-=======
 export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_3 =
 	| { Ok: BtcGetPendingTransactionsReponse }
@@ -184,7 +177,6 @@ export type Result_7 = { Ok: null } | { Err: string };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
->>>>>>> origin/main
 export interface SelectedUtxosFeeRequest {
 	network: BitcoinNetwork;
 	amount_satoshis: bigint;
@@ -239,35 +231,21 @@ export interface Utxo {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	allow_signing: ActorMethod<[], Result_1>;
-<<<<<<< HEAD
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_2>;
-=======
 	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_2>;
 	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_3>;
 	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_4>;
->>>>>>> origin/main
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-<<<<<<< HEAD
-	get_user_profile: ActorMethod<[], Result_3>;
-=======
 	get_user_profile: ActorMethod<[], Result_5>;
->>>>>>> origin/main
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-<<<<<<< HEAD
-	migrate_user_data_to: ActorMethod<[Principal], Result_4>;
-	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_5>;
-=======
 	migrate_user_data_to: ActorMethod<[Principal], Result_6>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
 	migration_stop_timer: ActorMethod<[], Result_7>;
->>>>>>> origin/main
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;

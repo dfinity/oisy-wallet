@@ -122,11 +122,7 @@ export const idlFactory = ({ IDL }) => {
 		PendingTransactions: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-<<<<<<< HEAD
-	const Result_2 = IDL.Variant({
-=======
 	const Result_4 = IDL.Variant({
->>>>>>> origin/main
 		Ok: SelectedUtxosFeeResponse,
 		Err: SelectedUtxosFeeError
 	});
@@ -173,11 +169,7 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-<<<<<<< HEAD
-	const Result_3 = IDL.Variant({
-=======
 	const Result_5 = IDL.Variant({
->>>>>>> origin/main
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -258,13 +250,8 @@ export const idlFactory = ({ IDL }) => {
 		to: IDL.Principal,
 		progress: MigrationProgress
 	});
-<<<<<<< HEAD
-	const Result_4 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
-	const Result_5 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
-=======
 	const Result_6 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
 	const Result_7 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
->>>>>>> origin/main
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -272,35 +259,21 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		allow_signing: IDL.Func([], [Result_1], []),
-<<<<<<< HEAD
-		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_2], []),
-=======
 		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
 		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
 		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
->>>>>>> origin/main
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		config: IDL.Func([], [Config], ['query']),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-<<<<<<< HEAD
-		get_user_profile: IDL.Func([], [Result_3], ['query']),
-=======
 		get_user_profile: IDL.Func([], [Result_5], ['query']),
->>>>>>> origin/main
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse], ['query']),
-<<<<<<< HEAD
-		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_4], []),
-		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
-		migration_stop_timer: IDL.Func([], [Result_5], []),
-=======
 		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_6], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
 		migration_stop_timer: IDL.Func([], [Result_7], []),
->>>>>>> origin/main
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
