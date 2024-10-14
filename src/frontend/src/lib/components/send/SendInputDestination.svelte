@@ -3,6 +3,7 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import QRButton from '$lib/components/common/QRButton.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
@@ -40,7 +41,7 @@
 </Input>
 
 {#if invalidDestination}
-	<p transition:slide={{ duration: 250 }} class="pb-3 text-cyclamen">
+	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">
 		{$i18n.send.assertion.invalid_destination_address}
 	</p>
 {/if}

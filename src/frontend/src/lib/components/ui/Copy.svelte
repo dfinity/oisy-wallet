@@ -27,11 +27,9 @@
 	data-tid={testId}
 	class:py-2={!inline}
 	class:inline-block={inline}
-	class:text-blue={color === 'blue'}
-	class:hover:text-dark-blue={color === 'blue'}
-	class:active:text-dark-blue={color === 'blue'}
-	class:hover:text-blue={color === 'inherit'}
-	class:active:text-blue={color === 'inherit'}
+	class:text-primary={color === 'blue'}
+	class:hover:text-inherit={color === 'blue'}
+	class:active:text-inherit={color === 'blue'}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 >
 	<IconCopy />

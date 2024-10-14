@@ -11,11 +11,11 @@
 	$: infoList = [
 		{
 			label: $i18n.auth.text.safe_access,
-			icon: IconGlasses
+			icon: IconShieldAlert
 		},
 		{
 			label: $i18n.auth.text.privacy_and_security,
-			icon: IconShieldAlert
+			icon: IconGlasses
 		},
 		{
 			label: $i18n.auth.text.powered_by_chain_fusion,
@@ -37,7 +37,7 @@
 		{#each infoList as { label, icon }}
 			<div class="flex items-center gap-4">
 				<div class="hidden md:block">
-					<svelte:component this={icon} class="hidden md:block" />
+					<svelte:component this={icon} />
 				</div>
 				{label}
 			</div>

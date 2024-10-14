@@ -4,7 +4,7 @@
 	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { ethereumToken } from '$eth/derived/token.derived';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { networkBitcoin, networkEthereum } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
@@ -41,7 +41,7 @@
 			ethereum: $ethAddress,
 			erc20: $ethAddress,
 			icrc: $icrcAccountIdentifierText,
-			icp: $icrcAccountIdentifierText
+			icp: $icpAccountIdentifierText
 		}
 	});
 
@@ -71,4 +71,5 @@
 	height="660px"
 	width="100%"
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
+	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
 />

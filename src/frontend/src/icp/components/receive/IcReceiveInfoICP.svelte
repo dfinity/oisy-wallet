@@ -6,6 +6,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -60,12 +61,9 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
 	</ReceiveAddress>
 
-	<button
-		class="primary full text-center"
-		data-tid={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
+	<ButtonDone
+		testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
 		on:click={close}
 		slot="toolbar"
-	>
-		{$i18n.core.text.done}
-	</button>
+	/>
 </ContentWithToolbar>

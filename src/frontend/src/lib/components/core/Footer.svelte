@@ -3,6 +3,7 @@
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,35 +14,26 @@
 </script>
 
 <footer
-	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 md:flex-1 md:flex-grow md:flex-row md:px-8"
+	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-6 md:flex-1 md:flex-grow md:flex-row md:items-end md:justify-between md:px-8"
 	class:md:sticky={$authNotSignedIn}
-	class:md:h-md:mx-0={$authNotSignedIn}
-	class:md:h-md:w-[50%]={$authNotSignedIn}
+	class:md:h-md:grid={$authNotSignedIn}
+	class:md:h-md:grid-cols-4={$authNotSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
 >
 	<div class="flex flex-row items-center gap-4">
-		<a
-			href={OISY_REPO_URL}
-			rel="external noopener noreferrer"
-			target="_blank"
-			class="rounded-full bg-white p-2"
-			aria-label={$i18n.navigation.text.source_code_on_github}
-		>
+		<ExternalLinkIcon href={OISY_REPO_URL} ariaLabel={$i18n.navigation.text.source_code_on_github}>
 			<IconGitHub />
-		</a>
+		</ExternalLinkIcon>
 
-		<a
+		<ExternalLinkIcon
 			href={OISY_TWITTER_URL}
-			rel="external noopener noreferrer"
-			target="_blank"
-			class="rounded-full bg-white p-2"
-			aria-label={$i18n.navigation.text.source_code_on_github}
+			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 		>
 			<IconTwitter />
-		</a>
+		</ExternalLinkIcon>
 	</div>
 
-	<div class="flex flex-row items-center gap-2 text-sm">
+	<div class="item flex flex-row items-center justify-end gap-2 text-sm">
 		<IconDfinity />
 		{$i18n.footer.text.copyright}
 		<span>

@@ -35,7 +35,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use signer::AllowSigningError;
+use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -300,9 +300,12 @@ async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
     let principal = ic_cdk::caller();
+    let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
     let all_utxos = bitcoin_api::get_all_utxos(
         params.network,
-        params.source_address.clone(),
+        source_address.clone(),
         Some(
             params
                 .min_confirmations
@@ -316,7 +319,7 @@ async fn btc_select_user_utxos_fee(
     let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
         pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
         !pending_transactions
-            .get_pending_transactions(&principal, &params.source_address)
+            .get_pending_transactions(&principal, &source_address)
             .is_empty()
     });
 

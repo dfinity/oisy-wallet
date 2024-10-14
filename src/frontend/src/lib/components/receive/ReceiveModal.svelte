@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -29,8 +30,6 @@
 
 		<slot name="content" />
 
-		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
-			>{$i18n.core.text.done}</button
-		>
+		<ButtonDone on:click={modalStore.close} slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>

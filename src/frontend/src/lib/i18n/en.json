@@ -31,6 +31,8 @@
 	},
 	"navigation": {
 		"text": {
+			"tokens": "Assets",
+			"settings": "Settings",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -38,10 +40,13 @@
 			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
+			"tokens": "Go to the assets view",
+			"settings": "Open your settings",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"submit_ticket": "Open the ticket submission form on GitHub to report an issue or request a feature"
+			"submit_ticket": "Report an issue or request a feature on GitHub",
+			"open_twitter": "Open the DFINITY X/Twitter feed"
 		}
 	},
 	"auth": {
@@ -51,11 +56,11 @@
 			"logout": "Logout",
 			"authenticate": "Open or Create",
 			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Top-notch privacy and security",
-			"powered_by_chain_fusion": "Powered by ICP's Chain Fusion technology"
+			"privacy_and_security": "Anonymous, self-custodial",
+			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
 		},
 		"alt": {
-			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet.",
+			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"warning": {
@@ -65,7 +70,7 @@
 		"error": {
 			"no_internet_identity": "No internet identity.",
 			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
-			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in Oisy: $error",
+			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in OISY: $error",
 			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
 			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
 			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
@@ -147,6 +152,7 @@
 	},
 	"hero": {
 		"text": {
+			"available_balance": "Available balance",
 			"use_with_caution": "This is an alpha version. Use with caution.",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
@@ -167,11 +173,11 @@
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
 			"pouh_credential_verified": "Verified ✅",
-			"sign_in": "Sign in to start using Oisy Wallet."
+			"sign_in": "Sign in to start using $oisy_name."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
-			"github_release": "Oisy release notes on GitHub"
+			"github_release": "OISY release notes on GitHub"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
@@ -222,6 +228,7 @@
 		},
 		"bitcoin": {
 			"text": {
+				"bitcoin": "Bitcoin",
 				"checking_status": "Checking BTC status...",
 				"refresh_status": "Refresh BTC status",
 				"initializing": "Initializing...",
@@ -278,7 +285,8 @@
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
-			"cketh_certified": "Please wait until the ckETH parameters have been certified."
+			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
+			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -301,7 +309,8 @@
 			"address_unknown": "Address is unknown.",
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
-			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing."
+			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
+			"utxos_fee_missing": "UTXOs fee is missing."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -313,7 +322,10 @@
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
-			"incompatible_token": "The token is incompatible. Please try again with a compatible token."
+			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
+			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
+			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
+			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
 		}
 	},
 	"convert": {
@@ -352,6 +364,7 @@
 			"contract_address": "Contract address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
+			"hide_zeros": "Hide zeros",
 			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
@@ -379,7 +392,7 @@
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
 				"add_the_token": "Add the token",
-				"info": "To display custom token information correctly, Oisy Wallet requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
+				"info": "To display custom token information correctly, $oisy_name requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
 				"github_howto": "Read how ICRC token Integration works",
 				"open_github_howto": "Open information about ICRC token integration on GitHub"
 			},
@@ -398,7 +411,7 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
-				"your_tokens": "Manage your tokens",
+				"manage_list": "Manage list",
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
@@ -409,7 +422,7 @@
 				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade.",
+				"outdated_index_canister": "$token Index canister is outdated and incompatible with $oisy_name. Contact the project team to propose an upgrade.",
 				"no_changes": "No changes need to be saved."
 			},
 			"error": {
@@ -622,7 +635,7 @@
 				"fully_on_chain": "<strong>Fully on-chain</strong><br>Not only the keys but the entire wallet application is <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">stored on chain</a> and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof.",
 				"cross_device": "<strong>Cross-device</strong><br>Using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a> means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
 				"verifiable_credentials": "<strong>Compatible with verifiable credentials</strong><br>$oisy_name is designed to integrate with Internet Computer’s <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials platform</a>. Users can access additional functionality, like airdrops, if they acquire credentials of a certain type.",
-				"open_source": "<strong>Open source</strong><br>Oisy is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
+				"open_source": "<strong>Open source</strong><br>OISY is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
 			}
 		}
 	}

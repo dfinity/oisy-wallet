@@ -1,24 +1,18 @@
 <script lang="ts">
-	import Header from '$lib/components/hero/Header.svelte';
+	import { slide } from 'svelte/transition';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
-	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 
 	export let usdTotal = false;
 	export let summary = false;
-	export let actions = true;
-	export let back: 'header' | 'hero' | undefined;
+	export let back = false;
 	export let testId: string | undefined = undefined;
 </script>
 
-<div class="pt-6">
-	<Header back={back === 'header'} />
-
-	{#if $authSignedIn}
-		<article
-			class="main relative flex flex-col items-center rounded-lg pb-6 pt-10"
-			data-tid={testId}
-		>
-			<HeroContent {usdTotal} {summary} {actions} back={back === 'hero'} />
-		</article>
-	{/if}
-</div>
+<article
+	class="relative flex flex-col items-center rounded-lg pb-6"
+	transition:slide={SLIDE_PARAMS}
+	data-tid={testId}
+>
+	<HeroContent {usdTotal} {summary} {back} />
+</article>

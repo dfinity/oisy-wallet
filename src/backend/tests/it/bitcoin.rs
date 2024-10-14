@@ -21,7 +21,6 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
-        source_address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         min_confirmations: None,
     };
@@ -77,7 +76,6 @@ fn test_select_user_utxos_fee_pending_transaction_error() {
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
-        source_address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         min_confirmations: None,
     };

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,6 +12,6 @@
 	ariaLabel={$i18n.send.text.send}
 	testId={SEND_TOKENS_MODAL_OPEN_BUTTON}
 >
-	<IconSend size="28" slot="icon" />
+	<IconlySend size="28" slot="icon" />
 	{$i18n.send.text.send}
 </ButtonHero>

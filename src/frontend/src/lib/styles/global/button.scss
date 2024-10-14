@@ -1,15 +1,12 @@
 @use '../mixins/media';
 @use '../mixins/button';
 
-button {
+button,
+a.as-button {
 	display: flex;
 	align-items: center;
 
 	gap: var(--padding-1_5x);
-
-	&:not([disabled]) {
-		cursor: pointer;
-	}
 
 	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
@@ -23,6 +20,10 @@ button {
 
 	--button-padding: var(--padding-2x) var(--padding-3x);
 
+	&:not([disabled]) {
+		cursor: pointer;
+	}
+
 	&.primary,
 	&.secondary,
 	&.tertiary {
@@ -34,10 +35,10 @@ button {
 			--button-border-radius: var(--border-radius-sm-1_5x);
 			--button-padding: var(--padding);
 		}
-	}
 
-	&.user {
-		border: 1px solid var(--color-blue);
+		&.padding-sm {
+			--button-padding: var(--padding-1_5x) var(--padding-2x);
+		}
 	}
 
 	&.primary,
@@ -109,29 +110,24 @@ button {
 	}
 
 	&.tertiary {
+		background: var(--color-white);
+
+		&:hover {
+			color: var(--color-primary);
+		}
+
+		&:active {
+			background: var(--color-onahau);
+			color: currentColor;
+		}
+
 		&.link {
-			background: var(--color-white);
 			color: var(--color-primary);
 
 			&:hover {
 				color: var(--color-secondary);
 			}
-
-			&:active {
-				background: var(--color-onahau);
-			}
 		}
-	}
-
-	&.hero {
-		justify-content: center;
-
-		background: var(--color-off-white);
-		color: var(--color-blue);
-
-		padding: var(--padding-1_5x) var(--padding-3x);
-
-		font-weight: var(--font-weight-bold);
 	}
 
 	&.primary,
@@ -144,46 +140,7 @@ button {
 	&.text {
 		&:hover,
 		&:active {
-			color: var(--color-blue);
-		}
-	}
-
-	&.wallet-connect {
-		background: var(--color-wallet-connect);
-		border: 1px solid var(--color-wallet-connect);
-
-		padding: var(--button-padding);
-	}
-
-	&.wallet-connect {
-		&.icon {
-			padding: 0;
-			border-radius: 50%;
-
-			width: var(--padding-6x);
-			height: var(--padding-6x);
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			span:not(.block) {
-				display: none;
-			}
-
-			@include media.min-width(medium) {
-				&.desktop-wide {
-					padding: var(--button-padding);
-					border-radius: var(--button-border-radius);
-
-					width: inherit;
-					height: inherit;
-
-					span {
-						display: block;
-					}
-				}
-			}
+			color: var(--color-blue-ribbon);
 		}
 	}
 

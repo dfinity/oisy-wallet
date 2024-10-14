@@ -9,7 +9,16 @@ import { testnets } from '$lib/derived/testnets.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const initHasPendingSentTransactions = (address: string): Readable<boolean | 'loading'> =>
+export enum BtcPendingSentTransactionsStatus {
+	SOME = 'has-pending-transactions',
+	NONE = 'empty-pending-transactions',
+	LOADING = 'loading',
+	ERROR = 'error'
+}
+
+export const initPendingSentTransactionsStatus = (
+	address: string
+): Readable<BtcPendingSentTransactionsStatus> =>
 	derived(
 		[
 			btcAddressMainnet,
@@ -28,18 +37,22 @@ export const initHasPendingSentTransactions = (address: string): Readable<boolea
 			const pendingTransactionsData = $pendingTransactionsStore[address];
 
 			if (nonNullish(pendingTransactionsData)) {
-				return pendingTransactionsData.data.length > 0;
+				return pendingTransactionsData.data === null
+					? BtcPendingSentTransactionsStatus.ERROR
+					: pendingTransactionsData.data.length > 0
+						? BtcPendingSentTransactionsStatus.SOME
+						: BtcPendingSentTransactionsStatus.NONE;
 			}
 
 			if (!$testnets) {
 				if (nonNullish($btcAddressMainnet) && $btcAddressMainnet !== address) {
 					// If the address is not a bitcoin address, there are no pending transactions.
-					return false;
+					return BtcPendingSentTransactionsStatus.NONE;
 				}
 
 				// Return loading while we don't have btc addresses and we can't tell
 				// whether there are pending transactions for a specific address.
-				return 'loading';
+				return BtcPendingSentTransactionsStatus.LOADING;
 			}
 
 			// Testnets are enabled.
@@ -49,10 +62,10 @@ export const initHasPendingSentTransactions = (address: string): Readable<boolea
 			const isRegtestEnabled = LOCAL;
 			if (isNotMainnet && isNotTestnet && (isNotRegtest || !isRegtestEnabled)) {
 				// If the address is not a bitcoin address, there are no pending transactions.
-				return false;
+				return BtcPendingSentTransactionsStatus.NONE;
 			}
 
 			// If we reach here is because either addresses nor pending transactions are loaded
-			return 'loading';
+			return BtcPendingSentTransactionsStatus.LOADING;
 		}
 	);

@@ -6,6 +6,7 @@ export const LOGIN_BUTTON = 'login-button';
 export const MAX_BUTTON = 'max-button';
 
 export const TOKEN_CARD = 'token-card';
+export const TOKEN_BALANCE = 'token-balance';
 
 export const ABOUT_WHAT_MODAL_OPEN_BUTTON = 'about-what-modal-open-button';
 export const ABOUT_WHAT_MODAL = 'about-what-modal';

@@ -2,14 +2,15 @@
 	import { Input } from '@dfinity/gix-components';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
 </script>
 
-<p class="mb-2 mt-1 text-dark-blue">{$i18n.tokens.import.text.info}</p>
+<p class="mb-2 mt-1 text-dark-blue">{replaceOisyPlaceholders($i18n.tokens.import.text.info)}</p>
 
-<p class="mb-4 font-bold text-blue">
+<p class="mb-4 font-bold text-blue-ribbon">
 	<ExternalLink
 		href="https://github.com/dfinity/oisy-wallet/blob/main/HOW-TO.md#custom-icrc-token-integration"
 		ariaLabel={$i18n.tokens.import.text.open_github_howto}

@@ -18,8 +18,7 @@
 	$: displayValue = formatToken({
 		value: amount,
 		unitName: $tokenWithFallback.decimals,
-		displayDecimals: EIGHT_DECIMALS,
-		trailingZeros: false
+		displayDecimals: EIGHT_DECIMALS
 	});
 </script>
 

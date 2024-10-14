@@ -4,14 +4,17 @@
 		"staging": "t7tos-nyaaa-aaaad-aadkq-cai"
 	},
 	"backend": {
-		"ic": "doked-biaaa-aaaar-qag2a-cai",
 		"beta": "doked-biaaa-aaaar-qag2a-cai",
-		"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
+		"ic": "doked-biaaa-aaaar-qag2a-cai",
 		"staging": "d3nvo-aaaaa-aaaar-qagzq-cai"
 	},
 	"frontend": {
-		"ic": "cha4i-riaaa-aaaan-qeccq-cai",
 		"beta": "v7iq7-yiaaa-aaaan-qmrtq-cai",
-		"staging": "tewsx-xaaaa-aaaad-aadia-cai"
+		"ic": "cha4i-riaaa-aaaan-qeccq-cai",
+		"staging": "tewsx-xaaaa-aaaad-aadia-cai",
+		"test_fe_1": "6qzfn-gyaaa-aaaar-qaisa-cai",
+		"test_fe_2": "6xydz-laaaa-aaaar-qaisq-cai",
+		"test_fe_3": "dxvmu-wiaaa-aaaah-aqzaa-cai",
+		"test_fe_4": "gwqec-uqaaa-aaaak-qlnza-cai"
 	}
 }

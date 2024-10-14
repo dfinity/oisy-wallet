@@ -1,3 +1,4 @@
+import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinNetwork } from '$declarations/signer/signer.did';
 import { getBtcBalance } from '$lib/api/signer.api';
@@ -86,7 +87,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}): Promise<CertifiedData<bigint>> {
 		const balance = await getBtcBalance({
 			identity,
-			network: bitcoinNetwork
+			network: bitcoinNetwork,
+			minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
 		});
 		const certifiedBalance = {
 			data: balance,
@@ -110,7 +112,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const bitcoinNetwork = data?.bitcoinNetwork;
 		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get BTC certified balance.');
 
-		const btcAddress = data?.btcAddress;
+		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
 		const balance = await this.loadBtcBalance({ identity, bitcoinNetwork });

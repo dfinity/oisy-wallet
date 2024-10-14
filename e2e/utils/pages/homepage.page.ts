@@ -6,6 +6,7 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
@@ -145,6 +146,9 @@ abstract class Homepage {
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
