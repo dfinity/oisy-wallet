@@ -1,3 +1,7 @@
+import {
+	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
+	PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
+} from '$btc/constants/btc.constants';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinOutput, BitcoinTransaction } from '$lib/types/blockchain';
@@ -21,13 +25,10 @@ export const mapBtcTransaction = ({
 		? latestBitcoinBlockHeight - block_index
 		: undefined;
 
-	// 0 confirmations (or undefined) - status "pending"
-	// 1 - 5 confirmations - status "unconfirmed"
-	// 6 and more confirmations - status "confirmed"
 	const status =
-		isNullish(confirmations) || confirmations === 0
+		isNullish(confirmations) || confirmations === PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
 			? 'pending'
-			: confirmations >= 6
+			: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 				? 'confirmed'
 				: 'unconfirmed';
 

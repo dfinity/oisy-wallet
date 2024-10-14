@@ -1,3 +1,7 @@
+import {
+	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
+	UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+} from '$btc/constants/btc.constants';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import { mockBtcAddress, mockBtcTransaction, mockBtcTransactionUi } from '$tests/mocks/btc.mock';
@@ -28,7 +32,8 @@ describe('mapBtcTransaction', () => {
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
-			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 1
+			latestBitcoinBlockHeight:
+				(mockBtcTransactionUi.blockNumber ?? 0) + UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		});
 		const expectedResult = { ...mockBtcTransactionUi, status: 'unconfirmed' };
 
@@ -44,7 +49,8 @@ describe('mapBtcTransaction', () => {
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
-			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 6
+			latestBitcoinBlockHeight:
+				(mockBtcTransactionUi.blockNumber ?? 0) + CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		});
 
 		expect(result).toEqual(mockBtcTransactionUi);
@@ -82,7 +88,8 @@ describe('mapBtcTransaction', () => {
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
-			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 3
+			latestBitcoinBlockHeight:
+				(mockBtcTransactionUi.blockNumber ?? 0) + UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		});
 		const expectedResult = {
 			...mockBtcTransactionUi,
@@ -105,7 +112,8 @@ describe('mapBtcTransaction', () => {
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
-			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 10
+			latestBitcoinBlockHeight:
+				(mockBtcTransactionUi.blockNumber ?? 0) + CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		});
 		const expectedResult = {
 			...mockBtcTransactionUi,
