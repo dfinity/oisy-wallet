@@ -31,6 +31,8 @@
 	},
 	"navigation": {
 		"text": {
+			"tokens": "Assets",
+			"settings": "Settings",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -38,6 +40,8 @@
 			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
+			"tokens": "Go to the assets view",
+			"settings": "Open your settings",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -305,7 +309,8 @@
 			"address_unknown": "Address is unknown.",
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
-			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing."
+			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
+			"utxos_fee_missing": "UTXOs fee is missing."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
