@@ -36,11 +36,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
+            /home/runner/.cargo/registry
+            /home/runner/.cargo/git
+            target/
             ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            target
           key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
               ${{ runner.os }}-cargo-
