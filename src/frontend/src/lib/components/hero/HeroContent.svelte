@@ -18,7 +18,6 @@
 
 	export let usdTotal = false;
 	export let summary = false;
-	export let actions = true;
 	export let back = false;
 
 	let displayTokenSymbol = false;
@@ -66,11 +65,9 @@
 		</div>
 	{/if}
 
-	{#if actions}
-		<div transition:slide={SLIDE_PARAMS} class="flex w-full justify-center text-left">
-			<Actions />
-		</div>
-	{/if}
+	<div transition:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
+		<Actions />
+	</div>
 
 	{#if isErc20Icp($token)}
 		<Erc20Icp />
