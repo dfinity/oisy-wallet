@@ -14,11 +14,16 @@
 	$: selectedDApp = $modalDAppDetails
 		? ($modalStore?.data as DApp | undefined)
 		: undefined;
+
+	export let selectedFilter;
+	$: filteredDApps = selectedFilter === "All"
+		? dApps
+		: dApps.filter(dApp => dApp.categories.includes(selectedFilter));
 </script>
 
 <div class="container mx-auto py-8">
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-		{#each dApps as dApp (dApp.name)}
+		{#each filteredDApps as dApp (dApp.name)}
 			<div class="rounded-lg shadow-md bg-white p-6 hover:shadow-lg transition-shadow cursor-pointer" on:click={() => modalStore.openDAppDetails(dApp)}>
 				<img
 					src={dApp.imageUrl || '/default-dapp-icon.png'}
