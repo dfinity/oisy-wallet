@@ -3,12 +3,17 @@
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 </script>
 
-<button
-	on:click
-	class="wallet-connect icon desktop-wide text-white"
-	disabled={$ethAddressNotLoaded}
-	class:opacity-0={$ethAddressNotLoaded}
->
+<button on:click class="tertiary text-primary h-10" disabled={$ethAddressNotLoaded}>
 	<IconWalletConnect size="24" />
-	<span class="font-bold"><slot /></span>
+	<slot />
 </button>
+
+<style lang="scss">
+	button {
+		border-radius: var(--border-radius-sm-1_5x);
+
+		&:hover {
+			color: inherit;
+		}
+	}
+</style>
