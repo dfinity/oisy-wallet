@@ -27,7 +27,7 @@ runs:
           /home/runner/.cargo/git
           target/
           ~/.cargo/bin/
-        key: ${{ runner.os }}-e2e-cargo-${{ hashFiles('Cargo.lock') }}
+        key: ${{ runner.os }}-e2e-cargo-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
         restore-keys: |
             ${{ runner.os }}-e2e-cargo-
 
