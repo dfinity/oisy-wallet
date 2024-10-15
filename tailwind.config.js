@@ -8,7 +8,8 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
  */
 function addCSSVariablesForColors(inputTheme) {
 	const { addBase, theme } = inputTheme;
-	function extractColorVars(colorObj, colorGroup = '') {
+
+	function extractColorVars({ colorObj, colorGroup = '' }) {
 		return Object.keys(colorObj).reduce((vars, colorKey) => {
 			const value = colorObj[colorKey];
 			const cssVariable =
@@ -17,14 +18,14 @@ function addCSSVariablesForColors(inputTheme) {
 			const newVars =
 				typeof value === 'string'
 					? { [cssVariable]: value }
-					: extractColorVars(value, `-${colorKey}`);
+					: extractColorVars({ colorObj: value, colorGroup: `-${colorKey}` });
 
 			return { ...vars, ...newVars };
 		}, {});
 	}
 
 	addBase({
-		':root': extractColorVars(theme('colors'))
+		':root': extractColorVars({ colorObj: theme('colors') })
 	});
 }
 
