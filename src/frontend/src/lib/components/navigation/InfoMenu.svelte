@@ -4,7 +4,7 @@
 </script>
 
 <div class="box-content flex w-full flex-col gap-5 py-3">
-	<AboutWhat asMenuItem shortLabel />
+	<AboutHow asMenuItem />
 
-	<AboutHow asMenuItem shortLabel />
+	<AboutWhat asMenuItem />
 </div>
