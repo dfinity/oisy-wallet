@@ -1,8 +1,8 @@
 <script lang="ts">
+	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { DApp } from '$lib/types/dapp';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dApp: DApp;
 	export let backgroundImage: string;
@@ -22,15 +22,9 @@
 				<h4 class="text-white">{dApp.name}</h4>
 			</div>
 
-			<a
-				rel="external noopener noreferrer"
-				aria-label={replacePlaceholders($i18n.dapps.alt.open_dapp, { $dAppname: dApp.name })}
-				href={dApp.website}
-				target="_blank"
-				class="as-button secondary no-underline"
-			>
+			<Button styleClass="flex-grow-0" colorStyle="secondary" on:click>
 				{$i18n.core.text.view}
-			</a>
+			</Button>
 		</div>
 	</div>
 </article>
