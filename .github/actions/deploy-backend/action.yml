@@ -16,6 +16,8 @@ runs:
       with:
         path: ~/.npm
         key: ${{ runner.os }}-e2e-npm-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-e2e-npm-
 
     - name: Restore cargo cache
       uses: actions/cache@v4
