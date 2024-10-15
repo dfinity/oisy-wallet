@@ -93,7 +93,7 @@ const send = async ({
 	});
 };
 
-const sendIcrc = async ({
+const sendIcrc = ({
 	to,
 	amount,
 	identity,
@@ -117,12 +117,7 @@ const sendIcrc = async ({
 	});
 };
 
-const sendIcp = async ({
-	to,
-	amount,
-	identity,
-	progress
-}: IcTransferParams): Promise<BlockHeight> => {
+const sendIcp = ({ to, amount, identity, progress }: IcTransferParams): Promise<BlockHeight> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 	const validIcpAddress = !invalidIcpAddress(to);
 

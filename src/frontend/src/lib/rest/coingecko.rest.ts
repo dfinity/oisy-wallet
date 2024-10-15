@@ -20,7 +20,7 @@ const API_KEY = import.meta.env.VITE_COINGECKO_API_KEY;
  * - https://www.coingecko.com/api/documentation
  *
  */
-export const simplePrice = async ({
+export const simplePrice = ({
 	ids,
 	...rest
 }: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
@@ -39,7 +39,7 @@ export const simplePrice = async ({
  * - https://www.coingecko.com/api/documentation
  *
  */
-export const simpleTokenPrice = async ({
+export const simpleTokenPrice = ({
 	id,
 	contract_addresses,
 	...rest
