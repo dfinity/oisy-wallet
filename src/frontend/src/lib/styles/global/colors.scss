@@ -45,4 +45,75 @@
 	--color-primary: rgb(var(--color-primary-rgb));
 	--color-secondary-rgb: var(--color-black-rgb);
 	--color-secondary: rgb(var(--color-secondary-rgb));
+
+	/* Brand colors */
+	--color-brand-100: #e8f1ff;
+	--color-brand-200: #d1e3ff;
+	--color-brand-300: #b0cdff;
+	--color-brand-400: #84b2ff;
+	--color-brand-base: #0066ff;
+	--color-brand-default: #004abe;
+	--color-brand-500: #004abe;
+	--color-brand-600: #012f80;
+
+	/* Warning colors */
+	--color-warning-lightest: #fff3e6;
+	--color-warning-lighter: #ffd099;
+	--color-warning-light: #feb967;
+	--color-warning-default: #ff8a00;
+	--color-warning-dark: #cc6e00;
+	--color-warning-darker: #663701;
+
+	/* Error colors */
+	--color-error-lightest: #fff6f6;
+	--color-error-lighter: #fadfdf;
+	--color-error-light: #f5a9b8;
+	--color-error-default: #dc3545;
+	--color-error-dark: #a71d2a;
+	--color-error-darker: #520c13;
+
+	/* Info colors */
+	--color-info-lightest: #f0f9ff;
+	--color-info-lighter: #e0f2fe;
+	--color-info-light: #7cd4fd;
+	--color-info-default: #0ba5ec;
+	--color-info-dark: #026aa2;
+	--color-info-darker: #0b4a6f;
+
+	/* Success colors */
+	--color-success-lightest: #d0f0e0;
+	--color-success-lighter: #a2e1c1;
+	--color-success-light: #73d1a2;
+	--color-success-default: #16b364;
+	--color-success-dark: #087443;
+	--color-success-darker: #084c2e;
+
+	/* Neutral colors */
+	--color-neutral-black: #000000;
+	--color-neutral-black-50: #00000080;
+	--color-neutral-white: #ffffff;
+	--color-neutral-white-50: #ffffff80;
+	--color-neutral-100: #f8f9fa;
+	--color-neutral-200: #e9ecef;
+	--color-neutral-300: #dee2e6;
+	--color-neutral-400: #ced4da;
+	--color-neutral-500: #adb5bd;
+	--color-neutral-600: #6c757d;
+	--color-neutral-700: #495057;
+	--color-neutral-800: #343a40;
+	--color-neutral-900: #212529;
+
+	/* Alpha colors */
+	--color-alpha-10: #ffffff1a;
+	--color-alpha-30: #ffffff4d;
+	--color-alpha-50: #ffffff80;
+	--color-alpha-70: #ffffffb2;
+	--color-alpha-90: #ffffffe5;
+
+	/* Alpha Inverted colors */
+	--color-alpha-inverted-10: #0000001a;
+	--color-alpha-inverted-30: #00000033;
+	--color-alpha-inverted-50: #00000080;
+	--color-alpha-inverted-70: #000000b2;
+	--color-alpha-inverted-90: #000000e5;
 }

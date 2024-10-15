@@ -139,3 +139,34 @@ figcaption {
 ::-webkit-scrollbar {
 	width: 0.45rem;
 }
+
+:root {
+	/* Background colors */
+	--background-page: var(--colors-neutral-white);
+	--background-primary: var(--colors-neutral-white);
+	--background-secondary: var(--colors-neutral-100);
+	--background-tertiary: var(--colors-neutral-200);
+	--background-primary-inverted: var(--colors-neutral-black);
+	--background-secondary-inverted: var(--colors-neutral-900);
+	--background-tertiary-inverted: var(--colors-neutral-600);
+	--background-disabled: var(--colors-neutral-300);
+
+	/* Foreground colors */
+	--foreground-primary: var(--colors-neutral-black);
+	--foreground-secondary: var(--colors-neutral-900);
+	--foreground-tertiary: var(--colors-neutral-600);
+	--foreground-primary-inverted: var(--colors-neutral-white);
+	--foreground-secondary-inverted: var(--colors-neutral-200);
+	--foreground-tertiary-inverted: var(--colors-neutral-500);
+	--foreground-disabled: var(--colors-neutral-400);
+
+	/* Border colors */
+	--border-base: var(--colors-neutral-white);
+	--border-primary: var(--colors-neutral-200);
+	--border-secondary: var(--colors-neutral-300);
+	--border-tertiary: var(--colors-neutral-400);
+	--border-primary-inverted: var(--colors-neutral-900);
+	--border-secondary-inverted: var(--colors-neutral-800);
+	--border-tertiary-inverted: var(--colors-neutral-500);
+	--border-disabled: var(--colors-neutral-200);
+}
