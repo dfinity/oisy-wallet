@@ -31,6 +31,7 @@ describe('mapBtcTransaction', () => {
 		const expectedResult = {
 			...mockBtcTransactionUi,
 			blockNumber: undefined,
+			confirmations: undefined,
 			status: 'pending'
 		};
 
@@ -42,7 +43,6 @@ describe('mapBtcTransaction', () => {
 			...mockBtcTransaction,
 			block_index: mockBtcTransactionUi.blockNumber
 		} as BitcoinTransaction;
-
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
@@ -52,7 +52,7 @@ describe('mapBtcTransaction', () => {
 		const expectedResult = {
 			...mockBtcTransactionUi,
 			status: 'unconfirmed',
-			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -63,7 +63,6 @@ describe('mapBtcTransaction', () => {
 			...mockBtcTransaction,
 			block_index: mockBtcTransactionUi.blockNumber
 		} as BitcoinTransaction;
-
 		const result = mapBtcTransaction({
 			transaction,
 			btcAddress: mockBtcAddress,
@@ -73,7 +72,7 @@ describe('mapBtcTransaction', () => {
 
 		const expectedResult = {
 			...mockBtcTransactionUi,
-			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -92,6 +91,7 @@ describe('mapBtcTransaction', () => {
 			value: sendTransactionValue,
 			type: 'send',
 			blockNumber: undefined,
+			confirmations: undefined,
 			status: 'pending'
 		};
 
@@ -116,7 +116,7 @@ describe('mapBtcTransaction', () => {
 			to: mockBtcTransaction.out[0].addr,
 			value: sendTransactionValue,
 			type: 'send',
-			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -139,7 +139,7 @@ describe('mapBtcTransaction', () => {
 			to: mockBtcTransaction.out[0].addr,
 			value: sendTransactionValue,
 			type: 'send',
-			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
 		};
 
 		expect(result).toEqual(expectedResult);
