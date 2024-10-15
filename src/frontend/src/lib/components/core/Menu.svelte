@@ -61,8 +61,8 @@
 			<Hr />
 		{/if}
 
-		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
 		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
 
 		<ExternalLink
 			href="https://github.com/dfinity/oisy-wallet/releases"
