@@ -124,9 +124,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
 		const balance = await this.loadBtcBalance({ identity, bitcoinNetwork });
-		const { newTransactions, latestBitcoinBlockHeight } = data?.shouldFetchTransactions
-			? await this.loadBtcTransactionsData({ btcAddress })
-			: { newTransactions: [], latestBitcoinBlockHeight: undefined };
+		const { newTransactions, latestBitcoinBlockHeight } =
+			nonNullish(data) && data.shouldFetchTransactions
+				? await this.loadBtcTransactionsData({ btcAddress })
+				: { newTransactions: [], latestBitcoinBlockHeight: undefined };
 
 		// TODO: handle the case when tx data is available but latestBitcoinBlockHeight is undefined
 		const uncertifiedTransactions = nonNullish(latestBitcoinBlockHeight)
