@@ -31,22 +31,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Cargo build
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            /home/runner/.cargo/registry
-            /home/runner/.cargo/git
-            target/
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-              ${{ runner.os }}-cargo-
-
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
