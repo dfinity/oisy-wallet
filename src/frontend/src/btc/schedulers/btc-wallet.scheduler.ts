@@ -3,7 +3,8 @@ import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinNetwork } from '$declarations/signer/signer.did';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import { btcAddressData, btcLatestBlock } from '$lib/rest/blockchain.rest';
+import { btcAddressData } from '$lib/rest/blockchain.rest';
+import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
@@ -75,7 +76,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}
 			};
 
-			const { height: latestBitcoinBlockHeight } = await btcLatestBlock();
+			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
 
 			return { newTransactions, latestBitcoinBlockHeight };
 		} catch (error) {
