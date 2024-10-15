@@ -15,6 +15,8 @@ export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeeP
 
 export type TransactionType = 'send' | 'receive';
 
+export type TransactionStatus = 'confirmed' | 'pending' | 'unconfirmed';
+
 export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to'> & {
 	timestamp?: bigint;
 	txExplorerUrl?: string;

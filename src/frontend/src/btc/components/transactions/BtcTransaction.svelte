@@ -14,12 +14,6 @@
 	let type: TransactionType;
 
 	$: ({ type, status, value, timestamp } = transaction);
-
-	let pending: boolean;
-	$: pending = status === 'pending';
-
-	let unconfirmed: boolean;
-	$: unconfirmed = status === 'unconfirmed';
 </script>
 
 <Transaction
@@ -27,6 +21,5 @@
 	value={nonNullish(value) ? BigNumber.from(value) : undefined}
 	{type}
 	{timestamp}
-	{pending}
-	{unconfirmed}
+	{status}
 />

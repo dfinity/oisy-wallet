@@ -4,18 +4,17 @@
 	import type { ComponentType } from 'svelte';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
+	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TransactionType } from '$lib/types/transaction';
+	import type { TransactionType, TransactionStatus } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
 
 	export let value: BigNumber | undefined;
 	export let type: TransactionType;
-	export let pending: boolean;
-	export let unconfirmed: boolean | undefined;
+	export let status: TransactionStatus;
 	export let timestamp: bigint | undefined;
 
 	let label: string;
@@ -23,13 +22,16 @@
 
 	let icon: ComponentType;
 	$: icon = type === 'send' ? IconSend : IconReceive;
+
+	let iconWithOpacity: boolean;
+	$: iconWithOpacity = status === 'pending' || status === 'unconfirmed';
 </script>
 
 <button class="contents" on:click>
 	<Card>
 		<span class="inline-block first-letter:capitalize">{label}</span>
 
-		<RoundedIcon slot="icon" {icon} iconStyleClass={pending || unconfirmed ? 'opacity-10' : ''} />
+		<RoundedIcon slot="icon" {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
 
 		<svelte:fragment slot="amount">
 			{#if nonNullish(value)}
@@ -42,7 +44,7 @@
 				{formatSecondsToDate(Number(timestamp))}
 			{/if}
 
-			<TransactionStatus {pending} {unconfirmed} />
+			<TransactionStatusComponent {status} />
 		</svelte:fragment>
 	</Card>
 </button>

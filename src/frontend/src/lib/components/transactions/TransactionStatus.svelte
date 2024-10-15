@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { TransactionStatus } from '$lib/types/transaction';
 
-	export let pending = false;
-	export let unconfirmed = false;
+	export let status: TransactionStatus;
+
+	let pending: boolean;
+	$: pending = status === 'pending';
+
+	let unconfirmed: boolean;
+	$: unconfirmed = status === 'unconfirmed';
 </script>
 
 {#if pending || unconfirmed}
