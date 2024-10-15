@@ -1,7 +1,4 @@
-import {
-	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
-	PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
-} from '$btc/constants/btc.constants';
+import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
@@ -63,16 +60,16 @@ export const mapBtcTransaction = ({
 
 	const utxosFee = totalInputValue - totalOutputValue;
 
+	// +1 is needed to account for the block where the transaction was first included
 	const confirmations = nonNullish(block_index)
-		? latestBitcoinBlockHeight - block_index
+		? latestBitcoinBlockHeight - block_index + 1
 		: undefined;
 
-	const status =
-		isNullish(confirmations) || confirmations <= PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
-			? 'pending'
-			: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
-				? 'confirmed'
-				: 'unconfirmed';
+	const status = isNullish(confirmations)
+		? 'pending'
+		: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+			? 'confirmed'
+			: 'unconfirmed';
 
 	return {
 		id: hash,
