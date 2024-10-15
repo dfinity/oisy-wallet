@@ -8,6 +8,7 @@
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
+	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -16,7 +17,6 @@
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isRouteSettings, networkParam } from '$lib/utils/nav.utils';
 
 	let visible = false;
@@ -64,12 +64,7 @@
 		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
 		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
 
-		<ExternalLink
-			href="https://github.com/dfinity/oisy-wallet/releases"
-			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
-		>
-			{replaceOisyPlaceholders($i18n.navigation.text.changelog)}
-		</ExternalLink>
+		<ChangelogLink />
 
 		<ExternalLink
 			href="https://github.com/dfinity/oisy-wallet/issues"
