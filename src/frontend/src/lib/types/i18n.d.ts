@@ -160,10 +160,10 @@ interface I18nSettings {
 interface I18nDApps {
 	text: {
 		featured: string;
-	},
+	};
 	alt: {
 		open_dapp: string;
-	}
+	};
 }
 
 interface I18nNetworks {
