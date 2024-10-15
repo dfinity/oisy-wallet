@@ -9,25 +9,25 @@ import type {
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import { nonNullish } from '@dfinity/utils';
 
-export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
 		vs_currencies: 'usd'
 	});
 
-export const exchangeRateBTCToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'bitcoin',
 		vs_currencies: 'usd'
 	});
 
-export const exchangeRateICPToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'internet-computer',
 		vs_currencies: 'usd'
 	});
 
-export const exchangeRateERC20ToUsd = async (
+export const exchangeRateERC20ToUsd = (
 	contractAddresses: Erc20ContractAddress[]
 ): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
@@ -37,7 +37,7 @@ export const exchangeRateERC20ToUsd = async (
 		include_market_cap: true
 	});
 
-export const exchangeRateICRCToUsd = async (
+export const exchangeRateICRCToUsd = (
 	ledgerCanisterIds: LedgerCanisterIdText[]
 ): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({

@@ -30,12 +30,13 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
+		// eslint-disable-next-line require-await
 		getAgent: async () => mockedAgent
 	};
 });
 
 describe('signer.canister', () => {
-	const createSignerCanister = async ({
+	const createSignerCanister = ({
 		serviceOverride
 	}: Pick<CreateCanisterOptions<SignerService>, 'serviceOverride'>): Promise<SignerCanister> =>
 		SignerCanister.create({
@@ -144,7 +145,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should throw an error if btc_caller_address throws', async () => {
-			service.btc_caller_address.mockImplementation(async () => {
+			service.btc_caller_address.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -242,7 +243,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should throw an error if btc_caller_balance throws', async () => {
-			service.btc_caller_balance.mockImplementation(async () => {
+			service.btc_caller_balance.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -297,7 +298,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should throw an error if eth_address throws', async () => {
-			service.eth_address.mockImplementation(async () => {
+			service.eth_address.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -386,7 +387,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should throw an error if eth_sign_transaction throws', async () => {
-			service.eth_sign_transaction.mockImplementation(async () => {
+			service.eth_sign_transaction.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -431,7 +432,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should throw an error if eth_personal_sign throws', async () => {
-			service.eth_personal_sign.mockImplementation(async () => {
+			service.eth_personal_sign.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -476,7 +477,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should throw an error if eth_sign_prehash throws', async () => {
-			service.eth_sign_prehash.mockImplementation(async () => {
+			service.eth_sign_prehash.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -556,7 +557,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should throw an error if btc_caller_send throws', async () => {
-			service.btc_caller_send.mockImplementation(async () => {
+			service.btc_caller_send.mockImplementation(() => {
 				throw mockResponseError;
 			});
 

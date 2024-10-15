@@ -16,6 +16,10 @@
 
 <header
 	class="z-1 relative grid w-full max-w-screen-2.5xl grid-cols-2 items-center gap-y-5 px-4 pt-6 sm:px-8"
+	class:lg:fixed={$authSignedIn}
+	class:lg:top-0={$authSignedIn}
+	class:lg:inset-x-0={$authSignedIn}
+	class:lg:z-10={$authSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 >
 	{#if back}
