@@ -52,30 +52,37 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}: {
 		btcAddress: BtcAddress;
 	}): Promise<BitcoinTransaction[]> {
-		const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
+		try {
+			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
-		const newTransactions = fetchedTransactions.filter(({ hash }) =>
-			isNullish(this.store.transactions[`${hash}`])
-		);
+			const newTransactions = fetchedTransactions.filter(({ hash }) =>
+				isNullish(this.store.transactions[`${hash}`])
+			);
 
-		this.store = {
-			...this.store,
-			transactions: {
-				...this.store.transactions,
-				...newTransactions.reduce(
-					(acc, transaction) => ({
-						...acc,
-						[transaction.hash]: {
-							certified: false,
-							data: transaction
-						}
-					}),
-					{}
-				)
-			}
-		};
+			this.store = {
+				...this.store,
+				transactions: {
+					...this.store.transactions,
+					...newTransactions.reduce(
+						(acc, transaction) => ({
+							...acc,
+							[transaction.hash]: {
+								certified: false,
+								data: transaction
+							}
+						}),
+						{}
+					)
+				}
+			};
 
-		return newTransactions;
+			return newTransactions;
+		} catch (error) {
+			// We don't want to disrupt the user experience if we can't fetch the transactions.
+			console.error('Error fetching BTC transactions:', error);
+			// TODO: Return an error instead of an empty array.
+			return [];
+		}
 	}
 
 	private async loadBtcBalance({
