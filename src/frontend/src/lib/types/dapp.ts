@@ -10,7 +10,7 @@ const dAppSchema = z.object({
 	tags: z.array(z.string()),
 	description: z.string(),
 	stats: z.string(),
-	logo: z.string().url(),
+	logo: z.string(),
 
 	usesInternetIdentity: z.boolean(),
 	authOrigins: z.array(z.string()).optional(),
