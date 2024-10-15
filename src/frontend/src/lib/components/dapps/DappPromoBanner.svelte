@@ -13,7 +13,7 @@
 		<div class="flex items-center gap-x-2">
 			<img class="h-12 w-12 rounded-full" src={dApp.logoUrl} alt={dApp.name} />
 			<div class="flex-1">
-				<h6 class="text-sm font-bold text-info">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-info text-sm font-bold">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-white">{dApp.name}</h4>
 			</div>
 			<Button size="sm" colorStyle="secondary" styleClass="flex-grow-0"

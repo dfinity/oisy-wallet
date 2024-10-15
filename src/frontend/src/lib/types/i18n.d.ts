@@ -159,7 +159,7 @@ interface I18nSettings {
 
 interface I18nDApps {
 	text: {
-		featured:string;
+		featured: string;
 	};
 }
 
