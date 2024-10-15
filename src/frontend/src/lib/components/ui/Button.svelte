@@ -18,11 +18,10 @@
 		lg: 'px-5 py-4 text-xs rounded-2xl',
 		xl: 'p-5 text-base rounded-2xl'
 	};
-
 </script>
 
 <button
-	class={`${colorStyle} flex flex-1 h-fit text-center ${styleClass} ${buttonClasses[size]}`}
+	class={`${colorStyle} flex h-fit flex-1 text-center ${styleClass} ${buttonClasses[size]}`}
 	class:w-full={fullWidth}
 	class:link
 	{type}
