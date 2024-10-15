@@ -49,7 +49,11 @@ describe('mapBtcTransaction', () => {
 			latestBitcoinBlockHeight:
 				(mockBtcTransactionUi.blockNumber ?? 0) + UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		});
-		const expectedResult = { ...mockBtcTransactionUi, status: 'unconfirmed' };
+		const expectedResult = {
+			...mockBtcTransactionUi,
+			status: 'unconfirmed',
+			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+		};
 
 		expect(result).toEqual(expectedResult);
 	});
@@ -67,7 +71,12 @@ describe('mapBtcTransaction', () => {
 				(mockBtcTransactionUi.blockNumber ?? 0) + CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		});
 
-		expect(result).toEqual(mockBtcTransactionUi);
+		const expectedResult = {
+			...mockBtcTransactionUi,
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+		};
+
+		expect(result).toEqual(expectedResult);
 	});
 
 	it('should map correctly when send transaction is pending', () => {
@@ -106,7 +115,8 @@ describe('mapBtcTransaction', () => {
 			from: mockBtcAddress,
 			to: mockBtcTransaction.out[0].addr,
 			value: sendTransactionValue,
-			type: 'send'
+			type: 'send',
+			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -128,7 +138,8 @@ describe('mapBtcTransaction', () => {
 			from: mockBtcAddress,
 			to: mockBtcTransaction.out[0].addr,
 			value: sendTransactionValue,
-			type: 'send'
+			type: 'send',
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 		};
 
 		expect(result).toEqual(expectedResult);
