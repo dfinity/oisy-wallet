@@ -7,6 +7,7 @@ import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
+// TODO: Add docs/comments to the steps needed to parse a BTC tx
 export const mapBtcTransaction = ({
 	transaction: { inputs, block_index, out, hash, time },
 	btcAddress,
@@ -22,7 +23,7 @@ export const mapBtcTransaction = ({
 	}>(
 		(acc, { prev_out: { value, addr } }) => ({
 			totalInputValue: acc.totalInputValue + value,
-			isTypeSend: !acc.isTypeSend ? addr === btcAddress : acc.isTypeSend
+			isTypeSend: acc.isTypeSend ? acc.isTypeSend : addr === btcAddress
 		}),
 		{
 			totalInputValue: 0,
