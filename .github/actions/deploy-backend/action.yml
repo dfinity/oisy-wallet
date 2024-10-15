@@ -7,7 +7,7 @@ description: Build and deploy the backend after having installed dfx
 runs:
   using: "composite"
   steps:
-  
+
     - name: Checkout
       uses: actions/checkout@v4
 
@@ -15,7 +15,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-e2e-npm-${{ hashFiles('package-lock.json') }}
 
     - name: Restore cargo cache
       uses: actions/cache@v4
@@ -25,12 +25,9 @@ runs:
           /home/runner/.cargo/git
           target/
           ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+        key: ${{ runner.os }}-e2e-cargo-${{ hashFiles('Cargo.lock') }}
         restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ runner.os }}-e2e-cargo-
 
     - name: Prepare
       uses: ./.github/actions/prepare
