@@ -19,6 +19,7 @@
 	let timestamp: bigint | undefined;
 	let id: string;
 	let blockNumber: number | undefined;
+	let confirmations: number | undefined;
 	let status: BtcTransactionStatus;
 
 	let explorerUrl: string | undefined;
@@ -30,7 +31,7 @@
 				: BTC_MAINNET_EXPLORER_URL;
 	}
 
-	$: ({ from, value, timestamp, id, blockNumber, to, type, status } = transaction);
+	$: ({ from, value, timestamp, id, blockNumber, to, type, status, confirmations } = transaction);
 
 	let txExplorerUrl: string | undefined;
 	$: txExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/tx/${id}` : undefined;
@@ -58,9 +59,21 @@
 	sendToLabel={$i18n.transaction.text.to}
 	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}
 >
-	<!--	TODO: Implement BtcTransactionStatus component	-->
+	{#if nonNullish(confirmations)}
+		<Value ref="confirmations" slot="confirmations">
+			<svelte:fragment slot="label">{$i18n.transaction.text.confirmations}</svelte:fragment>
+			{confirmations}
+		</Value>
+	{/if}
+
 	<Value ref="status" slot="transaction-status">
 		<svelte:fragment slot="label">{$i18n.transaction.text.status}</svelte:fragment>
-		{`${status === 'pending' ? $i18n.transaction.text.pending : 'Confirmed'}`}
+		{`${
+			status === 'pending'
+				? $i18n.transaction.text.pending
+				: status === 'unconfirmed'
+					? $i18n.transaction.text.unconfirmed
+					: $i18n.transaction.text.confirmed
+		}`}
 	</Value>
 </TransactionModal>
