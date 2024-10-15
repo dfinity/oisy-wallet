@@ -19,6 +19,7 @@ interface I18nCore {
 		more: string;
 		reject: string;
 		approve: string;
+		view: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string };
@@ -154,6 +155,12 @@ interface I18nSettings {
 	};
 	alt: { testnets_toggle: string; github_release: string };
 	error: { loading_profile: string };
+}
+
+interface I18nDApps {
+	text: {
+		featured:string;
+	};
 }
 
 interface I18nNetworks {
