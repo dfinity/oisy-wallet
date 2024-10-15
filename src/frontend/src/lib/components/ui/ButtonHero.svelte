@@ -6,7 +6,7 @@
 	export let ariaLabel: string;
 </script>
 
-<Button on:click {ariaLabel} {disabled} {testId} colorStyle="tertiary" link paddingSmall>
+<Button on:click {ariaLabel} {disabled} {testId} colorStyle="tertiary" link>
 	<div class="flex flex-col items-center justify-center gap-2 md:flex-row">
 		<slot name="icon" />
 		<div class="min-w-12 max-w-[72px] text-xs md:text-base">
