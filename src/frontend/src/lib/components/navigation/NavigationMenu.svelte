@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
