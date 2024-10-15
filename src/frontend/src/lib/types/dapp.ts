@@ -1,14 +1,15 @@
 export interface DApp {
+	id: string;
 	name: string;
-	featured?: boolean;
 	oneLiner: string;
+	website: string;
+	tags: string[];
+	display: string;
+	stats: string;
+	twitter: string;
 	description: string;
-	categories: string[];
-	logoUrl: string;
-	imageUrl?: string;
-	url: string;
-	channels?: {
-		github?: string;
-		twitter?: string;
-	};
+	usesInternetIdentity: boolean;
+	logo: string;
+	screenshots: string[];
+	featured?: boolean;
 }
