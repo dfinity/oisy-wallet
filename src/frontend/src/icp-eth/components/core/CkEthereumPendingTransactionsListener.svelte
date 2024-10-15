@@ -127,7 +127,7 @@
 				}) ?? '');
 
 	$: (async () =>
-		init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
+		await init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.

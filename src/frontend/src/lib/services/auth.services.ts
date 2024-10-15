@@ -104,10 +104,11 @@ const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promi
 	}
 };
 
-const emptyIdbBtcAddressMainnet = async () => emptyIdbAddress(deleteIdbBtcAddressMainnet);
+const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbAddress(deleteIdbBtcAddressMainnet);
 
-const emptyIdbEthAddress = async () => emptyIdbAddress(deleteIdbEthAddress);
+const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddress);
 
+// eslint-disable-next-line require-await
 const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
 };

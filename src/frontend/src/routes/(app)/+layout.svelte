@@ -24,11 +24,14 @@
 </script>
 
 <div
-	class="relative min-h-[640px] md:flex md:h-full md:flex-col"
+	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
 	class:overflow-hidden={$authNotSignedIn}
 	class:flex={$authSignedIn}
 	class:h-full={$authSignedIn}
 	class:flex-col={$authSignedIn}
+	class:md:flex={$authNotSignedIn}
+	class:md:flex-col={$authNotSignedIn}
+	class:md:h-full={$authNotSignedIn}
 >
 	<Header back={route === 'settings'} />
 

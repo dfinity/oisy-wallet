@@ -39,7 +39,7 @@ describe('loader.services', () => {
 		});
 
 		it('should return success equals to false', async () => {
-			apiMock.mockImplementation(async () => {
+			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
 
@@ -49,7 +49,7 @@ describe('loader.services', () => {
 		});
 
 		it('should sign out and ultimately reload the window', async () => {
-			apiMock.mockImplementation(async () => {
+			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
 
