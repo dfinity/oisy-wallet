@@ -59,12 +59,14 @@
 	sendToLabel={$i18n.transaction.text.to}
 	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}
 >
-	{#if nonNullish(confirmations)}
-		<Value ref="confirmations" slot="transaction-confirmations">
-			<svelte:fragment slot="label">{$i18n.transaction.text.confirmations}</svelte:fragment>
-			{confirmations}
-		</Value>
-	{/if}
+	<svelte:fragment slot="transaction-confirmations">
+		{#if nonNullish(confirmations)}
+			<Value ref="confirmations">
+				<svelte:fragment slot="label">{$i18n.transaction.text.confirmations}</svelte:fragment>
+				{confirmations}
+			</Value>
+		{/if}
+	</svelte:fragment>
 
 	<Value ref="status" slot="transaction-status">
 		<svelte:fragment slot="label">{$i18n.transaction.text.status}</svelte:fragment>
