@@ -569,7 +569,9 @@
 			"interacted_with": "Interacted With (To)",
 			"pending": "Pending...",
 			"unconfirmed": "Unconfirmed",
-			"status": "Status"
+			"confirmed": "Confirmed",
+			"status": "Status",
+			"confirmations": "Confirmations"
 		},
 		"status": {
 			"included": "Included",

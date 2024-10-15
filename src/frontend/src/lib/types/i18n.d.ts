@@ -509,7 +509,9 @@ interface I18nTransaction {
 		interacted_with: string;
 		pending: string;
 		unconfirmed: string;
+		confirmed: string;
 		status: string;
+		confirmations: string;
 	};
 	status: { included: string; safe: string; finalised: string };
 	label: {
