@@ -4,7 +4,7 @@
 	import type { ComponentType } from 'svelte';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
+	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
@@ -15,6 +15,7 @@
 	export let value: BigNumber | undefined;
 	export let type: TransactionType;
 	export let pending: boolean;
+	export let unconfirmed: boolean | undefined;
 	export let timestamp: bigint | undefined;
 
 	let label: string;
@@ -28,7 +29,7 @@
 	<Card>
 		<span class="inline-block first-letter:capitalize">{label}</span>
 
-		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
+		<RoundedIcon slot="icon" {icon} iconStyleClass={pending || unconfirmed ? 'opacity-10' : ''} />
 
 		<svelte:fragment slot="amount">
 			{#if nonNullish(value)}
@@ -41,7 +42,7 @@
 				{formatSecondsToDate(Number(timestamp))}
 			{/if}
 
-			<TransactionPending {pending} />
+			<TransactionStatus {pending} {unconfirmed} />
 		</svelte:fragment>
 	</Card>
 </button>

@@ -17,6 +17,9 @@
 
 	let pending: boolean;
 	$: pending = status === 'pending';
+
+	let unconfirmed: boolean;
+	$: unconfirmed = status === 'unconfirmed';
 </script>
 
 <Transaction
@@ -25,4 +28,5 @@
 	{type}
 	{timestamp}
 	{pending}
+	{unconfirmed}
 />
