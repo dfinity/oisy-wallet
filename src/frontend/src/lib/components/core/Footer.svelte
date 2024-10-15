@@ -35,7 +35,6 @@
 
 	<div class="item flex flex-row items-center justify-end gap-2 text-sm">
 		<IconDfinity />
-		{$i18n.footer.text.copyright}
 		<span>
 			{replaceOisyPlaceholders($i18n.footer.text.developed_with)}
 			<ExternalLink
