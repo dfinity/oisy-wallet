@@ -18,7 +18,7 @@
 		"description": "OpenChat is a fully decentralized real-time messaging service",
 		"tags": ["Social"],
 		"categories": ["Staking"],
-		"logoUrl": "/images/open_chat_logo.svg",
+		"logoUrl": "/images/dapps/open-chat-logo.svg",
 		"url": "https://oc.app/communities",
 		"channels": {
 			"github": "https://github.com/open-chat-labs/open-chat",
@@ -31,7 +31,7 @@
 		"description": "DecideAI is an ecosystem that consists of three products, Decide Protocol...",
 		"tags": ["AI", "Security"],
 		"categories": ["Other"],
-		"logoUrl": "/images/decide_ai_logo.svg",
+		"logoUrl": "/images/dapps/decide-ai-logo.svg",
 		"url": "https://decideai.xyz/",
 		"channels": {
 			"twitter": "https://x.com/decideai_"

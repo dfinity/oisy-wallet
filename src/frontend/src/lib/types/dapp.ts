@@ -5,7 +5,7 @@ export interface DApp {
 	description: string;
 	categories: string[];
 	logoUrl: string;
-	imageUrl: string;
+	imageUrl?: string;
 	url: string;
 	channels?: {
 		github?: string;
