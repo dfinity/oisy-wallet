@@ -5,14 +5,13 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dApp: DApp;
+	export let backgroundImage: string;
 </script>
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
-	{#if dApp.screenshots && dApp.screenshots.length > 0}
-		<div class="absolute">
-			<Img src={dApp.screenshots[0]} alt={dApp.name} />
-		</div>
-	{/if}
+	<div class="absolute">
+		<Img src={backgroundImage} alt={dApp.name} />
+	</div>
 	<div class="flex-1 px-4 py-4 backdrop-blur-sm">
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
@@ -35,6 +34,3 @@
 		</div>
 	</div>
 </article>
-
-<style lang="css">
-</style>
