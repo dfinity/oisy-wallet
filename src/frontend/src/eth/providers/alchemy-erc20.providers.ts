@@ -51,6 +51,7 @@ export class AlchemyErc20Provider {
 		erc20Contract.on(filterToAddress, filterListener);
 
 		return {
+			// eslint-disable-next-line require-await
 			disconnect: async () => {
 				erc20Contract.off(filterToAddress, filterListener);
 			}

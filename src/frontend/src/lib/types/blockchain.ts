@@ -67,14 +67,6 @@ export interface BitcoinAddressData {
 	txs: BitcoinTransaction[];
 }
 
-export interface BitcoinBlock {
-	hash: string;
-	time: number;
-	block_index: number;
-	height: number;
-	txIndexes: number[];
-}
-
 export interface BlockchainBtcAddressDataParams {
 	btcAddress: BtcAddress;
 }

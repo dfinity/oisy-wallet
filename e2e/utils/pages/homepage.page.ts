@@ -62,7 +62,7 @@ abstract class Homepage {
 	}
 
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
-		return this.#page.isVisible(selector);
+		return await this.#page.isVisible(selector);
 	}
 
 	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
@@ -96,7 +96,7 @@ abstract class Homepage {
 	private async getCanvasAsDataURL({
 		selector
 	}: SelectorOperationParams): Promise<string | undefined> {
-		return this.#page.evaluate<string | undefined, { selector: string }>(
+		return await this.#page.evaluate<string | undefined, { selector: string }>(
 			({ selector }) => {
 				const canvas = document.querySelector<HTMLCanvasElement>(selector);
 				return canvas?.toDataURL();
@@ -161,7 +161,7 @@ abstract class Homepage {
 	}
 
 	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
-		return this.#page.getByTestId(testId);
+		return await this.#page.getByTestId(testId);
 	}
 
 	async waitForTimeout(timeout: number): Promise<void> {
@@ -187,7 +187,9 @@ abstract class Homepage {
 		});
 
 		if (nonNullish(selectorsToMock)) {
-			await Promise.all(selectorsToMock.map(async (selector) => this.mockSelector({ selector })));
+			await Promise.all(
+				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
+			);
 		}
 
 		await expect(modal).toHaveScreenshot();

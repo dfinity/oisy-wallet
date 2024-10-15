@@ -147,12 +147,14 @@ const updateCSP = (indexHtml) => {
 		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
+	const onramperConnectFrameSrc = 'https://buy.onramper.dev';
+
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc};
         img-src 'self' data:;
-        frame-src 'self' ${walletConnectFrameSrc};
+        frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
         script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
         base-uri 'self';

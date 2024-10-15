@@ -8,11 +8,11 @@
 	import WalletConnectSendData from '$eth/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balance } from '$lib/derived/balances.derived';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
