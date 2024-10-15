@@ -82,10 +82,13 @@
 	},
 	"dapps": {
 		"text": {
+			"all_dapps": "All dapps",
 			"featured": "Featured"
 		},
 		"alt": {
-			"open_dapp": "Open the app $dAppname"
+			"logo": "Logo of $dAppname",
+			"open_dapp": "Open the app $dAppname",
+			"website": "Image of $dAppname"
 		}
 	},
 	"footer": {

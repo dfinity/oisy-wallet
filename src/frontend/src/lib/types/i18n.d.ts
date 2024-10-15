@@ -159,10 +159,13 @@ interface I18nSettings {
 
 interface I18nDApps {
 	text: {
+		all_dapps: string;
 		featured: string;
 	};
 	alt: {
+		logo: string;
 		open_dapp: string;
+		website: string;
 	};
 }
 
