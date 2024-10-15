@@ -21,7 +21,7 @@
 		listener = initTransactionsListener({ address, token });
 	};
 
-	$: (async () => initListener({ address: $ethAddress }))();
+	$: (async () => await initListener({ address: $ethAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>

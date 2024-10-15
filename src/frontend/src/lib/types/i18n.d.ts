@@ -72,7 +72,7 @@ interface I18nAuth {
 }
 
 interface I18nFooter {
-	text: { copyright: string; developed_with: string; dfinity: string };
+	text: { developed_with: string; dfinity: string };
 	alt: { dfinity: string };
 }
 
@@ -158,6 +158,7 @@ interface I18nSettings {
 
 interface I18nNetworks {
 	title: string;
+	test_networks: string;
 	show_testnets: string;
 	more: string;
 	chain_fusion: string;
@@ -248,7 +249,12 @@ interface I18nSend {
 		enter_wallet_address: string;
 		select_network: string;
 	};
-	info: { ckbtc_certified: string; cketh_certified: string; pending_bitcoin_transaction: string };
+	info: {
+		ckbtc_certified: string;
+		cketh_certified: string;
+		pending_bitcoin_transaction: string;
+		no_available_utxos: string;
+	};
 	assertion: {
 		invalid_destination_address: string;
 		insufficient_funds: string;
@@ -318,6 +324,7 @@ interface I18nBuy {
 
 interface I18nTokens {
 	text: {
+		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
@@ -501,6 +508,7 @@ interface I18nTransaction {
 		block: string;
 		interacted_with: string;
 		pending: string;
+		unconfirmed: string;
 		status: string;
 	};
 	status: { included: string; safe: string; finalised: string };

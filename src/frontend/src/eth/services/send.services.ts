@@ -27,6 +27,7 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
+import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
@@ -34,7 +35,7 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import type { TransactionResponse } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 
-const ethPrepareTransaction = async ({
+const ethPrepareTransaction = ({
 	to,
 	amount,
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
@@ -43,8 +44,7 @@ const ethPrepareTransaction = async ({
 	gas,
 	data,
 	chainId: chain_id
-}: TransferParams &
-	NetworkChainId & { nonce: number; gas: bigint | undefined }): Promise<SignRequest> => ({
+}: TransferParams & NetworkChainId & { nonce: number; gas: bigint | undefined }): SignRequest => ({
 	to,
 	value: amount.toBigInt(),
 	chain_id,
@@ -230,7 +230,7 @@ const erc20ContractPrepareApprove = async ({
 	});
 };
 
-const prepare = async ({
+const prepare = ({
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
@@ -244,7 +244,7 @@ const prepare = async ({
 		nonce: number;
 		gas: bigint;
 		amount: bigint;
-	}): Promise<SignRequest> => {
+	}): SignRequest => {
 	if (isNullish(data)) {
 		const {
 			send: {
@@ -438,15 +438,54 @@ const sendTransaction = async ({
 	return await sendTransaction(rawTransaction);
 };
 
-const approve = async ({
-	progress,
-	token,
-	to,
+const prepareAndSignApproval = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
 	sourceNetwork,
 	identity,
+	progress,
+	...rest
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from' | 'to'> &
+	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress' | 'minterInfo'> &
+	Partial<Pick<SendParams, 'progress'>> &
+	Pick<TransactionFeeData, 'gas'> & {
+		maxFeePerGas: BigNumber;
+		maxPriorityFeePerGas: BigNumber;
+		nonce: number;
+		spender: EthAddress;
+	}): Promise<
+	ResultSuccess & {
+		hash?: string;
+	}
+> => {
+	const { id: networkId, chainId } = sourceNetwork;
+
+	const approve = await erc20ContractPrepareApprove({
+		...rest,
+		gas: gas.toBigInt(),
+		maxFeePerGas: maxFeePerGas.toBigInt(),
+		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		chainId,
+		networkId
+	});
+
+	progress?.(ProgressStepsSend.SIGN_APPROVE);
+
+	const rawTransaction = await signTransaction({ identity, transaction: approve });
+
+	progress?.(ProgressStepsSend.APPROVE);
+
+	const { sendTransaction } = infuraProviders(networkId);
+
+	const { hash } = await sendTransaction(rawTransaction);
+
+	return { success: true, hash };
+};
+
+const approve = async ({
+	token,
+	to,
 	minterInfo,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
@@ -471,28 +510,11 @@ const approve = async ({
 		return { transactionApproved: false };
 	}
 
-	const { id: networkId, chainId } = sourceNetwork;
-
-	const approve = await erc20ContractPrepareApprove({
+	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-		chainId,
-		networkId,
 		token,
 		spender: erc20HelperContractAddress
 	});
 
-	progress(ProgressStepsSend.SIGN_APPROVE);
-
-	const rawTransaction = await signTransaction({ identity, transaction: approve });
-
-	progress(ProgressStepsSend.APPROVE);
-
-	const { sendTransaction } = infuraProviders(networkId);
-
-	const { hash } = await sendTransaction(rawTransaction);
-
-	return { transactionApproved: true, hash };
+	return { transactionApproved, hash };
 };

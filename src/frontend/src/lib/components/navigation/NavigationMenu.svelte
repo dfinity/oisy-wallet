@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -15,7 +15,7 @@
 			: 'tokens';
 </script>
 
-<div class=" flex w-full flex-col gap-3 py-3">
+<div class="box-content flex w-full flex-col gap-3 py-3 pl-4 sm:pl-8">
 	<NavigationItem
 		href="/"
 		ariaLabel={$i18n.navigation.alt.tokens}
@@ -30,7 +30,7 @@
 		ariaLabel={$i18n.navigation.alt.settings}
 		selected={route === 'settings'}
 	>
-		<IconSettings />
+		<IconlySettings />
 		{$i18n.navigation.text.settings}
 	</NavigationItem>
 </div>
