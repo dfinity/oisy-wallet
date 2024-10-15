@@ -17,8 +17,9 @@
 				<h4 class="text-white">{dApp.name}</h4>
 			</div>
 			<a href={dApp.url} target="_blank" class="no-underline">
-			<Button size="sm" colorStyle="secondary" styleClass="flex-grow-0"
-				>{$i18n.core.text.view}</Button>
+				<Button size="sm" colorStyle="secondary" styleClass="flex-grow-0"
+					>{$i18n.core.text.view}</Button
+				>
 			</a>
 		</div>
 	</div>
