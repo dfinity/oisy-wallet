@@ -17,5 +17,5 @@
 </script>
 
 <AboutItem {asMenuItem} on:click={openModal} testId={ABOUT_HOW_MODAL_OPEN_BUTTON}>
-	<span slot="label">{replaceOisyPlaceholders($i18n.about.how.text.label)} </span>
+	<span slot="label">{replaceOisyPlaceholders($i18n.about.how.text.label)}</span>
 </AboutItem>
