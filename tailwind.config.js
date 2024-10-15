@@ -3,10 +3,10 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 /**
  * This function (tw plugin) is used to automatically add css variables for all colors defined in the tailwind theme.
  * This allows us to: define a color (like brand.500) in the theme, and reference it in semantic definitions.
- * @param addBase where the :root attribute with var definitions is appended
- * @param theme that is processed
+ * @param inputTheme that is processed
  */
-function addCSSVariablesForColors({ addBase, theme }) {
+function addCSSVariablesForColors(inputTheme) {
+	const { addBase, theme } = inputTheme;
 	function extractColorVars(colorObj, colorGroup = '') {
 		return Object.keys(colorObj).reduce((vars, colorKey) => {
 			const value = colorObj[colorKey];
