@@ -5,7 +5,6 @@
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -47,10 +46,7 @@
 			{/each}
 		</ul>
 
-		<div class="mb-4 mt-8 flex items-center justify-between">
-			<span class="px-4.5 font-bold">{$i18n.networks.show_testnets}</span>
-			<NetworksTestnetsToggle />
-		</div>
+		<span class="px-4.5 mb-5 mt-8 flex font-bold">{$i18n.networks.test_networks}</span>
 
 		{#if $testnetsEnabled}
 			<ul class="mb-2 flex list-none flex-col gap-4 font-normal" transition:slide={SLIDE_EASING}>

@@ -12,13 +12,13 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let usdTotal = false;
 	export let summary = false;
-	export let actions = true;
 	export let back = false;
 
 	let displayTokenSymbol = false;
@@ -26,7 +26,14 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-blue-ribbon p-6 text-center text-white"
+	class="class:from-blue-ribbon-light flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-blue-ribbon bg-gradient-to-b from-blue-ribbon via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum}
+	class:via-interdimensional-blue={$networkICP}
+	class:to-chinese-purple={$networkICP}
+	class:via-beer={$networkBitcoin}
+	class:to-fulvous={$networkBitcoin}
+	class:via-united-nations-blue={$networkEthereum}
+	class:to-bright-lilac={$networkEthereum}
 >
 	{#if summary}
 		<div
@@ -66,11 +73,9 @@
 		</div>
 	{/if}
 
-	{#if actions}
-		<div transition:slide={SLIDE_PARAMS} class="flex w-full justify-center text-left">
-			<Actions />
-		</div>
-	{/if}
+	<div transition:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
+		<Actions />
+	</div>
 
 	{#if isErc20Icp($token)}
 		<Erc20Icp />

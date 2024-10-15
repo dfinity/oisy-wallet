@@ -15,7 +15,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const reloadBalance = async (token: Token): Promise<ResultSuccess> => {
+export const reloadBalance = (token: Token): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(token.id)) {
 		return loadBalance({ networkId: token.network.id, tokenId: token.id });
 	}

@@ -24,7 +24,7 @@ on:
       force-backend:
         required: false
         type: boolean
-        description: 'Choose whether to force backend deployment even if no changes are detected.'
+        description: 'Force backend deployment even if no changes are detected.'
         default: false
 
 jobs:
@@ -72,6 +72,7 @@ jobs:
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}" >> $GITHUB_ENV
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
+            echo "VITE_BLOCKSTREAM_API_URL=https://blockstream.info/api" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
             {
@@ -96,6 +97,7 @@ jobs:
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}" >> $GITHUB_ENV
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
+            echo "VITE_BLOCKSTREAM_API_URL=https://blockstream.info/api" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}" >> $GITHUB_ENV
             {
@@ -120,6 +122,7 @@ jobs:
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_PROD }}" >> $GITHUB_ENV
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_PROD }}" >> $GITHUB_ENV
             echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
+            echo "VITE_BLOCKSTREAM_API_URL=https://blockstream.info/api" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_PROD }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_PROD }}" >> $GITHUB_ENV
             {
@@ -153,11 +156,14 @@ jobs:
       - name: Pre-build
         run: npm run build
 
-      - name: Deploy to Environment
+      - name: Deploy Frontend to Environment
         run: |
           if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ]; then
             dfx deploy $CANISTER --network $NETWORK
           fi
+
+      - name: Deploy Backend to Environment
+        run: |
           if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then

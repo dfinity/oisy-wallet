@@ -3,6 +3,7 @@
 	import { APP_VERSION } from '$lib/constants/app.constants';
 	import { OISY_NAME, OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	const version = `v${APP_VERSION}`;
 	const releaseUrl = `${OISY_REPO_URL}/releases/tag/${version}`;
@@ -10,7 +11,9 @@
 
 <p class="text-secondary mt-24 text-center text-xs opacity-50">
 	{OISY_NAME}
-	<ExternalLink href={releaseUrl} ariaLabel={$i18n.settings.alt.github_release} iconVisible={false}
-		>{version}</ExternalLink
+	<ExternalLink
+		href={releaseUrl}
+		ariaLabel={replaceOisyPlaceholders($i18n.settings.alt.github_release)}
+		iconVisible={false}>{version}</ExternalLink
 	>
 </p>

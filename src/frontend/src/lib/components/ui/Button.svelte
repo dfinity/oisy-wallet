@@ -9,10 +9,11 @@
 	export let paddingSmall = false;
 	export let testId: string | undefined = undefined;
 	export let ariaLabel: string | undefined = undefined;
+	export let styleClass = '';
 </script>
 
 <button
-	class={`${colorStyle} flex flex-1 text-center`}
+	class={`${colorStyle} flex flex-1 text-center ${styleClass}`}
 	class:padding-sm={paddingSmall}
 	class:w-full={fullWidth}
 	class:link

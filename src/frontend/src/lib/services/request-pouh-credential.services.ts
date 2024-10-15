@@ -13,7 +13,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -60,9 +60,12 @@ const addPouhCredential = async ({
 			const errorKey = Object.keys(response.Err)[0];
 			toastsError({
 				msg: {
-					text: replacePlaceholders(authI18n.error.error_validating_pouh_credential_oisy, {
-						$error: errorKey
-					})
+					text: replacePlaceholders(
+						replaceOisyPlaceholders(authI18n.error.error_validating_pouh_credential_oisy),
+						{
+							$error: errorKey
+						}
+					)
 				}
 			});
 		}
@@ -102,7 +105,7 @@ const handleSuccess = async ({
 	return { success: false };
 };
 
-export const requestPouhCredential = async ({
+export const requestPouhCredential = ({
 	identity
 }: {
 	identity: Identity;

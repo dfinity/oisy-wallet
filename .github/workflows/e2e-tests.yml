@@ -4,8 +4,11 @@ on:
   pull_request:
     paths:
       - 'e2e/**'
-
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
 

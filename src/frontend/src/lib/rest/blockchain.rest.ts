@@ -1,8 +1,4 @@
-import type {
-	BitcoinAddressData,
-	BitcoinBlock,
-	BlockchainBtcAddressDataParams
-} from '$lib/types/blockchain';
+import type { BitcoinAddressData, BlockchainBtcAddressDataParams } from '$lib/types/blockchain';
 
 const API_URL = import.meta.env.VITE_BLOCKCHAIN_API_URL;
 
@@ -13,23 +9,11 @@ const API_URL = import.meta.env.VITE_BLOCKCHAIN_API_URL;
  * - https://www.blockchain.com/explorer/api/blockchain_api
  *
  */
-export const btcAddressData = async ({
+export const btcAddressData = ({
 	btcAddress
 }: BlockchainBtcAddressDataParams): Promise<BitcoinAddressData> =>
 	fetchBlockchainApi<BitcoinAddressData>({
 		endpointPath: `rawaddr/${btcAddress}`
-	});
-
-/**
- * Get latest mined BTC block. Used for calculating the number of confirmations for a BTC transaction.
- *
- * Documentation:
- * - https://www.blockchain.com/explorer/api/blockchain_api
- *
- */
-export const btcLatestBlock = async (): Promise<BitcoinBlock> =>
-	fetchBlockchainApi<BitcoinBlock>({
-		endpointPath: `latestblock`
 	});
 
 const fetchBlockchainApi = async <T>({ endpointPath }: { endpointPath: string }): Promise<T> => {

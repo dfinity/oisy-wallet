@@ -7,12 +7,12 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalCkETHReceive } from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
@@ -46,7 +46,7 @@
 		modalStore.openCkETHReceive(modalId);
 	};
 
-	const openModal = async (modalId: symbol) => await open(async () => openReceive(modalId));
+	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
 <ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
