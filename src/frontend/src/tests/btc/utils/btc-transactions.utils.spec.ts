@@ -8,6 +8,20 @@ import { mockBtcAddress, mockBtcTransaction, mockBtcTransactionUi } from '$tests
 import { expect } from 'vitest';
 
 describe('mapBtcTransaction', () => {
+	const sendTransaction = {
+		...mockBtcTransaction,
+		inputs: [
+			{
+				...mockBtcTransaction.inputs[0],
+				prev_out: { ...mockBtcTransaction.inputs[0].prev_out, addr: mockBtcAddress }
+			}
+		]
+	} as BitcoinTransaction;
+	const sendTransactionFee =
+		mockBtcTransaction.inputs[0].prev_out.value -
+		mockBtcTransaction.out.reduce((acc, { value }) => acc + value, 0);
+	const sendTransactionValue = BigInt(mockBtcTransaction.out[0].value + sendTransactionFee);
+
 	it('should map correctly when receive transaction is pending', () => {
 		const result = mapBtcTransaction({
 			transaction: mockBtcTransaction,
@@ -57,12 +71,8 @@ describe('mapBtcTransaction', () => {
 	});
 
 	it('should map correctly when send transaction is pending', () => {
-		const transaction = {
-			...mockBtcTransaction,
-			inputs: [...mockBtcTransaction.inputs, { prev_out: { addr: mockBtcAddress } }]
-		} as BitcoinTransaction;
 		const result = mapBtcTransaction({
-			transaction,
+			transaction: sendTransaction,
 			btcAddress: mockBtcAddress,
 			latestBitcoinBlockHeight: 1
 		});
@@ -70,7 +80,7 @@ describe('mapBtcTransaction', () => {
 			...mockBtcTransactionUi,
 			from: mockBtcAddress,
 			to: mockBtcTransaction.out[0].addr,
-			value: BigInt(mockBtcTransaction.out[0].value),
+			value: sendTransactionValue,
 			type: 'send',
 			blockNumber: undefined,
 			status: 'pending'
@@ -81,12 +91,11 @@ describe('mapBtcTransaction', () => {
 
 	it('should map correctly when send transaction is unconfirmed', () => {
 		const transaction = {
-			...mockBtcTransaction,
-			block_index: mockBtcTransactionUi.blockNumber,
-			inputs: [...mockBtcTransaction.inputs, { prev_out: { addr: mockBtcAddress } }]
+			...sendTransaction,
+			block_index: mockBtcTransactionUi.blockNumber
 		} as BitcoinTransaction;
 		const result = mapBtcTransaction({
-			transaction,
+			transaction: transaction,
 			btcAddress: mockBtcAddress,
 			latestBitcoinBlockHeight:
 				(mockBtcTransactionUi.blockNumber ?? 0) + UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
@@ -96,7 +105,7 @@ describe('mapBtcTransaction', () => {
 			status: 'unconfirmed',
 			from: mockBtcAddress,
 			to: mockBtcTransaction.out[0].addr,
-			value: BigInt(mockBtcTransaction.out[0].value),
+			value: sendTransactionValue,
 			type: 'send'
 		};
 
@@ -105,9 +114,8 @@ describe('mapBtcTransaction', () => {
 
 	it('should map correctly when send transaction is confirmed', () => {
 		const transaction = {
-			...mockBtcTransaction,
-			block_index: mockBtcTransactionUi.blockNumber,
-			inputs: [...mockBtcTransaction.inputs, { prev_out: { addr: mockBtcAddress } }]
+			...sendTransaction,
+			block_index: mockBtcTransactionUi.blockNumber
 		} as BitcoinTransaction;
 		const result = mapBtcTransaction({
 			transaction,
@@ -119,7 +127,7 @@ describe('mapBtcTransaction', () => {
 			...mockBtcTransactionUi,
 			from: mockBtcAddress,
 			to: mockBtcTransaction.out[0].addr,
-			value: BigInt(mockBtcTransaction.out[0].value),
+			value: sendTransactionValue,
 			type: 'send'
 		};
 
