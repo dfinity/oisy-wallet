@@ -46,9 +46,7 @@
 			{/each}
 		</ul>
 
-		<div class="mb-5 mt-8 flex items-center justify-between">
-			<span class="px-4.5 font-bold">{$i18n.networks.test_networks}</span>
-		</div>
+		<span class="px-4.5 mb-5 mt-8 flex font-bold">{$i18n.networks.test_networks}</span>
 
 		{#if $testnetsEnabled}
 			<ul class="mb-2 flex list-none flex-col gap-4 font-normal" transition:slide={SLIDE_EASING}>
