@@ -568,6 +568,7 @@
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"pending": "Pending...",
+			"unconfirmed": "Unconfirmed",
 			"status": "Status"
 		},
 		"status": {
