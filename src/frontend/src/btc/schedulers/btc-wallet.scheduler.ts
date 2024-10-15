@@ -80,6 +80,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		} catch (error) {
 			// We don't want to disrupt the user experience if we can't fetch the transactions.
 			console.error('Error fetching BTC transactions:', error);
+			// TODO: Return an error instead of an empty array.
 			return [];
 		}
 	}
