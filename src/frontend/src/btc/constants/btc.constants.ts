@@ -4,7 +4,7 @@
 // because the bitcoin canister doesn't know about the mempool and unconfirmed transactions.
 export const BTC_BALANCE_MIN_CONFIRMATIONS = 1;
 
-// no confirmations - transaction status "pending"
+// block_index (and hence confirmations value) is undefined - transaction status "pending"
 // 1 - 5 confirmations - transaction status "unconfirmed"
 // 6 and more confirmations - transaction status "confirmed"
 export const UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS = 1;
