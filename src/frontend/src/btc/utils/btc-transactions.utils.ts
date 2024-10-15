@@ -64,7 +64,7 @@ export const mapBtcTransaction = ({
 	const utxosFee = totalInputValue - totalOutputValue;
 
 	const confirmations = nonNullish(block_index)
-		? latestBitcoinBlockHeight - block_index
+		? latestBitcoinBlockHeight - block_index + 1
 		: undefined;
 
 	const status =
