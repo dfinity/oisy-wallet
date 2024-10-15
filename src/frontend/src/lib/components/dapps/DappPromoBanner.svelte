@@ -16,9 +16,10 @@
 				<h6 class="text-info text-sm font-bold">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-white">{dApp.name}</h4>
 			</div>
+			<a href={dApp.url} target="_blank" class="no-underline">
 			<Button size="sm" colorStyle="secondary" styleClass="flex-grow-0"
-				>{$i18n.core.text.view}</Button
-			>
+				>{$i18n.core.text.view}</Button>
+			</a>
 		</div>
 	</div>
 </div>
