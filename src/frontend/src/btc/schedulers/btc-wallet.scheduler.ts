@@ -13,7 +13,7 @@ import type {
 	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
+import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface BtcWalletStore {
 	balance: CertifiedData<bigint> | undefined;
@@ -47,11 +47,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
-	private async loadBtcTransactions({
-		btcAddress
-	}: {
-		btcAddress: BtcAddress;
-	}): Promise<BitcoinTransaction[]> {
+	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
+		newTransactions: BitcoinTransaction[];
+		latestBitcoinBlockHeight: number | undefined;
+	}> {
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
@@ -76,12 +75,14 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}
 			};
 
-			return newTransactions;
+			const { height: latestBitcoinBlockHeight } = await btcLatestBlock();
+
+			return { newTransactions, latestBitcoinBlockHeight };
 		} catch (error) {
-			// We don't want to disrupt the user experience if we can't fetch the transactions.
-			console.error('Error fetching BTC transactions:', error);
-			// TODO: Return an error instead of an empty array.
-			return [];
+			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
+			console.error('Error fetching BTC transactions data:', error);
+			// TODO: Return an error instead of an object with empty array.
+			return { newTransactions: [], latestBitcoinBlockHeight: undefined };
 		}
 	}
 
@@ -123,15 +124,18 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
 		const balance = await this.loadBtcBalance({ identity, bitcoinNetwork });
-		const newTransactions = data?.shouldFetchTransactions
-			? await this.loadBtcTransactions({ btcAddress })
-			: [];
+		const { newTransactions, latestBitcoinBlockHeight } =
+			nonNullish(data) && data.shouldFetchTransactions
+				? await this.loadBtcTransactionsData({ btcAddress })
+				: { newTransactions: [], latestBitcoinBlockHeight: undefined };
 
-		const { height } = await btcLatestBlock();
-		const uncertifiedTransactions = newTransactions.map((transaction) => ({
-			data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight: height }),
-			certified: false
-		}));
+		// TODO: handle the case when tx data is available but latestBitcoinBlockHeight is undefined
+		const uncertifiedTransactions = nonNullish(latestBitcoinBlockHeight)
+			? newTransactions.map((transaction) => ({
+					data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),
+					certified: false
+				}))
+			: [];
 
 		this.postMessageWallet({
 			wallet: {
