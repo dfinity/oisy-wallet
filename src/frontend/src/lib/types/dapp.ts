@@ -4,7 +4,9 @@ import { z } from 'zod';
 const dAppSchema = z.object({
 	id: z.string(),
 	name: z.string(),
+	// TODO replicate logic from https://github.com/dfinity/portal/blob/34a0328ed4792f5a7f3943be73f13f5abaefb4b8/plugins/validate-showcase.js#L179
 	oneLiner: z.string(),
+	// TODO validate that this URL starts with HTTPs
 	website: z.string().url(),
 
 	tags: z.array(z.string()),
