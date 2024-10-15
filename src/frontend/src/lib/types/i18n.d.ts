@@ -158,6 +158,7 @@ interface I18nSettings {
 
 interface I18nNetworks {
 	title: string;
+	test_networks: string;
 	show_testnets: string;
 	more: string;
 	chain_fusion: string;
@@ -323,6 +324,7 @@ interface I18nBuy {
 
 interface I18nTokens {
 	text: {
+		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
