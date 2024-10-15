@@ -7,7 +7,16 @@ export const dAppSchema = z.object({
 	oneLiner: z.string(),
 	website: z.string().url(),
 
-	tags: z.array(z.string()),
+	tags: z.array(
+		z.enum([
+			'DEX',
+			'Signer Standard',
+			'Staking',
+			'Verifiable Credentials',
+			'Social Media',
+			'WalletConnect'
+		])
+	),
 	description: z.string(),
 	stats: z.string(),
 	logo: z.string(),
