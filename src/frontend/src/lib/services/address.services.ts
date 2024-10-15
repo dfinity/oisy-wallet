@@ -106,7 +106,7 @@ const bitcoinMapper: Record<
 	}
 };
 
-const loadBtcAddress = async ({
+const loadBtcAddress = ({
 	tokenId,
 	network
 }: {
@@ -124,25 +124,25 @@ const loadBtcAddress = async ({
 		...bitcoinMapper[network]
 	});
 
-export const loadBtcAddressTestnet = async (): Promise<ResultSuccess> =>
+export const loadBtcAddressTestnet = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		tokenId: BTC_TESTNET_TOKEN_ID,
 		network: 'testnet'
 	});
 
-export const loadBtcAddressRegtest = async (): Promise<ResultSuccess> =>
+export const loadBtcAddressRegtest = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		tokenId: BTC_REGTEST_TOKEN_ID,
 		network: 'regtest'
 	});
 
-const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
+const loadBtcAddressMainnet = (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		network: 'mainnet'
 	});
 
-const loadEthAddress = async (): Promise<ResultSuccess> =>
+const loadEthAddress = (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getAddress: (identity: OptionIdentity) =>
@@ -232,7 +232,7 @@ const loadIdbTokenAddress = async <T extends Address>({
 	return { success: true };
 };
 
-const loadIdbBtcAddressMainnet = async (): Promise<ResultSuccess<LoadIdbAddressError>> =>
+const loadIdbBtcAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<BtcAddress>({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		getIdbAddress: getIdbBtcAddressMainnet,
@@ -240,7 +240,7 @@ const loadIdbBtcAddressMainnet = async (): Promise<ResultSuccess<LoadIdbAddressE
 		addressStore: btcAddressMainnetStore
 	});
 
-const loadIdbEthAddress = async (): Promise<ResultSuccess<LoadIdbAddressError>> =>
+const loadIdbEthAddress = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getIdbAddress: getIdbEthAddress,
@@ -304,9 +304,7 @@ const certifyAddress = async <T extends Address>({
 	return { success: true };
 };
 
-export const certifyBtcAddressMainnet = async (
-	address: BtcAddress
-): Promise<ResultSuccess<string>> =>
+export const certifyBtcAddressMainnet = (address: BtcAddress): Promise<ResultSuccess<string>> =>
 	certifyAddress<BtcAddress>({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		address,
@@ -319,7 +317,7 @@ export const certifyBtcAddressMainnet = async (
 		addressStore: btcAddressMainnetStore
 	});
 
-export const certifyEthAddress = async (address: EthAddress): Promise<ResultSuccess<string>> =>
+export const certifyEthAddress = (address: EthAddress): Promise<ResultSuccess<string>> =>
 	certifyAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		address,

@@ -63,7 +63,7 @@
 			if (isSupportedEthTokenId($sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
-					gas: await getEthFeeData({
+					gas: getEthFeeData({
 						...params,
 						helperContractAddress: toCkEthHelperContractAddress({
 							minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
@@ -128,6 +128,7 @@
 
 		debounceUpdateFeeData();
 		listener = initMinedTransactionsListener({
+			// eslint-disable-next-line require-await
 			callback: async () => debounceUpdateFeeData(),
 			networkId: sourceNetwork.id
 		});

@@ -60,6 +60,7 @@
 			}
 		}
 
+		// eslint-disable-next-line require-await
 		const callback = async () => {
 			modal.next();
 		};
