@@ -1,4 +1,5 @@
 {
+	"OISY_SHORT": "OISY",
 	"OISY_NAME": "OISY Wallet",
 	"OISY_ONELINER": "A multi-chain wallet powered by chainfusion",
 	"OISY_DESCRIPTION": "OISY Wallet provides a seamless on-chain experience to manage your Ethereum and ICP assets. By leveraging native web technologies and advanced cryptography, it eliminates the need for browser extensions or mobile apps. And accessing the wallet is easy using passkeys on a computer or mobile device.",
