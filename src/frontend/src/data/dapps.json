@@ -10,7 +10,8 @@
 		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/kong-swap-logo.svg",
-		"screenshots": ["/images/dapps/kong-swap.png"]
+		"screenshots": ["/images/dapps/kong-swap.png"],
+		"featured": true
 	},
 	{
 		"id": "openchat",
