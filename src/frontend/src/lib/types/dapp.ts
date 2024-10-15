@@ -1,15 +1,26 @@
-export interface DApp {
+// see https://github.com/dfinity/portal/tree/95c67a5cfe201e4e5cb79f3cf5d18fe16498cd8c?tab=readme-ov-file#object-schema
+type DApp = {
 	id: string;
 	name: string;
 	oneLiner: string;
 	website: string;
+
 	tags: string[];
-	display: string;
-	stats: string;
-	twitter: string;
 	description: string;
-	usesInternetIdentity: boolean;
+	stats: string;
 	logo: string;
-	screenshots: string[];
-	featured?: boolean;
-}
+
+	usesInternetIdentity: boolean;
+	authOrigins?: string[];
+
+	github?: string;
+	youtube?: string;
+	twitter?: string;
+
+	screenshots?: string[];
+
+	video?: string;
+	videoContentType?: 'video/webm' | 'video/mp4';
+
+	submittableId?: string;
+};
