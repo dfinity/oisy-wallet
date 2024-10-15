@@ -37,6 +37,7 @@ export const mapBtcTransaction = ({
 		to: string | undefined;
 	}>(
 		(acc, { addr, value }) => {
+			// TODO: test what happens when user sends to the current address (hence isValidOutput = false)
 			const isValidOutput =
 				(isTypeSend && addr !== btcAddress) || (!isTypeSend && addr === btcAddress);
 
