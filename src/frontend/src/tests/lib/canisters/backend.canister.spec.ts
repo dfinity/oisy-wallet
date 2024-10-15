@@ -32,12 +32,13 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
+		// eslint-disable-next-line require-await
 		getAgent: async () => mockedAgent
 	};
 });
 
 describe('backend.canister', () => {
-	const createBackendCanister = async ({
+	const createBackendCanister = ({
 		serviceOverride
 	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
 		BackendCanister.create({
@@ -160,7 +161,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if list_user_tokens throws', async () => {
-		service.list_user_tokens.mockImplementation(async () => {
+		service.list_user_tokens.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -186,7 +187,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if list_custom_tokens throws', async () => {
-		service.list_custom_tokens.mockImplementation(async () => {
+		service.list_custom_tokens.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -211,7 +212,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_many_custom_tokens throws', async () => {
-		service.set_many_custom_tokens.mockImplementation(async () => {
+		service.set_many_custom_tokens.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -236,7 +237,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_custom_token throws', async () => {
-		service.set_custom_token.mockImplementation(async () => {
+		service.set_custom_token.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -261,7 +262,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_many_user_tokens throws', async () => {
-		service.set_many_user_tokens.mockImplementation(async () => {
+		service.set_many_user_tokens.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -286,7 +287,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_user_token throws', async () => {
-		service.set_user_token.mockImplementation(async () => {
+		service.set_user_token.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -312,7 +313,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if create_user_profile throws', async () => {
-		service.create_user_profile.mockImplementation(async () => {
+		service.create_user_profile.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -352,7 +353,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if get_user_profile throws', async () => {
-		service.get_user_profile.mockImplementation(async () => {
+		service.get_user_profile.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -395,7 +396,7 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if add_user_credential throws', async () => {
-		service.add_user_credential.mockImplementation(async () => {
+		service.add_user_credential.mockImplementation(() => {
 			throw mockResponseError;
 		});
 
@@ -441,7 +442,7 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if btc_add_pending_transaction throws', async () => {
-			service.btc_add_pending_transaction.mockImplementation(async () => {
+			service.btc_add_pending_transaction.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -510,7 +511,7 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if btc_get_pending_transactions throws', async () => {
-			service.btc_get_pending_transactions.mockImplementation(async () => {
+			service.btc_get_pending_transactions.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -575,7 +576,7 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
-			service.btc_select_user_utxos_fee.mockImplementation(async () => {
+			service.btc_select_user_utxos_fee.mockImplementation(() => {
 				throw mockResponseError;
 			});
 
@@ -619,7 +620,7 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
-			service.allow_signing.mockImplementation(async () => {
+			service.allow_signing.mockImplementation(() => {
 				throw mockResponseError;
 			});
 

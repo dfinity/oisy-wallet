@@ -46,7 +46,7 @@
 		modalStore.openCkETHReceive(modalId);
 	};
 
-	const openModal = async (modalId: symbol) => await open(async () => openReceive(modalId));
+	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
 <ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>

@@ -22,7 +22,7 @@ export const initBtcWalletWorker = async ({
 	const WalletWorker = await import('$btc/workers/btc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	worker.onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataResponseWallet>>) => {
+	worker.onmessage = ({ data }: MessageEvent<PostMessage<PostMessageDataResponseWallet>>) => {
 		const { msg } = data;
 
 		switch (msg) {
