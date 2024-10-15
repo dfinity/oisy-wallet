@@ -1,10 +1,10 @@
 import {
-	OISY,
 	OISY_ALPHA_WARNING_URL,
 	OISY_DESCRIPTION,
 	OISY_NAME,
 	OISY_ONELINER,
 	OISY_REPO_URL,
+	OISY_SHORT,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -33,7 +33,7 @@ export const replacePlaceholders = (text: string, substitutions: I18nSubstitutio
 
 export const replaceOisyPlaceholders = (text: string): string =>
 	replacePlaceholders(text, {
-		$oisy: OISY,
+		$oisy_short: OISY_SHORT,
 		$oisy_name: OISY_NAME,
 		$oisy_oneliner: OISY_ONELINER,
 		$oisy_description: OISY_DESCRIPTION,

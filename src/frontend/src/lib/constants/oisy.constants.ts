@@ -4,7 +4,7 @@ import { oisyMetadata } from '$env/types/env-oisy-metadata';
 const parsedMetadata = oisyMetadata.safeParse(metadata);
 
 export const {
-	OISY,
+	OISY_SHORT,
 	OISY_NAME,
 	OISY_ONELINER,
 	OISY_DESCRIPTION,
@@ -13,7 +13,7 @@ export const {
 } = parsedMetadata.success
 	? parsedMetadata.data
 	: {
-			OISY: '',
+			OISY_SHORT: '',
 			OISY_NAME: '',
 			OISY_ONELINER: '',
 			OISY_DESCRIPTION: '',
