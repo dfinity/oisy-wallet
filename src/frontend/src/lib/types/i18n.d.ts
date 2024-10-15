@@ -600,4 +600,5 @@ interface I18n {
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
+	dapps: I18nDApps;
 }

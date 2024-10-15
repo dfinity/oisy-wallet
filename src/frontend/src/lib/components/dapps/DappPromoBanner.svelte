@@ -1,7 +1,7 @@
 <script lang="ts">
+	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { DApp } from '$lib/types/dapp';
-	import Button from '$lib/components/ui/Button.svelte';
 	export let dApp: DApp;
 </script>
 
