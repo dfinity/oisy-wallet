@@ -139,7 +139,7 @@ export const convertCkETHToEth = async ({
 	});
 };
 
-const approveTransfer = async ({
+const approveTransfer = ({
 	canisters: { ledgerCanisterId, minterCanisterId },
 	progress,
 	progressStep = ProgressStepsSendIc.APPROVE_TRANSFER,
