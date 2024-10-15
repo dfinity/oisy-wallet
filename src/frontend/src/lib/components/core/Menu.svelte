@@ -7,7 +7,7 @@
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
-	import IconSettings from '$lib/components/icons/IconSettings.svelte';
+	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -54,7 +54,7 @@
 
 		{#if !settingsRoute}
 			<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
-				<IconSettings />
+				<IconlySettings size="20" />
 				{$i18n.settings.text.title}
 			</ButtonMenu>
 

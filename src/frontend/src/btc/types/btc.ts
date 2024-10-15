@@ -1,6 +1,6 @@
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 
-export type BtcTransactionStatus = 'confirmed' | 'pending';
+export type BtcTransactionStatus = 'confirmed' | 'pending' | 'unconfirmed';
 
 export interface BtcTransactionUi extends TransactionUiCommon {
 	id: string;
