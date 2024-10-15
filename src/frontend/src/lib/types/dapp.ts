@@ -3,12 +3,12 @@ import dAppsData from '../../data/dapps.json';
 
 // see https://github.com/dfinity/portal/tree/95c67a5cfe201e4e5cb79f3cf5d18fe16498cd8c?tab=readme-ov-file#object-schema
 export enum DAppTag {
-	DEX="DEX",
-	SIGNER_STANDARD="Signer Standard",
-	STAKING="STAKING",
-	VERIFIABLE_CREDENTIALS="Verifiable Credentials",
-	SOCIAL_MEDIA='Social Media',
-	WALLET_CONNECT='WalletConnect'
+	DEX = 'DEX',
+	SIGNER_STANDARD = 'Signer Standard',
+	STAKING = 'STAKING',
+	VERIFIABLE_CREDENTIALS = 'Verifiable Credentials',
+	SOCIAL_MEDIA = 'Social Media',
+	WALLET_CONNECT = 'WalletConnect'
 }
 
 const dAppSchema = z.object({
@@ -40,6 +40,7 @@ const dAppSchema = z.object({
 });
 
 export type DApp = z.infer<typeof dAppSchema>;
+export type FeaturedDApp = Omit<DApp, 'screenshots'> & Required<Pick<DApp, 'screenshots'>>;
 
 const parseResult = z.array(dAppSchema).safeParse(dAppsData);
-export const dApps = parseResult.success ? parseResult.data : [];
+export const dApps: DApp[] = parseResult.success ? parseResult.data : [];
