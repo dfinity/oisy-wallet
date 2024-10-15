@@ -52,7 +52,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		return ckEthContract.populateTransaction.deposit(to);
 	};
 
-	getLogs = async ({
+	getLogs = ({
 		contract: { address: contractAddress },
 		startBlock: fromBlock,
 		topics

@@ -44,55 +44,55 @@ export class BackendCanister extends Canister<BackendService> {
 		return new BackendCanister(canisterId, service, certifiedService);
 	}
 
-	listUserTokens = async ({ certified = true }: QueryParams): Promise<UserToken[]> => {
+	listUserTokens = ({ certified = true }: QueryParams): Promise<UserToken[]> => {
 		const { list_user_tokens } = this.caller({ certified });
 
 		return list_user_tokens();
 	};
 
-	listCustomTokens = async ({ certified = true }: QueryParams): Promise<CustomToken[]> => {
+	listCustomTokens = ({ certified = true }: QueryParams): Promise<CustomToken[]> => {
 		const { list_custom_tokens } = this.caller({ certified });
 
 		return list_custom_tokens();
 	};
 
-	setManyCustomTokens = async ({ tokens }: { tokens: CustomToken[] }): Promise<void> => {
+	setManyCustomTokens = ({ tokens }: { tokens: CustomToken[] }): Promise<void> => {
 		const { set_many_custom_tokens } = this.caller({ certified: true });
 
 		return set_many_custom_tokens(tokens);
 	};
 
-	setCustomToken = async ({ token }: { token: CustomToken }): Promise<void> => {
+	setCustomToken = ({ token }: { token: CustomToken }): Promise<void> => {
 		const { set_custom_token } = this.caller({ certified: true });
 
 		return set_custom_token(token);
 	};
 
-	setManyUserTokens = async ({ tokens }: { tokens: UserToken[] }): Promise<void> => {
+	setManyUserTokens = ({ tokens }: { tokens: UserToken[] }): Promise<void> => {
 		const { set_many_user_tokens } = this.caller({ certified: true });
 
 		return set_many_user_tokens(tokens);
 	};
 
-	setUserToken = async ({ token }: { token: UserToken }): Promise<void> => {
+	setUserToken = ({ token }: { token: UserToken }): Promise<void> => {
 		const { set_user_token } = this.caller({ certified: true });
 
 		return set_user_token(token);
 	};
 
-	createUserProfile = async (): Promise<UserProfile> => {
+	createUserProfile = (): Promise<UserProfile> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
 		return create_user_profile();
 	};
 
-	getUserProfile = async ({ certified = true }: QueryParams): Promise<GetUserProfileResponse> => {
+	getUserProfile = ({ certified = true }: QueryParams): Promise<GetUserProfileResponse> => {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
 	};
 
-	addUserCredential = async ({
+	addUserCredential = ({
 		credentialJwt,
 		issuerCanisterId,
 		currentUserVersion,

@@ -102,7 +102,7 @@ const handleSuccess = async ({
 	return { success: false };
 };
 
-export const requestPouhCredential = async ({
+export const requestPouhCredential = ({
 	identity
 }: {
 	identity: Identity;
