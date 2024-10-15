@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TransactionStatus } from '$lib/types/transaction';
 
@@ -12,7 +13,7 @@
 </script>
 
 {#if pending || unconfirmed}
-	<span class="ml-2 text-goldenrod">
+	<span class="ml-2 text-goldenrod" in:fade>
 		{pending ? $i18n.transaction.text.pending : $i18n.transaction.text.unconfirmed}
 	</span>
 {/if}
