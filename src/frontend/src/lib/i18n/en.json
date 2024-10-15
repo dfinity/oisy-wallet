@@ -623,6 +623,7 @@
 		"what": {
 			"text": {
 				"label": "What I can do with my tokens",
+				"short_label": "What is $oisy_short",
 				"title": "Utility",
 				"hold_crypto": "<strong>Hold crypto across networks</strong><br>Manage and transact with native Ethereum, Bitcoin <i>(coming soon)</i>, and Internet Computer assets. Powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/chainfusion\">Chain Fusion</a>.",
 				"use_eth_dapps": "<strong>Use with Ethereum dapps</strong><br>$oisy_name is fully compatible with Ethereum Defi like <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://uniswap.org/\">Uniswap</a> thanks to the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://walletconnect.com/\">WalletConnect</a> framework.",
@@ -632,6 +633,7 @@
 		"how": {
 			"text": {
 				"label": "How $oisy_name works",
+				"short_label": "How it works",
 				"title": "Magic",
 				"self_custody": "<strong>Self-custody</strong><br>The key controlling your multi-chain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/t-ecdsa\">threshold ECDSA</a>.",
 				"fully_on_chain": "<strong>Fully on-chain</strong><br>Not only the keys but the entire wallet application is <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">stored on chain</a> and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof.",

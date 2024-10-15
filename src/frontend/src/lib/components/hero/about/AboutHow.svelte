@@ -7,6 +7,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let asMenuItem = false;
+	export let shortLabel = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -17,5 +18,9 @@
 </script>
 
 <AboutItem {asMenuItem} on:click={openModal} testId={ABOUT_HOW_MODAL_OPEN_BUTTON}>
-	<span slot="label">{replaceOisyPlaceholders($i18n.about.how.text.label)}</span>
+	<span slot="label"
+		>{replaceOisyPlaceholders(
+			shortLabel ? $i18n.about.how.text.short_label : $i18n.about.how.text.label
+		)}
+	</span>
 </AboutItem>

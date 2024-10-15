@@ -554,6 +554,7 @@ interface I18nAbout {
 	what: {
 		text: {
 			label: string;
+			short_label: string;
 			title: string;
 			hold_crypto: string;
 			use_eth_dapps: string;
@@ -563,6 +564,7 @@ interface I18nAbout {
 	how: {
 		text: {
 			label: string;
+			short_label: string;
 			title: string;
 			self_custody: string;
 			fully_on_chain: string;
