@@ -1,6 +1,7 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 
 /**
+ * See: https://gist.github.com/Merott/d2a19b32db07565e94f10d13d11a8574
  * This function (tw plugin) is used to automatically add css variables for all colors defined in the tailwind theme.
  * This allows us to: define a color (like brand.500) in the theme, and reference it in semantic definitions.
  * @param inputTheme that is processed
