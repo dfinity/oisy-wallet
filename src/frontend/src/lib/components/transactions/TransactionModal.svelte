@@ -67,7 +67,7 @@
 
 		<slot name="transaction-status" />
 
-		<slot name="confirmations" />
+		<slot name="transaction-confirmations" />
 
 		{#if nonNullish(timestamp)}
 			<Value ref="timestamp">
