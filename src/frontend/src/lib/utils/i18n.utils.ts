@@ -1,4 +1,5 @@
 import {
+	OISY,
 	OISY_ALPHA_WARNING_URL,
 	OISY_DESCRIPTION,
 	OISY_NAME,
@@ -32,6 +33,7 @@ export const replacePlaceholders = (text: string, substitutions: I18nSubstitutio
 
 export const replaceOisyPlaceholders = (text: string): string =>
 	replacePlaceholders(text, {
+		$oisy: OISY,
 		$oisy_name: OISY_NAME,
 		$oisy_oneliner: OISY_ONELINER,
 		$oisy_description: OISY_DESCRIPTION,
