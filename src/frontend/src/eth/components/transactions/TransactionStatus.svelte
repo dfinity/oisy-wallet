@@ -41,6 +41,7 @@
 		await loadCurrentBlockNumber();
 
 		listener = initMinedTransactionsListener({
+			// eslint-disable-next-line require-await
 			callback: async () => debounceLoadCurrentBlockNumber(),
 			networkId: $tokenWithFallback.network.id
 		});

@@ -17,7 +17,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	const WalletWorker = await import('$icp/workers/icp-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	worker.onmessage = async ({
+	worker.onmessage = ({
 		data
 	}: MessageEvent<
 		PostMessage<

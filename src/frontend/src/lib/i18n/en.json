@@ -81,8 +81,7 @@
 	},
 	"footer": {
 		"text": {
-			"copyright": "© 2024",
-			"developed_with": "Developed with ❤\uFE0F at ",
+			"developed_with": "© 2024 Developed with ❤\uFE0F at ",
 			"dfinity": "DFINITY"
 		},
 		"alt": {

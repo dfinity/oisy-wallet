@@ -72,7 +72,7 @@ interface I18nAuth {
 }
 
 interface I18nFooter {
-	text: { copyright: string; developed_with: string; dfinity: string };
+	text: { developed_with: string; dfinity: string };
 	alt: { dfinity: string };
 }
 

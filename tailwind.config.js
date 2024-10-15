@@ -24,11 +24,16 @@ export default {
 			'blue-ribbon': '#0066ff',
 			'dark-blue': '#321469',
 			'brandeis-blue': '#016dfc',
+			'absolute-blue': '#004eb5',
+			'interdimensional-blue': '#3b00b9',
+			'united-nations-blue': '#627eea',
 			'pale-cornflower-blue': '#b0cdff',
 			'brilliant-azure': '#348afd',
 			'misty-rose': '#937993',
+			'chinese-purple': '#7014a4',
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
+			'bright-lilac': '#e18dff',
 			'mountain-meadow': '#30af91',
 			'green-crayola': '#16b364',
 			'british-racing-green': '#084c2e',
@@ -45,9 +50,18 @@ export default {
 			zumthor: '#e8f1ff',
 			onahau: '#d1e3ff',
 			anakiwa: '#b0cdff',
+			beer: '#f7931a',
+			fulvous: '#de7900',
 			water: '#d1e3ff'
 		},
 		extend: {
+			backgroundSize: {
+				'size-200': '200% 200%'
+			},
+			backgroundPosition: {
+				'pos-0': '0% 0%',
+				'pos-100': '100% 100%'
+			},
 			width: {
 				sm: '576px'
 			},

@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_BLOCKCHAIN_API_URL;
  * - https://www.blockchain.com/explorer/api/blockchain_api
  *
  */
-export const btcAddressData = async ({
+export const btcAddressData = ({
 	btcAddress
 }: BlockchainBtcAddressDataParams): Promise<BitcoinAddressData> =>
 	fetchBlockchainApi<BitcoinAddressData>({
@@ -27,7 +27,7 @@ export const btcAddressData = async ({
  * - https://www.blockchain.com/explorer/api/blockchain_api
  *
  */
-export const btcLatestBlock = async (): Promise<BitcoinBlock> =>
+export const btcLatestBlock = (): Promise<BitcoinBlock> =>
 	fetchBlockchainApi<BitcoinBlock>({
 		endpointPath: `latestblock`
 	});

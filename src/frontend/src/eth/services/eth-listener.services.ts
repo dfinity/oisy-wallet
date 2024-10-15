@@ -50,7 +50,7 @@ export const initMinedTransactionsListener = ({
 		networkId
 	});
 
-export const initWalletConnectListener = async (params: {
+export const initWalletConnectListener = (params: {
 	uri: string;
 	address: EthAddress;
 }): Promise<WalletConnectListener> => initWalletConnect(params);

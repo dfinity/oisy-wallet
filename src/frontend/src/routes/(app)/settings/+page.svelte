@@ -3,6 +3,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<h2 class="mb-6 pb-1 text-base">{$i18n.settings.text.title}</h2>
+<h2 class="mb-6 pb-1 text-base lg:mt-20">{$i18n.settings.text.title}</h2>
 
 <Settings />
