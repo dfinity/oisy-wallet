@@ -71,7 +71,7 @@ export default {
 				'secondary-inverted': 'var(--foreground-secondary-inverted)',
 				'tertiary-inverted': 'var(--foreground-tertiary-inverted)',
 				'brand-secondary': 'var(--color-brand-500)',
-				disabled: 'var(--foreground-disabled)',
+				disabled: 'var(--foreground-disabled)'
 			},
 			background: {
 				primary: 'var(--background-primary)',
@@ -96,7 +96,7 @@ export default {
 				'error-subtle': 'var(--color-error-lightest)',
 				'error-subtle-alt': 'var(--color-error-lighter)',
 				'brand-disabled': 'var(--color-brand-100)',
-				page: 'var(--background-page)',
+				page: 'var(--background-page)'
 			},
 			border: {
 				primary: 'var(--border-primary)',
@@ -111,8 +111,8 @@ export default {
 				'brand-subtle2-alt': 'var(--color-brand-300)',
 				'brand-primary': 'var(--color-brand-base)',
 				'brand-secondary': 'var(--color-brand-500)',
-				'brand-tertiary': 'var(--color-brand-600)',
-			},
+				'brand-tertiary': 'var(--color-brand-600)'
+			}
 		},
 		extend: {
 			backgroundSize: {
