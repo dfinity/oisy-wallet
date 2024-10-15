@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // see https://github.com/dfinity/portal/tree/95c67a5cfe201e4e5cb79f3cf5d18fe16498cd8c?tab=readme-ov-file#object-schema
-const dAppSchema = z.object({
+export const dAppSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	oneLiner: z.string(),
