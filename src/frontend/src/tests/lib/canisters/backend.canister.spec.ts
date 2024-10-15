@@ -161,7 +161,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if list_user_tokens throws', async () => {
-		service.list_user_tokens.mockImplementation(() => {
+		service.list_user_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -187,7 +188,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if list_custom_tokens throws', async () => {
-		service.list_custom_tokens.mockImplementation(() => {
+		service.list_custom_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -212,7 +214,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_many_custom_tokens throws', async () => {
-		service.set_many_custom_tokens.mockImplementation(() => {
+		service.set_many_custom_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -237,7 +240,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_custom_token throws', async () => {
-		service.set_custom_token.mockImplementation(() => {
+		service.set_custom_token.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -262,7 +266,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_many_user_tokens throws', async () => {
-		service.set_many_user_tokens.mockImplementation(() => {
+		service.set_many_user_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -287,7 +292,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if set_user_token throws', async () => {
-		service.set_user_token.mockImplementation(() => {
+		service.set_user_token.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -313,7 +319,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if create_user_profile throws', async () => {
-		service.create_user_profile.mockImplementation(() => {
+		service.create_user_profile.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -353,7 +360,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if get_user_profile throws', async () => {
-		service.get_user_profile.mockImplementation(() => {
+		service.get_user_profile.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -396,7 +404,8 @@ describe('backend.canister', () => {
 	});
 
 	it('should throw an error if add_user_credential throws', async () => {
-		service.add_user_credential.mockImplementation(() => {
+		service.add_user_credential.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -442,7 +451,8 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if btc_add_pending_transaction throws', async () => {
-			service.btc_add_pending_transaction.mockImplementation(() => {
+			service.btc_add_pending_transaction.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 
@@ -511,7 +521,8 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if btc_get_pending_transactions throws', async () => {
-			service.btc_get_pending_transactions.mockImplementation(() => {
+			service.btc_get_pending_transactions.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 
@@ -576,7 +587,8 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
-			service.btc_select_user_utxos_fee.mockImplementation(() => {
+			service.btc_select_user_utxos_fee.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 
@@ -620,7 +632,8 @@ describe('backend.canister', () => {
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
-			service.allow_signing.mockImplementation(() => {
+			service.allow_signing.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 
