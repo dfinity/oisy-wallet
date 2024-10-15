@@ -83,6 +83,9 @@
 	"dapps": {
 		"text": {
 			"featured": "Featured"
+		},
+		"alt": {
+			"open_dapp": "Open the app $dAppname"
 		}
 	},
 	"footer": {
