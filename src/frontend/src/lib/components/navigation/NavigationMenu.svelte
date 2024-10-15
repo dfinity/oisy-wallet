@@ -15,7 +15,7 @@
 			: 'tokens';
 </script>
 
-<div class=" flex w-full flex-col gap-3 py-3">
+<div class="box-content flex w-full flex-col gap-3 py-3 pl-4 sm:pl-8">
 	<NavigationItem
 		href="/"
 		ariaLabel={$i18n.navigation.alt.tokens}
