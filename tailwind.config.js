@@ -52,7 +52,15 @@ export default {
 			anakiwa: '#b0cdff',
 			beer: '#f7931a',
 			fulvous: '#de7900',
-			water: '#d1e3ff'
+			water: '#d1e3ff',
+			info: {
+				lightest: '#F0F9FF',
+				lighter: '#E0F2FE',
+				light: '#7CD4FD',
+				DEFAULT: '#0BA5EC',
+				dark: '#026AA2',
+				darker: '#0B4A6F'
+			}
 		},
 		extend: {
 			backgroundSize: {
