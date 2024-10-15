@@ -14,7 +14,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 	const BtcStatusesWorker = await import('$icp/workers/btc-statuses.worker?worker');
 	const worker: Worker = new BtcStatusesWorker.default();
 
-	worker.onmessage = async ({
+	worker.onmessage = ({
 		data
 	}: MessageEvent<
 		PostMessage<PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError>

@@ -38,7 +38,6 @@
 		class:sm:max-w-none={$authNotSignedIn}
 	>
 		<IconDfinity />
-		{$i18n.footer.text.copyright}
 		<span>
 			{replaceOisyPlaceholders($i18n.footer.text.developed_with)}
 			<ExternalLink

@@ -40,7 +40,7 @@ describe('AddressGuard', () => {
 	});
 
 	describe('Signer allowance', () => {
-		it('should load signer allowance on event', async () => {
+		it('should load signer allowance on event', () => {
 			apiMock.mockResolvedValueOnce(undefined);
 
 			const spy = vi.spyOn(loaderServices, 'initSignerAllowance');
@@ -53,7 +53,7 @@ describe('AddressGuard', () => {
 		});
 
 		it('should sign out and ultimately reload the window if signer allowance fails', async () => {
-			apiMock.mockImplementation(async () => {
+			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
 

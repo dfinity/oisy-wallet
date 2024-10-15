@@ -35,7 +35,7 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import type { TransactionResponse } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 
-const ethPrepareTransaction = async ({
+const ethPrepareTransaction = ({
 	to,
 	amount,
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
@@ -44,8 +44,7 @@ const ethPrepareTransaction = async ({
 	gas,
 	data,
 	chainId: chain_id
-}: TransferParams &
-	NetworkChainId & { nonce: number; gas: bigint | undefined }): Promise<SignRequest> => ({
+}: TransferParams & NetworkChainId & { nonce: number; gas: bigint | undefined }): SignRequest => ({
 	to,
 	value: amount.toBigInt(),
 	chain_id,
@@ -231,7 +230,7 @@ const erc20ContractPrepareApprove = async ({
 	});
 };
 
-const prepare = async ({
+const prepare = ({
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
@@ -245,7 +244,7 @@ const prepare = async ({
 		nonce: number;
 		gas: bigint;
 		amount: bigint;
-	}): Promise<SignRequest> => {
+	}): SignRequest => {
 	if (isNullish(data)) {
 		const {
 			send: {

@@ -84,7 +84,7 @@ const send = async ({
 
 	progress(ProgressStepsSendBtc.SEND);
 
-	return sendBtcApi({
+	return await sendBtcApi({
 		identity,
 		network: signerBitcoinNetwork,
 		feeSatoshis: toNullable(utxosFee.feeSatoshis),

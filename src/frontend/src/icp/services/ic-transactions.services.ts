@@ -38,7 +38,7 @@ const getTransactions = async ({
 	return transactions.flatMap(mapTransactionIcpToSelf);
 };
 
-export const loadNextTransactions = async ({
+export const loadNextTransactions = ({
 	token,
 	identity,
 	signalEnd,
