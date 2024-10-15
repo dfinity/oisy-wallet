@@ -5,7 +5,7 @@
 	export let dApp: DApp;
 </script>
 
-<div
+<article
 	class="flex h-64 items-end overflow-hidden rounded-2xl bg-cover bg-center"
 	style="background-image: url('{dApp.imageUrl}')"
 >
@@ -23,7 +23,7 @@
 			</a>
 		</div>
 	</div>
-</div>
+</article>
 
 <style lang="css">
 </style>
