@@ -67,6 +67,8 @@
 
 		<slot name="transaction-status" />
 
+		<slot name="transaction-confirmations" />
+
 		{#if nonNullish(timestamp)}
 			<Value ref="timestamp">
 				<svelte:fragment slot="label">{$i18n.transaction.text.timestamp}</svelte:fragment>

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 jobs:
   generate:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -61,7 +61,7 @@ jobs:
           }
   binding-checks-pass:
     needs: [ 'generate' ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
         run: echo OK
