@@ -21,6 +21,7 @@
 	class={`text-${color} pointer-events-auto flex gap-0.5 font-bold`}
 	class:icon={onlyArrow}
 	on:click={() => back({ pop: nonNullish(fromRoute) })}
+	aria-label={$i18n.core.alt.back}
 >
 	{#if onlyArrow}
 		<IconBackArrow />
