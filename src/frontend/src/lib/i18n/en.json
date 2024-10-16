@@ -15,7 +15,8 @@
 			"max": "Max",
 			"more": "More",
 			"reject": "Reject",
-			"approve": "Approve"
+			"approve": "Approve",
+			"view": "View"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -79,10 +80,20 @@
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		}
 	},
+	"dapps": {
+		"text": {
+			"all_dapps": "All dapps",
+			"featured": "Featured"
+		},
+		"alt": {
+			"logo": "Logo of $dAppname",
+			"open_dapp": "Open the app $dAppname",
+			"website": "Image of $dAppname"
+		}
+	},
 	"footer": {
 		"text": {
-			"developed_with": "© 2024 Developed with ❤\uFE0F at ",
-			"dfinity": "DFINITY"
+			"developed_with": "© 2024 Developed with ❤\uFE0F at DFINITY"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website"

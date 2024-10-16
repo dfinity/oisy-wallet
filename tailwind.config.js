@@ -65,6 +65,7 @@ export default {
 				sm: '576px'
 			},
 			screens: {
+				'1.5md': '896px',
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
 			}
