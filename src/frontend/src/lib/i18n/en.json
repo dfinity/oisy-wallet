@@ -15,7 +15,8 @@
 			"max": "Max",
 			"more": "More",
 			"reject": "Reject",
-			"approve": "Approve"
+			"approve": "Approve",
+			"view": "View"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -77,6 +78,17 @@
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
+		}
+	},
+	"dapps": {
+		"text": {
+			"all_dapps": "All dapps",
+			"featured": "Featured"
+		},
+		"alt": {
+			"logo": "Logo of $dAppname",
+			"open_dapp": "Open the app $dAppname",
+			"website": "Image of $dAppname"
 		}
 	},
 	"footer": {
