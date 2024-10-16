@@ -14,7 +14,7 @@
 </script>
 
 <footer
-	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-6 sm:flex-1 sm:flex-grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0"
+	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-12 sm:flex-1 sm:flex-grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0"
 	class:sm:sticky={$authNotSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}
 	class:md:h-md:grid-cols-4={$authNotSignedIn}
@@ -42,7 +42,7 @@
 		class:lg:max-w-none={$authNotSignedIn}
 		class:sm:invisible={$authSignedIn}
 		class:1.5md:visible={$authSignedIn}
-		class:translate-x-full={$authSignedIn}
+		class:sm:translate-x-full={$authSignedIn}
 		class:1.5md:translate-x-0={$authSignedIn}
 	>
 		<ExternalLink
