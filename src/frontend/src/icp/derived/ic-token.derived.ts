@@ -15,17 +15,14 @@ export const tokenWithFallbackAsIcToken: Readable<IcToken> = derived(
 	([$token]) => $token as IcToken
 );
 
-export const tokenCkBtcLedger: Readable<boolean> = derived(
-	[tokenWithFallbackAsIcToken],
-	([$token]) => isTokenCkBtcLedger($token)
+export const tokenCkBtcLedger: Readable<boolean> = derived([tokenAsIcToken], ([$token]) =>
+	isTokenCkBtcLedger($token)
 );
 
-export const tokenCkEthLedger: Readable<boolean> = derived(
-	[tokenWithFallbackAsIcToken],
-	([$token]) => isTokenCkEthLedger($token)
+export const tokenCkEthLedger: Readable<boolean> = derived([tokenAsIcToken], ([$token]) =>
+	isTokenCkEthLedger($token)
 );
 
-export const tokenCkErc20Ledger: Readable<boolean> = derived(
-	[tokenWithFallbackAsIcToken],
-	([$token]) => isTokenCkErc20Ledger($token)
+export const tokenCkErc20Ledger: Readable<boolean> = derived([tokenAsIcToken], ([$token]) =>
+	isTokenCkErc20Ledger($token)
 );
