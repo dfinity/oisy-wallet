@@ -19,10 +19,12 @@
 
 <button
 	class={`text-${color} pointer-events-auto flex gap-0.5 font-bold`}
+	class:icon={onlyArrow}
 	on:click={() => back({ pop: nonNullish(fromRoute) })}
 >
 	{#if onlyArrow}
 		<IconBackArrow />
+		<span class="visually-hidden">{$i18n.core.text.back}</span>
 	{:else}
 		<IconBack />
 		{$i18n.core.text.back}
