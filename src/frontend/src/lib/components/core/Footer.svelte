@@ -5,7 +5,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -19,6 +19,9 @@
 	class:md:h-md:grid={$authNotSignedIn}
 	class:md:h-md:grid-cols-4={$authNotSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
+	class:sm:fixed={$authSignedIn}
+	class:sm:inset-x-0={$authSignedIn}
+	class:sm:bottom-0={$authSignedIn}
 >
 	<div class="flex flex-row items-center gap-4">
 		<ExternalLinkIcon href={OISY_REPO_URL} ariaLabel={$i18n.navigation.text.source_code_on_github}>
@@ -34,20 +37,24 @@
 	</div>
 
 	<div
-		class="item flex flex-row items-center justify-end gap-2 text-sm lg:max-w-48 xl:max-w-none"
+		class="item flex flex-row items-center justify-end gap-2 text-sm transition-all duration-200 ease-in-out lg:max-w-48 xl:max-w-none"
 		class:sm:max-w-none={$authNotSignedIn}
+		class:sm:invisible={$authSignedIn}
+		class:1.5md:visible={$authSignedIn}
+		class:translate-x-full={$authSignedIn}
+		class:1.5md:translate-x-0={$authSignedIn}
 	>
-		<IconDfinity />
-		<span>
-			{replaceOisyPlaceholders($i18n.footer.text.developed_with)}
-			<ExternalLink
-				href="https://dfinity.org"
-				ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
-				color="blue"
-				iconVisible={false}
-			>
-				{replaceOisyPlaceholders($i18n.footer.text.dfinity)}
-			</ExternalLink>
-		</span>
+		<ExternalLink
+			href="https://dfinity.org"
+			ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
+			iconVisible={false}
+		>
+			<div class="flex flex-row items-center gap-2">
+				<IconDfinity />
+				<span class:sm:hidden={$authSignedIn} class:xl:flex={$authSignedIn}>
+					{replaceOisyPlaceholders($i18n.footer.text.developed_with)}
+				</span>
+			</div>
+		</ExternalLink>
 	</div>
 </footer>

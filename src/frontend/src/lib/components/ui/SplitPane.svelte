@@ -8,7 +8,7 @@
 	</div>
 
 	<div
-		class="mx-auto px-5 transition-all duration-500 ease-linear sm:ml-44 sm:box-content sm:w-sm lg:ml-auto"
+		class="mx-auto px-5 transition-all duration-500 ease-linear sm:ml-52 sm:box-content sm:w-sm lg:ml-auto"
 	>
 		<slot />
 	</div>

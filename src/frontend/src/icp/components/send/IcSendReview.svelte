@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -26,4 +27,6 @@
 		invalidAmount(amount);
 </script>
 
-<SendReview on:icBack on:icSend {source} {amount} {destination} disabled={invalid} />
+<SendReview on:icBack on:icSend {source} {amount} {destination} disabled={invalid}>
+	<IcReviewNetwork {networkId} slot="network" />
+</SendReview>
