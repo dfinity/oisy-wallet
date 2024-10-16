@@ -1,4 +1,4 @@
-import type { SignRequest } from '$declarations/signer/signer.did';
+import type { EthPersonalSignRequest, EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
@@ -44,7 +44,7 @@ const ethPrepareTransaction = ({
 	gas,
 	data,
 	chainId: chain_id
-}: TransferParams & NetworkChainId & { nonce: number; gas: bigint | undefined }): SignRequest => ({
+}: TransferParams & NetworkChainId & { nonce: number; gas: bigint | undefined }): EthSignTransactionRequest => ({
 	to,
 	value: amount.toBigInt(),
 	chain_id,
@@ -66,7 +66,7 @@ const erc20PrepareTransaction = async ({
 		nonce: number;
 		gas: bigint;
 		populate: Erc20PopulateTransaction;
-	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
+	} & Pick<SendParams, 'token'>): Promise<EthSignTransactionRequest> => {
 	const { data } = await populate({
 		contract: token as Erc20Token,
 		to,
@@ -105,7 +105,7 @@ const ethHelperContractPrepareTransaction = async ({
 		gas: bigint;
 		populate: CkEthPopulateTransaction;
 		contract: Erc20ContractAddress;
-	}): Promise<SignRequest> => {
+	}): Promise<EthSignTransactionRequest> => {
 	const { data } = await populate({
 		contract,
 		to
@@ -147,7 +147,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		gas: bigint;
 		contract: Erc20ContractAddress;
 		networkId: NetworkId;
-	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
+	} & Pick<SendParams, 'token'>): Promise<EthSignTransactionRequest> => {
 	const { address: erc20ContractAddress } = token as Erc20Token;
 
 	const { populateTransaction } = infuraCkErc20Providers(networkId);
@@ -211,7 +211,7 @@ const erc20ContractPrepareApprove = async ({
 		gas: bigint;
 		networkId: NetworkId;
 		spender: EthAddress;
-	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
+	} & Pick<SendParams, 'token'>): Promise<EthSignTransactionRequest> => {
 	const { populateApprove } = infuraErc20Providers(networkId);
 
 	const { data } = await populateApprove({
@@ -244,7 +244,7 @@ const prepare = ({
 		nonce: number;
 		gas: bigint;
 		amount: bigint;
-	}): SignRequest => {
+	}): EthSignTransactionRequest => {
 	if (isNullish(data)) {
 		const {
 			send: {
