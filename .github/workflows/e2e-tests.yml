@@ -13,7 +13,7 @@ concurrency:
 jobs:
 
   oisy-backend-wasm:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
         uses: ./.github/actions/oisy-backend
 
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: oisy-backend-wasm
     steps:
       - name: Checkout
@@ -46,7 +46,7 @@ jobs:
 
   may-merge:
     needs: ['e2e']
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
         run: echo OK

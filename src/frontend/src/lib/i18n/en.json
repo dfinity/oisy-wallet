@@ -58,7 +58,7 @@
 			"logout": "Logout",
 			"authenticate": "Open or Create",
 			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Anonymous, self-custodial",
+			"privacy_and_security": "Anonymous, network custody",
 			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
 		},
 		"alt": {
@@ -653,6 +653,65 @@
 				"cross_device": "<strong>Cross-device</strong><br>Using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a> means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
 				"verifiable_credentials": "<strong>Compatible with verifiable credentials</strong><br>$oisy_name is designed to integrate with Internet Computer’s <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials platform</a>. Users can access additional functionality, like airdrops, if they acquire credentials of a certain type.",
 				"open_source": "<strong>Open source</strong><br>$oisy_short is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
+			}
+		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"access_your_wallet": "Access your $oisy_name",
+				"open_or_create": "Open or create your wallet to securely connect to the dApp and start managing your assets."
+			}
+		},
+		"idle": {
+			"text": {
+				"waiting": "Waiting for the dApp interaction..."
+			},
+			"alt": {
+				"img_placeholder": "The astronaut logo moves its eyes from left to right while waiting for messages from the relying party dapp"
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "Review permissions",
+				"requested_permissions": "Requested permissions",
+				"your_wallet_address": "Your wallet address",
+				"icrc27_accounts": "View your $oisy_name address",
+				"icrc49_call_canister": "Request approval for transactions"
+			},
+			"error": {
+				"no_confirm_callback": "No callback to confirm the permissions, which is unexpected. Close the wallet and try again."
+			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "Request from:",
+				"invalid_origin": "Invalid origin️!!"
+			},
+			"alt": {
+				"link_to_dapp": "Link to the dApp requesting permissions"
+			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": "Loading consent message..."
+			},
+			"error": {
+				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
+				"no_reject_callback": "No callback to reject the consent message, which is unexpected. Close the wallet and try again.",
+				"retrieve": "An error occurred while retrieving the consent message"
+			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "Processing the request...",
+				"executed": "The request has been executed",
+				"close_window": "You can close this window",
+				"error": "Request failed due to an error",
+				"try_again": "Please try again. If the issue persists, contact the developer of the dapp where you initiated the request."
+			},
+			"error": {
+				"cannot_call": "The call cannot be processed"
 			}
 		}
 	}

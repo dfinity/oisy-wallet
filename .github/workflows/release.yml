@@ -14,7 +14,7 @@ jobs:
   #####################
 
   docker-build-base:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
         uses: ./.github/actions/docker-build-base
 
   docker-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: docker-build-base
     strategy:
       matrix:
@@ -42,7 +42,7 @@ jobs:
           target: ${{ matrix.target }}
 
   candid:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
@@ -59,7 +59,7 @@ jobs:
           path: ./src/${{ matrix.target }}/${{ matrix.name }}
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: ['docker-build', 'candid']
     steps:
       - uses: actions/checkout@v4

@@ -29,7 +29,7 @@ on:
 
 jobs:
   deployment:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Fail if branch is not main
