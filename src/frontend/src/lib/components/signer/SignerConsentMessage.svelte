@@ -16,7 +16,8 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 
 	const {
-		consentMessagePrompt: { payload, reset: resetPrompt }
+		consentMessagePrompt: { payload, reset: resetPrompt },
+		callCanisterPrompt: { reset: resetCallCanisterPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
 	let approve: ConsentMessageApproval | undefined;
@@ -35,6 +36,11 @@
 		if ($payload?.status === 'loading') {
 			displayMessage = undefined;
 			loading = true;
+
+			// In case the relying party has not closed the window between the last call and requesting a new call, we reset the call canister prompt; otherwise, we might display both the previous result screen and the consent message.
+			// Note that the library handles the case where the relying party tries to submit another call while a call is still being processed. Therefore, we cannot close a prompt here that is not yet finished.
+			resetCallCanisterPrompt();
+
 			return;
 		}
 
