@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import IconCheck from '$lib/components/icons/IconCheck.svelte';
-	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import SignerAlert from '$lib/components/signer/SignerAlert.svelte';
 	import SignerCenteredContent from '$lib/components/signer/SignerCenteredContent.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
@@ -35,9 +33,7 @@
 	<SignerCenteredContent>
 		<h2 class="mb-4 text-center">{$i18n.signer.call_canister.text.executed}</h2>
 
-		<SignerAlert type="ok">
-			<IconCheck />
-		</SignerAlert>
+		<SignerAlert type="ok" />
 
 		<p class="mt-10 text-center font-bold">{$i18n.signer.call_canister.text.close_window}</p>
 	</SignerCenteredContent>
@@ -45,9 +41,7 @@
 	<SignerCenteredContent>
 		<h2 class="mb-4 text-center">{$i18n.signer.call_canister.text.error}</h2>
 
-		<SignerAlert type="error">
-			<IconClose />
-		</SignerAlert>
+		<SignerAlert type="error" />
 
 		<p class="mt-10 text-center font-bold">{$i18n.signer.call_canister.text.try_again}</p>
 	</SignerCenteredContent>
