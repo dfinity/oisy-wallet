@@ -26,7 +26,9 @@ a.as-button {
 
 	&.primary,
 	&.secondary,
-	&.tertiary {
+	&.tertiary,
+	&.success,
+	&.error {
 		justify-content: center;
 
 		padding: var(--button-padding);
@@ -43,7 +45,9 @@ a.as-button {
 
 	&.primary,
 	&.secondary,
-	&.tertiary {
+	&.tertiary,
+	&.success,
+	&.error {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -126,6 +130,32 @@ a.as-button {
 			&:hover {
 				color: var(--color-secondary);
 			}
+		}
+	}
+
+	&.success {
+		background: var(--color-green-crayola);
+		color: var(--color-white);
+
+		&:hover {
+			background: var(--color-dartmouth-green);
+		}
+
+		&:active {
+			background: var(--color-british-racing-green);
+		}
+	}
+
+	&.error {
+		background: var(--color-rusty-red);
+		color: var(--color-white);
+
+		&:hover {
+			background: var(--color-upsdell-red);
+		}
+
+		&:active {
+			background: var(--color-chocolate-cosmos);
 		}
 	}
 
