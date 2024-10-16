@@ -93,7 +93,7 @@
 		<SignerOrigin payload={$payload} />
 
 		<div class="mb-6 rounded-lg border border-light-blue bg-light-blue p-6">
-			<p class="break-normal font-bold">{$i18n.signer.permissions.text.the_dapp_is_requesting}</p>
+			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
 				{#each scopes as scope}

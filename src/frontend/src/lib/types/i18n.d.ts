@@ -564,7 +564,7 @@ interface I18nSigner {
 	permissions: {
 		text: {
 			title: string;
-			the_dapp_is_requesting: string;
+			requested_permissions: string;
 			your_wallet_address: string;
 			icrc27_accounts: string;
 			icrc49_call_canister: string;

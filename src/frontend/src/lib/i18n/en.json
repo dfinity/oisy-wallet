@@ -646,7 +646,7 @@
 		"permissions": {
 			"text": {
 				"title": "Review permissions",
-				"the_dapp_is_requesting": "The dapp is requesting the following permissions",
+				"requested_permissions": "Requested permissions",
 				"your_wallet_address": "Your wallet address",
 				"icrc27_accounts": "Learn your Oisy wallet address",
 				"icrc49_call_canister": "Initiate transactions to approve in Oisy"
