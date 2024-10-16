@@ -39,6 +39,7 @@
 	<div
 		class="item flex flex-row items-center justify-end gap-2 text-sm transition-all duration-200 ease-in-out lg:max-w-48 xl:max-w-none"
 		class:sm:max-w-none={$authNotSignedIn}
+		class:lg:max-w-none={$authNotSignedIn}
 		class:sm:invisible={$authSignedIn}
 		class:1.5md:visible={$authSignedIn}
 		class:translate-x-full={$authSignedIn}
