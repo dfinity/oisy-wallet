@@ -14,7 +14,7 @@
 	});
 </script>
 
-<main class="flex flex-col gap-y-8 pt-10">
+<main class="mx-auto flex flex-col gap-y-6 px-5 pt-10 sm:w-sm">
 	<div class="flex justify-center"><OisyWalletLogoLink /></div>
 
 	<WarningBanner>
