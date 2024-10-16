@@ -128,8 +128,38 @@ a.as-button {
 			color: var(--color-primary);
 
 			&:hover {
-				color: var(--color-secondary);
+				color: var(--color-cobalt);
 			}
+
+			&:active {
+				color: var(--color-cobalt);
+			}
+		}
+	}
+
+	&.success {
+		background: var(--color-green-crayola);
+		color: var(--color-white);
+
+		&:hover {
+			background: var(--color-dartmouth-green);
+		}
+
+		&:active {
+			background: var(--color-british-racing-green);
+		}
+	}
+
+	&.error {
+		background: var(--color-rusty-red);
+		color: var(--color-white);
+
+		&:hover {
+			background: var(--color-upsdell-red);
+		}
+
+		&:active {
+			background: var(--color-chocolate-cosmos);
 		}
 	}
 
