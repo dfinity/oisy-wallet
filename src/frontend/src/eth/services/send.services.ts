@@ -1,4 +1,4 @@
-import type { EthPersonalSignRequest, EthSignTransactionRequest } from '$declarations/signer/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
@@ -44,7 +44,8 @@ const ethPrepareTransaction = ({
 	gas,
 	data,
 	chainId: chain_id
-}: TransferParams & NetworkChainId & { nonce: number; gas: bigint | undefined }): EthSignTransactionRequest => ({
+}: TransferParams &
+	NetworkChainId & { nonce: number; gas: bigint | undefined }): EthSignTransactionRequest => ({
 	to,
 	value: amount.toBigInt(),
 	chain_id,
