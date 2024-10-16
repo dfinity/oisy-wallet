@@ -3,17 +3,17 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 
-	export let type: 'ok' | 'error';
+	export let alertType: 'ok' | 'error';
 
 	let icon: ComponentType;
-	$: icon = type === 'error' ? IconClose : IconCheck;
+	$: icon = alertType === 'error' ? IconClose : IconCheck;
 </script>
 
 <div class="flex justify-center pb-5 pt-8">
 	<div
 		class="flex h-20 w-20 items-center justify-center rounded-full"
-		class:bg-cyclamen={type === 'error'}
-		class:bg-[var(--color-primary)]={type === 'ok'}
+		class:bg-cyclamen={alertType === 'error'}
+		class:bg-[var(--color-primary)]={alertType === 'ok'}
 	>
 		<svelte:component this={icon} />
 	</div>

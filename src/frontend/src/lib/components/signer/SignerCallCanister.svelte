@@ -33,7 +33,7 @@
 	<SignerCenteredContent>
 		<h2 class="mb-4 text-center">{$i18n.signer.call_canister.text.executed}</h2>
 
-		<SignerAlert type="ok" />
+		<SignerAlert alertType="ok" />
 
 		<p class="mt-10 text-center font-bold">{$i18n.signer.call_canister.text.close_window}</p>
 	</SignerCenteredContent>
@@ -41,7 +41,7 @@
 	<SignerCenteredContent>
 		<h2 class="mb-4 text-center">{$i18n.signer.call_canister.text.error}</h2>
 
-		<SignerAlert type="error" />
+		<SignerAlert alertType="error" />
 
 		<p class="mt-10 text-center font-bold">{$i18n.signer.call_canister.text.try_again}</p>
 	</SignerCenteredContent>
