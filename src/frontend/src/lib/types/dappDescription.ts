@@ -5,7 +5,7 @@ import { z } from 'zod';
 export enum DappDescriptionTag {
 	DEX = 'DEX',
 	SIGNER_STANDARD = 'Signer Standard',
-	STAKING = 'STAKING',
+	STAKING = 'Staking',
 	VERIFIABLE_CREDENTIALS = 'Verifiable Credentials',
 	SOCIAL_MEDIA = 'Social Media',
 	WALLET_CONNECT = 'WalletConnect'
