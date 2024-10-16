@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,7 +13,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="stretch min-h-[50vh]">
+<ContentWithToolbar minHeight="50vh">
 	<p class="text-center font-bold">{addressLabel ?? $i18n.wallet.text.address}:</p>
 	<p class="mb-4 px-2 text-center font-normal">
 		<output class="break-all" data-tid={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}>{address}</output><Copy
@@ -23,8 +24,14 @@
 	</p>
 
 	<ReceiveQRCode address={address ?? ''} />
-</div>
 
-<Button colorStyle="secondary" fullWidth styleClass="mt-8" on:click={() => dispatch('icBack')}
-	>{$i18n.core.text.back}</Button
->
+	<Button
+		colorStyle="secondary"
+		fullWidth
+		styleClass="mt-8"
+		on:click={() => dispatch('icBack')}
+		slot="toolbar"
+	>
+		{$i18n.core.text.back}
+	</Button>
+</ContentWithToolbar>
