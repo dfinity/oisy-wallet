@@ -42,7 +42,7 @@
 		class:lg:max-w-none={$authNotSignedIn}
 		class:sm:invisible={$authSignedIn}
 		class:1.5md:visible={$authSignedIn}
-		class:translate-x-full={$authSignedIn}
+		class:sm:translate-x-full={$authSignedIn}
 		class:1.5md:translate-x-0={$authSignedIn}
 	>
 		<ExternalLink
