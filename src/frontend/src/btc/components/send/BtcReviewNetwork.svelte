@@ -13,5 +13,4 @@
 		: isNetworkIdBTCRegtest(networkId)
 			? BTC_REGTEST_NETWORK
 			: BTC_MAINNET_NETWORK}
-	destinationNetworkId={networkId}
 />

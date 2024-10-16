@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { Readable } from 'svelte/store';
 	import BtcSendWarnings from './BtcSendWarnings.svelte';
+	import BtcReviewNetwork from '$btc/components/send/BtcReviewNetwork.svelte';
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import {
 		BtcPendingSentTransactionsStatus,
@@ -42,6 +43,8 @@
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
+	<BtcReviewNetwork {networkId} slot="network" />
+
 	<BtcUtxosFee slot="fee" bind:utxosFee {progress} {networkId} {amount} />
 
 	<BtcSendWarnings
