@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import dAppsData from '$env/dapp-descriptions.json';
+import dAppDescriptionsJson from '$env/dapp-descriptions.json';
 
 // see https://github.com/dfinity/portal/tree/95c67a5cfe201e4e5cb79f3cf5d18fe16498cd8c?tab=readme-ov-file#object-schema
 export enum DappDescriptionTag {
@@ -43,5 +43,5 @@ const dAppDescriptionSchema = z.object({
 
 export type DappDescription = z.infer<typeof dAppDescriptionSchema>;
 
-const parseResult = z.array(dAppDescriptionSchema).safeParse(dAppsData);
+const parseResult = z.array(dAppDescriptionSchema).safeParse(dAppDescriptionsJson);
 export const dAppDescriptions: DappDescription[] = parseResult.success ? parseResult.data : [];
