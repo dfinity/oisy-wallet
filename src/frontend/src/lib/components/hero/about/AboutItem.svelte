@@ -12,7 +12,9 @@
 >
 	<div class="flex items-center gap-2">
 		{#if asMenuItem}
-			<IconInfo />
+			<slot name="icon">
+				<IconInfo />
+			</slot>
 		{/if}
 		<slot name="label"></slot>
 	</div>
