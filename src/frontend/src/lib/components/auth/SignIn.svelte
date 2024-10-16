@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconLogin from '$lib/components/icons/IconLogin.svelte';
+	import IconLogin from '$lib/components/icons/lucide/IconLogin.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
