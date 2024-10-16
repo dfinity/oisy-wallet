@@ -19,9 +19,9 @@
 	>
 
 	<div class="stretch pt-4">
-		<ImgBanner src={CoverWhat} alt={$i18n.about.what.text.title} />
+		<ImgBanner size="small" src={CoverWhat} alt={$i18n.about.what.text.title} />
 
-		<p class="mt-6">
+		<p class="mt-12">
 			<IconCrypto />
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.hold_crypto)} />
 		</p>
