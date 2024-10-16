@@ -7,11 +7,13 @@
 	export let token: Token;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let showNetworkIcon = true;
+	export let networkIconBlackAndWhite = false;
+	export let ring = false;
 
 	const {
 		icon,
 		name,
-		network: { name: networkName, icon: networkIcon }
+		network: { name: networkName, icon: networkIcon, iconBW: networkIconBW }
 	} = token;
 </script>
 
@@ -21,11 +23,12 @@
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
 		size="medium"
 		{color}
+		{ring}
 	/>
 	{#if showNetworkIcon}
-		<div class="absolute bottom-0 right-0">
+		<div class="absolute -bottom-1 -right-1">
 			<Logo
-				src={networkIcon}
+				src={networkIconBlackAndWhite ? networkIconBW : networkIcon}
 				alt={replacePlaceholders($i18n.core.alt.logo, { $name: networkName })}
 				{color}
 			/>
