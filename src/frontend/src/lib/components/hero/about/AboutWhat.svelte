@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import AboutItem from '$lib/components/hero/about/AboutItem.svelte';
-	import IconStar from '$lib/components/icons/IconStar.svelte';
+	import IconStar from '$lib/components/icons/lucide/IconStar.svelte';
 	import { ABOUT_WHAT_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
