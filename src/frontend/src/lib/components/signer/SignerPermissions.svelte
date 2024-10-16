@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconWallet } from '@dfinity/gix-components';
 	import {
+		ICRC25_PERMISSION_GRANTED,
 		ICRC27_ACCOUNTS,
 		type IcrcScope,
 		type IcrcScopedMethod,
@@ -56,7 +57,7 @@
 			return;
 		}
 
-		confirm((scopes ?? []).map((scope) => ({ ...scope, state: 'granted' })));
+		confirm((scopes ?? []).map((scope) => ({ ...scope, state: ICRC25_PERMISSION_GRANTED })));
 
 		resetPrompt();
 	};
