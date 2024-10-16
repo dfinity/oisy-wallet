@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
+	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -15,22 +16,26 @@
 			: 'tokens';
 </script>
 
-<div class=" flex w-full flex-col gap-3 py-3">
-	<NavigationItem
-		href="/"
-		ariaLabel={$i18n.navigation.alt.tokens}
-		selected={route === 'tokens' || route === 'transactions'}
-	>
-		<IconWallet />
-		{$i18n.navigation.text.tokens}
-	</NavigationItem>
+<div class="box-content flex h-full w-full flex-col justify-between py-3 pl-4 sm:pl-8">
+	<div class="flex flex-col gap-3">
+		<NavigationItem
+			href="/"
+			ariaLabel={$i18n.navigation.alt.tokens}
+			selected={route === 'tokens' || route === 'transactions'}
+		>
+			<IconWallet />
+			{$i18n.navigation.text.tokens}
+		</NavigationItem>
 
-	<NavigationItem
-		href={`/settings?${networkParam($networkId)}`}
-		ariaLabel={$i18n.navigation.alt.settings}
-		selected={route === 'settings'}
-	>
-		<IconlySettings />
-		{$i18n.navigation.text.settings}
-	</NavigationItem>
+		<NavigationItem
+			href={`/settings?${networkParam($networkId)}`}
+			ariaLabel={$i18n.navigation.alt.settings}
+			selected={route === 'settings'}
+		>
+			<IconlySettings />
+			{$i18n.navigation.text.settings}
+		</NavigationItem>
+	</div>
+
+	<InfoMenu />
 </div>
