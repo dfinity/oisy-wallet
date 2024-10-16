@@ -15,28 +15,98 @@ import { Signer } from '@dfinity/oisy-wallet-signer/signer';
 import { isNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
+/**
+ * Interface for managing the OISY Wallet Signer context in any route or component.
+ */
 export interface SignerContext {
+	/**
+	 * Initializes the signer with the authenticated user - the owner of the wallet.
+	 * @param {Object} params - Initialization parameters.
+	 * @param {Identity} params.owner - The identity of the signer owner.
+	 */
 	init: (params: { owner: Identity }) => void;
+
+	/**
+	 * Resets the signer context and disconnects the signer.
+	 */
 	reset: () => void;
+
+	/**
+	 * A derived store that indicates if all prompts of the signer that either require user interactions or are calls to the IC are idle.
+	 * @type {Readable<boolean>}
+	 */
 	idle: Readable<boolean>;
+
+	/**
+	 * Handles the accounts prompt requests.
+	 */
 	accountsPrompt: {
+		/**
+		 * A derived store containing the accounts prompt payload.
+		 * @type {Readable<PermissionsPromptPayload | undefined | null>}
+		 */
 		payload: Readable<AccountsPromptPayload | undefined | null>;
+
+		/**
+		 * Resets the accounts prompt payload to null once processed.
+		 */
 		reset: () => void;
 	};
+
+	/**
+	 * Handles the permissions prompt requests.
+	 */
 	permissionsPrompt: {
+		/**
+		 * A derived store containing the permissions prompt payload.
+		 * @type {Readable<PermissionsPromptPayload | undefined | null>}
+		 */
 		payload: Readable<PermissionsPromptPayload | undefined | null>;
+
+		/**
+		 * Resets the permissions prompt payload to null once processed.
+		 */
 		reset: () => void;
 	};
+
+	/**
+	 * Handles the consent message prompt requests.
+	 */
 	consentMessagePrompt: {
+		/**
+		 * A derived store containing the consent message prompt payload.
+		 * @type {Readable<ConsentMessagePromptPayload | undefined | null>}
+		 */
 		payload: Readable<ConsentMessagePromptPayload | undefined | null>;
+
+		/**
+		 * Resets the consent message prompt payload to null once processed.
+		 */
 		reset: () => void;
 	};
+
+	/**
+	 * Handles the call canister prompt state.
+	 */
 	callCanisterPrompt: {
+		/**
+		 * A derived store containing the call canister prompt payload.
+		 * @type {Readable<CallCanisterPromptPayload | undefined | null>}
+		 */
 		payload: Readable<CallCanisterPromptPayload | undefined | null>;
+
+		/**
+		 * Resets the call canister prompt payload to null once processed.
+		 */
 		reset: () => void;
 	};
 }
 
+/**
+ * Initializes the SignerContext, creating the signer and registering various stores to handles its prompts.
+ *
+ * @returns {SignerContext} The initialized signer context, providing functions and stores to interact with the signer.
+ */
 export const initSignerContext = (): SignerContext => {
 	let signer: Option<Signer>;
 

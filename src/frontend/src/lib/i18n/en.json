@@ -23,7 +23,8 @@
 		},
 		"alt": {
 			"logo": "$name logo",
-			"go_to_home": "Go to the $oisy_name home page"
+			"go_to_home": "Go to the $oisy_name home page",
+			"back": "Go back to the previous page"
 		},
 		"warning": {
 			"may_take_a_few_seconds": "This may take a few seconds.",
@@ -57,7 +58,7 @@
 			"logout": "Logout",
 			"authenticate": "Open or Create",
 			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Anonymous, self-custodial",
+			"privacy_and_security": "Anonymous, network custody",
 			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
 		},
 		"alt": {
