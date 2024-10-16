@@ -23,7 +23,8 @@
 		},
 		"alt": {
 			"logo": "$name logo",
-			"go_to_home": "Go to the $oisy_name home page"
+			"go_to_home": "Go to the $oisy_name home page",
+			"back": "Go back to the previous page"
 		},
 		"warning": {
 			"may_take_a_few_seconds": "This may take a few seconds.",
