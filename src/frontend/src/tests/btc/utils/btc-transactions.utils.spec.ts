@@ -148,6 +148,7 @@ describe('mapBtcTransaction', () => {
 });
 
 describe('sortBtcTransactions', () => {
+	// TODO: add more test cases
 	it('sorts transactions correctly', () => {
 		const pendingTransaction1 = {
 			...mockBtcTransactionUi,
