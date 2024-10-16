@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { DappDescription } from '$lib/types/dappDescription';
