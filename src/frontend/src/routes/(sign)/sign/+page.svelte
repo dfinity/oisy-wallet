@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SignerAccounts from "$lib/components/signer/SignerAccounts.svelte";
+	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 </script>
