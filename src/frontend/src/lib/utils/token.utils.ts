@@ -204,7 +204,6 @@ function createTokenGroup(nativeToken: TokenUi, twinToken: TokenUi): TokenGroupU
  *          The group replaces the first token of the group in the list.
  */
 export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
-	console.log("PMD groupTokensByTwin START", tokens);
 	const groupedTokens = new Map<string, TokenGroupUi>();
 	const usedSymbols = new Set<string>();
 	const firstTokenIndexMap = new Map<string, number>();
@@ -250,6 +249,5 @@ export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
 		}
 	});
 
-	console.log("PMD groupTokensByTwin END", result);
 	return result;
 }
