@@ -37,7 +37,7 @@
 		<div transition:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-5">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				{#if back}
-					<Back color="current" />
+					<Back color="current" onlyArrow />
 				{/if}
 
 				<div>
