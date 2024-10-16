@@ -2,18 +2,19 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { DApp } from '$lib/types/dapp';
+	import type { DappDescription } from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let dApp: Omit<DApp, 'screenshots'> & Required<Pick<DApp, 'screenshots'>>;
+	export let dAppDescription: Omit<DappDescription, 'screenshots'> &
+		Required<Pick<DappDescription, 'screenshots'>>;
 </script>
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
-	{#if dApp.screenshots.length > 0}
+	{#if dAppDescription.screenshots.length > 0}
 		<div class="absolute">
 			<Img
-				src={dApp.screenshots[0]}
-				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: dApp.name })}
+				src={dAppDescription.screenshots[0]}
+				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: dAppDescription.name })}
 			/>
 		</div>
 	{/if}
@@ -21,13 +22,13 @@
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img
-					src={dApp.logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dApp.name })}
+					src={dAppDescription.logo}
+					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dAppDescription.name })}
 				/>
 			</div>
 			<div class="flex-1">
 				<h6 class="text-sm font-bold">{$i18n.dapps.text.featured}</h6>
-				<h4 class="text-white">{dApp.name}</h4>
+				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
 			<Button styleClass="flex-grow-0" colorStyle="secondary" on:click>

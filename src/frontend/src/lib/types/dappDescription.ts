@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // see https://github.com/dfinity/portal/tree/95c67a5cfe201e4e5cb79f3cf5d18fe16498cd8c?tab=readme-ov-file#object-schema
-const dAppSchema = z.object({
+const dAppDescriptionSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	// TODO replicate logic from https://github.com/dfinity/portal/blob/34a0328ed4792f5a7f3943be73f13f5abaefb4b8/plugins/validate-showcase.js#L179
@@ -31,4 +31,4 @@ const dAppSchema = z.object({
 	featured: z.boolean().optional()
 });
 
-export type DApp = z.infer<typeof dAppSchema>;
+export type DappDescription = z.infer<typeof dAppDescriptionSchema>;
