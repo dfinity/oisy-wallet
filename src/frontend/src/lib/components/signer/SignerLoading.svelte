@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
+	import SignerCenteredContent from '$lib/components/signer/SignerCenteredContent.svelte';
 </script>
 
-<div class="flex min-h-full flex-1 flex-col items-center justify-center gap-3">
+<SignerCenteredContent>
 	<div class="text-[var(--color-primary)]">
 		<Spinner inline />
 	</div>
 	<span><slot /></span>
-</div>
+</SignerCenteredContent>
