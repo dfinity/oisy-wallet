@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionString } from '$lib/types/string';
 	import type { Option } from '$lib/types/utils';
 
 	export let payload: Option<PayloadOrigin>;
@@ -10,13 +11,13 @@
 	let origin: Origin | undefined;
 	$: origin = payload?.origin;
 
-	const mapHost = (origin: Origin | undefined): Option<string> => {
+	const mapHost = (origin: Origin | undefined): OptionString => {
 		if (isNullish(origin)) {
 			return undefined;
 		}
 
 		try {
-			// If set we actually for sure that the $payload.origin is a valid URL but, for the state of the art, we still catch potential errors here too.
+			// If set we are actually sure that the $payload.origin is a valid URL, thanks to the library but, for the state of the art, we still catch potential errors here too.
 			const { host } = new URL(origin);
 			return host;
 		} catch {
@@ -26,7 +27,7 @@
 
 	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
 	// eslint-disable-next-line local-rules/use-option-type-wrapper
-	let host: string | null | undefined;
+	let host: OptionString;
 	$: host = mapHost(origin);
 </script>
 
