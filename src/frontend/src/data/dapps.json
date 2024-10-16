@@ -23,8 +23,7 @@
 		"usesInternetIdentity": true,
 		"display": "Large",
 		"stats": "80,000+ users",
-		"logo": "/images/dapps/open-chat-logo.svg",
-		"featured": true
+		"logo": "/images/dapps/open-chat-logo.svg"
 	},
 	{
 		"id": "decideid",
