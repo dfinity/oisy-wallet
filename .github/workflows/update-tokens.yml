@@ -8,7 +8,7 @@ on:
 
 jobs:
   update-tokens-sns:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
             Modifications have been made to the icons and metadata of the Icrc tokens known to the Sns-Aggregator.
 
   update-tokens-ckerc20:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4

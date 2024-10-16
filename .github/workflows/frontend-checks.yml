@@ -7,7 +7,7 @@ on:
 jobs:
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -18,7 +18,7 @@ jobs:
         run: npm run lint -- --max-warnings 0
 
   check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -30,7 +30,7 @@ jobs:
 
   may-merge:
     needs: ['check', 'lint']
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
         run: echo OK
