@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
+	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
@@ -7,7 +8,11 @@
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 	import { token } from '$lib/stores/token.store';
 	import type { Network, NetworkId } from '$lib/types/network';
-	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdEthereum,
+		isNetworkIdICP,
+		isNetworkIdBitcoin
+	} from '$lib/utils/network.utils';
 
 	export let source: string;
 	export let destination: string;
@@ -49,6 +54,20 @@
 			on:icBack
 			on:icNext
 			on:icClose
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else if isNetworkIdBitcoin($token?.network.id)}
+		<BtcSendTokenWizard
+			{currentStep}
+			{formCancelAction}
+			bind:destination
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icNext
+			on:icClose
+			on:icSendBack
 			on:icQRCodeScan
 			on:icQRCodeBack
 		/>

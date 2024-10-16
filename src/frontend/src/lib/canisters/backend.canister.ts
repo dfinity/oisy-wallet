@@ -44,55 +44,55 @@ export class BackendCanister extends Canister<BackendService> {
 		return new BackendCanister(canisterId, service, certifiedService);
 	}
 
-	listUserTokens = async ({ certified = true }: QueryParams): Promise<UserToken[]> => {
+	listUserTokens = ({ certified = true }: QueryParams): Promise<UserToken[]> => {
 		const { list_user_tokens } = this.caller({ certified });
 
 		return list_user_tokens();
 	};
 
-	listCustomTokens = async ({ certified = true }: QueryParams): Promise<CustomToken[]> => {
+	listCustomTokens = ({ certified = true }: QueryParams): Promise<CustomToken[]> => {
 		const { list_custom_tokens } = this.caller({ certified });
 
 		return list_custom_tokens();
 	};
 
-	setManyCustomTokens = async ({ tokens }: { tokens: CustomToken[] }): Promise<void> => {
+	setManyCustomTokens = ({ tokens }: { tokens: CustomToken[] }): Promise<void> => {
 		const { set_many_custom_tokens } = this.caller({ certified: true });
 
 		return set_many_custom_tokens(tokens);
 	};
 
-	setCustomToken = async ({ token }: { token: CustomToken }): Promise<void> => {
+	setCustomToken = ({ token }: { token: CustomToken }): Promise<void> => {
 		const { set_custom_token } = this.caller({ certified: true });
 
 		return set_custom_token(token);
 	};
 
-	setManyUserTokens = async ({ tokens }: { tokens: UserToken[] }): Promise<void> => {
+	setManyUserTokens = ({ tokens }: { tokens: UserToken[] }): Promise<void> => {
 		const { set_many_user_tokens } = this.caller({ certified: true });
 
 		return set_many_user_tokens(tokens);
 	};
 
-	setUserToken = async ({ token }: { token: UserToken }): Promise<void> => {
+	setUserToken = ({ token }: { token: UserToken }): Promise<void> => {
 		const { set_user_token } = this.caller({ certified: true });
 
 		return set_user_token(token);
 	};
 
-	createUserProfile = async (): Promise<UserProfile> => {
+	createUserProfile = (): Promise<UserProfile> => {
 		const { create_user_profile } = this.caller({ certified: true });
 
 		return create_user_profile();
 	};
 
-	getUserProfile = async ({ certified = true }: QueryParams): Promise<GetUserProfileResponse> => {
+	getUserProfile = ({ certified = true }: QueryParams): Promise<GetUserProfileResponse> => {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
 	};
 
-	addUserCredential = async ({
+	addUserCredential = ({
 		credentialJwt,
 		issuerCanisterId,
 		currentUserVersion,
@@ -119,13 +119,14 @@ export class BackendCanister extends Canister<BackendService> {
 			...rest
 		});
 
-		if ('Err' in response) {
-			throw mapBtcPendingTransactionError(response.Err);
+		if ('Ok' in response) {
+			return true;
 		}
 
-		return 'Ok' in response;
+		throw mapBtcPendingTransactionError(response.Err);
 	};
 
+	// TODO: rename to plural
 	btcGetPendingTransaction = async ({
 		network,
 		address
@@ -137,33 +138,35 @@ export class BackendCanister extends Canister<BackendService> {
 			address
 		});
 
-		if ('Err' in response) {
-			throw mapBtcPendingTransactionError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { transactions }
+			} = response;
+			return transactions;
 		}
 
-		return response.Ok.transactions;
+		throw mapBtcPendingTransactionError(response.Err);
 	};
 
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
-		amountSatoshis,
-		sourceAddress
+		amountSatoshis
 	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
 			network,
 			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis,
-			source_address: sourceAddress
+			amount_satoshis: amountSatoshis
 		});
 
-		if ('Err' in response) {
-			throw mapBtcSelectUserUtxosFeeError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
 
-		return response.Ok;
+		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
 	allowSigning = async (): Promise<void> => {

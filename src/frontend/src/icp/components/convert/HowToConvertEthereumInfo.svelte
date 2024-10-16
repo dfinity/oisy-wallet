@@ -6,9 +6,9 @@
 		ckEthereumNativeTokenBalance,
 		ckEthereumTwinToken
 	} from '$icp-eth/derived/cketh.derived';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -16,6 +16,7 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -136,9 +137,14 @@
 					})}</svelte:fragment
 				>
 
-				<button class="secondary full center mb-4 mt-3" on:click={() => dispatch('icConvert')}>
+				<Button
+					colorStyle="secondary"
+					fullWidth
+					styleClass="mb-4 mt-3"
+					on:click={() => dispatch('icConvert')}
+				>
 					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
-				</button>
+				</Button>
 			</Value>
 		</div>
 	</div>
@@ -149,7 +155,7 @@
 				>{$i18n.core.text.back}</Button
 			>
 		{:else}
-			<Button fullWidth type="button" on:click={modalStore.close}>{$i18n.core.text.done}</Button>
+			<ButtonDone on:click={modalStore.close} />
 		{/if}
 	</div>
 </ContentWithToolbar>

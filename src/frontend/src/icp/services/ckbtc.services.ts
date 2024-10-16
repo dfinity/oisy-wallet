@@ -132,7 +132,7 @@ export const loadAllCkBtcInfo = async ({
 	busy.stop();
 };
 
-const loadBtcAddress = async (params: IcCkToken & { identity: OptionIdentity }) =>
+const loadBtcAddress = (params: IcCkToken & { identity: OptionIdentity }): Promise<void> =>
 	loadData({
 		...params,
 		store: btcAddressStore,

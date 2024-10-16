@@ -32,12 +32,13 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
+		// eslint-disable-next-line require-await
 		getAgent: async () => mockedAgent
 	};
 });
 
 describe('backend.canister', () => {
-	const createBackendCanister = async ({
+	const createBackendCanister = ({
 		serviceOverride
 	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<BackendCanister> =>
 		BackendCanister.create({
@@ -98,14 +99,12 @@ describe('backend.canister', () => {
 	const btcSelectUserUtxosFeeParams = {
 		network: btcAddPendingTransactionParams.network,
 		minConfirmations: [100],
-		amountSatoshis: 100n,
-		sourceAddress: mockBtcAddress
+		amountSatoshis: 100n
 	} as BtcSelectUserUtxosFeeParams;
 	const btcSelectUserUtxosFeeEndpointParams = {
 		network: btcSelectUserUtxosFeeParams.network,
 		min_confirmations: btcSelectUserUtxosFeeParams.minConfirmations,
-		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis,
-		source_address: btcSelectUserUtxosFeeParams.sourceAddress
+		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis
 	};
 
 	const mockedUserProfile = {
@@ -163,6 +162,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if list_user_tokens throws', async () => {
 		service.list_user_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -189,6 +189,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if list_custom_tokens throws', async () => {
 		service.list_custom_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -214,6 +215,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if set_many_custom_tokens throws', async () => {
 		service.set_many_custom_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -239,6 +241,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if set_custom_token throws', async () => {
 		service.set_custom_token.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -264,6 +267,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if set_many_user_tokens throws', async () => {
 		service.set_many_user_tokens.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -289,6 +293,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if set_user_token throws', async () => {
 		service.set_user_token.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -315,6 +320,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if create_user_profile throws', async () => {
 		service.create_user_profile.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -355,6 +361,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if get_user_profile throws', async () => {
 		service.get_user_profile.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -398,6 +405,7 @@ describe('backend.canister', () => {
 
 	it('should throw an error if add_user_credential throws', async () => {
 		service.add_user_credential.mockImplementation(async () => {
+			await Promise.resolve();
 			throw mockResponseError;
 		});
 
@@ -444,6 +452,7 @@ describe('backend.canister', () => {
 
 		it('should throw an error if btc_add_pending_transaction throws', async () => {
 			service.btc_add_pending_transaction.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 
@@ -454,6 +463,19 @@ describe('backend.canister', () => {
 			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_add_pending_transaction returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_add_pending_transaction.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			await expect(res).rejects.toThrow();
 		});
 	});
 
@@ -500,6 +522,7 @@ describe('backend.canister', () => {
 
 		it('should throw an error if btc_get_pending_transactions throws', async () => {
 			service.btc_get_pending_transactions.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 
@@ -510,6 +533,19 @@ describe('backend.canister', () => {
 			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_get_pending_transactions returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_get_pending_transactions.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcGetPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+
+			await expect(res).rejects.toThrow();
 		});
 	});
 
@@ -552,6 +588,7 @@ describe('backend.canister', () => {
 
 		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
 			service.btc_select_user_utxos_fee.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 
@@ -562,6 +599,19 @@ describe('backend.canister', () => {
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_select_user_utxos_fee returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_select_user_utxos_fee.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow();
 		});
 	});
 
@@ -583,6 +633,7 @@ describe('backend.canister', () => {
 
 		it('should throw an error if allowSigning throws', async () => {
 			service.allow_signing.mockImplementation(async () => {
+				await Promise.resolve();
 				throw mockResponseError;
 			});
 

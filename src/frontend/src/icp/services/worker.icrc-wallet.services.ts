@@ -22,7 +22,7 @@ export const initIcrcWalletWorker = async ({
 	const WalletWorker = await import('$icp/workers/icrc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	worker.onmessage = async ({
+	worker.onmessage = ({
 		data
 	}: MessageEvent<
 		PostMessage<

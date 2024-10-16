@@ -30,9 +30,9 @@ export const tokens: Readable<Token[]> = derived(
 export const tokensToPin: Readable<TokenToPin[]> = derived(
 	[icrcChainFusionDefaultTokens],
 	([$icrcChainFusionDefaultTokens]) => [
-		ICP_TOKEN,
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
+		ICP_TOKEN,
 		...$icrcChainFusionDefaultTokens
 	]
 );

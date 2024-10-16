@@ -61,6 +61,7 @@ type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
   api : opt Guards;
   ecdsa_key_name : text;
+  cfs_canister_id : opt principal;
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_raw : opt blob;
@@ -99,6 +100,7 @@ type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
   api : opt Guards;
   ecdsa_key_name : text;
+  cfs_canister_id : opt principal;
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
@@ -165,7 +167,6 @@ type SelectedUtxosFeeError = variant {
 type SelectedUtxosFeeRequest = record {
   network : BitcoinNetwork;
   amount_satoshis : nat64;
-  source_address : text;
   min_confirmations : opt nat32;
 };
 type SelectedUtxosFeeResponse = record {

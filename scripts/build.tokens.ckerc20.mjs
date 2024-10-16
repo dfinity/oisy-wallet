@@ -33,7 +33,7 @@ const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 		canisterId
 	});
 
-	return getOrchestratorInfo({ certified: true });
+	return await getOrchestratorInfo({ certified: true });
 };
 
 const buildOrchestratorInfo = async (orchestratorId) => {

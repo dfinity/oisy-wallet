@@ -2,4 +2,6 @@
 	<slot />
 </div>
 
-<slot name="toolbar" />
+<div class="flex w-full">
+	<slot name="toolbar" />
+</div>

@@ -6,6 +6,7 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
@@ -59,7 +60,7 @@ abstract class Homepage {
 	}
 
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
-		return this.#page.isVisible(selector);
+		return await this.#page.isVisible(selector);
 	}
 
 	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
@@ -93,7 +94,7 @@ abstract class Homepage {
 	private async getCanvasAsDataURL({
 		selector
 	}: SelectorOperationParams): Promise<string | undefined> {
-		return this.#page.evaluate<string | undefined, { selector: string }>(
+		return await this.#page.evaluate<string | undefined, { selector: string }>(
 			({ selector }) => {
 				const canvas = document.querySelector<HTMLCanvasElement>(selector);
 				return canvas?.toDataURL();
@@ -137,6 +138,9 @@ abstract class Homepage {
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
@@ -151,7 +155,7 @@ abstract class Homepage {
 	}
 
 	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
-		return this.#page.getByTestId(testId);
+		return await this.#page.getByTestId(testId);
 	}
 
 	async waitForTimeout(timeout: number): Promise<void> {
@@ -177,7 +181,9 @@ abstract class Homepage {
 		});
 
 		if (nonNullish(selectorsToMock)) {
-			await Promise.all(selectorsToMock.map(async (selector) => this.mockSelector({ selector })));
+			await Promise.all(
+				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
+			);
 		}
 
 		await expect(modal).toHaveScreenshot();

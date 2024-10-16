@@ -31,6 +31,8 @@
 	},
 	"navigation": {
 		"text": {
+			"tokens": "Assets",
+			"settings": "Settings",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -38,6 +40,8 @@
 			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
+			"tokens": "Go to the assets view",
+			"settings": "Open your settings",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -52,8 +56,8 @@
 			"logout": "Logout",
 			"authenticate": "Open or Create",
 			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Top-notch privacy and security",
-			"powered_by_chain_fusion": "Powered by ICP's Chain Fusion technology"
+			"privacy_and_security": "Anonymous, self-custodial",
+			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
@@ -66,7 +70,7 @@
 		"error": {
 			"no_internet_identity": "No internet identity.",
 			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
-			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in OISY: $error",
+			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in $oisy_short: $error",
 			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
 			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
 			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
@@ -77,8 +81,7 @@
 	},
 	"footer": {
 		"text": {
-			"copyright": "© 2024",
-			"developed_with": "Developed with ❤\uFE0F at ",
+			"developed_with": "© 2024 Developed with ❤\uFE0F at ",
 			"dfinity": "DFINITY"
 		},
 		"alt": {
@@ -148,6 +151,8 @@
 	},
 	"hero": {
 		"text": {
+			"available_balance": "Available balance",
+			"use_with_caution": "This is an alpha version. Use with caution.",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
@@ -171,7 +176,7 @@
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
-			"github_release": "OISY release notes on GitHub"
+			"github_release": "$oisy_short release notes on GitHub"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
@@ -179,6 +184,7 @@
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",
+		"test_networks": "Test networks",
 		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
 		"chain_fusion": "Chain Fusion (all networks)"
@@ -279,7 +285,9 @@
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
-			"cketh_certified": "Please wait until the ckETH parameters have been certified."
+			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
+			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
+			"no_available_utxos": "You won't have available utxos to perform this transaction."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -302,7 +310,8 @@
 			"address_unknown": "Address is unknown.",
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
-			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing."
+			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
+			"utxos_fee_missing": "UTXOs fee is missing."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -315,7 +324,9 @@
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
-			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network."
+			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
+			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
+			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
 		}
 	},
 	"convert": {
@@ -351,9 +362,11 @@
 	},
 	"tokens": {
 		"text": {
+			"title": "Tokens",
 			"contract_address": "Contract address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
+			"hide_zeros": "Hide zeros",
 			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
@@ -400,7 +413,7 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
-				"your_tokens": "Manage your tokens",
+				"manage_list": "Manage list",
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
@@ -555,7 +568,10 @@
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"pending": "Pending...",
-			"status": "Status"
+			"unconfirmed": "Unconfirmed",
+			"confirmed": "Confirmed",
+			"status": "Status",
+			"confirmations": "Confirmations"
 		},
 		"status": {
 			"included": "Included",
@@ -609,7 +625,7 @@
 		},
 		"what": {
 			"text": {
-				"label": "What I can do with my tokens",
+				"label": "$oisy_short's features",
 				"title": "Utility",
 				"hold_crypto": "<strong>Hold crypto across networks</strong><br>Manage and transact with native Ethereum, Bitcoin <i>(coming soon)</i>, and Internet Computer assets. Powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/chainfusion\">Chain Fusion</a>.",
 				"use_eth_dapps": "<strong>Use with Ethereum dapps</strong><br>$oisy_name is fully compatible with Ethereum Defi like <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://uniswap.org/\">Uniswap</a> thanks to the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://walletconnect.com/\">WalletConnect</a> framework.",
@@ -618,13 +634,13 @@
 		},
 		"how": {
 			"text": {
-				"label": "How $oisy_name works",
+				"label": "What is $oisy_short?",
 				"title": "Magic",
 				"self_custody": "<strong>Self-custody</strong><br>The key controlling your multi-chain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/t-ecdsa\">threshold ECDSA</a>.",
 				"fully_on_chain": "<strong>Fully on-chain</strong><br>Not only the keys but the entire wallet application is <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">stored on chain</a> and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof.",
 				"cross_device": "<strong>Cross-device</strong><br>Using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a> means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
 				"verifiable_credentials": "<strong>Compatible with verifiable credentials</strong><br>$oisy_name is designed to integrate with Internet Computer’s <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials platform</a>. Users can access additional functionality, like airdrops, if they acquire credentials of a certain type.",
-				"open_source": "<strong>Open source</strong><br>OISY is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
+				"open_source": "<strong>Open source</strong><br>$oisy_short is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
 			}
 		}
 	},

@@ -78,7 +78,7 @@ export interface EthPersonalSignResponse {
 	signature: string;
 }
 export interface EthSignPrehashRequest {
-	message: string;
+	hash: string;
 }
 export interface EthSignPrehashResponse {
 	signature: string;
@@ -100,6 +100,11 @@ export interface GetAddressRequest {
 }
 export interface GetAddressResponse {
 	address: string;
+}
+export interface GetBalanceRequest {
+	network: BitcoinNetwork;
+	address_type: BitcoinAddressType;
+	min_confirmations: [] | [number];
 }
 export interface GetBalanceResponse {
 	balance: bigint;
@@ -245,7 +250,7 @@ export type WithdrawFromError =
 	| { InsufficientFunds: { balance: bigint } };
 export interface _SERVICE {
 	btc_caller_address: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result>;
-	btc_caller_balance: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result_1>;
+	btc_caller_balance: ActorMethod<[GetBalanceRequest, [] | [PaymentType]], Result_1>;
 	btc_caller_send: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_2>;
 	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;

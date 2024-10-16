@@ -27,6 +27,8 @@ interface I18nCore {
 
 interface I18nNavigation {
 	text: {
+		tokens: string;
+		settings: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -34,6 +36,8 @@ interface I18nNavigation {
 		submit_ticket: string;
 	};
 	alt: {
+		tokens: string;
+		settings: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
@@ -68,7 +72,7 @@ interface I18nAuth {
 }
 
 interface I18nFooter {
-	text: { copyright: string; developed_with: string; dfinity: string };
+	text: { developed_with: string; dfinity: string };
 	alt: { dfinity: string };
 }
 
@@ -127,7 +131,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { learn_more_about_erc20_icp: string };
+	text: { available_balance: string; use_with_caution: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -154,6 +158,7 @@ interface I18nSettings {
 
 interface I18nNetworks {
 	title: string;
+	test_networks: string;
 	show_testnets: string;
 	more: string;
 	chain_fusion: string;
@@ -244,7 +249,12 @@ interface I18nSend {
 		enter_wallet_address: string;
 		select_network: string;
 	};
-	info: { ckbtc_certified: string; cketh_certified: string };
+	info: {
+		ckbtc_certified: string;
+		cketh_certified: string;
+		pending_bitcoin_transaction: string;
+		no_available_utxos: string;
+	};
 	assertion: {
 		invalid_destination_address: string;
 		insufficient_funds: string;
@@ -267,6 +277,7 @@ interface I18nSend {
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
 		cketh_max_transaction_fee_missing: string;
+		utxos_fee_missing: string;
 	};
 	error: {
 		unexpected: string;
@@ -280,6 +291,8 @@ interface I18nSend {
 		invalid_destination: string;
 		incompatible_token: string;
 		no_btc_network_id: string;
+		no_pending_bitcoin_transaction: string;
+		unexpected_utxos_fee: string;
 	};
 }
 
@@ -311,9 +324,11 @@ interface I18nBuy {
 
 interface I18nTokens {
 	text: {
+		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
+		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;
@@ -360,7 +375,7 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
-			your_tokens: string;
+			manage_list: string;
 			do_not_see_import: string;
 			clear_filter: string;
 			manage_for_network: string;
@@ -493,7 +508,10 @@ interface I18nTransaction {
 		block: string;
 		interacted_with: string;
 		pending: string;
+		unconfirmed: string;
+		confirmed: string;
 		status: string;
+		confirmations: string;
 	};
 	status: { included: string; safe: string; finalised: string };
 	label: {

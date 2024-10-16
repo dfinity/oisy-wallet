@@ -5,7 +5,7 @@
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -144,5 +144,5 @@
 		{$i18n.receive.ethereum.text.ethereum}
 	</ReceiveAddressWithLogo>
 
-	<Button fullWidth on:click={modalStore.close} slot="toolbar">{$i18n.core.text.done}</Button>
+	<ButtonDone on:click={modalStore.close} slot="toolbar" />
 </ContentWithToolbar>
