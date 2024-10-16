@@ -19,6 +19,10 @@ export interface SignerContext {
 	init: (params: { owner: Identity }) => void;
 	reset: () => void;
 	idle: Readable<boolean>;
+	accountsPrompt: {
+		payload: Readable<AccountsPromptPayload | undefined | null>;
+		reset: () => void;
+	};
 	permissionsPrompt: {
 		payload: Readable<PermissionsPromptPayload | undefined | null>;
 		reset: () => void;
@@ -33,12 +37,10 @@ export interface SignerContext {
 	};
 }
 
-export const initSignerContext = ({
-	accountsPrompt
-}: {
-	accountsPrompt: (payload: AccountsPromptPayload) => void;
-}): SignerContext => {
+export const initSignerContext = (): SignerContext => {
 	let signer: Option<Signer>;
+
+	const accountsPromptPayloadStore = writable<AccountsPromptPayload | undefined | null>(undefined);
 
 	const permissionsPromptPayloadStore = writable<PermissionsPromptPayload | undefined | null>(
 		undefined
@@ -50,6 +52,11 @@ export const initSignerContext = ({
 
 	const callCanisterPromptPayloadStore = writable<CallCanisterPromptPayload | undefined | null>(
 		undefined
+	);
+
+	const accountsPromptPayload = derived(
+		[accountsPromptPayloadStore],
+		([$accountsPromptPayloadStore]) => $accountsPromptPayloadStore
 	);
 
 	const permissionsPromptPayload = derived(
@@ -67,6 +74,7 @@ export const initSignerContext = ({
 		([$callCanisterPromptPayloadStore]) => $callCanisterPromptPayloadStore
 	);
 
+	// We omit the accountsPrompt for the idle status because this prompt is handled without user interactions.
 	const idle = derived(
 		[permissionsPromptPayload, consentMessagePromptPayload, callCanisterPromptPayload],
 		([$permissionsPromptPayload, $consentMessagePromptPayload, $callCanisterPromptPayloadStore]) =>
@@ -88,7 +96,7 @@ export const initSignerContext = ({
 
 		signer.register({
 			method: ICRC27_ACCOUNTS,
-			prompt: accountsPrompt
+			prompt: (payload: AccountsPromptPayload) => accountsPromptPayloadStore.set(payload)
 		});
 
 		signer.register({
@@ -106,11 +114,13 @@ export const initSignerContext = ({
 		});
 	};
 
+	const resetAccountsPromptPayload = () => accountsPromptPayloadStore.set(null);
 	const resetPermissionsPromptPayload = () => permissionsPromptPayloadStore.set(null);
 	const resetConsentMessagePromptPayload = () => consentMessagePromptPayloadStore.set(null);
 	const resetCallCanisterPromptPayload = () => callCanisterPromptPayloadStore.set(null);
 
 	const reset = () => {
+		resetAccountsPromptPayload();
 		resetPermissionsPromptPayload();
 		resetConsentMessagePromptPayload();
 		resetCallCanisterPromptPayload();
@@ -123,6 +133,10 @@ export const initSignerContext = ({
 		init,
 		reset,
 		idle,
+		accountsPrompt: {
+			payload: accountsPromptPayload,
+			reset: resetAccountsPromptPayload
+		},
 		permissionsPrompt: {
 			payload: permissionsPromptPayload,
 			reset: resetPermissionsPromptPayload
