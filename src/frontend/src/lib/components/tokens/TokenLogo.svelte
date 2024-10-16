@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let token: Token;
+	export let token: Pick<Token, 'icon', 'name', 'network'>;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let showNetworkIcon = true;
 	export let networkIconBlackAndWhite = false;

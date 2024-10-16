@@ -7,14 +7,15 @@
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
+	import TokenCardGroup from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TokenUi } from '$lib/types/token';
+	import type { TokenUiOrGroupUi, TokenUi, TokenGroupUi } from '$lib/types/token';
+	import { isTokenGroupUi } from '$lib/utils/token.utils';
 
-	let tokens: TokenUi[] | undefined;
-
+	let tokens: TokenUiOrGroupUi[] | undefined;
 	let animating = false;
 
 	const handleAnimationStart = () => {
@@ -48,17 +49,23 @@
 					on:animationend={handleAnimationEnd}
 					class:pointer-events-none={animating}
 				>
-					<Listener {token}>
-						<TokenCardWithUrl {token}>
-							<TokenCardContent {token} />
-						</TokenCardWithUrl>
-					</Listener>
+					{#if isTokenGroupUi(token)}
+						<TokenCardGroup tokenGroup={token} />
+					{:else}
+						<Listener {token}>
+							<TokenCardWithUrl {token}>
+								<TokenCardContent {token} />
+							</TokenCardWithUrl>
+						</Listener>
+					{/if}
 				</div>
 			{/each}
 		</div>
 
 		{#if tokens?.length === 0}
-			<p class="text-secondary mt-4 opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
+			<p class="text-secondary mt-4 opacity-50">
+				{$i18n.tokens.text.all_tokens_with_zero_hidden}
+			</p>
 		{/if}
 
 		{#if $modalManageTokens}
