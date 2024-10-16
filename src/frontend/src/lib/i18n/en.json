@@ -648,7 +648,7 @@
 				"title": "Review permissions",
 				"requested_permissions": "Requested permissions",
 				"your_wallet_address": "Your wallet address",
-				"icrc27_accounts": "View your Oisy wallet address",
+				"icrc27_accounts": "View your $oisy_name address",
 				"icrc49_call_canister": "Request approval for transactions"
 			},
 			"error": {

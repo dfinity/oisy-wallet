@@ -17,6 +17,7 @@
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
@@ -72,7 +73,7 @@
 	> = {
 		icrc27_accounts: {
 			icon: IconWallet,
-			label: $i18n.signer.permissions.text.icrc27_accounts
+			label: replaceOisyPlaceholders($i18n.signer.permissions.text.icrc27_accounts)
 		},
 		icrc49_call_canister: {
 			icon: IconShield,
