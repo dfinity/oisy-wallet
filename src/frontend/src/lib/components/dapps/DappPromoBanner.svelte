@@ -31,9 +31,10 @@
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
-			<Button styleClass="flex-grow-0" colorStyle="secondary" on:click>
-				{$i18n.core.text.view}
-			</Button>
+			<!--	TODO add button as soon as modalOpen feature is implemented		-->
+			<!--			<Button styleClass="flex-grow-0" colorStyle="secondary" on:click>-->
+			<!--				{$i18n.core.text.view}-->
+			<!--			</Button>-->
 		</div>
 	</div>
 </article>
