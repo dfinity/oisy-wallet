@@ -34,7 +34,6 @@ export default {
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
 			'bright-lilac': '#e18dff',
-			'mountain-meadow': '#30af91',
 			'green-crayola': '#16b364',
 			'british-racing-green': '#084c2e',
 			'dartmouth-green': '#087443',
