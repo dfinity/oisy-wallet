@@ -34,7 +34,6 @@ export default {
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
 			'bright-lilac': '#e18dff',
-			'mountain-meadow': '#30af91',
 			'green-crayola': '#16b364',
 			'british-racing-green': '#084c2e',
 			'dartmouth-green': '#087443',
@@ -66,6 +65,7 @@ export default {
 				sm: '576px'
 			},
 			screens: {
+				'1.5md': '896px',
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
 			}

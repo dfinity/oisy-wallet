@@ -82,6 +82,7 @@ export const idlFactory = ({ IDL }) => {
 			ledger: IDL.Principal
 		}),
 		LedgerUnreachable: CallerPaysIcrc2Tokens,
+		InvalidPatron: IDL.Null,
 		LedgerTransferFromError: IDL.Record({
 			error: TransferFromError,
 			ledger: IDL.Principal
@@ -248,24 +249,12 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
-	const SignRequest = IDL.Record({
-		to: IDL.Text,
-		gas: IDL.Nat,
-		value: IDL.Nat,
-		max_priority_fee_per_gas: IDL.Nat,
-		data: IDL.Opt(IDL.Text),
-		max_fee_per_gas: IDL.Nat,
-		chain_id: IDL.Nat,
-		nonce: IDL.Nat
-	});
 	return IDL.Service({
 		btc_caller_address: IDL.Func([GetAddressRequest, IDL.Opt(PaymentType)], [Result], []),
 		btc_caller_balance: IDL.Func([GetBalanceRequest, IDL.Opt(PaymentType)], [Result_1], []),
 		btc_caller_send: IDL.Func([SendBtcRequest, IDL.Opt(PaymentType)], [Result_2], []),
-		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config]),
 		eth_address: IDL.Func([EthAddressRequest, IDL.Opt(PaymentType)], [Result_3], []),
-		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		eth_address_of_caller: IDL.Func([IDL.Opt(PaymentType)], [Result_3], []),
 		eth_personal_sign: IDL.Func([EthPersonalSignRequest, IDL.Opt(PaymentType)], [Result_4], []),
 		eth_sign_prehash: IDL.Func([EthSignPrehashRequest, IDL.Opt(PaymentType)], [Result_5], []),
@@ -285,10 +274,7 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		http_request: IDL.Func([HttpRequest], [HttpResponse]),
-		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
-		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
-		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
+		http_request: IDL.Func([HttpRequest], [HttpResponse])
 	});
 };
 // @ts-ignore

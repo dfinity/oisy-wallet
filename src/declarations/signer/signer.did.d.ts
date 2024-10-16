@@ -141,6 +141,7 @@ export type PaymentError =
 			};
 	  }
 	| { LedgerUnreachable: CallerPaysIcrc2Tokens }
+	| { InvalidPatron: null }
 	| {
 			LedgerTransferFromError: {
 				error: TransferFromError;
@@ -193,16 +194,6 @@ export interface SendBtcRequest {
 export interface SendBtcResponse {
 	txid: string;
 }
-export interface SignRequest {
-	to: string;
-	gas: bigint;
-	value: bigint;
-	max_priority_fee_per_gas: bigint;
-	data: [] | [string];
-	max_fee_per_gas: bigint;
-	chain_id: bigint;
-	nonce: bigint;
-}
 export interface SignWithEcdsaArgument {
 	key_id: EcdsaKeyId;
 	derivation_path: Array<Uint8Array | number[]>;
@@ -252,10 +243,8 @@ export interface _SERVICE {
 	btc_caller_address: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result>;
 	btc_caller_balance: ActorMethod<[GetBalanceRequest, [] | [PaymentType]], Result_1>;
 	btc_caller_send: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_2>;
-	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
 	eth_address: ActorMethod<[EthAddressRequest, [] | [PaymentType]], Result_3>;
-	eth_address_of: ActorMethod<[Principal], string>;
 	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result_3>;
 	eth_personal_sign: ActorMethod<[EthPersonalSignRequest, [] | [PaymentType]], Result_4>;
 	eth_sign_prehash: ActorMethod<[EthSignPrehashRequest, [] | [PaymentType]], Result_5>;
@@ -267,9 +256,6 @@ export interface _SERVICE {
 	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_7>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
-	personal_sign: ActorMethod<[string], string>;
-	sign_prehash: ActorMethod<[string], string>;
-	sign_transaction: ActorMethod<[SignRequest], string>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

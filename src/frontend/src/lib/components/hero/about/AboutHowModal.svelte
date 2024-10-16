@@ -20,9 +20,9 @@
 	</svelte:fragment>
 
 	<div class="stretch pt-4">
-		<ImgBanner src={CoverHow} alt={$i18n.about.how.text.title} />
+		<ImgBanner size="small" src={CoverHow} alt={$i18n.about.how.text.title} />
 
-		<p class="mt-6">
+		<p class="mt-12">
 			<IconKey />
 			<Html text={replaceOisyPlaceholders($i18n.about.how.text.self_custody)} />
 		</p>
@@ -48,5 +48,5 @@
 		</p>
 	</div>
 
-	<ButtonCloseModal />
+	<ButtonCloseModal colorStyle="primary" />
 </Modal>

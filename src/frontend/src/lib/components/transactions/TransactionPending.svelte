@@ -1,4 +1,6 @@
 <script lang="ts">
+	// TODO: delete this component and use TransactionStatus instead
+
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let pending = false;

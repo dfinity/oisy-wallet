@@ -102,6 +102,7 @@ type PaymentError = variant {
     ledger : principal;
   };
   LedgerUnreachable : CallerPaysIcrc2Tokens;
+  InvalidPatron;
   LedgerTransferFromError : record {
     error : TransferFromError;
     ledger : principal;
@@ -161,16 +162,6 @@ type SendBtcRequest = record {
   outputs : vec BtcTxOutput;
 };
 type SendBtcResponse = record { txid : text };
-type SignRequest = record {
-  to : text;
-  gas : nat;
-  value : nat;
-  max_priority_fee_per_gas : nat;
-  data : opt text;
-  max_fee_per_gas : nat;
-  chain_id : nat;
-  nonce : nat;
-};
 type SignWithEcdsaArgument = record {
   key_id : EcdsaKeyId;
   derivation_path : vec blob;
@@ -210,10 +201,8 @@ service : (Arg) -> {
   btc_caller_address : (GetAddressRequest, opt PaymentType) -> (Result);
   btc_caller_balance : (GetBalanceRequest, opt PaymentType) -> (Result_1);
   btc_caller_send : (SendBtcRequest, opt PaymentType) -> (Result_2);
-  caller_eth_address : () -> (text);
   config : () -> (Config) query;
   eth_address : (EthAddressRequest, opt PaymentType) -> (Result_3);
-  eth_address_of : (principal) -> (text);
   eth_address_of_caller : (opt PaymentType) -> (Result_3);
   eth_personal_sign : (EthPersonalSignRequest, opt PaymentType) -> (Result_4);
   eth_sign_prehash : (EthSignPrehashRequest, opt PaymentType) -> (Result_5);
@@ -229,7 +218,4 @@ service : (Arg) -> {
     );
   get_canister_status : () -> (CanisterStatusResultV2);
   http_request : (HttpRequest) -> (HttpResponse) query;
-  personal_sign : (text) -> (text);
-  sign_prehash : (text) -> (text);
-  sign_transaction : (SignRequest) -> (text);
 }

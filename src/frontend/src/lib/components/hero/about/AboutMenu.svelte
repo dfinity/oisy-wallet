@@ -13,8 +13,8 @@
 </script>
 
 <div class="hidden gap-5 md:flex">
-	<AboutWhat />
 	<AboutHow />
+	<AboutWhat />
 </div>
 
 <div class="flex md:hidden">
