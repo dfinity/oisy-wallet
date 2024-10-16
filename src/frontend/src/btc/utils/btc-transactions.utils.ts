@@ -83,3 +83,38 @@ export const mapBtcTransaction = ({
 		confirmations
 	};
 };
+
+export const sortBtcTransactions = ({
+	transactionA: { status: statusA, timestamp: timestampA },
+	transactionB: { status: statusB, timestamp: timestampB }
+}: {
+	transactionA: BtcTransactionUi;
+	transactionB: BtcTransactionUi;
+}): number => {
+	const isPendingA = statusA === 'pending';
+	const isPendingB = statusB === 'pending';
+	const isUnconfirmedA = statusA === 'unconfirmed';
+	const isUnconfirmedB = statusB === 'unconfirmed';
+
+	if (isPendingA && !isPendingB) {
+		return -1;
+	}
+
+	if (isPendingB && !isPendingA) {
+		return 1;
+	}
+
+	if (isUnconfirmedA && !isUnconfirmedB) {
+		return -1;
+	}
+
+	if (isUnconfirmedB && !isUnconfirmedA) {
+		return 1;
+	}
+
+	if (nonNullish(timestampA) && nonNullish(timestampB)) {
+		return Number(timestampB - timestampA);
+	}
+
+	return nonNullish(timestampA) ? -1 : 1;
+};
