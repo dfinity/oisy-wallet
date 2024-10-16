@@ -1,3 +1,3 @@
-<div class="mb-2 flex gap-3">
+<div class="mb-2 flex w-full gap-3">
 	<slot />
 </div>

@@ -11,6 +11,7 @@ export interface BtcTransactionUi extends TransactionUiCommon {
 	type: TransactionType;
 	status: BtcTransactionStatus;
 	value?: bigint;
+	confirmations?: number;
 
 	/* TODO: add one more field "confirmations", a number that represents the acceptance of a new block by the blockchain network.
 	 1. Use https://blockchain.info/latestblock to get info about the latest block height.

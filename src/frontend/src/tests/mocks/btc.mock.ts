@@ -11,7 +11,8 @@ export const mockBtcTransactionUi: BtcTransactionUi = {
 	timestamp: 1727175987n,
 	to: 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7',
 	type: 'receive',
-	value: 126527n
+	value: 126527n,
+	confirmations: 1
 };
 
 export const mockBtcTransaction: BitcoinTransaction = {
