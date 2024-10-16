@@ -1,9 +1,9 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic';
+import type { IcCkInterface, IcCkToken, IcFee, IcInterface, IcToken } from '$icp/types/ic';
 import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import type { Token, TokenCategory, TokenMetadata } from '$lib/types/token';
 import {
 	IcrcMetadataResponseEntries,
 	type IcrcTokenMetadataResponse,
@@ -150,3 +150,7 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 			}
 		: {})
 });
+
+export function isIcCkToken(token: Token): token is IcCkToken {
+	return 'minterCanisterId' in token && token.network?.id === ICP_NETWORK.id;
+}
