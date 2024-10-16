@@ -17,13 +17,13 @@
 	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-6 sm:flex-1 sm:flex-grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0"
 	class:sm:sticky={$authNotSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}
-	class:md:h-md:grid-cols-4={$authNotSignedIn}
+	class:md:h-md:grid-cols-2={$authNotSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
 	class:sm:fixed={$authSignedIn}
 	class:sm:inset-x-0={$authSignedIn}
 	class:sm:bottom-0={$authSignedIn}
 >
-	<div class="col-span-2 flex w-full flex-col items-center justify-between sm:flex-row sm:gap-4">
+	<div class="flex w-full flex-col items-center justify-between sm:flex-row sm:gap-4">
 		<div class="flex flex-row items-center gap-4">
 			<ExternalLinkIcon
 				href={OISY_REPO_URL}
