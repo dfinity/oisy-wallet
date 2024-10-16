@@ -648,8 +648,8 @@
 				"title": "Review permissions",
 				"requested_permissions": "Requested permissions",
 				"your_wallet_address": "Your wallet address",
-				"icrc27_accounts": "Learn your Oisy wallet address",
-				"icrc49_call_canister": "Initiate transactions to approve in Oisy"
+				"icrc27_accounts": "View your Oisy wallet address",
+				"icrc49_call_canister": "Request approval for transactions"
 			},
 			"error": {
 				"no_confirm_callback": "No callback to confirm the permissions, which is unexpected. Close the wallet and try again."
