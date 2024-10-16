@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconEllipsisHorizontal from '$lib/components/icons/IconEllipsisHorizontal.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { tokenToggleable } from '$lib/derived/token.derived';
@@ -9,6 +8,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import IconMoreVertical from '$lib/components/icons/IconMoreVertical.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -40,7 +40,7 @@
 	aria-label={$i18n.tokens.alt.context_menu}
 	disabled={$erc20UserTokensNotInitialized}
 >
-	<IconEllipsisHorizontal />
+	<IconMoreVertical />
 </button>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">

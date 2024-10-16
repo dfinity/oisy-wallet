@@ -41,7 +41,7 @@
 			class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-start justify-between"
 		>
 			{#if back}
-				<Back color="current" />
+				<Back color="current" onlyArrow />
 			{/if}
 
 			<div>
