@@ -73,7 +73,7 @@ interface I18nAuth {
 }
 
 interface I18nFooter {
-	text: { developed_with: string; dfinity: string };
+	text: { developed_with: string };
 	alt: { dfinity: string };
 }
 
@@ -159,15 +159,19 @@ interface I18nSettings {
 
 interface I18nDApps {
 	text: {
+		all_dapps: string;
 		featured: string;
 	};
 	alt: {
+		logo: string;
 		open_dapp: string;
+		website: string;
 	};
 }
 
 interface I18nNetworks {
 	title: string;
+	test_networks: string;
 	show_testnets: string;
 	more: string;
 	chain_fusion: string;
@@ -333,6 +337,7 @@ interface I18nBuy {
 
 interface I18nTokens {
 	text: {
+		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
@@ -516,7 +521,10 @@ interface I18nTransaction {
 		block: string;
 		interacted_with: string;
 		pending: string;
+		unconfirmed: string;
+		confirmed: string;
 		status: string;
+		confirmations: string;
 	};
 	status: { included: string; safe: string; finalised: string };
 	label: {
