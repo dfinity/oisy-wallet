@@ -127,10 +127,10 @@
 		</div>
 
 		<ButtonGroup>
-			<button type="button" class="error block flex-1" on:click={onReject}
+			<button type="button" class="error flex-1" on:click={onReject}
 				>{$i18n.core.text.reject}</button
 			>
-			<button type="submit" class="success block flex-1">{$i18n.core.text.approve}</button>
+			<button type="submit" class="success flex-1">{$i18n.core.text.approve}</button>
 		</ButtonGroup>
 	</form>
 {/if}
