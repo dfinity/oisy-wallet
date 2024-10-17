@@ -88,6 +88,7 @@
 			"open_dapp": "Open the dapp $dAppname"
 		},
 		"alt": {
+			"learn_more": "Learn more about $dAppname",
 			"logo": "Logo of $dAppname",
 			"open_dapp": "Open the app $dAppname",
 			"open_twitter": "Open the $dAppname X/Twitter feed",
