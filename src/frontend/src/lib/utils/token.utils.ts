@@ -183,7 +183,7 @@ const createTokenGroup = ({
 		name: nativeToken.network.name,
 		symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
 		decimals: nativeToken.decimals,
-		icon: nativeToken.icon ?? '/images/default_token_icon.svg'
+		icon: nativeToken.icon
 	},
 	nativeNetwork: nativeToken.network,
 	tokens: [nativeToken, twinToken]
