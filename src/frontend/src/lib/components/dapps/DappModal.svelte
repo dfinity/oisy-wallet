@@ -64,7 +64,7 @@
 					{/if}
 				</div>
 				<div class="ml-auto flex space-x-4">
-					{#if twitter}
+					{#if nonNullish(twitter)}
 						<ExternalLinkIcon
 							href={twitter}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_twitter, {
@@ -74,7 +74,7 @@
 							<IconTwitter />
 						</ExternalLinkIcon>
 					{/if}
-					{#if github}
+					{#if nonNullish(github)}
 						<ExternalLinkIcon
 							href={github}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.source_code_on_github, {
@@ -93,7 +93,7 @@
 			<DappTags dAppName={name} {tags} />
 		</article>
 
-		{#if websiteURL}
+		{#if nonNullish(websiteURL)}
 			<ExternalLink
 				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
 					$dAppname: name
