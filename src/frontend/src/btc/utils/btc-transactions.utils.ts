@@ -1,7 +1,4 @@
-import {
-	CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS,
-	PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
-} from '$btc/constants/btc.constants';
+import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
@@ -63,16 +60,16 @@ export const mapBtcTransaction = ({
 
 	const utxosFee = totalInputValue - totalOutputValue;
 
+	// +1 is needed to account for the block where the transaction was first included
 	const confirmations = nonNullish(block_index)
-		? latestBitcoinBlockHeight - block_index
+		? latestBitcoinBlockHeight - block_index + 1
 		: undefined;
 
-	const status =
-		isNullish(confirmations) || confirmations <= PENDING_BTC_TRANSACTION_MIN_CONFIRMATIONS
-			? 'pending'
-			: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
-				? 'confirmed'
-				: 'unconfirmed';
+	const status = isNullish(confirmations)
+		? 'pending'
+		: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+			? 'confirmed'
+			: 'unconfirmed';
 
 	return {
 		id: hash,
@@ -85,4 +82,39 @@ export const mapBtcTransaction = ({
 		to,
 		confirmations
 	};
+};
+
+export const sortBtcTransactions = ({
+	transactionA: { status: statusA, timestamp: timestampA },
+	transactionB: { status: statusB, timestamp: timestampB }
+}: {
+	transactionA: BtcTransactionUi;
+	transactionB: BtcTransactionUi;
+}): number => {
+	const isPendingA = statusA === 'pending';
+	const isPendingB = statusB === 'pending';
+	const isUnconfirmedA = statusA === 'unconfirmed';
+	const isUnconfirmedB = statusB === 'unconfirmed';
+
+	if (isPendingA && !isPendingB) {
+		return -1;
+	}
+
+	if (isPendingB && !isPendingA) {
+		return 1;
+	}
+
+	if (isUnconfirmedA && !isUnconfirmedB) {
+		return -1;
+	}
+
+	if (isUnconfirmedB && !isUnconfirmedA) {
+		return 1;
+	}
+
+	if (nonNullish(timestampA) && nonNullish(timestampB)) {
+		return Number(timestampB - timestampA);
+	}
+
+	return nonNullish(timestampA) ? -1 : 1;
 };

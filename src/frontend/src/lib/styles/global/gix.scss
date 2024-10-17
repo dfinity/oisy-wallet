@@ -1,14 +1,14 @@
 @use '../mixins/media';
 
 :root {
-	--positive-emphasis: var(--color-mountain-meadow);
+	--positive-emphasis: var(--color-green-crayola);
 	--positive-emphasis-rgb: 48, 175, 145;
 
 	--warning-emphasis-shade: var(--color-goldenrod);
 
 	--negative-emphasis: var(--color-cyclamen);
 
-	--primary: var(--color-blue);
+	--primary: var(--color-blue-ribbon);
 	--primary-contrast: var(--color-white);
 	--tertiary: var(--color-secondary);
 
@@ -202,7 +202,7 @@ div.toggle {
 	--card-background: var(--color-white);
 
 	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--color-blue);
+		--card-background-contrast: var(--color-blue-ribbon);
 	}
 }
 

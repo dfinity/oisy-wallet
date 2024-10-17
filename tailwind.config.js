@@ -19,7 +19,6 @@ export default {
 			grey: '#c0bbc4',
 			'light-grey': '#ced4da',
 			'light-blue': '#e8f1ff',
-			blue: '#3b00b9',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'blue-ribbon': '#0066ff',
 			'dark-blue': '#321469',
@@ -34,7 +33,6 @@ export default {
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
 			'bright-lilac': '#e18dff',
-			'mountain-meadow': '#30af91',
 			'green-crayola': '#16b364',
 			'british-racing-green': '#084c2e',
 			'dartmouth-green': '#087443',
@@ -66,6 +64,7 @@ export default {
 				sm: '576px'
 			},
 			screens: {
+				'1.5md': '896px',
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
 			}
