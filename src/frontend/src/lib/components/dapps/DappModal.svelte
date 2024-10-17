@@ -12,16 +12,17 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { DappDescription } from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Option } from '$lib/types/utils';
 
 	export let dAppDescription: DappDescription;
 	$: ({ website, screenshots, twitter, github, tags, name, description, logo } = dAppDescription);
 
-	let websiteURL: URL | undefined;
+	let websiteURL: Option<URL>;
 	$: {
 		try {
 			websiteURL = new URL(website);
 		} catch (e) {
-			websiteURL = undefined;
+			websiteURL = null;
 		}
 	}
 </script>
