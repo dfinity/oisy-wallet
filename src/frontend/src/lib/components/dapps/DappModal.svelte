@@ -16,16 +16,12 @@
 	export let dAppDescription: DappDescription;
 	$: ({ website, screenshots, twitter, github, tags, name, description, logo } = dAppDescription);
 
-	let isURLValid: boolean;
-	let formattedUrl: string | undefined;
-
+	let websiteURL: URL | undefined;
 	$: {
 		try {
-			formattedUrl = new URL(website).hostname.replace('www.', '');
-			isURLValid = true;
+			websiteURL = new URL(website);
 		} catch (e) {
-			formattedUrl = undefined;
-			isURLValid = false;
+			websiteURL = undefined;
 		}
 	}
 </script>
@@ -55,14 +51,14 @@
 				/>
 				<div>
 					<div class="text-lg font-bold">{name}</div>
-					{#if nonNullish(formattedUrl)}
+					{#if nonNullish(websiteURL)}
 						<ExternalLink
 							iconVisible={false}
 							ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
 								$dAppname: name
 							})}
-							href={website}
-							styleClass="text-sm text-misty-rose">{formattedUrl}</ExternalLink
+							href={websiteURL.toString()}
+							styleClass="text-sm text-misty-rose">{websiteURL.hostname}</ExternalLink
 						>
 					{/if}
 				</div>
@@ -96,13 +92,13 @@
 			<DappTags dAppName={name} {tags} />
 		</article>
 
-		{#if isURLValid}
+		{#if websiteURL}
 			<ExternalLink
 				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
 					$dAppname: name
 				})}
 				styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
-				href={website}
+				href={websiteURL.toString()}
 				>{replacePlaceholders($i18n.dapps.text.open_dapp, {
 					$dAppname: name
 				})}</ExternalLink
