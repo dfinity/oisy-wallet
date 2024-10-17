@@ -62,7 +62,7 @@
 								$dAppname: name
 							})}
 							href={website}
-							class="text-sm text-misty-rose">{formattedUrl}</ExternalLink
+							styleClass="text-sm text-misty-rose">{formattedUrl}</ExternalLink
 						>
 					{/if}
 				</div>
