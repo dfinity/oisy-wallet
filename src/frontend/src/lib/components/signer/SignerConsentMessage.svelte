@@ -21,13 +21,13 @@
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
 	let approve: ConsentMessageApproval | undefined;
-	$: approve = $payload?.status === 'result' ? $payload?.approve : undefined;
-
 	let reject: Rejection | undefined;
-	$: reject = $payload?.status === 'result' ? $payload?.reject : undefined;
-
 	let consentInfo: icrc21_consent_info | undefined;
-	$: consentInfo = $payload?.status === 'result' ? $payload?.consentInfo : undefined;
+
+	$: ({ approve, reject, consentInfo } =
+		nonNullish($payload) && $payload.status === 'result'
+			? $payload
+			: { approve: undefined, reject: undefined, consentInfo: undefined });
 
 	let loading = false;
 	let displayMessage: string | undefined;
@@ -64,6 +64,7 @@
 
 	type Text = { title: string; content: string } | undefined;
 
+	// We try to split the content and title because we received a chunk of unstructured text from the canister. This works well for the ICP ledger, but we will likely need to iterate on it. There are a few tasks documented in the backlog.
 	const mapText = (markdown: string | undefined): Text => {
 		if (isNullish(markdown)) {
 			return undefined;
@@ -104,7 +105,7 @@
 			return;
 		}
 
-		reject?.();
+		reject();
 		resetPrompt();
 	};
 </script>
@@ -135,6 +136,7 @@
 {/if}
 
 <style lang="scss">
+	// We are using global selector because we try to style a Markdown section that is generated on the fly when the consent message can be successfully fetched.
 	.msg {
 		:global(p) {
 			margin: 0 0 var(--padding);
