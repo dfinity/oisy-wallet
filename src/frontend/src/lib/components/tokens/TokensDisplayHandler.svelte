@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
-	import { showZeroBalances } from '$lib/derived/settings.derived';
-	import type { Token, TokenUi } from '$lib/types/token';
+	import {
+		combinedDerivedFilteredNetworkTokensUi
+	} from '$lib/derived/network-tokens.derived';
+	import type { TokenUi } from '$lib/types/token';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
-	export let tokens: Token[] | undefined = undefined;
+	export let tokens: TokenUi[] | undefined = undefined;
 
 	let sortedTokens: TokenUi[];
-	$: sortedTokens = $combinedDerivedSortedNetworkTokensUi.filter(
-		({ balance, usdBalance }) => Number(balance ?? 0n) || (usdBalance ?? 0) || $showZeroBalances
-	);
+	$: sortedTokens = $combinedDerivedFilteredNetworkTokensUi;
 
 	const updateTokensToDisplay = () => (tokens = [...sortedTokens]);
 
