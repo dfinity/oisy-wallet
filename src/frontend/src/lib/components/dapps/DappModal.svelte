@@ -14,20 +14,33 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: DappDescription;
-	const formattedUrl = new URL(dAppDescription.website).hostname.replace('www.', '');
+	$: ({ website, screenshots, twitter, github, tags, name, description, logo } = dAppDescription);
+
+	let isURLValid: boolean;
+	let formattedUrl: string | undefined;
+
+	$: {
+		try {
+			formattedUrl = new URL(website).hostname.replace('www.', '');
+			isURLValid = true;
+		} catch (e) {
+			formattedUrl = undefined;
+			isURLValid = false;
+		}
+	}
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">
-		<span class="text-center text-xl">{dAppDescription.name}</span>
+		<span class="text-center text-xl">{name}</span>
 	</svelte:fragment>
 
 	<div class="stretch flex flex-col gap-4 pt-4">
-		{#if nonNullish(dAppDescription.screenshots) && dAppDescription.screenshots.length > 0}
+		{#if nonNullish(screenshots) && screenshots.length > 0}
 			<div class="overflow-hidden rounded-3xl">
 				<ImgBanner
-					src={dAppDescription.screenshots[0]}
-					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: dAppDescription.name })}
+					src={screenshots[0]}
+					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: name })}
 				/>
 			</div>
 		{/if}
@@ -37,27 +50,30 @@
 				<Img
 					width="40"
 					height="40"
-					src={dAppDescription.logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dAppDescription.name })}
+					src={logo}
+					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
 				/>
 				<div>
-					<div class="text-lg font-bold">{dAppDescription.name}</div>
-					<div class="text-sm text-misty-rose">{formattedUrl}</div>
+					<div class="text-lg font-bold">{name}</div>
+					{#if nonNullish(formattedUrl)}
+						<ExternalLink
+							iconVisible={false}
+							ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
+								$dAppname: name
+							})}
+							href={website}
+							class="text-sm text-misty-rose">{formattedUrl}</ExternalLink
+						>
+					{/if}
 				</div>
 				<div class="ml-auto flex space-x-4">
-					{#if dAppDescription.twitter}
-						<ExternalLinkIcon
-							href={dAppDescription.twitter}
-							ariaLabel={$i18n.dapps.alt.open_twitter}
-						>
+					{#if twitter}
+						<ExternalLinkIcon href={twitter} ariaLabel={$i18n.dapps.alt.open_twitter}>
 							<IconTwitter />
 						</ExternalLinkIcon>
 					{/if}
-					{#if dAppDescription.github}
-						<ExternalLinkIcon
-							href={dAppDescription.github}
-							ariaLabel={$i18n.dapps.alt.source_code_on_github}
-						>
+					{#if github}
+						<ExternalLinkIcon href={github} ariaLabel={$i18n.dapps.alt.source_code_on_github}>
 							<IconGitHub />
 						</ExternalLinkIcon>
 					{/if}
@@ -65,20 +81,22 @@
 			</div>
 
 			<p class="m-0 my-5 text-sm">
-				<Html text={dAppDescription.description} />
+				<Html text={description} />
 			</p>
-			<DappTags dAppName={dAppDescription.name} tags={dAppDescription.tags} />
+			<DappTags dAppName={name} {tags} />
 		</article>
 
-		<ExternalLink
-			ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
-				$dAppname: dAppDescription.name
-			})}
-			class="as-button primary padding-sm mt-auto flex flex-row-reverse"
-			href={dAppDescription.website}
-		>{replacePlaceholders($i18n.dapps.text.open_dapp, {
-			$dAppname: dAppDescription.name
-		})}</ExternalLink
-		>
+		{#if isURLValid}
+			<ExternalLink
+				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
+					$dAppname: name
+				})}
+				class="as-button primary padding-sm mt-auto flex flex-row-reverse"
+				href={website}
+				>{replacePlaceholders($i18n.dapps.text.open_dapp, {
+					$dAppname: name
+				})}</ExternalLink
+			>
+		{/if}
 	</div>
 </Modal>
