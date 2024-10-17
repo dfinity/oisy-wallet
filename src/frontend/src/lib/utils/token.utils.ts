@@ -1,4 +1,6 @@
 import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import type { IcCkToken } from '$icp/types/ic';
+import { isIcCkToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -19,8 +21,6 @@ import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
-import { isIcCkToken } from '$icp/utils/icrc.utils';
-import type { IcCkToken } from '$icp/types/ic';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -160,11 +160,13 @@ export function isRequiredTokenWithLinkedData(token: Token): token is RequiredTo
  * @returns A boolean indicating whether the object is a TokenGroupUi.
  */
 export function isTokenGroupUi(obj: unknown): obj is TokenGroupUi {
-	return typeof obj === 'object' &&
+	return (
+		typeof obj === 'object' &&
 		obj !== null &&
 		'header' in obj &&
 		typeof (obj as TokenGroupUi).header === 'object' &&
 		'tokens' in obj
+	);
 }
 
 /**
@@ -184,7 +186,7 @@ function createTokenGroup(nativeToken: TokenUi, twinToken: TokenUi): TokenGroupU
 			name: capitalizeNetworkName(nativeToken.network.name),
 			symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
 			decimals: nativeToken.decimals,
-			icon: nativeToken.icon || '/images/default_token_icon.svg',
+			icon: nativeToken.icon || '/images/default_token_icon.svg'
 		},
 		native: nativeToken.network,
 		tokens: [nativeToken, twinToken]
@@ -210,9 +212,9 @@ export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
 			return token;
 		}
 
-		const twinToken = tokens.find(
-			(t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)
-		) as IcCkToken | undefined;
+		const twinToken = tokens.find((t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)) as
+			| IcCkToken
+			| undefined;
 
 		if (twinToken) {
 			groupedTokenTwins.add(twinToken.symbol);
@@ -223,5 +225,7 @@ export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
 		return token;
 	});
 
-	return mappedTokensWithGroups.filter(t => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol));
+	return mappedTokensWithGroups.filter(
+		(t) => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol)
+	);
 }

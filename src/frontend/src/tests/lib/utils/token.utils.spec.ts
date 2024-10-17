@@ -1,16 +1,17 @@
+import { ICP_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { TokenGroupUi, TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdBalance,
-	getMaxTransactionAmount, groupTokensByTwin,
+	getMaxTransactionAmount,
+	groupTokensByTwin,
 	mapTokenUi
 } from '$lib/utils/token.utils';
 import { $balances, bn3 } from '$tests/mocks/balances.mock';
 import { $exchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
-import { ICP_NETWORK } from '$env/networks.env';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -20,47 +21,53 @@ const fee = 10000000n;
 
 const tokens = [
 	{
-		symbol: "BTC",
-		network: { id: Symbol("BTC"), name: "Bitcoin", icon: "btc-icon", iconBW: "btc-icon-bw", env: "mainnet" },
-		twinTokenSymbol: "ckBTC",
+		symbol: 'BTC',
+		network: {
+			id: Symbol('BTC'),
+			name: 'Bitcoin',
+			icon: 'btc-icon',
+			iconBW: 'btc-icon-bw',
+			env: 'mainnet'
+		},
+		twinTokenSymbol: 'ckBTC',
 		balance: BigNumber.from(1),
 		usdBalance: 50000,
-		standard: "bitcoin",
-		category: "default",
+		standard: 'bitcoin',
+		category: 'default',
 		decimals: 8,
-		name: "Bitcoin"
+		name: 'Bitcoin'
 	},
 	{
-		symbol: "ckBTC",
+		symbol: 'ckBTC',
 		network: ICP_NETWORK,
 		balance: BigNumber.from(2),
 		usdBalance: 100000,
-		standard: "icrc",
-		category: "default",
+		standard: 'icrc',
+		category: 'default',
 		decimals: 8,
-		name: "Chain key Bitcoin",
-		minterCanisterId: "mc6ru-gyaaa-aaaar-qaaaq-cai"
+		name: 'Chain key Bitcoin',
+		minterCanisterId: 'mc6ru-gyaaa-aaaar-qaaaq-cai'
 	},
 	{
 		...ETHEREUM_TOKEN,
 		balance: BigNumber.from(10),
-		usdBalance: 20000,
+		usdBalance: 20000
 	},
 	{
-		symbol: "ckETH",
+		symbol: 'ckETH',
 		network: ICP_NETWORK,
 		balance: BigNumber.from(5),
 		usdBalance: 15000,
-		standard: "icrc",
-		category: "default",
+		standard: 'icrc',
+		category: 'default',
 		decimals: 18,
-		name: "Chain key Ethereum",
-		minterCanisterId: "apia6-jaaaa-aaaar-qabma-cai"
+		name: 'Chain key Ethereum',
+		minterCanisterId: 'apia6-jaaaa-aaaar-qabma-cai'
 	},
 	{
 		...ICP_TOKEN,
 		balance: BigNumber.from(50),
-		usdBalance: 1000,
+		usdBalance: 1000
 	}
 ];
 
@@ -232,42 +239,43 @@ describe('mapTokenUi', () => {
 		});
 	});
 
-	it("should group tokens with matching twinTokenSymbol", () => {
+	it('should group tokens with matching twinTokenSymbol', () => {
 		const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 		expect(groupedTokens).toHaveLength(3);
 
 		const btcGroup = groupedTokens[0];
-		expect(btcGroup).toHaveProperty("header");
-		expect(btcGroup).toHaveProperty("tokens");
+		expect(btcGroup).toHaveProperty('header');
+		expect(btcGroup).toHaveProperty('tokens');
 		expect((btcGroup as TokenGroupUi).tokens).toHaveLength(2);
-		expect((btcGroup as TokenGroupUi).tokens.map(t => t.symbol)).toContain("BTC");
-		expect((btcGroup as TokenGroupUi).tokens.map(t => t.symbol)).toContain("ckBTC");
+		expect((btcGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('BTC');
+		expect((btcGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('ckBTC');
 
 		const icpToken = groupedTokens[2];
-		expect(icpToken).toHaveProperty("symbol", "ICP");
+		expect(icpToken).toHaveProperty('symbol', 'ICP');
 	});
 
-	it("should handle tokens without twinTokenSymbol", () => {
-
+	it('should handle tokens without twinTokenSymbol', () => {
 		const tokensWithoutTwins = [ICP_TOKEN];
 		const groupedTokens = groupTokensByTwin(tokensWithoutTwins);
 
 		expect(groupedTokens).toHaveLength(1);
-		expect(groupedTokens[0]).toHaveProperty("symbol", "ICP");
+		expect(groupedTokens[0]).toHaveProperty('symbol', 'ICP');
 	});
 
-	it("should place the group in the position of the first token", () => {
+	it('should place the group in the position of the first token', () => {
 		const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 		const firstGroup = groupedTokens[0];
-		expect(firstGroup).toHaveProperty("tokens");
-		expect((firstGroup as TokenGroupUi).tokens.map(t => t.symbol)).toContain("BTC");
-		expect((firstGroup as TokenGroupUi).tokens.map(t => t.symbol)).toContain("ckBTC");
+		expect(firstGroup).toHaveProperty('tokens');
+		expect((firstGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('BTC');
+		expect((firstGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('ckBTC');
 	});
 
-	it("should not duplicate tokens in the result", () => {
+	it('should not duplicate tokens in the result', () => {
 		const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 
-		const tokenSymbols = groupedTokens.flatMap(groupOrToken => 'tokens' in groupOrToken ? groupOrToken.tokens.map(t => t.symbol) : [groupOrToken.symbol]);
+		const tokenSymbols = groupedTokens.flatMap((groupOrToken) =>
+			'tokens' in groupOrToken ? groupOrToken.tokens.map((t) => t.symbol) : [groupOrToken.symbol]
+		);
 		const uniqueSymbols = new Set(tokenSymbols);
 		expect(uniqueSymbols.size).toBe(tokenSymbols.length);
 	});
