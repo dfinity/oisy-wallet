@@ -179,11 +179,9 @@ const createTokenGroup = ({
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
 }): TokenGroupUi => {
-	const capitalizeNetworkName = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
-
 	return {
 		header: {
-			name: capitalizeNetworkName(nativeToken.network.name),
+			name: nativeToken.network.name,
 			symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
 			decimals: nativeToken.decimals,
 			icon: nativeToken.icon ?? '/images/default_token_icon.svg'
