@@ -68,12 +68,22 @@
 				</div>
 				<div class="ml-auto flex space-x-4">
 					{#if twitter}
-						<ExternalLinkIcon href={twitter} ariaLabel={$i18n.dapps.alt.open_twitter}>
+						<ExternalLinkIcon
+							href={twitter}
+							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_twitter, {
+								$dAppname: name
+							})}
+						>
 							<IconTwitter />
 						</ExternalLinkIcon>
 					{/if}
 					{#if github}
-						<ExternalLinkIcon href={github} ariaLabel={$i18n.dapps.alt.source_code_on_github}>
+						<ExternalLinkIcon
+							href={github}
+							ariaLabel={replacePlaceholders($i18n.dapps.alt.source_code_on_github, {
+								$dAppname: name
+							})}
+						>
 							<IconGitHub />
 						</ExternalLinkIcon>
 					{/if}
