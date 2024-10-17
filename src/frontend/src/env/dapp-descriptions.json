@@ -1,0 +1,41 @@
+[
+	{
+		"id": "kongswap",
+		"name": "KongSwap",
+		"oneLiner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
+		"website": "https://www.kongswap.io/",
+		"tags": ["DEX", "Signer Standard"],
+		"description": "KongSwap is a fully decentralized exchange (DEX) offering bridgeless cross-chain trading across Bitcoin, Ethereum, and Solana. <br/><br/>Using Chain Fusion technology and the Internet Computer Protocol, it reduces fees, simplifies user experience, and avoids liquidity fragmentation. Both frontend and backend operate on-chain via smart contracts, delivering a seamless DeFi experience.",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/kong-swap-logo.svg",
+		"screenshots": ["/images/dapps/kong-swap.png"],
+		"featured": true
+	},
+	{
+		"id": "openchat",
+		"name": "OpenChat",
+		"oneLiner": "Decentralized alternative to WhatsApp.",
+		"website": "https://oc.app/",
+		"tags": ["Social Media"],
+		"description": "OpenChat is a fully decentralized real-time messaging service that is indistinguishable from Web2 chat apps while living 100% on the blockchain. This allows users to send crypto to each other - including Bitcoin - and own a part of OpenChat through CHAT tokens.",
+		"usesInternetIdentity": true,
+		"display": "Large",
+		"stats": "80,000+ users",
+		"logo": "/images/dapps/open-chat-logo.svg"
+	},
+	{
+		"id": "decideid",
+		"name": "DecideID",
+		"oneLiner": "Unique Identity Verification for Trustworthy Digital Engagements.",
+		"website": "https://decideai.xyz/id",
+		"twitter": "https://twitter.com/DecideAI_",
+		"tags": ["Verifiable Credentials"],
+		"stats": "50,000+ inference requests",
+		"description": "DecideID is part of DecideAI, which is an ecosystem that contains more products, such as Decide Protocol and Decide Cortex. It is designed to meet the needs of the high-end, specialized LLM market.",
+		"usesInternetIdentity": true,
+		"logo": "/images/dapps/decide-ai-logo.svg",
+		"github": "https://github.com/modclub-app"
+	}
+]
