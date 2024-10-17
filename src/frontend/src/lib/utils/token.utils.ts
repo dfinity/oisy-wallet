@@ -1,5 +1,4 @@
 import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
-import type { IcCkToken } from '$icp/types/ic';
 import { isIcCkToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -12,8 +11,7 @@ import type {
 	TokenGroupUi,
 	TokenStandard,
 	TokenUi,
-	TokenUiOrGroupUi,
-	TokenUiWithLinkedData
+	TokenUiOrGroupUi
 } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
@@ -149,9 +147,7 @@ export const mapTokenUi = ({
  * @param token - The token object to be checked.
  * @returns A boolean indicating whether the token is of type RequiredTokenWithLinkedData.
  */
-export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>{
-	return 'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
-}
+export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string'
 
 /**
  * Type guard to check if an object is of type TokenGroupUi.
@@ -159,15 +155,13 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
  * @param obj - The object to check.
  * @returns A boolean indicating whether the object is a TokenGroupUi.
  */
-export const isTokenGroupUi = (obj: unknown): obj is TokenGroupUi => {
-	return (
+export const isTokenGroupUi = (obj: unknown): obj is TokenGroupUi => (
 		typeof obj === 'object' &&
 		obj !== null &&
 		'header' in obj &&
 		typeof (obj as TokenGroupUi).header === 'object' &&
 		'tokens' in obj
-	);
-}
+	)
 
 /**
  * Factory function to create a TokenGroupUi based on the provided tokens and network details.
@@ -212,27 +206,43 @@ const createTokenGroup = ({
  *          The group replaces the first token of the group in the list.
  */
 export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const groupedTokenTwins = new Set<string>();
-	const mappedTokensWithGroups: TokenUiOrGroupUi[] = tokens.map((token) => {
-		if (!isRequiredTokenWithLinkedData(token)) {
-			return token;
+	const { mappedTokensWithGroups, groupedTokenTwins } = tokens.reduce<{
+		mappedTokensWithGroups: TokenUiOrGroupUi[];
+		groupedTokenTwins: Set<string>;
+	}>(
+		(acc, token) => {
+			const { mappedTokensWithGroups, groupedTokenTwins } = acc;
+
+			if (!isRequiredTokenWithLinkedData(token)) {
+				mappedTokensWithGroups.push(token);
+				return acc;
+			}
+
+			const twinToken: TokenUi | undefined = tokens.find(
+				(t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)
+			);
+
+			if (nonNullish(twinToken)) {
+				groupedTokenTwins.add(twinToken.symbol);
+				groupedTokenTwins.add(token.symbol);
+
+				mappedTokensWithGroups.push(
+					createTokenGroup({
+						nativeToken: token,
+						twinToken,
+					})
+				);
+			} else {
+				mappedTokensWithGroups.push(token);
+			}
+
+			return acc;
+		},
+		{
+			mappedTokensWithGroups: [],
+			groupedTokenTwins: new Set<string>(),
 		}
-
-		const twinToken = tokens.find((t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)) as
-			| IcCkToken
-			| undefined;
-
-		if (twinToken) {
-			groupedTokenTwins.add(twinToken.symbol);
-			groupedTokenTwins.add(token.symbol);
-			return createTokenGroup({
-				nativeToken: token as TokenUiWithLinkedData,
-				twinToken: twinToken
-			});
-		}
-
-		return token;
-	});
+	);
 
 	return mappedTokensWithGroups.filter(
 		(t) => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol)
