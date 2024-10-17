@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import DAppModal from '$lib/components/dapps/DAppModal.svelte';
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
