@@ -182,8 +182,8 @@ function createTokenGroup({
 	nativeToken,
 	twinToken
 }: {
-	nativeToken: TokenUi,
-	twinToken: TokenUi
+	nativeToken: TokenUi;
+	twinToken: TokenUi;
 }): TokenGroupUi {
 	const capitalizeNetworkName = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
 
@@ -225,7 +225,10 @@ export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
 		if (twinToken) {
 			groupedTokenTwins.add(twinToken.symbol);
 			groupedTokenTwins.add(token.symbol);
-			return createTokenGroup({nativeToken: token as TokenUiWithLinkedData, twinToken: twinToken});
+			return createTokenGroup({
+				nativeToken: token as TokenUiWithLinkedData,
+				twinToken: twinToken
+			});
 		}
 
 		return token;
