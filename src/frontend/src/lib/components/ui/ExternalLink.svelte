@@ -14,7 +14,7 @@
 	{href}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="inline-flex items-center gap-2 no-underline"
+	class="inline-flex items-center gap-2 no-underline {$$restProps.class || ''}"
 	aria-label={ariaLabel}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	class:text-primary={color === 'blue'}
