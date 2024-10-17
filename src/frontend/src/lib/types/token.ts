@@ -71,7 +71,7 @@ export type TokenUiWithLinkedData = TokenUi & TokenFinancialData & RequiredToken
 
 export interface TokenGroupUi {
 	header: TokenMetadata;
-	native: Network;
+	nativeNetwork: Network;
 	tokens: TokenUi[];
 }
 

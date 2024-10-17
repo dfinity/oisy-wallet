@@ -185,7 +185,7 @@ const createTokenGroup = ({
 		decimals: nativeToken.decimals,
 		icon: nativeToken.icon ?? '/images/default_token_icon.svg'
 	},
-	native: nativeToken.network,
+	nativeNetwork: nativeToken.network,
 	tokens: [nativeToken, twinToken]
 });
 
