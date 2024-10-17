@@ -76,6 +76,7 @@ interface I18nDapps {
 	text: { all_dapps: string; featured: string; open_dapp: string };
 	alt: {
 		logo: string;
+		learn_more: string;
 		open_dapp: string;
 		open_twitter: string;
 		source_code_on_github: string;
