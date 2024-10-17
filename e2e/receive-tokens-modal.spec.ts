@@ -13,14 +13,16 @@ import { getReceiveTokensModalAddressLabelSelector } from './utils/selectors.uti
 const RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT = 900;
 let homepageLoggedIn: HomepageLoggedIn;
 
-testWithII.beforeEach(async ({ page, iiPage }) => {
+testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
-		viewportSize: {
-			width: MODALS_VIEWPORT_WIDTH,
-			height: RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT
-		}
+		viewportSize: !isMobile
+			? {
+					width: MODALS_VIEWPORT_WIDTH,
+					height: RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT
+				}
+			: undefined
 	});
 
 	await homepageLoggedIn.waitForReady();
