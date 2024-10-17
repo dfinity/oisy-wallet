@@ -25,7 +25,7 @@
 	$: $payload, onPayload();
 </script>
 
-{#if $payload?.status === 'loading'}
+{#if $payload?.status === 'executing'}
 	<SignerLoading>
 		{$i18n.signer.call_canister.text.processing}
 	</SignerLoading>
