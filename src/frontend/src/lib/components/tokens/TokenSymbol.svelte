@@ -5,7 +5,7 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let token: Token;
+	export let token: Pick<Token, 'symbol' | 'network'>;
 </script>
 
 <div class="flex flex-row items-center justify-between gap-2">

@@ -3,7 +3,7 @@
 	import Tag from '$lib/components/ui/Tag.svelte';
 	import type { Token } from '$lib/types/token';
 
-	export let token: Token;
+	export let token: Pick<Token, 'name'>;
 
 	const ariaLabel = nonNullish(token.oisyName)
 		? `${token.oisyName.prefix ?? ''}${token.oisyName.oisyName}`
