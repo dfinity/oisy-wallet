@@ -20,7 +20,7 @@
 			width="64"
 			rounded
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: name })}
+			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
 		/>
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">
