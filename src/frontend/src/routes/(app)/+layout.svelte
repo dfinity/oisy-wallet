@@ -11,14 +11,16 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteDApps, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 
-	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
+	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
-		: isRouteTransactions($page)
-			? 'transactions'
-			: 'tokens';
+		: isRouteDApps($page)
+			? 'dapps'
+			: isRouteTransactions($page)
+				? 'transactions'
+				: 'tokens';
 
 	$: token.set($pageToken);
 </script>
@@ -39,7 +41,7 @@
 		<SplitPane>
 			<NavigationMenu slot="menu" />
 
-			{#if route !== 'settings'}
+			{#if route !== 'settings' && route !== 'dapps'}
 				<Hero
 					usdTotal={route === 'tokens'}
 					summary={route === 'transactions'}
