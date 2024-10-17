@@ -10,6 +10,7 @@
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import { btcAddressTestnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
@@ -126,7 +127,7 @@
 {#if $loading}
 	{#if progressModal}
 		<div in:fade={{ delay: 0, duration: 250 }}>
-			<Modal>
+			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<ImgBanner width="100%" src={banner} size="small" />
 

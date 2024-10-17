@@ -4,6 +4,8 @@ export const NAVIGATION_MENU = 'navigation-menu';
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
 
+export const LOADER_MODAL = 'loader-modal';
+
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_BALANCE = 'token-balance';
 
