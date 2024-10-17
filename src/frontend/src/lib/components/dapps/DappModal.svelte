@@ -72,7 +72,7 @@
 
 		<ExternalLink
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.open, { $dAppname: dAppDescription.name })}
-			class="as-button primary padding-sm flex flex-row-reverse"
+			class="as-button primary padding-sm flex flex-row-reverse mt-auto"
 			href={dAppDescription.website}
 			>{replacePlaceholders($i18n.dapps.text.open, {
 				$dAppname: dAppDescription.name
