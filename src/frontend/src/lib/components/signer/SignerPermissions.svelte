@@ -66,13 +66,8 @@
 
 	const onApprove = () => approvePermissions();
 
-	const listItems: Record<
-		IcrcScopedMethod,
-		{
-			icon: ComponentType;
-			label: string;
-		}
-	> = {
+	let listItems: Record<IcrcScopedMethod, { icon: ComponentType; label: string }>;
+	$: listItems = {
 		icrc27_accounts: {
 			icon: IconWallet,
 			label: replaceOisyPlaceholders($i18n.signer.permissions.text.icrc27_accounts)
