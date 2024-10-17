@@ -204,50 +204,24 @@ function createTokenGroup(nativeToken: TokenUi, twinToken: TokenUi): TokenGroupU
  *          The group replaces the first token of the group in the list.
  */
 export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
-	const groupedTokens = new Map<string, TokenGroupUi>();
-	const usedSymbols = new Set<string>();
-	const firstTokenIndexMap = new Map<string, number>();
-
-	const result: TokenUiOrGroupUi[] = [...tokens];
-
-	tokens.forEach((token, index) => {
-		if (isRequiredTokenWithLinkedData(token)) {
-			const twinSymbol = token.twinTokenSymbol;
-
-			if (usedSymbols.has(token.symbol)) return;
-
-			if (!firstTokenIndexMap.has(twinSymbol)) {
-				firstTokenIndexMap.set(twinSymbol, index);
-			}
-
-			const twinToken = tokens.find(t => t.symbol === twinSymbol && isIcCkToken(t)) as IcCkToken | undefined;
-
-			if (twinToken) {
-				if (!groupedTokens.has(twinSymbol)) {
-					const nativeToken = token.standard === 'icp' ? twinToken : token;
-
-					const tokenGroup = createTokenGroup(nativeToken as TokenUiWithLinkedData, twinToken as IcCkToken);
-					groupedTokens.set(twinSymbol, tokenGroup);
-				}
-
-				usedSymbols.add(token.symbol);
-				usedSymbols.add(twinToken.symbol);
-			}
+	const groupedTokenTwins = new Set<string>();
+	const mappedTokensWithGroups: TokenUiOrGroupUi[] = tokens.map((token) => {
+		if (!isRequiredTokenWithLinkedData(token)) {
+			return token;
 		}
+
+		const twinToken = tokens.find(
+			(t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)
+		) as IcCkToken | undefined;
+
+		if (twinToken) {
+			groupedTokenTwins.add(twinToken.symbol);
+			groupedTokenTwins.add(token.symbol);
+			return createTokenGroup(token as TokenUiWithLinkedData, twinToken);
+		}
+
+		return token;
 	});
 
-	firstTokenIndexMap.forEach((index, twinSymbol) => {
-		const group = groupedTokens.get(twinSymbol);
-		if (group) {
-			result[index] = group;
-
-			result.forEach((token, idx) => {
-				if (!('tokens' in token) && token.symbol === twinSymbol) {
-					result.splice(idx, 1);
-				}
-			});
-		}
-	});
-
-	return result;
+	return mappedTokensWithGroups.filter(t => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol));
 }
