@@ -18,9 +18,9 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<div slot="title">
+	<svelte:fragment slot="title">
 		<span class="text-center text-xl">{dAppDescription.name}</span>
-	</div>
+	</svelte:fragment>
 
 	<div class="stretch flex flex-col gap-4 pt-4">
 		{#if nonNullish(dAppDescription.screenshots) && dAppDescription.screenshots.length > 0}
