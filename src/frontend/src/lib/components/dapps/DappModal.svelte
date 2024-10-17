@@ -32,14 +32,14 @@
 			</div>
 		{/if}
 
-		<div class="rounded-3xl p-5 shadow">
+		<article class="rounded-3xl p-5 shadow">
 			<div class="flex items-center gap-4 border-b border-light-grey pb-5">
-				<div class="h-10 w-10">
-					<Img
-						src={dAppDescription.logo}
-						alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dAppDescription.name })}
-					/>
-				</div>
+				<Img
+					width="40"
+					height="40"
+					src={dAppDescription.logo}
+					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dAppDescription.name })}
+				/>
 				<div>
 					<div class="text-lg font-bold">{dAppDescription.name}</div>
 					<div class="text-sm text-misty-rose">{formattedUrl}</div>
@@ -68,7 +68,7 @@
 				<Html text={dAppDescription.description} />
 			</p>
 			<DappTags dAppName={dAppDescription.name} tags={dAppDescription.tags} />
-		</div>
+		</article>
 
 		<ExternalLink
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
@@ -76,9 +76,9 @@
 			})}
 			class="as-button primary padding-sm mt-auto flex flex-row-reverse"
 			href={dAppDescription.website}
-			>{replacePlaceholders($i18n.dapps.text.open_dapp, {
-				$dAppname: dAppDescription.name
-			})}</ExternalLink
+		>{replacePlaceholders($i18n.dapps.text.open_dapp, {
+			$dAppname: dAppDescription.name
+		})}</ExternalLink
 		>
 	</div>
 </Modal>
