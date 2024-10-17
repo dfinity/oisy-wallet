@@ -25,8 +25,8 @@
 		permissionsPrompt: { payload, reset: resetPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let scopes: IcrcScope[] | undefined;
-	$: scopes = $payload?.requestedScopes;
+	let scopes: IcrcScope[];
+	$: scopes = $payload?.requestedScopes ?? [];
 
 	let confirm: PermissionsConfirmation | undefined;
 	$: confirm = $payload?.confirm;
@@ -57,7 +57,7 @@
 			return;
 		}
 
-		confirm((scopes ?? []).map((scope) => ({ ...scope, state: ICRC25_PERMISSION_GRANTED })));
+		confirm(scopes.map((scope) => ({ ...scope, state: ICRC25_PERMISSION_GRANTED })));
 
 		resetPrompt();
 	};
@@ -85,11 +85,11 @@
 
 	let requestAccountsPermissions = false;
 	$: requestAccountsPermissions = nonNullish(
-		scopes?.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS)
+		scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS)
 	);
 </script>
 
-{#if nonNullish(scopes) && nonNullish($payload)}
+{#if nonNullish($payload)}
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
 		<h2 class="mb-4 text-center">{$i18n.signer.permissions.text.title}</h2>
 
