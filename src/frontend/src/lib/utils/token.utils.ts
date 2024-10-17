@@ -178,18 +178,16 @@ const createTokenGroup = ({
 }: {
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
-}): TokenGroupUi => {
-	return {
-		header: {
-			name: nativeToken.network.name,
-			symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
-			decimals: nativeToken.decimals,
-			icon: nativeToken.icon ?? '/images/default_token_icon.svg'
-		},
-		native: nativeToken.network,
-		tokens: [nativeToken, twinToken]
-	};
-};
+}): TokenGroupUi => ({
+	header: {
+		name: nativeToken.network.name,
+		symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
+		decimals: nativeToken.decimals,
+		icon: nativeToken.icon ?? '/images/default_token_icon.svg'
+	},
+	native: nativeToken.network,
+	tokens: [nativeToken, twinToken]
+});
 
 /**
  * Function to create a list of TokenUiOrGroupUi by grouping tokens with matching twinTokenSymbol.
