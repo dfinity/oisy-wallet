@@ -149,7 +149,7 @@ export const mapTokenUi = ({
  * @param token - The token object to be checked.
  * @returns A boolean indicating whether the token is of type RequiredTokenWithLinkedData.
  */
-export function isRequiredTokenWithLinkedData(token: Token): token is RequiredTokenWithLinkedData {
+export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>{
 	return 'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
 }
 
