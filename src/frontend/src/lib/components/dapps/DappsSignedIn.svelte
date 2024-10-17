@@ -6,15 +6,22 @@
 	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type DappDescription, dAppDescriptions, type FeaturedDappDescription } from '$lib/types/dappDescription';
+	import {
+		type DappDescription,
+		dAppDescriptions,
+		type FeaturedDappDescription
+	} from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import DappModal from '$lib/components/dapps/DappModal.svelte';
 
 	let selectedTag: string | null = null;
 	const featuredDapp: FeaturedDappDescription | undefined = dAppDescriptions.find(
 		(dApp) => dApp.featured && nonNullish(dApp.screenshots) && dApp.screenshots.length > 0
 	) as FeaturedDappDescription | undefined;
 
-	const uniqueTags = new Set(dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB)));
+	const uniqueTags = new Set(
+		dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
+	);
 
 	$: filteredDapps = nonNullish(selectedTag)
 		? dAppDescriptions.filter((dApp) => dApp.tags.includes(selectedTag!))
@@ -55,13 +62,13 @@
 	{/each}
 </div>
 
-<ul class="mt-8 grid grid-cols-1 gap-x-4 gap-y-7 md:grid-cols-3 list-none">
+<ul class="mt-8 grid list-none grid-cols-1 gap-x-4 gap-y-7 md:grid-cols-3">
 	{#each filteredDapps as dApp}
 		<li class="flex">
 			<DappCard
 				on:click={() => {
-				modalStore.openDappDetails(dApp);
-			}}
+					modalStore.openDappDetails(dApp);
+				}}
 				dAppDescription={dApp}
 			/>
 		</li>
@@ -69,5 +76,5 @@
 </ul>
 
 {#if $modalDAppDetails && selectedDapp}
-	<DAppModal dAppDescription={selectedDapp} />
+	<DappModal dAppDescription={selectedDapp} />
 {/if}
