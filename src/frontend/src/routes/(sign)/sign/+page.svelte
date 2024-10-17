@@ -3,13 +3,13 @@
 	import { onDestroy, setContext } from 'svelte';
 	import { fade, type FadeParams } from 'svelte/transition';
 	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
-    import SignerCallCanister from "$lib/components/signer/SignerCallCanister.svelte";
-    import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
-    import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
-    import SignerPermissions from '$lib/components/signer/SignerPermissions.svelte';
-    import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
-    import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
-    import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
+	import SignerCallCanister from '$lib/components/signer/SignerCallCanister.svelte';
+	import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
+	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
+	import SignerPermissions from '$lib/components/signer/SignerPermissions.svelte';
+	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
+	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
+	import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
 
 	const { idle, reset, ...context } = initSignerContext();
 	setContext(SIGNER_CONTEXT_KEY, {
@@ -51,7 +51,7 @@
 
 				<SignerConsentMessage />
 
-                <SignerCallCanister />
+				<SignerCallCanister />
 			{/if}
 		</SignerAccounts>
 	{/if}
