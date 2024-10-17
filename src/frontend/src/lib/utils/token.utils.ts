@@ -159,7 +159,7 @@ export function isRequiredTokenWithLinkedData(token: Token): token is RequiredTo
  * @param obj - The object to check.
  * @returns A boolean indicating whether the object is a TokenGroupUi.
  */
-export function isTokenGroupUi(obj: unknown): obj is TokenGroupUi {
+export const isTokenGroupUi = (obj: unknown): obj is TokenGroupUi => {
 	return (
 		typeof obj === 'object' &&
 		obj !== null &&
