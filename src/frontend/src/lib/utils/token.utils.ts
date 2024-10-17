@@ -178,7 +178,13 @@ export function isTokenGroupUi(obj: unknown): obj is TokenGroupUi {
  *
  * @returns A TokenGroupUi object that includes a header with network and symbol information and contains both the native and twin tokens.
  */
-function createTokenGroup(nativeToken: TokenUi, twinToken: TokenUi): TokenGroupUi {
+function createTokenGroup({
+	nativeToken,
+	twinToken
+}: {
+	nativeToken: TokenUi,
+	twinToken: TokenUi
+}): TokenGroupUi {
 	const capitalizeNetworkName = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
 
 	return {
@@ -186,7 +192,7 @@ function createTokenGroup(nativeToken: TokenUi, twinToken: TokenUi): TokenGroupU
 			name: capitalizeNetworkName(nativeToken.network.name),
 			symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
 			decimals: nativeToken.decimals,
-			icon: nativeToken.icon || '/images/default_token_icon.svg'
+			icon: nativeToken.icon ?? '/images/default_token_icon.svg'
 		},
 		native: nativeToken.network,
 		tokens: [nativeToken, twinToken]
@@ -219,7 +225,7 @@ export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
 		if (twinToken) {
 			groupedTokenTwins.add(twinToken.symbol);
 			groupedTokenTwins.add(token.symbol);
-			return createTokenGroup(token as TokenUiWithLinkedData, twinToken);
+			return createTokenGroup({nativeToken: token as TokenUiWithLinkedData, twinToken: twinToken});
 		}
 
 		return token;
