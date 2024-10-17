@@ -71,10 +71,12 @@
 		</div>
 
 		<ExternalLink
-			ariaLabel={replacePlaceholders($i18n.dapps.alt.open, { $dAppname: dAppDescription.name })}
-			class="as-button primary padding-sm flex flex-row-reverse mt-auto"
+			ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
+				$dAppname: dAppDescription.name
+			})}
+			class="as-button primary padding-sm mt-auto flex flex-row-reverse"
 			href={dAppDescription.website}
-			>{replacePlaceholders($i18n.dapps.text.open, {
+			>{replacePlaceholders($i18n.dapps.text.open_dapp, {
 				$dAppname: dAppDescription.name
 			})}</ExternalLink
 		>
