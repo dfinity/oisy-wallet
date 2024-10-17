@@ -105,7 +105,7 @@
 			return;
 		}
 
-		reject?.();
+		reject();
 		resetPrompt();
 	};
 </script>
