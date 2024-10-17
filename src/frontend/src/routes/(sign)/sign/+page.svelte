@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy, setContext } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import { fade, type FadeParams } from 'svelte/transition';
 	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
 	import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
 	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
@@ -28,6 +28,11 @@
 	onDestroy(reset);
 
 	$: $authIdentity, init();
+
+	// We use specific fade parameters for the idle state due to the asynchronous communication between the relying party and the wallet.
+	// Because the idle state might be displayed when a client starts communication with the wallet, we add a small delay to prevent a minor glitch where the idle animation is briefly shown before the actual action is rendered.
+	// Technically, from a specification standpoint, we don't have a way to fully prevent this.
+	const fadeParams: FadeParams = { delay: 150, duration: 250 };
 </script>
 
 <article class="mb-10 flex min-h-96 flex-col rounded-lg border border-water bg-white px-5 py-6">
@@ -36,7 +41,7 @@
 	{:else}
 		<SignerAccounts>
 			{#if $idle}
-				<div in:fade={{ delay: 150, duration: 250 }}>
+				<div in:fade={fadeParams}>
 					<SignerIdle />
 				</div>
 			{:else}
