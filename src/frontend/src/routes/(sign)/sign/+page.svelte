@@ -3,6 +3,7 @@
 	import { onDestroy, setContext } from 'svelte';
 	import { fade, type FadeParams } from 'svelte/transition';
 	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
+	import SignerCallCanister from '$lib/components/signer/SignerCallCanister.svelte';
 	import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
 	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
 	import SignerPermissions from '$lib/components/signer/SignerPermissions.svelte';
@@ -50,7 +51,7 @@
 
 				<SignerConsentMessage />
 
-				<p>Work in progress. Click the OISY Wallet logo above to go back to wallet.</p>
+				<SignerCallCanister />
 			{/if}
 		</SignerAccounts>
 	{/if}
