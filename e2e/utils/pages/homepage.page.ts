@@ -138,7 +138,7 @@ abstract class Homepage {
 	}
 
 	protected async waitForLoaderModal(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.locator(LOADER_MODAL).waitFor(options);
+		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
