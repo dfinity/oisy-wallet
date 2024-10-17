@@ -73,7 +73,7 @@ interface I18nAuth {
 }
 
 interface I18nDapps {
-	text: { all_dapps: string; featured: string; open_dapp: string; title: string; };
+	text: { all_dapps: string; featured: string; open_dapp: string; title: string };
 	alt: {
 		logo: string;
 		learn_more: string;

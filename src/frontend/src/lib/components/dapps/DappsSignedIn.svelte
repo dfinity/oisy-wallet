@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
+	import DappModal from '$lib/components/dapps/DappModal.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { modalDAppDetails } from '$lib/derived/modal.derived';
@@ -12,7 +13,6 @@
 		type FeaturedDappDescription
 	} from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import DappModal from '$lib/components/dapps/DappModal.svelte';
 
 	let selectedTag: string | null = null;
 	const featuredDapp: FeaturedDappDescription | undefined = dAppDescriptions.find(
