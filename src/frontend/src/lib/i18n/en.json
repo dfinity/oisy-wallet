@@ -85,15 +85,19 @@
 		"text": {
 			"all_dapps": "All dapps",
 			"featured": "Featured",
+			"title": "Explore Web3 Ecosystem",
 			"open_dapp": "Open the dapp $dAppname"
 		},
 		"alt": {
+			"learn_more": "Learn more about $dAppname",
 			"logo": "Logo of $dAppname",
-			"open_dapp": "Open the app $dAppname",
-			"open_twitter": "Open the $dAppname X/Twitter feed",
-			"source_code_on_github": "View source code of $dAppname on github",
+			"show_all": "Show all decentralised applications",
+			"show_tag": "Show decentralised applications with the tag $tag",
 			"tags": "Tags related to $dAppname",
-			"website": "Image of $dAppname"
+			"website": "Image of $dAppname",
+			"open_dapp": "Open $dAppname",
+			"source_code_on_github": "View source code of $dAppname on github",
+			"open_twitter": "Open the $dAppname X/Twitter feed"
 		}
 	},
 	"footer": {
