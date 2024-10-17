@@ -77,9 +77,10 @@ interface I18nDapps {
 	alt: {
 		logo: string;
 		open_dapp: string;
-		website: string;
 		open_twitter: string;
 		source_code_on_github: string;
+		tags: string;
+		website: string;
 	};
 }
 
