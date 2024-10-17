@@ -136,12 +136,12 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
 	(token.standard === 'icp' || token.standard === 'icrc') && 'enabled' in token;
 
-const icCkToken = (token: IcInterface): token is IcCkInterface =>
+const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
 
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
-	...(icCkToken(token) && nonNullish(token.twinToken)
+	...(isIcCkInterface(token) && nonNullish(token.twinToken)
 		? {
 				oisyName: {
 					prefix: 'ck',
@@ -151,6 +151,5 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 		: {})
 });
 
-export function isIcCkToken(token: Token): token is IcCkToken {
-	return 'minterCanisterId' in token && token.network?.id === ICP_NETWORK.id;
-}
+export const isIcCkToken = (token: Token): token is IcCkToken =>
+	'minterCanisterId' in token && token.network?.id === ICP_NETWORK.id;
