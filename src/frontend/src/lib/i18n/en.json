@@ -84,11 +84,15 @@
 	"dapps": {
 		"text": {
 			"all_dapps": "All dapps",
-			"featured": "Featured"
+			"featured": "Featured",
+			"open_dapp": "Open the dapp $dAppname"
 		},
 		"alt": {
 			"logo": "Logo of $dAppname",
 			"open_dapp": "Open the app $dAppname",
+			"open_twitter": "Open the $dAppname X/Twitter feed",
+			"source_code_on_github": "View source code of $dAppname on github",
+			"tags": "Tags related to $dAppname",
 			"website": "Image of $dAppname"
 		}
 	},
