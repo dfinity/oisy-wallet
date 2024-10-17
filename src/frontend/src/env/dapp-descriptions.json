@@ -1,0 +1,45 @@
+[
+	{
+		"id": "kongswap",
+		"name": "KongSwap",
+		"oneLiner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
+		"website": "https://www.kongswap.io/",
+		"twitter": "https://x.com/kongswap",
+		"github": "https://github.com/KongSwap",
+		"tags": ["DEX", "Signer Standard"],
+		"description": "KongSwap is a fully decentralized exchange (DEX) offering bridgeless cross-chain trading across Bitcoin, Ethereum, and Solana. <br/><br/>Using Chain Fusion technology and the Internet Computer Protocol, it reduces fees, simplifies user experience, and avoids liquidity fragmentation. Both frontend and backend operate on-chain via smart contracts, delivering a seamless DeFi experience.",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/kong-swap-logo.svg",
+		"screenshots": ["/images/dapps/kong-swap.png"],
+		"featured": true
+	},
+	{
+		"id": "openchat",
+		"name": "OpenChat",
+		"oneLiner": "Decentralized alternative to WhatsApp.",
+		"website": "https://oc.app/",
+		"twitter": "https://x.com/OpenChat",
+		"github": "https://github.com/open-chat-labs/open-chat",
+		"tags": ["Social Media"],
+		"description": "OpenChat is a fully decentralized real-time messaging service that is indistinguishable from Web2 chat apps while living 100% on the blockchain. This allows users to send crypto to each other - including Bitcoin - and own a part of OpenChat through CHAT tokens.",
+		"usesInternetIdentity": true,
+		"display": "Large",
+		"stats": "80,000+ users",
+		"logo": "/images/dapps/open-chat-logo.svg"
+	},
+	{
+		"id": "decideid",
+		"name": "DecideID",
+		"oneLiner": "Unique Identity Verification for Trustworthy Digital Engagements.",
+		"website": "https://decideai.xyz/id",
+		"twitter": "https://twitter.com/DecideAI_",
+		"tags": ["Verifiable Credentials"],
+		"stats": "50,000+ inference requests",
+		"description": "Decide ID is at the heart of the Decide AI system, ensuring trust and security through its unique Proof of Personhood (PoP) methodology. When you join, you'll go through a verification process where you provide multiple proofs and complete a special challenge to confirm your identity. This makes sure that every user is real, unique, and not a bot. Your Principal ID, a unique on-chain identifier, is created during this process. It can be used across various applications that require verified personhood, ensuring a secure and seamless integration into any app’s sign-up or login process. Plus, the use of Zero-Knowledge proofs means your private data, like biometric information, remains confidential and safe.<br/><br/>With Decide ID, enjoy a flexible, secure, and privacy-first way to verify and engage online.",
+		"usesInternetIdentity": true,
+		"logo": "/images/dapps/decide-ai-logo.svg",
+		"github": "https://github.com/modclub-app"
+	}
+]
