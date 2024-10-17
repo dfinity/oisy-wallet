@@ -211,7 +211,7 @@ const createTokenGroup = ({
  *          and tokens without twins remain in their original place.
  *          The group replaces the first token of the group in the list.
  */
-export function groupTokensByTwin(tokens: TokenUi[]): TokenUiOrGroupUi[] {
+export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	const groupedTokenTwins = new Set<string>();
 	const mappedTokensWithGroups: TokenUiOrGroupUi[] = tokens.map((token) => {
 		if (!isRequiredTokenWithLinkedData(token)) {
