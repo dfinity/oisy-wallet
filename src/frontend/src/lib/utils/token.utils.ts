@@ -147,7 +147,8 @@ export const mapTokenUi = ({
  * @param token - The token object to be checked.
  * @returns A boolean indicating whether the token is of type RequiredTokenWithLinkedData.
  */
-export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string'
+export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>
+	'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
 
 /**
  * Type guard to check if an object is of type TokenGroupUi.
@@ -155,13 +156,12 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
  * @param obj - The object to check.
  * @returns A boolean indicating whether the object is a TokenGroupUi.
  */
-export const isTokenGroupUi = (obj: unknown): obj is TokenGroupUi => (
-		typeof obj === 'object' &&
-		obj !== null &&
-		'header' in obj &&
-		typeof (obj as TokenGroupUi).header === 'object' &&
-		'tokens' in obj
-	)
+export const isTokenGroupUi = (obj: unknown): obj is TokenGroupUi =>
+	typeof obj === 'object' &&
+	obj !== null &&
+	'header' in obj &&
+	typeof (obj as TokenGroupUi).header === 'object' &&
+	'tokens' in obj;
 
 /**
  * Factory function to create a TokenGroupUi based on the provided tokens and network details.
@@ -191,7 +191,7 @@ const createTokenGroup = ({
 		native: nativeToken.network,
 		tokens: [nativeToken, twinToken]
 	};
-}
+};
 
 /**
  * Function to create a list of TokenUiOrGroupUi by grouping tokens with matching twinTokenSymbol.
@@ -229,7 +229,7 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 				mappedTokensWithGroups.push(
 					createTokenGroup({
 						nativeToken: token,
-						twinToken,
+						twinToken
 					})
 				);
 			} else {
@@ -240,11 +240,11 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		},
 		{
 			mappedTokensWithGroups: [],
-			groupedTokenTwins: new Set<string>(),
+			groupedTokenTwins: new Set<string>()
 		}
 	);
 
 	return mappedTokensWithGroups.filter(
 		(t) => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol)
 	);
-}
+};
