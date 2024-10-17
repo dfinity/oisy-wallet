@@ -109,6 +109,10 @@ export const modalAboutHow: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'about-how'
 );
+export const modalDAppDetails: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'dapp-details'
+);
 
 export const modalWalletConnect: Readable<boolean> = derived(
 	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],

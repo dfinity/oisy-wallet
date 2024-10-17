@@ -73,8 +73,15 @@ interface I18nAuth {
 }
 
 interface I18nDapps {
-	text: { all_dapps: string; featured: string };
-	alt: { logo: string; open_dapp: string; website: string };
+	text: { all_dapps: string; featured: string; open_dapp: string };
+	alt: {
+		logo: string;
+		open_dapp: string;
+		open_twitter: string;
+		source_code_on_github: string;
+		tags: string;
+		website: string;
+	};
 }
 
 interface I18nFooter {
