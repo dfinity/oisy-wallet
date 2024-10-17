@@ -1,11 +1,10 @@
 <script lang="ts">
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { DappDescription } from '$lib/types/dappDescription';
+	import type { FeaturedDappDescription } from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: Omit<DappDescription, 'screenshots'> &
-		Required<Pick<DappDescription, 'screenshots'>>;
+	export let dAppDescription: FeaturedDappDescription;
 </script>
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
