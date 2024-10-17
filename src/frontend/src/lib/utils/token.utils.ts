@@ -178,13 +178,13 @@ export function isTokenGroupUi(obj: unknown): obj is TokenGroupUi {
  *
  * @returns A TokenGroupUi object that includes a header with network and symbol information and contains both the native and twin tokens.
  */
-function createTokenGroup({
+const createTokenGroup = ({
 	nativeToken,
 	twinToken
 }: {
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
-}): TokenGroupUi {
+}): TokenGroupUi => {
 	const capitalizeNetworkName = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
 
 	return {
