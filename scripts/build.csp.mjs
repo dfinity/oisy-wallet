@@ -147,7 +147,7 @@ const updateCSP = (indexHtml) => {
 		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
-	const onramperConnectFrameSrc = 'https://buy.onramper.dev';
+	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
 
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
