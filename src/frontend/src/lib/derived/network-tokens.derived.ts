@@ -6,6 +6,7 @@ import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
+import { showZeroBalances } from '$lib/derived/settings.derived';
 
 /**
  * All user-enabled tokens matching the selected network or chain fusion.
@@ -35,3 +36,16 @@ export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived
 			$exchanges
 		})
 );
+
+/**
+ * Filtered tokens based on user settings (e.g., hiding/showing zero balances).
+ */
+export const combinedDerivedFilteredNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[combinedDerivedSortedNetworkTokensUi, showZeroBalances],
+	([$sortedTokens, $showZeroBalances]) =>
+		$sortedTokens.filter(
+			({ balance, usdBalance }) =>
+				Number(balance ?? 0n) !== 0 || (usdBalance ?? 0) !== 0 || $showZeroBalances
+		)
+);
+
