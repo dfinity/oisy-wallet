@@ -11,21 +11,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { DappDescription } from '$lib/types/dappDescription';
+	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: DappDescription;
 	$: ({ website, screenshots, twitter, github, tags, name, description, logo } = dAppDescription);
 
-	let isURLValid: boolean;
-	let formattedUrl: string | undefined;
-
+	let websiteURL: Option<URL>;
 	$: {
 		try {
-			formattedUrl = new URL(website).hostname.replace('www.', '');
-			isURLValid = true;
+			websiteURL = new URL(website);
 		} catch (e) {
-			formattedUrl = undefined;
-			isURLValid = false;
+			websiteURL = null;
 		}
 	}
 </script>
@@ -55,19 +52,19 @@
 				/>
 				<div>
 					<div class="text-lg font-bold">{name}</div>
-					{#if nonNullish(formattedUrl)}
+					{#if nonNullish(websiteURL)}
 						<ExternalLink
 							iconVisible={false}
 							ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
 								$dAppname: name
 							})}
-							href={website}
-							class="text-sm text-misty-rose">{formattedUrl}</ExternalLink
+							href={websiteURL.toString()}
+							styleClass="text-sm text-misty-rose">{websiteURL.hostname}</ExternalLink
 						>
 					{/if}
 				</div>
 				<div class="ml-auto flex space-x-4">
-					{#if twitter}
+					{#if nonNullish(twitter)}
 						<ExternalLinkIcon
 							href={twitter}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_twitter, {
@@ -77,7 +74,7 @@
 							<IconTwitter />
 						</ExternalLinkIcon>
 					{/if}
-					{#if github}
+					{#if nonNullish(github)}
 						<ExternalLinkIcon
 							href={github}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.source_code_on_github, {
@@ -96,13 +93,13 @@
 			<DappTags dAppName={name} {tags} />
 		</article>
 
-		{#if isURLValid}
+		{#if nonNullish(websiteURL)}
 			<ExternalLink
 				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
 					$dAppname: name
 				})}
-				class="as-button primary padding-sm mt-auto flex flex-row-reverse"
-				href={website}
+				styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
+				href={websiteURL.toString()}
 				>{replacePlaceholders($i18n.dapps.text.open_dapp, {
 					$dAppname: name
 				})}</ExternalLink
