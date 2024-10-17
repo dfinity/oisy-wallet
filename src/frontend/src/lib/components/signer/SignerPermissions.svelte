@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { IconWallet } from '@dfinity/gix-components';
 	import {
+		ICRC25_PERMISSION_GRANTED,
+		ICRC27_ACCOUNTS,
 		type IcrcScope,
 		type IcrcScopedMethod,
 		type PermissionsConfirmation
@@ -23,8 +25,8 @@
 		permissionsPrompt: { payload, reset: resetPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let scopes: IcrcScope[] | undefined;
-	$: scopes = $payload?.requestedScopes;
+	let scopes: IcrcScope[];
+	$: scopes = $payload?.requestedScopes ?? [];
 
 	let confirm: PermissionsConfirmation | undefined;
 	$: confirm = $payload?.confirm;
@@ -55,7 +57,7 @@
 			return;
 		}
 
-		confirm((scopes ?? []).map((scope) => ({ ...scope, state: 'granted' })));
+		confirm(scopes.map((scope) => ({ ...scope, state: ICRC25_PERMISSION_GRANTED })));
 
 		resetPrompt();
 	};
@@ -64,13 +66,8 @@
 
 	const onApprove = () => approvePermissions();
 
-	const listItems: Record<
-		IcrcScopedMethod,
-		{
-			icon: ComponentType;
-			label: string;
-		}
-	> = {
+	let listItems: Record<IcrcScopedMethod, { icon: ComponentType; label: string }>;
+	$: listItems = {
 		icrc27_accounts: {
 			icon: IconWallet,
 			label: replaceOisyPlaceholders($i18n.signer.permissions.text.icrc27_accounts)
@@ -83,12 +80,12 @@
 
 	let requestAccountsPermissions = false;
 	$: requestAccountsPermissions = nonNullish(
-		scopes?.find(({ scope: { method } }) => method === 'icrc27_accounts')
+		scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS)
 	);
 </script>
 
-{#if nonNullish(scopes) && nonNullish($payload)}
-	<form in:fade on:submit|preventDefault={onApprove} method="POST">
+{#if nonNullish($payload)}
+	<form in:fade on:submit={onApprove} method="POST">
 		<h2 class="mb-4 text-center">{$i18n.signer.permissions.text.title}</h2>
 
 		<SignerOrigin payload={$payload} />
@@ -125,10 +122,10 @@
 		{/if}
 
 		<ButtonGroup>
-			<button type="button" class="error block flex-1" on:click={onReject}
+			<button type="button" class="error flex-1" on:click={onReject}
 				>{$i18n.core.text.reject}</button
 			>
-			<button type="submit" class="success block flex-1">{$i18n.core.text.approve}</button>
+			<button type="submit" class="success flex-1">{$i18n.core.text.approve}</button>
 		</ButtonGroup>
 	</form>
 {/if}
