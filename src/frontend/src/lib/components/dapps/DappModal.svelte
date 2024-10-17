@@ -11,8 +11,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { DappDescription } from '$lib/types/dappDescription';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Option } from '$lib/types/utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: DappDescription;
 	$: ({ website, screenshots, twitter, github, tags, name, description, logo } = dAppDescription);
