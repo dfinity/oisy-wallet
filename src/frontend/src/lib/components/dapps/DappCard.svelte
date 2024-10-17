@@ -6,13 +6,13 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: DappDescription;
-	$: ({name, logo, oneLiner, tags} = dAppDescription);
+	$: ({ name, logo, oneLiner, tags } = dAppDescription);
 </script>
 
 <button
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppname: name })}
 	on:click
-	class="relative rounded-3xl bg-white p-4 pt-12 h-44 md:h-60"
+	class="relative h-44 rounded-3xl bg-white p-4 pt-12 md:h-60"
 >
 	<span class="absolute -top-5 left-4">
 		<Img
@@ -28,13 +28,13 @@
 			<p class="m-0 text-start text-lg font-semibold">{name}</p>
 			<p
 				title={oneLiner}
-				class="m-0 mt-2 line-clamp-2 md:line-clamp-4 text-ellipsis text-start text-xs text-misty-rose"
+				class="m-0 mt-2 line-clamp-2 text-ellipsis text-start text-xs text-misty-rose md:line-clamp-4"
 			>
 				{oneLiner}
 			</p>
 		</section>
 		<section>
-			<DappTags dAppName={name} tags={tags} />
+			<DappTags dAppName={name} {tags} />
 		</section>
 	</article>
 </button>
