@@ -153,15 +153,15 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
 /**
  * Type guard to check if an object is of type TokenGroupUi.
  *
- * @param obj - The object to check.
+ * @param tokenUiOrGroupUi - The object to check.
  * @returns A boolean indicating whether the object is a TokenGroupUi.
  */
-export const isTokenGroupUi = (obj: unknown): obj is TokenGroupUi =>
-	typeof obj === 'object' &&
-	obj !== null &&
-	'header' in obj &&
-	typeof (obj as TokenGroupUi).header === 'object' &&
-	'tokens' in obj;
+export const isTokenGroupUi = (tokenUiOrGroupUi: TokenUiOrGroupUi): tokenUiOrGroupUi is TokenGroupUi =>
+	typeof tokenUiOrGroupUi === 'object' &&
+	tokenUiOrGroupUi !== null &&
+	'header' in tokenUiOrGroupUi &&
+	typeof (tokenUiOrGroupUi).header === 'object' &&
+	'tokens' in tokenUiOrGroupUi;
 
 /**
  * Factory function to create a TokenGroupUi based on the provided tokens and network details.
