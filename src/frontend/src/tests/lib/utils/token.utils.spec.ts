@@ -92,6 +92,14 @@ const tokensWithMismatchedDecimals = [
 	},
 ];
 
+const reorderedTokens = [
+	tokens[1], // ckBTC
+	tokens[0], // BTC
+	tokens[3], // ckETH
+	tokens[2], // ETH
+	tokens[4], // ICP
+];
+
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
 }));
@@ -315,4 +323,37 @@ describe('mapTokenUi', () => {
 		expect(fooToken).not.toHaveProperty('tokens');
 		expect(ckFooToken).not.toHaveProperty('tokens');
 	});
+
+	it('should correctly group tokens even when the ckToken is declared before the native token', () => {
+		const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
+
+		expect(groupedTokens).toHaveLength(3);
+
+		const btcGroup = groupedTokens.find(
+			(groupOrToken) =>
+				'tokens' in groupOrToken &&
+				(groupOrToken as TokenGroupUi).tokens.some((t) => t.symbol === 'BTC')
+		) as TokenGroupUi;
+
+		expect(btcGroup).toBeDefined();
+		expect(btcGroup.tokens).toHaveLength(2);
+		expect(btcGroup.tokens.map((t) => t.symbol)).toContain('BTC');
+		expect(btcGroup.tokens.map((t) => t.symbol)).toContain('ckBTC');
+
+		const ethGroup = groupedTokens.find(
+			(groupOrToken) =>
+				'tokens' in groupOrToken &&
+				(groupOrToken as TokenGroupUi).tokens.some((t) => t.symbol === 'ETH')
+		) as TokenGroupUi;
+
+		expect(ethGroup).toBeDefined();
+		expect(ethGroup.tokens).toHaveLength(2);
+		expect(ethGroup.tokens.map((t) => t.symbol)).toContain('ETH');
+		expect(ethGroup.tokens.map((t) => t.symbol)).toContain('ckETH');
+
+		const icpToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'ICP');
+
+		expect(icpToken).toBeDefined();
+	});
+
 });

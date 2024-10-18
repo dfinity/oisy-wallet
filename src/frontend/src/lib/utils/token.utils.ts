@@ -1,4 +1,5 @@
 import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import type { IcCkToken } from '$icp/types/ic';
 import { isIcCkToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -17,7 +18,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -156,11 +157,13 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
  * @param tokenUiOrGroupUi - The object to check.
  * @returns A boolean indicating whether the object is a TokenGroupUi.
  */
-export const isTokenGroupUi = (tokenUiOrGroupUi: TokenUiOrGroupUi): tokenUiOrGroupUi is TokenGroupUi =>
+export const isTokenGroupUi = (
+	tokenUiOrGroupUi: TokenUiOrGroupUi
+): tokenUiOrGroupUi is TokenGroupUi =>
 	typeof tokenUiOrGroupUi === 'object' &&
 	nonNullish(tokenUiOrGroupUi) &&
 	'header' in tokenUiOrGroupUi &&
-	typeof (tokenUiOrGroupUi).header === 'object' &&
+	typeof tokenUiOrGroupUi.header === 'object' &&
 	'tokens' in tokenUiOrGroupUi;
 
 /**
@@ -201,42 +204,30 @@ const createTokenGroup = ({
  *          and tokens without twins remain in their original place.
  *          The group replaces the first token of the group in the list.
  */
-export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] =>
-	tokens
-		.reduce(
-			(acc, token) =>
-				isRequiredTokenWithLinkedData(token)
-					? (() => {
-						const twinToken = tokens.find(
-							(t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)
-						);
-						return nonNullish(twinToken) &&
-						!acc.groupedTokenSymbols.has(token.symbol) &&
-						!acc.groupedTokenSymbols.has(twinToken.symbol) &&
-						token.decimals === twinToken.decimals
-							? {
-								tokens: acc.tokens.concat(
-									createTokenGroup({ nativeToken: token, twinToken })
-								),
-								groupedTokenSymbols: acc.groupedTokenSymbols
-									.add(token.symbol)
-									.add(twinToken.symbol),
-							}
-							: {
-								tokens: acc.tokens.concat(token),
-								groupedTokenSymbols: acc.groupedTokenSymbols,
-							};
-					})()
-					: acc.groupedTokenSymbols.has(token.symbol)
-						? acc
-						: {
-							tokens: acc.tokens.concat(token),
-							groupedTokenSymbols: acc.groupedTokenSymbols,
-						},
-			{
-				tokens: [] as TokenUiOrGroupUi[],
-				groupedTokenSymbols: new Set<string>(),
-			}
-		)
-		.tokens;
+export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
+	const groupedTokenTwins = new Set<string>();
+	const mappedTokensWithGroups: TokenUiOrGroupUi[] = tokens.map((token) => {
+		if (!isRequiredTokenWithLinkedData(token)) {
+			return token;
+		}
 
+		const twinToken = tokens.find((t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)) as
+			| IcCkToken
+			| undefined;
+
+		if (twinToken && twinToken.decimals === token.decimals) {
+			groupedTokenTwins.add(twinToken.symbol);
+			groupedTokenTwins.add(token.symbol);
+			return createTokenGroup({
+				nativeToken: token,
+				twinToken: twinToken
+			});
+		}
+
+		return token;
+	});
+
+	return mappedTokensWithGroups.filter(
+		(t) => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol)
+	);
+};
