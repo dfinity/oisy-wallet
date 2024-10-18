@@ -4,8 +4,9 @@
 	import type { TokenUi } from '$lib/types/token';
 
 	export let token: TokenUi;
+	$: ({ balance, usdBalance } = token);
 </script>
 
 <TokenExchangeValueSkeleton {token}>
-	<TokenExchangeBalance usdBalance={token.usdBalance} />
+	<TokenExchangeBalance {balance} {usdBalance} />
 </TokenExchangeValueSkeleton>
