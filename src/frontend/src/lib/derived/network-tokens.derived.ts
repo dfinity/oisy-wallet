@@ -1,5 +1,6 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import { showZeroBalances } from '$lib/derived/settings.derived';
 import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
@@ -34,4 +35,16 @@ export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived
 			$balances,
 			$exchanges
 		})
+);
+
+/**
+ * Filtered tokens based on user settings (e.g., hiding/showing zero balances).
+ */
+export const combinedDerivedFilteredNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[combinedDerivedSortedNetworkTokensUi, showZeroBalances],
+	([$sortedTokens, $showZeroBalances]) =>
+		$sortedTokens.filter(
+			({ balance, usdBalance }) =>
+				Number(balance ?? 0n) !== 0 || (usdBalance ?? 0) !== 0 || $showZeroBalances
+		)
 );
