@@ -52,9 +52,6 @@
 	// Segment
 	--segment-selected-background: var(--color-secondary);
 
-	// Checkbox
-	--checkbox-padding: 0;
-
 	// Modal
 
 	--alert-width: calc(100% - var(--padding-8x));
@@ -219,34 +216,5 @@ div.step.completed {
 
 	div.line {
 		--line-color: var(--color-primary);
-	}
-}
-
-div.checkbox {
-	input[type='checkbox'] {
-		--secondary: var(--color-primary);
-		--focus-background: var(--color-white);
-
-		&:focus {
-			--secondary: var(--color-primary);
-			--focus-background: var(--color-white);
-		}
-
-		&:checked {
-			--secondary: var(--color-primary);
-			--focus-background: var(--color-cobalt);
-			--input-custom-border-color: var(--color-primary);
-			--input-background: var(--color-primary);
-
-			&:focus {
-				--secondary: var(--color-cobalt);
-				--focus-background: var(--color-cobalt);
-				--input-custom-border-color: var(--color-cobalt);
-			}
-		}
-
-		&:checked:after {
-			--background-contrast: var(--color-white);
-		}
 	}
 }
