@@ -332,7 +332,7 @@ describe('mapTokenUi', () => {
 		const btcGroup = groupedTokens.find(
 			(groupOrToken) =>
 				'tokens' in groupOrToken &&
-				(groupOrToken as TokenGroupUi).tokens.some((t) => t.symbol === 'BTC')
+				(groupOrToken).tokens.some((t) => t.symbol === 'BTC')
 		) as TokenGroupUi;
 
 		expect(btcGroup).toBeDefined();
@@ -343,7 +343,7 @@ describe('mapTokenUi', () => {
 		const ethGroup = groupedTokens.find(
 			(groupOrToken) =>
 				'tokens' in groupOrToken &&
-				(groupOrToken as TokenGroupUi).tokens.some((t) => t.symbol === 'ETH')
+				(groupOrToken).tokens.some((t) => t.symbol === 'ETH')
 		) as TokenGroupUi;
 
 		expect(ethGroup).toBeDefined();
