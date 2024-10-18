@@ -158,7 +158,7 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
  */
 export const isTokenGroupUi = (tokenUiOrGroupUi: TokenUiOrGroupUi): tokenUiOrGroupUi is TokenGroupUi =>
 	typeof tokenUiOrGroupUi === 'object' &&
-	!isNullish(tokenUiOrGroupUi) &&
+	nonNullish(tokenUiOrGroupUi) &&
 	'header' in tokenUiOrGroupUi &&
 	typeof (tokenUiOrGroupUi).header === 'object' &&
 	'tokens' in tokenUiOrGroupUi;
