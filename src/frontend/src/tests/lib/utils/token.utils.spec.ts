@@ -1,4 +1,5 @@
 import { ICP_NETWORK } from '$env/networks.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { TokenGroupUi, TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
@@ -12,7 +13,6 @@ import { $balances, bn3 } from '$tests/mocks/balances.mock';
 import { $exchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -22,9 +22,9 @@ const fee = 10000000n;
 
 const tokens = [
 	{
-		... BTC_MAINNET_TOKEN,
+		...BTC_MAINNET_TOKEN,
 		balance: BigNumber.from(1),
-		usdBalance: 50000,
+		usdBalance: 50000
 	},
 	{
 		symbol: 'ckBTC',
@@ -69,7 +69,7 @@ const tokensWithMismatchedDecimals = [
 			name: 'Foo Network',
 			icon: 'foo-icon',
 			iconBW: 'foo-icon-bw',
-			env: 'mainnet',
+			env: 'mainnet'
 		},
 		twinTokenSymbol: 'ckFOO',
 		balance: BigNumber.from(100),
@@ -77,7 +77,7 @@ const tokensWithMismatchedDecimals = [
 		standard: 'ethereum',
 		category: 'default',
 		decimals: 8,
-		name: 'Foo Token',
+		name: 'Foo Token'
 	},
 	{
 		symbol: 'ckFOO',
@@ -88,8 +88,8 @@ const tokensWithMismatchedDecimals = [
 		category: 'default',
 		decimals: 9, // Mismatched decimals
 		name: 'Chain key Foo Token',
-		minterCanisterId: 'ckfoo-canister-id',
-	},
+		minterCanisterId: 'ckfoo-canister-id'
+	}
 ];
 
 const reorderedTokens = [
@@ -97,7 +97,7 @@ const reorderedTokens = [
 	tokens[0], // BTC
 	tokens[3], // ckETH
 	tokens[2], // ETH
-	tokens[4], // ICP
+	tokens[4] // ICP
 ];
 
 vi.mock('$lib/utils/exchange.utils', () => ({
@@ -309,7 +309,6 @@ describe('mapTokenUi', () => {
 		expect(uniqueSymbols.size).toBe(tokenSymbols.length);
 	});
 
-
 	it('should not group tokens when their decimals are mismatched', () => {
 		const groupedTokens = groupTokensByTwin(tokensWithMismatchedDecimals as TokenUi[]);
 		expect(groupedTokens).toHaveLength(5);
@@ -331,8 +330,7 @@ describe('mapTokenUi', () => {
 
 		const btcGroup = groupedTokens.find(
 			(groupOrToken) =>
-				'tokens' in groupOrToken &&
-				(groupOrToken).tokens.some((t) => t.symbol === 'BTC')
+				'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'BTC')
 		) as TokenGroupUi;
 
 		expect(btcGroup).toBeDefined();
@@ -342,8 +340,7 @@ describe('mapTokenUi', () => {
 
 		const ethGroup = groupedTokens.find(
 			(groupOrToken) =>
-				'tokens' in groupOrToken &&
-				(groupOrToken).tokens.some((t) => t.symbol === 'ETH')
+				'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'ETH')
 		) as TokenGroupUi;
 
 		expect(ethGroup).toBeDefined();
@@ -355,5 +352,4 @@ describe('mapTokenUi', () => {
 
 		expect(icpToken).toBeDefined();
 	});
-
 });

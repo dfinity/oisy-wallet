@@ -18,7 +18,7 @@ export const BTC_MAINNET_TOKEN: TokenWithLinkedData = {
 	symbol: BTC_MAINNET_SYMBOL,
 	decimals: BTC_DECIMALS,
 	icon: bitcoin,
-	twinTokenSymbol: 'ckBTC',
+	twinTokenSymbol: 'ckBTC'
 };
 
 export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
