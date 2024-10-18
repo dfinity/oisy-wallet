@@ -201,46 +201,42 @@ const createTokenGroup = ({
  *          and tokens without twins remain in their original place.
  *          The group replaces the first token of the group in the list.
  */
-export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const { mappedTokensWithGroups, groupedTokenTwins } = tokens.reduce<{
-		mappedTokensWithGroups: TokenUiOrGroupUi[];
-		groupedTokenTwins: Set<string>;
-	}>(
-		(acc, token) => {
-			const { mappedTokensWithGroups, groupedTokenTwins } = acc;
-
-			if (!isRequiredTokenWithLinkedData(token)) {
-				mappedTokensWithGroups.push(token);
-				return acc;
+export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] =>
+	tokens
+		.reduce(
+			(acc, token) =>
+				isRequiredTokenWithLinkedData(token)
+					? (() => {
+						const twinToken = tokens.find(
+							(t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)
+						);
+						return nonNullish(twinToken) &&
+						!acc.groupedTokenSymbols.has(token.symbol) &&
+						!acc.groupedTokenSymbols.has(twinToken.symbol)
+							? {
+								tokens: acc.tokens.concat(
+									createTokenGroup({ nativeToken: token, twinToken })
+								),
+								groupedTokenSymbols: acc.groupedTokenSymbols
+									.add(token.symbol)
+									.add(twinToken.symbol),
+							}
+							: {
+								tokens: acc.tokens.concat(token),
+								groupedTokenSymbols: acc.groupedTokenSymbols,
+							};
+					})()
+					: acc.groupedTokenSymbols.has(token.symbol)
+						? acc
+						: {
+							tokens: acc.tokens.concat(token),
+							groupedTokenSymbols: acc.groupedTokenSymbols,
+						},
+			{
+				tokens: [] as TokenUiOrGroupUi[],
+				groupedTokenSymbols: new Set<string>(),
 			}
+		)
+		.tokens;
 
-			const twinToken = tokens.find(
-				(t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)
-			);
 
-			if (nonNullish(twinToken)) {
-				groupedTokenTwins.add(twinToken.symbol);
-				groupedTokenTwins.add(token.symbol);
-
-				mappedTokensWithGroups.push(
-					createTokenGroup({
-						nativeToken: token,
-						twinToken
-					})
-				);
-			} else {
-				mappedTokensWithGroups.push(token);
-			}
-
-			return acc;
-		},
-		{
-			mappedTokensWithGroups: [],
-			groupedTokenTwins: new Set<string>()
-		}
-	);
-
-	return mappedTokensWithGroups.filter(
-		(t) => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol)
-	);
-};
