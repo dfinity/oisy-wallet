@@ -212,7 +212,8 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] =>
 						);
 						return nonNullish(twinToken) &&
 						!acc.groupedTokenSymbols.has(token.symbol) &&
-						!acc.groupedTokenSymbols.has(twinToken.symbol)
+						!acc.groupedTokenSymbols.has(twinToken.symbol) &&
+						token.decimals === twinToken.decimals
 							? {
 								tokens: acc.tokens.concat(
 									createTokenGroup({ nativeToken: token, twinToken })
@@ -238,5 +239,4 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] =>
 			}
 		)
 		.tokens;
-
 

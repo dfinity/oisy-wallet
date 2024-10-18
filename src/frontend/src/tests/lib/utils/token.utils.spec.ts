@@ -71,6 +71,38 @@ const tokens = [
 	}
 ];
 
+const tokensWithMismatchedDecimals = [
+	...tokens,
+	{
+		symbol: 'FOO',
+		network: {
+			id: Symbol('FOO'),
+			name: 'Foo Network',
+			icon: 'foo-icon',
+			iconBW: 'foo-icon-bw',
+			env: 'mainnet',
+		},
+		twinTokenSymbol: 'ckFOO',
+		balance: BigNumber.from(100),
+		usdBalance: 1000,
+		standard: 'ethereum',
+		category: 'default',
+		decimals: 8,
+		name: 'Foo Token',
+	},
+	{
+		symbol: 'ckFOO',
+		network: ICP_NETWORK,
+		balance: BigNumber.from(200),
+		usdBalance: 2000,
+		standard: 'icrc',
+		category: 'default',
+		decimals: 9, // Mismatched decimals
+		name: 'Chain key Foo Token',
+		minterCanisterId: 'ckfoo-canister-id',
+	},
+];
+
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
 }));
@@ -278,5 +310,20 @@ describe('mapTokenUi', () => {
 		);
 		const uniqueSymbols = new Set(tokenSymbols);
 		expect(uniqueSymbols.size).toBe(tokenSymbols.length);
+	});
+
+
+	it('should not group tokens when their decimals are mismatched', () => {
+		const groupedTokens = groupTokensByTwin(tokensWithMismatchedDecimals as TokenUi[]);
+		expect(groupedTokens).toHaveLength(5);
+
+		const fooToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'FOO');
+		const ckFooToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'ckFOO');
+
+		expect(fooToken).toBeDefined();
+		expect(ckFooToken).toBeDefined();
+
+		expect(fooToken).not.toHaveProperty('tokens');
+		expect(ckFooToken).not.toHaveProperty('tokens');
 	});
 });
