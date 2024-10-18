@@ -1,7 +1,10 @@
 import { test } from '@playwright/test';
 import {
 	ABOUT_HOW_MODAL,
-	ABOUT_HOW_MODAL_OPEN_BUTTON
+	ABOUT_HOW_MODAL_OPEN_BUTTON,
+	ABOUT_HOW_MODAL_OPEN_MENU_ITEM,
+	ABOUT_MENU_OPEN_BUTTON,
+	ABOUT_MENU_POPOVER
 } from '../src/frontend/src/lib/constants/test-ids.constants';
 import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
@@ -22,7 +25,9 @@ test('should display about-how modal', async ({ page, isMobile }) => {
 	await homepageLoggedOut.waitForReady();
 
 	await homepageLoggedOut.testModalSnapshot({
-		modalOpenButtonTestId: ABOUT_HOW_MODAL_OPEN_BUTTON,
-		modalTestId: ABOUT_HOW_MODAL
+		modalOpenButtonTestId: isMobile ? ABOUT_HOW_MODAL_OPEN_MENU_ITEM : ABOUT_HOW_MODAL_OPEN_BUTTON,
+		modalTestId: ABOUT_HOW_MODAL,
+		initializerTestId: isMobile ? ABOUT_MENU_OPEN_BUTTON : undefined,
+		initializedIndicatorTestId: isMobile ? ABOUT_MENU_POPOVER : undefined
 	});
 });

@@ -41,6 +41,8 @@ interface WaitForModalParams {
 
 type TestModalSnapshotParams = {
 	selectorsToMock?: string[];
+	initializerTestId?: string;
+	initializedIndicatorTestId?: string;
 } & WaitForModalParams;
 
 interface ClickMenuItemParams {
@@ -179,8 +181,18 @@ abstract class Homepage {
 	async testModalSnapshot({
 		modalOpenButtonTestId,
 		modalTestId,
-		selectorsToMock
+		selectorsToMock,
+		initializerTestId,
+		initializedIndicatorTestId
 	}: TestModalSnapshotParams): Promise<void> {
+		if (nonNullish(initializerTestId)) {
+			await this.#page.getByTestId(initializerTestId).click();
+		}
+
+		if (nonNullish(initializedIndicatorTestId)) {
+			await this.#page.getByTestId(initializedIndicatorTestId).waitFor();
+		}
+
 		const modal = await this.waitForModal({
 			modalOpenButtonTestId,
 			modalTestId

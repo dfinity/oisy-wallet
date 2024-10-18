@@ -30,6 +30,14 @@ export default defineConfig({
 		{
 			name: 'Google Chrome',
 			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+		},
+		{
+			name: 'Apple iPhone SE',
+			use: { ...devices['iPhone SE'] }
+		},
+		{
+			name: 'Apple iPhone 14 Pro Max',
+			use: { ...devices['iPhone 14 Pro Max'] }
 		}
 	]
 });
