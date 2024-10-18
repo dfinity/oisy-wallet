@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcCkToken, IcFee, IcInterface, IcToken } from '$icp/types/ic';
 import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -152,4 +152,4 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 });
 
 export const isIcCkToken = (token: Token): token is IcCkToken =>
-	'minterCanisterId' in token && token.network?.id === ICP_NETWORK.id;
+	'minterCanisterId' in token && token.network?.id === ICP_NETWORK_ID;
