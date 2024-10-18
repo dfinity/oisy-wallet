@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconManage from '$lib/components/icons/IconManage.svelte';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';

@@ -13,7 +13,7 @@
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
-	import { token } from '$lib/stores/token.store';
+	import { pageToken } from '$lib/derived/page-token.derived';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -37,14 +37,14 @@
 		<div transition:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-5">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				{#if back}
-					<Back color="current" />
+					<Back color="current" onlyArrow />
 				{/if}
 
 				<div>
 					<div class="my-0.5 flex items-center justify-center">
-						{#if displayTokenSymbol && nonNullish($token)}
+						{#if displayTokenSymbol && nonNullish($pageToken)}
 							<div in:fade>
-								<TokenLogo token={$token} ring networkIconBlackAndWhite />
+								<TokenLogo token={$pageToken} ring networkIconBlackAndWhite />
 							</div>
 						{:else}
 							<SkeletonLogo size="small" />
@@ -69,7 +69,7 @@
 		<Actions />
 	</div>
 
-	{#if isErc20Icp($token)}
+	{#if isErc20Icp($pageToken)}
 		<Erc20Icp />
 	{/if}
 </div>
