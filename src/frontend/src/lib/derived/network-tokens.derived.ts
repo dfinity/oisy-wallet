@@ -1,12 +1,12 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import { showZeroBalances } from '$lib/derived/settings.derived';
 import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
-import { showZeroBalances } from '$lib/derived/settings.derived';
 
 /**
  * All user-enabled tokens matching the selected network or chain fusion.
@@ -48,4 +48,3 @@ export const combinedDerivedFilteredNetworkTokensUi: Readable<TokenUi[]> = deriv
 				Number(balance ?? 0n) !== 0 || (usdBalance ?? 0) !== 0 || $showZeroBalances
 		)
 );
-
