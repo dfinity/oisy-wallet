@@ -214,7 +214,7 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 				return acc;
 			}
 
-			const twinToken: TokenUi | undefined = tokens.find(
+			const twinToken = tokens.find(
 				(t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)
 			);
 
