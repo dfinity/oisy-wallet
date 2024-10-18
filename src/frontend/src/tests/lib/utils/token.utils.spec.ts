@@ -12,6 +12,7 @@ import { $balances, bn3 } from '$tests/mocks/balances.mock';
 import { $exchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
+import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -21,21 +22,9 @@ const fee = 10000000n;
 
 const tokens = [
 	{
-		symbol: 'BTC',
-		network: {
-			id: Symbol('BTC'),
-			name: 'Bitcoin',
-			icon: 'btc-icon',
-			iconBW: 'btc-icon-bw',
-			env: 'mainnet'
-		},
-		twinTokenSymbol: 'ckBTC',
+		... BTC_MAINNET_TOKEN,
 		balance: BigNumber.from(1),
 		usdBalance: 50000,
-		standard: 'bitcoin',
-		category: 'default',
-		decimals: 8,
-		name: 'Bitcoin'
 	},
 	{
 		symbol: 'ckBTC',
