@@ -8,12 +8,13 @@ import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
-import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
+import { tokenStandard } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { token } from '$lib/stores/token.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
@@ -26,9 +27,9 @@ import { derived, type Readable } from 'svelte/store';
  * - on network ICP if the token is ckETH
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[tokenStandard, tokenWithFallbackAsIcToken],
-	([$tokenStandard, $tokenWithFallbackAsIcToken]) =>
-		$tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenWithFallbackAsIcToken)
+	[tokenStandard, tokenAsIcToken],
+	([$tokenStandard, $tokenAsIcToken]) =>
+		$tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenAsIcToken)
 );
 
 /**
@@ -37,18 +38,17 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
  * - on network ICP if the token is ckErc20
  */
 export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
-	[tokenWithFallbackAsIcToken],
-	([$tokenWithFallbackAsIcToken]) =>
-		ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) ||
-		isTokenCkErc20Ledger($tokenWithFallbackAsIcToken)
+	[tokenAsIcToken],
+	([$tokenAsIcToken]) =>
+		ERC20_TWIN_TOKENS_IDS.includes($tokenAsIcToken.id) || isTokenCkErc20Ledger($tokenAsIcToken)
 );
 
 /**
  * On ckETH, we need to know if the target for conversion is Ethereum mainnet or Sepolia.
  */
 export const ckEthereumTwinToken: Readable<Token> = derived(
-	[tokenWithFallback],
-	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
+	[token],
+	([$token]) => ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
 );
 
 export const ckEthereumTwinTokenId: Readable<TokenId> = derived(
