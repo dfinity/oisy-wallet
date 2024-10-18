@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import {
-		combinedDerivedFilteredNetworkTokensUi
-	} from '$lib/derived/network-tokens.derived';
+	import { combinedDerivedFilteredNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import type { TokenUi } from '$lib/types/token';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
