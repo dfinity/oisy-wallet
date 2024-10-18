@@ -17,7 +17,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -158,7 +158,7 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
  */
 export const isTokenGroupUi = (tokenUiOrGroupUi: TokenUiOrGroupUi): tokenUiOrGroupUi is TokenGroupUi =>
 	typeof tokenUiOrGroupUi === 'object' &&
-	tokenUiOrGroupUi !== null &&
+	!isNullish(tokenUiOrGroupUi) &&
 	'header' in tokenUiOrGroupUi &&
 	typeof (tokenUiOrGroupUi).header === 'object' &&
 	'tokens' in tokenUiOrGroupUi;
