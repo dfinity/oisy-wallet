@@ -13,7 +13,7 @@
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
-	import { pageToken } from '$lib/derived/page-token.derived';
+	import { pageToken, pageTokenUi } from '$lib/derived/page-token.derived';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -55,7 +55,7 @@
 				<ContextMenu />
 			</div>
 
-			<Balance />
+			<Balance token={$pageTokenUi} />
 		</div>
 	{/if}
 
