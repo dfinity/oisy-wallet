@@ -20,6 +20,8 @@
 	class:lg:top-0={$authSignedIn}
 	class:lg:inset-x-0={$authSignedIn}
 	class:lg:z-10={$authSignedIn}
+	class:grid={$authNotSignedIn}
+	class:grid-cols-2={$authNotSignedIn}
 	class:xl:grid={$authNotSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 >
