@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { tokenSymbol } from '$lib/derived/token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { token } from '$lib/stores/token.store';
-	import { formatUSD } from '$lib/utils/format.utils';
 	import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
 
 	let usdBalance: number | undefined;
@@ -31,15 +31,6 @@
 	</output>
 
 	<span class="text-xl font-bold" class:opacity-50={usdBalance ?? 0 === 0}>
-		{#if nonNullish(usdBalance)}
-			{formatUSD({ value: usdBalance })}
-		{:else}
-			<span class:animate-pulse={isNullish(usdBalance)}
-				>{formatUSD({
-					value: 0,
-					options: { minFraction: 0, maxFraction: 0 }
-				}).replace('0', '-')}</span
-			>
-		{/if}
+		<TokenExchangeBalance {usdBalance} />
 	</span>
 </span>
