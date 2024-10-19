@@ -1,7 +1,3 @@
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '../../../src/frontend/src/env/tokens.env';
-import type { RequiredTokenWithLinkedData } from '../../../src/frontend/src/lib/types/token';
+import { ETHEREUM_SYMBOL, ICP_SYMBOL } from '../../../src/frontend/src/env/tokens.env';
 
-export const tokens: [RequiredTokenWithLinkedData, ...RequiredTokenWithLinkedData[]] = [
-	ICP_TOKEN,
-	ETHEREUM_TOKEN
-];
+export const tokenSymbols: [string, ...string[]] = [ICP_SYMBOL, ETHEREUM_SYMBOL];
