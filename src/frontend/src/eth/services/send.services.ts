@@ -21,6 +21,7 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -173,8 +174,6 @@ const ckErc20HelperContractPrepareTransaction = async ({
 /**
  * Get the current allowance of an Erc20 contract.
  */
-// TODO: this function is still not used in the codebase, so for now we put an ESLINT exception
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const erc20ContractAllowance = async ({
 	token,
 	owner,
@@ -488,6 +487,9 @@ const approve = async ({
 	token,
 	to,
 	minterInfo,
+	amount,
+	sourceNetwork,
+	progress,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
@@ -511,9 +513,34 @@ const approve = async ({
 		return { transactionApproved: false };
 	}
 
+	const preApprovedAmount = await erc20ContractAllowance({
+		token,
+		owner: to,
+		spender: erc20HelperContractAddress,
+		networkId: sourceNetwork.id
+	});
+
+	// If there is already an approved allowance that is enough for the required amount, we don't need to approve again.
+	if (preApprovedAmount.gte(amount)) {
+		progress(ProgressStepsSend.APPROVE);
+		return { transactionApproved: true };
+	}
+
+	// If the existing pre-approved amount is not enough, we need to reset the allowance first and then approve the new amount.
+	await prepareAndSignApproval({
+		...rest,
+		amount: ZERO,
+		token,
+		sourceNetwork,
+		spender: erc20HelperContractAddress
+	});
+
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
+		amount,
 		token,
+		sourceNetwork,
+		progress,
 		spender: erc20HelperContractAddress
 	});
 
