@@ -526,14 +526,16 @@ const approve = async ({
 		return { transactionApproved: true };
 	}
 
-	// If the existing pre-approved amount is not enough, we need to reset the allowance first and then approve the new amount.
-	await prepareAndSignApproval({
-		...rest,
-		amount: ZERO,
-		token,
-		sourceNetwork,
-		spender: erc20HelperContractAddress
-	});
+	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first and then approve the new amount.
+	if (preApprovedAmount.gt(ZERO)) {
+		await prepareAndSignApproval({
+			...rest,
+			amount: ZERO,
+			token,
+			sourceNetwork,
+			spender: erc20HelperContractAddress
+		});
+	}
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
