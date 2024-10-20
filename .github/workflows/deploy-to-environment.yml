@@ -1,6 +1,6 @@
 name: Deploy Frontend / Backend to Environment
 
-run-name: Deploying ${{ inputs.canister }} to ${{ inputs.network.upper }}
+run-name: Deploying ${{ inputs.canister }} to ${{ inputs.network }}
 
 on:
   push:
