@@ -17,11 +17,11 @@
 </script>
 
 <Card noMargin testId={`${TOKEN_GROUP}-${tokenGroup.header.symbol}`}>
-	<TokenSymbol token={{symbol:tokenGroup.header.name, network: tokenGroup.native}} />
+	<TokenSymbol token={{symbol:tokenGroup.header.name, network: tokenGroup.nativeNetwork}} />
 
 	<TokenName token={{name: tokenGroup.header.symbol}} slot="description" />
 
-	<TokenLogo token={{name: tokenGroup.header.name, icon: tokenGroup.header.icon, network: tokenGroup.native}} showNetworkIcon={false} slot="icon" color="white" />
+	<TokenLogo token={{name: tokenGroup.header.name, icon: tokenGroup.header.icon, network: tokenGroup.nativeNetwork}} showNetworkIcon={false} slot="icon" color="white" />
 
 	<span slot="balance">{totalBalance}</span>
 	<span slot="amountDescription">{totalBalanceUsd}</span>
