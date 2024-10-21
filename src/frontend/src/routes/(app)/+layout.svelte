@@ -11,12 +11,12 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteDApps, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
-		: isRouteDApps($page)
+		: isRouteDappExplorer($page)
 			? 'dapps'
 			: isRouteTransactions($page)
 				? 'transactions'

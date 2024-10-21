@@ -7,7 +7,7 @@
 </script>
 
 <ul
-	aria-label={replacePlaceholders($i18n.dapps.alt.tags, { $dAppname: dAppName })}
+	aria-label={replacePlaceholders($i18n.dapp_explorer.alt.tags, { $dAppname: dAppName })}
 	class="flex list-none flex-wrap gap-2"
 >
 	{#each tags as tag}

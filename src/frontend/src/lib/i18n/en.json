@@ -83,7 +83,7 @@
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		}
 	},
-	"dapps": {
+	"dapp_explorer": {
 		"text": {
 			"all_dapps": "All dapps",
 			"featured": "Featured",

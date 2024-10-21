@@ -10,7 +10,7 @@
 </script>
 
 <button
-	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppname: name })}
+	aria-label={replacePlaceholders($i18n.dapp_explorer.alt.learn_more, { $dAppname: name })}
 	on:click
 	class="relative h-44 flex-1 rounded-3xl bg-white p-4 pt-12 md:h-60"
 >
@@ -20,7 +20,7 @@
 			width="64"
 			rounded
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
+			alt={replacePlaceholders($i18n.dapp_explorer.alt.logo, { $dAppname: name })}
 		/>
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">

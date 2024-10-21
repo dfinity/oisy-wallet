@@ -15,7 +15,7 @@ export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 
 export const isRouteSettings = ({ route: { id } }: Page): boolean => id === '/(app)/settings';
 
-export const isRouteDApps = ({ route: { id } }: Page): boolean => id === '/(app)/dapps';
+export const isRouteDappExplorer = ({ route: { id } }: Page): boolean => id === '/(app)/explore';
 
 export const isRouteTokens = ({ route: { id } }: Page): boolean => id === '/(app)';
 

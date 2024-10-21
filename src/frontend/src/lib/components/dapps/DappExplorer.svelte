@@ -32,7 +32,7 @@
 		: undefined;
 </script>
 
-<h1 class="mb-5 mt-6">{$i18n.dapps.text.title}</h1>
+<h1 class="mb-5 mt-6">{$i18n.dapp_explorer.text.title}</h1>
 
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-10">
@@ -46,15 +46,15 @@
 <div class="flex flex-wrap gap-4 {$$restProps.class || ''}">
 	<Button
 		paddingSmall
-		ariaLabel={$i18n.dapps.alt.show_all}
+		ariaLabel={$i18n.dapp_explorer.alt.show_all}
 		on:click={() => (selectedTag = null)}
 		styleClass="text-nowrap max-w-fit text-sm"
-		colorStyle={selectedTag === null ? 'primary' : 'tertiary'}>{$i18n.dapps.text.all_dapps}</Button
+		colorStyle={selectedTag === null ? 'primary' : 'tertiary'}>{$i18n.dapp_explorer.text.all_dapps}</Button
 	>
 	{#each uniqueTags as tag}
 		<Button
 			paddingSmall
-			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, { $tag: tag })}
+			ariaLabel={replacePlaceholders($i18n.dapp_explorer.alt.show_tag, { $tag: tag })}
 			on:click={() => (selectedTag = tag)}
 			styleClass="text-nowrap max-w-fit text-sm"
 			colorStyle={selectedTag === tag ? 'primary' : 'tertiary'}>{tag}</Button

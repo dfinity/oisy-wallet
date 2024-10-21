@@ -8,17 +8,17 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
-		isRouteDApps,
+		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
 
-	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
+	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
-		: isRouteDApps($page)
-			? 'dapps'
+		: isRouteDappExplorer($page)
+			? 'explore'
 			: isRouteTransactions($page)
 				? 'transactions'
 				: 'tokens';
@@ -36,9 +36,9 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={`/dapps`}
+			href={`/explore`}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
-			selected={route === 'dapps'}
+			selected={route === 'explore'}
 		>
 			<IconlyUfo />
 			{$i18n.navigation.text.dapp_explorer}

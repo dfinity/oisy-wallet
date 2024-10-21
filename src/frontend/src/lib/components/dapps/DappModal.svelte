@@ -37,7 +37,7 @@
 			<div class="overflow-hidden rounded-3xl">
 				<ImgBanner
 					src={screenshots[0]}
-					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: name })}
+					alt={replacePlaceholders($i18n.dapp_explorer.alt.website, { $dAppname: name })}
 				/>
 			</div>
 		{/if}
@@ -48,14 +48,14 @@
 					width="40"
 					height="40"
 					src={logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
+					alt={replacePlaceholders($i18n.dapp_explorer.alt.logo, { $dAppname: name })}
 				/>
 				<div>
 					<div class="text-lg font-bold">{name}</div>
 					{#if nonNullish(websiteURL)}
 						<ExternalLink
 							iconVisible={false}
-							ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
+							ariaLabel={replacePlaceholders($i18n.dapp_explorer.text.open_dapp, {
 								$dAppname: name
 							})}
 							href={websiteURL.toString()}
@@ -67,7 +67,7 @@
 					{#if nonNullish(twitter)}
 						<ExternalLinkIcon
 							href={twitter}
-							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_twitter, {
+							ariaLabel={replacePlaceholders($i18n.dapp_explorer.alt.open_twitter, {
 								$dAppname: name
 							})}
 						>
@@ -77,7 +77,7 @@
 					{#if nonNullish(github)}
 						<ExternalLinkIcon
 							href={github}
-							ariaLabel={replacePlaceholders($i18n.dapps.alt.source_code_on_github, {
+							ariaLabel={replacePlaceholders($i18n.dapp_explorer.alt.source_code_on_github, {
 								$dAppname: name
 							})}
 						>
@@ -95,12 +95,12 @@
 
 		{#if nonNullish(websiteURL)}
 			<ExternalLink
-				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
+				ariaLabel={replacePlaceholders($i18n.dapp_explorer.alt.open_dapp, {
 					$dAppname: name
 				})}
 				styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
 				href={websiteURL.toString()}
-				>{replacePlaceholders($i18n.dapps.text.open_dapp, {
+				>{replacePlaceholders($i18n.dapp_explorer.text.open_dapp, {
 					$dAppname: name
 				})}</ExternalLink
 			>

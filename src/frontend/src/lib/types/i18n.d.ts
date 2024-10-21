@@ -74,7 +74,7 @@ interface I18nAuth {
 	};
 }
 
-interface I18nDapps {
+interface I18nDappExplorer {
 	text: { all_dapps: string; featured: string; open_dapp: string; title: string };
 	alt: {
 		logo: string;
@@ -635,7 +635,7 @@ interface I18n {
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
-	dapps: I18nDapps;
+	dapp_explorer: I18nDappExplorer;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;

@@ -12,7 +12,7 @@
 		<div class="absolute">
 			<Img
 				src={dAppDescription.screenshots[0]}
-				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: dAppDescription.name })}
+				alt={replacePlaceholders($i18n.dapp_explorer.alt.website, { $dAppname: dAppDescription.name })}
 			/>
 		</div>
 	{/if}
@@ -21,11 +21,11 @@
 			<div class="h-12 w-12 rounded-full">
 				<Img
 					src={dAppDescription.logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dAppDescription.name })}
+					alt={replacePlaceholders($i18n.dapp_explorer.alt.logo, { $dAppname: dAppDescription.name })}
 				/>
 			</div>
 			<div class="flex-1">
-				<h6 class="text-sm font-bold">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-sm font-bold">{$i18n.dapp_explorer.text.featured}</h6>
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
