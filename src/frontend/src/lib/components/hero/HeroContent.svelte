@@ -12,15 +12,25 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
-	import { token } from '$lib/stores/token.store';
+	import { pageToken } from '$lib/derived/page-token.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import type { OptionTokenUi } from '$lib/types/token';
+	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	export let usdTotal = false;
 	export let summary = false;
 	export let back = false;
 
-	let displayTokenSymbol = false;
-	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
+	let pageTokenUi: OptionTokenUi;
+	$: pageTokenUi = nonNullish($pageToken)
+		? mapTokenUi({
+				token: $pageToken,
+				$balances: $balancesStore,
+				$exchanges: $exchanges
+			})
+		: undefined;
 </script>
 
 <div
@@ -42,9 +52,9 @@
 
 				<div>
 					<div class="my-0.5 flex items-center justify-center">
-						{#if displayTokenSymbol && nonNullish($token)}
+						{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
 							<div in:fade>
-								<TokenLogo token={$token} ring networkIconBlackAndWhite />
+								<TokenLogo token={$pageToken} ring networkIconBlackAndWhite />
 							</div>
 						{:else}
 							<SkeletonLogo size="small" />
@@ -55,7 +65,7 @@
 				<ContextMenu />
 			</div>
 
-			<Balance />
+			<Balance token={pageTokenUi} />
 		</div>
 	{/if}
 
@@ -69,7 +79,7 @@
 		<Actions />
 	</div>
 
-	{#if isErc20Icp($token)}
+	{#if isErc20Icp($pageToken)}
 		<Erc20Icp />
 	{/if}
 </div>
