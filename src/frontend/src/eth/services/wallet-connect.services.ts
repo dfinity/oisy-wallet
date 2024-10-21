@@ -11,16 +11,10 @@ import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
-	TRACK_COUNT_WC_ETH_SEND_SUCCESS,
-	TRACK_DURATION_WC_ETH_SEND
+	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
-import {
-	initTimedEvent,
-	trackEvent,
-	trackTimedEventError,
-	trackTimedEventSuccess
-} from '$lib/services/analytics.services';
+import { trackEvent } from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -178,13 +172,6 @@ export const send = ({
 
 			modalNext();
 
-			const timedEvent = initTimedEvent({
-				name: TRACK_DURATION_WC_ETH_SEND,
-				metadata: {
-					token: token.symbol
-				}
-			});
-
 			try {
 				const { hash } = await executeSend({
 					from: address,
@@ -207,27 +194,21 @@ export const send = ({
 
 				progress(lastProgressStep);
 
-				await Promise.allSettled([
-					trackTimedEventSuccess(timedEvent),
-					trackEvent({
-						name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
-						metadata: {
-							token: token.symbol
-						}
-					})
-				]);
+				await trackEvent({
+					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
+					metadata: {
+						token: token.symbol
+					}
+				});
 
 				return { success: true };
 			} catch (err: unknown) {
-				await Promise.allSettled([
-					trackTimedEventError(timedEvent),
-					trackEvent({
-						name: TRACK_COUNT_WC_ETH_SEND_ERROR,
-						metadata: {
-							token: token.symbol
-						}
-					})
-				]);
+				await trackEvent({
+					name: TRACK_COUNT_WC_ETH_SEND_ERROR,
+					metadata: {
+						token: token.symbol
+					}
+				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
