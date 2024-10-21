@@ -35,6 +35,7 @@
 		"text": {
 			"tokens": "Assets",
 			"settings": "Settings",
+			"dapp_explorer": "Explore",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -44,6 +45,7 @@
 		"alt": {
 			"tokens": "Go to the assets view",
 			"settings": "Open your settings",
+			"dapp_explorer": "Open dapp explorer",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -81,20 +83,26 @@
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		}
 	},
-	"dapps": {
+	"dapp_explorer": {
 		"text": {
 			"all_dapps": "All dapps",
 			"featured": "Featured",
+			"title": "Explore Web3 Ecosystem",
 			"open_dapp": "Open the dapp $dAppname"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppname",
 			"logo": "Logo of $dAppname",
-			"open_dapp": "Open the app $dAppname",
+			"show_all": "Show all decentralised applications",
+			"show_tag": "Show decentralised applications with the tag $tag",
+			"tags": "Tags related to $dAppname",
 			"open_twitter": "Open the $dAppname X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppname on github",
 			"tags": "Tags related to $dAppname",
-			"website": "Image of $dAppname"
+			"website": "Image of $dAppname",
+			"open_dapp": "Open $dAppname",
+			"source_code_on_github": "View source code of $dAppname on github",
+			"open_twitter": "Open the $dAppname X/Twitter feed"
 		}
 	},
 	"footer": {
