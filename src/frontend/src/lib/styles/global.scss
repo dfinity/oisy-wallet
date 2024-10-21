@@ -1,17 +1,19 @@
+@use 'sass:meta';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import './global/font-faces';
-@import './global/fonts';
-@import './global/theme';
-@import './global/variables';
-@import './global/colors';
-@import './global/layout';
-@import './global/body';
-@import './global/button';
-@import './global/text';
-@import './global/gix';
-@import './global/position';
-@import './global/links';
-@import './global/border';
+@include meta.load-css('global/font-faces');
+@include meta.load-css('global/fonts');
+@include meta.load-css('global/theme');
+@include meta.load-css('global/variables');
+@include meta.load-css('global/colors');
+@include meta.load-css('global/layout');
+@include meta.load-css('global/body');
+@include meta.load-css('global/button');
+@include meta.load-css('global/text');
+@include meta.load-css('global/gix');
+@include meta.load-css('global/position');
+@include meta.load-css('global/links');
+@include meta.load-css('global/border');
