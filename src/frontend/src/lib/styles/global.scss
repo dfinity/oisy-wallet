@@ -2,16 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-@import './global/font-faces';
-@import './global/fonts';
-@import './global/theme';
-@import './global/variables';
-@import './global/colors';
-@import './global/layout';
-@import './global/body';
-@import './global/button';
-@import './global/text';
-@import './global/gix';
-@import './global/position';
-@import './global/links';
-@import './global/border';
+@use './global/font-faces';
+@use './global/fonts';
+@use './global/theme';
+@use './global/variables';
+@use './global/colors';
+@use './global/layout';
+@use './global/body';
+@use './global/button';
+@use './global/text';
+@use './global/gix';
+@use './global/position';
+@use './global/links';
+@use './global/border';
+
