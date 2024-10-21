@@ -10,8 +10,12 @@
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="absolute">
+		<div class="absolute inset-0">
 			<Img
+				fitHeight={true}
+				height="100%"
+				width="100%"
+				styleClass="object-cover"
 				src={dAppDescription.screenshots[0]}
 				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: dAppDescription.name })}
 			/>
@@ -26,7 +30,7 @@
 				/>
 			</div>
 			<div class="flex-1">
-				<h6 class="text-sm font-bold">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-sm font-bold text-info-blue">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
