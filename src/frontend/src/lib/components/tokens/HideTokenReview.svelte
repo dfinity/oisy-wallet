@@ -10,6 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { LogoSize } from '$lib/types/logo-size';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -18,7 +19,7 @@
 	<div class="icon flex flex-col items-center gap-3">
 		<Logo
 			src={$token?.icon}
-			size="big"
+			size={LogoSize.LG}
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 			color="off-white"
 		/>

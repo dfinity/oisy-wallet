@@ -19,6 +19,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { LogoSize } from '$lib/types/logo-size';
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;
@@ -61,7 +62,7 @@
 						src={token.token.icon}
 						slot="icon"
 						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-						size="medium"
+						size={LogoSize.MD}
 						color="white"
 					/>
 

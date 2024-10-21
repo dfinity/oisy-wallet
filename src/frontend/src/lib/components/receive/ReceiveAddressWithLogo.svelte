@@ -10,6 +10,7 @@
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { LogoSize } from '$lib/types/logo-size';
 
 	export let token: Token;
 	export let address: OptionString;
@@ -27,7 +28,7 @@
 					color="white"
 					src={token.network.icon}
 					alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
-					size="medium"
+					size={LogoSize.MD}
 				/>
 			{/if}
 		</div>

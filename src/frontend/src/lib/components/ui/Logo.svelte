@@ -2,20 +2,14 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { LogoSize } from '$lib/types/logo-size';
+
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: 'extra-small' | 'medium' | 'big' = 'extra-small';
+	export let size: LogoSize = LogoSize.XS;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
-
-	const sizes = {
-		['extra-small']: '22px',
-		small: '42px',
-		medium: '52px',
-		big: '64px'
-	};
-	let sizePx = sizes[size];
 
 	let loaded = false;
 
@@ -39,19 +33,19 @@
 	class:bg-white={color === 'white' && !loaded}
 	class:opacity-10={!loaded}
 	class:ring-1={ring}
-	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
+	style={`width: ${size}; height: ${size}; transition: opacity 0.15s ease-in;`}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
 			{src}
 			{alt}
 			fitHeight
-			height={sizePx}
+			height={size}
 			on:load={() => (loaded = true)}
 			on:error={onError}
 			rounded
 		/>
 	{:else}
-		<IconRandom size={sizePx} text={alt} />
+		<IconRandom size={size} text={alt} />
 	{/if}
 </div>
