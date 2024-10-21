@@ -11,15 +11,17 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import type { IcCkToken } from '$icp/types/ic';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	const { tokenId, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { tokenId, token, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -34,12 +36,15 @@
 
 	let kytFee: bigint | undefined = undefined;
 	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
+
+	let twinToken: Token | undefined;
+	$: twinToken = ($token as IcCkToken | undefined)?.twinToken;
 </script>
 
 <ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	{#if nonNullish(btcAddress)}
+	{#if nonNullish(btcAddress) && nonNullish(twinToken)}
 		<div class="mb-6">
 			<Hr />
 		</div>
@@ -47,6 +52,7 @@
 		<ReceiveAddress
 			labelRef="bitcoin-address"
 			address={btcAddress}
+			network={twinToken.network}
 			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			on:click={() => displayQRCode(btcAddress ?? '')}

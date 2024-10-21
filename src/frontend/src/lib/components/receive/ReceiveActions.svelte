@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconQRCodeScanner } from '@dfinity/gix-components';
-	import Copy from '$lib/components/ui/Copy.svelte';
+	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let address: string;
@@ -8,15 +9,10 @@
 	export let copyAriaLabel: string;
 </script>
 
-<div class="flex justify-center gap-1">
-	<button
-		aria-label={qrCodeAriaLabel}
-		class="text-primary hover:text-inherit active:text-inherit"
-		data-tid={RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}
-		on:click
-	>
-		<IconQRCodeScanner />
-	</button>
+<div class="flex justify-center gap-2">
+	<ButtonIcon ariaLabel={qrCodeAriaLabel} on:click testId={RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}>
+		<IconQRCodeScanner size="24" slot="icon" />
+	</ButtonIcon>
 
-	<Copy inline value={address} text={copyAriaLabel} />
+	<ReceiveCopy {address} {copyAriaLabel} />
 </div>

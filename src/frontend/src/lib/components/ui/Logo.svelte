@@ -12,7 +12,7 @@
 
 	const sizes = {
 		small: '22px',
-		smallish: '36px',
+        smallish: '36px',
 		medium: '52px',
 		big: '64px'
 	};
