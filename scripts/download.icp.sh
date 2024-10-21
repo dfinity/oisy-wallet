@@ -16,4 +16,4 @@ curl -o "$DIR"/icp_index.did "https://raw.githubusercontent.com/dfinity/ic/$IC_V
 
 curl -o "$DIR"/icp_ledger.wasm.gz "https://download.dfinity.systems/ic/$IC_VERSION/canisters/ledger-canister.wasm.gz"
 gunzip "$DIR"/icp_ledger.wasm.gz
-curl -o "$DIR"/icp_ledger.did "https://raw.githubusercontent.com/dfinity/ic/$IC_VERSION/rs/ledger_suite/icp/ledger/ledger.did"
+curl -o "$DIR"/icp_ledger.did "https://raw.githubusercontent.com/dfinity/ic/$IC_VERSION/rs/ledger_suite/icp/ledger.did"
