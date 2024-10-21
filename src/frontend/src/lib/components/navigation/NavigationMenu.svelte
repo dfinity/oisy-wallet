@@ -6,7 +6,12 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteDApps, isRouteSettings, isRouteTransactions, networkParam } from '$lib/utils/nav.utils.js';
+	import {
+		isRouteDApps,
+		isRouteSettings,
+		isRouteTransactions,
+		networkParam
+	} from '$lib/utils/nav.utils.js';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
