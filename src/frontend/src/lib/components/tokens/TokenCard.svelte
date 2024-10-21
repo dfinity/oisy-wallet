@@ -4,12 +4,11 @@
 	import TokenSymbol from '$lib/components/tokens/TokenSymbol.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
-	import type { Token } from '$lib/types/token';
 	import type { LogoSize } from '$lib/types/logo-size';
+	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
 	export let logoSize: LogoSize | undefined = undefined;
-
 </script>
 
 <Card noMargin testId={`${TOKEN_CARD}-${token.symbol}`}>

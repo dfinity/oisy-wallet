@@ -9,8 +9,8 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { LogoSize } from '$lib/types/logo-size';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const dispatch = createEventDispatcher();
 </script>

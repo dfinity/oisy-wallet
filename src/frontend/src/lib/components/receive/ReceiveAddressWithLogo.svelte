@@ -6,11 +6,11 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { LogoSize } from '$lib/types/logo-size';
 	import type { OptionString } from '$lib/types/string';
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { LogoSize } from '$lib/types/logo-size';
 
 	export let token: Token;
 	export let address: OptionString;

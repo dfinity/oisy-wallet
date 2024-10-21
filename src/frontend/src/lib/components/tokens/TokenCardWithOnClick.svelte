@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	export let styleClass: string | undefined;
 </script>
 

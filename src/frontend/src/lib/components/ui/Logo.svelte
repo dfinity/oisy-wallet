@@ -4,7 +4,6 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { LogoSize } from '$lib/types/logo-size';
 
-
 	export let src: string | undefined;
 	export let alt = '';
 	export let size: LogoSize = LogoSize.XS;
@@ -46,6 +45,6 @@
 			rounded
 		/>
 	{:else}
-		<IconRandom size={size} text={alt} />
+		<IconRandom {size} text={alt} />
 	{/if}
 </div>

@@ -78,4 +78,4 @@ export interface TokenGroupUi {
 
 export type TokenUiOrGroupUi = TokenUi | TokenGroupUi;
 
-export type TokenUiBalance = Pick<TokenUi, 'balance' | 'decimals' | 'symbol' | 'usdBalance'>
+export type TokenUiBalance = Pick<TokenUi, 'balance' | 'decimals' | 'symbol' | 'usdBalance'>;

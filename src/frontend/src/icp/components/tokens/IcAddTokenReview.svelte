@@ -18,8 +18,8 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { LogoSize } from '$lib/types/logo-size';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;
