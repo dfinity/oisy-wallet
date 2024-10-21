@@ -1,0 +1,59 @@
+name: Version Bump and Release Branch Creation
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type (major, minor, patch)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+      release_description:
+        description: 'Short description of the release (motivation, changes, tests)'
+        required: true
+
+jobs:
+  version_bump:
+    runs-on: ubuntu-24.04
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Prepare
+      uses: ./.github/actions/prepare
+
+    - name: Bump version
+      id: bump_version
+      run: |
+        # Bump the version in package.json and package-lock.json
+        npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
+        # Extract the new version from package.json
+        new_version=$(node -p "require('./package.json').version")
+        echo "New version: $new_version"
+        echo "::set-output name=new_version::$new_version"
+
+    - name: Commit version bump on release branch
+      run: |
+        branch_name="release/v${{ steps.bump_version.outputs.new_version }}"
+        git checkout -b "$branch_name"
+        git add package.json package-lock.json
+        git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
+        git push origin "$branch_name"
+
+    - name: Create Pull Request
+      uses: ./.github/actions/create-pr
+      with:
+        token: ${{ secrets.GIX_CREATE_PR_PAT }}
+        branch: "release/v${{ steps.bump_version.outputs.new_version }}"
+        title: "Release: v${{ steps.bump_version.outputs.new_version }}"
+        body: |
+          This PR prepares the release of version v${{ steps.bump_version.outputs.new_version }}.
+
+          ### Release Description:
+          ${{ github.event.inputs.release_description }}
