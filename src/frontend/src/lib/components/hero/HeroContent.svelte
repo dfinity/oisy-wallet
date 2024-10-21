@@ -12,12 +12,25 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import type { OptionTokenUi } from '$lib/types/token';
+	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	export let usdTotal = false;
 	export let summary = false;
 	export let back = false;
+
+	let pageTokenUi: OptionTokenUi;
+	$: pageTokenUi = nonNullish($pageToken)
+		? mapTokenUi({
+				token: $pageToken,
+				$balances: $balancesStore,
+				$exchanges: $exchanges
+			})
+		: undefined;
 </script>
 
 <div
@@ -52,7 +65,7 @@
 				<ContextMenu />
 			</div>
 
-			<Balance />
+			<Balance token={pageTokenUi} />
 		</div>
 	{/if}
 

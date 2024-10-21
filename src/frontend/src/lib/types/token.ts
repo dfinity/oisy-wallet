@@ -67,6 +67,8 @@ export interface TokenFinancialData {
 
 export type TokenUi = Token & TokenFinancialData;
 
+export type OptionTokenUi = Option<TokenUi>;
+
 export interface TokenGroupUi {
 	header: TokenMetadata;
 	nativeNetwork: Network;
