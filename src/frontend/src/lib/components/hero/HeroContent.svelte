@@ -55,7 +55,7 @@
 
 				<div>
 					<div class="my-0.5 flex items-center justify-center">
-						{#if displayTokenSymbol && nonNullish($pageToken)}
+						{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
 							<div in:fade>
 								<TokenLogo token={$pageToken} ring networkIconBlackAndWhite />
 							</div>

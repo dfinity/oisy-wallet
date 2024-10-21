@@ -554,7 +554,13 @@ interface I18nTransaction {
 }
 
 interface I18nTransactions {
-	text: { title: string; no_transactions: string; sign_in: string; open_transactions: string };
+	text: {
+		title: string;
+		no_transactions: string;
+		sign_in: string;
+		open_transactions: string;
+		mainnet_btc_transactions_info: string;
+	};
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
