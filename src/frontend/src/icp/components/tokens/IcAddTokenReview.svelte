@@ -61,7 +61,7 @@
 						src={token.token.icon}
 						slot="icon"
 						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-						size="medium"
+						size="md"
 						color="white"
 					/>
 
