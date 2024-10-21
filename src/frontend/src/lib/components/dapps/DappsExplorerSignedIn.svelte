@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
+
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
 	import DappModal from '$lib/components/dapps/DappModal.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
@@ -27,6 +29,7 @@
 		? dAppDescriptions.filter((dApp) => dApp.tags.includes(selectedTag))
 		: dAppDescriptions;
 
+	let selectedDapp: DappDescription | undefined = undefined;
 	$: selectedDapp = $modalDAppDetails
 		? ($modalStore?.data as DappDescription | undefined)
 		: undefined;
@@ -49,7 +52,8 @@
 		ariaLabel={$i18n.dapps.alt.show_all}
 		on:click={() => (selectedTag = undefined)}
 		styleClass="text-nowrap max-w-fit text-sm"
-		colorStyle={selectedTag === null ? 'primary' : 'tertiary'}>{$i18n.dapps.text.all_dapps}</Button
+		colorStyle={selectedTag === undefined ? 'primary' : 'tertiary'}
+		>{$i18n.dapps.text.all_dapps}</Button
 	>
 	{#each uniqueTags as tag}
 		<Button
@@ -64,7 +68,7 @@
 
 <ul class="mt-8 grid list-none grid-cols-1 gap-x-4 gap-y-7 md:grid-cols-3">
 	{#each filteredDapps as dApp}
-		<li class="flex">
+		<li class="flex" in:fade>
 			<DappCard
 				on:click={() => {
 					modalStore.openDappDetails(dApp);
