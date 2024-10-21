@@ -3,11 +3,13 @@
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import type { TokenUi } from '$lib/types/token';
+	import type { LogoSize } from '$lib/types/logo-size';
 
 	export let token: TokenUi;
+	export let logoSize: LogoSize | undefined = undefined;
 </script>
 
-<TokenCard {token}>
+<TokenCard {logoSize} {token}>
 	<TokenBalance {token} slot="balance" />
 
 	<ExchangeTokenValue {token} slot="exchange" />
