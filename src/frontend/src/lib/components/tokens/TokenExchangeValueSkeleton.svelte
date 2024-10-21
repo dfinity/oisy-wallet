@@ -1,9 +1,9 @@
 <script lang="ts">
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
-	import type { TokenUi } from '$lib/types/token';
+	import type { TokenUiBalance } from '$lib/types/token';
 
-	export let token: TokenUi;
+	export let token: TokenUiBalance;
 </script>
 
 {#if token.balance === undefined || !$exchangeInitialized}

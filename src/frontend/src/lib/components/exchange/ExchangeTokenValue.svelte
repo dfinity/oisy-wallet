@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import TokenExchangeValueSkeleton from '$lib/components/tokens/TokenExchangeValueSkeleton.svelte';
-	import type { TokenUi } from '$lib/types/token';
+	import type { TokenUiBalance } from '$lib/types/token';
 	import { formatUSD } from '$lib/utils/format.utils';
 
-	export let token: TokenUi;
+	export let token: TokenUiBalance;
 </script>
 
 <TokenExchangeValueSkeleton {token}>
