@@ -26,7 +26,7 @@
 				/>
 			</div>
 			<div class="flex-1">
-				<h6 class="text-sm font-bold">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-sm font-bold text-[#0BA5EC]">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
