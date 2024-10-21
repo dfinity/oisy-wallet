@@ -1,3 +1,4 @@
-import { ETHEREUM_SYMBOL, ICP_SYMBOL } from '../../../src/frontend/src/env/tokens.env';
+import { ETHEREUM_TOKEN, ICP_TOKEN } from '../../../src/frontend/src/env/tokens.env';
+import type { RequiredToken } from '../../../src/frontend/src/lib/types/token';
 
-export const tokenSymbols: [string, ...string[]] = [ICP_SYMBOL, ETHEREUM_SYMBOL];
+export const tokens: [RequiredToken, ...RequiredToken[]] = [ICP_TOKEN, ETHEREUM_TOKEN];
