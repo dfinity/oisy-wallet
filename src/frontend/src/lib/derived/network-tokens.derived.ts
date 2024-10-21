@@ -1,13 +1,13 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import { showZeroBalances } from '$lib/derived/settings.derived';
 import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi, TokenUiOrGroupUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+import { groupTokensByTwin } from '$lib/utils/token.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
-import { showZeroBalances } from '$lib/derived/settings.derived';
-import { groupTokensByTwin } from '$lib/utils/token.utils';
 
 /**
  * All user-enabled tokens matching the selected network or chain fusion.
