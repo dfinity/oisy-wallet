@@ -289,10 +289,16 @@ export const send = async ({
 
 	const nonce = await getTransactionCount(from);
 
-	const { transactionApproved } = await approve({ progress, sourceNetwork, nonce, token, ...rest });
+	const { transactionNeededApproval } = await approve({
+		progress,
+		sourceNetwork,
+		nonce,
+		token,
+		...rest
+	});
 
 	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
-	const nonceTransaction = transactionApproved ? nonce + 1 : nonce;
+	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
 
 	const transactionSent = await sendTransaction({
 		progress,
@@ -495,7 +501,7 @@ const approve = async ({
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 		nonce: number;
-	}): Promise<{ transactionApproved: boolean; hash?: string }> => {
+	}): Promise<{ transactionNeededApproval: boolean; hash?: string }> => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
@@ -508,7 +514,7 @@ const approve = async ({
 			erc20HelperContractAddress
 		})
 	) {
-		return { transactionApproved: false };
+		return { transactionNeededApproval: false };
 	}
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
@@ -517,5 +523,5 @@ const approve = async ({
 		spender: erc20HelperContractAddress
 	});
 
-	return { transactionApproved, hash };
+	return { transactionNeededApproval: transactionApproved, hash };
 };
