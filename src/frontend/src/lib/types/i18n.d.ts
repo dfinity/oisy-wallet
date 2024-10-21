@@ -20,6 +20,7 @@ interface I18nCore {
 		reject: string;
 		approve: string;
 		view: string;
+		copy: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -75,8 +76,8 @@ interface I18nAuth {
 interface I18nDapps {
 	text: { all_dapps: string; featured: string; open_dapp: string };
 	alt: {
-		logo: string;
 		learn_more: string;
+		logo: string;
 		open_dapp: string;
 		open_twitter: string;
 		source_code_on_github: string;

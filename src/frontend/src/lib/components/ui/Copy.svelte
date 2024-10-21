@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
 	export let value: string;
@@ -10,7 +11,7 @@
 
 <button
 	on:click|preventDefault|stopPropagation={async () => await copyToClipboard({ value, text })}
-	aria-label={`Copy: ${value}`}
+	aria-label={`${$i18n.core.text.copy}: ${value}`}
 	class="pl-0.5"
 	class:py-2={!inline}
 	class:inline-block={inline}
