@@ -3,12 +3,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { LogoSize } from '$lib/types/logo-size';
 
 	export let token: Pick<Token, 'icon' | 'name' | 'network'>;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let showNetworkIcon = true;
 	export let networkIconBlackAndWhite = false;
 	export let ring = false;
+	export let size: LogoSize = LogoSize.MD;
 
 	const {
 		icon,
@@ -21,7 +23,7 @@
 	<Logo
 		src={icon}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
-		size="medium"
+		size={size}
 		{color}
 		{ring}
 	/>
