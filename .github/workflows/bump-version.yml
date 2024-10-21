@@ -36,13 +36,15 @@ jobs:
         # Extract the new version from package.json
         new_version=$(node -p "require('./package.json').version")
         echo "New version: $new_version"
-        echo "::set-output name=new_version::$new_version"
+        echo "{new_version}={new_version}" >> $GITHUB_OUTPUT
 
     - name: Commit version bump on release branch
       run: |
         branch_name="release/v${{ steps.bump_version.outputs.new_version }}"
         git checkout -b "$branch_name"
         git add package.json package-lock.json
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions@github.com"
         git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
         git push origin "$branch_name"
 
