@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
+	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
@@ -12,7 +13,6 @@
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
-	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
 	$: route = isRouteSettings($page)
