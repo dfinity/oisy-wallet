@@ -9,6 +9,7 @@
 
 	export let token: Token;
 	export let logoSize: LogoSize | undefined = undefined;
+	export let logoStyleClass: string | undefined = undefined;
 </script>
 
 <Card noMargin testId={`${TOKEN_CARD}-${token.symbol}`}>
@@ -16,7 +17,7 @@
 
 	<TokenName {token} slot="description" />
 
-	<TokenLogo size={logoSize} {token} showNetworkIcon={false} slot="icon" color="white" />
+	<TokenLogo styleClass={logoStyleClass} size={logoSize} {token} showNetworkIcon={false} slot="icon" color="white" />
 
 	<slot name="balance" slot="amount" />
 
