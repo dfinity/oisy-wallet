@@ -12,9 +12,10 @@
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { LogoSize } from '$lib/types/logo-size';
 	import type { TokenGroupUi, TokenUi } from '$lib/types/token';
+	import { isNullish } from '@dfinity/utils';
+	import { easyGroupStore } from '$lib/stores/groups.store.js';
 
 	export let tokenGroup: TokenGroupUi;
-	let isOpened = false;
 
 	$: totalBalance = tokenGroup.tokens.reduce(
 		(sum, token: TokenUi) => sum.add(token.balance ?? BigNumber.from(0)),
@@ -30,10 +31,22 @@
 		decimals: tokenGroup.header.decimals,
 		usdBalance: totalUsdBalance
 	};
+
+	$: groups = $easyGroupStore ?? {};
+	$: expanded = groups[Symbol.keyFor(tokenGroup.id)]?.expanded ?? false;
+
+	const toggleExpand = (expanded: boolean) => {
+		const idString = Symbol.keyFor(tokenGroup.id);
+		if (isNullish(idString)) {
+			throw new Error('Invalid TokenGroupId Symbol');
+		}
+		const updatedData = { ...groups, [idString]: { expanded: expanded }};
+		easyGroupStore.set({ key: 'groups', value: updatedData });
+	}
 </script>
 
 <TokenCardWithOnClick
-	on:click={() => (isOpened = !isOpened)}
+	on:click={() => (toggleExpand(!expanded))}
 	styleClass="!m-0 py-2 px-3 w-full rounded-xl hover:text-blue-ribbon hover:bg-white {isOpened
 		? 'bg-white rounded-b-none'
 		: ''}"
@@ -65,7 +78,7 @@
 	</Card>
 </TokenCardWithOnClick>
 
-{#if isOpened}
+{#if expanded}
 	<div class="rounded-b-xl bg-white/40 pt-2">
 		{#each tokenGroup.tokens as token}
 			<Listener {token}>
