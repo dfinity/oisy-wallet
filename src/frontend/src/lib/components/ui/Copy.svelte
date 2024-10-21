@@ -1,26 +1,15 @@
 <script lang="ts">
 	import IconCopy from '$lib/components/icons/IconCopy.svelte';
-	import { toastsShow } from '$lib/stores/toasts.store';
-	import { copyText } from '$lib/utils/share.utils';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
 	export let value: string;
 	export let text: string;
 	export let inline = false;
 	export let color: 'blue' | 'inherit' = 'blue';
-
-	const copyToClipboard = async () => {
-		await copyText(value);
-
-		toastsShow({
-			text,
-			level: 'success',
-			duration: 2000
-		});
-	};
 </script>
 
 <button
-	on:click|preventDefault|stopPropagation={copyToClipboard}
+	on:click|preventDefault|stopPropagation={() => copyToClipboard({ value, text })}
 	aria-label={`Copy: ${value}`}
 	class="pl-0.5"
 	class:py-2={!inline}
