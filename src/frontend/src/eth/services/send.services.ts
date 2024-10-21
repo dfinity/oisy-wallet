@@ -12,7 +12,7 @@ import type {
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork, NetworkChainId } from '$eth/types/network';
-import type { SendParams } from '$eth/types/send';
+import type { ApproveParams, SendParams, SignAndApproveParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
@@ -21,6 +21,7 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
@@ -173,8 +174,6 @@ const ckErc20HelperContractPrepareTransaction = async ({
 /**
  * Get the current allowance of an Erc20 contract.
  */
-// TODO: this function is still not used in the codebase, so for now we put an ESLINT exception
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const erc20ContractAllowance = async ({
 	token,
 	owner,
@@ -271,9 +270,7 @@ const prepare = ({
 export const send = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
-	sourceNetwork,
 	token,
-	from,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
@@ -283,16 +280,8 @@ export const send = async ({
 	}): Promise<{ hash: string }> => {
 	progress(ProgressStepsSend.INITIALIZATION);
 
-	const { id: networkId } = sourceNetwork;
-
-	const { getTransactionCount } = infuraProviders(networkId);
-
-	const nonce = await getTransactionCount(from);
-
-	const { transactionNeededApproval } = await approve({
+	const { transactionNeededApproval, nonce } = await approve({
 		progress,
-		sourceNetwork,
-		nonce,
 		token,
 		...rest
 	});
@@ -302,8 +291,6 @@ export const send = async ({
 
 	const transactionSent = await sendTransaction({
 		progress,
-		from,
-		sourceNetwork,
 		nonce: nonceTransaction,
 		token,
 		...rest
@@ -453,15 +440,7 @@ const prepareAndSignApproval = async ({
 	identity,
 	progress,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from' | 'to'> &
-	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress' | 'minterInfo'> &
-	Partial<Pick<SendParams, 'progress'>> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-		nonce: number;
-		spender: EthAddress;
-	}): Promise<
+}: SignAndApproveParams): Promise<
 	ResultSuccess & {
 		hash?: string;
 	}
@@ -490,20 +469,79 @@ const prepareAndSignApproval = async ({
 	return { success: true, hash };
 };
 
+const resetExistingApprovalToZero = async (
+	params: Omit<SignAndApproveParams, 'amount'>
+): Promise<
+	ResultSuccess & {
+		hash?: string;
+	}
+> =>
+	await prepareAndSignApproval({
+		...params,
+		amount: ZERO
+	});
+
+const checkExistingApproval = async ({
+	token,
+	from,
+	spender,
+	amount,
+	sourceNetwork,
+	...rest
+}: Omit<ApproveParams, 'to' | 'minterInfo' | 'progress'> & {
+	nonce: number;
+	spender: EthAddress;
+}): Promise<'existingApprovalIsEnough' | 'approvalNeededReset' | 'noExistingApproval'> => {
+	const preApprovedAmount = await erc20ContractAllowance({
+		token,
+		owner: from,
+		spender,
+		networkId: sourceNetwork.id
+	});
+
+	// If there is already an approved allowance that is enough for the required amount, we don't need to approve again.
+	if (preApprovedAmount.gte(amount)) {
+		return 'existingApprovalIsEnough';
+	}
+
+	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
+	if (preApprovedAmount.gt(ZERO)) {
+		await resetExistingApprovalToZero({
+			...rest,
+			token,
+			sourceNetwork,
+			spender
+		});
+
+		return 'approvalNeededReset';
+	}
+
+	return 'noExistingApproval';
+};
+
 const approve = async ({
 	token,
+	from,
 	to,
 	minterInfo,
+	amount,
+	sourceNetwork,
+	progress,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
-	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-		nonce: number;
-	}): Promise<{ transactionNeededApproval: boolean; hash?: string }> => {
+}: ApproveParams): Promise<{
+	transactionNeededApproval: boolean;
+	hash?: string;
+	nonce: number;
+}> => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
+
+	const { id: networkId } = sourceNetwork;
+
+	const { getTransactionCount } = infuraProviders(networkId);
+
+	const nonce = await getTransactionCount(from);
+
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
 	if (
@@ -514,14 +552,37 @@ const approve = async ({
 			erc20HelperContractAddress
 		})
 	) {
-		return { transactionNeededApproval: false };
+		return { transactionNeededApproval: false, nonce };
 	}
+
+	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't and it's non-null, we reset it to zero.
+	const approvalCheckResult = await checkExistingApproval({
+		token,
+		from,
+		spender: erc20HelperContractAddress,
+		nonce,
+		amount,
+		sourceNetwork,
+		...rest
+	});
+
+	if (approvalCheckResult === 'existingApprovalIsEnough') {
+		progress(ProgressStepsSend.APPROVE);
+		return { transactionNeededApproval: false, nonce };
+	}
+
+	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
+	const nonceApproval = approvalCheckResult === 'approvalNeededReset' ? nonce + 1 : nonce;
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
+		nonce: nonceApproval,
+		amount,
 		token,
+		sourceNetwork,
+		progress,
 		spender: erc20HelperContractAddress
 	});
 
-	return { transactionNeededApproval: transactionApproved, hash };
+	return { transactionNeededApproval: transactionApproved, hash, nonce: nonceApproval };
 };
