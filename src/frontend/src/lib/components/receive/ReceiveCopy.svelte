@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { copyText } from '$lib/utils/share.utils';
 
@@ -17,10 +18,6 @@
 	};
 </script>
 
-<button
-	aria-label={copyAriaLabel}
-	class="tertiary icon link flex h-10 w-10 flex-col text-center text-xs font-normal"
-	on:click={copyToClipboard}
->
-	<IconCopy size="24" />
-</button>
+<ButtonIcon ariaLabel={copyAriaLabel} on:click={copyToClipboard}>
+	<IconCopy size="24" slot="icon" />
+</ButtonIcon>
