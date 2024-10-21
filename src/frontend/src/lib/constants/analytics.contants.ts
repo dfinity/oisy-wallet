@@ -12,9 +12,6 @@ export const TRACK_COUNT_ETH_SEND_ERROR = 'eth_send_error_count';
 export const TRACK_COUNT_WC_ETH_SEND_SUCCESS = 'wc_eth_send_success_count';
 export const TRACK_COUNT_WC_ETH_SEND_ERROR = 'wc_eth_send_error_count';
 
-export const TRACK_DURATION_ETH_SEND = 'eth_send_duration';
-export const TRACK_DURATION_WC_ETH_SEND = 'wc_eth_send_duration';
-
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success_count';
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR = 'ic_ckbtc_to_btc_error_count';
@@ -24,11 +21,6 @@ export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS = 'ic_ckerc20_to_erc20
 export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_error_count';
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
-
-export const TRACK_DURATION_CONVERT_CKBTC_TO_BTC = 'ic_ckbtc_to_btc_duration';
-export const TRACK_DURATION_CONVERT_CKETH_TO_ETH = 'ic_cketh_to_eth_duration';
-export const TRACK_DURATION_CONVERT_CKERC20_TO_ERC20 = 'ic_ckerc20_to_erc20_duration';
-export const TRACK_DURATION_IC_SEND = 'ic_send_duration';
 
 // WalletConnect
 export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open_count';
