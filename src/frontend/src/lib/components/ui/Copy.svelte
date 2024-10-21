@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { copyText } from '$lib/utils/share.utils';
 
@@ -21,7 +22,7 @@
 
 <button
 	on:click|preventDefault|stopPropagation={copyToClipboard}
-	aria-label={`Copy: ${value}`}
+	aria-label={`${$i18n.core.text.copy}: ${value}`}
 	class="pl-0.5"
 	class:py-2={!inline}
 	class:inline-block={inline}
