@@ -22,6 +22,6 @@ gunzip "$DIR"/cketh_index.wasm.gz
 
 curl -sSL https://raw.githubusercontent.com/dfinity/ic/$IC_COMMIT/rs/ethereum/cketh/minter/cketh_minter.did -o "$DIR"/cketh_minter.did
 
-curl -sSL https://raw.githubusercontent.com/dfinity/ic/$IC_COMMIT/rs/rosetta-api/icrc1/ledger/ledger.did -o "$DIR"/cketh_ledger.did
+curl -sSL https://raw.githubusercontent.com/dfinity/ic/$IC_COMMIT/rs/ledger_suite/icrc1/ledger/ledger.did -o "$DIR"/cketh_ledger.did
 
-curl -sSL https://raw.githubusercontent.com/dfinity/ic/$IC_COMMIT/rs/rosetta-api/icrc1/index-ng/index-ng.did -o "$DIR"/cketh_index.did
+curl -sSL https://raw.githubusercontent.com/dfinity/ic/$IC_COMMIT/rs/ledger_suite/icrc1/index-ng/index-ng.did -o "$DIR"/cketh_index.did

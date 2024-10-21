@@ -30,7 +30,7 @@ Custom tokens seeking compatibility with OISY Wallet can choose one of the follo
 
 ### Index-ng
 
-The source code of the Index-ng canister can be found in the Internet Computer main [repository](https://github.com/dfinity/ic/tree/master/rs/rosetta-api/icrc1/index-ng) and can be downloaded using the following script:
+The source code of the Index-ng canister can be found in the Internet Computer main [repository](https://github.com/dfinity/ic/tree/master/rs/ledger_suite/icrc1/index-ng) and can be downloaded using the following script:
 
 ```bash
 #!/bin/bash
@@ -40,7 +40,7 @@ IC_COMMIT="43f31c0a1b0d9f9ecbc4e2e5f142c56c7d9b0c7b"
 curl -sSL https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-icrc1-index-ng.wasm.gz -o "$DIR"/ckbtc_index.wasm.gz
 gunzip "$DIR"/ckbtc_index.wasm.gz
 
-curl -sSL https://raw.githubusercontent.com/dfinity/ic/$IC_COMMIT/rs/rosetta-api/icrc1/index-ng/index-ng.did -o "$DIR"/ckbtc_index.did
+curl -sSL https://raw.githubusercontent.com/dfinity/ic/$IC_COMMIT/rs/ledger_suite/icrc1/index-ng/index-ng.did -o "$DIR"/ckbtc_index.did
 ```
 
 > Tips: You can follow this [guide](https://internetcomputer.org/docs/current/developer-docs/defi/icrc-1/icrc1-index-setup) to deploy an ICRC-1 index canister locally.
@@ -69,4 +69,4 @@ This function allows querying of balance and transactions for a specific account
 get_account_transactions : (GetAccountTransactionsArgs) -> (GetTransactionsResult) query;
 ```
 
-Find more information in the Index-ng [Candid file definition](https://github.com/dfinity/ic/blob/master/rs/rosetta-api/icrc1/index/index.did).
+Find more information in the Index-ng [Candid file definition](https://github.com/dfinity/ic/blob/master/rs/ledger_suite/icrc1/index-ng/index-ng.did).
