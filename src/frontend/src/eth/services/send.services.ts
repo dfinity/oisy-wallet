@@ -280,14 +280,14 @@ export const send = async ({
 	}): Promise<{ hash: string }> => {
 	progress(ProgressStepsSend.INITIALIZATION);
 
-	const { transactionApproved, nonce } = await approve({
+	const { transactionNeededApproval, nonce } = await approve({
 		progress,
 		token,
 		...rest
 	});
 
 	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
-	const nonceTransaction = transactionApproved ? nonce + 1 : nonce;
+	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
 
 	const transactionSent = await sendTransaction({
 		progress,
@@ -528,7 +528,11 @@ const approve = async ({
 	sourceNetwork,
 	progress,
 	...rest
-}: ApproveParams): Promise<{ transactionApproved: boolean; hash?: string; nonce: number }> => {
+}: ApproveParams): Promise<{
+	transactionNeededApproval: boolean;
+	hash?: string;
+	nonce: number;
+}> => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
 
@@ -548,7 +552,7 @@ const approve = async ({
 			erc20HelperContractAddress
 		})
 	) {
-		return { transactionApproved: false, nonce };
+		return { transactionNeededApproval: false, nonce };
 	}
 
 	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't and it's non-null, we reset it to zero.
@@ -564,7 +568,7 @@ const approve = async ({
 
 	if (existingApprovalIsEnough) {
 		progress(ProgressStepsSend.APPROVE);
-		return { transactionApproved: false, nonce };
+		return { transactionNeededApproval: false, nonce };
 	}
 
 	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
@@ -580,5 +584,5 @@ const approve = async ({
 		spender: erc20HelperContractAddress
 	});
 
-	return { transactionApproved, hash, nonce: nonceApproval };
+	return { transactionNeededApproval: transactionApproved, hash, nonce: nonceApproval };
 };
