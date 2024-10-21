@@ -17,7 +17,7 @@
 	let selectedTag: string | undefined = undefined;
 	const featuredDapp: FeaturedDappDescription | undefined = dAppDescriptions.find(
 		(dApp) => dApp.featured && nonNullish(dApp.screenshots) && dApp.screenshots.length > 0
-	) as FeaturedDappDescription | undefined;
+	);
 
 	const uniqueTags = new Set(
 		dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
