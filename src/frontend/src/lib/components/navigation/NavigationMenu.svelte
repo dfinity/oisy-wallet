@@ -6,14 +6,17 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteSettings, isRouteTransactions, networkParam } from '$lib/utils/nav.utils.js';
+	import { isRouteDApps, isRouteSettings, isRouteTransactions, networkParam } from '$lib/utils/nav.utils.js';
+	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 
-	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
+	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
-		: isRouteTransactions($page)
-			? 'transactions'
-			: 'tokens';
+		: isRouteDApps($page)
+			? 'dapps'
+			: isRouteTransactions($page)
+				? 'transactions'
+				: 'tokens';
 </script>
 
 <div class="box-content flex h-full w-full flex-col justify-between py-3 pl-4 sm:pl-8">
@@ -25,6 +28,15 @@
 		>
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
+		</NavigationItem>
+
+		<NavigationItem
+			href={`/dapps`}
+			ariaLabel={$i18n.navigation.alt.dapp_explorer}
+			selected={route === 'dapps'}
+		>
+			<IconlyUfo />
+			{$i18n.navigation.text.dapp_explorer}
 		</NavigationItem>
 
 		<NavigationItem
