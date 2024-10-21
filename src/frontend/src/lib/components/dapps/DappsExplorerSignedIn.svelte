@@ -14,7 +14,7 @@
 	} from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let selectedTag: string | null = null;
+	let selectedTag: string | undefined = undefined;
 	const featuredDapp: FeaturedDappDescription | undefined = dAppDescriptions.find(
 		(dApp) => dApp.featured && nonNullish(dApp.screenshots) && dApp.screenshots.length > 0
 	) as FeaturedDappDescription | undefined;
@@ -24,7 +24,7 @@
 	);
 
 	$: filteredDapps = nonNullish(selectedTag)
-		? dAppDescriptions.filter((dApp) => dApp.tags.includes(selectedTag!))
+		? dAppDescriptions.filter((dApp) => dApp.tags.includes(selectedTag))
 		: dAppDescriptions;
 
 	$: selectedDapp = $modalDAppDetails
@@ -43,11 +43,11 @@
 	</div>
 {/if}
 
-<div class="flex flex-wrap gap-4 {$$restProps.class || ''}">
+<div class="flex flex-wrap gap-4">
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.dapps.alt.show_all}
-		on:click={() => (selectedTag = null)}
+		on:click={() => (selectedTag = undefined)}
 		styleClass="text-nowrap max-w-fit text-sm"
 		colorStyle={selectedTag === null ? 'primary' : 'tertiary'}>{$i18n.dapps.text.all_dapps}</Button
 	>
@@ -75,6 +75,6 @@
 	{/each}
 </ul>
 
-{#if $modalDAppDetails && selectedDapp}
+{#if $modalDAppDetails && nonNullish(selectedDapp)}
 	<DappModal dAppDescription={selectedDapp} />
 {/if}
