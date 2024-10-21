@@ -1,4 +1,5 @@
 import {
+	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
 	NAVIGATION_MENU,
@@ -48,6 +49,7 @@ interface ClickMenuItemParams {
 
 interface WaitForLocatorOptions {
 	state: 'attached' | 'detached' | 'visible' | 'hidden';
+	timeout?: number;
 }
 
 abstract class Homepage {
@@ -133,6 +135,10 @@ abstract class Homepage {
 
 		await this.goto();
 		await this.waitForLoggedOutIndicator();
+	}
+
+	protected async waitForLoaderModal(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
@@ -272,6 +278,10 @@ export class HomepageLoggedIn extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
+
+		await this.waitForLoaderModal();
+
+		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
 		await this.waitForTokensInitialization();
 	}
