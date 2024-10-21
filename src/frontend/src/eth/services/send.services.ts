@@ -12,7 +12,7 @@ import type {
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork, NetworkChainId } from '$eth/types/network';
-import type { SendParams } from '$eth/types/send';
+import type { ApproveParams, SendParams, SignAndApproveParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
@@ -440,15 +440,7 @@ const prepareAndSignApproval = async ({
 	identity,
 	progress,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from' | 'to'> &
-	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress' | 'minterInfo'> &
-	Partial<Pick<SendParams, 'progress'>> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-		nonce: number;
-		spender: EthAddress;
-	}): Promise<
+}: SignAndApproveParams): Promise<
 	ResultSuccess & {
 		hash?: string;
 	}
@@ -477,6 +469,18 @@ const prepareAndSignApproval = async ({
 	return { success: true, hash };
 };
 
+const resetExistingApprovalToZero = async (
+	params: Omit<SignAndApproveParams, 'amount'>
+): Promise<
+	ResultSuccess & {
+		hash?: string;
+	}
+> =>
+	await prepareAndSignApproval({
+		...params,
+		amount: ZERO
+	});
+
 const approve = async ({
 	token,
 	from,
@@ -486,12 +490,7 @@ const approve = async ({
 	sourceNetwork,
 	progress,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
-	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-	}): Promise<{ transactionApproved: boolean; hash?: string; nonce: number }> => {
+}: ApproveParams): Promise<{ transactionApproved: boolean; hash?: string; nonce: number }> => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
 
@@ -529,10 +528,9 @@ const approve = async ({
 
 	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first and then approve the new amount.
 	if (preApprovedAmount.gt(ZERO)) {
-		await prepareAndSignApproval({
+		await resetExistingApprovalToZero({
 			...rest,
 			nonce,
-			amount: ZERO,
 			token,
 			sourceNetwork,
 			spender: erc20HelperContractAddress
