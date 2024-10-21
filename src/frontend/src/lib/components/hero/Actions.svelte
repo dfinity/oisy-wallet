@@ -50,24 +50,26 @@
 
 		<Send {isTransactionsPage} />
 
-		{#if convertEth}
-			{#if $networkICP}
-				<ConvertToEthereum />
-			{:else}
-				<ConvertToCkETH />
+		{#if isTransactionsPage}
+			{#if convertEth}
+				{#if $networkICP}
+					<ConvertToEthereum />
+				{:else}
+					<ConvertToCkETH />
+				{/if}
 			{/if}
-		{/if}
 
-		{#if convertErc20}
-			{#if $networkICP}
-				<ConvertToEthereum />
-			{:else}
-				<ConvertToCkERC20 />
+			{#if convertErc20}
+				{#if $networkICP}
+					<ConvertToEthereum />
+				{:else}
+					<ConvertToCkERC20 />
+				{/if}
 			{/if}
-		{/if}
 
-		{#if convertBtc}
-			<ConvertToBTC />
+			{#if convertBtc}
+				<ConvertToBTC />
+			{/if}
 		{/if}
 
 		<Buy />
