@@ -18,9 +18,6 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let back = false;
-
-	let displayTokenSymbol = false;
-	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
 </script>
 
 <div
@@ -42,7 +39,7 @@
 
 				<div>
 					<div class="my-0.5 flex items-center justify-center">
-						{#if displayTokenSymbol && nonNullish($pageToken)}
+						{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
 							<div in:fade>
 								<TokenLogo token={$pageToken} ring networkIconBlackAndWhite />
 							</div>
