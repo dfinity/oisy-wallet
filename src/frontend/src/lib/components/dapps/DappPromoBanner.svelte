@@ -1,11 +1,11 @@
 <script lang="ts">
+	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { DappDescription } from '$lib/types/dappDescription';
+	import type { FeaturedDappDescription } from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: Omit<DappDescription, 'screenshots'> &
-		Required<Pick<DappDescription, 'screenshots'>>;
+	export let dAppDescription: FeaturedDappDescription;
 </script>
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
@@ -30,10 +30,9 @@
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
-			<!--	TODO add button as soon as modalOpen feature is implemented		-->
-			<!--			<Button styleClass="flex-grow-0" colorStyle="secondary" on:click>-->
-			<!--				{$i18n.core.text.view}-->
-			<!--			</Button>-->
+			<Button paddingSmall styleClass="flex-grow-0 text-sm" colorStyle="secondary" on:click>
+				{$i18n.core.text.view}
+			</Button>
 		</div>
 	</div>
 </article>

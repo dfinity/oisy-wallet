@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DappsExplorer from '$lib/components/dapps/DappsExplorer.svelte';
 </script>
 
-<div>You're early. Come back later to see more.</div>
+<DappsExplorer />
