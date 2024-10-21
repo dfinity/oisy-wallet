@@ -13,7 +13,7 @@ import type { RequiredToken, RequiredTokenWithLinkedData } from '$lib/types/toke
  */
 export const ETHEREUM_DEFAULT_DECIMALS = 18;
 
-export const ETHEREUM_SYMBOL = 'ETH';
+const ETHEREUM_SYMBOL = 'ETH';
 
 export const ETHEREUM_TOKEN_ID: unique symbol = Symbol(ETHEREUM_SYMBOL);
 
