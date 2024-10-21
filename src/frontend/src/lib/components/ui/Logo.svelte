@@ -5,13 +5,14 @@
 
 	export let src: string | undefined;
 	export let alt = '';
+	// TODO: rename into xs | sm | md | lg
 	export let size: 'small' | 'smallish' | 'medium' | 'big' = 'small';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
 
 	const sizes = {
 		small: '22px',
-		smallish: '36px',
+        smallish: '36px',
 		medium: '52px',
 		big: '64px'
 	};
