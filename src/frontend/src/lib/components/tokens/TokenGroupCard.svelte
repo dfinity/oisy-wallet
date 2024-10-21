@@ -47,7 +47,7 @@
 
 <TokenCardWithOnClick
 	on:click={() => (toggleExpand(!expanded))}
-	styleClass="!m-0 py-2 px-3 w-full rounded-xl hover:text-blue-ribbon hover:bg-white {isOpened
+	styleClass="!m-0 py-2 px-3 w-full rounded-xl hover:text-blue-ribbon hover:bg-white {expanded
 		? 'bg-white rounded-b-none'
 		: ''}"
 >
