@@ -55,7 +55,7 @@
 				color="white"
 			/>
 			<span
-				class="token-count absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border border-light-grey bg-white font-semibold"
+				class="token-count absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold"
 				>{tokenGroup.tokens.length}</span
 			>
 		</div>
