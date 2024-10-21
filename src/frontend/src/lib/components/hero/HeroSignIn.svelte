@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
-	import IconGlasses from '$lib/components/icons/IconGlasses.svelte';
-	import IconInfinity from '$lib/components/icons/IconInfinity.svelte';
-	import IconShieldAlert from '$lib/components/icons/IconShieldAlert.svelte';
+	import IconGlasses from '$lib/components/icons/lucide/IconGlasses.svelte';
+	import IconInfinity from '$lib/components/icons/lucide/IconInfinity.svelte';
+	import IconShieldAlert from '$lib/components/icons/lucide/IconShieldAlert.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -11,11 +11,11 @@
 	$: infoList = [
 		{
 			label: $i18n.auth.text.safe_access,
-			icon: IconGlasses
+			icon: IconShieldAlert
 		},
 		{
 			label: $i18n.auth.text.privacy_and_security,
-			icon: IconShieldAlert
+			icon: IconGlasses
 		},
 		{
 			label: $i18n.auth.text.powered_by_chain_fusion,

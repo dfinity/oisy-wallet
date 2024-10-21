@@ -6,10 +6,14 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   oisy-backend-wasm:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,9 +22,10 @@ jobs:
         uses: ./.github/actions/oisy-backend
 
   update_snapshots:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: oisy-backend-wasm
     steps:
+
       - name: Fail if branch is main
         if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
         run: |

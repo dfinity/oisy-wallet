@@ -26,7 +26,9 @@ a.as-button {
 
 	&.primary,
 	&.secondary,
-	&.tertiary {
+	&.tertiary,
+	&.success,
+	&.error {
 		justify-content: center;
 
 		padding: var(--button-padding);
@@ -37,13 +39,15 @@ a.as-button {
 		}
 
 		&.padding-sm {
-			--button-padding: var(--padding-1_5x) var(--padding-2x);
+			--button-padding: var(--padding-1_5x) var(--padding-1_5x);
 		}
 	}
 
 	&.primary,
 	&.secondary,
-	&.tertiary {
+	&.tertiary,
+	&.success,
+	&.error {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -53,10 +57,9 @@ a.as-button {
 			opacity: 1;
 			cursor: not-allowed;
 
-			&:hover,
-			&:active {
-				background: var(--color-grey);
-				color: var(--color-white);
+			&.tertiary {
+				background: var(--color-white);
+				color: var(--color-grey);
 			}
 		}
 
@@ -83,7 +86,7 @@ a.as-button {
 		}
 	}
 
-	&.primary {
+	&.primary:not([disabled]):not(.disabled) {
 		background: var(--color-blue-ribbon);
 		color: var(--color-white);
 
@@ -96,7 +99,7 @@ a.as-button {
 		}
 	}
 
-	&.secondary {
+	&.secondary:not([disabled]):not(.disabled) {
 		background: var(--color-zumthor);
 		color: var(--color-primary);
 
@@ -109,7 +112,7 @@ a.as-button {
 		}
 	}
 
-	&.tertiary {
+	&.tertiary:not([disabled]):not(.disabled) {
 		background: var(--color-white);
 
 		&:hover {
@@ -125,15 +128,38 @@ a.as-button {
 			color: var(--color-primary);
 
 			&:hover {
-				color: var(--color-secondary);
+				color: var(--color-cobalt);
+			}
+
+			&:active {
+				color: var(--color-cobalt);
 			}
 		}
 	}
 
-	&.primary,
-	&.secondary {
-		&.full {
-			width: 100%;
+	&.success {
+		background: var(--color-green-crayola);
+		color: var(--color-white);
+
+		&:hover {
+			background: var(--color-dartmouth-green);
+		}
+
+		&:active {
+			background: var(--color-british-racing-green);
+		}
+	}
+
+	&.error {
+		background: var(--color-rusty-red);
+		color: var(--color-white);
+
+		&:hover {
+			background: var(--color-upsdell-red);
+		}
+
+		&:active {
+			background: var(--color-chocolate-cosmos);
 		}
 	}
 
@@ -141,45 +167,6 @@ a.as-button {
 		&:hover,
 		&:active {
 			color: var(--color-blue-ribbon);
-		}
-	}
-
-	&.wallet-connect {
-		background: var(--color-wallet-connect);
-		border: 1px solid var(--color-wallet-connect);
-
-		padding: var(--button-padding);
-	}
-
-	&.wallet-connect {
-		&.icon {
-			padding: 0;
-			border-radius: 50%;
-
-			width: var(--padding-6x);
-			height: var(--padding-6x);
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			span:not(.block) {
-				display: none;
-			}
-
-			@include media.min-width(medium) {
-				&.desktop-wide {
-					padding: var(--button-padding);
-					border-radius: var(--button-border-radius);
-
-					width: inherit;
-					height: inherit;
-
-					span {
-						display: block;
-					}
-				}
-			}
 		}
 	}
 

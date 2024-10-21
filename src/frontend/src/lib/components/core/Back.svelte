@@ -3,10 +3,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
+	import IconBackArrow from '$lib/components/icons/IconBackArrow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { back } from '$lib/utils/nav.utils';
 
 	export let color: 'primary' | 'current' = 'primary';
+	export let onlyArrow = false;
 
 	let fromRoute: NavigationTarget | null;
 
@@ -17,6 +19,15 @@
 
 <button
 	class={`text-${color} pointer-events-auto flex gap-0.5 font-bold`}
-	on:click={async () => back({ pop: nonNullish(fromRoute) })}
-	><IconBack /> {$i18n.core.text.back}</button
+	class:icon={onlyArrow}
+	on:click={() => back({ pop: nonNullish(fromRoute) })}
+	aria-label={$i18n.core.alt.back}
 >
+	{#if onlyArrow}
+		<IconBackArrow />
+		<span class="visually-hidden">{$i18n.core.text.back}</span>
+	{:else}
+		<IconBack />
+		{$i18n.core.text.back}
+	{/if}
+</button>

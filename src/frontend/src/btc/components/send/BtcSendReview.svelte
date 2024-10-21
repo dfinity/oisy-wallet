@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Readable } from 'svelte/store';
-	import BtcSendHasPendingTransactions from './BtcSendHasPendingTransactions.svelte';
+	import BtcSendWarnings from './BtcSendWarnings.svelte';
+	import BtcReviewNetwork from '$btc/components/send/BtcReviewNetwork.svelte';
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import {
 		BtcPendingSentTransactionsStatus,
@@ -29,6 +30,7 @@
 	$: disableSend =
 		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
 		isNullish(utxosFee) ||
+		utxosFee.utxos.length === 0 ||
 		invalid;
 
 	// Should never happen given that the same checks are performed on previous wizard step
@@ -41,10 +43,13 @@
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
+	<BtcReviewNetwork {networkId} slot="network" />
+
 	<BtcUtxosFee slot="fee" bind:utxosFee {progress} {networkId} {amount} />
 
-	<BtcSendHasPendingTransactions
+	<BtcSendWarnings
 		slot="info"
+		{utxosFee}
 		pendingTransactionsStatus={$hasPendingTransactionsStore}
 	/>
 </SendReview>

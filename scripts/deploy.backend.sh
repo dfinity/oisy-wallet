@@ -7,7 +7,6 @@ SIGNER_CANISTER_ID="$(dfx canister id signer --network "${ENV:-local}")"
 case $ENV in
 "staging")
   ECDSA_KEY_NAME="test_key_1"
-  WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
   # URL used by issuer in the issued verifiable credentials (typically hard-coded)
@@ -16,7 +15,6 @@ case $ENV in
   ;;
 "ic")
   ECDSA_KEY_NAME="key_1"
-  WALLET="yit3i-lyaaa-aaaan-qeavq-cai"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
   # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
@@ -62,7 +60,7 @@ if [ -n "${ENV+1}" ]; then
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })" --network "$ENV" --wallet "$WALLET"
+  })" --network "$ENV"
 else
   DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
   dfx deploy backend --argument "(variant {

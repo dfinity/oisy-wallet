@@ -21,7 +21,7 @@ const checkKeyUsage = ({ key, content }) =>
 	content.includes(key) ||
 	(content.includes(`get(i18n)`) && key.split('.').every((k) => content.includes(k)));
 
-const main = async () => {
+const main = () => {
 	const en = JSON.parse(readFileSync(PATH_TO_EN_JSON, 'utf8'));
 
 	let potentialUnusedKeys = extractKeys({ obj: en });
@@ -47,7 +47,4 @@ const main = async () => {
 	}
 };
 
-main().catch((err) => {
-	console.error(err);
-	process.exit(1);
-});
+main();

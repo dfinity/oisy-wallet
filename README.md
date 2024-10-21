@@ -16,11 +16,11 @@
 
 ## What is the OISY wallet
 
-OISY is a new browser-based, self-custodial and multi-chain wallet powered by Internet Computer's [chain fusion](https://internetcomputer.org/chainfusion) technology.
+OISY is a new browser-based, network-custodial and multi-chain wallet powered by Internet Computer's [chain fusion](https://internetcomputer.org/chainfusion) technology.
 
 ## Features
 
-The OISY wallet provides a convenient user experience known from custodial wallets but without their strong trust assumptions. In contrast, OISY provides trust assumptions comparable to self-custody solutions. Different from self-custody wallets though, OISY requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, OISY provides an attractive user experience with a low entry barrier, yet requires no strong trust assumptions.
+The OISY wallet provides a convenient user experience known from custodial wallets but without their strong trust assumptions. In contrast, OISY provides trust assumptions based on network custody, and comparable to self-custody. Different from self-custody wallets though, OISY requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, OISY provides an attractive user experience with a low entry barrier, yet requires no strong trust assumptions.
 
 Building on ICP, OISY achieves a unique set of features:
 
@@ -28,7 +28,7 @@ Building on ICP, OISY achieves a unique set of features:
 
 - **Cross-device:** due to the use of Internet Identity, OISY can easily be used across all devices you have linked to your Internet Identity.
 
-- **Self-custody:** the key controlling your multi-chain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using [threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
+- **Network custody:** the key controlling your multi-chain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using [threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
 
 - **Fully on-chain:** not only the keys but the entire wallet application is stored on-chain and served directly to your browser. The entire wallet is secured by a decentralized trust model, which guarantees that neither the front-end, nor the back-end have been tampered with.
 
@@ -126,3 +126,12 @@ The frontend is written entirely in Svelte. You can serve the frontend in develo
 ```
 npm run dev
 ```
+
+## Dependencies
+
+[//]: # 'TODO: Add fonts that are bought and owned by DFINITY too.'
+
+### [Iconly Pro](https://iconly.pro/)
+
+Some Iconly icons are used in the project, **not included**. You must obtain a license separately.  
+The license for this project is bought and owned by the DFINITY Foundation, please see terms and conditions [here](https://iconly.pro/pages/terms).

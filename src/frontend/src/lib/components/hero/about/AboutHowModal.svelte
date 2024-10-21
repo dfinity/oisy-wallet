@@ -6,6 +6,7 @@
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
 	import IconKey from '$lib/components/icons/IconKey.svelte';
 	import IconWorld from '$lib/components/icons/IconWorld.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { ABOUT_HOW_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -19,9 +20,9 @@
 	</svelte:fragment>
 
 	<div class="stretch pt-4">
-		<ImgBanner src={CoverHow} alt={$i18n.about.how.text.title} />
+		<ImgBanner size="small" src={CoverHow} alt={$i18n.about.how.text.title} />
 
-		<p class="mt-6">
+		<p class="mt-12">
 			<IconKey />
 			<Html text={replaceOisyPlaceholders($i18n.about.how.text.self_custody)} />
 		</p>
@@ -47,7 +48,5 @@
 		</p>
 	</div>
 
-	<button class="secondary full text-center" on:click={modalStore.close}
-		>{$i18n.core.text.close}</button
-	>
+	<ButtonCloseModal colorStyle="primary" />
 </Modal>

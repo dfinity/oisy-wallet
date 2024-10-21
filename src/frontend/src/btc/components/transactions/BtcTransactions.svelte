@@ -3,6 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
+	import BtcTransactionsHeader from '$btc/components/transactions/BtcTransactionsHeader.svelte';
 	import {
 		sortedBtcTransactions,
 		btcTransactionsNotInitialized
@@ -19,6 +20,8 @@
 		? ($modalStore?.data as BtcTransactionUi | undefined)
 		: undefined;
 </script>
+
+<BtcTransactionsHeader />
 
 <TokensSkeletons loading={$btcTransactionsNotInitialized}>
 	{#each $sortedBtcTransactions as transaction (transaction.data.id)}

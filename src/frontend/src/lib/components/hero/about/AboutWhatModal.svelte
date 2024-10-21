@@ -2,7 +2,9 @@
 	import { Html, Modal } from '@dfinity/gix-components';
 	import CoverWhat from '$lib/assets/cover-features.png';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
+	import IconIcLogoPlain from '$lib/components/icons/IconIcLogoPlain.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { ABOUT_WHAT_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -17,9 +19,9 @@
 	>
 
 	<div class="stretch pt-4">
-		<ImgBanner src={CoverWhat} alt={$i18n.about.what.text.title} />
+		<ImgBanner size="small" src={CoverWhat} alt={$i18n.about.what.text.title} />
 
-		<p class="mt-6">
+		<p class="mt-12">
 			<IconCrypto />
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.hold_crypto)} />
 		</p>
@@ -30,11 +32,10 @@
 		</p>
 
 		<p class="my-6">
+			<IconIcLogoPlain />
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.use_ic_dapps)} />
 		</p>
 	</div>
 
-	<button class="secondary full text-center" on:click={modalStore.close}
-		>{$i18n.core.text.close}</button
-	>
+	<ButtonCloseModal colorStyle="primary" />
 </Modal>

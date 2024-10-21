@@ -10,6 +10,7 @@ export interface Network {
 	env: NetworkEnvironment;
 	name: string;
 	icon?: string;
+	iconBW?: string;
 	buy?: AtLeastOne<NetworkBuy>;
 }
 

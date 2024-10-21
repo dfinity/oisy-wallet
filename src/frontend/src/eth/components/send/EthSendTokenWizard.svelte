@@ -22,7 +22,6 @@
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
@@ -31,20 +30,15 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
-		TRACK_COUNT_ETH_SEND_SUCCESS,
-		TRACK_DURATION_ETH_SEND
+		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import {
-		initTimedEvent,
-		trackTimedEventError,
-		trackTimedEventSuccess,
-		trackEvent
-	} from '$lib/services/analytics.services';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
@@ -175,13 +169,6 @@
 
 		dispatch('icNext');
 
-		const timedEvent = initTimedEvent({
-			name: TRACK_DURATION_ETH_SEND,
-			metadata: {
-				token: $sendToken.symbol
-			}
-		});
-
 		try {
 			await executeSend({
 				from: $ethAddress,
@@ -201,27 +188,21 @@
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
-			await Promise.allSettled([
-				trackTimedEventSuccess(timedEvent),
-				trackEvent({
-					name: TRACK_COUNT_ETH_SEND_SUCCESS,
-					metadata: {
-						token: $sendToken.symbol
-					}
-				})
-			]);
+			await trackEvent({
+				name: TRACK_COUNT_ETH_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await Promise.allSettled([
-				trackTimedEventError(timedEvent),
-				trackEvent({
-					name: TRACK_COUNT_ETH_SEND_ERROR,
-					metadata: {
-						token: $sendToken.symbol
-					}
-				})
-			]);
+			await trackEvent({
+				name: TRACK_COUNT_ETH_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
 
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },

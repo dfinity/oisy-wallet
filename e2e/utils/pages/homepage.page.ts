@@ -1,4 +1,5 @@
 import {
+	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
 	NAVIGATION_MENU,
@@ -48,6 +49,7 @@ interface ClickMenuItemParams {
 
 interface WaitForLocatorOptions {
 	state: 'attached' | 'detached' | 'visible' | 'hidden';
+	timeout?: number;
 }
 
 abstract class Homepage {
@@ -60,7 +62,7 @@ abstract class Homepage {
 	}
 
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
-		return this.#page.isVisible(selector);
+		return await this.#page.isVisible(selector);
 	}
 
 	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
@@ -94,7 +96,7 @@ abstract class Homepage {
 	private async getCanvasAsDataURL({
 		selector
 	}: SelectorOperationParams): Promise<string | undefined> {
-		return this.#page.evaluate<string | undefined, { selector: string }>(
+		return await this.#page.evaluate<string | undefined, { selector: string }>(
 			({ selector }) => {
 				const canvas = document.querySelector<HTMLCanvasElement>(selector);
 				return canvas?.toDataURL();
@@ -135,6 +137,10 @@ abstract class Homepage {
 		await this.waitForLoggedOutIndicator();
 	}
 
+	protected async waitForLoaderModal(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
+	}
+
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
@@ -155,7 +161,7 @@ abstract class Homepage {
 	}
 
 	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
-		return this.#page.getByTestId(testId);
+		return await this.#page.getByTestId(testId);
 	}
 
 	async waitForTimeout(timeout: number): Promise<void> {
@@ -181,7 +187,9 @@ abstract class Homepage {
 		});
 
 		if (nonNullish(selectorsToMock)) {
-			await Promise.all(selectorsToMock.map(async (selector) => this.mockSelector({ selector })));
+			await Promise.all(
+				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
+			);
 		}
 
 		await expect(modal).toHaveScreenshot();
@@ -270,6 +278,10 @@ export class HomepageLoggedIn extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
+
+		await this.waitForLoaderModal();
+
+		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
 		await this.waitForTokensInitialization();
 	}

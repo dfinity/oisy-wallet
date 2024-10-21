@@ -5,7 +5,7 @@
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import type { OptionIcCkToken } from '$icp/types/ic';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
@@ -38,7 +38,7 @@
 	on:click={async () => await openSend()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
-	<IconConvert size="28" slot="icon" />
+	<IconCkConvert size="28" slot="icon" />
 	{BTC_MAINNET_SYMBOL}
 </ButtonHero>
 

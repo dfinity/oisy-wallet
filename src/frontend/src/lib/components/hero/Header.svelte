@@ -15,31 +15,33 @@
 </script>
 
 <header
-	class="z-1 relative grid w-full max-w-screen-2.5xl grid-cols-2 items-center gap-y-5 px-4 pt-6 sm:px-8"
-	class:sm:grid-cols-[1fr_auto_1fr]={$authSignedIn}
+	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 sm:px-8"
+	class:lg:fixed={$authSignedIn}
+	class:lg:top-0={$authSignedIn}
+	class:lg:inset-x-0={$authSignedIn}
+	class:lg:z-10={$authSignedIn}
+	class:grid={$authNotSignedIn}
+	class:grid-cols-2={$authNotSignedIn}
+	class:xl:grid={$authNotSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 >
-	{#if back}
-		<Back />
-	{:else}
-		<OisyWalletLogoLink />
-	{/if}
-
-	<div
-		class="col-span-3 col-start-1 row-start-2 flex"
-		class:sm:col-span-1={$authSignedIn}
-		class:xl:col-span-1={$authNotSignedIn}
-		class:sm:col-start-2={$authSignedIn}
-		class:xl:col-start-2={$authNotSignedIn}
-		class:sm:row-start-1={$authSignedIn}
-		class:xl:row-start-1={$authNotSignedIn}
-		class:sm:w-fit={$authSignedIn}
-		class:xl:w-fit={$authNotSignedIn}
-	>
-		<Alpha />
+	<div class="pointer-events-auto">
+		{#if back}
+			<Back />
+		{:else}
+			<OisyWalletLogoLink />
+		{/if}
 	</div>
 
-	<div class="flex justify-end gap-4">
+	{#if $authNotSignedIn}
+		<div
+			class="pointer-events-auto col-span-3 col-start-1 row-start-2 flex xl:col-span-1 xl:col-start-2 xl:row-start-1 xl:w-fit"
+		>
+			<Alpha />
+		</div>
+	{/if}
+
+	<div class="pointer-events-auto flex justify-end gap-4">
 		{#if $authSignedIn}
 			<WalletConnect />
 		{/if}
