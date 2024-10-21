@@ -481,6 +481,44 @@ const resetExistingApprovalToZero = async (
 		amount: ZERO
 	});
 
+const checkExistingApproval = async ({
+	token,
+	from,
+	spender,
+	amount,
+	sourceNetwork,
+	progress,
+	...rest
+}: Omit<ApproveParams, 'to' | 'minterInfo'> & {
+	nonce: number;
+	spender: EthAddress;
+}): Promise<boolean> => {
+	const preApprovedAmount = await erc20ContractAllowance({
+		token,
+		owner: from,
+		spender,
+		networkId: sourceNetwork.id
+	});
+
+	// If there is already an approved allowance that is enough for the required amount, we don't need to approve again.
+	if (preApprovedAmount.gte(amount)) {
+		progress(ProgressStepsSend.APPROVE);
+		return true;
+	}
+
+	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
+	if (preApprovedAmount.gt(ZERO)) {
+		await resetExistingApprovalToZero({
+			...rest,
+			token,
+			sourceNetwork,
+			spender
+		});
+	}
+
+	return false;
+};
+
 const approve = async ({
 	token,
 	from,
@@ -513,32 +551,20 @@ const approve = async ({
 		return { transactionApproved: false, nonce };
 	}
 
-	const preApprovedAmount = await erc20ContractAllowance({
+	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't and it's non-null, we reset it to zero.
+	const existingApprovalIsEnough = await checkExistingApproval({
 		token,
-		owner: from,
+		from,
 		spender: erc20HelperContractAddress,
-		networkId
+		nonce,
+		amount,
+		sourceNetwork,
+		progress,
+		...rest
 	});
 
-	// If there is already an approved allowance that is enough for the required amount, we don't need to approve again.
-	if (preApprovedAmount.gte(amount)) {
-		progress(ProgressStepsSend.APPROVE);
-		return { transactionApproved: false, nonce };
-	}
-
-	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first and then approve the new amount.
-	if (preApprovedAmount.gt(ZERO)) {
-		await resetExistingApprovalToZero({
-			...rest,
-			nonce,
-			token,
-			sourceNetwork,
-			spender: erc20HelperContractAddress
-		});
-	}
-
 	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
-	const nonceApproval = preApprovedAmount.gt(ZERO) ? nonce + 1 : nonce;
+	const nonceApproval = existingApprovalIsEnough ? nonce + 1 : nonce;
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
