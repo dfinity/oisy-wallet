@@ -5,12 +5,13 @@
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: 'small' | 'medium' | 'big' = 'small';
+	export let size: 'extra-small' | 'medium' | 'big' = 'extra-small';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
 
 	const sizes = {
-		small: '22px',
+		['extra-small']: '22px',
+		small: '42px',
 		medium: '52px',
 		big: '64px'
 	};
