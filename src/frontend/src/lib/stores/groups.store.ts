@@ -8,4 +8,4 @@ export interface GroupsData {
 	[key: string]: GroupData;
 }
 
-export const easyGroupStore = initStorageStore<GroupsData>({ key: 'groups' });
+export const groupsStore = initStorageStore<GroupsData>({ key: 'groups' });

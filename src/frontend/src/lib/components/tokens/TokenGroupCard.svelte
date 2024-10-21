@@ -13,7 +13,7 @@
 	import { LogoSize } from '$lib/types/logo-size';
 	import type { TokenGroupUi, TokenUi } from '$lib/types/token';
 	import { isNullish } from '@dfinity/utils';
-	import { easyGroupStore } from '$lib/stores/groups.store.js';
+	import { groupsStore } from '$lib/stores/groups.store.js';
 
 	export let tokenGroup: TokenGroupUi;
 
@@ -32,7 +32,7 @@
 		usdBalance: totalUsdBalance
 	};
 
-	$: groups = $easyGroupStore ?? {};
+	$: groups = $groupsStore ?? {};
 	$: expanded = groups[Symbol.keyFor(tokenGroup.id)]?.expanded ?? false;
 
 	const toggleExpand = (expanded: boolean) => {
@@ -41,7 +41,7 @@
 			throw new Error('Invalid TokenGroupId Symbol');
 		}
 		const updatedData = { ...groups, [idString]: { expanded: expanded }};
-		easyGroupStore.set({ key: 'groups', value: updatedData });
+		groupsStore.set({ key: 'groups', value: updatedData });
 	}
 </script>
 
