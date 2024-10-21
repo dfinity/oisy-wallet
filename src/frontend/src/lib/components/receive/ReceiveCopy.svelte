@@ -9,7 +9,7 @@
 
 <ButtonIcon
 	ariaLabel={copyAriaLabel}
-	on:click={() => copyToClipboard({ value: address, text: copyAriaLabel })}
+	on:click={async () => await copyToClipboard({ value: address, text: copyAriaLabel })}
 >
 	<IconCopy size="24" slot="icon" />
 </ButtonIcon>

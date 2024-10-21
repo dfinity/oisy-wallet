@@ -9,7 +9,7 @@
 </script>
 
 <button
-	on:click|preventDefault|stopPropagation={() => copyToClipboard({ value, text })}
+	on:click|preventDefault|stopPropagation={async () => await copyToClipboard({ value, text })}
 	aria-label={`Copy: ${value}`}
 	class="pl-0.5"
 	class:py-2={!inline}
