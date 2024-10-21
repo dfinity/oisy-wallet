@@ -12,7 +12,9 @@
 		<div class="absolute">
 			<Img
 				src={dAppDescription.screenshots[0]}
-				alt={replacePlaceholders($i18n.dapp_explorer.alt.website, { $dAppname: dAppDescription.name })}
+				alt={replacePlaceholders($i18n.dapp_explorer.alt.website, {
+					$dAppname: dAppDescription.name
+				})}
 			/>
 		</div>
 	{/if}
@@ -21,7 +23,9 @@
 			<div class="h-12 w-12 rounded-full">
 				<Img
 					src={dAppDescription.logo}
-					alt={replacePlaceholders($i18n.dapp_explorer.alt.logo, { $dAppname: dAppDescription.name })}
+					alt={replacePlaceholders($i18n.dapp_explorer.alt.logo, {
+						$dAppname: dAppDescription.name
+					})}
 				/>
 			</div>
 			<div class="flex-1">
