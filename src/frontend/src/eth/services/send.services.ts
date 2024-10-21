@@ -539,6 +539,7 @@ const approve = async ({
 		});
 	}
 
+	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
 	const nonceApproval = preApprovedAmount.gt(ZERO) ? nonce + 1 : nonce;
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
