@@ -182,6 +182,7 @@ const createTokenGroup = ({
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
 }): TokenGroupUi => ({
+	id: Symbol(`GRP-${nativeToken.symbol}-${twinToken.symbol}`),
 	header: {
 		name: nativeToken.network.name,
 		symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,

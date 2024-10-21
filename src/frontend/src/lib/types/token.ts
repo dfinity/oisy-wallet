@@ -67,7 +67,10 @@ interface TokenFinancialData {
 
 export type TokenUi = Token & TokenFinancialData;
 
+export type TokenGroupId = symbol;
+
 export interface TokenGroupUi {
+	id: TokenGroupId;
 	header: TokenMetadata;
 	nativeNetwork: Network;
 	tokens: TokenUi[];
