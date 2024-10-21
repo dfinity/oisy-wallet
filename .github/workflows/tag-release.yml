@@ -1,0 +1,57 @@
+name: Tag and Release on Merge from Release Branch
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-24.04
+
+    steps:
+    
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Prepare
+      uses: ./.github/actions/prepare
+
+    - name: Get version from package.json
+      id: get_version
+      run: |
+        version=$(node -p "require('./package.json').version")
+        echo "Version from package.json: $version"
+        echo "::set-output name=version::$version"
+
+    - name: Create Git tag
+      run: |
+        git tag -a "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
+        git push origin "v${{ steps.get_version.outputs.version }}"
+
+    - name: Generate release notes from PRs since last release
+      id: release_notes
+      run: |
+        latest_tag=$(git describe --tags --abbrev=0 HEAD^)
+        release_notes=$(git log "$latest_tag"..HEAD --merges --pretty=format:"* %s (%h)" --reverse)
+
+        if [ -z "$release_notes" ]; then
+          release_notes="No PRs were merged since the last release."
+          exit 1
+        fi
+
+        echo "::set-output name=release_notes::$release_notes"
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      with:
+        tag_name: "v${{ steps.get_version.outputs.version }}"
+        release_name: "v${{ steps.get_version.outputs.version}}"
+        draft: false
+        body: ${{ steps.release_notes.outputs.release_notes }}
+        prerelease: false
+        files: |
+          ./dist/*.zip
+          ./dist/*.tar.gz

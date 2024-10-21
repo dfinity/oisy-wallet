@@ -425,7 +425,7 @@ async fn btc_get_pending_transactions(
 fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
-    let current_time_ns = time() as u128;
+    let current_time_ns = u128::from(time());
 
     let (vc_flow_signers, root_pk_raw, credential_type) =
         read_config(|config| find_credential_config(&request, config))
@@ -437,7 +437,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
         &vc_flow_signers,
         &request.credential_spec,
         &root_pk_raw,
-        current_time_ns as u128,
+        current_time_ns,
     ) {
         Ok(()) => mutate_state(|s| {
             let mut user_profile_model =

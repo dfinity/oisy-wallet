@@ -16,7 +16,8 @@
 			"more": "More",
 			"reject": "Reject",
 			"approve": "Approve",
-			"view": "View"
+			"view": "View",
+			"copy": "Copy"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
