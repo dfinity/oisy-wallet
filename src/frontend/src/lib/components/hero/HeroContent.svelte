@@ -23,9 +23,6 @@
 	export let summary = false;
 	export let back = false;
 
-	let displayTokenSymbol = false;
-	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
-
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
 		? mapTokenUi({
