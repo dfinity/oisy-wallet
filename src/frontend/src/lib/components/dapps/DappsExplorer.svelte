@@ -1,7 +1,7 @@
 <script>
-	import { authSignedIn } from '$lib/derived/auth.derived';
 	import DappsExplorerSignedIn from '$lib/components/dapps/DappsExplorerSignedIn.svelte';
 	import DappsExplorerSignedOut from '$lib/components/dapps/DappsExplorerSignedOut.svelte';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 </script>
 
 {#if $authSignedIn}

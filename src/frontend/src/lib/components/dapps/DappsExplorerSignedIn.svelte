@@ -49,8 +49,7 @@
 		ariaLabel={$i18n.dapps.alt.show_all}
 		on:click={() => (selectedTag = null)}
 		styleClass="text-nowrap max-w-fit text-sm"
-		colorStyle={selectedTag === null ? 'primary' : 'tertiary'}
-		>{$i18n.dapps.text.all_dapps}</Button
+		colorStyle={selectedTag === null ? 'primary' : 'tertiary'}>{$i18n.dapps.text.all_dapps}</Button
 	>
 	{#each uniqueTags as tag}
 		<Button
