@@ -85,7 +85,7 @@
 
 <a
 	class="as-button tertiary padding-sm mx-auto my-10 w-fit text-sm no-underline"
-	href="https://github.com/dfinity/oisy-wallet/issues/new?assignees=&labels=enhancement&projects=&title=Add+Dapp+to+Dapp-Explorer"
+	href="https://github.com/dfinity/oisy-wallet/issues/new?assignees=&template=dapp_submission_request.md&labels=enhancement&projects=&title=Add+Dapp+to+Dapp-Explorer"
 	rel="external noopener noreferrer"
 	target="_blank"
 	aria-label={$i18n.dapps.alt.submit_your_dapp}
