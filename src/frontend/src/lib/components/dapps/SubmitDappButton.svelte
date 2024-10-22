@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
