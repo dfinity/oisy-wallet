@@ -54,9 +54,9 @@ interface I18nAuth {
 		title_part_2: string;
 		logout: string;
 		authenticate: string;
-		safe_access: string;
-		privacy_and_security: string;
-		powered_by_chain_fusion: string;
+		asset_types: string;
+		instant_and_private: string;
+		advanced_cryptography: string;
 	};
 	alt: { sign_in: string; preview: string };
 	warning: { not_signed_in: string; session_expired: string };
@@ -74,13 +74,23 @@ interface I18nAuth {
 }
 
 interface I18nDapps {
-	text: { all_dapps: string; featured: string; open_dapp: string };
+	text: {
+		all_dapps: string;
+		featured: string;
+		open_dapp: string;
+		title: string;
+		sign_in: string;
+		submit_your_dapp: string;
+	};
 	alt: {
 		learn_more: string;
 		logo: string;
 		open_dapp: string;
 		open_twitter: string;
+		show_all: string;
+		show_tag: string;
 		source_code_on_github: string;
+		submit_your_dapp: string;
 		tags: string;
 		website: string;
 	};
@@ -102,7 +112,7 @@ interface I18nWallet {
 		icp_deposits: string;
 		use_address_from_to: string;
 	};
-	alt: { open_etherscan: string };
+	alt: { open_etherscan: string; qrcode_address: string };
 }
 
 interface I18nInit {
@@ -627,6 +637,10 @@ interface I18nSigner {
 	};
 }
 
+interface I18nCarousel {
+	text: { next_slide: string; prev_slide: string; indicator: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -651,4 +665,5 @@ interface I18n {
 	transactions: I18nTransactions;
 	about: I18nAbout;
 	signer: I18nSigner;
+	carousel: I18nCarousel;
 }
