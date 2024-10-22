@@ -13,11 +13,11 @@
 	import { token } from '$lib/stores/token.store';
 	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 
-	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
+	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
 		: isRouteDappExplorer($page)
-			? 'dapps'
+			? 'explore'
 			: isRouteTransactions($page)
 				? 'transactions'
 				: 'tokens';
@@ -41,7 +41,7 @@
 		<SplitPane>
 			<NavigationMenu slot="menu" />
 
-			{#if route !== 'settings' && route !== 'dapps'}
+			{#if route !== 'settings' && route !== 'explore'}
 				<Hero
 					usdTotal={route === 'tokens'}
 					summary={route === 'transactions'}
