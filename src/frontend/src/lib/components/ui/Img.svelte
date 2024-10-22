@@ -7,6 +7,7 @@
 	export let height: string | undefined = undefined;
 	export let rounded = false;
 	export let fitHeight = false;
+	export let styleClass: string | undefined = undefined;
 </script>
 
 <img
@@ -20,5 +21,6 @@
 	on:load
 	on:error
 	class:rounded-full={rounded}
+	class={styleClass}
 	style={fitHeight ? `max-width: inherit; height: ${height};` : undefined}
 />
