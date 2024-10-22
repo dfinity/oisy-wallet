@@ -88,7 +88,8 @@
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
 			"title": "Explore Web3 Ecosystem",
-			"open_dapp": "Open the dapp $dAppname"
+			"open_dapp": "Open the dapp $dAppname",
+			"submit_your_dapp": "Submit your dapp"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppname",
