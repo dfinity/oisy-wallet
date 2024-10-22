@@ -14,6 +14,7 @@
 		type FeaturedDappDescription
 	} from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedDappDescription | undefined =>
@@ -81,6 +82,8 @@
 		</li>
 	{/each}
 </ul>
+
+<SubmitDappButton/>
 
 {#if $modalDAppDetails && nonNullish(selectedDapp)}
 	<DappModal dAppDescription={selectedDapp} />
