@@ -42,11 +42,7 @@
 			<NavigationMenu slot="menu" />
 
 			{#if route !== 'settings' && route !== 'explore'}
-				<Hero
-					usdTotal={route === 'tokens'}
-					summary={route === 'transactions'}
-					back={route === 'transactions'}
-				/>
+				<Hero usdTotal={route === 'tokens'} summary={route === 'transactions'} />
 			{/if}
 
 			<LoadersGuard>
