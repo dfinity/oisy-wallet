@@ -71,6 +71,7 @@ export type OptionTokenUi = Option<TokenUi>;
 
 export interface TokenGroupUi {
 	header: TokenMetadata;
+	nativeToken: TokenUi;
 	nativeNetwork: Network;
 	tokens: TokenUi[];
 }
