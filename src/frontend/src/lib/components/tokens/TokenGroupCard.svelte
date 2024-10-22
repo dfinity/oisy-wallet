@@ -80,7 +80,7 @@
 		{#each tokenGroup.tokens as token}
 			<Listener {token}>
 				<TokenCardWithUrl {token}>
-					<TokenCardContent logoStyleClass="mx-[5px]" logoSize='md' {token} />
+					<TokenCardContent logoStyleClass="mx-[5px]" logoSize="md" {token} />
 				</TokenCardWithUrl>
 			</Listener>
 		{/each}
