@@ -18,7 +18,7 @@
 		lg: '52px',
 		xl: '64px'
 	};
-	let sizePx = typeof size === 'number' ? `${size}px` : sizes[size];
+	let sizePx = sizes[size];
 
 	let loaded = false;
 

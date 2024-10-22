@@ -10,7 +10,7 @@
 	export let showNetworkIcon = true;
 	export let networkIconBlackAndWhite = false;
 	export let ring = false;
-	export let size: LogoSize | undefined = undefined;
+	export let size: LogoSize = 'xs';
 	export let styleClass: string | undefined = undefined;
 
 	const {

@@ -71,7 +71,7 @@
 		</div>
 
 		<TokenBalance slot="amount" token={tokenGroupBalance} />
-		<ExchangeTokenValue slot="amountDescription" tokenUi={tokenGroupBalance} />
+		<ExchangeTokenValue slot="amountDescription" token={tokenGroupBalance} />
 	</Card>
 </TokenCardWithOnClick>
 
@@ -80,7 +80,7 @@
 		{#each tokenGroup.tokens as token}
 			<Listener {token}>
 				<TokenCardWithUrl {token}>
-					<TokenCardContent logoStyleClass="mx-[5px]" logoSize={42} {token} />
+					<TokenCardContent logoStyleClass="mx-[5px]" logoSize='md' {token} />
 				</TokenCardWithUrl>
 			</Listener>
 		{/each}
