@@ -1,1 +1,1 @@
-export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | number
+export type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | number;
