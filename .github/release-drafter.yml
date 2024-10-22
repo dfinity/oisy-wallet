@@ -1,7 +1,7 @@
 # .github/release-drafter.yml
 
-name-template: 'Release v$NEXT_PATCH_VERSION'
-tag-template: 'v$NEXT_PATCH_VERSION'
+name-template: 'Release v{{version}}'
+tag-template: 'v{{version}}'
 categories:
   - title: '🚀 Features'
     label: 'feat'
@@ -26,8 +26,18 @@ categories:
   - title: '🧪 Testing'
     label: 'test'
 
-change-template: '- $BODY by @$AUTHOR'  # This will include the full PR description
-no-changes-template: "No notable changes in this release."
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
 
-# Optional customization to control how the version is incremented
-version-template: $MAJOR.$MINOR.$PATCH
+template: |
+  ## What's Changed
+
+  ### Detailed Changes
+  {% for change in changes %}
+  - **Title**: {{ change.title }}
+  - **PR**: [#{{ change.number }}]({{ change.html_url }})
+  - **Author**: @{{ change.author.login }}
+  - **Motivation**:
+    {{ change.body | paragraph_start_with("# Motivation") | default("No specific motivation provided.") }}
+  - **Changes**:
+    {{ change.body | paragraph_start_with("# Changes") | default("No detailed changes provided.") }}
+  {% endfor %}
