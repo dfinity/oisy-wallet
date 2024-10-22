@@ -17,7 +17,7 @@
 
 	const updateTokensToDisplay = () => (tokens = [...sortedTokens]);
 
-	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
+	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 1000);
 
 	$: sortedTokens, debounceUpdateTokensToDisplay();
 </script>
