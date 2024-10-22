@@ -215,7 +215,8 @@
 	"receive": {
 		"text": {
 			"receive": "Receive",
-			"address": "Receive address"
+			"address": "Receive address",
+			"receive_token": "Receive $token"
 		},
 		"icp": {
 			"text": {

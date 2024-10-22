@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
+	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -14,7 +15,7 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
+	<ReceiveTitle slot="title" {addressToken} />
 
 	<ContentWithToolbar>
 		<p class="text-center font-bold">Address:</p>
