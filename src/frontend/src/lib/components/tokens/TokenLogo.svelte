@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { LogoSize } from '$lib/types/logo-size';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { LogoSize } from '$lib/types/logo-size';
 
 	export let token: Pick<Token, 'icon' | 'name' | 'network'>;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
