@@ -16,17 +16,21 @@
 	} from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let selectedTag: string | undefined = undefined;
-	const featuredDapp: FeaturedDappDescription | undefined = dAppDescriptions.find(
-		(dApp) => dApp.featured && nonNullish(dApp.screenshots) && dApp.screenshots.length > 0
-	);
+	// For the moment only the first featured dapp is highlighted
+	const selectFirstFeaturedDapp = (): FeaturedDappDescription | undefined =>
+		dAppDescriptions.find(
+			({ featured, screenshots }) => featured && nonNullish(screenshots) && screenshots.length
+		) as FeaturedDappDescription | undefined;
 
+	const featuredDapp = selectFirstFeaturedDapp();
+
+	let selectedTag: string | undefined = undefined;
 	const uniqueTags = new Set(
 		dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
 	);
 
 	$: filteredDapps = nonNullish(selectedTag)
-		? dAppDescriptions.filter((dApp) => dApp.tags.includes(selectedTag))
+		? dAppDescriptions.filter((dApp) => dApp.tags.includes(selectedTag as string))
 		: dAppDescriptions;
 
 	let selectedDapp: DappDescription | undefined = undefined;
