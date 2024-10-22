@@ -30,6 +30,7 @@
 	{#if nonNullish(tokenCount) && tokenCount > 0}
 		<span
 			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold text-[var(--color-secondary)]"
+			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: token.name })}
 		>
 			{tokenCount}
 		</span>
