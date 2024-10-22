@@ -3,14 +3,14 @@
 	import TokenExchangeValueSkeleton from '$lib/components/tokens/TokenExchangeValueSkeleton.svelte';
 	import type { TokenUi } from '$lib/types/token';
 
-	export let tokenUi: TokenUi;
+	export let token: TokenUi;
 
 	let balance: TokenUi['balance'];
 	let usdBalance: TokenUi['usdBalance'];
 
-	$: ({ balance, usdBalance } = tokenUi);
+	$: ({ balance, usdBalance } = token);
 </script>
 
-<TokenExchangeValueSkeleton {tokenUi}>
+<TokenExchangeValueSkeleton {token}>
 	<TokenExchangeBalance {balance} {usdBalance} />
 </TokenExchangeValueSkeleton>

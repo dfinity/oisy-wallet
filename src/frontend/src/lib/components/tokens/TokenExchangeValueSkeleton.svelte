@@ -3,10 +3,10 @@
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import type { TokenUi } from '$lib/types/token';
 
-	export let tokenUi: TokenUi;
+	export let token: TokenUi;
 </script>
 
-{#if tokenUi.balance === undefined || !$exchangeInitialized}
+{#if token.balance === undefined || !$exchangeInitialized}
 	<span class="w-full max-w-[50px]"><SkeletonText /></span>
 {:else}
 	<slot />
