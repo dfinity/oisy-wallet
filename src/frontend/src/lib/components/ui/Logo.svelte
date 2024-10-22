@@ -5,15 +5,16 @@
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: 'xs' | 'sm' | 'md' | 'lg' = 'xs';
+	export let size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'xs';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
 
 	const sizes = {
 		xs: '22px',
 		sm: '36px',
-		md: '52px',
-		lg: '64px'
+		md: '42px',
+		lg: '52px',
+		xl: '64px'
 	};
 	let sizePx = sizes[size];
 
