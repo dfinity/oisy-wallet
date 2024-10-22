@@ -10,10 +10,11 @@
 	export let address: string;
 	export let addressToken: Token | undefined;
 
+	let symbol: string | undefined;
 	let icon: string | undefined;
 	let name: string;
 
-	$: ({ icon, name } = addressToken ?? { icon: undefined, name: '' });
+	$: ({ icon, name, symbol } = addressToken ?? { icon: undefined, name: '', symbol: undefined });
 
 	let render = true;
 
@@ -27,21 +28,27 @@
 
 <div in:fade class="qr-container p-4" class:opacity-0={!render}>
 	{#if render}
-		<QRCode value={address}>
-			<svelte:fragment slot="logo">
-				{#if nonNullish(icon)}
-					<div class="flex items-center justify-center rounded-lg bg-white p-2">
-						<Logo
-							src={icon}
-							alt={replacePlaceholders($i18n.core.alt.logo, {
-								$name: name
-							})}
-							size="md"
-						/>
-					</div>
-				{/if}
-			</svelte:fragment>
-		</QRCode>
+		<article
+			aria-label={replacePlaceholders($i18n.wallet.alt.qrcode_address, {
+				$token: symbol ?? ''
+			})}
+		>
+			<QRCode value={address}>
+				<svelte:fragment slot="logo">
+					{#if nonNullish(icon)}
+						<div class="flex items-center justify-center rounded-lg bg-white p-2">
+							<Logo
+								src={icon}
+								alt={replacePlaceholders($i18n.core.alt.logo, {
+									$name: name
+								})}
+								size="md"
+							/>
+						</div>
+					{/if}
+				</svelte:fragment>
+			</QRCode>
+		</article>
 	{/if}
 </div>
 
