@@ -8,7 +8,7 @@
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
-	export let logoSize: LogoSize | undefined = undefined;
+	export let logoSize: LogoSize | undefined = 'md';
 	export let logoStyleClass: string | undefined = undefined;
 </script>
 
