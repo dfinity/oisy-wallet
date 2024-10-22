@@ -4,6 +4,7 @@
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
 	import DappModal from '$lib/components/dapps/DappModal.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
+	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -14,7 +15,6 @@
 		type FeaturedDappDescription
 	} from '$lib/types/dappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedDappDescription | undefined =>
@@ -83,7 +83,7 @@
 	{/each}
 </ul>
 
-<SubmitDappButton/>
+<SubmitDappButton />
 
 {#if $modalDAppDetails && nonNullish(selectedDapp)}
 	<DappModal dAppDescription={selectedDapp} />
