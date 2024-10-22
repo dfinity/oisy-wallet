@@ -1,27 +1,17 @@
 <script lang="ts">
 	import { IconWest, IconEast } from '@dfinity/gix-components';
+	import ButtonControl from '$lib/components/ui/ButtonControl.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let onNextClick: () => void;
-	export let onPreviousClick: () => void;
-
-	const classes =
-		'w-7 h-7 bg-white rounded-md shadow p-1 hover:text-blue-ribbon transition-colors duration-700';
+	export let onNext: () => void;
+	export let onPrevious: () => void;
 </script>
 
 <div class="flex w-[25%] items-center justify-center">
-	<button
-		aria-label={$i18n.carousel.text.prev_slide}
-		class={`${classes} mr-1`}
-		on:click={() => onPreviousClick()}
-	>
+	<ButtonControl ariaLabel={$i18n.carousel.text.prev_slide} styleClass="mr-1" on:click={onPrevious}>
 		<IconWest />
-	</button>
-	<button
-		aria-label={$i18n.carousel.text.next_slide}
-		class={classes}
-		on:click={() => onNextClick()}
-	>
+	</ButtonControl>
+	<ButtonControl ariaLabel={$i18n.carousel.text.next_slide} on:click={onNext}>
 		<IconEast />
-	</button>
+	</ButtonControl>
 </div>
