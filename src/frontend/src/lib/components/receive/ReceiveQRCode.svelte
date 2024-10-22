@@ -1,9 +1,18 @@
 <script lang="ts">
 	import { QRCode } from '@dfinity/gix-components';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let address: string;
+	// TODO: remove undefined assignation to make property mandatory in PR #3023
+	export let addressToken: Token | undefined = undefined;
+
+	let symbol: string | undefined;
+	$: symbol = addressToken?.symbol;
 
 	let render = true;
 
@@ -15,19 +24,30 @@
 
 <svelte:window on:resize={rerender} />
 
-<div in:fade class="rounded-sm bg-off-white p-4" class:opacity-0={!render}>
+<div in:fade class="qr-container p-4" class:opacity-0={!render}>
 	{#if render}
-		<QRCode value={address} />
+		<article
+			aria-label={replacePlaceholders($i18n.wallet.alt.qrcode_address, {
+				$token: symbol ?? ''
+			})}
+		>
+			<QRCode value={address}>
+				<svelte:fragment slot="logo">
+					{#if nonNullish(addressToken)}
+						<div class="flex items-center justify-center rounded-lg bg-white p-2">
+							<TokenLogo token={addressToken} showNetworkIcon={false} />
+						</div>
+					{/if}
+				</svelte:fragment>
+			</QRCode>
+		</article>
 	{/if}
 </div>
 
 <style lang="scss">
-	div {
-		border: 2px solid var(--color-secondary);
+	.qr-container {
 		max-width: var(--qrcode-max-width, 300px);
 		margin: 0 auto;
 		height: var(--qrcode-height);
-		border-radius: 10px;
-		background: white;
 	}
 </style>

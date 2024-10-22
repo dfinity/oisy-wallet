@@ -44,7 +44,7 @@
 	class:to-bright-lilac={$networkEthereum}
 >
 	{#if summary}
-		<div transition:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-5">
+		<div transition:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				{#if back}
 					<Back color="current" onlyArrow />
