@@ -99,6 +99,7 @@
 			"open_dapp": "Open the app $dAppname",
 			"open_twitter": "Open the $dAppname X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppname on github",
+			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
 			"tags": "Tags related to $dAppname",
 			"website": "Image of $dAppname"
 		}

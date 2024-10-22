@@ -90,6 +90,7 @@ interface I18nDapps {
 		show_all: string;
 		show_tag: string;
 		source_code_on_github: string;
+		submit_your_dapp: string;
 		tags: string;
 		website: string;
 	};

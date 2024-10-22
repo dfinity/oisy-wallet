@@ -89,6 +89,7 @@
 	href="https://github.com/dfinity/oisy-wallet/issues/new?assignees=&labels=enhancement&projects=&title=Add+Dapp+to+Dapp-Explorer"
 	rel="external noopener noreferrer"
 	target="_blank"
+	aria-label={$i18n.dapps.alt.submit_your_dapp}
 >
 	<IconPlus />
 	<span>
