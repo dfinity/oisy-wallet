@@ -13,5 +13,5 @@
 <TokenCard {logoStyleClass} {logoSize} {token}>
 	<TokenBalance {token} slot="balance" />
 
-	<ExchangeTokenValue {token} slot="exchange" />
+	<ExchangeTokenValue tokenUiBalance={token} slot="exchange" />
 </TokenCard>

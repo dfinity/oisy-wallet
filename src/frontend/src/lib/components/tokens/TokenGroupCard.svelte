@@ -61,7 +61,7 @@
 		</div>
 
 		<TokenBalance slot="amount" token={tokenGroupBalance} />
-		<ExchangeTokenValue slot="amountDescription" token={tokenGroupBalance} />
+		<ExchangeTokenValue slot="amountDescription" tokenUiBalance={tokenGroupBalance} />
 	</Card>
 </TokenCardWithOnClick>
 
