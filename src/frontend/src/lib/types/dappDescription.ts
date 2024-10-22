@@ -33,6 +33,8 @@ const dAppDescriptionSchema = z.object({
 });
 
 export type DappDescription = z.infer<typeof dAppDescriptionSchema>;
+export type FeaturedDappDescription = Omit<DappDescription, 'screenshots'> &
+	Required<Pick<DappDescription, 'screenshots'>>;
 
 const parseResult = z.array(dAppDescriptionSchema).safeParse(dAppDescriptionsJson);
 export const dAppDescriptions: DappDescription[] = parseResult.success ? parseResult.data : [];
