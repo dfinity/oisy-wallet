@@ -629,6 +629,10 @@ interface I18nSigner {
 	};
 }
 
+interface I18nCarousel {
+	text: { next_slide: string; prev_slide: string; indicator: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -653,4 +657,5 @@ interface I18n {
 	transactions: I18nTransactions;
 	about: I18nAbout;
 	signer: I18nSigner;
+	carousel: I18nCarousel;
 }
