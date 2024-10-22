@@ -11,6 +11,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import { ETHEREUM_TOKEN } from '$env/tokens.env';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
@@ -37,7 +38,7 @@
 	formCancelAction="back"
 >
 	{#if currentStep?.name === steps[1].name}
-		<ReceiveAddressQRCode address={$ethAddress ?? ''} on:icBack />
+		<ReceiveAddressQRCode address={$ethAddress ?? ''} addressToken={ETHEREUM_TOKEN} on:icBack />
 	{:else}
 		<slot />
 	{/if}

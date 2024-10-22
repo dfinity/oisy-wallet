@@ -11,12 +11,15 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { close, token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
 	const displayQRCode = (details: { address: string; addressLabel: string }) =>
-		dispatch('icQRCode', details);
+		dispatch('icQRCode', {
+			...details,
+			addressToken: $token
+		});
 </script>
 
 <ContentWithToolbar>

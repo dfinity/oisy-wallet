@@ -24,6 +24,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { ICP_TOKEN } from '$env/tokens.env';
 
 	/**
 	 * Props
@@ -109,7 +110,11 @@
 				on:icConvert={() => modal.set(4)}
 			/>
 		{:else if currentStep?.name === steps[1].name}
-			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
+			<ReceiveAddressQRCode
+				on:icBack={modal.back}
+				address={$icrcAccountIdentifierText ?? ''}
+				addressToken={ICP_TOKEN}
+			/>
 		{:else}
 			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
 		{/if}

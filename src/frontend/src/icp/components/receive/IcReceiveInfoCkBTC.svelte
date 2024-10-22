@@ -18,15 +18,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Token } from '$lib/types/token';
+	import type { IcCkToken } from '$icp/types/ic';
 
-	const { tokenId, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { tokenId, token, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
 	const displayQRCode = (address: string) =>
 		dispatch('icQRCode', {
 			address,
-			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
+			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
+			addressToken: twinToken
 		});
 
 	let btcAddress: string | undefined = undefined;
@@ -34,6 +37,9 @@
 
 	let kytFee: bigint | undefined = undefined;
 	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
+
+	let twinToken: Token | undefined;
+	$: twinToken = ($token as IcCkToken | undefined)?.twinToken;
 </script>
 
 <ContentWithToolbar>

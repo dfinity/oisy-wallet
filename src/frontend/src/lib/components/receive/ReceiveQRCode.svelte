@@ -1,9 +1,20 @@
 <script lang="ts">
 	import { QRCode } from '@dfinity/gix-components';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import type { Token } from '$lib/types/token';
+	import eth from '$icp-eth/assets/eth.svg';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let address: string;
+	export let addressToken: Token | undefined;
+
+	let icon: string | undefined;
+	let name: string;
+
+	$: ({ icon, name } = addressToken ?? { icon: undefined, name: '' });
 
 	let render = true;
 
@@ -15,19 +26,30 @@
 
 <svelte:window on:resize={rerender} />
 
-<div in:fade class="rounded-sm bg-off-white p-4" class:opacity-0={!render}>
+<div in:fade class="qr-container p-4" class:opacity-0={!render}>
 	{#if render}
-		<QRCode value={address} />
+		<QRCode value={address}>
+			<svelte:fragment slot="logo">
+				{#if nonNullish(icon)}
+					<div class="flex items-center justify-center rounded-lg bg-white p-2">
+						<Logo
+							src={icon}
+							alt={replacePlaceholders($i18n.core.alt.logo, {
+								$name: name
+							})}
+							size="md"
+						/>
+					</div>
+				{/if}
+			</svelte:fragment>
+		</QRCode>
 	{/if}
 </div>
 
 <style lang="scss">
-	div {
-		border: 2px solid var(--color-secondary);
+	.qr-container {
 		max-width: var(--qrcode-max-width, 300px);
 		margin: 0 auto;
 		height: var(--qrcode-height);
-		border-radius: 10px;
-		background: white;
 	}
 </style>
