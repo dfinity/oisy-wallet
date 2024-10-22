@@ -2,11 +2,11 @@
 	import { QRCode } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import type { Token } from '$lib/types/token';
 	import eth from '$icp-eth/assets/eth.svg';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let address: string;
 	export let addressToken: Token | undefined;
