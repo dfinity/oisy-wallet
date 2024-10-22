@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let styleClass: string | undefined;
+	export let styleClass: string | undefined = undefined;
 </script>
 
 <div class="mb-6 flex gap-3 sm:gap-8 {styleClass}">
