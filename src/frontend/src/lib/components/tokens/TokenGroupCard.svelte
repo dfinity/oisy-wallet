@@ -33,7 +33,7 @@
 
 <TokenCardWithOnClick
 	on:click={() => (isOpened = !isOpened)}
-	styleClass="group !mb-3 flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8 {isOpened
+	styleClass="group !mb-0 flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8 {isOpened
 		? 'bg-white rounded-b-none'
 		: ''}"
 >
