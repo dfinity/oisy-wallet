@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
@@ -10,24 +9,29 @@
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
-	import type { TokenGroupUi, TokenUi } from '$lib/types/token';
+	import type { TokenFinancialData, TokenGroupUi, TokenUi } from '$lib/types/token';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let tokenGroup: TokenGroupUi;
 	let isOpened = false;
 
-	$: totalBalance = tokenGroup.tokens.reduce(
-		(sum, token: TokenUi) => sum.add(token.balance ?? BigNumber.from(0)),
-		BigNumber.from(0)
+	// TODO: calculate these in the grouping function to reduce loops
+	let groupFinancialData: TokenFinancialData
+	$: groupFinancialData = tokenGroup.tokens.reduce<{
+		balance: TokenUi['balance'],
+		usdBalance: TokenUi['usdBalance']
+	}>(
+		(acc, token: TokenUi) => ({
+			balance: nonNullish(acc.balance) && nonNullish(token.balance) ? acc.balance.add(token.balance) : token.balance,
+			usdBalance: nonNullish(acc.usdBalance) && nonNullish(token.usdBalance) ? acc.usdBalance + token.usdBalance : token.usdBalance
+		}),
+		{balance: undefined, usdBalance: undefined}
 	);
-	$: totalUsdBalance = tokenGroup.tokens.reduce(
-		(sum, token: TokenUi) => sum + (token.usdBalance ?? 0),
-		0
-	);
+
+	let tokenGroupBalance: TokenUi
 	$: tokenGroupBalance = {
-		balance: totalBalance,
-		symbol: tokenGroup.header.symbol,
-		decimals: tokenGroup.header.decimals,
-		usdBalance: totalUsdBalance
+		...tokenGroup.header,
+		...groupFinancialData
 	};
 </script>
 
@@ -61,7 +65,7 @@
 		</div>
 
 		<TokenBalance slot="amount" token={tokenGroupBalance} />
-		<ExchangeTokenValue slot="amountDescription" tokenUiBalance={tokenGroupBalance} />
+		<ExchangeTokenValue slot="amountDescription" tokenUi={tokenGroupBalance} />
 	</Card>
 </TokenCardWithOnClick>
 

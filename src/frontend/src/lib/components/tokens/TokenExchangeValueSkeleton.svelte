@@ -1,12 +1,12 @@
 <script lang="ts">
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
-	import type { TokenUiBalance } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token';
 
-	export let tokenUiBalance: TokenUiBalance;
+	export let tokenUi: TokenUi;
 </script>
 
-{#if tokenUiBalance.balance === undefined || !$exchangeInitialized}
+{#if tokenUi.balance === undefined || !$exchangeInitialized}
 	<span class="w-full max-w-[50px]"><SkeletonText /></span>
 {:else}
 	<slot />
