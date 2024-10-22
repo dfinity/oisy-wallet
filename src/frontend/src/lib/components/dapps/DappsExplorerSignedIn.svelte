@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
 	import DappModal from '$lib/components/dapps/DappModal.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
@@ -30,9 +29,9 @@
 		dAppDescriptions.flatMap((dapp) => dapp.tags).sort((tagA, tagB) => tagA.localeCompare(tagB))
 	);
 
-	$: filteredDapps = nonNullish(selectedTag)
-		? dAppDescriptions.filter((dApp) => dApp.tags.includes(selectedTag as string))
-		: dAppDescriptions;
+	$: filteredDapps = dAppDescriptions.filter(
+		({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
+	);
 
 	let selectedDapp: DappDescription | undefined = undefined;
 	$: selectedDapp = $modalDAppDetails

@@ -24,8 +24,8 @@ jobs:
       run: |
         version=$(node -p "require('./package.json').version")
         echo "Version from package.json: $version"
-        echo "::set-output name=version::$version"
-
+        echo "{version}={version}" >> $GITHUB_OUTPUT
+  
     - name: Create Git tag
       run: |
         git tag -a "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
