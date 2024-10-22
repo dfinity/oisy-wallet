@@ -69,10 +69,12 @@ export type TokenUi = Token & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;
 
-export interface TokenGroupUi {
+export type TokenGroupUi = {
 	header: TokenMetadata;
+	nativeToken: TokenUi;
 	nativeNetwork: Network;
 	tokens: TokenUi[];
-}
+	name: string;
+} & TokenFinancialData;
 
 export type TokenUiOrGroupUi = TokenUi | TokenGroupUi;

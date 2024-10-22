@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import TokenSymbol from '$lib/components/tokens/TokenSymbol.svelte';
@@ -7,6 +8,7 @@
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
+	export let tokenCount: number | undefined = undefined;
 </script>
 
 <Card noMargin testId={`${TOKEN_CARD}-${token.symbol}`}>
@@ -14,7 +16,12 @@
 
 	<TokenName {token} slot="description" />
 
-	<TokenLogo {token} showNetworkIcon={false} slot="icon" color="white" />
+	<TokenLogo
+		{token}
+		subLogo={nonNullish(tokenCount) ? { type: 'tokenCount', count: tokenCount } : undefined}
+		slot="icon"
+		color="white"
+	/>
 
 	<slot name="balance" slot="amount" />
 

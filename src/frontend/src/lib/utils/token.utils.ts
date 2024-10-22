@@ -18,7 +18,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -188,8 +188,22 @@ const createTokenGroup = ({
 		decimals: nativeToken.decimals,
 		icon: nativeToken.icon
 	},
+	nativeToken,
 	nativeNetwork: nativeToken.network,
-	tokens: [nativeToken, twinToken]
+	tokens: [nativeToken, twinToken],
+	name: `${nativeToken.symbol}, ${twinToken.symbol}`,
+	balance:
+		nonNullish(nativeToken.balance) && nonNullish(twinToken.balance)
+			? nativeToken.balance.add(twinToken.balance)
+			: isNullish(nativeToken.balance)
+				? twinToken.balance
+				: nativeToken.balance,
+	usdBalance:
+		nonNullish(nativeToken.usdBalance) && nonNullish(twinToken.usdBalance)
+			? nativeToken.usdBalance + twinToken.usdBalance
+			: isNullish(nativeToken.usdBalance)
+				? twinToken.usdBalance
+				: nativeToken.usdBalance
 });
 
 /**
