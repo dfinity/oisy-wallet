@@ -27,7 +27,7 @@
 					color="white"
 					src={token.network.icon}
 					alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
-					size="medium"
+					size="md"
 				/>
 			{/if}
 		</div>
