@@ -29,7 +29,7 @@
 	/>
 	{#if nonNullish(tokenCount) && tokenCount > 0}
 		<span
-			class="token-count absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold"
+			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold text-[var(--color-secondary)]"
 		>
 			{tokenCount}
 		</span>
@@ -43,9 +43,3 @@
 		</div>
 	{/if}
 </div>
-
-<style lang="scss">
-	.token-count {
-		color: var(--color-secondary);
-	}
-</style>
