@@ -6,10 +6,10 @@
 	import type { TokenUi } from '$lib/types/token';
 
 	export let token: TokenUi;
-	export let logoSize: LogoSize | undefined = undefined;
+	export let logoSize: LogoSize = 'lg';
 </script>
 
-<TokenCard {logoSize} {token}>
+<TokenCard {token} {logoSize}>
 	<TokenBalance {token} slot="balance" />
 
 	<ExchangeTokenValue {token} slot="exchange" />
