@@ -2,7 +2,7 @@
 	import { QRCode } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import Logo from '$lib/components/ui/Logo.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -12,10 +12,7 @@
 	export let addressToken: Token | undefined = undefined;
 
 	let symbol: string | undefined;
-	let icon: string | undefined;
-	let name: string;
-
-	$: ({ icon, name, symbol } = addressToken ?? { icon: undefined, name: '', symbol: undefined });
+	$: symbol = addressToken?.symbol;
 
 	let render = true;
 
@@ -36,15 +33,9 @@
 		>
 			<QRCode value={address}>
 				<svelte:fragment slot="logo">
-					{#if nonNullish(icon)}
+					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-white p-2">
-							<Logo
-								src={icon}
-								alt={replacePlaceholders($i18n.core.alt.logo, {
-									$name: name
-								})}
-								size="md"
-							/>
+							<TokenLogo token={addressToken} showNetworkIcon={false} />
 						</div>
 					{/if}
 				</svelte:fragment>
