@@ -10,9 +10,9 @@
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
+	import { groupsStore } from '$lib/stores/groups.store.js';
 	import { LogoSize } from '$lib/types/logo-size';
 	import type { TokenGroupUi, TokenUi } from '$lib/types/token';
-	import { groupsStore } from '$lib/stores/groups.store.js';
 
 	export let tokenGroup: TokenGroupUi;
 
