@@ -14,7 +14,7 @@
 
 	<TokenName {token} slot="description" />
 
-	<TokenLogo {token} showNetworkIcon={false} slot="icon" color="white" />
+	<TokenLogo {token} slot="icon" color="white" />
 
 	<slot name="balance" slot="amount" />
 
