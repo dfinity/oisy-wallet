@@ -8,8 +8,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let address: string;
-	// TODO: remove undefined assignation to make property mandatory in PR #3023
-	export let addressToken: Token | undefined = undefined;
+	export let addressToken: Token | undefined;
 
 	let symbol: string | undefined;
 	$: symbol = addressToken?.symbol;
