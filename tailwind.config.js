@@ -11,6 +11,7 @@ export default {
 			inherit: 'inherit',
 			transparent: 'transparent',
 			current: 'currentColor',
+			black: 'rgb(0, 0, 0)',
 			'black-rgb': '0, 0, 0',
 			white: 'rgb(255 255 255)',
 			'white-rgb': '255, 255, 255',
