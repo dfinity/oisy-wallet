@@ -69,6 +69,8 @@ export type TokenUi = Token & TokenFinancialData;
 
 export type TokenGroupId = symbol;
 
+export type OptionTokenUi = Option<TokenUi>;
+
 export interface TokenGroupUi {
 	id: TokenGroupId;
 	header: TokenMetadata;

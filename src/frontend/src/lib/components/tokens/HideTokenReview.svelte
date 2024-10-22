@@ -9,7 +9,6 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
-	import { LogoSize } from '$lib/types/logo-size';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const dispatch = createEventDispatcher();
@@ -19,7 +18,7 @@
 	<div class="icon flex flex-col items-center gap-3">
 		<Logo
 			src={$token?.icon}
-			size={LogoSize.LG}
+			size="lg"
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 			color="off-white"
 		/>

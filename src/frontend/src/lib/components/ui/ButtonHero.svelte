@@ -9,7 +9,7 @@
 <Button on:click {ariaLabel} {disabled} {testId} colorStyle="tertiary" link paddingSmall>
 	<div class="flex flex-col items-center justify-center gap-2 md:flex-row">
 		<slot name="icon" />
-		<div class="min-w-12 max-w-[72px] text-sm md:text-base">
+		<div class="min-w-12 max-w-[72px] break-words text-sm md:text-base">
 			<slot />
 		</div>
 	</div>
