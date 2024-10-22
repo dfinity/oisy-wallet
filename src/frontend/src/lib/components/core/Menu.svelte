@@ -8,6 +8,7 @@
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
+	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -18,7 +19,6 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isRouteDappExplorer, isRouteSettings, networkParam } from '$lib/utils/nav.utils';
-	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
