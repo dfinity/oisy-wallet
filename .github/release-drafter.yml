@@ -1,0 +1,33 @@
+# .github/release-drafter.yml
+
+name-template: 'Release v$NEXT_PATCH_VERSION'
+tag-template: 'v$NEXT_PATCH_VERSION'
+categories:
+  - title: '🚀 Features'
+    label: 'feat'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+      - 'fix'
+  - title: '🛠 Maintenance'
+    label: 'chore'
+  - title: '🔧 Build System'
+    label: 'build'
+  - title: '📦 CI/CD'
+    label: 'ci'
+  - title: '📝 Documentation'
+    label: 'docs'
+  - title: '💄 Style'
+    label: 'style'
+  - title: '♻️ Refactoring'
+    label: 'refactor'
+  - title: '⚡️ Performance Improvements'
+    label: 'perf'
+  - title: '🧪 Testing'
+    label: 'test'
+
+change-template: '- $BODY by @$AUTHOR'  # This will include the full PR description
+no-changes-template: "No notable changes in this release."
+
+# Optional customization to control how the version is incremented
+version-template: $MAJOR.$MINOR.$PATCH

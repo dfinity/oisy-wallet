@@ -18,7 +18,6 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { LogoSize } from '$lib/types/logo-size';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let ledgerCanisterId: string | undefined;
@@ -62,7 +61,7 @@
 						src={token.token.icon}
 						slot="icon"
 						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-						size={LogoSize.MD}
+						size="md"
 						color="white"
 					/>
 

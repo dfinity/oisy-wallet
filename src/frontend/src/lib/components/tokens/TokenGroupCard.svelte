@@ -11,7 +11,6 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { groupsStore } from '$lib/stores/groups.store.js';
-	import { LogoSize } from '$lib/types/logo-size';
 	import type { TokenGroupUi, TokenUi } from '$lib/types/token';
 
 	export let tokenGroup: TokenGroupUi;
@@ -41,7 +40,7 @@
 
 <TokenCardWithOnClick
 	on:click={() => (toggleExpand(!expanded))}
-	styleClass="!m-0 py-2 px-3 w-full rounded-xl hover:text-blue-ribbon hover:bg-white {expanded
+	styleClass="group !mb-0 flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8 {expanded
 		? 'bg-white rounded-b-none'
 		: ''}"
 >
@@ -53,6 +52,7 @@
 
 		<div class="relative" slot="icon">
 			<TokenLogo
+				size="md"
 				token={{
 					name: tokenGroup.header.name,
 					icon: tokenGroup.header.icon,
@@ -77,7 +77,7 @@
 		{#each tokenGroup.tokens as token}
 			<Listener {token}>
 				<TokenCardWithUrl {token}>
-					<TokenCardContent logoStyleClass="mx-[5px]" logoSize={LogoSize.SM} {token} />
+					<TokenCardContent logoStyleClass="mx-[5px]" logoSize={42} {token} />
 				</TokenCardWithUrl>
 			</Listener>
 		{/each}

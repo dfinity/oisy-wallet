@@ -6,7 +6,6 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { LogoSize } from '$lib/types/logo-size';
 	import type { OptionString } from '$lib/types/string';
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -28,7 +27,7 @@
 					color="white"
 					src={token.network.icon}
 					alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
-					size={LogoSize.MD}
+					size="md"
 				/>
 			{/if}
 		</div>
