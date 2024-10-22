@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
@@ -10,25 +11,30 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { TokenFinancialData, TokenGroupUi, TokenUi } from '$lib/types/token';
-	import { nonNullish } from '@dfinity/utils';
 
 	export let tokenGroup: TokenGroupUi;
 	let isOpened = false;
 
 	// TODO: calculate these in the grouping function to reduce loops
-	let groupFinancialData: TokenFinancialData
+	let groupFinancialData: TokenFinancialData;
 	$: groupFinancialData = tokenGroup.tokens.reduce<{
-		balance: TokenUi['balance'],
-		usdBalance: TokenUi['usdBalance']
+		balance: TokenUi['balance'];
+		usdBalance: TokenUi['usdBalance'];
 	}>(
 		(acc, token: TokenUi) => ({
-			balance: nonNullish(acc.balance) && nonNullish(token.balance) ? acc.balance.add(token.balance) : token.balance,
-			usdBalance: nonNullish(acc.usdBalance) && nonNullish(token.usdBalance) ? acc.usdBalance + token.usdBalance : token.usdBalance
+			balance:
+				nonNullish(acc.balance) && nonNullish(token.balance)
+					? acc.balance.add(token.balance)
+					: token.balance,
+			usdBalance:
+				nonNullish(acc.usdBalance) && nonNullish(token.usdBalance)
+					? acc.usdBalance + token.usdBalance
+					: token.usdBalance
 		}),
-		{balance: undefined, usdBalance: undefined}
+		{ balance: undefined, usdBalance: undefined }
 	);
 
-	let tokenGroupBalance: TokenUi
+	let tokenGroupBalance: TokenUi;
 	$: tokenGroupBalance = {
 		...tokenGroup.header,
 		...groupFinancialData
