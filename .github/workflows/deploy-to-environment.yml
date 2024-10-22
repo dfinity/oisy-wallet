@@ -1,7 +1,5 @@
 name: Deploy Frontend / Backend to Environment
 
-run-name: Deploying ${{ github.event.inputs.canister }} to ${{ github.event.inputs.network }}
-
 on:
   push:
     branches:
@@ -28,6 +26,8 @@ on:
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
         default: false
+
+run-name: Deploying ${{ inputs.canister }} to ${{ inputs.network }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
