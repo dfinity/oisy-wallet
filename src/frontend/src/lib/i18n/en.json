@@ -86,11 +86,15 @@
 		"text": {
 			"all_dapps": "All dapps",
 			"featured": "Featured",
+			"sign_in": "Sign-in to explore the ecosystem.",
+			"title": "Explore Web3 Ecosystem",
 			"open_dapp": "Open the dapp $dAppname"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppname",
 			"logo": "Logo of $dAppname",
+			"show_all": "Show all decentralised applications",
+			"show_tag": "Show decentralised applications with the tag $tag",
 			"open_dapp": "Open the app $dAppname",
 			"open_twitter": "Open the $dAppname X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppname on github",
@@ -118,7 +122,8 @@
 			"use_address_from_to": "Use this address to transfer $token to and from your wallet."
 		},
 		"alt": {
-			"open_etherscan": "Open your address on Etherscan"
+			"open_etherscan": "Open your address on Etherscan",
+			"qrcode_address": "Scan this QR code to copy the address to receive $token tokens"
 		}
 	},
 	"init": {
@@ -720,6 +725,13 @@
 			"error": {
 				"cannot_call": "The call cannot be processed"
 			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "Next slide",
+			"prev_slide": "Previous slide",
+			"indicator": "Jump to slide $index"
 		}
 	}
 }
