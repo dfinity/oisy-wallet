@@ -21,7 +21,7 @@
 	<Logo
 		src={icon}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
-		size="md"
+		size="lg"
 		{color}
 		{ring}
 	/>
