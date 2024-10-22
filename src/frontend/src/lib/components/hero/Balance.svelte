@@ -1,24 +1,24 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
+	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import type { OptionTokenUi } from '$lib/types/token';
 
 	export let token: OptionTokenUi;
 </script>
 
-<span>
+<span class="flex flex-col gap-2">
 	<output
-		class={`break-all ${(token?.balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'} flex flex-col sm:block`}
+		class={`break-words ${(token?.balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'} inline-flex w-full flex-row justify-center gap-3 text-4xl font-bold lg:text-5xl`}
 	>
-		{#if nonNullish(token?.balance) && !token.balance.isZero()}
-			<span class="text-5xl font-bold"><Amount amount={token.balance} /></span>
+		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !token.balance.isZero()}
+			<span><Amount amount={token.balance} /> {token.symbol}</span>
 		{:else}
-			<span class="text-5xl font-bold" class:animate-pulse={isNullish(token?.balance)}>0.00</span>
-		{/if}
-
-		{#if $erc20UserTokensInitialized && nonNullish(token?.symbol)}
-			<span class="opacity-100">{token.symbol}</span>
+			<span class:animate-pulse={isNullish(token?.balance)}>0.00</span>
 		{/if}
 	</output>
+
+	<span class="text-xl font-bold" class:opacity-50={token?.usdBalance ?? 0 === 0}>
+		<TokenExchangeBalance balance={token?.balance} usdBalance={token?.usdBalance} />
+	</span>
 </span>

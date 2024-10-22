@@ -60,7 +60,7 @@ export type OptionTokenStandard = Option<TokenStandard>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
-interface TokenFinancialData {
+export interface TokenFinancialData {
 	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
 }
