@@ -12,7 +12,6 @@
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { LogoSize } from '$lib/types/logo-size';
 	import type { TokenGroupUi, TokenUi } from '$lib/types/token';
-	import { isNullish } from '@dfinity/utils';
 	import { groupsStore } from '$lib/stores/groups.store.js';
 
 	export let tokenGroup: TokenGroupUi;
@@ -33,16 +32,11 @@
 	};
 
 	$: groups = $groupsStore ?? {};
-	$: expanded = groups[Symbol.keyFor(tokenGroup.id)]?.expanded ?? false;
+	$: expanded = groups[tokenGroup.id]?.expanded ?? false;
 
-	const toggleExpand = (expanded: boolean) => {
-		const idString = Symbol.keyFor(tokenGroup.id);
-		if (isNullish(idString)) {
-			throw new Error('Invalid TokenGroupId Symbol');
-		}
-		const updatedData = { ...groups, [idString]: { expanded: expanded }};
-		groupsStore.set({ key: 'groups', value: updatedData });
-	}
+	const toggleExpand = (toggle: boolean) =>
+		groupsStore.set({ key: 'groups', value: { ...groups, [tokenGroup.id]: { expanded: toggle }} });
+
 </script>
 
 <TokenCardWithOnClick

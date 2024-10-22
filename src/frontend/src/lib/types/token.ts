@@ -67,7 +67,7 @@ interface TokenFinancialData {
 
 export type TokenUi = Token & TokenFinancialData;
 
-export type TokenGroupId = symbol;
+export type TokenGroupId = string;
 
 export interface TokenGroupUi {
 	id: TokenGroupId;
