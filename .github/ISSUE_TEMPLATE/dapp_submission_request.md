@@ -6,4 +6,4 @@ labels: ''
 assignees: ''
 ---
 
-Please provide the details of the dApp you'd like to feature on the Oisy Wallet.
+Please provide the details of the dapp you'd like to feature on the OISY Wallet.
