@@ -726,5 +726,12 @@
 				"cannot_call": "The call cannot be processed"
 			}
 		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "Next slide",
+			"prev_slide": "Previous slide",
+			"indicator": "Jump to slide $index"
+		}
 	}
 }
