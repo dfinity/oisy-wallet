@@ -7,10 +7,9 @@
 
 	export let token: TokenUi;
 	export let logoSize: LogoSize | undefined = undefined;
-	export let logoStyleClass: string | undefined = undefined;
 </script>
 
-<TokenCard {logoStyleClass} {logoSize} {token}>
+<TokenCard {logoSize} {token}>
 	<TokenBalance {token} slot="balance" />
 
 	<ExchangeTokenValue {token} slot="exchange" />

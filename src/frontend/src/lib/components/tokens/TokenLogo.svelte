@@ -11,7 +11,6 @@
 	export let networkIconBlackAndWhite = false;
 	export let ring = false;
 	export let size: LogoSize = 'lg';
-	export let styleClass: string | undefined = undefined;
 
 	const {
 		icon,
@@ -24,7 +23,6 @@
 	<Logo
 		src={icon}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
-		{styleClass}
 		{size}
 		{color}
 		{ring}
