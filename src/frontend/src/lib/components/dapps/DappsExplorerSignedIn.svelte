@@ -83,7 +83,7 @@
 	{/each}
 </ul>
 
-<SubmitDappButton
+<SubmitDappButton/>
 
 {#if $modalDAppDetails && nonNullish(selectedDapp)}
 	<DappModal dAppDescription={selectedDapp} />
