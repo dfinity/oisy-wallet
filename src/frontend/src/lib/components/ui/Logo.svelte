@@ -14,8 +14,9 @@
 	const sizes = {
 		xs: '22px',
 		sm: '36px',
-		md: '52px',
-		lg: '64px'
+		md: '42px',
+		lg: '52px',
+		xl: '64px'
 	};
 	let sizePx = typeof size === 'number' ? `${size}px` : sizes[size];
 
