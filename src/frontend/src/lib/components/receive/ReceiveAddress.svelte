@@ -33,7 +33,7 @@
 					src={network.icon}
 					alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
 					color="white"
-					size="smallish"
+					size="sm"
 				/>
 			</div>
 
