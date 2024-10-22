@@ -122,7 +122,8 @@
 			"use_address_from_to": "Use this address to transfer $token to and from your wallet."
 		},
 		"alt": {
-			"open_etherscan": "Open your address on Etherscan"
+			"open_etherscan": "Open your address on Etherscan",
+			"qrcode_address": "Scan this QR code to copy the address to receive $token tokens"
 		}
 	},
 	"init": {
