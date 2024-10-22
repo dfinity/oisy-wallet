@@ -24,7 +24,8 @@
 			? $btcAddressRegtestStore
 			: $btcAddressMainnetStore;
 
-	let addressToken: Token = isNetworkIdBTCTestnet($networkId)
+	let addressToken: Token;
+	$: addressToken = isNetworkIdBTCTestnet($networkId)
 		? BTC_TESTNET_TOKEN
 		: isNetworkIdBTCRegtest($networkId)
 			? BTC_REGTEST_TOKEN
