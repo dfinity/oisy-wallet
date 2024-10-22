@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { quintOut } from 'svelte/easing';
+	import { slide, type SlideParams } from 'svelte/transition';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import SignIn from '$lib/components/auth/SignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
@@ -12,6 +14,8 @@
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
 
 	export let back = false;
+
+	const backAndLogoTransition: SlideParams = { axis: 'x', easing: quintOut, duration: 150 };
 </script>
 
 <header
@@ -27,9 +31,13 @@
 >
 	<div class="pointer-events-auto">
 		{#if back}
-			<Back />
+			<div in:slide={backAndLogoTransition}>
+				<Back />
+			</div>
 		{:else}
-			<OisyWalletLogoLink />
+			<div in:slide={backAndLogoTransition}>
+				<OisyWalletLogoLink />
+			</div>
 		{/if}
 	</div>
 
