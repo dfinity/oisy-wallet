@@ -8,6 +8,7 @@
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
+	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -17,7 +18,7 @@
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteSettings, networkParam } from '$lib/utils/nav.utils';
+	import { isRouteDappExplorer, isRouteSettings, networkParam } from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -28,9 +29,16 @@
 		hidePopover();
 		await goto(`/settings?${networkParam($networkId)}`);
 	};
+	const goToDappExplorer = async () => {
+		hidePopover();
+		await goto(`/explore`);
+	};
 
 	let settingsRoute = false;
 	$: settingsRoute = isRouteSettings($page);
+
+	let dAppExplorerRoute = false;
+	$: dAppExplorerRoute = isRouteDappExplorer($page);
 
 	let walletOptions = true;
 	$: walletOptions = !settingsRoute;
@@ -50,6 +58,13 @@
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
 		{#if walletOptions}
 			<MenuWallet on:icMenuClick={hidePopover} />
+		{/if}
+
+		{#if !dAppExplorerRoute && !settingsRoute}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.dapp_explorer} on:click={goToDappExplorer}>
+				<IconlyUfo size="20" />
+				{$i18n.navigation.text.dapp_explorer}
+			</ButtonMenu>
 		{/if}
 
 		{#if !settingsRoute}
