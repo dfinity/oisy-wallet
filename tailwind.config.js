@@ -1,4 +1,5 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
+import { colorsPrimitive } from './src/frontend/src/lib/styles/tailwind/colors/primitive';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -52,7 +53,8 @@ export default {
 			anakiwa: '#b0cdff',
 			beer: '#f7931a',
 			fulvous: '#de7900',
-			water: '#d1e3ff'
+			water: '#d1e3ff',
+			foreground: { 'brand-primary': colorsPrimitive.brand.base }
 		},
 		extend: {
 			backgroundSize: {
