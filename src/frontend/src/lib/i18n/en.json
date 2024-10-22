@@ -56,13 +56,13 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "Multi-chain wallet.",
-			"title_part_2": "100% onchain.",
+			"title_part_1": "Your Digital Assets",
+			"title_part_2": "Safe. Seamless. Sovereign.",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Anonymous, network custody",
-			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
+			"asset_types": "Bitcoin, Ethereum, ICP and more",
+			"instant_and_private": "Instant and private access anywhere",
+			"advanced_cryptography": "Peace of mind through advanced cryptography"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
@@ -88,14 +88,20 @@
 		"text": {
 			"all_dapps": "All dapps",
 			"featured": "Featured",
-			"open_dapp": "Open the dapp $dAppname"
+			"sign_in": "Sign-in to explore the ecosystem.",
+			"title": "Explore Web3 Ecosystem",
+			"open_dapp": "Open the dapp $dAppname",
+			"submit_your_dapp": "Submit your dapp"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppname",
 			"logo": "Logo of $dAppname",
+			"show_all": "Show all decentralised applications",
+			"show_tag": "Show decentralised applications with the tag $tag",
 			"open_dapp": "Open the app $dAppname",
 			"open_twitter": "Open the $dAppname X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppname on github",
+			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
 			"tags": "Tags related to $dAppname",
 			"website": "Image of $dAppname"
 		}
@@ -120,7 +126,8 @@
 			"use_address_from_to": "Use this address to transfer $token to and from your wallet."
 		},
 		"alt": {
-			"open_etherscan": "Open your address on Etherscan"
+			"open_etherscan": "Open your address on Etherscan",
+			"qrcode_address": "Scan this QR code to copy the address to receive $token tokens"
 		}
 	},
 	"init": {
@@ -722,6 +729,13 @@
 			"error": {
 				"cannot_call": "The call cannot be processed"
 			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "Next slide",
+			"prev_slide": "Previous slide",
+			"indicator": "Jump to slide $index"
 		}
 	}
 }
