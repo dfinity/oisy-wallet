@@ -54,13 +54,13 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "Multi-chain wallet.",
-			"title_part_2": "100% onchain.",
+			"title_part_1": "Your Digital Assets",
+			"title_part_2": "Safe. Seamless. Sovereign.",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Anonymous, network custody",
-			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
+			"asset_types": "Bitcoin, Ethereum, ICP and more",
+			"instant_and_private": "Instant and private access anywhere",
+			"advanced_cryptography": "Peace of mind through advanced cryptography"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
