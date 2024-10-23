@@ -4,14 +4,14 @@
 	import type { TokenUi } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
 
-	export let token: CardData;
+	export let data: CardData;
 
 	let balance: TokenUi['balance'];
 	let usdBalance: TokenUi['usdBalance'];
 
-	$: ({ balance, usdBalance } = token);
+	$: ({ balance, usdBalance } = data);
 </script>
 
-<TokenExchangeValueSkeleton {token}>
+<TokenExchangeValueSkeleton {data}>
 	<TokenExchangeBalance {balance} {usdBalance} />
 </TokenExchangeValueSkeleton>

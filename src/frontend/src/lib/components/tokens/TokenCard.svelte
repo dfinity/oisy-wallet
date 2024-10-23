@@ -6,16 +6,16 @@
 	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { CardData } from '$lib/types/token-card';
 
-	export let token: CardData;
+	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 </script>
 
-<Card noMargin testId={`${testIdPrefix}-${token.symbol}`}>
-	<TokenSymbol {token} />
+<Card noMargin testId={`${testIdPrefix}-${data.symbol}`}>
+	<TokenSymbol {data} />
 
-	<TokenName {token} slot="description" />
+	<TokenName {data} slot="description" />
 
-	<TokenLogo {token} slot="icon" color="white" />
+	<TokenLogo {data} slot="icon" color="white" />
 
 	<slot name="balance" slot="amount" />
 

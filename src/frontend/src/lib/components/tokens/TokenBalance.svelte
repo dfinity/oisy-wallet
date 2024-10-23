@@ -6,20 +6,20 @@
 	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let token: CardData;
+	export let data: CardData;
 </script>
 
-<TokenBalanceSkeleton {token}>
-	<output class="break-all" data-tid={`${TOKEN_BALANCE}-${token.symbol}`}>
-		{#if nonNullish(token.balance)}
+<TokenBalanceSkeleton {data}>
+	<output class="break-all" data-tid={`${TOKEN_BALANCE}-${data.symbol}`}>
+		{#if nonNullish(data.balance)}
 			{formatToken({
-				value: token.balance,
-				unitName: token.decimals
+				value: data.balance,
+				unitName: data.decimals
 			})}
 		{:else}
 			{formatToken({
 				value: ZERO,
-				unitName: token.decimals
+				unitName: data.decimals
 			}).replace('0', '-')}
 		{/if}
 	</output>
