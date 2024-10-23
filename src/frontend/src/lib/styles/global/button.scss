@@ -31,8 +31,6 @@ a.as-button {
 	&.error {
 		justify-content: center;
 
-		padding: var(--button-padding);
-
 		&.icon {
 			--button-border-radius: var(--border-radius-sm-1_5x);
 			--button-padding: var(--padding);

@@ -52,7 +52,7 @@
 
 <div class="flex flex-wrap gap-4">
 	<Button
-		paddingSmall
+		padding="md"
 		ariaLabel={$i18n.dapps.alt.show_all}
 		on:click={() => (selectedTag = undefined)}
 		styleClass="text-nowrap max-w-fit text-sm"
@@ -61,7 +61,7 @@
 	>
 	{#each uniqueTags as tag}
 		<Button
-			paddingSmall
+			padding="md"
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.show_tag, { $tag: tag })}
 			on:click={() => (selectedTag = tag)}
 			styleClass="text-nowrap max-w-fit text-sm"
