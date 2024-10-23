@@ -15,6 +15,7 @@ export const buildCarouselSliderFrameItem = ({
 	totalSlides: number;
 }): HTMLDivElement => {
 	// Create slider frame item and apply styling
+	// TODO: check if slide is an HTMLElement and if so, only set width w/o creating a new div
 	const frameItem = document.createElement('div');
 
 	if (totalSlides > 0) {
@@ -41,6 +42,7 @@ export const extendCarouselSliderFrame = ({
 		return;
 	}
 
+	// TODO: use Svelte 5 and/or pure CSS in order to avoid the hacky solution
 	// We add the last slide as the first element to properly animate last-to-first slide transition.
 	// The same applies to the last element - we use the first slide as the last item of the array.
 	const extendedSlides = [
@@ -50,7 +52,7 @@ export const extendCarouselSliderFrame = ({
 	];
 	const totalSlides = extendedSlides.length;
 
-	// Calculate and set width
+	// Calculate and set width for CSS transform to work correctly
 	sliderFrame.style.width = `${slideWidth * totalSlides}px`;
 
 	sliderFrame.append(
@@ -92,7 +94,7 @@ export const enableTransition = ({
 /**
  * Update visible part of the provided slider frame.
  */
-export const updateSliderFrameVisiblePart = ({
+export const moveSlider = ({
 	animateTo,
 	sliderFrame
 }: { animateTo: number } & CommonParams): void => {
