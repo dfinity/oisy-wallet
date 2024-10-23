@@ -25,11 +25,13 @@
 
 <ContentWithToolbar>
 	<TokensSkeletons {loading}>
-		{#each tokens as token (token.id)}
-			<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
-				<TokenCardContent {token} />
-			</TokenCardWithOnClick>
-		{/each}
+		<div class="mb-6 flex flex-col gap-6">
+			{#each tokens as token (token.id)}
+				<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
+					<TokenCardContent {token} />
+				</TokenCardWithOnClick>
+			{/each}
+		</div>
 
 		{#if tokens.length === 0}
 			<p class="text-secondary mb-6 mt-4 opacity-50">
