@@ -90,7 +90,7 @@
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
 			"title": "Explore Web3 Ecosystem",
-			"open_dapp": "Open the dapp $dAppname",
+			"open_dapp": "Open $dAppname",
 			"submit_your_dapp": "Submit your dapp"
 		},
 		"alt": {
@@ -99,6 +99,8 @@
 			"show_all": "Show all decentralised applications",
 			"show_tag": "Show decentralised applications with the tag $tag",
 			"open_dapp": "Open the app $dAppname",
+			"open_telegram": "Open $dAppname on Telegram",
+			"open_open_chat": "Open $dAppname on OpenChat",
 			"open_twitter": "Open the $dAppname X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppname on github",
 			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
