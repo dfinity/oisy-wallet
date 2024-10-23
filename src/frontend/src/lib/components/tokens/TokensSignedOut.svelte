@@ -8,8 +8,10 @@
 	onMount(unsafeLoadDefaultPublicIcrcTokens);
 </script>
 
-{#each $combinedDerivedSortedNetworkTokens as token (token.id)}
-	<TokenCardWithUrl {token} disableTabSelector>
-		<TokenCardSignedOut {token} />
-	</TokenCardWithUrl>
-{/each}
+<div class="flex flex-col gap-3">
+	{#each $combinedDerivedSortedNetworkTokens as token (token.id)}
+		<TokenCardWithUrl {token} disableTabSelector>
+			<TokenCardSignedOut {token} />
+		</TokenCardWithUrl>
+	{/each}
+</div>
