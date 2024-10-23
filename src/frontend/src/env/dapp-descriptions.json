@@ -14,7 +14,7 @@
 		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/kong-swap-logo.svg",
-		"screenshots": ["/images/dapps/kong-swap.png"],
+		"screenshots": ["/images/dapps/kong-swap.webp"],
 		"featured": true
 	},
 	{
@@ -31,7 +31,7 @@
 		"display": "Large",
 		"stats": "80,000+ users",
 		"logo": "/images/dapps/open-chat-logo.svg",
-		"screenshots": ["/images/dapps/open-chat.png"]
+		"screenshots": ["/images/dapps/open-chat.webp"]
 	},
 	{
 		"id": "decideid",
@@ -46,6 +46,6 @@
 		"usesInternetIdentity": true,
 		"logo": "/images/dapps/decide-ai-logo.svg",
 		"github": "https://github.com/modclub-app",
-		"screenshots": ["/images/dapps/decide-ai.png"]
+		"screenshots": ["/images/dapps/decide-ai.webp"]
 	}
 ]
