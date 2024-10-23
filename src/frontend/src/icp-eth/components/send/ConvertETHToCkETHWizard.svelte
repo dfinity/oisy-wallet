@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
+	import { ETHEREUM_TOKEN } from '$env/tokens.env';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import {
@@ -37,7 +38,7 @@
 	formCancelAction="back"
 >
 	{#if currentStep?.name === steps[1].name}
-		<ReceiveAddressQRCode address={$ethAddress ?? ''} on:icBack />
+		<ReceiveAddressQRCode address={$ethAddress ?? ''} addressToken={ETHEREUM_TOKEN} on:icBack />
 	{:else}
 		<slot />
 	{/if}

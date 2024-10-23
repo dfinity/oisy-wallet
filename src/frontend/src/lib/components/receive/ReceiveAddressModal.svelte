@@ -5,6 +5,7 @@
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
+	import type { Token } from '$lib/types/token';
 
 	export let infoCmp: ComponentType;
 
@@ -24,10 +25,14 @@
 
 	let qrCodeAddress: undefined | string;
 	let qrCodeAddressLabel: undefined | string;
+	let qrCodeAddressToken: Token | undefined;
 
-	const displayQRCode = ({ detail: { address, addressLabel } }: CustomEvent<ReceiveQRCode>) => {
+	const displayQRCode = ({
+		detail: { address, addressLabel, addressToken }
+	}: CustomEvent<ReceiveQRCode>) => {
 		qrCodeAddress = address;
 		qrCodeAddressLabel = addressLabel;
+		qrCodeAddressToken = addressToken;
 		modal.next();
 	};
 
@@ -35,6 +40,7 @@
 		modal.back();
 		qrCodeAddress = undefined;
 		qrCodeAddressLabel = undefined;
+		qrCodeAddressToken = undefined;
 	};
 </script>
 
@@ -46,6 +52,7 @@
 			on:icBack={displayAddresses}
 			address={qrCodeAddress}
 			addressLabel={qrCodeAddressLabel}
+			addressToken={qrCodeAddressToken}
 		/>
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />

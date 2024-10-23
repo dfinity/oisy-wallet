@@ -6,9 +6,11 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 
 	export let address: undefined | string;
 	export let addressLabel: string | undefined = undefined;
+	export let addressToken: Token | undefined;
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -23,7 +25,7 @@
 		/>
 	</p>
 
-	<ReceiveQRCode address={address ?? ''} />
+	<ReceiveQRCode address={address ?? ''} {addressToken} />
 
 	<Button
 		colorStyle="secondary"
