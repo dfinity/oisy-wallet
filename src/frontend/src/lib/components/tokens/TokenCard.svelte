@@ -6,21 +6,21 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { LogoSize } from '$lib/types/components';
-	import type { Token } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 
-	export let token: Token;
+	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 	export let tokenCount: number | undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 </script>
 
-<Card noMargin testId={`${testIdPrefix}-${token.symbol}`}>
-	<TokenSymbol {token} />
+<Card noMargin testId={`${testIdPrefix}-${data.symbol}`}>
+	<TokenSymbol {data} />
 
-	<TokenName {token} slot="description" />
+	<TokenName {data} slot="description" />
 
 	<TokenLogo
-		{token}
+		{data}
 		subLogo={nonNullish(tokenCount) ? { type: 'tokenCount', count: tokenCount } : undefined}
 		slot="icon"
 		color="white"
