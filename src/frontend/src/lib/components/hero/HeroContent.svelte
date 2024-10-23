@@ -21,7 +21,6 @@
 
 	export let usdTotal = false;
 	export let summary = false;
-	export let back = false;
 
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
@@ -46,9 +45,7 @@
 	{#if summary}
 		<div transition:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
-				{#if back}
-					<Back color="current" onlyArrow />
-				{/if}
+				<Back color="current" onlyArrow />
 
 				<div>
 					<div class="my-0.5 flex items-center justify-center">

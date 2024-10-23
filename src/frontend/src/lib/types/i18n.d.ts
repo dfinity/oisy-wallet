@@ -31,6 +31,7 @@ interface I18nNavigation {
 	text: {
 		tokens: string;
 		settings: string;
+		dapp_explorer: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -40,6 +41,7 @@ interface I18nNavigation {
 	alt: {
 		tokens: string;
 		settings: string;
+		dapp_explorer: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
@@ -74,7 +76,14 @@ interface I18nAuth {
 }
 
 interface I18nDapps {
-	text: { all_dapps: string; featured: string; sign_in: string; title: string; open_dapp: string };
+	text: {
+		all_dapps: string;
+		featured: string;
+		sign_in: string;
+		title: string;
+		open_dapp: string;
+		submit_your_dapp: string;
+	};
 	alt: {
 		learn_more: string;
 		logo: string;
@@ -83,6 +92,7 @@ interface I18nDapps {
 		open_dapp: string;
 		open_twitter: string;
 		source_code_on_github: string;
+		submit_your_dapp: string;
 		tags: string;
 		website: string;
 	};

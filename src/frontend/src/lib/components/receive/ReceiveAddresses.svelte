@@ -24,11 +24,11 @@
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (details: { address: string; addressLabel: string }) =>
-		dispatch('icQRCode', details);
+	const displayQRCode = (details: Required<ReceiveQRCode>) => dispatch('icQRCode', details);
 </script>
 
 <ContentWithToolbar>
@@ -36,7 +36,8 @@
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.principal
+				addressLabel: $i18n.receive.icp.text.principal,
+				addressToken: ICP_TOKEN
 			})}
 		address={$icrcAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
@@ -55,7 +56,8 @@
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.icp_account
+				addressLabel: $i18n.receive.icp.text.icp_account,
+				addressToken: ICP_TOKEN
 			})}
 		address={$icpAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
@@ -80,7 +82,8 @@
 			on:click={() =>
 				displayQRCode({
 					address: $btcAddressMainnet ?? '',
-					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
+					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
+					addressToken: BTC_MAINNET_TOKEN
 				})}
 			address={$btcAddressMainnet}
 			token={BTC_MAINNET_TOKEN}
@@ -96,7 +99,8 @@
 				on:click={() =>
 					displayQRCode({
 						address: $btcAddressTestnet ?? '',
-						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address
+						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
+						addressToken: BTC_TESTNET_TOKEN
 					})}
 				address={$btcAddressTestnet}
 				token={BTC_TESTNET_TOKEN}
@@ -112,7 +116,8 @@
 					on:click={() =>
 						displayQRCode({
 							address: $btcAddressRegtest ?? '',
-							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address
+							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
+							addressToken: BTC_REGTEST_TOKEN
 						})}
 					address={$btcAddressRegtest}
 					token={BTC_REGTEST_TOKEN}
@@ -133,7 +138,8 @@
 		on:click={() =>
 			displayQRCode({
 				address: $ethAddress ?? '',
-				addressLabel: $i18n.receive.ethereum.text.ethereum_address
+				addressLabel: $i18n.receive.ethereum.text.ethereum_address,
+				addressToken: ETHEREUM_TOKEN
 			})}
 		address={$ethAddress ?? ''}
 		token={ETHEREUM_TOKEN}
