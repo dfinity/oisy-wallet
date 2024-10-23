@@ -80,7 +80,6 @@ export type TokenGroupUi = {
 	nativeToken: TokenUi;
 	nativeNetwork: Network;
 	tokens: TokenUi[];
-	name: string;
 } & TokenFinancialData;
 
 export type TokenUiOrGroupUi = TokenUi | TokenGroupUi;

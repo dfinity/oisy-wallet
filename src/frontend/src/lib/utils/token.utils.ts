@@ -141,6 +141,40 @@ export const mapTokenUi = ({
 	})
 });
 
+/** Function to sum the balances of two tokens.
+ *
+ * If the decimals of the tokens are the same, the balances are added together.
+ * If the decimals are different, the function returns null.
+ * If one of the balances is nullish, the function returns the other balance.
+ * If both balances are nullish, the function prioritize the first token
+ * NOTE: the function assumes that the two tokens are always 1:1 twins, for example BTC and ckBTC, or ETH and SepoliaETH
+ *
+ * @param token1
+ * @param token2
+ * @returns The sum of the balances or nullish value.
+ */
+export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
+	nonNullish(token1.balance) && nonNullish(token2.balance)
+		? token1.decimals === token2.decimals
+			? token1.balance.add(token2.balance)
+			: null
+		: isNullish(token2.balance)
+			? token1.balance
+			: token2.balance;
+
+/** Function to sum the USD balances of two tokens.
+ *
+ * If one of the balances is nullish, the function returns the other balance.
+ *
+ * @param token1
+ * @param token2
+ * @returns The sum of the USD balances or nullish value.
+ */
+export const sumTokenUsdBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['usdBalance'] =>
+	nonNullish(token1.usdBalance) || nonNullish(token2.usdBalance)
+		? (token1.usdBalance ?? 0) + (token2.usdBalance ?? 0)
+		: undefined;
+
 /**
  * Type guard to check if a token is of type RequiredTokenWithLinkedData.
  * This checks whether the token has a twinTokenSymbol field and ensures that it is a string.
@@ -191,19 +225,8 @@ const createTokenGroup = ({
 	nativeToken,
 	nativeNetwork: nativeToken.network,
 	tokens: [nativeToken, twinToken],
-	name: `${nativeToken.symbol}, ${twinToken.symbol}`,
-	balance:
-		nonNullish(nativeToken.balance) && nonNullish(twinToken.balance)
-			? nativeToken.balance.add(twinToken.balance)
-			: isNullish(nativeToken.balance)
-				? twinToken.balance
-				: nativeToken.balance,
-	usdBalance:
-		nonNullish(nativeToken.usdBalance) && nonNullish(twinToken.usdBalance)
-			? nativeToken.usdBalance + twinToken.usdBalance
-			: isNullish(nativeToken.usdBalance)
-				? twinToken.usdBalance
-				: nativeToken.usdBalance
+	balance: sumTokenBalances([nativeToken, twinToken]),
+	usdBalance: sumTokenUsdBalances([nativeToken, twinToken])
 });
 
 /**
