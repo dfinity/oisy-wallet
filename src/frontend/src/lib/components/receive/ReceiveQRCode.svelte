@@ -8,7 +8,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let address: string;
-	// TODO: remove undefined assignation to make property mandatory in PR #3023
 	export let addressToken: Token | undefined = undefined;
 
 	let symbol: string | undefined;
@@ -35,7 +34,7 @@
 				<svelte:fragment slot="logo">
 					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-white p-2">
-							<TokenLogo token={addressToken} showNetworkIcon={false} />
+							<TokenLogo token={addressToken} />
 						</div>
 					{/if}
 				</svelte:fragment>

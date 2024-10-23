@@ -470,7 +470,8 @@
 			"context_menu": "Context menu for to the selected token",
 			"open_etherscan": "Open the details of the token on Etherscan",
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
-			"open_contract_address_block_explorer": "Open the contract address on a block explorer"
+			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
+			"token_group_number": "Total number of tokens in the group for native token $token"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",

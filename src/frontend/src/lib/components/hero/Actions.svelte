@@ -41,7 +41,7 @@
 		{#if $networkICP}
 			<IcReceive token={$tokenWithFallback} />
 		{:else if $networkEthereum}
-			<EthReceive />
+			<EthReceive token={$tokenWithFallback} />
 		{:else if $networkBitcoin}
 			<BtcReceive />
 		{:else if $pseudoNetworkChainFusion}
