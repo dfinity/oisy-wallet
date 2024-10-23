@@ -1,13 +1,14 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
+	import { Html, IconGitHub, Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
-	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconOpenChat from '$lib/components/icons/IconOpenChat.svelte';
+	import IconTelegram from '$lib/components/icons/IconTelegram.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyDappDescription } from '$lib/types/oisyDappDescription';
@@ -15,7 +16,19 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: OisyDappDescription;
-	$: ({ website, screenshots, twitter, github, tags, name, description, logo } = dAppDescription);
+	$: ({
+		website,
+		screenshots,
+		twitter,
+		github,
+		tags,
+		name,
+		description,
+		logo,
+		callToAction,
+		telegram,
+		openChat
+	} = dAppDescription);
 
 	let websiteURL: Option<URL>;
 	$: {
@@ -36,6 +49,9 @@
 		{#if nonNullish(screenshots) && screenshots.length > 0}
 			<div class="overflow-hidden rounded-3xl">
 				<ImgBanner
+					fitHeight={true}
+					height="100%"
+					width="100%"
 					src={screenshots[0]}
 					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: name })}
 				/>
@@ -43,14 +59,13 @@
 		{/if}
 
 		<article class="rounded-3xl p-5 shadow">
-			<div class="flex items-center gap-4 border-b border-light-grey pb-5">
-				<Img
-					width="40"
-					height="40"
+			<div class="flex flex-wrap items-center justify-start gap-4 border-b border-light-grey pb-5">
+				<Logo
+					size="md"
 					src={logo}
 					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
 				/>
-				<div>
+				<div class="mr-auto">
 					<div class="text-lg font-bold">{name}</div>
 					{#if nonNullish(websiteURL)}
 						<ExternalLink
@@ -63,7 +78,27 @@
 						>
 					{/if}
 				</div>
-				<div class="ml-auto flex space-x-4">
+				<div class="flex space-x-3">
+					{#if nonNullish(telegram)}
+						<ExternalLinkIcon
+							href={telegram}
+							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_telegram, {
+								$dAppname: name
+							})}
+						>
+							<IconTelegram size="22" />
+						</ExternalLinkIcon>
+					{/if}
+					{#if nonNullish(openChat)}
+						<ExternalLinkIcon
+							href={openChat}
+							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_open_chat, {
+								$dAppname: name
+							})}
+						>
+							<IconOpenChat size="22" />
+						</ExternalLinkIcon>
+					{/if}
 					{#if nonNullish(twitter)}
 						<ExternalLinkIcon
 							href={twitter}
@@ -81,7 +116,7 @@
 								$dAppname: name
 							})}
 						>
-							<IconGitHub />
+							<IconGitHub size="22" />
 						</ExternalLinkIcon>
 					{/if}
 				</div>
@@ -100,9 +135,10 @@
 				})}
 				styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
 				href={websiteURL.toString()}
-				>{replacePlaceholders($i18n.dapps.text.open_dapp, {
-					$dAppname: name
-				})}</ExternalLink
+				>{callToAction ??
+					replacePlaceholders($i18n.dapps.text.open_dapp, {
+						$dAppname: name
+					})}</ExternalLink
 			>
 		{/if}
 	</div>
