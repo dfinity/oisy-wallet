@@ -41,13 +41,9 @@ jobs:
         echo "new_version=$new_version" >> $GITHUB_OUTPUT
         echo "Bumped to version: $new_version"
 
-    - name: Commit version bump on release branch
+    - name: Stage changes
       run: |
-        branch_name="release/v${{ steps.bump_version.outputs.new_version }}"
-        git checkout -b "$branch_name"
         git add package.json package-lock.json
-        git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
-        git push origin "$branch_name"
 
     - name: Create Pull Request
       uses: ./.github/actions/create-pr
