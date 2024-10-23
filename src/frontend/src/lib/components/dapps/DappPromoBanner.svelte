@@ -34,7 +34,7 @@
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
-			<Button padding="md" styleClass="flex-grow-0 text-sm" colorStyle="secondary" on:click>
+			<Button padding="sm" styleClass="flex-grow-0 text-sm" colorStyle="secondary" on:click>
 				{$i18n.core.text.view}
 			</Button>
 		</div>
