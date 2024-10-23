@@ -45,6 +45,6 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: '.'
-          message: '🔄 Updated i18n files'
+          message: '🤖 Updated i18n files'
           push: true
           pull_strategy: 'default'
