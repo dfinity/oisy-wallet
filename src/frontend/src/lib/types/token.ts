@@ -35,7 +35,7 @@ export interface TokenOisySymbol {
 }
 
 export interface TokenOisyName {
-	prefix?: string | undefined;
+	prefix?: string;
 	oisyName: string;
 }
 
