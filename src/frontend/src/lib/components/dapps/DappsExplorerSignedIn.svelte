@@ -10,17 +10,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
-		type DappDescription,
+		type OisyDappDescription,
 		dAppDescriptions,
-		type FeaturedDappDescription
-	} from '$lib/types/dappDescription';
+		type FeaturedOisyDappDescription
+	} from '$lib/types/oisyDappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// For the moment only the first featured dapp is highlighted
-	const selectFirstFeaturedDapp = (): FeaturedDappDescription | undefined =>
+	const selectFirstFeaturedDapp = (): FeaturedOisyDappDescription | undefined =>
 		dAppDescriptions.find(
 			({ featured, screenshots }) => featured && nonNullish(screenshots) && screenshots.length
-		) as FeaturedDappDescription | undefined;
+		) as FeaturedOisyDappDescription | undefined;
 
 	const featuredDapp = selectFirstFeaturedDapp();
 
@@ -33,9 +33,9 @@
 		({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
 	);
 
-	let selectedDapp: DappDescription | undefined = undefined;
+	let selectedDapp: OisyDappDescription | undefined = undefined;
 	$: selectedDapp = $modalDAppDetails
-		? ($modalStore?.data as DappDescription | undefined)
+		? ($modalStore?.data as OisyDappDescription | undefined)
 		: undefined;
 </script>
 
