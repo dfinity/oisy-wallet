@@ -16,7 +16,10 @@ export const buildCarouselSliderFrameItem = ({
 }): HTMLDivElement => {
 	// Create slider frame item and apply styling
 	const frameItem = document.createElement('div');
-	frameItem.style.width = `${100 / totalSlides}%`;
+
+	if (totalSlides > 0) {
+		frameItem.style.width = `${100 / totalSlides}%`;
+	}
 
 	frameItem.appendChild(slide);
 
@@ -24,35 +27,40 @@ export const buildCarouselSliderFrameItem = ({
 };
 
 /**
- * A util for building carousel slider frame.
+ * A util for extending provided sliderFrame element with carousel items and width style..
  */
-export const buildCarouselSliderFrame = ({
+export const extendCarouselSliderFrame = ({
+	sliderFrame,
 	slides,
 	slideWidth
 }: {
 	slides: Node[];
 	slideWidth: number;
-}): HTMLDivElement => {
+} & CommonParams) => {
+	if (isNullish(sliderFrame)) {
+		return;
+	}
+
 	// We add the last slide as the first element to properly animate last-to-first slide transition.
 	// The same applies to the last element - we use the first slide as the last item of the array.
-	const extendedSlides = [slides[slides.length - 1], ...slides, slides[0]];
+	const extendedSlides = [
+		slides[slides.length - 1].cloneNode(true),
+		...slides,
+		slides[0].cloneNode(true)
+	];
 	const totalSlides = extendedSlides.length;
 
-	// Create slider frame and apply styling
-	const sliderFrame = document.createElement('div');
+	// Calculate and set width
 	sliderFrame.style.width = `${slideWidth * totalSlides}px`;
-	sliderFrame.style.display = 'flex';
 
-	extendedSlides.forEach((slide) => {
-		sliderFrame.appendChild(
+	sliderFrame.append(
+		...extendedSlides.map((slide) =>
 			buildCarouselSliderFrameItem({
-				slide: slide.cloneNode(true),
+				slide,
 				totalSlides
 			})
-		);
-	});
-
-	return sliderFrame;
+		)
+	);
 };
 
 /**

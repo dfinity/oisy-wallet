@@ -1,4 +1,4 @@
-import { buildCarouselSliderFrame, buildCarouselSliderFrameItem } from '$lib/utils/carousel.utils';
+import { buildCarouselSliderFrameItem, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 import { describe, expect } from 'vitest';
 
 const slides = [
@@ -10,9 +10,11 @@ const slides = [
 const extendedSlides = [slides[slides.length - 1], ...slides, slides[0]];
 const slideWidth = 300;
 
-describe('buildCarouselSliderFrame', () => {
+describe('extendCarouselSliderFrame', () => {
 	it('puts correct amount of slides in the frame', () => {
-		const sliderFrame = buildCarouselSliderFrame({
+		const sliderFrame = document.createElement('div');
+		extendCarouselSliderFrame({
+			sliderFrame,
 			slides,
 			slideWidth
 		});
@@ -21,7 +23,9 @@ describe('buildCarouselSliderFrame', () => {
 	});
 
 	it('sets correct width to frame', () => {
-		const sliderFrame = buildCarouselSliderFrame({
+		const sliderFrame = document.createElement('div');
+		extendCarouselSliderFrame({
+			sliderFrame,
 			slides,
 			slideWidth
 		});
