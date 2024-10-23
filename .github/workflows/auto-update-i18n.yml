@@ -1,0 +1,50 @@
+name: Auto Update i18n
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - './src/frontend/src/lib/i18n/*'
+      - './src/frontend/src/lib/types/i18n.d.ts'
+
+jobs:
+  auto_update:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-i18n-npm-${{ hashFiles('package-lock.json', 'package.json') }}
+          restore-keys: |
+              ${{ runner.os }}-i18n-npm-
+      
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Run i18n Script
+        run: npm run i18n
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit i18n
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: '.'
+          message: '🤖 Updated i18n files'
+          push: true
+          pull_strategy: 'default'
