@@ -28,7 +28,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: run i18n Script
+      - name: Run i18n Script
         run: npm run i18n
 
       - name: Check for Changes
@@ -45,6 +45,6 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: '.'
-          message: '🔄 Updated i18n files'
+          message: '🤖 Updated i18n files'
           push: true
           pull_strategy: 'default'
