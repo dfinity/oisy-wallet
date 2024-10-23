@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
+	import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { ethereumToken } from '$eth/derived/token.derived';
-	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { networkBitcoin, networkEthereum } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
-	import { enabledTokens, tokens } from '$lib/derived/tokens.derived';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
-	import type { OnramperCryptoWallet, OnramperId, OnramperNetworkId } from '$lib/types/onramper';
-	import { buildOnramperLink, mapOnramperWallets } from '$lib/utils/onramper.utils';
+	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
+	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
@@ -33,30 +34,29 @@
 	let onlyCryptoNetworks: OnramperNetworkId[];
 	$: onlyCryptoNetworks = $networks.map((network) => network.buy?.onramperId).filter(nonNullish);
 
-	let wallets: OnramperCryptoWallet[];
-	$: wallets = mapOnramperWallets({
-		tokens: $tokens,
-		walletMap: {
-			bitcoin: $btcAddressMainnet,
-			ethereum: $ethAddress,
-			erc20: $ethAddress,
-			icrc: $icrcAccountIdentifierText,
-			icp: $icpAccountIdentifierText
-		}
+	let networkWallets: OnramperNetworkWallet[];
+	$: networkWallets = mapOnramperNetworkWallets({
+		networks: $networks,
+		walletMap: new Map([
+			[BTC_MAINNET_NETWORK_ID, $btcAddressMainnet],
+			[ETHEREUM_NETWORK_ID, $ethAddress],
+			[ICP_NETWORK_ID, $icpAccountIdentifierText]
+		])
 	});
 
 	let src: string;
 	$: defaultCrypto,
 		onlyCryptos,
 		onlyCryptoNetworks,
-		wallets,
+		networkWallets,
 		(src = buildOnramperLink({
 			mode: 'buy',
 			defaultFiat: 'usd',
 			defaultCrypto,
 			onlyCryptos,
 			onlyCryptoNetworks,
-			wallets,
+			wallets: [],
+			networkWallets,
 			supportRecurringPayments: true,
 			enableCountrySelector: true
 		}));
