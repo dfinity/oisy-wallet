@@ -191,19 +191,18 @@ const createTokenGroup = ({
 	nativeToken,
 	nativeNetwork: nativeToken.network,
 	tokens: [nativeToken, twinToken],
-	name: `${nativeToken.symbol}, ${twinToken.symbol}`,
 	balance:
 		nonNullish(nativeToken.balance) && nonNullish(twinToken.balance)
 			? nativeToken.balance.add(twinToken.balance)
-			: isNullish(nativeToken.balance)
-				? twinToken.balance
-				: nativeToken.balance,
+			: isNullish(twinToken.balance)
+				? nativeToken.balance
+				: twinToken.balance,
 	usdBalance:
 		nonNullish(nativeToken.usdBalance) && nonNullish(twinToken.usdBalance)
 			? nativeToken.usdBalance + twinToken.usdBalance
-			: isNullish(nativeToken.usdBalance)
-				? twinToken.usdBalance
-				: nativeToken.usdBalance
+			: isNullish(twinToken.usdBalance)
+				? nativeToken.usdBalance
+				: twinToken.usdBalance
 });
 
 /**
