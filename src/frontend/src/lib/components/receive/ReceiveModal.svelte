@@ -26,9 +26,7 @@
 			{network}
 			{copyAriaLabel}
 			qrCodeAction={{ enabled: false }}
-		>
-			<slot name="text" slot="text" />
-		</ReceiveAddressQRCodeContent>
+		/>
 
 		<slot name="content" />
 

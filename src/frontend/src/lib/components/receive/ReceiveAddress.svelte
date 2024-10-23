@@ -24,12 +24,15 @@
 		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
 
 		{#if text}
-			<p class="break-normal py-2 text-misty-rose">
+			<p class="mb-1.5 break-normal py-2 text-misty-rose">
 				<slot name="text" />
 			</p>
 		{/if}
 
-		<div class="flex items-center justify-between gap-6 rounded-lg bg-zumthor px-3 py-2">
+		<div
+			class="flex items-center justify-between gap-6 rounded-lg bg-zumthor px-3 py-2"
+			class:mt-2={!text}
+		>
 			<div class="h-8 w-8">
 				<Logo
 					src={network.iconBW}

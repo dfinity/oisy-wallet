@@ -30,9 +30,7 @@
 		{qrCodeAction}
 		{copyAriaLabel}
 		on:click
-	>
-		<slot name="text" slot="text" />
-	</ReceiveAddressQRCodeContent>
+	/>
 
 	<Button
 		colorStyle="secondary"
