@@ -28,7 +28,8 @@
 	const displayQRCode = (address: string) =>
 		dispatch('icQRCode', {
 			address,
-			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
+			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
+			addressToken: twinToken
 		});
 
 	let btcAddress: string | undefined = undefined;

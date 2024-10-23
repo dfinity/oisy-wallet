@@ -17,7 +17,8 @@
 	const displayQRCode = (address: string) =>
 		dispatch('icQRCode', {
 			address,
-			addressLabel: $i18n.wallet.text.wallet_address
+			addressLabel: $i18n.wallet.text.wallet_address,
+			addressToken: $token
 		});
 </script>
 

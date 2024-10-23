@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -17,7 +18,10 @@
 	const dispatch = createEventDispatcher();
 
 	const displayQRCode = (details: { address: string; addressLabel: string }) =>
-		dispatch('icQRCode', details);
+		dispatch('icQRCode', {
+			...details,
+			addressToken: ICP_TOKEN
+		});
 </script>
 
 <ContentWithToolbar>
