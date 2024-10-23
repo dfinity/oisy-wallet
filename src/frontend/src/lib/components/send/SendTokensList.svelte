@@ -25,7 +25,7 @@
 
 <ContentWithToolbar>
 	<TokensSkeletons {loading}>
-		<div class="flex flex-col gap-6">
+		<div class="mb-6 flex flex-col gap-6">
 			{#each tokens as token (token.id)}
 				<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
 					<TokenCardContent {token} />

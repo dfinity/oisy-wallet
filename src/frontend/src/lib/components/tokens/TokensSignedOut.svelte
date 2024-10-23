@@ -8,7 +8,7 @@
 	onMount(unsafeLoadDefaultPublicIcrcTokens);
 </script>
 
-<div class="flex flex-col gap-3">
+<div class="mb-3 flex flex-col gap-3">
 	{#each $combinedDerivedSortedNetworkTokens as token (token.id)}
 		<TokenCardWithUrl {token} disableTabSelector>
 			<TokenCardSignedOut {token} />
