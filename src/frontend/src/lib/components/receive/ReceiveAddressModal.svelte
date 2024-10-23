@@ -28,23 +28,13 @@
 	let address: undefined | string;
 	let addressLabel: undefined | string;
 	let addressToken: Token | undefined;
-	let qrCodeAriaLabel: string | undefined;
 	let copyAriaLabel: string | undefined;
 
-	const displayQRCode = ({
-		detail: {
-			address: a,
-			addressLabel: aL,
-			addressToken: aT,
-			qrCodeAriaLabel: qrL,
-			copyAriaLabel: cAL
-		}
-	}: CustomEvent<ReceiveQRCode>) => {
-		address = a;
-		addressLabel = aL;
-		addressToken = aT;
-		qrCodeAriaLabel = qrL;
-		copyAriaLabel = cAL;
+	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
+		address = detail.address;
+		addressLabel = detail.addressLabel;
+		addressToken = detail.addressToken;
+		copyAriaLabel = detail.copyAriaLabel;
 		modal.next();
 	};
 
@@ -53,7 +43,6 @@
 		address = undefined;
 		addressLabel = undefined;
 		addressToken = undefined;
-		qrCodeAriaLabel = undefined;
 		copyAriaLabel = undefined;
 	};
 </script>
@@ -74,7 +63,7 @@
 			{addressLabel}
 			{addressToken}
 			network={addressToken.network}
-			qrCodeAriaLabel={qrCodeAriaLabel ?? $i18n.wallet.text.display_wallet_address_qr}
+			qrCodeAction={{ enabled: false }}
 			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 		/>
 	{:else}

@@ -53,7 +53,6 @@
 		address={addressData?.data}
 		{addressToken}
 		network={addressToken.network}
-		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 	/>
 </ReceiveButtonWithModal>

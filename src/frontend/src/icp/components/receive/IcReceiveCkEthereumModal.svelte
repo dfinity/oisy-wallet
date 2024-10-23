@@ -115,7 +115,7 @@
 				address={$icrcAccountIdentifierText ?? ''}
 				addressToken={ICP_TOKEN}
 				network={ICP_NETWORK}
-				qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
+				qrCodeAction={{ enabled: false }}
 				copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 			/>
 		{:else}

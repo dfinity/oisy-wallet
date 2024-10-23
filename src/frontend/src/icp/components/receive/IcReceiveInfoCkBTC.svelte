@@ -30,7 +30,6 @@
 			address,
 			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
 			addressToken: twinToken,
-			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 		});
 
@@ -56,7 +55,10 @@
 			labelRef="bitcoin-address"
 			address={btcAddress}
 			network={twinToken.network}
-			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+			qrCodeAction={{
+				enabled: true,
+				label: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+			}}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			on:click={() => displayQRCode(btcAddress ?? '')}
 		>

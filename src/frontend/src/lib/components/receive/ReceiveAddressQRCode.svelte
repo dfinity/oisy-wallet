@@ -6,6 +6,7 @@
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
 	export let address: undefined | string;
@@ -13,7 +14,7 @@
 	export let addressToken: Token | undefined;
 
 	export let network: Network;
-	export let qrCodeAriaLabel: string;
+	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
 
 	const dispatch = createEventDispatcher();
@@ -26,7 +27,7 @@
 		{addressToken}
 		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
 		{network}
-		{qrCodeAriaLabel}
+		{qrCodeAction}
 		{copyAriaLabel}
 		on:click
 	>

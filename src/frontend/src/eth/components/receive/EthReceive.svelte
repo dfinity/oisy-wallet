@@ -34,7 +34,6 @@
 		address={$networkAddress}
 		addressToken={token}
 		network={token.network}
-		qrCodeAriaLabel={$i18n.receive.ethereum.text.display_ethereum_address_qr}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
 	>
 		<svelte:fragment slot="content">

@@ -14,7 +14,6 @@
 
 	export let network: Network;
 	export let copyAriaLabel: string;
-	export let qrCodeAriaLabel: string;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -26,7 +25,7 @@
 			{addressToken}
 			{network}
 			{copyAriaLabel}
-			{qrCodeAriaLabel}
+			qrCodeAction={{ enabled: false }}
 		>
 			<slot name="text" slot="text" />
 		</ReceiveAddressQRCodeContent>

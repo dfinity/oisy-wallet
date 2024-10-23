@@ -4,6 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address, OptionAddress } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
 	export let address: OptionAddress<Address>;
@@ -13,7 +14,7 @@
 	export let testId: string | undefined = undefined;
 
 	export let network: Network;
-	export let qrCodeAriaLabel: string;
+	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
 
 	// TODO: replace property with mandatory property ReceiveQRCode
@@ -26,7 +27,7 @@
 	address={address ?? ''}
 	{testId}
 	{network}
-	{qrCodeAriaLabel}
+	{qrCodeAction}
 	{copyAriaLabel}
 >
 	<svelte:fragment slot="title">{addressLabel ?? $i18n.wallet.text.address}</svelte:fragment>

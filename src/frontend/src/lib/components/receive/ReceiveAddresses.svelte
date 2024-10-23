@@ -28,7 +28,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (details: Required<ReceiveQRCode>) => dispatch('icQRCode', details);
+	const displayQRCode = (details: Omit<Required<ReceiveQRCode>, 'qrCodeAriaLabel'>) =>
+		dispatch('icQRCode', details);
 </script>
 
 <ContentWithToolbar>
@@ -38,7 +39,6 @@
 				address: $icrcAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.principal,
 				addressToken: ICP_TOKEN,
-				qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
 				copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied
 			})}
 		address={$icrcAccountIdentifierText ?? ''}
@@ -60,7 +60,6 @@
 				address: $icpAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.icp_account,
 				addressToken: ICP_TOKEN,
-				qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr,
 				copyAriaLabel: $i18n.receive.icp.text.icp_account_copied
 			})}
 		address={$icpAccountIdentifierText ?? ''}
@@ -88,7 +87,6 @@
 					address: $btcAddressMainnet ?? '',
 					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
 					addressToken: BTC_MAINNET_TOKEN,
-					qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
 					copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 				})}
 			address={$btcAddressMainnet}
@@ -107,7 +105,6 @@
 						address: $btcAddressTestnet ?? '',
 						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
 						addressToken: BTC_TESTNET_TOKEN,
-						qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
 						copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 					})}
 				address={$btcAddressTestnet}
@@ -126,7 +123,6 @@
 							address: $btcAddressRegtest ?? '',
 							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
 							addressToken: BTC_REGTEST_TOKEN,
-							qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
 							copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 						})}
 					address={$btcAddressRegtest}
@@ -150,7 +146,6 @@
 				address: $ethAddress ?? '',
 				addressLabel: $i18n.receive.ethereum.text.ethereum_address,
 				addressToken: ETHEREUM_TOKEN,
-				qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
 				copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied
 			})}
 		address={$ethAddress ?? ''}

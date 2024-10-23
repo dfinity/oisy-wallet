@@ -11,15 +11,12 @@
 	export let labelRef: string;
 	export let address: string;
 	export let network: Network;
-	export let qrCodeAriaLabel: string;
+	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
 	export let testId: string | undefined = undefined;
 
 	let text = false;
 	$: text = nonNullish($$slots.text);
-
-	let qrCodeAction: ReceiveQRCodeAction;
-	$: qrCodeAction = { enabled: true, label: qrCodeAriaLabel };
 </script>
 
 <div>

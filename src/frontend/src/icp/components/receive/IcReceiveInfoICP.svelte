@@ -30,13 +30,15 @@
 		labelRef="wallet-address"
 		address={$icrcAccountIdentifierText ?? ''}
 		network={ICP_NETWORK}
-		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+		qrCodeAction={{
+			enabled: true,
+			label: $i18n.wallet.text.display_wallet_address_qr
+		}}
 		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
 				addressLabel: $i18n.wallet.text.wallet_address,
-				qrCodeAriaLabel: $i18n.wallet.text.display_wallet_address_qr,
 				copyAriaLabel: $i18n.wallet.text.wallet_address_copied
 			})}
 	>
@@ -52,13 +54,15 @@
 		labelRef="icp-account-id"
 		address={$icpAccountIdentifierText ?? ''}
 		network={ICP_NETWORK}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_account_id_qr}
+		qrCodeAction={{
+			enabled: true,
+			label: $i18n.receive.icp.text.display_account_id_qr
+		}}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.account_id,
-				qrCodeAriaLabel: $i18n.receive.icp.text.display_account_id_qr,
 				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
 			})}
 	>
