@@ -383,8 +383,7 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Buy",
-			"buy_dev": "Buy (Dev Environment)"
+			"buy": "Buy"
 		},
 		"onramper": {
 			"title": "Buy through Onramper",
