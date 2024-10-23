@@ -50,7 +50,7 @@
 				>
 					<Listener {token}>
 						<TokenCardWithUrl {token}>
-							<TokenCardContent {token} />
+							<TokenCardContent data={token} />
 						</TokenCardWithUrl>
 					</Listener>
 				</div>

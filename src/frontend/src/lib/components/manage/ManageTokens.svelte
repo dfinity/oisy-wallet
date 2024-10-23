@@ -238,9 +238,9 @@
 	<div class="container overflow-y-auto overscroll-contain pr-2 pt-1 md:max-h-[26rem]">
 		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 			<Card>
-				<TokenName {token} />
+				<TokenName data={token} />
 
-				<TokenLogo slot="icon" color="white" {token} subLogo={{ type: 'network' }} />
+				<TokenLogo slot="icon" color="white" data={token} subLogo={{ type: 'network' }} />
 
 				<span class="break-all" slot="description">
 					{token.symbol}

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let token: Token;
+	export let data: CardData;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let subLogo:
 		| { type: 'network'; blackAndWhite?: boolean }
@@ -16,7 +16,7 @@
 		icon,
 		name,
 		network: { name: networkName, icon: networkIcon, iconBW: networkIconBW }
-	} = token;
+	} = data;
 </script>
 
 <div class="relative">
@@ -30,7 +30,7 @@
 	{#if subLogo?.type === 'tokenCount' && subLogo.count > 0}
 		<span
 			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold text-[var(--color-secondary)]"
-			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: token.name })}
+			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: data.name })}
 		>
 			{subLogo.count}
 		</span>
