@@ -153,7 +153,7 @@ export const mapTokenUi = ({
  * @param token2
  * @returns The sum of the balances or nullish value.
  */
-export const sumTokenBalances = ([token1, token2]: TokenUi[]): TokenUi['balance'] =>
+export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
 	nonNullish(token1.balance) && nonNullish(token2.balance)
 		? token1.decimals === token2.decimals
 			? token1.balance.add(token2.balance)
@@ -170,12 +170,10 @@ export const sumTokenBalances = ([token1, token2]: TokenUi[]): TokenUi['balance'
  * @param token2
  * @returns The sum of the USD balances or nullish value.
  */
-export const sumTokenUsdBalances = ([token1, token2]: TokenUi[]): TokenUi['usdBalance'] =>
-	nonNullish(token1.usdBalance) && nonNullish(token2.usdBalance)
-		? token1.usdBalance + token2.usdBalance
-		: isNullish(token2.usdBalance)
-			? token1.usdBalance
-			: token2.usdBalance;
+export const sumTokenUsdBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['usdBalance'] =>
+	nonNullish(token1.usdBalance) || nonNullish(token2.usdBalance)
+		? (token1.usdBalance ?? 0) + (token2.usdBalance ?? 0)
+		: undefined;
 
 /**
  * Type guard to check if a token is of type RequiredTokenWithLinkedData.
