@@ -82,7 +82,7 @@ const populatePendingUtxos = ({
 	};
 
 	ckBtcPendingUtxosStore.set({
-		tokenId,
+		id: tokenId,
 		data
 	});
 };
@@ -143,7 +143,7 @@ type LoadData = <T>(params: LoadDataParams<T>) => Promise<void>;
 
 type LoadDataParams<T> = IcToken &
 	Partial<IcCkMetadata> & {
-		store: CertifiedSetterStoreStore<CertifiedData<T>>;
+		store: CertifiedSetterStoreStore<TokenId, CertifiedData<T>>;
 		request: (
 			options: QueryAndUpdateRequestParams & Pick<IcCkMetadata, 'minterCanisterId'>
 		) => Promise<T>;
@@ -166,7 +166,7 @@ const loadData: LoadData = async <T>({
 				identity,
 				certified
 			}),
-		onLoad: ({ response: data, certified }) => store.set({ tokenId, data: { data, certified } }),
+		onLoad: ({ response: data, certified }) => store.set({ id: tokenId, data: { data, certified } }),
 		onCertifiedError: ({ error: err }) => {
 			store.reset(tokenId);
 

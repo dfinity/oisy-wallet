@@ -9,7 +9,7 @@ export type CertifiedTransaction<T> = CertifiedData<T>;
 
 export type TransactionsData<T> = CertifiedTransaction<T>[];
 
-export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>> {
+export interface TransactionsStore<T> extends CertifiedStore<TokenId, TransactionsData<T>> {
 	prepend: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
 	append: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
 	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
@@ -18,7 +18,7 @@ export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>
 export const initTransactionsStore = <
 	T extends IcTransactionUi | BtcTransactionUi
 >(): TransactionsStore<T> => {
-	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
+	const { subscribe, update, reset } = initCertifiedStore<TokenId, TransactionsData<T>>();
 
 	return {
 		prepend: ({

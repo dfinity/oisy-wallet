@@ -9,13 +9,13 @@ export type IcCertifiedPendingTransaction = IcCertifiedTransaction;
 
 export type IcPendingTransactionsData = IcCertifiedPendingTransaction[];
 
-export interface IcPendingTransactionsStore extends CertifiedStore<IcPendingTransactionsData> {
+export interface IcPendingTransactionsStore extends CertifiedStore<TokenId, IcPendingTransactionsData> {
 	prepend: (params: { tokenId: TokenId; transaction: CertifiedData<IcTransactionUi> }) => void;
 	set: (params: { tokenId: TokenId; data: IcPendingTransactionsData }) => void;
 }
 
 const initIcPendingTransactionsStore = (): IcPendingTransactionsStore => {
-	const { subscribe, update, reset } = initCertifiedStore<IcPendingTransactionsData>();
+	const { subscribe, update, reset } = initCertifiedStore<TokenId, IcPendingTransactionsData>();
 
 	return {
 		prepend: ({

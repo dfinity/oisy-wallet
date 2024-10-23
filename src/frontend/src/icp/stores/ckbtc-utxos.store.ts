@@ -10,12 +10,12 @@ import { nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 
 export type CkBtcPendingUtxosData = CertifiedData<PendingUtxo[]>;
 
-export interface CkBtcPendingUtxosStore extends CertifiedSetterStoreStore<CkBtcPendingUtxosData> {
+export interface CkBtcPendingUtxosStore extends CertifiedSetterStoreStore<TokenId, CkBtcPendingUtxosData> {
 	filter: (params: { tokenId: TokenId; utxosIds: CertifiedData<UtxoTxidText[]> }) => void;
 }
 
 export const initCkBtcPendingUtxosStore = (): CkBtcPendingUtxosStore => {
-	const { subscribe, set, reset, update } = initCertifiedSetterStore<CkBtcPendingUtxosData>();
+	const { subscribe, set, reset, update } = initCertifiedSetterStore<TokenId, CkBtcPendingUtxosData>();
 
 	return {
 		filter: ({

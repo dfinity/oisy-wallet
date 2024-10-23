@@ -27,7 +27,7 @@ export const loadEip1559TransactionPrice = async (token: IcCkToken) => {
 			}),
 		onLoad: ({ certified, response: price }) =>
 			eip1559TransactionPriceStore.set({
-				tokenId,
+				id: tokenId,
 				data: {
 					data: price,
 					certified

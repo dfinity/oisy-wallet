@@ -20,7 +20,7 @@ export const syncWallet = ({
 	} = data;
 
 	balancesStore.set({
-		tokenId,
+		id: tokenId,
 		data: {
 			data: BigNumber.from(balance),
 			certified
