@@ -23,7 +23,11 @@
 
 <svelte:window on:resize={rerender} />
 
-<div in:fade class="qr-container px-4 pb-4" class:opacity-0={!render}>
+<div
+	in:fade
+	class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] px-4 pb-4"
+	class:opacity-0={!render}
+>
 	{#if render}
 		<article
 			aria-label={replacePlaceholders($i18n.wallet.alt.qrcode_address, {
@@ -34,7 +38,7 @@
 				<svelte:fragment slot="logo">
 					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-white p-2">
-							<TokenLogo token={addressToken} showNetworkIcon={false} />
+							<TokenLogo token={addressToken} />
 						</div>
 					{/if}
 				</svelte:fragment>
@@ -42,11 +46,3 @@
 		</article>
 	{/if}
 </div>
-
-<style lang="scss">
-	.qr-container {
-		max-width: var(--qrcode-max-width, 300px);
-		margin: 0 auto;
-		height: var(--qrcode-height);
-	}
-</style>
