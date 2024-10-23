@@ -1,4 +1,4 @@
-import { initStorageStore} from '$lib/stores/storage.store';
+import { initStorageStore } from '$lib/stores/storage.store';
 
 export interface TokenGroupData {
 	expanded: boolean;
