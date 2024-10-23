@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
