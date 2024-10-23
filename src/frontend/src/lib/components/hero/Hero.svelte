@@ -6,7 +6,6 @@
 
 	export let usdTotal = false;
 	export let summary = false;
-	export let back = false;
 </script>
 
 <article
@@ -17,5 +16,5 @@
 		<Alpha />
 	</div>
 
-	<HeroContent {usdTotal} {summary} {back} />
+	<HeroContent {usdTotal} {summary} />
 </article>
