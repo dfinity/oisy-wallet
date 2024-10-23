@@ -27,6 +27,7 @@
 	let slides: Node[];
 	let currentSlide = 0;
 	let totalSlides: number;
+	$: totalSlides = slides?.length ?? 0;
 
 	/**
 	 * Autoplay timer
@@ -61,7 +62,6 @@
 		}
 
 		slides = [...sliderFrame.children];
-		totalSlides = slides.length;
 	};
 
 	/**

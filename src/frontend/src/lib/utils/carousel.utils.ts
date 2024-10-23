@@ -84,7 +84,8 @@ export const moveSlider = ({
 		return;
 	}
 
-	const transitionDisabled = sliderFrame.style.transition === 'none';
+	const transitionDisabled =
+		isNullish(sliderFrame.style.transition) || sliderFrame.style.transition === 'none';
 
 	if (transitionDisabled && withTransition) {
 		sliderFrame.style.transition = `all ${duration}ms ${easing}`;
