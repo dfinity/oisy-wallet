@@ -2,9 +2,9 @@
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenBalance from '$lib/components/tokens/TokenBalance.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
-	import type { CardData } from '$lib/types/token-card';
+	import type { TokenUi } from '$lib/types/token.js';
 
-	export let token: CardData;
+	export let token: TokenUi;
 </script>
 
 <TokenCard {token}>
