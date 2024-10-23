@@ -40,7 +40,7 @@
 	let slideTransformTimer: NodeJS.Timeout | undefined = undefined;
 
 	/**
-	 * Initialise all required data and attach/detach events
+	 * Initialise all required data
 	 */
 	onMount(() => {
 		initializeSlides();
@@ -54,7 +54,8 @@
 	});
 
 	/**
-	 * Initialise slides-related vars on component mount
+	 * Initialise slides-related vars on component mount and window resize
+	 * Note: the component needs to be adjusted in case it has to handle dynamic change of slides
 	 */
 	const initializeSlides = () => {
 		if (isNullish(sliderFrame)) {
