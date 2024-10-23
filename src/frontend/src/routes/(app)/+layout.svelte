@@ -13,6 +13,8 @@
 	import { token } from '$lib/stores/token.store';
 	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 
+	// TODO: We should consider adding a description for the pages, as this block of code is now appearing in two places.
+	// Other areas, like the Menu, are also somewhat disorganized, with navigation logic spread across multiple locations.
 	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
@@ -35,7 +37,7 @@
 	class:md:flex-col={$authNotSignedIn}
 	class:md:h-full={$authNotSignedIn}
 >
-	<Header back={route === 'settings'} />
+	<Header />
 
 	<AuthGuard>
 		<SplitPane>
