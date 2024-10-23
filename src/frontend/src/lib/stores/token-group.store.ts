@@ -1,10 +1,7 @@
 import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
-import type { CertifiedData } from '$lib/types/store';
-import type { TokenId } from '$lib/types/token';
 
-//todo: Work with typed group id
-export type TokenGroupsExpanded = Record<TokenId, boolean>;
+export interface TokenGroupData {
+	expanded: boolean;
+}
 
-export type TokenGroupsExpandedData = CertifiedData<TokenGroupsExpanded>;
-
-export const tokenGroupStore = initCertifiedSetterStore<TokenGroupsExpandedData>();
+export const tokenGroupStore = initCertifiedSetterStore<TokenGroupData>();
