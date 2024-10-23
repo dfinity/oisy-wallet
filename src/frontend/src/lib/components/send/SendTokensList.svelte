@@ -27,7 +27,7 @@
 	<TokensSkeletons {loading}>
 		{#each tokens as token (token.id)}
 			<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
-				<TokenCardContent {token} />
+				<TokenCardContent data={token} />
 			</TokenCardWithOnClick>
 		{/each}
 
