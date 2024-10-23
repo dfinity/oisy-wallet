@@ -14,7 +14,6 @@ const dAppDescriptionSchema = z.object({
 	description: z.string(),
 	stats: z.string(),
 	logo: z.string(),
-	callToAction: z.string().optional(),
 
 	usesInternetIdentity: z.boolean(),
 	authOrigins: z.array(z.string()).optional(),
@@ -22,22 +21,25 @@ const dAppDescriptionSchema = z.object({
 	github: z.string().url().optional(),
 	youtube: z.string().url().optional(),
 	twitter: z.string().url().optional(),
-	telegram: z.string().url().optional(),
-	openChat: z.string().url().optional(),
 
 	screenshots: z.array(z.string()).optional(),
 
 	video: z.string().optional(),
 	videoContentType: z.enum(['video/webm', 'video/mp4']).optional(),
 
-	submittableId: z.string().optional(),
-
-	featured: z.boolean().optional()
+	submittableId: z.string().optional()
 });
 
-export type DappDescription = z.infer<typeof dAppDescriptionSchema>;
-export type FeaturedDappDescription = Omit<DappDescription, 'screenshots'> &
-	Required<Pick<DappDescription, 'screenshots'>>;
+const oisyDappDescriptionSchema = dAppDescriptionSchema.extend({
+	featured: z.boolean().optional(),
+	callToAction: z.string().optional(),
+	telegram: z.string().url().optional(),
+	openChat: z.string().url().optional()
+});
 
-const parseResult = z.array(dAppDescriptionSchema).safeParse(dAppDescriptionsJson);
-export const dAppDescriptions: DappDescription[] = parseResult.success ? parseResult.data : [];
+export type OisyDappDescription = z.infer<typeof oisyDappDescriptionSchema>;
+export type FeaturedOisyDappDescription = Omit<OisyDappDescription, 'screenshots'> &
+	Required<Pick<OisyDappDescription, 'screenshots'>>;
+
+const parseResult = z.array(oisyDappDescriptionSchema).safeParse(dAppDescriptionsJson);
+export const dAppDescriptions: OisyDappDescription[] = parseResult.success ? parseResult.data : [];
