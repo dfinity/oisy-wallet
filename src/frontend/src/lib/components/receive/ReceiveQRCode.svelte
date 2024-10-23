@@ -8,7 +8,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let address: string;
-	export let addressToken: Token | undefined;
+	export let addressToken: Token | undefined = undefined;
 
 	let symbol: string | undefined;
 	$: symbol = addressToken?.symbol;
