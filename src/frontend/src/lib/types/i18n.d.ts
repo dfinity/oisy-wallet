@@ -79,18 +79,18 @@ interface I18nDapps {
 	text: {
 		all_dapps: string;
 		featured: string;
-		open_dapp: string;
-		title: string;
 		sign_in: string;
+		title: string;
+		open_dapp: string;
 		submit_your_dapp: string;
 	};
 	alt: {
 		learn_more: string;
 		logo: string;
-		open_dapp: string;
-		open_twitter: string;
 		show_all: string;
 		show_tag: string;
+		open_dapp: string;
+		open_twitter: string;
 		source_code_on_github: string;
 		submit_your_dapp: string;
 		tags: string;
