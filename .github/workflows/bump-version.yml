@@ -48,6 +48,7 @@ jobs:
         git add package.json package-lock.json
         git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}"
         git push origin "$branch_name"
+        git checkout main
 
     - name: Create Pull Request
       uses: ./.github/actions/create-pr
