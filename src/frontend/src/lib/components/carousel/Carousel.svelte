@@ -3,12 +3,7 @@
 	import { onMount } from 'svelte';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
-	import {
-		updateSliderFrameVisiblePart,
-		extendCarouselSliderFrame,
-		disableTransition,
-		enableTransition
-	} from '$lib/utils/carousel.utils';
+	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
 	export let autoplay = 5000;
 	export let duration = 300;
@@ -44,30 +39,30 @@
 	let slideTransformTimer: NodeJS.Timeout | undefined = undefined;
 
 	/**
-	 * A const to be used for enabling transition animation
-	 */
-	const animationParams = {
-		easing,
-		duration
-	};
-
-	/**
 	 * Initialise all required data and attach/detach events
 	 */
 	onMount(() => {
+		initializeSlides();
 		initializeCarousel();
 		initialiseAutoplayTimer();
-
-		// Resize listener to re-calculate slide frame width
-		window.addEventListener('resize', onResize);
 
 		return () => {
 			clearAutoplayTimer();
 			clearSlideTransformTimer();
-
-			window.removeEventListener('resize', onResize);
 		};
 	});
+
+	/**
+	 * Initialise slides-related vars on component mount
+	 */
+	const initializeSlides = () => {
+		if (isNullish(sliderFrame)) {
+			return;
+		}
+
+		slides = [...sliderFrame.children];
+		totalSlides = slides.length;
+	};
 
 	/**
 	 * Build slider frame and set required variables
@@ -75,12 +70,6 @@
 	const initializeCarousel = () => {
 		if (isNullish(container) || isNullish(sliderFrame)) {
 			return;
-		}
-
-		// Save this data only on mount
-		if (isNullish(slides)) {
-			slides = [...sliderFrame.children];
-			totalSlides = slides.length;
 		}
 
 		containerWidth = container.offsetWidth;
@@ -94,7 +83,11 @@
 			slideWidth: containerWidth
 		});
 
-		goToSlide(currentSlide);
+		if (nonNullish(sliderFrame.children)) {
+			goToSlide({
+				slide: currentSlide
+			});
+		}
 	};
 
 	/**
@@ -110,10 +103,8 @@
 	 * Clear autoplay timer
 	 */
 	const clearAutoplayTimer = () => {
-		if (nonNullish(autoplayTimer)) {
-			clearInterval(autoplayTimer);
-			autoplayTimer = undefined;
-		}
+		clearInterval(autoplayTimer);
+		autoplayTimer = undefined;
 	};
 
 	/**
@@ -128,10 +119,8 @@
 	 * Clear slide transform timer
 	 */
 	const clearSlideTransformTimer = () => {
-		if (nonNullish(slideTransformTimer)) {
-			clearInterval(slideTransformTimer);
-			slideTransformTimer = undefined;
-		}
+		clearInterval(slideTransformTimer);
+		slideTransformTimer = undefined;
 	};
 
 	/**
@@ -147,14 +136,14 @@
 	const goToNextSlide = () => {
 		const nextCurrentSlide = currentSlide + 1;
 
-		enableTransition({ sliderFrame, ...animationParams });
-		goToSlide(nextCurrentSlide);
+		goToSlide({
+			slide: nextCurrentSlide
+		});
 
 		if (nextCurrentSlide >= totalSlides) {
 			// Switch to the first slide without animation
 			slideTransformTimer = setTimeout(() => {
-				disableTransition({ sliderFrame });
-				goToSlide(0);
+				goToSlide({ slide: 0, withTransition: false });
 			}, duration);
 		}
 	};
@@ -178,14 +167,17 @@
 	const goToPreviousSlide = () => {
 		const nextCurrentSlide = currentSlide - 1;
 
-		enableTransition({ sliderFrame, ...animationParams });
-		goToSlide(nextCurrentSlide);
+		goToSlide({
+			slide: nextCurrentSlide
+		});
 
 		if (nextCurrentSlide < 0) {
 			// Switch to the last slide without animation
 			slideTransformTimer = setTimeout(() => {
-				disableTransition({ sliderFrame });
-				goToSlide(totalSlides - 1);
+				goToSlide({
+					slide: totalSlides - 1,
+					withTransition: false
+				});
 			}, duration);
 		}
 	};
@@ -208,26 +200,34 @@
 	 */
 	const onIndicatorClick = (nextSlideIndex: number) => {
 		resetAutoplayTimer();
-		enableTransition({ sliderFrame, ...animationParams });
-		goToSlide(nextSlideIndex);
+		goToSlide({ slide: nextSlideIndex });
 	};
 
 	/**
 	 * Switch to the provided slide
 	 */
-	const goToSlide = (nextSlideIndex: number) => {
-		currentSlide = nextSlideIndex;
+	const goToSlide = ({
+		slide,
+		withTransition = true
+	}: {
+		slide: number;
+		withTransition?: boolean;
+	}) => {
+		currentSlide = slide;
 
 		// We add +1 here to scroll frame to the end of the current slide
 		const offset = (currentSlide + 1) * containerWidth;
-		updateSliderFrameVisiblePart({ sliderFrame, animateTo: -offset });
+		moveSlider({ sliderFrame, animateTo: -offset, withTransition, duration, easing });
 	};
 </script>
+
+<!-- Resize listener to re-calculate slide frame width -->
+<svelte:window on:resize={onResize} />
 
 <div class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white p-4 pb-16 shadow`}>
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div class="flex" bind:this={sliderFrame}>
-			<slot></slot>
+			<slot />
 		</div>
 	</div>
 	<div class="absolute bottom-4 left-0 flex w-full justify-center">
