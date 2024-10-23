@@ -31,6 +31,7 @@ interface I18nNavigation {
 	text: {
 		tokens: string;
 		settings: string;
+		dapp_explorer: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -40,6 +41,7 @@ interface I18nNavigation {
 	alt: {
 		tokens: string;
 		settings: string;
+		dapp_explorer: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
