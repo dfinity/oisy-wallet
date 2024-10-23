@@ -24,7 +24,7 @@
 				: 'tokens';
 </script>
 
-<div class="box-content flex h-full w-full flex-col justify-between py-3 pl-4 sm:pl-8">
+<div class="box-content flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
 	<div class="flex flex-col gap-3">
 		<NavigationItem
 			href="/"
