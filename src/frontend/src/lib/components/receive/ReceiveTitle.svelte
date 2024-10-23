@@ -13,5 +13,5 @@
 {isNullish(symbol)
 	? $i18n.receive.text.receive
 	: replacePlaceholders($i18n.receive.text.receive_token, {
-			$token: addressToken?.symbol ?? ''
+			$token: symbol
 		})}
