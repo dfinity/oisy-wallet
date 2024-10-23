@@ -51,6 +51,7 @@
 				<ImgBanner
 					fitHeight={true}
 					height="100%"
+					width="100%"
 					src={screenshots[0]}
 					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: name })}
 				/>
