@@ -7,9 +7,11 @@ import {
 	calculateTokenUsdBalance,
 	getMaxTransactionAmount,
 	groupTokensByTwin,
-	mapTokenUi
+	mapTokenUi,
+	sumTokenBalances,
+	sumTokenUsdBalances
 } from '$lib/utils/token.utils';
-import { $balances, bn3 } from '$tests/mocks/balances.mock';
+import { $balances, bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
 import { $exchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
@@ -266,6 +268,93 @@ describe('mapTokenUi', () => {
 			balance: null,
 			usdBalance: 0
 		});
+	});
+});
+
+describe('sumTokenBalances', () => {
+	// We mock ETH to be a twin of ICP
+	const token1: TokenUi = { ...ICP_TOKEN, balance: bn1, decimals: 18 };
+	const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2, decimals: 18 };
+
+	it('should sum token balances when both balances are non-null and decimals match', () => {
+		const result = sumTokenBalances([token1, token2]);
+
+		expect(result).toStrictEqual(bn1.add(bn2));
+	});
+
+	it('should return null when decimals do not match', () => {
+		expect(sumTokenBalances([token1, { ...token2, decimals: 8 }])).toBeNull();
+	});
+
+	it('should return the first balance when the second balance is nullish', () => {
+		expect(sumTokenBalances([token1, { ...token2, balance: null }])).toBe(bn1);
+
+		expect(sumTokenBalances([token1, { ...token2, balance: undefined }])).toBe(bn1);
+	});
+
+	it('should return the second balance when the first balance is nullish', () => {
+		expect(sumTokenBalances([{ ...token1, balance: null }, token2])).toBe(bn2);
+
+		expect(sumTokenBalances([{ ...token1, balance: undefined }, token2])).toBe(bn2);
+	});
+
+	it('should return the first balance nullish value when both balances are nullish', () => {
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: null },
+				{ ...token2, balance: null }
+			])
+		).toBeNull();
+
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: null },
+				{ ...token2, balance: undefined }
+			])
+		).toBeNull();
+
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: undefined },
+				{ ...token2, balance: null }
+			])
+		).toBeUndefined();
+
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: undefined },
+				{ ...token2, balance: undefined }
+			])
+		).toBeUndefined();
+	});
+});
+
+describe('sumTokenUsdBalances', () => {
+	// We mock ETH to be a twin of ICP
+	const token1: TokenUi = { ...ICP_TOKEN, usdBalance: 100 };
+	const token2: TokenUi = { ...ETHEREUM_TOKEN, usdBalance: 200 };
+
+	it('should sum token balances when both balances are non-null', () => {
+		const result = sumTokenUsdBalances([token1, token2]);
+
+		expect(result).toEqual(300);
+	});
+
+	it('should return the first balance when the second balance is nullish', () => {
+		expect(sumTokenUsdBalances([token1, { ...token2, usdBalance: undefined }])).toBe(100);
+	});
+
+	it('should return the second balance when the first balance is nullish', () => {
+		expect(sumTokenUsdBalances([{ ...token1, usdBalance: undefined }, token2])).toBe(200);
+	});
+
+	it('should return undefined when both balances are nullish', () => {
+		expect(
+			sumTokenUsdBalances([
+				{ ...token1, usdBalance: undefined },
+				{ ...token2, usdBalance: undefined }
+			])
+		).toBeUndefined();
 	});
 });
 
