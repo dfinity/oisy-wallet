@@ -267,7 +267,9 @@ describe('mapTokenUi', () => {
 			usdBalance: 0
 		});
 	});
+});
 
+describe('groupTokensByTwin', () => {
 	it('should group tokens with matching twinTokenSymbol', () => {
 		const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 		expect(groupedTokens).toHaveLength(3);

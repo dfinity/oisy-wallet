@@ -188,6 +188,7 @@ const createTokenGroup = ({
 		decimals: nativeToken.decimals,
 		icon: nativeToken.icon
 	},
+	nativeToken,
 	nativeNetwork: nativeToken.network,
 	tokens: [nativeToken, twinToken]
 });
