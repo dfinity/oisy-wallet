@@ -7,8 +7,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionAddress, Address } from '$lib/types/address';
+	import type { Token } from '$lib/types/token';
 
 	export let address: OptionAddress<Address> = undefined;
+	export let addressToken: Token | undefined = undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -24,7 +26,7 @@
 			/>
 		</p>
 
-		<ReceiveQRCode address={address ?? ''} />
+		<ReceiveQRCode address={address ?? ''} {addressToken} />
 
 		<slot name="content" />
 
