@@ -419,6 +419,7 @@ interface I18nTokens {
 		open_etherscan: string;
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
+		token_group_number: string;
 	};
 	placeholder: { enter_contract_address: string; search_token: string };
 	warning: { trust_token: string };
