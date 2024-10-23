@@ -272,7 +272,7 @@ describe('mapTokenUi', () => {
 });
 
 describe('sumTokenBalances', () => {
-	// We fake ETH to be a twin of ICP
+	// We mock ETH to be a twin of ICP
 	const token1: TokenUi = { ...ICP_TOKEN, balance: bn1, decimals: 18 };
 	const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2, decimals: 18 };
 
@@ -330,7 +330,7 @@ describe('sumTokenBalances', () => {
 });
 
 describe('sumTokenUsdBalances', () => {
-	// We fake ETH to be a twin of ICP
+	// We mock ETH to be a twin of ICP
 	const token1: TokenUi = { ...ICP_TOKEN, usdBalance: 100 };
 	const token2: TokenUi = { ...ETHEREUM_TOKEN, usdBalance: 200 };
 
