@@ -2,10 +2,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let token: Token;
+	export let token: CardData;
 </script>
 
 <div class="flex flex-row items-center justify-between gap-2">

@@ -3,10 +3,10 @@
 	import TokenBalanceSkeleton from '$lib/components/tokens/TokenBalanceSkeleton.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
-	import type { TokenUi } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let token: TokenUi;
+	export let token: CardData;
 </script>
 
 <TokenBalanceSkeleton {token}>

@@ -4,9 +4,9 @@
 	import TokenSymbol from '$lib/components/tokens/TokenSymbol.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
-	import type { Token } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 
-	export let token: Token;
+	export let token: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 </script>
 

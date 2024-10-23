@@ -1,8 +1,8 @@
 <script lang="ts">
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import type { TokenUi } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 
-	export let token: TokenUi;
+	export let token: CardData;
 </script>
 
 {#if token.balance === undefined}

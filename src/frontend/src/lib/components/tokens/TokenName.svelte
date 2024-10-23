@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import Tag from '$lib/components/ui/Tag.svelte';
-	import type { Token } from '$lib/types/token';
+	import type { CardData } from '$lib/types/token-card';
 
-	export let token: Token;
+	export let token: CardData;
 
 	const ariaLabel = nonNullish(token.oisyName)
 		? `${token.oisyName.prefix ?? ''}${token.oisyName.oisyName}`
