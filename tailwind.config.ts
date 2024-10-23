@@ -1,6 +1,6 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
+import type { Config } from 'tailwindcss/types/config';
 
-/** @type {import('tailwindcss').Config} */
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
@@ -73,4 +73,4 @@ export default {
 		}
 	},
 	plugins: []
-};
+} satisfies Config;
