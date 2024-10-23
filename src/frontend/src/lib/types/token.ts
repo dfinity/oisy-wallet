@@ -26,11 +26,16 @@ export interface TokenMetadata {
 }
 
 export interface TokenAppearance {
+	oisySymbol?: TokenOisySymbol;
 	oisyName?: TokenOisyName;
 }
 
+export interface TokenOisySymbol {
+	oisySymbol: string;
+}
+
 export interface TokenOisyName {
-	prefix: string | undefined;
+	prefix?: string;
 	oisyName: string;
 }
 
@@ -60,7 +65,7 @@ export type OptionTokenStandard = Option<TokenStandard>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
-interface TokenFinancialData {
+export interface TokenFinancialData {
 	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
 }
@@ -69,8 +74,10 @@ export type TokenUi = Token & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;
 
+// TODO: remove header and nativeNetwork, since we added nativeToken that has all their data, and they became redundant
 export interface TokenGroupUi {
 	header: TokenMetadata;
+	nativeToken: TokenUi;
 	nativeNetwork: Network;
 	tokens: TokenUi[];
 }
