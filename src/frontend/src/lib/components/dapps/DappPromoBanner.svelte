@@ -2,10 +2,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { FeaturedDappDescription } from '$lib/types/dappDescription';
+	import type { FeaturedOisyDappDescription } from '$lib/types/oisyDappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: FeaturedDappDescription;
+	export let dAppDescription: FeaturedOisyDappDescription;
 </script>
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
