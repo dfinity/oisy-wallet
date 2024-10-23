@@ -1,6 +1,6 @@
 import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
-import type { TokenId } from '$lib/types/token';
 import type { CertifiedData } from '$lib/types/store';
+import type { TokenId } from '$lib/types/token';
 
 //todo: Work with typed group id
 export type TokenGroupsExpanded = Record<TokenId, boolean>;
