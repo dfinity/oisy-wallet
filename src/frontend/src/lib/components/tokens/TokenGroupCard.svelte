@@ -10,10 +10,12 @@
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
-	import { groupsStore } from '$lib/stores/groups.store.js';
-	import type { TokenGroupUi, TokenUi } from '$lib/types/token';
+	import type { TokenGroupUi, TokenId, TokenUi } from '$lib/types/token';
+	import { tokenGroupStore } from '$lib/stores/token-group.store';
 
 	export let tokenGroup: TokenGroupUi;
+
+	let myId: TokenId = tokenGroup.id as TokenId;
 
 	$: totalBalance = tokenGroup.tokens.reduce(
 		(sum, token: TokenUi) => sum.add(token.balance ?? BigNumber.from(0)),
@@ -30,16 +32,16 @@
 		usdBalance: totalUsdBalance
 	};
 
-	$: groups = $groupsStore ?? {};
-	$: expanded = groups[tokenGroup.id]?.expanded ?? false;
+	$: groups = $tokenGroupStore ?? {};
+	$: expanded = groups[myId]?.expanded ?? false;
 
 	const toggleExpand = (toggle: boolean) =>
-		groupsStore.set({ key: 'groups', value: { ...groups, [tokenGroup.id]: { expanded: toggle }} });
+		tokenGroupStore.set({ tokenId: myId, data: {expanded: toggle} });
 
 </script>
 
 <TokenCardWithOnClick
-	on:click={() => (toggleExpand(!expanded))}
+on:click={() => toggleExpand(!expanded)}
 	styleClass="group !mb-0 flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8 {expanded
 		? 'bg-white rounded-b-none'
 		: ''}"
