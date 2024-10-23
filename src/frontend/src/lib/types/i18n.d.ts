@@ -90,6 +90,8 @@ interface I18nDapps {
 		show_all: string;
 		show_tag: string;
 		open_dapp: string;
+		open_telegram: string;
+		open_open_chat: string;
 		open_twitter: string;
 		source_code_on_github: string;
 		submit_your_dapp: string;
@@ -192,7 +194,7 @@ interface I18nNetworks {
 }
 
 interface I18nReceive {
-	text: { receive: string; address: string };
+	text: { receive: string; address: string; receive_token: string };
 	icp: {
 		text: {
 			account_id: string;
