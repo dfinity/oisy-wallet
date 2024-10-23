@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { ComponentType } from 'svelte';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
+	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
@@ -45,7 +46,13 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose testId={RECEIVE_TOKENS_MODAL}>
-	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
+	<svelte:fragment slot="title">
+		{#if currentStep?.name === steps[1].name}
+			<ReceiveTitle addressToken={qrCodeAddressToken} />
+		{:else}
+			{$i18n.receive.text.receive}
+		{/if}</svelte:fragment
+	>
 
 	{#if currentStep?.name === steps[1].name}
 		<ReceiveAddressQRCode

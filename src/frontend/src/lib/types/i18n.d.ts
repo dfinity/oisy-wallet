@@ -192,7 +192,7 @@ interface I18nNetworks {
 }
 
 interface I18nReceive {
-	text: { receive: string; address: string };
+	text: { receive: string; address: string; receive_token: string };
 	icp: {
 		text: {
 			account_id: string;
