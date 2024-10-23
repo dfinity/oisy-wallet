@@ -9,7 +9,8 @@ export interface CertifiedStore<K extends symbol, T> extends Readable<CertifiedS
 	reset: (id: K) => void;
 }
 
-export const initCertifiedStore = <K extends symbol, T>(): CertifiedStore<K, T> & WritableUpdateStore<T> => {
+export const initCertifiedStore = <K extends symbol, T>(): CertifiedStore<K, T> &
+	WritableUpdateStore<T> => {
 	const { update, subscribe } = writable<CertifiedStoreData<T>>(undefined);
 
 	return {

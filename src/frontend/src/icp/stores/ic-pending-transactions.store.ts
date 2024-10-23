@@ -9,7 +9,8 @@ export type IcCertifiedPendingTransaction = IcCertifiedTransaction;
 
 export type IcPendingTransactionsData = IcCertifiedPendingTransaction[];
 
-export interface IcPendingTransactionsStore extends CertifiedStore<TokenId, IcPendingTransactionsData> {
+export interface IcPendingTransactionsStore
+	extends CertifiedStore<TokenId, IcPendingTransactionsData> {
 	prepend: (params: { tokenId: TokenId; transaction: CertifiedData<IcTransactionUi> }) => void;
 	set: (params: { tokenId: TokenId; data: IcPendingTransactionsData }) => void;
 }

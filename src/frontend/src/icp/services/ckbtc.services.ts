@@ -166,7 +166,8 @@ const loadData: LoadData = async <T>({
 				identity,
 				certified
 			}),
-		onLoad: ({ response: data, certified }) => store.set({ id: tokenId, data: { data, certified } }),
+		onLoad: ({ response: data, certified }) =>
+			store.set({ id: tokenId, data: { data, certified } }),
 		onCertifiedError: ({ error: err }) => {
 			store.reset(tokenId);
 
