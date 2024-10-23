@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalBtcReceive } from '$lib/derived/modal.derived';
@@ -13,6 +14,7 @@
 	} from '$lib/stores/address.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { BtcAddress } from '$lib/types/address';
+	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
 	let addressData: StorageAddressData<BtcAddress>;
@@ -21,6 +23,13 @@
 		: isNetworkIdBTCRegtest($networkId)
 			? $btcAddressRegtestStore
 			: $btcAddressMainnetStore;
+
+	let addressToken: Token;
+	$: addressToken = isNetworkIdBTCTestnet($networkId)
+		? BTC_TESTNET_TOKEN
+		: isNetworkIdBTCRegtest($networkId)
+			? BTC_REGTEST_TOKEN
+			: BTC_MAINNET_TOKEN;
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
@@ -38,5 +47,5 @@
 </script>
 
 <ReceiveButtonWithModal open={openReceive} isOpen={$modalBtcReceive}>
-	<ReceiveModal slot="modal" address={addressData?.data} />
+	<ReceiveModal slot="modal" address={addressData?.data} {addressToken} />
 </ReceiveButtonWithModal>
