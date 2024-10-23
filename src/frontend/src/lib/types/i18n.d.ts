@@ -5,6 +5,8 @@
 interface I18nCore {
 	text: {
 		cancel: string;
+		decimals: string;
+		amount: string;
 		next: string;
 		save: string;
 		back: string;
@@ -13,8 +15,6 @@ interface I18nCore {
 		refresh: string;
 		name: string;
 		symbol: string;
-		decimals: string;
-		amount: string;
 		max: string;
 		more: string;
 		reject: string;
@@ -35,7 +35,6 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		changelog: string;
 		submit_ticket: string;
 	};
 	alt: {

@@ -387,7 +387,8 @@
 			"buy_dev": "Buy (Dev Environment)"
 		},
 		"onramper": {
-			"title": "Buy through Onramper"
+			"title": "Buy through Onramper",
+			"this_is_a_test": "This is a test"
 		}
 	},
 	"tokens": {
