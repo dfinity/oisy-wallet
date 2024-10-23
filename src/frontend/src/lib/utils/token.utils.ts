@@ -9,9 +9,9 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	RequiredTokenWithLinkedData,
 	Token,
-	TokenGroupUi,
 	TokenStandard,
 	TokenUi,
+	TokenUiGroup,
 	TokenUiOrGroupUi
 } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
@@ -186,14 +186,14 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
 	'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
 
 /**
- * Type guard to check if an object is of type TokenGroupUi.
+ * Type guard to check if an object is of type TokenUiGroup.
  *
  * @param tokenUiOrGroupUi - The object to check.
- * @returns A boolean indicating whether the object is a TokenGroupUi.
+ * @returns A boolean indicating whether the object is a TokenUiGroup.
  */
-export const isTokenGroupUi = (
+export const isTokenUiGroup = (
 	tokenUiOrGroupUi: TokenUiOrGroupUi
-): tokenUiOrGroupUi is TokenGroupUi =>
+): tokenUiOrGroupUi is TokenUiGroup =>
 	typeof tokenUiOrGroupUi === 'object' &&
 	nonNullish(tokenUiOrGroupUi) &&
 	'header' in tokenUiOrGroupUi &&
@@ -201,13 +201,13 @@ export const isTokenGroupUi = (
 	'tokens' in tokenUiOrGroupUi;
 
 /**
- * Factory function to create a TokenGroupUi based on the provided tokens and network details.
+ * Factory function to create a TokenUiGroup based on the provided tokens and network details.
  * This function creates a group header and adds both the native token and the twin token to the group's tokens array.
  *
  * @param nativeToken - The native token used for the group, typically the original token or the one from the selected network.
  * @param twinToken - The twin token to be grouped with the native token, usually representing the same asset on a different network.
  *
- * @returns A TokenGroupUi object that includes a header with network and symbol information and contains both the native and twin tokens.
+ * @returns A TokenUiGroup object that includes a header with network and symbol information and contains both the native and twin tokens.
  */
 const createTokenGroup = ({
 	nativeToken,
@@ -215,7 +215,7 @@ const createTokenGroup = ({
 }: {
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
-}): TokenGroupUi => ({
+}): TokenUiGroup => ({
 	header: {
 		name: nativeToken.network.name,
 		symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
@@ -237,7 +237,7 @@ const createTokenGroup = ({
  * @param tokens - The list of TokenUi objects to group. Each token may or may not have a twinTokenSymbol.
  *                 Tokens with a twinTokenSymbol are grouped together.
  *
- * @returns A new list where tokens with twinTokenSymbols are grouped into a TokenGroupUi,
+ * @returns A new list where tokens with twinTokenSymbols are grouped into a TokenUiGroup,
  *          and tokens without twins remain in their original place.
  *          The group replaces the first token of the group in the list.
  */
@@ -265,6 +265,6 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	});
 
 	return mappedTokensWithGroups.filter(
-		(t) => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol)
+		(t) => isTokenUiGroup(t) || !groupedTokenTwins.has(t.symbol)
 	);
 };
