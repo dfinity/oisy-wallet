@@ -12,6 +12,7 @@
 		btcAddressTestnetStore,
 		type StorageAddressData
 	} from '$lib/stores/address.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { BtcAddress } from '$lib/types/address';
 	import type { Token } from '$lib/types/token';
@@ -47,5 +48,12 @@
 </script>
 
 <ReceiveButtonWithModal open={openReceive} isOpen={$modalBtcReceive}>
-	<ReceiveModal slot="modal" address={addressData?.data} {addressToken} />
+	<ReceiveModal
+		slot="modal"
+		address={addressData?.data}
+		{addressToken}
+		network={addressToken.network}
+		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+	/>
 </ReceiveButtonWithModal>

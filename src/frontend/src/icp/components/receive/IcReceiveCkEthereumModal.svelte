@@ -114,6 +114,9 @@
 				on:icBack={modal.back}
 				address={$icrcAccountIdentifierText ?? ''}
 				addressToken={ICP_TOKEN}
+				network={ICP_NETWORK}
+				qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
+				copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 			/>
 		{:else}
 			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />

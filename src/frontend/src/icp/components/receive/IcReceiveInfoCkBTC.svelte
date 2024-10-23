@@ -29,7 +29,9 @@
 		dispatch('icQRCode', {
 			address,
 			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
-			addressToken: twinToken
+			addressToken: twinToken,
+			qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 		});
 
 	let btcAddress: string | undefined = undefined;

@@ -12,12 +12,13 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (details: { address: string; addressLabel: string }) =>
+	const displayQRCode = (details: Omit<ReceiveQRCode, 'addressToken'>) =>
 		dispatch('icQRCode', {
 			...details,
 			addressToken: ICP_TOKEN
@@ -34,7 +35,9 @@
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
-				addressLabel: $i18n.wallet.text.wallet_address
+				addressLabel: $i18n.wallet.text.wallet_address,
+				qrCodeAriaLabel: $i18n.wallet.text.display_wallet_address_qr,
+				copyAriaLabel: $i18n.wallet.text.wallet_address_copied
 			})}
 	>
 		<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
@@ -54,7 +57,9 @@
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.account_id
+				addressLabel: $i18n.receive.icp.text.account_id,
+				qrCodeAriaLabel: $i18n.receive.icp.text.display_account_id_qr,
+				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
 			})}
 	>
 		<svelte:fragment slot="title">{$i18n.receive.icp.text.account_id}</svelte:fragment>

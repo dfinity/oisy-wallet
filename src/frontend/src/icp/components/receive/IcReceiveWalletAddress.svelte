@@ -18,7 +18,9 @@
 		dispatch('icQRCode', {
 			address,
 			addressLabel: $i18n.wallet.text.wallet_address,
-			addressToken: $token
+			addressToken: $token,
+			qrCodeAriaLabel: $i18n.wallet.text.display_wallet_address_qr,
+			copyAriaLabel: $i18n.wallet.text.wallet_address_copied
 		});
 </script>
 

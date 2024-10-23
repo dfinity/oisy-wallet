@@ -1,23 +1,34 @@
 <script lang="ts">
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address, OptionAddress } from '$lib/types/address';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 
 	export let address: OptionAddress<Address>;
 	export let addressLabel: string | undefined = undefined;
 	export let addressToken: Token | undefined;
+
 	export let testId: string | undefined = undefined;
+
+	export let network: Network;
+	export let qrCodeAriaLabel: string;
+	export let copyAriaLabel: string;
+
+	// TODO: replace property with mandatory property ReceiveQRCode
 </script>
 
-<p class="text-center font-bold">{addressLabel ?? $i18n.wallet.text.address}:</p>
-<p class="mb-4 px-2 text-center font-normal">
-	<output class="break-all" data-tid={testId}>{address}</output><Copy
-		inline
-		value={address ?? ''}
-		text={$i18n.wallet.text.address_copied}
-	/>
-</p>
-
 <ReceiveQRCode address={address ?? ''} {addressToken} />
+
+<ReceiveAddress
+	labelRef="address"
+	address={address ?? ''}
+	{testId}
+	{network}
+	{qrCodeAriaLabel}
+	{copyAriaLabel}
+>
+	<svelte:fragment slot="title">{addressLabel ?? $i18n.wallet.text.address}</svelte:fragment>
+	<slot name="text" slot="text" />
+</ReceiveAddress>

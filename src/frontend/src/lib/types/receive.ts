@@ -4,4 +4,6 @@ export interface ReceiveQRCode {
 	address: string;
 	addressLabel?: string;
 	addressToken: Token;
+	qrCodeAriaLabel: string;
+	copyAriaLabel: string;
 }

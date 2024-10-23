@@ -12,6 +12,7 @@
 	export let network: Network;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
+	export let testId: string | undefined = undefined;
 
 	let text = false;
 	$: text = nonNullish($$slots.text);
@@ -30,14 +31,14 @@
 		<div class="flex items-center justify-between gap-6 rounded-lg bg-zumthor px-3 py-2">
 			<div class="h-8 w-8">
 				<Logo
-					src={network.icon}
+					src={network.iconBW}
 					alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
 					color="white"
 					size="sm"
 				/>
 			</div>
 
-			<output id="ic-wallet-address" class="break-all">{address}</output>
+			<output id="ic-wallet-address" class="break-all" data-tid={testId}>{address}</output>
 
 			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} />
 		</div>

@@ -5,11 +5,16 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 
 	export let address: undefined | string;
 	export let addressLabel: string | undefined = undefined;
 	export let addressToken: Token | undefined;
+
+	export let network: Network;
+	export let qrCodeAriaLabel: string;
+	export let copyAriaLabel: string;
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -20,7 +25,13 @@
 		{addressLabel}
 		{addressToken}
 		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
-	/>
+		{network}
+		{qrCodeAriaLabel}
+		{copyAriaLabel}
+		on:click
+	>
+		<slot name="text" slot="text" />
+	</ReceiveAddressQRCodeContent>
 
 	<Button
 		colorStyle="secondary"

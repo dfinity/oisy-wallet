@@ -23,7 +23,7 @@
 
 <svelte:window on:resize={rerender} />
 
-<div in:fade class="qr-container p-4" class:opacity-0={!render}>
+<div in:fade class="qr-container px-4 pb-4" class:opacity-0={!render}>
 	{#if render}
 		<article
 			aria-label={replacePlaceholders($i18n.wallet.alt.qrcode_address, {

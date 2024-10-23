@@ -37,7 +37,9 @@
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.principal,
-				addressToken: ICP_TOKEN
+				addressToken: ICP_TOKEN,
+				qrCodeAriaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr,
+				copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied
 			})}
 		address={$icrcAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
@@ -57,7 +59,9 @@
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.icp_account,
-				addressToken: ICP_TOKEN
+				addressToken: ICP_TOKEN,
+				qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr,
+				copyAriaLabel: $i18n.receive.icp.text.icp_account_copied
 			})}
 		address={$icpAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
@@ -83,7 +87,9 @@
 				displayQRCode({
 					address: $btcAddressMainnet ?? '',
 					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
-					addressToken: BTC_MAINNET_TOKEN
+					addressToken: BTC_MAINNET_TOKEN,
+					qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+					copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 				})}
 			address={$btcAddressMainnet}
 			token={BTC_MAINNET_TOKEN}
@@ -100,7 +106,9 @@
 					displayQRCode({
 						address: $btcAddressTestnet ?? '',
 						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
-						addressToken: BTC_TESTNET_TOKEN
+						addressToken: BTC_TESTNET_TOKEN,
+						qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+						copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 					})}
 				address={$btcAddressTestnet}
 				token={BTC_TESTNET_TOKEN}
@@ -117,7 +125,9 @@
 						displayQRCode({
 							address: $btcAddressRegtest ?? '',
 							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
-							addressToken: BTC_REGTEST_TOKEN
+							addressToken: BTC_REGTEST_TOKEN,
+							qrCodeAriaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+							copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 						})}
 					address={$btcAddressRegtest}
 					token={BTC_REGTEST_TOKEN}
