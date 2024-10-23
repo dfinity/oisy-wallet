@@ -5,7 +5,7 @@
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import {
 		updateSliderFrameVisiblePart,
-		buildCarouselSliderFrame,
+		extendCarouselSliderFrame,
 		disableTransition,
 		enableTransition
 	} from '$lib/utils/carousel.utils';
@@ -73,26 +73,26 @@
 	 * Build slider frame and set required variables
 	 */
 	const initializeCarousel = () => {
-		if (isNullish(container)) {
+		if (isNullish(container) || isNullish(sliderFrame)) {
 			return;
 		}
 
 		// Save this data only on mount
 		if (isNullish(slides)) {
-			slides = [...container.children];
+			slides = [...sliderFrame.children];
 			totalSlides = slides.length;
 		}
 
 		containerWidth = container.offsetWidth;
 
-		sliderFrame = buildCarouselSliderFrame({
+		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
+		sliderFrame.innerHTML = '';
+
+		extendCarouselSliderFrame({
+			sliderFrame,
 			slides,
 			slideWidth: containerWidth
 		});
-
-		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
-		container.innerHTML = '';
-		container.appendChild(sliderFrame);
 
 		goToSlide(currentSlide);
 	};
@@ -225,8 +225,10 @@
 </script>
 
 <div class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white p-4 pb-16 shadow`}>
-	<div class="overflow-hidden" bind:this={container}>
-		<slot></slot>
+	<div class="w-full overflow-hidden" bind:this={container}>
+		<div class="flex" bind:this={sliderFrame}>
+			<slot></slot>
+		</div>
 	</div>
 	<div class="absolute bottom-4 left-0 flex w-full justify-center">
 		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
