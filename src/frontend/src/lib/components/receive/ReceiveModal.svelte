@@ -13,8 +13,8 @@
 	export let addressToken: Token | undefined = undefined;
 
 	export let network: Network;
-	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
+	export let qrCodeAriaLabel: string;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -25,8 +25,8 @@
 			{address}
 			{addressToken}
 			{network}
-			{qrCodeAriaLabel}
 			{copyAriaLabel}
+			{qrCodeAriaLabel}
 		>
 			<slot name="text" slot="text" />
 		</ReceiveAddressQRCodeContent>

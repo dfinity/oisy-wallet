@@ -7,3 +7,7 @@ export interface ReceiveQRCode {
 	qrCodeAriaLabel: string;
 	copyAriaLabel: string;
 }
+
+export type ReceiveQRCodeAction =
+	| { enabled: true; label: string; testId?: string }
+	| { enabled: false };

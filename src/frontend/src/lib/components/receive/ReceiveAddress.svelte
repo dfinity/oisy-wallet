@@ -5,6 +5,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let labelRef: string;
@@ -16,6 +17,9 @@
 
 	let text = false;
 	$: text = nonNullish($$slots.text);
+
+	let qrCodeAction: ReceiveQRCodeAction;
+	$: qrCodeAction = { enabled: true, label: qrCodeAriaLabel };
 </script>
 
 <div>
@@ -40,7 +44,7 @@
 
 			<output id="ic-wallet-address" class="break-all" data-tid={testId}>{address}</output>
 
-			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} />
+			<ReceiveActions on:click {address} {copyAriaLabel} {qrCodeAction} />
 		</div>
 
 		<slot />

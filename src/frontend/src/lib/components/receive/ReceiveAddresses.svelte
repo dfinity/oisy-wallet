@@ -149,7 +149,9 @@
 			displayQRCode({
 				address: $ethAddress ?? '',
 				addressLabel: $i18n.receive.ethereum.text.ethereum_address,
-				addressToken: ETHEREUM_TOKEN
+				addressToken: ETHEREUM_TOKEN,
+				qrCodeAriaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr,
+				copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied
 			})}
 		address={$ethAddress ?? ''}
 		token={ETHEREUM_TOKEN}
