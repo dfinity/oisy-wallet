@@ -8,6 +8,9 @@
 	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
+
+	export let token: Token;
 
 	const isDisabled = (): boolean => $ethAddressNotCertified || $metamaskNotInitialized;
 
@@ -25,7 +28,7 @@
 </script>
 
 <ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
-	<ReceiveModal slot="modal" address={$networkAddress}>
+	<ReceiveModal slot="modal" address={$networkAddress} addressToken={token}>
 		<svelte:fragment slot="content">
 			{#if $networkEthereum}
 				<EthReceiveMetamask />

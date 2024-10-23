@@ -36,6 +36,7 @@
 		"text": {
 			"tokens": "Assets",
 			"settings": "Settings",
+			"dapp_explorer": "Explore",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -45,6 +46,7 @@
 		"alt": {
 			"tokens": "Go to the assets view",
 			"settings": "Open your settings",
+			"dapp_explorer": "Open dapp explorer",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -88,7 +90,8 @@
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
 			"title": "Explore Web3 Ecosystem",
-			"open_dapp": "Open the dapp $dAppname"
+			"open_dapp": "Open the dapp $dAppname",
+			"submit_your_dapp": "Submit your dapp"
 		},
 		"alt": {
 			"learn_more": "Learn more about $dAppname",
@@ -98,6 +101,7 @@
 			"open_dapp": "Open the app $dAppname",
 			"open_twitter": "Open the $dAppname X/Twitter feed",
 			"source_code_on_github": "View source code of $dAppname on github",
+			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
 			"tags": "Tags related to $dAppname",
 			"website": "Image of $dAppname"
 		}
