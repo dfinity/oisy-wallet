@@ -7,6 +7,7 @@ export const LOGIN_BUTTON = 'login-button';
 export const LOADER_MODAL = 'loader-modal';
 
 export const TOKEN_CARD = 'token-card';
+export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
 
 export const ABOUT_WHAT_MODAL_OPEN_BUTTON = 'about-what-modal-open-button';

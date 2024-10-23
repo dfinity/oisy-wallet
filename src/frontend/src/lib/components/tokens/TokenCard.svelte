@@ -3,13 +3,14 @@
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import TokenSymbol from '$lib/components/tokens/TokenSymbol.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
+	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
+	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 </script>
 
-<Card noMargin testId={`${TOKEN_CARD}-${token.symbol}`}>
+<Card noMargin testId={`${testIdPrefix}-${token.symbol}`}>
 	<TokenSymbol {token} />
 
 	<TokenName {token} slot="description" />
