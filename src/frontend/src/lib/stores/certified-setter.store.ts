@@ -3,22 +3,21 @@ import {
 	type CertifiedStore,
 	type WritableUpdateStore
 } from '$lib/stores/certified.store';
-import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
-export interface CertifiedSetterStoreStore<T> extends CertifiedStore<T> {
-	set: (params: { tokenId: TokenId; data: T }) => void;
+export interface CertifiedSetterStoreStore<K extends symbol, T> extends CertifiedStore<K, T> {
+	set: (params: { id: K; data: T }) => void;
 }
 
-export const initCertifiedSetterStore = <T>(): CertifiedSetterStoreStore<T> &
+export const initCertifiedSetterStore = <K extends symbol, T>(): CertifiedSetterStoreStore<K, T> &
 	WritableUpdateStore<T> => {
-	const { subscribe, update, reset } = initCertifiedStore<T>();
+	const { subscribe, update, reset } = initCertifiedStore<K, T>();
 
 	return {
-		set: ({ tokenId, data }: { tokenId: TokenId; data: T }) =>
+		set: ({ id, data }: { id: K; data: T }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
-				[tokenId]: data
+				[id]: data
 			})),
 		update,
 		reset,
