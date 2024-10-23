@@ -9,7 +9,7 @@
 </script>
 
 <div class="flex flex-row items-center justify-between gap-2">
-	{token.symbol}
+	{nonNullish(token.oisySymbol) ? token.oisySymbol.oisySymbol : token.symbol}
 
 	{#if nonNullish(token.network.iconBW)}
 		<Logo

@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_TOKEN } from '$env/tokens.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -109,7 +110,11 @@
 				on:icConvert={() => modal.set(4)}
 			/>
 		{:else if currentStep?.name === steps[1].name}
-			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
+			<ReceiveAddressQRCode
+				on:icBack={modal.back}
+				address={$icrcAccountIdentifierText ?? ''}
+				addressToken={ICP_TOKEN}
+			/>
 		{:else}
 			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
 		{/if}
