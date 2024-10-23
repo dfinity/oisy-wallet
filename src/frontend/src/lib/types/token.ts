@@ -26,11 +26,16 @@ export interface TokenMetadata {
 }
 
 export interface TokenAppearance {
+	oisySymbol?: TokenOisySymbol;
 	oisyName?: TokenOisyName;
 }
 
+export interface TokenOisySymbol {
+	oisySymbol: string;
+}
+
 export interface TokenOisyName {
-	prefix: string | undefined;
+	prefix?: string;
 	oisyName: string;
 }
 
