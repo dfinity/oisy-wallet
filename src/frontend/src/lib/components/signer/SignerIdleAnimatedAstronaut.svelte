@@ -19,16 +19,6 @@
 </svg>
 
 <style lang="scss">
-	@keyframes blink {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0;
-		}
-	}
-
 	@keyframes moveInnerArea {
 		0% {
 			transform: translateX(0);
@@ -68,16 +58,6 @@
 		}
 		100% {
 			transform: translateX(0) scaleY(1);
-		}
-	}
-
-	@keyframes squeezeEyes {
-		0%,
-		100% {
-			transform: scaleY(1);
-		}
-		50% {
-			transform: scaleY(0.5);
 		}
 	}
 
