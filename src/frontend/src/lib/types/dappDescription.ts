@@ -14,6 +14,7 @@ const dAppDescriptionSchema = z.object({
 	description: z.string(),
 	stats: z.string(),
 	logo: z.string(),
+	callToAction: z.string().optional(),
 
 	usesInternetIdentity: z.boolean(),
 	authOrigins: z.array(z.string()).optional(),
@@ -21,6 +22,8 @@ const dAppDescriptionSchema = z.object({
 	github: z.string().url().optional(),
 	youtube: z.string().url().optional(),
 	twitter: z.string().url().optional(),
+	telegram: z.string().url().optional(),
+	openChat: z.string().url().optional(),
 
 	screenshots: z.array(z.string()).optional(),
 
