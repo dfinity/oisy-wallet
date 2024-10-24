@@ -9,6 +9,7 @@ import type { CardData } from '$lib/types/token-card';
 export const mapHeaderData = ({
 	nativeToken: { name, symbol, decimals, icon, network },
 	header: { name: headerName },
+	tokens,
 	balance,
 	usdBalance
 }: TokenUiGroup): CardData => ({
@@ -20,5 +21,6 @@ export const mapHeaderData = ({
 	oisyName: { oisyName: headerName },
 	oisySymbol: { oisySymbol: name },
 	balance: balance,
-	usdBalance: usdBalance
+	usdBalance: usdBalance,
+	tokenCount: tokens.length
 });

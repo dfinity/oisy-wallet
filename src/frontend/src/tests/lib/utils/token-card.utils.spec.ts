@@ -33,7 +33,8 @@ describe('mapHeaderData', () => {
 			oisyName: { oisyName: BTC_MAINNET_TOKEN.name },
 			oisySymbol: { oisySymbol: ICP_TOKEN.name },
 			balance: bn1,
-			usdBalance: 300
+			usdBalance: 300,
+			tokenCount: 2
 		};
 
 		expect(mapHeaderData(tokenGroup)).toEqual(expected);
@@ -49,7 +50,8 @@ describe('mapHeaderData', () => {
 			icon: ICP_TOKEN.icon,
 			network: ICP_NETWORK,
 			oisyName: { oisyName: BTC_MAINNET_TOKEN.name },
-			oisySymbol: { oisySymbol: ICP_TOKEN.name }
+			oisySymbol: { oisySymbol: ICP_TOKEN.name },
+			tokenCount: 2
 		};
 
 		expect(mapHeaderData(rest)).toEqual(expected);
