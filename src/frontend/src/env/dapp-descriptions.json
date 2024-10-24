@@ -16,8 +16,10 @@
 		"logo": "/images/dapps/kong-swap-logo.svg",
 		"screenshots": ["/images/dapps/kong-swap.webp"],
 		"featured": true,
-		"carouselSlideText": "Swap tokens on DEX",
-		"carouselSlideCallToAction": "Try KongSwap"
+		"carousel": {
+			"text": "Swap tokens on DEX",
+			"callToAction": "Try KongSwap"
+		}
 	},
 	{
 		"id": "openchat",
@@ -34,8 +36,10 @@
 		"stats": "80,000+ users",
 		"logo": "/images/dapps/open-chat-logo.svg",
 		"screenshots": ["/images/dapps/open-chat.webp"],
-		"carouselSlideText": "OpenChat - where web3 communicates",
-		"carouselSlideCallToAction": "Show more"
+		"carousel": {
+			"text": "OpenChat - where web3 communicates",
+			"callToAction": "Show more"
+		}
 	},
 	{
 		"id": "decideid",
@@ -51,7 +55,9 @@
 		"logo": "/images/dapps/decide-ai-logo.svg",
 		"github": "https://github.com/modclub-app",
 		"screenshots": ["/images/dapps/decide-ai.webp"],
-		"carouselSlideText": "Enjoy a privacy-first way to verify and engage online",
-		"carouselSlideCallToAction": "Interested?"
+		"carousel": {
+			"text": "Enjoy a privacy-first way to verify and engage online",
+			"callToAction": "Interested?"
+		}
 	}
 ]
