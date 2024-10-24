@@ -21,7 +21,7 @@
 
 	<TokenLogo
 		{data}
-		subLogo={nonNullish(tokenCount) ? { type: 'tokenCount', count: tokenCount } : undefined}
+		badge={nonNullish(tokenCount) ? { type: 'tokenCount', count: tokenCount } : undefined}
 		slot="icon"
 		color="white"
 		{logoSize}
