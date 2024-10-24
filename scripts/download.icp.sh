@@ -8,7 +8,7 @@ if [ ! -d "$DIR" ]; then
   mkdir "$DIR"
 fi
 
-IC_VERSION=03dd6ee6de80c2202f66948692c69c61eb6af54d
+IC_VERSION=6dcfafb491092704d374317d9a72a7ad2475d7c9
 
 curl -o "$DIR"/icp_index.wasm.gz "https://download.dfinity.systems/ic/$IC_VERSION/canisters/ic-icp-index-canister.wasm.gz"
 gunzip "$DIR"/icp_index.wasm.gz
