@@ -14,13 +14,14 @@
 	export let tokenGroup: TokenUiGroup;
 
 	$: groups = $tokenGroupStore ?? {};
-	$: isExpanded = groups[tokenGroup.id]?.expanded ?? false;
+	$: isExpanded = groups[tokenGroup.id]?.isExpanded ?? false;
+
+	let headerData: CardData;
+	$: headerData = mapHeaderData(tokenGroup);
 
 	const toggleIsExpand = (toggle: boolean) =>
 		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded: toggle } });
 
-	let headerData: CardData;
-	$: headerData = mapHeaderData(tokenGroup);
 </script>
 
 <div class="flex flex-col">
