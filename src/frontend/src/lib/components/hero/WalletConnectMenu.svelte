@@ -1,10 +1,10 @@
 <script>
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	const openWalletConnectAuth = async () => {
