@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
@@ -44,7 +45,9 @@
 		<SplitPane>
 			<NavigationMenu slot="menu">
 				{#if route === 'tokens'}
-					<DappsCarousel styleClass="w-80 xl:block hidden" />
+					<div in:fade class="hidden w-80 xl:block">
+						<DappsCarousel />
+					</div>
 				{/if}
 			</NavigationMenu>
 
