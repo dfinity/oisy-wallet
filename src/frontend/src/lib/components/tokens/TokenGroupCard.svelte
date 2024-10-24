@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
