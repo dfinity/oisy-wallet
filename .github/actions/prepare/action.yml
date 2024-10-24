@@ -5,10 +5,21 @@ description: Checkout and install dependencies
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v4
+
+    - name: Restore npm cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json', 'package.json') }}
+        restore-keys: |
+            ${{ runner.os }}-npm-
+
+    - name: Setup node
+      uses: actions/setup-node@v4
       with:
         node-version: 20
         registry-url: 'https://registry.npmjs.org'
+
     - name: Install dependencies
       shell: bash
       run: npm ci
