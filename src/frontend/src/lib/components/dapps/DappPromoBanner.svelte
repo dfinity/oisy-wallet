@@ -10,7 +10,7 @@
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="absolute inset-0">
+		<div class="absolute inset-0 bg-onahau">
 			<Img
 				fitHeight={true}
 				height="100%"
@@ -21,7 +21,7 @@
 			/>
 		</div>
 	{/if}
-	<div class="flex-1 px-4 py-4 backdrop-blur-sm">
+	<div class="z-10 flex-1 bg-black/30 px-4 py-4 backdrop-blur-sm">
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img

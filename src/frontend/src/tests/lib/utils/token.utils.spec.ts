@@ -1,7 +1,7 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-import type { TokenGroupUi, TokenStandard, TokenUi } from '$lib/types/token';
+import type { TokenStandard, TokenUi, TokenUiGroup } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdBalance,
@@ -366,9 +366,9 @@ describe('groupTokensByTwin', () => {
 		const btcGroup = groupedTokens[0];
 		expect(btcGroup).toHaveProperty('header');
 		expect(btcGroup).toHaveProperty('tokens');
-		expect((btcGroup as TokenGroupUi).tokens).toHaveLength(2);
-		expect((btcGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('BTC');
-		expect((btcGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('ckBTC');
+		expect((btcGroup as TokenUiGroup).tokens).toHaveLength(2);
+		expect((btcGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('BTC');
+		expect((btcGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('ckBTC');
 
 		const icpToken = groupedTokens[2];
 		expect(icpToken).toHaveProperty('symbol', 'ICP');
@@ -386,8 +386,8 @@ describe('groupTokensByTwin', () => {
 		const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 		const firstGroup = groupedTokens[0];
 		expect(firstGroup).toHaveProperty('tokens');
-		expect((firstGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('BTC');
-		expect((firstGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('ckBTC');
+		expect((firstGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('BTC');
+		expect((firstGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('ckBTC');
 	});
 
 	it('should not duplicate tokens in the result', () => {
@@ -422,7 +422,7 @@ describe('groupTokensByTwin', () => {
 		const btcGroup = groupedTokens.find(
 			(groupOrToken) =>
 				'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'BTC')
-		) as TokenGroupUi;
+		) as TokenUiGroup;
 
 		expect(btcGroup).toBeDefined();
 		expect(btcGroup.tokens).toHaveLength(2);
@@ -432,7 +432,7 @@ describe('groupTokensByTwin', () => {
 		const ethGroup = groupedTokens.find(
 			(groupOrToken) =>
 				'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'ETH')
-		) as TokenGroupUi;
+		) as TokenUiGroup;
 
 		expect(ethGroup).toBeDefined();
 		expect(ethGroup.tokens).toHaveLength(2);
