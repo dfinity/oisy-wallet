@@ -10,11 +10,11 @@ interface I18nCore {
 		next: string;
 		save: string;
 		back: string;
+		close: string;
+		copy: string;
 		reject: string;
 		approve: string;
 		view: string;
-		close: string;
-		copy: string;
 		done: string;
 		refresh: string;
 		name: string;

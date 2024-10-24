@@ -13,10 +13,10 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"done": "Done",
-			"close": "Close",
-			"refresh": "Refresh",
 			"name": "Name",
 			"amount": "Amount",
+			"close": "Close",
+			"refresh": "Refresh",
 			"max": "Max"
 
 		},
