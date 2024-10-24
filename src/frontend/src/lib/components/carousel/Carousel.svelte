@@ -45,11 +45,9 @@
 	onMount(() => {
 		initializeSlides();
 		initializeCarousel();
-		initialiseAutoplayTimer();
 
 		return () => {
-			clearAutoplayTimer();
-			clearSlideTransformTimer();
+			clearTimers();
 		};
 	});
 
@@ -66,6 +64,14 @@
 	};
 
 	/**
+	 * Clear all timers
+	 */
+	const clearTimers = () => {
+		clearAutoplayTimer();
+		clearSlideTransformTimer();
+	};
+
+	/**
 	 * Build slider frame and set required variables
 	 */
 	const initializeCarousel = () => {
@@ -74,6 +80,12 @@
 		}
 
 		containerWidth = container.offsetWidth;
+
+		// Clear timers and stop further initialisation in case container is rendered but not visible (e.g. display: none)
+		if (containerWidth === 0) {
+			clearTimers();
+			return;
+		}
 
 		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
 		sliderFrame.innerHTML = '';
@@ -88,6 +100,11 @@
 			goToSlide({
 				slide: currentSlide
 			});
+
+			// Start autoplay timer if it is not running
+			if (isNullish(autoplayTimer)) {
+				initialiseAutoplayTimer();
+			}
 		}
 	};
 
