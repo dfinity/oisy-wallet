@@ -225,13 +225,15 @@
 <!-- Resize listener to re-calculate slide frame width -->
 <svelte:window on:resize={onResize} />
 
-<div class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white p-4 pb-16 shadow`}>
+<div
+	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-14 pt-3 shadow`}
+>
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>
-	<div class="absolute bottom-4 left-0 flex w-full justify-center">
+	<div class="absolute bottom-3 left-0 flex w-full justify-center">
 		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 		<Controls {onNext} {onPrevious} />
 	</div>
