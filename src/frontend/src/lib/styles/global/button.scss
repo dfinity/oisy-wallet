@@ -41,6 +41,10 @@ a.as-button {
 		&.padding-sm {
 			--button-padding: var(--padding-1_5x) var(--padding-1_5x);
 		}
+
+		&.loading {
+			background: var(--color-grey);
+		}
 	}
 
 	&.primary,
@@ -86,7 +90,7 @@ a.as-button {
 		}
 	}
 
-	&.primary:not([disabled]):not(.disabled) {
+	&.primary:not([disabled]):not(.disabled):not(.loading) {
 		background: var(--color-blue-ribbon);
 		color: var(--color-white);
 
@@ -99,7 +103,7 @@ a.as-button {
 		}
 	}
 
-	&.secondary:not([disabled]):not(.disabled) {
+	&.secondary:not([disabled]):not(.disabled):not(.loading) {
 		background: var(--color-zumthor);
 		color: var(--color-primary);
 
@@ -112,7 +116,7 @@ a.as-button {
 		}
 	}
 
-	&.tertiary:not([disabled]):not(.disabled) {
+	&.tertiary:not([disabled]):not(.disabled):not(.loading) {
 		background: var(--color-white);
 
 		&:hover {

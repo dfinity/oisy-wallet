@@ -4,6 +4,7 @@
 	export let colorStyle: ButtonColorStyle = 'primary';
 	export let type: 'submit' | 'reset' | 'button' = 'submit';
 	export let disabled = false;
+	export let loading = false;
 	export let fullWidth = false;
 	export let link = false;
 	export let paddingSmall = false;
@@ -13,15 +14,20 @@
 </script>
 
 <button
-	class={`${colorStyle} flex flex-1 text-center ${styleClass}`}
+	class={`${colorStyle} flex flex-1 text-center transition duration-500 ease-in-out ${styleClass}`}
 	class:padding-sm={paddingSmall}
 	class:w-full={fullWidth}
 	class:link
 	{type}
-	{disabled}
+	disabled={disabled || loading}
+	class:loading
+	class:animate-pulse={loading}
+	class:opacity-40={loading}
 	on:click
 	data-tid={testId}
 	aria-label={ariaLabel}
 >
-	<slot />
+	<div class="transition duration-500 ease-in-out" class:invisible={loading} aria-hidden={loading}>
+		<slot />
+	</div>
 </button>
