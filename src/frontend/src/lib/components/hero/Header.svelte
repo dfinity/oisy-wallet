@@ -5,9 +5,8 @@
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
-	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import { modalAboutHow } from '$lib/derived/modal.derived';
 </script>
 
 <header
@@ -47,8 +46,6 @@
 	</div>
 </header>
 
-{#if $modalAboutWhat}
-	<AboutWhatModal />
-{:else if $modalAboutHow}
+{#if $modalAboutHow}
 	<AboutHowModal />
 {/if}
