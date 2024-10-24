@@ -19,9 +19,8 @@
 	$: headerData = mapHeaderData(tokenGroup);
 </script>
 
-<MultipleListeners tokens={tokenGroup.tokens}>
-	<div class="flex flex-col">
-		<!-- TODO: Add listeners for all tokens in group -->
+<div class="flex flex-col">
+	<MultipleListeners tokens={tokenGroup.tokens}>
 		<TokenCardWithOnClick
 			on:click={() => (isExpanded = !isExpanded)}
 			styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isExpanded
@@ -30,18 +29,15 @@
 		>
 			<TokenCard data={headerData} testIdPrefix={TOKEN_GROUP} />
 		</TokenCardWithOnClick>
+	</MultipleListeners>
 
-		{#if isExpanded}
-			<div
-				class="flex flex-col gap-3 rounded-b-xl bg-white/40 pt-2"
-				transition:slide={SLIDE_PARAMS}
-			>
-				{#each tokenGroup.tokens as token (token.id)}
-					<TokenCardWithUrl {token}>
-						<TokenCardContent logoSize="md" data={token} />
-					</TokenCardWithUrl>
-				{/each}
-			</div>
-		{/if}
-	</div>
-</MultipleListeners>
+	{#if isExpanded}
+		<div class="flex flex-col gap-3 rounded-b-xl bg-white/40 pt-2" transition:slide={SLIDE_PARAMS}>
+			{#each tokenGroup.tokens as token (token.id)}
+				<TokenCardWithUrl {token}>
+					<TokenCardContent logoSize="md" data={token} />
+				</TokenCardWithUrl>
+			{/each}
+		</div>
+	{/if}
+</div>
