@@ -4,8 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize]
     paths:
-      - './src/frontend/src/lib/i18n/*'
-      - './src/frontend/src/lib/types/i18n.d.ts'
+      - 'src/frontend/src/lib/i18n/*'
+      - 'src/frontend/src/lib/types/i18n.d.ts'
 
 jobs:
   auto_update:
