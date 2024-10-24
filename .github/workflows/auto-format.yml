@@ -1,0 +1,40 @@
+name: Auto format
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Run format Script
+        run: npm run format
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit format
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: .
+          default_author: github_actions
+          message: '🤖 Apply formatting changes'
