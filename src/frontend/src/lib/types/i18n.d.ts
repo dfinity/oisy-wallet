@@ -5,23 +5,22 @@
 interface I18nCore {
 	text: {
 		cancel: string;
-		decimals: string;
-		amount: string;
 		next: string;
 		save: string;
-		back: string;
-		close: string;
-		copy: string;
+		more: string;
 		reject: string;
 		approve: string;
 		view: string;
-		done: string;
-		refresh: string;
-		name: string;
+		copy: string;
+		back: string;
 		symbol: string;
+		decimals: string;
+		done: string;
+		name: string;
+		amount: string;
+		close: string;
+		refresh: string;
 		max: string;
-		more: string;
-
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -36,6 +35,7 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
+		changelog: string;
 		submit_ticket: string;
 	};
 	alt: {
@@ -347,8 +347,8 @@ interface I18nConvert {
 }
 
 interface I18nBuy {
-	text: { buy: string; buy_dev: string };
-	onramper: { title: string };
+	text: { buy: string };
+	onramper: { title: string; this_is_a_test: string };
 }
 
 interface I18nTokens {
