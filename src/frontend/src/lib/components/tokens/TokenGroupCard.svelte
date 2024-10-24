@@ -8,25 +8,14 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import type { TokenUiGroup } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
-	import { mapHeaderData } from '$lib/utils/token-card';
+	import { mapHeaderData } from '$lib/utils/token-card.utils';
 
 	export let tokenGroup: TokenUiGroup;
 
 	let isExpanded = false;
 
-	let { nativeToken } = tokenGroup;
-
 	let headerData: CardData;
-	$: headerData = {
-		symbol: nativeToken.symbol,
-		name: nativeToken.name,
-		decimals: nativeToken.decimals,
-		network: nativeToken.network,
-		oisySymbol: { oisySymbol: nativeToken.name },
-		oisyName: { oisyName: tokenGroup.header.name },
-		balance: tokenGroup.balance,
-		usdBalance: tokenGroup.usdBalance
-	};
+	$: headerData = mapHeaderData(tokenGroup);
 </script>
 
 <div class="flex flex-col">
