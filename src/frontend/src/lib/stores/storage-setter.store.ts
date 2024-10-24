@@ -6,12 +6,13 @@ import { type Readable } from 'svelte/store';
 export type StorageSetterStoreData<T> = Option<Record<TokenId, T | null>>;
 
 export interface StorageSetterStore<T> extends Readable<StorageSetterStoreData<T>> {
-	reset: (tokenId: TokenId) => void;
 	set: (params: { tokenId: TokenId; data: T }) => void;
+	reset: (tokenId: TokenId) => void;
+	resetAll: (params: { key: string }) => void;
 }
 
 export const initStorageSetterStore = <T>({ key }: { key: string }): StorageSetterStore<T> => {
-	const { set, subscribe, update } = initStorageStore<StorageSetterStoreData<T>>({ key });
+	const { set, subscribe, update, reset } = initStorageStore<StorageSetterStoreData<T>>({ key });
 
 	return {
 		set: ({ tokenId, data }: { tokenId: TokenId; data: T }) =>
@@ -36,6 +37,7 @@ export const initStorageSetterStore = <T>({ key }: { key: string }): StorageSett
 
 				return newState;
 			}),
+		resetAll: reset,
 		subscribe
 	};
 };
