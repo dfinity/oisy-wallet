@@ -25,7 +25,7 @@
 
 <div
 	in:fade
-	class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] p-4"
+	class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] px-4 pb-4"
 	class:opacity-0={!render}
 >
 	{#if render}
