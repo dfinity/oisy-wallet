@@ -42,7 +42,6 @@
 			<Menu />
 		{:else}
 			<AboutMenu />
-
 		{/if}
 	</div>
 </header>
