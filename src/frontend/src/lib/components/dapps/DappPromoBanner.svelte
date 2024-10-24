@@ -2,15 +2,15 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { FeaturedDappDescription } from '$lib/types/dappDescription';
+	import type { FeaturedOisyDappDescription } from '$lib/types/oisyDappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: FeaturedDappDescription;
+	export let dAppDescription: FeaturedOisyDappDescription;
 </script>
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="absolute inset-0">
+		<div class="absolute inset-0 bg-onahau">
 			<Img
 				fitHeight={true}
 				height="100%"
@@ -21,7 +21,7 @@
 			/>
 		</div>
 	{/if}
-	<div class="flex-1 px-4 py-4 backdrop-blur-sm">
+	<div class="z-10 flex-1 bg-black/30 px-4 py-4 backdrop-blur-sm">
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img
