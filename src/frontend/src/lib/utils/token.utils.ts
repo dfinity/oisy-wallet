@@ -216,14 +216,7 @@ const createTokenGroup = ({
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
 }): TokenUiGroup => ({
-	header: {
-		name: nativeToken.network.name,
-		symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
-		decimals: nativeToken.decimals,
-		icon: nativeToken.icon
-	},
 	nativeToken,
-	nativeNetwork: nativeToken.network,
 	tokens: [nativeToken, twinToken],
 	balance: sumTokenBalances([nativeToken, twinToken]),
 	usdBalance: sumTokenUsdBalances([nativeToken, twinToken])
