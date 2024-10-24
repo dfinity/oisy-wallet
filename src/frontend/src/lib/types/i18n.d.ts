@@ -590,15 +590,6 @@ interface I18nTransactions {
 
 interface I18nAbout {
 	text: { title: string };
-	what: {
-		text: {
-			label: string;
-			title: string;
-			hold_crypto: string;
-			use_eth_dapps: string;
-			use_ic_dapps: string;
-		};
-	};
 	how: {
 		text: {
 			label: string;

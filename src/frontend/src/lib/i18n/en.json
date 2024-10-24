@@ -655,15 +655,6 @@
 		"text": {
 			"title": "About $oisy_name"
 		},
-		"what": {
-			"text": {
-				"label": "Wallet Features",
-				"title": "$oisy_name Features",
-				"hold_crypto": "<strong>Hold crypto across networks</strong><br>Manage and transact with native Ethereum, Bitcoin, and Internet Computer assets. Powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/chainfusion\">Chain Fusion</a>.",
-				"use_eth_dapps": "<strong>Use with Ethereum dapps</strong><br>$oisy_short is fully compatible with Ethereum Defi like <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://uniswap.org/\">Uniswap</a> thanks to the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://walletconnect.com/\">WalletConnect</a> framework.",
-				"use_ic_dapps": "<strong>Use with Internet Computer dapps</strong><br>Use your $oisy_name in any <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/ecosystem\">dapp on the Internet Computer</a> that supports the signer standards, including <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://oc.app/\">OpenChat</a>, <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://www.icpswap.com/\">ICPSwap</a>, and the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://nns.ic0.app/\">NNS dapp</a>."
-			}
-		},
 		"how": {
 			"text": {
 				"label": "What sets $oisy_short apart",
