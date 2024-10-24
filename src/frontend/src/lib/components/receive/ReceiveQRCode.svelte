@@ -38,7 +38,7 @@
 				<svelte:fragment slot="logo">
 					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-white p-2">
-							<TokenLogo token={addressToken} />
+							<TokenLogo data={addressToken} />
 						</div>
 					{/if}
 				</svelte:fragment>

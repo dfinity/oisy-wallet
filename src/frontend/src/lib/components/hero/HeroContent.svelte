@@ -52,9 +52,9 @@
 						{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
 							<div in:fade>
 								<TokenLogo
-									token={$pageToken}
+									data={$pageToken}
 									ring
-									subLogo={{ type: 'network', blackAndWhite: true }}
+									badge={{ type: 'network', blackAndWhite: true }}
 								/>
 							</div>
 						{:else}

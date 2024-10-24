@@ -39,7 +39,7 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		<div class="flex flex-col">
+		<div class="mb-3 flex flex-col gap-3">
 			{#each tokens ?? [] as token (token.id)}
 				<div
 					transition:fade
@@ -50,7 +50,7 @@
 				>
 					<Listener {token}>
 						<TokenCardWithUrl {token}>
-							<TokenCardContent {token} />
+							<TokenCardContent data={token} />
 						</TokenCardWithUrl>
 					</Listener>
 				</div>
