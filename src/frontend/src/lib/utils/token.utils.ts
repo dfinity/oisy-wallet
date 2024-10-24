@@ -195,9 +195,7 @@ export const isTokenUiGroup = (
 	tokenUiOrGroupUi: TokenUiOrGroupUi
 ): tokenUiOrGroupUi is TokenUiGroup =>
 	typeof tokenUiOrGroupUi === 'object' &&
-	nonNullish(tokenUiOrGroupUi) &&
-	'header' in tokenUiOrGroupUi &&
-	typeof tokenUiOrGroupUi.header === 'object' &&
+	'nativeToken' in tokenUiOrGroupUi &&
 	'tokens' in tokenUiOrGroupUi;
 
 /**
@@ -216,6 +214,7 @@ const createTokenGroup = ({
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
 }): TokenUiGroup => ({
+	id: Symbol(`GRP-${nativeToken.symbol}`),
 	nativeToken,
 	tokens: [nativeToken, twinToken],
 	balance: sumTokenBalances([nativeToken, twinToken]),
