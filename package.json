@@ -60,7 +60,7 @@
 		"@dfinity/ledger-icrc": "^2.6.0",
 		"@dfinity/oisy-wallet-signer": "^0.0.1",
 		"@dfinity/principal": "^2.1.2",
-		"@dfinity/utils": "^2.5.1",
+		"@dfinity/utils": "^2.5.2-next-2024-10-24",
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@junobuild/analytics": "^0.0.28",
 		"@metamask/detect-provider": "^2.0.0",
