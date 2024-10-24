@@ -9,16 +9,16 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	RequiredTokenWithLinkedData,
 	Token,
-	TokenGroupUi,
 	TokenStandard,
 	TokenUi,
+	TokenUiGroup,
 	TokenUiOrGroupUi
 } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -141,6 +141,40 @@ export const mapTokenUi = ({
 	})
 });
 
+/** Function to sum the balances of two tokens.
+ *
+ * If the decimals of the tokens are the same, the balances are added together.
+ * If the decimals are different, the function returns null.
+ * If one of the balances is nullish, the function returns the other balance.
+ * If both balances are nullish, the function prioritize the first token
+ * NOTE: the function assumes that the two tokens are always 1:1 twins, for example BTC and ckBTC, or ETH and SepoliaETH
+ *
+ * @param token1
+ * @param token2
+ * @returns The sum of the balances or nullish value.
+ */
+export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
+	nonNullish(token1.balance) && nonNullish(token2.balance)
+		? token1.decimals === token2.decimals
+			? token1.balance.add(token2.balance)
+			: null
+		: isNullish(token2.balance)
+			? token1.balance
+			: token2.balance;
+
+/** Function to sum the USD balances of two tokens.
+ *
+ * If one of the balances is nullish, the function returns the other balance.
+ *
+ * @param token1
+ * @param token2
+ * @returns The sum of the USD balances or nullish value.
+ */
+export const sumTokenUsdBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['usdBalance'] =>
+	nonNullish(token1.usdBalance) || nonNullish(token2.usdBalance)
+		? (token1.usdBalance ?? 0) + (token2.usdBalance ?? 0)
+		: undefined;
+
 /**
  * Type guard to check if a token is of type RequiredTokenWithLinkedData.
  * This checks whether the token has a twinTokenSymbol field and ensures that it is a string.
@@ -152,14 +186,14 @@ export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTo
 	'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
 
 /**
- * Type guard to check if an object is of type TokenGroupUi.
+ * Type guard to check if an object is of type TokenUiGroup.
  *
  * @param tokenUiOrGroupUi - The object to check.
- * @returns A boolean indicating whether the object is a TokenGroupUi.
+ * @returns A boolean indicating whether the object is a TokenUiGroup.
  */
-export const isTokenGroupUi = (
+export const isTokenUiGroup = (
 	tokenUiOrGroupUi: TokenUiOrGroupUi
-): tokenUiOrGroupUi is TokenGroupUi =>
+): tokenUiOrGroupUi is TokenUiGroup =>
 	typeof tokenUiOrGroupUi === 'object' &&
 	nonNullish(tokenUiOrGroupUi) &&
 	'header' in tokenUiOrGroupUi &&
@@ -167,13 +201,13 @@ export const isTokenGroupUi = (
 	'tokens' in tokenUiOrGroupUi;
 
 /**
- * Factory function to create a TokenGroupUi based on the provided tokens and network details.
+ * Factory function to create a TokenUiGroup based on the provided tokens and network details.
  * This function creates a group header and adds both the native token and the twin token to the group's tokens array.
  *
  * @param nativeToken - The native token used for the group, typically the original token or the one from the selected network.
  * @param twinToken - The twin token to be grouped with the native token, usually representing the same asset on a different network.
  *
- * @returns A TokenGroupUi object that includes a header with network and symbol information and contains both the native and twin tokens.
+ * @returns A TokenUiGroup object that includes a header with network and symbol information and contains both the native and twin tokens.
  */
 const createTokenGroup = ({
 	nativeToken,
@@ -181,15 +215,18 @@ const createTokenGroup = ({
 }: {
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
-}): TokenGroupUi => ({
+}): TokenUiGroup => ({
 	header: {
 		name: nativeToken.network.name,
 		symbol: `${nativeToken.symbol}, ${twinToken.symbol}`,
 		decimals: nativeToken.decimals,
 		icon: nativeToken.icon
 	},
+	nativeToken,
 	nativeNetwork: nativeToken.network,
-	tokens: [nativeToken, twinToken]
+	tokens: [nativeToken, twinToken],
+	balance: sumTokenBalances([nativeToken, twinToken]),
+	usdBalance: sumTokenUsdBalances([nativeToken, twinToken])
 });
 
 /**
@@ -200,7 +237,7 @@ const createTokenGroup = ({
  * @param tokens - The list of TokenUi objects to group. Each token may or may not have a twinTokenSymbol.
  *                 Tokens with a twinTokenSymbol are grouped together.
  *
- * @returns A new list where tokens with twinTokenSymbols are grouped into a TokenGroupUi,
+ * @returns A new list where tokens with twinTokenSymbols are grouped into a TokenUiGroup,
  *          and tokens without twins remain in their original place.
  *          The group replaces the first token of the group in the list.
  */
@@ -228,6 +265,6 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	});
 
 	return mappedTokensWithGroups.filter(
-		(t) => isTokenGroupUi(t) || !groupedTokenTwins.has(t.symbol)
+		(t) => isTokenUiGroup(t) || !groupedTokenTwins.has(t.symbol)
 	);
 };

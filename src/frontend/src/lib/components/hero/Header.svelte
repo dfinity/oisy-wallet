@@ -1,8 +1,6 @@
 <script lang="ts">
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
-	import SignIn from '$lib/components/auth/SignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
-	import Back from '$lib/components/core/Back.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
@@ -10,27 +8,22 @@
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
-
-	export let back = false;
 </script>
 
 <header
-	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 sm:px-8"
+	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:lg:fixed={$authSignedIn}
 	class:lg:top-0={$authSignedIn}
 	class:lg:inset-x-0={$authSignedIn}
 	class:lg:z-10={$authSignedIn}
 	class:grid={$authNotSignedIn}
 	class:grid-cols-2={$authNotSignedIn}
+	class:sm:px-8={$authNotSignedIn}
 	class:xl:grid={$authNotSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 >
 	<div class="pointer-events-auto">
-		{#if back}
-			<Back />
-		{:else}
-			<OisyWalletLogoLink />
-		{/if}
+		<OisyWalletLogoLink />
 	</div>
 
 	{#if $authNotSignedIn}
@@ -50,8 +43,6 @@
 			<Menu />
 		{:else}
 			<AboutMenu />
-
-			<SignIn />
 		{/if}
 	</div>
 </header>

@@ -2,10 +2,10 @@
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { DappDescription } from '$lib/types/dappDescription';
+	import type { OisyDappDescription } from '$lib/types/oisyDappDescription';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: DappDescription;
+	export let dAppDescription: OisyDappDescription;
 	$: ({ name, logo, oneLiner, tags } = dAppDescription);
 </script>
 

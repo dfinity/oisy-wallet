@@ -26,11 +26,16 @@ export interface TokenMetadata {
 }
 
 export interface TokenAppearance {
+	oisySymbol?: TokenOisySymbol;
 	oisyName?: TokenOisyName;
 }
 
+export interface TokenOisySymbol {
+	oisySymbol: string;
+}
+
 export interface TokenOisyName {
-	prefix: string | undefined;
+	prefix?: string;
 	oisyName: string;
 }
 
@@ -69,10 +74,12 @@ export type TokenUi = Token & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;
 
-export interface TokenGroupUi {
+// TODO: remove header and nativeNetwork, since we added nativeToken that has all their data, and they became redundant
+export type TokenUiGroup = {
 	header: TokenMetadata;
+	nativeToken: TokenUi;
 	nativeNetwork: Network;
 	tokens: TokenUi[];
-}
+} & TokenFinancialData;
 
-export type TokenUiOrGroupUi = TokenUi | TokenGroupUi;
+export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;

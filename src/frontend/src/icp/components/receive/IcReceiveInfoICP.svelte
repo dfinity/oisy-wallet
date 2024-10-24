@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -16,13 +18,17 @@
 	const dispatch = createEventDispatcher();
 
 	const displayQRCode = (details: { address: string; addressLabel: string }) =>
-		dispatch('icQRCode', details);
+		dispatch('icQRCode', {
+			...details,
+			addressToken: ICP_TOKEN
+		});
 </script>
 
 <ContentWithToolbar>
 	<ReceiveAddress
 		labelRef="wallet-address"
 		address={$icrcAccountIdentifierText ?? ''}
+		network={ICP_NETWORK}
 		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 		on:click={() =>
@@ -42,6 +48,7 @@
 	<ReceiveAddress
 		labelRef="icp-account-id"
 		address={$icpAccountIdentifierText ?? ''}
+		network={ICP_NETWORK}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_account_id_qr}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
 		on:click={() =>
