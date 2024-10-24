@@ -1,4 +1,4 @@
-name: Formatting changes
+name: Auto format
 
 on:
   pull_request:
