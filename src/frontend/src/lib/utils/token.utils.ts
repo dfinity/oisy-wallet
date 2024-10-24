@@ -162,24 +162,21 @@ const sumBalances = ([balance1, balance2]: [
 export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
 	token1.decimals === token2.decimals ? sumBalances([token1.balance, token2.balance]) : null;
 
-const sumUsdBalances = ([usdBalance1, usdBalance2]: [
+/** Function to sum the USD balances of two tokens.
+ *
+ * If one of the balances is nullish, the function returns the other balance.
+ *
+ * @param usdBalance1
+ * @param usdBalance2
+ * @returns The sum of the USD balances or nullish value.
+ */
+export const sumUsdBalances = ([usdBalance1, usdBalance2]: [
 	TokenUi['usdBalance'],
 	TokenUi['usdBalance']
 ]): TokenUi['usdBalance'] =>
 	nonNullish(usdBalance1) || nonNullish(usdBalance2)
 		? (usdBalance1 ?? 0) + (usdBalance2 ?? 0)
 		: undefined;
-
-/** Function to sum the USD balances of two tokens.
- *
- * If one of the balances is nullish, the function returns the other balance.
- *
- * @param token1
- * @param token2
- * @returns The sum of the USD balances or nullish value.
- */
-export const sumTokenUsdBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['usdBalance'] =>
-	sumUsdBalances([token1.usdBalance, token2.usdBalance]);
 
 /**
  * Type guard to check if a token is of type RequiredTokenWithLinkedData.
@@ -224,7 +221,7 @@ const createTokenGroup = ({
 	nativeToken,
 	tokens: [nativeToken, twinToken],
 	balance: sumTokenBalances([nativeToken, twinToken]),
-	usdBalance: sumTokenUsdBalances([nativeToken, twinToken])
+	usdBalance: sumUsdBalances([nativeToken.usdBalance, twinToken.usdBalance])
 });
 
 /**
