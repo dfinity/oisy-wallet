@@ -4,7 +4,7 @@
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
-	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -20,7 +20,7 @@
 	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger($tokenWithFallbackAsIcToken);
+	$: ckBTC = isTokenCkBtcLedger($tokenAsIcToken);
 
 	let btcNetwork = false;
 	$: btcNetwork = isNetworkIdBitcoin(networkId);
