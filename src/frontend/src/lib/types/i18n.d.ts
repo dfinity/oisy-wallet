@@ -7,20 +7,20 @@ interface I18nCore {
 		cancel: string;
 		next: string;
 		save: string;
-		back: string;
-		done: string;
-		close: string;
-		refresh: string;
-		name: string;
-		symbol: string;
-		decimals: string;
-		amount: string;
-		max: string;
 		more: string;
 		reject: string;
 		approve: string;
 		view: string;
 		copy: string;
+		back: string;
+		symbol: string;
+		decimals: string;
+		done: string;
+		name: string;
+		amount: string;
+		close: string;
+		refresh: string;
+		max: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -347,8 +347,8 @@ interface I18nConvert {
 }
 
 interface I18nBuy {
-	text: { buy: string; buy_dev: string };
-	onramper: { title: string };
+	text: { buy: string };
+	onramper: { title: string; this_is_a_test: string };
 }
 
 interface I18nTokens {
