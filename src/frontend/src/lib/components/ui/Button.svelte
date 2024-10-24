@@ -19,7 +19,7 @@
 	class:w-full={fullWidth}
 	class:link
 	{type}
-	{disabled}
+	disabled={disabled || loading}
 	class:loading
 	class:animate-pulse={loading}
 	class:opacity-40={loading}
