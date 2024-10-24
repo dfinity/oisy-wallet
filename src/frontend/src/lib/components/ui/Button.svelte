@@ -11,9 +11,11 @@
 	export let testId: string | undefined = undefined;
 	export let ariaLabel: string | undefined = undefined;
 	export let styleClass = '';
+	export let testId: string | undefined = undefined;
 </script>
 
 <button
+	data-tid={testId}
 	class={`${colorStyle} flex flex-1 text-center transition duration-500 ease-in-out ${styleClass}`}
 	class:padding-sm={paddingSmall}
 	class:w-full={fullWidth}
