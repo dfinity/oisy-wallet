@@ -2,7 +2,7 @@
 	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
+	import MenuYourAddresses from '$lib/components/core/MenuYourAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
@@ -40,8 +40,8 @@
 	let dAppExplorerRoute = false;
 	$: dAppExplorerRoute = isRouteDappExplorer($page);
 
-	let walletOptions = true;
-	$: walletOptions = !settingsRoute;
+	let yourAddressesOption = true;
+	$: yourAddressesOption = !settingsRoute;
 </script>
 
 <ButtonIcon
@@ -56,8 +56,8 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
-		{#if walletOptions}
-			<MenuWallet on:icMenuClick={hidePopover} />
+		{#if yourAddressesOption}
+			<MenuYourAddresses on:icMenuClick={hidePopover} />
 		{/if}
 
 		{#if !dAppExplorerRoute && !settingsRoute}
