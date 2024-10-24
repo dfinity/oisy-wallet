@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { LogoSize } from '$lib/types/components';
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -10,6 +11,7 @@
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
 		| undefined = undefined;
+	export let logoSize: LogoSize = 'lg';
 	export let ring = false;
 
 	const {
@@ -23,7 +25,7 @@
 	<Logo
 		src={icon}
 		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
-		size="lg"
+		size={logoSize}
 		{color}
 		{ring}
 	/>
