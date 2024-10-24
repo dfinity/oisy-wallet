@@ -2,10 +2,11 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import type { LogoSize } from '$lib/types/components';
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' = 'xs';
+	export let size: LogoSize = 'xs';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
 
