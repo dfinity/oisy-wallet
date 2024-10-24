@@ -12,6 +12,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON } from '$lib/constants/test-ids.constants';
 
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -31,6 +32,7 @@
 		network={ICP_NETWORK}
 		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+		testCopyId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
