@@ -8,6 +8,7 @@
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import WalletConnectMenu from '$lib/components/hero/WalletConnectMenu.svelte';
 </script>
 
 <header
@@ -40,6 +41,7 @@
 		{/if}
 
 		{#if $authSignedIn}
+			<WalletConnectMenu />
 			<Menu />
 		{:else}
 			<AboutMenu />
