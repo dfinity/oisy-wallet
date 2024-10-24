@@ -1,6 +1,6 @@
 <script lang="ts">
-
 	export let variant: 'default' | 'info' | 'error' | 'warning' | 'success' | 'outline' = 'default';
+	export let styleClass: string | undefined = undefined;
 
 	const variantClassNames = {
 		default: 'border border-light-grey bg-dust/30',
@@ -10,10 +10,12 @@
 		success: 'bg-green-crayola/20 text-green-crayola',
 		outline: 'border border-light-grey bg-off-white'
 	};
-
 </script>
 
-
-<div class="inline-flex px-2 py-0.5 gap-1 items-center rounded  text-xs font-semibold {variantClassNames[variant]}">
+<div
+	class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
+		variant
+	]} {styleClass ?? ''}"
+>
 	<slot />
 </div>
