@@ -10,7 +10,6 @@
 
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
-	export let tokenCount: number | undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 </script>
 
@@ -21,7 +20,7 @@
 
 	<TokenLogo
 		{data}
-		badge={nonNullish(tokenCount) ? { type: 'tokenCount', count: tokenCount } : undefined}
+		badge={nonNullish(data.tokenCount) ? { type: 'tokenCount', count: data.tokenCount } : undefined}
 		slot="icon"
 		color="white"
 		{logoSize}

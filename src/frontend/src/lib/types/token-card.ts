@@ -11,4 +11,6 @@ export type CardData = Pick<
 	| 'oisySymbol'
 	| 'balance'
 	| 'usdBalance'
->;
+> & {
+	tokenCount?: number;
+};
