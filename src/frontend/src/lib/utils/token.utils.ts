@@ -15,23 +15,11 @@ import type {
 	TokenUiOrGroupUi
 } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
-import type { Option } from '$lib/types/utils';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
-
-export const isToken = (token: Option<unknown>): token is Token =>
-	nonNullish(token) &&
-	typeof token === 'object' &&
-	'id' in token &&
-	'network' in token &&
-	'standard' in token &&
-	'category' in token &&
-	'name' in token &&
-	'symbol' in token &&
-	'decimals' in token;
 
 /**
  * Calculates the maximum amount for a transaction.
