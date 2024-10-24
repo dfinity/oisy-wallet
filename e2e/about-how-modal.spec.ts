@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import {
-	ABOUT_HOW_MODAL,
-	ABOUT_HOW_MODAL_OPEN_BUTTON
+	ABOUT_WHY_OISY_MODAL,
+	ABOUT_WHY_OISY_BUTTON
 } from '../src/frontend/src/lib/constants/test-ids.constants';
 import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
@@ -22,7 +22,7 @@ test('should display about-how modal', async ({ page, isMobile }) => {
 	await homepageLoggedOut.waitForReady();
 
 	await homepageLoggedOut.testModalSnapshot({
-		modalOpenButtonTestId: ABOUT_HOW_MODAL_OPEN_BUTTON,
-		modalTestId: ABOUT_HOW_MODAL
+		modalOpenButtonTestId: ABOUT_WHY_OISY_BUTTON,
+		modalTestId: ABOUT_WHY_OISY_MODAL
 	});
 });

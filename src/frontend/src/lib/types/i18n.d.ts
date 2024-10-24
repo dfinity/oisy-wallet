@@ -590,24 +590,16 @@ interface I18nTransactions {
 
 interface I18nAbout {
 	text: { title: string };
-	what: {
+	why_oisy: {
 		text: {
 			label: string;
 			title: string;
-			hold_crypto: string;
-			use_eth_dapps: string;
-			use_ic_dapps: string;
-		};
-	};
-	how: {
-		text: {
-			label: string;
-			title: string;
-			self_custody: string;
+			network_custody: string;
 			fully_on_chain: string;
 			cross_device: string;
 			verifiable_credentials: string;
 			open_source: string;
+			hold_crypto: string;
 		};
 	};
 }
