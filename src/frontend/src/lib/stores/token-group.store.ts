@@ -1,7 +1,7 @@
-import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
+import { initStorageSetterStore } from '$lib/stores/storage-setter.store';
 
 export interface TokenGroupData {
 	expanded: boolean;
 }
 
-export const tokenGroupStore = initCertifiedSetterStore<TokenGroupData>();
+export const tokenGroupStore = initStorageSetterStore<TokenGroupData>({ key: 'group-tokens' });
