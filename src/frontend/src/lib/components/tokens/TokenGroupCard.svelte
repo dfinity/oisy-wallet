@@ -8,10 +8,11 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import type { TokenUiGroup } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
+	import { mapHeaderData } from '$lib/utils/token-card';
 
 	export let tokenGroup: TokenUiGroup;
 
-	let isOpened = false;
+	let isExpanded = false;
 
 	let { nativeToken } = tokenGroup;
 
@@ -31,15 +32,15 @@
 <div class="flex flex-col">
 	<!-- TODO: Add listeners for all tokens in group -->
 	<TokenCardWithOnClick
-		on:click={() => (isOpened = !isOpened)}
-		styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isOpened
+		on:click={() => (isExpanded = !isExpanded)}
+		styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isExpanded
 			? 'bg-white rounded-b-none'
 			: ''}"
 	>
 		<TokenCard data={headerData} testIdPrefix={TOKEN_GROUP} tokenCount={tokenGroup.tokens.length} />
 	</TokenCardWithOnClick>
 
-	{#if isOpened}
+	{#if isExpanded}
 		<div class="flex flex-col gap-3 rounded-b-xl bg-white/40 pt-2" transition:slide={SLIDE_PARAMS}>
 			{#each tokenGroup.tokens as token (token.id)}
 				<TokenCardWithUrl {token}>
