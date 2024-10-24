@@ -15,11 +15,23 @@ import type {
 	TokenUiOrGroupUi
 } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { Option } from '$lib/types/utils';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+
+export const isToken = (token: Option<unknown>): token is Token =>
+	nonNullish(token) &&
+	typeof token === 'object' &&
+	'id' in token &&
+	'network' in token &&
+	'standard' in token &&
+	'category' in token &&
+	'name' in token &&
+	'symbol' in token &&
+	'decimals' in token;
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -141,6 +153,12 @@ export const mapTokenUi = ({
 	})
 });
 
+const sumBalances = ([balance1, balance2]: [
+	TokenUi['balance'],
+	TokenUi['balance']
+]): TokenUi['balance'] =>
+	nonNullish(balance1) && nonNullish(balance2) ? balance1.add(balance2) : (balance2 ?? balance1);
+
 /** Function to sum the balances of two tokens.
  *
  * If the decimals of the tokens are the same, the balances are added together.
@@ -154,13 +172,15 @@ export const mapTokenUi = ({
  * @returns The sum of the balances or nullish value.
  */
 export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
-	nonNullish(token1.balance) && nonNullish(token2.balance)
-		? token1.decimals === token2.decimals
-			? token1.balance.add(token2.balance)
-			: null
-		: isNullish(token2.balance)
-			? token1.balance
-			: token2.balance;
+	token1.decimals === token2.decimals ? sumBalances([token1.balance, token2.balance]) : null;
+
+const sumUsdBalances = ([usdBalance1, usdBalance2]: [
+	TokenUi['usdBalance'],
+	TokenUi['usdBalance']
+]): TokenUi['usdBalance'] =>
+	nonNullish(usdBalance1) || nonNullish(usdBalance2)
+		? (usdBalance1 ?? 0) + (usdBalance2 ?? 0)
+		: undefined;
 
 /** Function to sum the USD balances of two tokens.
  *
@@ -171,9 +191,7 @@ export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi[
  * @returns The sum of the USD balances or nullish value.
  */
 export const sumTokenUsdBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['usdBalance'] =>
-	nonNullish(token1.usdBalance) || nonNullish(token2.usdBalance)
-		? (token1.usdBalance ?? 0) + (token2.usdBalance ?? 0)
-		: undefined;
+	sumUsdBalances([token1.usdBalance, token2.usdBalance]);
 
 /**
  * Type guard to check if a token is of type RequiredTokenWithLinkedData.
