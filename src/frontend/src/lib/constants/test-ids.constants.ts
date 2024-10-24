@@ -3,6 +3,7 @@ export const NAVIGATION_MENU = 'navigation-menu';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
+export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
 
