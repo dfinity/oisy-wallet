@@ -2,15 +2,12 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
-	import DappModal from '$lib/components/dapps/DappModal.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
 	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
-		type OisyDappDescription,
 		dAppDescriptions,
 		type FeaturedOisyDappDescription
 	} from '$lib/types/oisyDappDescription';
@@ -32,11 +29,6 @@
 	$: filteredDapps = dAppDescriptions.filter(
 		({ tags }) => isNullish(selectedTag) || tags.includes(selectedTag)
 	);
-
-	let selectedDapp: OisyDappDescription | undefined = undefined;
-	$: selectedDapp = $modalDAppDetails
-		? ($modalStore?.data as OisyDappDescription | undefined)
-		: undefined;
 </script>
 
 <h1 class="mb-5 mt-6">{$i18n.dapps.text.title}</h1>
@@ -84,7 +76,3 @@
 </ul>
 
 <SubmitDappButton />
-
-{#if $modalDAppDetails && nonNullish(selectedDapp)}
-	<DappModal dAppDescription={selectedDapp} />
-{/if}
