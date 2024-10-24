@@ -594,12 +594,12 @@ interface I18nAbout {
 		text: {
 			label: string;
 			title: string;
+			hold_crypto: string;
 			network_custody: string;
 			fully_on_chain: string;
 			cross_device: string;
 			verifiable_credentials: string;
 			open_source: string;
-			hold_crypto: string;
 		};
 	};
 }
