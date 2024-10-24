@@ -54,7 +54,7 @@
 								<TokenLogo
 									data={$pageToken}
 									ring
-									subLogo={{ type: 'network', blackAndWhite: true }}
+									badge={{ type: 'network', blackAndWhite: true }}
 								/>
 							</div>
 						{:else}
