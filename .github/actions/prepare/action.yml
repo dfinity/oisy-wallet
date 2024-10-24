@@ -6,19 +6,12 @@ runs:
   using: composite
   steps:
 
-    - name: Restore npm cache
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json', 'package.json') }}
-        restore-keys: |
-            ${{ runner.os }}-npm-
-
     - name: Setup node
       uses: actions/setup-node@v4
       with:
         node-version: 20
         registry-url: 'https://registry.npmjs.org'
+        cache: 'npm'
 
     - name: Install dependencies
       shell: bash
