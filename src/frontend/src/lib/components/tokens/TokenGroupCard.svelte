@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
@@ -27,7 +26,7 @@
 				? 'bg-white rounded-b-none'
 				: ''}"
 		>
-			<TokenCard data={headerData} testIdPrefix={TOKEN_GROUP} />
+			<TokenCardContent data={headerData} testIdPrefix={TOKEN_GROUP} />
 		</TokenCardWithOnClick>
 	</MultipleListeners>
 
