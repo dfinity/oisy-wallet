@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { authSignedIn } from '$lib/derived/auth.derived';
+	import type { TokenToListener } from '$lib/types/listener';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapListeners } from '$lib/utils/listener.utils';
-	import type { TokenToListener } from '$lib/types/listener';
 
 	export let tokens: OptionToken[];
 
