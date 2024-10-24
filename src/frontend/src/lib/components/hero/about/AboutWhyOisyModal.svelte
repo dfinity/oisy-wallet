@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
 	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
+	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconIcLogoPlain from '$lib/components/icons/IconIcLogoPlain.svelte';
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
@@ -12,7 +13,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_WHY_OISY_MODAL}>

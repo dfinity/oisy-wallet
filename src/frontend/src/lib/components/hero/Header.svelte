@@ -3,8 +3,8 @@
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
-	import AboutWhyOisyModal from '$lib/components/hero/about/AboutWhyOisyModal.svelte';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
+	import AboutWhyOisyModal from '$lib/components/hero/about/AboutWhyOisyModal.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
 </script>
