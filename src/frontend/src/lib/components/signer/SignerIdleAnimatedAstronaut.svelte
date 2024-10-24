@@ -19,16 +19,6 @@
 </svg>
 
 <style lang="scss">
-	@keyframes blink {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0;
-		}
-	}
-
 	@keyframes moveInnerArea {
 		0% {
 			transform: translateX(0);
@@ -71,24 +61,14 @@
 		}
 	}
 
-	@keyframes squeezeEyes {
-		0%,
-		100% {
-			transform: scaleY(1);
-		}
-		50% {
-			transform: scaleY(0.5);
-		}
-	}
-
 	.eye-left,
 	.eye-right {
 		transform-origin: 50% 50%;
-		animation: moveEyes 3s ease-in-out infinite;
+		animation: moveEyes 3s cubic-bezier(0.76, 0, 0.24, 1) infinite;
 	}
 
 	.inner-area {
-		animation: moveInnerArea 3s ease-in-out infinite;
+		animation: moveInnerArea 3s cubic-bezier(0.76, 0, 0.24, 1) infinite;
 		animation-iteration-count: infinite;
 	}
 </style>
