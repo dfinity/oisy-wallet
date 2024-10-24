@@ -7,8 +7,8 @@ import { isNullish } from '@dfinity/utils';
 
 /** Mapping function to set listeners for a list of tokens
  *
- * @param tokens
- * @returns
+ * @param {OptionToken[]} tokens An array of tokens to be mapped
+ * @returns {TokenToListener[]} An array of token-listener pairs
  */
 export const mapListeners = (tokens: OptionToken[]): TokenToListener[] =>
 	tokens.reduce<TokenToListener[]>((acc, token) => {
