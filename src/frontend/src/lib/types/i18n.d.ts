@@ -10,6 +10,10 @@ interface I18nCore {
 		next: string;
 		save: string;
 		back: string;
+		reject: string;
+		approve: string;
+		view: string;
+		copy: string;
 		done: string;
 		close: string;
 		refresh: string;
@@ -17,10 +21,7 @@ interface I18nCore {
 		symbol: string;
 		max: string;
 		more: string;
-		reject: string;
-		approve: string;
-		view: string;
-		copy: string;
+
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };

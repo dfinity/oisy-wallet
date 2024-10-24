@@ -4,6 +4,11 @@
 			"cancel": "Cancel",
 			"next": "Next",
 			"save": "Save",
+			"more": "More",
+			"reject": "Reject",
+			"approve": "Approve",
+			"view": "View",
+			"copy": "Copy",
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
@@ -12,12 +17,8 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
-			"max": "Max",
-			"more": "More",
-			"reject": "Reject",
-			"approve": "Approve",
-			"view": "View",
-			"copy": "Copy"
+			"max": "Max"
+
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
