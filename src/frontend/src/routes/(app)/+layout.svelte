@@ -4,6 +4,7 @@
 	import Footer from '$lib/components/core/Footer.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
@@ -41,7 +42,11 @@
 
 	<AuthGuard>
 		<SplitPane>
-			<NavigationMenu slot="menu" />
+			<NavigationMenu slot="menu">
+				{#if route === 'tokens'}
+					<DappsCarousel styleClass="w-80 xl:block hidden" />
+				{/if}
+			</NavigationMenu>
 
 			{#if route !== 'settings' && route !== 'explore'}
 				<Hero usdTotal={route === 'tokens'} summary={route === 'transactions'} />
