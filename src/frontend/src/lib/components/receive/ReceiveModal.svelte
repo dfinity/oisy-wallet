@@ -7,6 +7,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionAddress, Address } from '$lib/types/address';
 	import type { Token } from '$lib/types/token';
+	import { RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let address: OptionAddress<Address> = undefined;
 	export let addressToken: Token | undefined = undefined;
@@ -16,7 +17,7 @@
 	<ReceiveTitle slot="title" {addressToken} />
 
 	<ContentWithToolbar>
-		<ReceiveAddressQRCodeContent {address} {addressToken} />
+		<ReceiveAddressQRCodeContent testIdCopy={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON} {address} {addressToken} />
 
 		<slot name="content" />
 

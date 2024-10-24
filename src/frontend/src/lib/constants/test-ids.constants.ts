@@ -28,3 +28,4 @@ export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-sectio
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
 export const RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON = 'receive-tokens-modal-qr-code-button';
 export const RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT = 'receive-tokens-modal-qr-code-output';
+export const RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON = 'receive-tokens-modal-copy-address-button';
