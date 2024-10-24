@@ -6,14 +6,16 @@ import {
 } from '$lib/stores/setter.store';
 import type { CertifiedData } from '$lib/types/store';
 
-export type CertifiedStoreData<T extends CertifiedData<unknown>> = SetterStoreData<T>;
+export type CertifiedStoreBaseData = CertifiedData<unknown> | CertifiedData<unknown>[];
 
-export type CertifiedStore<T extends CertifiedData<unknown>> = Omit<
+export type CertifiedStoreData<T extends CertifiedStoreBaseData> = SetterStoreData<T>;
+
+export type CertifiedStore<T extends CertifiedStoreBaseData> = Omit<
 	CertifiedSetterStoreStore<T>,
 	'set'
 >;
 
-export const initCertifiedStore = <T extends CertifiedData<unknown>>(): CertifiedStore<T> &
+export const initCertifiedStore = <T extends CertifiedStoreBaseData>(): CertifiedStore<T> &
 	WritableUpdateStore<T> => {
 	const { update, subscribe, reset } = initSetterStore<T>();
 
