@@ -21,7 +21,6 @@
 
 	const toggleIsExpand = (toggle: boolean) =>
 		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded: toggle } });
-
 </script>
 
 <div class="flex flex-col">
