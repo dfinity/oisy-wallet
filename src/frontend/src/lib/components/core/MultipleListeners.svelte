@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { authSignedIn } from '$lib/derived/auth.derived';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 	import { mapListeners } from '$lib/utils/listener.utils';
 	import type { TokenToListener } from '$lib/types/listener';
 
