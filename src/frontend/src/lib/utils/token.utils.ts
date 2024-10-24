@@ -222,6 +222,7 @@ const createTokenGroup = ({
 		decimals: nativeToken.decimals,
 		icon: nativeToken.icon
 	},
+	id: nativeToken.id,
 	nativeToken,
 	nativeNetwork: nativeToken.network,
 	tokens: [nativeToken, twinToken],

@@ -77,6 +77,7 @@ export type OptionTokenUi = Option<TokenUi>;
 // TODO: remove header and nativeNetwork, since we added nativeToken that has all their data, and they became redundant
 export type TokenUiGroup = {
 	header: TokenMetadata;
+	id: TokenId;
 	nativeToken: TokenUi;
 	nativeNetwork: Network;
 	tokens: TokenUi[];
