@@ -1,14 +1,11 @@
-name: Auto Update i18n
+name: Auto format
 
 on:
   pull_request:
     types: [opened, synchronize]
-    paths:
-      - 'src/frontend/src/lib/i18n/*'
-      - 'src/frontend/src/lib/types/i18n.d.ts'
 
 jobs:
-  auto_update:
+  format:
     runs-on: ubuntu-24.04
 
     steps:
@@ -18,12 +15,12 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
-      
+
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Run i18n Script
-        run: npm run i18n
+      - name: Run format Script
+        run: npm run format
 
       - name: Check for Changes
         id: check_changes
@@ -34,10 +31,10 @@ jobs:
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit i18n
+      - name: Commit format
         if: steps.check_changes.outputs.changes_detected == 'true'
         uses: EndBug/add-and-commit@v9
         with:
           add: .
           default_author: github_actions
-          message: '🤖 Updated i18n files'
+          message: '🤖 Apply formatting changes'
