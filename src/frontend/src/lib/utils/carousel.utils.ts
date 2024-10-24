@@ -66,40 +66,31 @@ export const extendCarouselSliderFrame = ({
 };
 
 /**
- * Disable transition for the provided slider frame.
- */
-export const disableTransition = ({ sliderFrame }: CommonParams) => {
-	if (isNullish(sliderFrame)) {
-		return;
-	}
-
-	sliderFrame.style.transition = 'none';
-};
-
-/**
- * Enable transition for the provided slider frame.
- */
-export const enableTransition = ({
-	sliderFrame,
-	duration,
-	easing
-}: { duration: number; easing: string } & CommonParams) => {
-	if (isNullish(sliderFrame)) {
-		return;
-	}
-
-	sliderFrame.style.transition = `all ${duration}ms ${easing}`;
-};
-
-/**
  * Update visible part of the provided slider frame.
  */
 export const moveSlider = ({
 	animateTo,
-	sliderFrame
-}: { animateTo: number } & CommonParams): void => {
+	sliderFrame,
+	withTransition,
+	duration,
+	easing
+}: {
+	animateTo: number;
+	duration: number;
+	easing: string;
+	withTransition: boolean;
+} & CommonParams): void => {
 	if (isNullish(sliderFrame)) {
 		return;
+	}
+
+	const transitionDisabled =
+		sliderFrame.style.transition === '' || sliderFrame.style.transition === 'none';
+
+	if (transitionDisabled && withTransition) {
+		sliderFrame.style.transition = `all ${duration}ms ${easing}`;
+	} else if (!transitionDisabled && !withTransition) {
+		sliderFrame.style.transition = 'none';
 	}
 
 	sliderFrame.style.transform = `translate3d(${animateTo}px, 0, 0)`;
