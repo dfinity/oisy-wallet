@@ -74,8 +74,11 @@ export type TokenUi = Token & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;
 
+//todo: separate typing from token id
+export type GroupId = TokenId;
+
 export type TokenUiGroup = {
-	id: TokenId;
+	id: GroupId;
 	nativeToken: TokenUi;
 	tokens: TokenUi[];
 } & TokenFinancialData;
