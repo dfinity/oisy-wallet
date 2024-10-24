@@ -18,6 +18,7 @@ export const ABOUT_HOW_MODAL_OPEN_BUTTON = 'about-how-modal-open-button';
 export const ABOUT_HOW_MODAL = 'about-how-modal';
 
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
+export const RECEIVE_TOKENS_MODAL_DONE_BUTTON = 'receive-tokens-modal-done-button';
 export const RECEIVE_TOKENS_MODAL = 'receive-tokens-modal';
 
 export const RECEIVE_TOKENS_MODAL_ICRC_SECTION = 'receive-tokens-modal-icrc-section';
