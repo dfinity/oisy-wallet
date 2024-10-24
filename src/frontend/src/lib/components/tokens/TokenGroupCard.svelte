@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
@@ -18,24 +19,29 @@
 	$: headerData = mapHeaderData(tokenGroup);
 </script>
 
-<div class="flex flex-col">
-	<!-- TODO: Add listeners for all tokens in group -->
-	<TokenCardWithOnClick
-		on:click={() => (isExpanded = !isExpanded)}
-		styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isExpanded
-			? 'bg-white rounded-b-none'
-			: ''}"
-	>
-		<TokenCard data={headerData} testIdPrefix={TOKEN_GROUP} />
-	</TokenCardWithOnClick>
+<MultipleListeners tokens={tokenGroup.tokens}>
+	<div class="flex flex-col">
+		<!-- TODO: Add listeners for all tokens in group -->
+		<TokenCardWithOnClick
+			on:click={() => (isExpanded = !isExpanded)}
+			styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isExpanded
+				? 'bg-white rounded-b-none'
+				: ''}"
+		>
+			<TokenCard data={headerData} testIdPrefix={TOKEN_GROUP} />
+		</TokenCardWithOnClick>
 
-	{#if isExpanded}
-		<div class="flex flex-col gap-3 rounded-b-xl bg-white/40 pt-2" transition:slide={SLIDE_PARAMS}>
-			{#each tokenGroup.tokens as token (token.id)}
-				<TokenCardWithUrl {token}>
-					<TokenCardContent logoSize="md" data={token} />
-				</TokenCardWithUrl>
-			{/each}
-		</div>
-	{/if}
-</div>
+		{#if isExpanded}
+			<div
+				class="flex flex-col gap-3 rounded-b-xl bg-white/40 pt-2"
+				transition:slide={SLIDE_PARAMS}
+			>
+				{#each tokenGroup.tokens as token (token.id)}
+					<TokenCardWithUrl {token}>
+						<TokenCardContent logoSize="md" data={token} />
+					</TokenCardWithUrl>
+				{/each}
+			</div>
+		{/if}
+	</div>
+</MultipleListeners>
