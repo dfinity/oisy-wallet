@@ -10,12 +10,12 @@
 			"view": "View",
 			"copy": "Copy",
 			"back": "Back",
+			"symbol": "Symbol",
+			"decimals": "Decimals",
 			"done": "Done",
 			"close": "Close",
 			"refresh": "Refresh",
 			"name": "Name",
-			"symbol": "Symbol",
-			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max"
 

@@ -13,9 +13,9 @@ interface I18nCore {
 		reject: string;
 		approve: string;
 		view: string;
+		close: string;
 		copy: string;
 		done: string;
-		close: string;
 		refresh: string;
 		name: string;
 		symbol: string;
