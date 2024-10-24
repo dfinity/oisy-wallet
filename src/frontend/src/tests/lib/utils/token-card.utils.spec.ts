@@ -1,5 +1,5 @@
-import { ICP_NETWORK } from '$env/networks.env';
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { SEPOLIA_NETWORK } from '$env/networks.env';
+import { ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { TokenUiGroup } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
 import { mapHeaderData } from '$lib/utils/token-card.utils';
@@ -9,21 +9,21 @@ import { describe, expect, it } from 'vitest';
 describe('mapHeaderData', () => {
 	// We mock the token group with a mix of data just to verify that the function works correctly
 	const tokenGroup: TokenUiGroup = {
-		nativeToken: ICP_TOKEN,
-		tokens: [ICP_TOKEN, ETHEREUM_TOKEN],
+		nativeToken: SEPOLIA_TOKEN,
+		tokens: [SEPOLIA_TOKEN, ICP_TOKEN],
 		balance: bn1,
 		usdBalance: 300
 	};
 
 	it('should correctly map the token group to card data', () => {
 		const expected: CardData = {
-			name: ICP_TOKEN.name,
-			symbol: ICP_TOKEN.symbol,
-			decimals: ICP_TOKEN.decimals,
-			icon: ICP_TOKEN.icon,
-			network: ICP_NETWORK,
-			oisyName: { oisyName: ICP_NETWORK.name },
-			oisySymbol: { oisySymbol: ICP_TOKEN.name },
+			name: SEPOLIA_TOKEN.name,
+			symbol: SEPOLIA_TOKEN.symbol,
+			decimals: SEPOLIA_TOKEN.decimals,
+			icon: SEPOLIA_TOKEN.icon,
+			network: SEPOLIA_NETWORK,
+			oisyName: { oisyName: SEPOLIA_NETWORK.name },
+			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
 			balance: bn1,
 			usdBalance: 300,
 			tokenCount: 2
@@ -36,13 +36,13 @@ describe('mapHeaderData', () => {
 		const { balance: _balance, usdBalance: _usdBalance, ...rest } = tokenGroup;
 
 		const expected: CardData = {
-			name: ICP_TOKEN.name,
-			symbol: ICP_TOKEN.symbol,
-			decimals: ICP_TOKEN.decimals,
-			icon: ICP_TOKEN.icon,
-			network: ICP_NETWORK,
-			oisyName: { oisyName: ICP_NETWORK.name },
-			oisySymbol: { oisySymbol: ICP_TOKEN.name },
+			name: SEPOLIA_TOKEN.name,
+			symbol: SEPOLIA_TOKEN.symbol,
+			decimals: SEPOLIA_TOKEN.decimals,
+			icon: SEPOLIA_TOKEN.icon,
+			network: SEPOLIA_NETWORK,
+			oisyName: { oisyName: SEPOLIA_NETWORK.name },
+			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
 			tokenCount: 2
 		};
 
