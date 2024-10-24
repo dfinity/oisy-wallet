@@ -6,7 +6,7 @@ export type WritableUpdateStore<T> = Pick<Writable<SetterStoreData<T>>, 'update'
 
 export type SetterStoreData<T> = Record<TokenId, T | null> | undefined;
 
-export interface SetterStoreStore<T> extends Readable<SetterStoreData<T>>, WritableUpdateStore<T> {
+export interface SetterStoreStore<T> extends Readable<SetterStoreData<T>> {
 	reset: (tokenId: TokenId) => void;
 	set: (params: { tokenId: TokenId; data: T }) => void;
 }
