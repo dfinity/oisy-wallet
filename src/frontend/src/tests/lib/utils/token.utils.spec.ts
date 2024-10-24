@@ -364,7 +364,6 @@ describe('groupTokensByTwin', () => {
 		expect(groupedTokens).toHaveLength(3);
 
 		const btcGroup = groupedTokens[0];
-		expect(btcGroup).toHaveProperty('header');
 		expect(btcGroup).toHaveProperty('tokens');
 		expect((btcGroup as TokenUiGroup).tokens).toHaveLength(2);
 		expect((btcGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('BTC');

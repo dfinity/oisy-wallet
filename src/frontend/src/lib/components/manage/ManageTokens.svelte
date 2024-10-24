@@ -240,7 +240,7 @@
 			<Card>
 				<TokenName data={token} />
 
-				<TokenLogo slot="icon" color="white" data={token} subLogo={{ type: 'network' }} />
+				<TokenLogo slot="icon" color="white" data={token} badge={{ type: 'network' }} />
 
 				<span class="break-all" slot="description">
 					{token.symbol}
