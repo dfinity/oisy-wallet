@@ -4,9 +4,15 @@
 
 	export let currentSlide: number;
 	export let index: number;
+	export let totalSlides: number;
 
 	let isActive: boolean;
-	$: isActive = currentSlide === index;
+	$: isActive =
+		currentSlide === index ||
+		// set the last indicator as active on last-to-first transition
+		(index === totalSlides - 1 && currentSlide < 0) ||
+		// set the first indicator as active on first-to-last transition
+		(index === 0 && currentSlide >= totalSlides);
 </script>
 
 <button
