@@ -24,7 +24,7 @@
 				: 'tokens';
 </script>
 
-<div class="box-content flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
+<div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
 	<div class="flex flex-col gap-3">
 		<NavigationItem
 			href="/"
@@ -52,6 +52,10 @@
 			<IconlySettings />
 			{$i18n.navigation.text.settings}
 		</NavigationItem>
+	</div>
+
+	<div class="my-4 flex h-full flex-col justify-center">
+		<slot />
 	</div>
 
 	<InfoMenu />
