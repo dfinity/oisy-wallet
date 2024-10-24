@@ -15,6 +15,10 @@ const dAppDescriptionSchema = z.object({
 	stats: z.string(),
 	logo: z.string(),
 
+	// TODO: check if text is not too long using logic from https://github.com/dfinity/portal/blob/34a0328ed4792f5a7f3943be73f13f5abaefb4b8/plugins/validate-showcase.js#L179
+	carouselSlideText: z.string().optional(),
+	carouselSlideCallToAction: z.string().optional(),
+
 	usesInternetIdentity: z.boolean(),
 	authOrigins: z.array(z.string()).optional(),
 
@@ -40,6 +44,11 @@ const oisyDappDescriptionSchema = dAppDescriptionSchema.extend({
 export type OisyDappDescription = z.infer<typeof oisyDappDescriptionSchema>;
 export type FeaturedOisyDappDescription = Omit<OisyDappDescription, 'screenshots'> &
 	Required<Pick<OisyDappDescription, 'screenshots'>>;
+export type CarouselCardOisyDappDescription = Omit<
+	OisyDappDescription,
+	'carouselSlideText' | 'carouselSlideCallToAction'
+> &
+	Required<Pick<OisyDappDescription, 'carouselSlideText' & 'carouselSlideCallToAction'>>;
 
 const parseResult = z.array(oisyDappDescriptionSchema).safeParse(dAppDescriptionsJson);
 export const dAppDescriptions: OisyDappDescription[] = parseResult.success ? parseResult.data : [];
