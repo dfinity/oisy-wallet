@@ -30,18 +30,18 @@ const dAppDescriptionSchema = z.object({
 	submittableId: z.string().optional()
 });
 
-const carouselDappDescriptionSchema = {
+const carouselDappDescriptionSchema = z.object({
 	// TODO: check if text is not too long using logic from https://github.com/dfinity/portal/blob/34a0328ed4792f5a7f3943be73f13f5abaefb4b8/plugins/validate-showcase.js#L179
 	text: z.string(),
 	callToAction: z.string()
-};
+});
 
 const oisyDappDescriptionSchema = dAppDescriptionSchema.extend({
 	featured: z.boolean().optional(),
 	callToAction: z.string().optional(),
 	telegram: z.string().url().optional(),
 	openChat: z.string().url().optional(),
-	carousel: z.object(carouselDappDescriptionSchema).optional()
+	carousel: carouselDappDescriptionSchema.optional()
 });
 
 export type OisyDappDescription = z.infer<typeof oisyDappDescriptionSchema>;
