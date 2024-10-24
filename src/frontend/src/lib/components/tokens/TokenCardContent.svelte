@@ -4,12 +4,14 @@
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import type { LogoSize } from '$lib/types/components';
 	import type { CardData } from '$lib/types/token-card';
+	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 
 	export let data: CardData;
 	export let logoSize: LogoSize = 'lg';
+	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 </script>
 
-<TokenCard {data} {logoSize}>
+<TokenCard {data} {logoSize} {testIdPrefix}>
 	<TokenBalance {data} slot="balance" />
 
 	<ExchangeTokenValue {data} slot="exchange" />

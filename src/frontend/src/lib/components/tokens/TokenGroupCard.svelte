@@ -26,7 +26,7 @@
 			? 'bg-white rounded-b-none'
 			: ''}"
 	>
-		<TokenCard data={headerData} testIdPrefix={TOKEN_GROUP} />
+		<TokenCardContent data={headerData} testIdPrefix={TOKEN_GROUP} />
 	</TokenCardWithOnClick>
 
 	{#if isExpanded}
