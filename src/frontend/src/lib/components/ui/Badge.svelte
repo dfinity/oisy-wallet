@@ -14,9 +14,11 @@
 </script>
 
 <span
-	class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
+	class="inline-flex w-full items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
 		variant
 	]} {styleClass ?? ''}"
 >
-	<slot />
+	<span class="inline-block min-w-0 truncate">
+		<slot />
+	</span>
 </span>
