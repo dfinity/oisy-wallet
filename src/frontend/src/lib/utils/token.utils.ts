@@ -19,7 +19,7 @@ import type { Option } from '$lib/types/utils';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -142,6 +142,12 @@ export const mapTokenUi = ({
 	})
 });
 
+const sumBalances = ([balance1, balance2]: [
+	TokenUi['balance'],
+	TokenUi['balance']
+]): TokenUi['balance'] =>
+	nonNullish(balance1) && nonNullish(balance2) ? balance1.add(balance2) : (balance2 ?? balance1);
+
 /** Function to sum the balances of two tokens.
  *
  * If the decimals of the tokens are the same, the balances are added together.
@@ -155,25 +161,22 @@ export const mapTokenUi = ({
  * @returns The sum of the balances or nullish value.
  */
 export const sumTokenBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['balance'] =>
-	nonNullish(token1.balance) && nonNullish(token2.balance)
-		? token1.decimals === token2.decimals
-			? token1.balance.add(token2.balance)
-			: null
-		: isNullish(token2.balance)
-			? token1.balance
-			: token2.balance;
+	token1.decimals === token2.decimals ? sumBalances([token1.balance, token2.balance]) : null;
 
 /** Function to sum the USD balances of two tokens.
  *
  * If one of the balances is nullish, the function returns the other balance.
  *
- * @param token1
- * @param token2
+ * @param usdBalance1
+ * @param usdBalance2
  * @returns The sum of the USD balances or nullish value.
  */
-export const sumTokenUsdBalances = ([token1, token2]: [TokenUi, TokenUi]): TokenUi['usdBalance'] =>
-	nonNullish(token1.usdBalance) || nonNullish(token2.usdBalance)
-		? (token1.usdBalance ?? 0) + (token2.usdBalance ?? 0)
+export const sumUsdBalances = ([usdBalance1, usdBalance2]: [
+	TokenUi['usdBalance'],
+	TokenUi['usdBalance']
+]): TokenUi['usdBalance'] =>
+	nonNullish(usdBalance1) || nonNullish(usdBalance2)
+		? (usdBalance1 ?? 0) + (usdBalance2 ?? 0)
 		: undefined;
 
 /**
@@ -219,7 +222,7 @@ const createTokenGroup = ({
 	nativeToken,
 	tokens: [nativeToken, twinToken],
 	balance: sumTokenBalances([nativeToken, twinToken]),
-	usdBalance: sumTokenUsdBalances([nativeToken, twinToken])
+	usdBalance: sumUsdBalances([nativeToken.usdBalance, twinToken.usdBalance])
 });
 
 /**
