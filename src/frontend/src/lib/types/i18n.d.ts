@@ -590,11 +590,12 @@ interface I18nTransactions {
 
 interface I18nAbout {
 	text: { title: string };
-	how: {
+	why_oisy: {
 		text: {
 			label: string;
 			title: string;
-			self_custody: string;
+			hold_crypto: string;
+			network_custody: string;
 			fully_on_chain: string;
 			cross_device: string;
 			verifiable_credentials: string;
