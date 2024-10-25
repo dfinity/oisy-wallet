@@ -22,4 +22,5 @@
 	disabled={$walletConnectPaired}
 >
 	<IconWalletConnect size="22" slot="icon" />
+	<svelte:fragment>{$i18n.wallet_connect.text.name}</svelte:fragment>
 </ButtonIcon>
