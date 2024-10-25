@@ -30,3 +30,4 @@ export const RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON = 'receive-tokens-modal-qr-code
 export const RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT = 'receive-tokens-modal-qr-code-output';
 export const RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON = 'receive-tokens-modal-copy-address-button';
 export const RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON = 'receive-tokens-modal-copy-icp-address-button';
+export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON = 'receive-tokens-modal-copy-icp-account-id-button';
