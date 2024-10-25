@@ -13,8 +13,8 @@
 
 	export let tokenGroup: TokenUiGroup;
 
-	$: groups = $tokenGroupStore ?? {};
-	$: isExpanded = groups[tokenGroup.id]?.isExpanded ?? false;
+	let isExpanded: boolean;
+	$: isExpanded = ($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false;
 
 	let headerData: CardData;
 	$: headerData = mapHeaderData(tokenGroup);
