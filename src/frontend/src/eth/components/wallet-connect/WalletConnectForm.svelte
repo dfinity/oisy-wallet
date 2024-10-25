@@ -74,7 +74,7 @@
 		{#if !renderQRCodeReader}
 			<button
 				type="button"
-				class="wallet-connect inset-center text-center font-bold text-white"
+				class="primary inset-center"
 				style="padding: var(--padding) var(--padding-3x)"
 				on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</button
 			>
