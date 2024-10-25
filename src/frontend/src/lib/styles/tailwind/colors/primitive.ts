@@ -1,4 +1,4 @@
-import { colorsBase } from './base.js';
+import { colorsBase } from './base';
 
 export const colorsPrimitive = {
 	brand: {
