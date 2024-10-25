@@ -72,7 +72,7 @@
 		"tags": ["DEX"],
 		"stats": "",
 		"usesInternetIdentity": true,
-		"description": "The Hub of Future Decentralized Finance!<br/><br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly.",
+		"description": "The Hub of Future Decentralized Finance!<br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly.",
 		"logo": "/images/dapps/icp-swap-logo.svg",
 		"screenshots": ["/images/dapps/icp-swap.webp"]
 	}
