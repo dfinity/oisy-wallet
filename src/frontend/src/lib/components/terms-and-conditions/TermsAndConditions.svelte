@@ -22,13 +22,12 @@
 		$i18n.terms_and_conditions.text.no_waiver,
 		$i18n.terms_and_conditions.text.english_version
 	];
-
-	let terms: string;
-	$: terms = replaceOisyPlaceholders(termsList.map((term) => `<p>${term}</p>`).join(''));
 </script>
 
 <h1 class="text-5xl">{replaceOisyPlaceholders($i18n.terms_and_conditions.text.title)}</h1>
 
-<p class="mt-12">
-	<Html text={terms} />
-</p>
+<section class="mt-12">
+	{#each termsList as terms}
+		<p><Html text={replaceOisyPlaceholders(terms)} /></p>
+	{/each}
+</section>
