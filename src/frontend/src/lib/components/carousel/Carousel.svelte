@@ -9,6 +9,7 @@
 	export let duration = 300;
 	export let easing = 'ease-out';
 	export let styleClass: string | undefined = undefined;
+	export let controlsWidthStyleClass: string | undefined = undefined;
 
 	/**
 	 * Carousel container element variables
@@ -243,14 +244,16 @@
 <svelte:window on:resize={onResize} />
 
 <div
-	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-14 pt-3 shadow`}
+	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>
-	<div class="absolute bottom-3 left-0 flex w-full justify-center">
+	<div
+		class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+	>
 		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 		<Controls {onNext} {onPrevious} />
 	</div>

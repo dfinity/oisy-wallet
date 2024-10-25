@@ -45,7 +45,7 @@
 		<SplitPane>
 			<NavigationMenu slot="menu">
 				{#if route === 'tokens'}
-					<div in:fade class="hidden w-80 xl:block">
+					<div in:fade class="hidden xl:block">
 						<DappsCarousel />
 					</div>
 				{/if}
