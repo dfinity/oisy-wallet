@@ -5,7 +5,6 @@
 	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
-	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
@@ -77,7 +76,6 @@
 		{/if}
 
 		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
-		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
 
 		<ChangelogLink />
 
