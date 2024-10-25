@@ -35,7 +35,9 @@
 	{/if}
 
 	<div class="pointer-events-auto flex justify-end gap-4">
-		<WalletConnect />
+		{#if $authSignedIn}
+			<WalletConnect />
+		{/if}
 
 		{#if $authSignedIn}
 			<Menu />
