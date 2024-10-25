@@ -13,7 +13,7 @@
 	} = dappsCarouselSlide);
 </script>
 
-<div class="flex">
+<div class="flex h-full items-center">
 	<div class="mr-4 shrink-0">
 		<Img
 			height="64"
