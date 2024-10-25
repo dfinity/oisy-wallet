@@ -54,7 +54,14 @@ export default {
 			beer: '#f7931a',
 			fulvous: '#de7900',
 			water: '#d1e3ff',
-			foreground: { 'brand-primary': colorsPrimitive.brand.base }
+			foreground: {
+				'brand-primary': colorsPrimitive.brand.base,
+				'brand-secondary': colorsPrimitive.brand[500],
+				warning: colorsPrimitive.warning.default
+			},
+			background: {
+				'brand-primary': colorsPrimitive.brand.base
+			}
 		},
 		extend: {
 			backgroundSize: {

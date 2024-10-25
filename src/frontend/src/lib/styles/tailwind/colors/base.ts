@@ -1,3 +1,5 @@
 export const colorsBase = {
-	'blue-ribbon': '#0066ff'
+	'american-orange': '#ff8a00',
+	'blue-ribbon': '#0066ff',
+	cobalt: '#004abe'
 };

@@ -5,7 +5,7 @@
 		default: 'border border-light-grey bg-dust/30',
 		info: 'bg-light-blue text-foreground-brand-primary',
 		error: 'bg-rusty-red/20 text-rusty-red',
-		warning: 'bg-american-orange/20 text-american-orange',
+		warning: 'bg-american-orange/20 text-foreground-warning',
 		success: 'bg-green-crayola/20 text-green-crayola',
 		outline: 'border border-light-grey bg-off-white'
 	};
