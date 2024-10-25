@@ -1,4 +1,4 @@
-import { themeDefault } from '$lib/styles/tailwind/colors/theme-default';
+import { themeDefault } from './theme-default';
 
 export const themeVariables = {
 	foreground: {
