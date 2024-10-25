@@ -1,6 +1,6 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import type { Config } from 'tailwindcss/types/config';
-import { colorsTheme } from './src/frontend/src/lib/styles/tailwind/colors/theme-default';
+import { themeVariables } from './src/frontend/src/lib/styles/tailwind/colors/variables';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -54,14 +54,7 @@ export default {
 			beer: '#f7931a',
 			fulvous: '#de7900',
 			water: '#d1e3ff',
-			foreground: {
-				'brand-primary': colorsTheme.brand.base,
-				'brand-secondary': colorsTheme.brand[500],
-				warning: colorsTheme.warning.default
-			},
-			background: {
-				'brand-primary': colorsTheme.brand.base
-			}
+			...themeVariables
 		},
 		extend: {
 			backgroundSize: {

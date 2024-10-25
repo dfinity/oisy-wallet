@@ -1,6 +1,6 @@
 import { colorsBase } from './base';
 
-export const colorsTheme = {
+export const themeDefault = {
 	brand: {
 		base: colorsBase['blue-ribbon'],
 		500: colorsBase['cobalt']
