@@ -638,7 +638,7 @@ interface I18nCarousel {
 	text: { next_slide: string; prev_slide: string; indicator: string };
 }
 
-interface I18nTerms_and_conditions {
+interface I18nLicense_agreement {
 	text: {
 		title: string;
 		paragraph_1: string;
@@ -685,5 +685,5 @@ interface I18n {
 	about: I18nAbout;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
-	terms_and_conditions: I18nTerms_and_conditions;
+	license_agreement: I18nLicense_agreement;
 }
