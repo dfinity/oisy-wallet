@@ -244,7 +244,7 @@
 <svelte:window on:resize={onResize} />
 
 <div
-	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-14 pt-3 shadow`}
+	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div class="flex" bind:this={sliderFrame}>
@@ -252,7 +252,7 @@
 		</div>
 	</div>
 	<div
-		class={`absolute bottom-3 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+		class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
 	>
 		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 		<Controls {onNext} {onPrevious} />
