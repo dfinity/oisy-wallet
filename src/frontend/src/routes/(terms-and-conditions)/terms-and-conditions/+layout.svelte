@@ -11,7 +11,7 @@
 </header>
 
 <main
-	class="md:w-md 1.5lg:mt-28 mx-0 mt-10 flex flex-col items-center justify-center px-8 pb-10 md:mx-auto md:px-0"
+	class="mx-0 mt-10 flex flex-col items-center justify-center px-8 pb-10 lg:mx-auto lg:w-md lg:px-0 1.5lg:mt-28"
 >
 	<slot />
 </main>
