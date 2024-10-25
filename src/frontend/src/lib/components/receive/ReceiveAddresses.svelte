@@ -10,10 +10,10 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
-		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
-		RECEIVE_TOKENS_MODAL_ICP_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_SECTION,
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
-		RECEIVE_TOKENS_MODAL_BTC_SECTION
+		RECEIVE_TOKENS_MODAL_ICP_SECTION,
+		RECEIVE_TOKENS_MODAL_ICRC_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -32,47 +32,6 @@
 </script>
 
 <ContentWithToolbar>
-	<ReceiveAddressWithLogo
-		on:click={() =>
-			displayQRCode({
-				address: $icrcAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.principal,
-				addressToken: ICP_TOKEN
-			})}
-		address={$icrcAccountIdentifierText ?? ''}
-		token={ICP_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
-		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
-		testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
-	>
-		{$i18n.receive.icp.text.principal}
-
-		<span slot="notes" class="text-secondary text-sm"
-			>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
-		>
-	</ReceiveAddressWithLogo>
-
-	<ReceiveAddressWithLogo
-		on:click={() =>
-			displayQRCode({
-				address: $icpAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.icp_account,
-				addressToken: ICP_TOKEN
-			})}
-		address={$icpAccountIdentifierText ?? ''}
-		token={ICP_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_account_qr}
-		copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
-		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
-		invisibleLogo
-	>
-		{$i18n.receive.icp.text.icp_account}
-
-		<span slot="notes" class="text-secondary text-sm"
-			>{$i18n.receive.icp.text.use_for_icp_deposit}</span
-		>
-	</ReceiveAddressWithLogo>
-
 	{#if NETWORK_BITCOIN_ENABLED}
 		<div class="mb-6">
 			<Hr />
@@ -148,6 +107,55 @@
 		testId={RECEIVE_TOKENS_MODAL_ETH_SECTION}
 	>
 		{$i18n.receive.ethereum.text.ethereum}
+
+		<span slot="notes" class="text-secondary text-sm"
+			>{$i18n.receive.icp.text.your_private_eth_address}</span
+		>
+	</ReceiveAddressWithLogo>
+
+	<div class="mb-6">
+		<Hr />
+	</div>
+
+	<ReceiveAddressWithLogo
+		on:click={() =>
+			displayQRCode({
+				address: $icrcAccountIdentifierText ?? '',
+				addressLabel: $i18n.receive.icp.text.principal,
+				addressToken: ICP_TOKEN
+			})}
+		address={$icrcAccountIdentifierText ?? ''}
+		token={ICP_TOKEN}
+		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
+		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+		testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
+	>
+		{$i18n.receive.icp.text.principal}
+
+		<span slot="notes" class="text-secondary text-sm"
+			>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
+		>
+	</ReceiveAddressWithLogo>
+
+	<ReceiveAddressWithLogo
+		on:click={() =>
+			displayQRCode({
+				address: $icpAccountIdentifierText ?? '',
+				addressLabel: $i18n.receive.icp.text.icp_account,
+				addressToken: ICP_TOKEN
+			})}
+		address={$icpAccountIdentifierText ?? ''}
+		token={ICP_TOKEN}
+		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_account_qr}
+		copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
+		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
+		invisibleLogo
+	>
+		{$i18n.receive.icp.text.icp_account}
+
+		<span slot="notes" class="text-secondary text-sm"
+			>{$i18n.receive.icp.text.use_for_icp_deposit}</span
+		>
 	</ReceiveAddressWithLogo>
 
 	<ButtonDone on:click={modalStore.close} slot="toolbar" />
