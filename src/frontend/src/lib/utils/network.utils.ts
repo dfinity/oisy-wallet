@@ -56,7 +56,7 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 		} = token;
 
 		return (
-			($pseudoNetworkChainFusion /*&& !isTokenIcrcTestnet(token) && env !== 'testnet'*/) ||
+			($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && env !== 'testnet') ||
 			$selectedNetwork?.id === networkId
 		);
 	});
