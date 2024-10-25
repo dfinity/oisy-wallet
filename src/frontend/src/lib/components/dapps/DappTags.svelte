@@ -12,8 +12,10 @@
 	class="flex list-none flex-wrap gap-2"
 >
 	{#each tags as tag}
-		<Badge>
-			{tag}
-		</Badge>
+		<li>
+			<Badge>
+				{tag}
+			</Badge>
+		</li>
 	{/each}
 </ul>
