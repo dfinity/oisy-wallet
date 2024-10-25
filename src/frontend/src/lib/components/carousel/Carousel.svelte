@@ -9,6 +9,7 @@
 	export let duration = 300;
 	export let easing = 'ease-out';
 	export let styleClass: string | undefined = undefined;
+	export let controlsWidthStyleClass: string | undefined = undefined;
 
 	/**
 	 * Carousel container element variables
@@ -250,7 +251,9 @@
 			<slot />
 		</div>
 	</div>
-	<div class="absolute bottom-3 left-0 flex w-full justify-center">
+	<div
+		class={`absolute bottom-3 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+	>
 		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 		<Controls {onNext} {onPrevious} />
 	</div>
