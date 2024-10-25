@@ -101,9 +101,9 @@ export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive-bitcoin'
 );
-export const modalAboutHow: Readable<boolean> = derived(
+export const modalAboutWhyOisy: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'about-how'
+	($modalStore) => $modalStore?.type === 'about-why-oisy'
 );
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,

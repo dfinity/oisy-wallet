@@ -10,8 +10,8 @@ export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
 
-export const ABOUT_HOW_MODAL_OPEN_BUTTON = 'about-how-modal-open-button';
-export const ABOUT_HOW_MODAL = 'about-how-modal';
+export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
+export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
 
 export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
 export const RECEIVE_TOKENS_MODAL = 'receive-tokens-modal';
