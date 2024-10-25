@@ -19,14 +19,14 @@
 	let headerData: CardData;
 	$: headerData = mapHeaderData(tokenGroup);
 
-	const toggleIsExpand = (toggle: boolean) =>
+	const toggleIsExpanded = (toggle: boolean) =>
 		tokenGroupStore.set({ tokenId: tokenGroup.id, data: { isExpanded: toggle } });
 </script>
 
 <div class="flex flex-col">
 	<MultipleListeners tokens={tokenGroup.tokens}>
 		<TokenCardWithOnClick
-			on:click={() => toggleIsExpand(!isExpanded)}
+			on:click={() => toggleIsExpanded(!isExpanded)}
 			styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isExpanded
 				? 'bg-white rounded-b-none'
 				: ''}"
