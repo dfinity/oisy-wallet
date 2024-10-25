@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
-	import CoverHow from '$lib/assets/cover-how-it-works.png';
+	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconIcLogoPlain from '$lib/components/icons/IconIcLogoPlain.svelte';
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
@@ -20,7 +20,7 @@
 	</svelte:fragment>
 
 	<div class="stretch pt-4">
-		<ImgBanner size="small" src={CoverHow} alt={$i18n.about.how.text.title} />
+		<ImgBanner size="small" src={CoverWhyOisy} alt={$i18n.about.how.text.title} />
 
 		<p class="mt-12">
 			<IconKey />

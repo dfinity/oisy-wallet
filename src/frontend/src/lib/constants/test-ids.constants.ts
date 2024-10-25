@@ -10,9 +10,6 @@ export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
 
-export const ABOUT_WHAT_MODAL_OPEN_BUTTON = 'about-what-modal-open-button';
-export const ABOUT_WHAT_MODAL = 'about-what-modal';
-
 export const ABOUT_HOW_MODAL_OPEN_BUTTON = 'about-how-modal-open-button';
 export const ABOUT_HOW_MODAL = 'about-how-modal';
 

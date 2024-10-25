@@ -27,7 +27,6 @@ export interface Modal<T> {
 		| 'token'
 		| 'ic-token'
 		| 'receive-bitcoin'
-		| 'about-what'
 		| 'about-how'
 		| 'btc-transaction'
 		| 'dapp-details';
@@ -62,7 +61,6 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openToken: () => void;
 	openIcToken: () => void;
 	openReceiveBitcoin: () => void;
-	openAboutWhat: () => void;
 	openAboutHow: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
 	close: () => void;
@@ -97,7 +95,6 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openToken: () => set({ type: 'token' }),
 		openIcToken: () => set({ type: 'ic-token' }),
 		openReceiveBitcoin: () => set({ type: 'receive-bitcoin' }),
-		openAboutWhat: () => set({ type: 'about-what' }),
 		openAboutHow: () => set({ type: 'about-how' }),
 		openDappDetails: <D extends T>(data: D) => set({ type: 'dapp-details', data }),
 		close: () => set(null),
