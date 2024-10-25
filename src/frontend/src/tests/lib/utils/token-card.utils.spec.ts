@@ -22,7 +22,7 @@ describe('mapHeaderData', () => {
 			decimals: SEPOLIA_TOKEN.decimals,
 			icon: SEPOLIA_TOKEN.icon,
 			network: SEPOLIA_NETWORK,
-			oisyName: { oisyName: SEPOLIA_NETWORK.name },
+			oisyName: { oisyName: `${SEPOLIA_TOKEN.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
 			balance: bn1,
 			usdBalance: 300,
@@ -41,7 +41,7 @@ describe('mapHeaderData', () => {
 			decimals: SEPOLIA_TOKEN.decimals,
 			icon: SEPOLIA_TOKEN.icon,
 			network: SEPOLIA_NETWORK,
-			oisyName: { oisyName: SEPOLIA_NETWORK.name },
+			oisyName: { oisyName: `${SEPOLIA_TOKEN.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
 			tokenCount: 2
 		};
