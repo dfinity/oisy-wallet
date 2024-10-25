@@ -63,10 +63,12 @@ export default {
 				'pos-100': '100% 100%'
 			},
 			width: {
-				sm: '576px'
+				sm: '576px',
+				md: '768px'
 			},
 			screens: {
 				'1.5md': '896px',
+				'1.5lg': '1152px',
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
 			}
