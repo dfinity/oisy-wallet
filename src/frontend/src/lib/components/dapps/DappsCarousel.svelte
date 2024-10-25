@@ -15,7 +15,7 @@
 </script>
 
 {#if nonNullish(dappsCarouselSlides)}
-	<Carousel styleClass={`w-full ${styleClass}`}>
+	<Carousel styleClass={`w-full ${styleClass ?? ''}`}>
 		{#each dappsCarouselSlides as dappsCarouselSlide}
 			<DappsCarouselSlide {dappsCarouselSlide} />
 		{/each}
