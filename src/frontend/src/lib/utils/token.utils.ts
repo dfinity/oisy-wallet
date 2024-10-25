@@ -217,7 +217,7 @@ const createTokenGroup = ({
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
 }): TokenUiGroup => ({
-	id: Symbol(`GRP-${nativeToken.symbol}`),
+	id: nativeToken.id,
 	nativeToken,
 	tokens: [nativeToken, twinToken],
 	balance: sumTokenBalances([nativeToken, twinToken]),
