@@ -3,8 +3,8 @@
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
-	let termsList: string[];
-	$: termsList = [
+	let agreementList: string[];
+	$: agreementList = [
 		$i18n.license_agreement.text.paragraph_1,
 		$i18n.license_agreement.text.paragraph_2,
 		$i18n.license_agreement.text.paragraph_3,
@@ -27,7 +27,7 @@
 <h1 class="text-5xl">{replaceOisyPlaceholders($i18n.license_agreement.text.title)}</h1>
 
 <section class="mt-12">
-	{#each termsList as terms}
-		<p><Html text={replaceOisyPlaceholders(terms)} /></p>
+	{#each agreementList as agreement}
+		<p><Html text={replaceOisyPlaceholders(agreement)} /></p>
 	{/each}
 </section>
