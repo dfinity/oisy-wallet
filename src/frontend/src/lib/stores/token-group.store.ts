@@ -1,7 +1,7 @@
 import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
 
 export interface TokenGroupData {
-	expanded: boolean;
+	isExpanded: boolean;
 }
 
 export const tokenGroupStore = initCertifiedSetterStore<TokenGroupData>();
