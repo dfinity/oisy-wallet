@@ -4,6 +4,7 @@
 	import Footer from '$lib/components/core/Footer.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
@@ -12,7 +13,6 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
-	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 
 	// TODO: We should consider adding a description for the pages, as this block of code is now appearing in two places.
 	// Other areas, like the Menu, are also somewhat disorganized, with navigation logic spread across multiple locations.
@@ -28,8 +28,8 @@
 	$: token.set($pageToken);
 </script>
 
-<main class="mx-auto flex flex-col gap-y-6 px-5 pt-10 sm:w-sm">
-	<div class="absolute top-0"><OisyWalletLogoLink /></div>
+<div class="absolute top-0"><OisyWalletLogoLink /></div>
 
+<main class="mx-auto flex flex-col gap-y-6 px-5 pt-10 sm:w-sm">
 	<slot />
 </main>
