@@ -51,7 +51,7 @@
 		<span>{$i18n.license_agreement.text.accept_terms}</span>
 
 		<a
-			href="/terms-and-conditions"
+			href="/license-agreement"
 			aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
 		>
 			{$i18n.license_agreement.text.accept_terms_link}
