@@ -1,5 +1,4 @@
 <script lang="ts">
-	export let variant: 'default' | 'info' | 'error' | 'warning' | 'success' | 'outline' = 'default';
 	export let styleClass: string | undefined = undefined;
 
 	const variantClassNames = {
@@ -10,6 +9,8 @@
 		success: 'bg-green-crayola/20 text-green-crayola',
 		outline: 'border border-light-grey bg-off-white'
 	};
+
+	export let variant: keyof typeof variantClassNames = 'default';
 </script>
 
 <span
