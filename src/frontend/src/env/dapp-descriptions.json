@@ -59,5 +59,21 @@
 			"text": "Enjoy a privacy-first way to verify and engage online",
 			"callToAction": "Interested?"
 		}
+	},
+	{
+		"id": "icpswap",
+		"name": "ICPSwap",
+		"oneLiner": "ICPSwap is an AMM DEX built completely onchain that is the premier hub for full-stack financial and DAO services on ICP.",
+		"callToAction": "Meet the future",
+		"website": "https://icpswap.com",
+		"twitter": "https://x.com/ICPSwap",
+		"telegram": "https://t.me/ICPSwap_Official",
+		"github": " https://github.com/ICPSwap-Labs/icpswap-frontend",
+		"tags": ["DEX"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "The Hub of Future Decentralized Finance!<br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly.",
+		"logo": "/images/dapps/icp-swap-logo.svg",
+		"screenshots": ["/images/dapps/icp-swap.webp"]
 	}
 ]
