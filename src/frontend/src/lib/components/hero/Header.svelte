@@ -1,14 +1,12 @@
 <script lang="ts">
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
-	import SignIn from '$lib/components/auth/SignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
-	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import { modalAboutHow } from '$lib/derived/modal.derived';
 </script>
 
 <header
@@ -44,14 +42,10 @@
 			<Menu />
 		{:else}
 			<AboutMenu />
-
-			<SignIn />
 		{/if}
 	</div>
 </header>
 
-{#if $modalAboutWhat}
-	<AboutWhatModal />
-{:else if $modalAboutHow}
+{#if $modalAboutHow}
 	<AboutHowModal />
 {/if}
