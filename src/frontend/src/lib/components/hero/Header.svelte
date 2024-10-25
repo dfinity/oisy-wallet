@@ -3,7 +3,6 @@
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
-	import WalletConnectMenu from '$lib/components/hero/WalletConnectMenu.svelte';
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
@@ -36,12 +35,9 @@
 	{/if}
 
 	<div class="pointer-events-auto flex justify-end gap-4">
-		{#if $authSignedIn}
-			<WalletConnect />
-		{/if}
+		<WalletConnect />
 
 		{#if $authSignedIn}
-			<WalletConnectMenu />
 			<Menu />
 		{:else}
 			<AboutMenu />
