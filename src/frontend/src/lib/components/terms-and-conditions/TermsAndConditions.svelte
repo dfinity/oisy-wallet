@@ -24,7 +24,7 @@
 	];
 
 	let terms: string;
-	$: terms = replaceOisyPlaceholders(termsList.join('<br><br>'));
+	$: terms = replaceOisyPlaceholders(termsList.map((term) => `<p>${term}</p>`).join(''));
 </script>
 
 <h1 class="text-5xl">{replaceOisyPlaceholders($i18n.terms_and_conditions.text.title)}</h1>
