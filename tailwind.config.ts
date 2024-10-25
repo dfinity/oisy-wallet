@@ -19,6 +19,7 @@ export default {
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
 			'light-grey': '#ced4da',
+			aurometalsaurus: '#6c757d',
 			'light-blue': '#e8f1ff',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'blue-ribbon': '#0066ff',
