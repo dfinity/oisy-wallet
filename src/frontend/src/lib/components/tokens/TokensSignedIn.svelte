@@ -51,16 +51,7 @@
 					class:pointer-events-none={animating}
 				>
 					{#if isTokenUiGroup(token)}
-						{#if token.tokens.length > 1}
-							<TokenGroupCard tokenGroup={token} />
-						{:else}
-							<Listener token={token.tokens[0]}>
-								<TokenCardWithUrl token={token.tokens[0]}>
-									<TokenCardContent data={token.tokens[0]} />
-								</TokenCardWithUrl>
-							</Listener>
-						{/if}
-						<!-- TODO: remove this part when the token list will be only groups -->
+						<TokenGroupCard tokenGroup={token} />
 					{:else}
 						<Listener {token}>
 							<TokenCardWithUrl {token}>

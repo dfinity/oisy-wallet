@@ -142,7 +142,7 @@ export const mapTokenUi = ({
 	})
 });
 
-const sumBalances = ([balance1, balance2]: [
+export const sumBalances = ([balance1, balance2]: [
 	TokenUi['balance'],
 	TokenUi['balance']
 ]): TokenUi['balance'] =>
