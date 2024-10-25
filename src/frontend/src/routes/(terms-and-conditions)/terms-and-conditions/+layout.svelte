@@ -1,35 +1,17 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
-	import Footer from '$lib/components/core/Footer.svelte';
-	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
-	import Modals from '$lib/components/core/Modals.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
-	import Header from '$lib/components/hero/Header.svelte';
-	import Hero from '$lib/components/hero/Hero.svelte';
-	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
-	import SplitPane from '$lib/components/ui/SplitPane.svelte';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { pageToken } from '$lib/derived/page-token.derived';
-	import { token } from '$lib/stores/token.store';
-	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
-
-	// TODO: We should consider adding a description for the pages, as this block of code is now appearing in two places.
-	// Other areas, like the Menu, are also somewhat disorganized, with navigation logic spread across multiple locations.
-	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
-	$: route = isRouteSettings($page)
-		? 'settings'
-		: isRouteDappExplorer($page)
-			? 'explore'
-			: isRouteTransactions($page)
-				? 'transactions'
-				: 'tokens';
-
-	$: token.set($pageToken);
 </script>
 
-<div class="absolute top-0"><OisyWalletLogoLink /></div>
+<header
+	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between px-4 pt-6 md:px-8 1.5lg:fixed 1.5lg:inset-x-0 1.5lg:top-0 1.5lg:z-10"
+>
+	<div class="pointer-events-auto">
+		<OisyWalletLogoLink />
+	</div>
+</header>
 
-<main class="mx-auto flex flex-col gap-y-6 px-5 pt-10 sm:w-sm">
+<main
+	class="mx-0 mt-10 flex flex-col items-center justify-center px-8 pb-10 md:mx-auto md:w-md md:px-0 1.5lg:mt-28"
+>
 	<slot />
 </main>

@@ -27,7 +27,7 @@
 	$: terms = replaceOisyPlaceholders(termsList.join('<br><br>'));
 </script>
 
-<h1 class="text-xl">{replaceOisyPlaceholders($i18n.terms_and_conditions.text.title)}</h1>
+<h1 class="text-5xl">{replaceOisyPlaceholders($i18n.terms_and_conditions.text.title)}</h1>
 
 <p class="mt-12">
 	<Html text={terms} />
