@@ -45,7 +45,7 @@
 		<span class="text-center text-xl">{name}</span>
 	</svelte:fragment>
 
-	<div class="stretch flex flex-col gap-4 pt-4">
+	<div class="stretch flex flex-col gap-4">
 		{#if nonNullish(screenshots) && screenshots.length > 0}
 			<div class="overflow-hidden rounded-3xl">
 				<ImgBanner
