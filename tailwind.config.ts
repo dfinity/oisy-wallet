@@ -1,6 +1,6 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import type { Config } from 'tailwindcss/types/config';
-import { colorsPrimitive } from './src/frontend/src/lib/styles/tailwind/colors/primitive';
+import { colorsTheme } from './src/frontend/src/lib/styles/tailwind/colors/theme-default';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -55,12 +55,12 @@ export default {
 			fulvous: '#de7900',
 			water: '#d1e3ff',
 			foreground: {
-				'brand-primary': colorsPrimitive.brand.base,
-				'brand-secondary': colorsPrimitive.brand[500],
-				warning: colorsPrimitive.warning.default
+				'brand-primary': colorsTheme.brand.base,
+				'brand-secondary': colorsTheme.brand[500],
+				warning: colorsTheme.warning.default
 			},
 			background: {
-				'brand-primary': colorsPrimitive.brand.base
+				'brand-primary': colorsTheme.brand.base
 			}
 		},
 		extend: {
