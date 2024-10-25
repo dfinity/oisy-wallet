@@ -217,6 +217,8 @@ const createTokenGroup = ({
 	nativeToken: TokenUi;
 	twinToken: TokenUi;
 }): TokenUiGroup => ({
+	// Setting the same ID of the native token to ensure the Group Card component is treated as the same component of the Native Token Card.
+	// This allows Svelte transitions/animations to handle the two cards as the same component, giving a smoother user experience.
 	id: nativeToken.id,
 	nativeToken,
 	tokens: [nativeToken, twinToken],
