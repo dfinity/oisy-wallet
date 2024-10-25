@@ -1,6 +1,7 @@
 {
 	"core": {
 		"text": {
+			"test": "test",
 			"cancel": "Cancel",
 			"next": "Next",
 			"save": "Save",

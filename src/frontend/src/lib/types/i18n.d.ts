@@ -4,6 +4,7 @@
 
 interface I18nCore {
 	text: {
+		test: string;
 		cancel: string;
 		next: string;
 		save: string;
