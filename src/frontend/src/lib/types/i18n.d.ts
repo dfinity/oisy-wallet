@@ -657,7 +657,6 @@ interface I18nLicense_agreement {
 		no_waiver: string;
 		english_version: string;
 	};
-	alt: { license_agreement: string };
 }
 
 interface I18n {
