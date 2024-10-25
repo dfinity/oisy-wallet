@@ -26,11 +26,16 @@ export interface TokenMetadata {
 }
 
 export interface TokenAppearance {
+	oisySymbol?: TokenOisySymbol;
 	oisyName?: TokenOisyName;
 }
 
+export interface TokenOisySymbol {
+	oisySymbol: string;
+}
+
 export interface TokenOisyName {
-	prefix: string | undefined;
+	prefix?: string;
 	oisyName: string;
 }
 
@@ -69,10 +74,13 @@ export type TokenUi = Token & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;
 
-export interface TokenGroupUi {
-	header: TokenMetadata;
-	nativeNetwork: Network;
-	tokens: TokenUi[];
-}
+//todo: separate typing from token id
+export type GroupId = TokenId;
 
-export type TokenUiOrGroupUi = TokenUi | TokenGroupUi;
+export type TokenUiGroup = {
+	id: GroupId;
+	nativeToken: TokenUi;
+	tokens: TokenUi[];
+} & TokenFinancialData;
+
+export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;

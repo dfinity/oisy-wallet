@@ -8,7 +8,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let address: string;
-	// TODO: remove undefined assignation to make property mandatory in PR #3023
 	export let addressToken: Token | undefined = undefined;
 
 	let symbol: string | undefined;
@@ -24,7 +23,11 @@
 
 <svelte:window on:resize={rerender} />
 
-<div in:fade class="qr-container p-4" class:opacity-0={!render}>
+<div
+	in:fade
+	class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] p-4"
+	class:opacity-0={!render}
+>
 	{#if render}
 		<article
 			aria-label={replacePlaceholders($i18n.wallet.alt.qrcode_address, {
@@ -35,7 +38,7 @@
 				<svelte:fragment slot="logo">
 					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-white p-2">
-							<TokenLogo token={addressToken} showNetworkIcon={false} />
+							<TokenLogo data={addressToken} />
 						</div>
 					{/if}
 				</svelte:fragment>
@@ -43,11 +46,3 @@
 		</article>
 	{/if}
 </div>
-
-<style lang="scss">
-	.qr-container {
-		max-width: var(--qrcode-max-width, 300px);
-		margin: 0 auto;
-		height: var(--qrcode-height);
-	}
-</style>

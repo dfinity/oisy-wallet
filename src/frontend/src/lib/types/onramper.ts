@@ -21,3 +21,8 @@ export interface OnramperCryptoWallet {
 	cryptoId: OnramperId;
 	wallet: OnramperWalletAddress;
 }
+
+export interface OnramperNetworkWallet {
+	networkId: OnramperNetworkId;
+	wallet: OnramperWalletAddress;
+}

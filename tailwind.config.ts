@@ -1,7 +1,7 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
+import type { Config } from 'tailwindcss/types/config';
 import { colorsPrimitive } from './src/frontend/src/lib/styles/tailwind/colors/primitive';
 
-/** @type {import('tailwindcss').Config} */
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
@@ -65,14 +65,16 @@ export default {
 				'pos-100': '100% 100%'
 			},
 			width: {
-				sm: '576px'
+				sm: '576px',
+				md: '768px'
 			},
 			screens: {
 				'1.5md': '896px',
+				'1.5lg': '1152px',
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
 			}
 		}
 	},
 	plugins: []
-};
+} satisfies Config;

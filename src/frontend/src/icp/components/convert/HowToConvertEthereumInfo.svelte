@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { ETHEREUM_NETWORK } from '$env/networks.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
@@ -82,6 +83,7 @@
 		<ReceiveAddress
 			labelRef="eth-wallet-address"
 			address={$ethAddress ?? ''}
+			network={ETHEREUM_NETWORK}
 			qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}
