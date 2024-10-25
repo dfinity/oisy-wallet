@@ -28,7 +28,7 @@
 			<p class="m-0 text-start text-lg font-semibold">{name}</p>
 			<p
 				title={oneLiner}
-				class="m-0 mt-2 line-clamp-2 text-ellipsis text-start text-xs text-misty-rose md:line-clamp-4"
+				class="m-0 mt-2 line-clamp-2 text-ellipsis text-start text-xs text-misty-rose md:line-clamp-6"
 			>
 				{oneLiner}
 			</p>
