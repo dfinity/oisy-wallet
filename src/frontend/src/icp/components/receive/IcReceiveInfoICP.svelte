@@ -56,7 +56,7 @@
 		network={ICP_NETWORK}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_account_id_qr}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
-		testCopyId={{ RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON }}
+		testCopyId={ RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON }
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',

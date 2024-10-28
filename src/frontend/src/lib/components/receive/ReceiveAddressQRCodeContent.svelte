@@ -18,7 +18,7 @@
 		inline
 		value={address ?? ''}
 		text={$i18n.wallet.text.address_copied}
-		data-tid={testIdCopy}
+		testId={testIdCopy}
 	/>
 </p>
 
