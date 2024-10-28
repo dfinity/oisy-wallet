@@ -17,7 +17,7 @@
 	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
 
-	// TODO: replace property with mandatory property ReceiveQRCode
+	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQRCode
 </script>
 
 <ReceiveQRCode address={address ?? ''} {addressToken} />
