@@ -5,13 +5,16 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let labelRef: string;
 	export let address: string;
 	export let network: Network;
-	export let qrCodeAriaLabel: string;
+	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
+
+	export let testId: string | undefined = undefined;
 	export let copyButtonTestId: string | undefined = undefined;
 
 	let text = false;
@@ -23,12 +26,15 @@
 		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
 
 		{#if text}
-			<p class="break-normal py-2 text-misty-rose">
+			<p class="mb-1.5 break-normal py-2 text-misty-rose">
 				<slot name="text" />
 			</p>
 		{/if}
 
-		<div class="flex items-center justify-between gap-4 rounded-lg bg-zumthor px-3 py-2">
+		<div
+			class="flex items-center justify-between gap-4 rounded-lg bg-zumthor px-3 py-2"
+			class:mt-2={!text}
+		>
 			<div class="h-8 w-8">
 				<Logo
 					src={network.iconBW}
@@ -38,9 +44,9 @@
 				/>
 			</div>
 
-			<output id="ic-wallet-address" class="break-all text-sm">{address}</output>
+			<output id="ic-wallet-address" class="break-all text-sm" data-tid={testId}>{address}</output>
 
-			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} {copyButtonTestId} />
+			<ReceiveActions on:click {address} {copyAriaLabel} {qrCodeAction} {copyButtonTestId} />
 		</div>
 
 		<slot />

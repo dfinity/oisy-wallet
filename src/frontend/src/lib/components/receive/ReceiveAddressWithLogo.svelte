@@ -4,8 +4,12 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
+	import {
+		RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
+		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -17,6 +21,13 @@
 	export let copyAriaLabel: string;
 	export let invisibleLogo = false;
 	export let testId: string | undefined = undefined;
+
+	let qrCodeAction: ReceiveQRCodeAction;
+	$: qrCodeAction = {
+		enabled: true,
+		ariaLabel: qrCodeAriaLabel,
+		testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
+	};
 </script>
 
 <div class="mb-6 flex justify-between gap-8" data-tid={testId}>
@@ -49,7 +60,7 @@
 				</Card>
 
 				{#if nonNullish(address)}
-					<ReceiveActions on:click {address} {qrCodeAriaLabel} {copyAriaLabel} />
+					<ReceiveActions on:click {address} {qrCodeAction} {copyAriaLabel} />
 				{/if}
 			</div>
 			<slot name="notes" />
