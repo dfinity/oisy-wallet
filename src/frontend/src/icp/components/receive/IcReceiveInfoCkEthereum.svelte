@@ -22,9 +22,7 @@
 <ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	<div class="my-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<Value ref="ethereum-helper-contract" element="div">
 		<svelte:fragment slot="label"
