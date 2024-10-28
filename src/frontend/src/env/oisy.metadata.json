@@ -4,6 +4,6 @@
 	"OISY_ONELINER": "A multi-chain wallet powered by chainfusion",
 	"OISY_DESCRIPTION": "OISY Wallet provides a seamless on-chain experience to manage your Ethereum and ICP assets. By leveraging native web technologies and advanced cryptography, it eliminates the need for browser extensions or mobile apps. And accessing the wallet is easy using passkeys on a computer or mobile device.",
 	"OISY_REPO_URL": "https://github.com/dfinity/oisy-wallet",
-	"OISY_ALPHA_WARNING_URL": "https://github.com/dfinity/oisy-wallet#status",
+	"OISY_STATUS_URL": "https://github.com/dfinity/oisy-wallet#status",
 	"OISY_TWITTER_URL": "https://x.com/OISY_Wallet"
 }

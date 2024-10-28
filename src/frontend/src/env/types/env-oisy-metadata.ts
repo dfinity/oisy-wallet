@@ -6,6 +6,6 @@ export const oisyMetadata = z.object({
 	OISY_ONELINER: z.string(),
 	OISY_DESCRIPTION: z.string(),
 	OISY_REPO_URL: z.string().url(),
-	OISY_ALPHA_WARNING_URL: z.string().url(),
+	OISY_STATUS_URL: z.string().url(),
 	OISY_TWITTER_URL: z.string().url()
 });
