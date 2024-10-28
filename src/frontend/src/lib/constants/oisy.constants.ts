@@ -23,3 +23,6 @@ export const {
 
 export const OISY_URL = import.meta.env.VITE_OISY_URL;
 export const OISY_ICON = `${OISY_URL}/favicons/icon-512x512.png`;
+
+// TODO: Adjust the URL when we remove the Alpha warning
+export const OISY_STATUS_URL = OISY_ALPHA_WARNING_URL;
