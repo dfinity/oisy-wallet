@@ -1,4 +1,3 @@
-import * as btcEnv from '$env/networks.btc.env';
 import * as api from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
@@ -73,11 +72,6 @@ describe('AddressGuard', () => {
 	});
 
 	describe('Validate addresses', () => {
-		beforeEach(() => {
-			// TODO: to be removed when the flag NETWORK_BITCOIN_ENABLED gets removed and Bitcoin becomes default.
-			vi.spyOn(btcEnv, 'NETWORK_BITCOIN_ENABLED', 'get').mockReturnValue(true);
-		});
-
 		describe('Signer allowance not loaded', () => {
 			it('should not call validate eth address if signer allowance is not loaded', () => {
 				render(AddressGuard);
