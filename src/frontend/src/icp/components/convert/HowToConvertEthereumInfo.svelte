@@ -9,6 +9,7 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -20,7 +21,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
 

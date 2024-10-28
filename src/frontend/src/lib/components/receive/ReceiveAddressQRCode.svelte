@@ -32,12 +32,7 @@
 		on:click
 	/>
 
-	<Button
-		colorStyle="secondary"
-		fullWidth
-		on:click={() => dispatch('icBack')}
-		slot="toolbar"
-	>
+	<Button colorStyle="secondary" fullWidth on:click={() => dispatch('icBack')} slot="toolbar">
 		{$i18n.core.text.back}
 	</Button>
 </ContentWithToolbar>
