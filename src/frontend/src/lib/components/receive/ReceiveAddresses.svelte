@@ -74,7 +74,7 @@
 	</ReceiveAddressWithLogo>
 
 	{#if NETWORK_BITCOIN_ENABLED}
-		<div class="mb-6">
+		<div class="my-6">
 			<Hr />
 		</div>
 
@@ -130,7 +130,7 @@
 		{/if}
 	{/if}
 
-	<div class="mb-6">
+	<div class="my-6">
 		<Hr />
 	</div>
 

@@ -22,7 +22,7 @@
 <ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	<div class="mb-6">
+	<div class="my-6">
 		<Hr />
 	</div>
 
