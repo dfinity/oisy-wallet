@@ -10,6 +10,7 @@ export const {
 	OISY_DESCRIPTION,
 	OISY_REPO_URL,
 	OISY_STATUS_URL
+	OISY_TWITTER_URL
 } = parsedMetadata.success
 	? parsedMetadata.data
 	: {
@@ -19,6 +20,7 @@ export const {
 			OISY_DESCRIPTION: '',
 			OISY_REPO_URL: '',
 			OISY_STATUS_URL: ''
+			OISY_TWITTER_URL: ''
 		};
 
 export const OISY_URL = import.meta.env.VITE_OISY_URL;
