@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens.env';
@@ -20,7 +19,7 @@
 		$token?.buy?.onramperId ??
 		($networkEthereum
 			? $ethereumToken.buy?.onramperId
-			: $networkBitcoin && NETWORK_BITCOIN_ENABLED
+			: $networkBitcoin
 				? BTC_MAINNET_TOKEN.buy?.onramperId
 				: ICP_TOKEN.buy?.onramperId) ??
 		ICP_TOKEN.buy?.onramperId ??
