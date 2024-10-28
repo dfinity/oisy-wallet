@@ -102,7 +102,7 @@ interface I18nDapps {
 
 interface I18nFooter {
 	text: { developed_with: string };
-	alt: { dfinity: string };
+	alt: { dfinity: string; status: string };
 }
 
 interface I18nWallet {

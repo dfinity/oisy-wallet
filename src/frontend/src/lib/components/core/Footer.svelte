@@ -5,8 +5,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
-	import { APP_VERSION } from '$lib/constants/app.constants';
-	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { OISY_REPO_URL, OISY_STATUS_URL } from '$lib/constants/oisy.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -44,7 +43,16 @@
 			>
 				<IconTwitter />
 			</ExternalLinkIcon>
-			<Badge variant="warning">{APP_VERSION}</Badge>
+
+			<a
+				href={OISY_STATUS_URL}
+				rel="external noopener noreferrer"
+				target="_blank"
+				class="mx-auto no-underline"
+				aria-label={replaceOisyPlaceholders($i18n.footer.alt.status)}
+			>
+				<Badge variant="warning">beta</Badge>
+			</a>
 		</div>
 
 		<div
