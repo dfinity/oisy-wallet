@@ -7,6 +7,7 @@
 	export let address: string;
 	export let qrCodeAction: ReceiveQRCodeAction = { enabled: false };
 	export let copyAriaLabel: string;
+	export let copyButtonTestId: string | undefined = undefined;
 </script>
 
 <div class="flex justify-center gap-2">
@@ -16,5 +17,5 @@
 		</ButtonIcon>
 	{/if}
 
-	<ReceiveCopy {address} {copyAriaLabel} />
+	<ReceiveCopy {address} {copyAriaLabel} testId={copyButtonTestId} />
 </div>

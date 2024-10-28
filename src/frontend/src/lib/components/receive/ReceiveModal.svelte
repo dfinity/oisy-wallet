@@ -4,6 +4,7 @@
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionAddress, Address } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
@@ -26,7 +27,8 @@
 			{network}
 			{copyAriaLabel}
 			qrCodeAction={{ enabled: false }}
-		/>
+            copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
+        />
 
 		<slot name="content" />
 
