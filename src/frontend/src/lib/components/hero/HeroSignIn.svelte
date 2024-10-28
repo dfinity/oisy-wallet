@@ -47,7 +47,7 @@
 
 	<ButtonAuthenticate on:click={async () => await signIn({})} />
 
-	<div class="mt-4 flex flex-col text-base text-aurometalsaurus">
+	<div class="mt-4 flex flex-col text-sm text-aurometalsaurus">
 		<span>{$i18n.license_agreement.text.accept_terms}</span>
 
 		<a
