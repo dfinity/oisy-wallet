@@ -50,7 +50,9 @@ What are the unique ICP technical building blocks enabling the creation of OISY?
 
 ## Status
 
-This project is **not yet ready for production use**, but we are actively working towards its first production release. We are happy to answer questions if they are raised as issues in this GitHub repo.
+Please note that this is a **beta version** of OISY Wallet which is still undergoing final testing before its official release.
+The platform, its software and all content found on it are provided on an “as is” and “as available” basis.
+OISY Wallet does not give any warranties, whether express or implied, as to the suitability or usability of the application, its software or any of its content.
 
 ## Build and run yourself
 
