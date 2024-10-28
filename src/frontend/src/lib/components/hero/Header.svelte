@@ -3,11 +3,10 @@
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
-	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
-	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
-	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
+	import AboutWhyOisy from '$lib/components/hero/about/AboutWhyOisy.svelte';
+	import AboutWhyOisyModal from '$lib/components/hero/about/AboutWhyOisyModal.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
 </script>
 
 <header
@@ -42,13 +41,13 @@
 		{#if $authSignedIn}
 			<Menu />
 		{:else}
-			<AboutMenu />
+			<div class="mr-2 md:mr-0">
+				<AboutWhyOisy />
+			</div>
 		{/if}
 	</div>
 </header>
 
-{#if $modalAboutWhat}
-	<AboutWhatModal />
-{:else if $modalAboutHow}
-	<AboutHowModal />
+{#if $modalAboutWhyOisy}
+	<AboutWhyOisyModal />
 {/if}
