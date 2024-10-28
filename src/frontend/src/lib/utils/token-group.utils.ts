@@ -15,6 +15,8 @@ import { nonNullish } from '@dfinity/utils';
  * So, independently of being a "native token" or a "secondary token", the group will replace the first token of the group in the list.
  * That is useful if a "secondary token" is before the "native token" in the list; for example, if the list is sorted by balance.
  *
+ * NOTE: The function does not sort the groups by any criteria. It only groups the tokens. So, even if a group ends up having a total balance that would put it in a higher position in the list, it will not be moved.
+ *
  * @param {TokenUi[]} tokens - The list of TokenUi objects to group. Each token may or may not have a prop key to identify a "native token".
  * @returns {TokenUiGroup[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
  */

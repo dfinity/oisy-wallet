@@ -220,4 +220,38 @@ describe('groupTokens', () => {
 		expect(result[0].tokens[0]).toBe(tokens[0]);
 		expect(result[1].tokens[0]).toBe(tokens[1]);
 	});
+
+	it('should not re-sort the groups even if the total balance of a group would put it in a higher position in the list', () => {
+		// We mock the tokens to have the same "native token"
+		const tokens = [
+			{ ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 },
+			{ ...ICP_TOKEN, balance: bn1, usdBalance: 100 },
+			{
+				...SEPOLIA_TOKEN,
+				balance: bn2,
+				usdBalance: 200,
+				twinToken: ICP_TOKEN,
+				decimals: ICP_TOKEN.decimals
+			},
+			{
+				...BTC_REGTEST_TOKEN,
+				balance: bn1,
+				usdBalance: 400,
+				twinToken: ICP_TOKEN,
+				decimals: ICP_TOKEN.decimals
+			}
+		];
+
+		const result = groupTokens(tokens);
+
+		expect(result.length).toBe(2);
+
+		expect(result[0].tokens.length).not.toBe(3);
+
+		expect(result[0].id).not.toBe(ICP_TOKEN.id);
+
+		expect(result[0].nativeToken).not.toBe(tokens[1]);
+
+		expect(result[0].balance).not.toStrictEqual(bn1.add(bn2).add(bn1));
+	});
 });
