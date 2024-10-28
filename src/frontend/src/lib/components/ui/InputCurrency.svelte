@@ -17,6 +17,7 @@
 	{decimals}
 	{placeholder}
 	spellcheck={false}
+	autocomplete="off"
 	{testId}
 	on:nnsInput
 >
