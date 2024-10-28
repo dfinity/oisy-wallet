@@ -46,7 +46,7 @@
 	<IcReceiveWalletAddress on:icQRCode />
 
 	{#if nonNullish(btcAddress) && nonNullish(twinToken)}
-		<div class="mb-6">
+		<div class="my-6">
 			<Hr />
 		</div>
 
