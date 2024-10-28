@@ -4,6 +4,7 @@ import {
 	OISY_NAME,
 	OISY_ONELINER,
 	OISY_REPO_URL,
+	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -52,10 +53,10 @@ describe('i18n-utils', () => {
 		it('should replace Oisy placeholders', () => {
 			expect(
 				replaceOisyPlaceholders(
-					'Lorem Ipsum! $oisy_name $oisy_oneliner $oisy_description $oisy_alpha_warning_url'
+					'Lorem Ipsum! $oisy_name $oisy_oneliner $oisy_description $oisy_alpha_warning_url $oisy_twitter_url'
 				)
 			).toBe(
-				`Lorem Ipsum! ${OISY_NAME} ${OISY_ONELINER} ${OISY_DESCRIPTION} ${OISY_ALPHA_WARNING_URL}`
+				`Lorem Ipsum! ${OISY_NAME} ${OISY_ONELINER} ${OISY_DESCRIPTION} ${OISY_ALPHA_WARNING_URL} ${OISY_TWITTER_URL}`
 			);
 
 			expect(replaceOisyPlaceholders('Url: $oisy_url')).toBe(`Url: ${OISY_URL}`);

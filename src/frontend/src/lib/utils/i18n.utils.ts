@@ -5,6 +5,7 @@ import {
 	OISY_ONELINER,
 	OISY_REPO_URL,
 	OISY_SHORT,
+	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -39,7 +40,8 @@ export const replaceOisyPlaceholders = (text: string): string =>
 		$oisy_description: OISY_DESCRIPTION,
 		$oisy_url: OISY_URL,
 		$oisy_repo_url: OISY_REPO_URL,
-		$oisy_alpha_warning_url: OISY_ALPHA_WARNING_URL
+		$oisy_alpha_warning_url: OISY_ALPHA_WARNING_URL,
+		$oisy_twitter_url: OISY_TWITTER_URL
 	});
 
 interface MaybeI18n extends I18n {
