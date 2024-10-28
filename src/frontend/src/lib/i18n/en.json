@@ -114,7 +114,7 @@
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
-			"status": "Go to the status page of $oisy_name"
+			"status": "Find more details about the current status of $oisy_short's development."
 		}
 	},
 	"wallet": {
