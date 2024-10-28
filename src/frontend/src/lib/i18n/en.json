@@ -113,7 +113,8 @@
 			"developed_with": "© 2024 Developed with ❤\uFE0F at DFINITY"
 		},
 		"alt": {
-			"dfinity": "Go to DFINITY Foundation website"
+			"dfinity": "Go to DFINITY Foundation website",
+			"status": "Find more details about the current status of $oisy_short's development."
 		}
 	},
 	"wallet": {

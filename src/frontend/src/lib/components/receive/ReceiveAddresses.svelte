@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -73,60 +72,58 @@
 		>
 	</ReceiveAddressWithLogo>
 
-	{#if NETWORK_BITCOIN_ENABLED}
-		<div class="my-6">
-			<Hr />
-		</div>
+	<div class="my-6">
+		<Hr />
+	</div>
 
+	<ReceiveAddressWithLogo
+		on:click={() =>
+			displayQRCode({
+				address: $btcAddressMainnet ?? '',
+				addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
+				addressToken: BTC_MAINNET_TOKEN
+			})}
+		address={$btcAddressMainnet}
+		token={BTC_MAINNET_TOKEN}
+		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+		testId={RECEIVE_TOKENS_MODAL_BTC_SECTION}
+	>
+		{$i18n.receive.bitcoin.text.bitcoin_address}
+	</ReceiveAddressWithLogo>
+
+	{#if $testnets}
 		<ReceiveAddressWithLogo
 			on:click={() =>
 				displayQRCode({
-					address: $btcAddressMainnet ?? '',
-					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
-					addressToken: BTC_MAINNET_TOKEN
+					address: $btcAddressTestnet ?? '',
+					addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
+					addressToken: BTC_TESTNET_TOKEN
 				})}
-			address={$btcAddressMainnet}
-			token={BTC_MAINNET_TOKEN}
+			address={$btcAddressTestnet}
+			token={BTC_TESTNET_TOKEN}
 			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
-			testId={RECEIVE_TOKENS_MODAL_BTC_SECTION}
 		>
-			{$i18n.receive.bitcoin.text.bitcoin_address}
+			{$i18n.receive.bitcoin.text.bitcoin_testnet_address}
 		</ReceiveAddressWithLogo>
 
-		{#if $testnets}
+		{#if LOCAL}
+			<!-- Same address for Regtest and for Testnet are used. -->
 			<ReceiveAddressWithLogo
 				on:click={() =>
 					displayQRCode({
-						address: $btcAddressTestnet ?? '',
-						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
-						addressToken: BTC_TESTNET_TOKEN
+						address: $btcAddressRegtest ?? '',
+						addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
+						addressToken: BTC_REGTEST_TOKEN
 					})}
-				address={$btcAddressTestnet}
-				token={BTC_TESTNET_TOKEN}
+				address={$btcAddressRegtest}
+				token={BTC_REGTEST_TOKEN}
 				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			>
-				{$i18n.receive.bitcoin.text.bitcoin_testnet_address}
+				{$i18n.receive.bitcoin.text.bitcoin_regtest_address}
 			</ReceiveAddressWithLogo>
-
-			{#if LOCAL}
-				<!-- Same address for Regtest and for Testnet are used. -->
-				<ReceiveAddressWithLogo
-					on:click={() =>
-						displayQRCode({
-							address: $btcAddressRegtest ?? '',
-							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
-							addressToken: BTC_REGTEST_TOKEN
-						})}
-					address={$btcAddressRegtest}
-					token={BTC_REGTEST_TOKEN}
-					qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
-					copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
-				>
-					{$i18n.receive.bitcoin.text.bitcoin_regtest_address}
-				</ReceiveAddressWithLogo>
-			{/if}
 		{/if}
 	{/if}
 
