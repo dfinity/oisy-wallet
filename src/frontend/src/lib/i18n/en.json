@@ -182,7 +182,6 @@
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
-			"use_with_caution": "This is an alpha version. Use with caution.",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
