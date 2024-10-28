@@ -7,6 +7,15 @@
 	export let required = true;
 </script>
 
-<Input {name} inputType="text" {required} bind:value {placeholder} spellcheck={false} on:nnsInput>
+<Input
+	{name}
+	inputType="text"
+	{required}
+	bind:value
+	{placeholder}
+	spellcheck={false}
+	autocomplete="off"
+	on:nnsInput
+>
 	<slot name="inner-end" slot="inner-end" />
 </Input>
