@@ -77,6 +77,20 @@
 		"screenshots": ["/images/dapps/icp-swap.webp"]
 	},
 	{
+		"id": "nnsdapp",
+		"name": "NNS Dapp",
+		"oneLiner": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI.",
+		"callToAction": "Get engaged",
+		"website": "https://nns.ic0.app/",
+		"github": "https://github.com/dfinity/nns-dapp",
+		"tags": ["Staking"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI. Served completely end-to-end through blockchain, this decentralized dapp allows you to easily perform the following actions:<br/><ul><li>Send and receive tokens (ICP, ckBTC, CHAT, etc.)</li><li>Stake and manage neurons</li><li>Vote on the governance of the Internet Computer and SNSes</li><li>Participate in decentralization swaps</li><li>Create and top up canisters</li><li>Earn governance rewards</li></ul>",
+		"logo": "/images/dapps/nns-dapp-logo.svg",
+		"screenshots": ["/images/dapps/nns-dapp.webp"]
+	},
+	{
 		"id": "uniswap",
 		"name": "Uniswap",
 		"oneLiner": "The largest onchain marketplace. Buy and sell crypto on Ethereum and 11+ other chains.",
