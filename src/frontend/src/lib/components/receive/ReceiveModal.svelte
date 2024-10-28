@@ -27,8 +27,8 @@
 			{network}
 			{copyAriaLabel}
 			qrCodeAction={{ enabled: false }}
-            copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
-        />
+			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
+		/>
 
 		<slot name="content" />
 
