@@ -49,8 +49,8 @@ jobs:
       uses: ./.github/actions/create-pr
       with:
         token: ${{ secrets.GIX_CREATE_PR_PAT }}
-        branch: "release/v${{ steps.bump_version.outputs.new_version }}"
-        title: "Release: v${{ steps.bump_version.outputs.new_version }}"
+        branch: "chore(release)/v${{ steps.bump_version.outputs.new_version }}"
+        title: "chore(release): v${{ steps.bump_version.outputs.new_version }}"
         body: |
           This PR prepares the release of version v${{ steps.bump_version.outputs.new_version }}.
 
