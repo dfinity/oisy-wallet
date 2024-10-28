@@ -62,7 +62,7 @@
 	{/each}
 </div>
 
-<ul class="mt-8 grid list-none grid-cols-1 gap-x-4 gap-y-7 md:grid-cols-3">
+<ul class="mt-10 grid list-none grid-cols-1 gap-x-4 gap-y-10 md:grid-cols-3">
 	{#each filteredDapps as dApp}
 		<li class="flex" in:fade>
 			<DappCard
