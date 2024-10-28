@@ -87,7 +87,7 @@
 			network={ETHEREUM_NETWORK}
 			qrCodeAction={{
 				enabled: true,
-				label: $i18n.wallet.text.display_wallet_address_qr
+				ariaLabel: $i18n.wallet.text.display_wallet_address_qr
 			}}
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}

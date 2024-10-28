@@ -25,7 +25,7 @@
 	let qrCodeAction: ReceiveQRCodeAction;
 	$: qrCodeAction = {
 		enabled: true,
-		label: qrCodeAriaLabel,
+		ariaLabel: qrCodeAriaLabel,
 		testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
 	};
 </script>

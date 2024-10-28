@@ -11,7 +11,7 @@
 
 <div class="flex justify-center gap-2">
 	{#if qrCodeAction.enabled}
-		<ButtonIcon ariaLabel={qrCodeAction.label} on:click testId={qrCodeAction?.testId}>
+		<ButtonIcon ariaLabel={qrCodeAction.ariaLabel} on:click testId={qrCodeAction?.testId}>
 			<IconQRCodeScanner size="24" slot="icon" />
 		</ButtonIcon>
 	{/if}

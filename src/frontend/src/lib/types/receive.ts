@@ -9,5 +9,5 @@ export interface ReceiveQRCode {
 }
 
 export type ReceiveQRCodeAction =
-	| { enabled: true; label: string; testId?: string }
+	| { enabled: true; ariaLabel: string; testId?: string }
 	| { enabled: false };
