@@ -69,6 +69,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 						...acc[token.id],
 						id: token.id,
 						nativeToken: token,
+						// We place the "native token" as the first token in the group, independently of its position in the list, so basically ignoring the sorting rules, like the balance.
 						// TODO: Check if the "native token" should always be the first token in the group, or if it should respect the order of the tokens in the group.
 						tokens: [token, ...acc[token.id].tokens],
 						balance: sumBalances([acc[token.id].balance, token.balance]),
