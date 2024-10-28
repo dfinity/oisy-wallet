@@ -18,7 +18,8 @@
 		dispatch('icQRCode', {
 			address,
 			addressLabel: $i18n.wallet.text.wallet_address,
-			addressToken: $token
+			addressToken: $token,
+			copyAriaLabel: $i18n.wallet.text.wallet_address_copied
 		});
 </script>
 
@@ -26,7 +27,10 @@
 	labelRef="wallet-address"
 	address={$icrcAccountIdentifierText ?? ''}
 	network={ICP_NETWORK}
-	qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+	qrCodeAction={{
+		enabled: true,
+		ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+	}}
 	copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
