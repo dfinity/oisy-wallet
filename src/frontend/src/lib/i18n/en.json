@@ -544,6 +544,9 @@
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message"
 		},
+		"alt": {
+			"connect_input": "e.g. wc:a281567bb3e4..."
+		},
 		"domain": {
 			"title": "Domain Verification",
 			"valid": "Valid ✅",

@@ -84,7 +84,7 @@
 
 	<p class="pb-2 pt-4 text-center">{$i18n.wallet_connect.text.or_use_link}</p>
 
-	<InputText name="uri" placeholder="e.g. wc:a281567bb3e4..." bind:value={uri} />
+	<InputText name="uri" placeholder={$i18n.wallet_connect.alt.connect_input} bind:value={uri} />
 
 	<ButtonGroup slot="toolbar">
 		<Button disabled={invalid} on:click={onClick}>
