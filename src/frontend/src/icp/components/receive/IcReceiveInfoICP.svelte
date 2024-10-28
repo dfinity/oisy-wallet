@@ -11,6 +11,10 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import {
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON,
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
@@ -31,6 +35,7 @@
 		network={ICP_NETWORK}
 		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
@@ -51,6 +56,7 @@
 		network={ICP_NETWORK}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_account_id_qr}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
+		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',

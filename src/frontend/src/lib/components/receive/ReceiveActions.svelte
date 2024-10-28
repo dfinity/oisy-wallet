@@ -7,6 +7,7 @@
 	export let address: string;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
+	export let copyButtonTestId: string | undefined = undefined;
 </script>
 
 <div class="flex justify-center gap-2">
@@ -14,5 +15,5 @@
 		<IconQRCodeScanner size="24" slot="icon" />
 	</ButtonIcon>
 
-	<ReceiveCopy {address} {copyAriaLabel} />
+	<ReceiveCopy {address} {copyAriaLabel} testId={copyButtonTestId} />
 </div>

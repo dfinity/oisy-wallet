@@ -4,6 +4,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
 
@@ -28,7 +29,7 @@
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
 
-			<ButtonNext {disabled} />
+			<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
 		</ButtonGroup>
 	</ContentWithToolbar>
 </form>

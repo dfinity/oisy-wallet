@@ -5,11 +5,13 @@
 
 	export let address: string;
 	export let copyAriaLabel: string;
+	export let testId: string | undefined = undefined;
 </script>
 
 <ButtonIcon
 	ariaLabel={copyAriaLabel}
 	on:click={async () => await copyToClipboard({ value: address, text: copyAriaLabel })}
+	{testId}
 >
 	<IconCopy size="24" slot="icon" />
 </ButtonIcon>
