@@ -14,13 +14,16 @@
 </script>
 
 <button
-	class={`${colorStyle} flex flex-1 text-center transition duration-500 ease-in-out ${styleClass}`}
+	class={`${colorStyle} flex flex-1 text-center ${styleClass}`}
 	class:padding-sm={paddingSmall}
 	class:w-full={fullWidth}
 	class:link
 	{type}
 	disabled={disabled || loading}
 	class:loading
+	class:transition={loading}
+	class:duration-500={loading}
+	class:ease-in-out={loading}
 	class:animate-pulse={loading}
 	class:opacity-40={loading}
 	on:click
@@ -28,7 +31,10 @@
 	aria-label={ariaLabel}
 >
 	<span
-		class="flex gap-2 transition duration-500 ease-in-out"
+		class="flex gap-2"
+		class:transition={loading}
+		class:duration-500={loading}
+		class:ease-in-out={loading}
 		class:invisible={loading}
 		aria-hidden={loading}
 	>
