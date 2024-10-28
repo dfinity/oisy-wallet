@@ -739,6 +739,8 @@
 	},
 	"license_agreement": {
 		"text": {
+			"accept_terms": "By clicking this button, you agree to the",
+			"accept_terms_link": "License Agreement",
 			"title": "$oisy_name License Agreement (“License Agreement”)",
 			"paragraph_1": "Thank you for your interest in $oisy_name, a browser-based, self-custodial and multi-chain wallet decentralized application hosted on the Internet Computer public blockchain network (“$oisy_short”). For more information about $oisy_short, its open-source code and related licenses, please refer to the $oisy_short github repository found here: $oisy_repo_url.",
 			"paragraph_2": "This License Agreement governs your use of $oisy_short (\"You\"). BY USING $oisy_short, YOU AGREE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THIS LICENSE AGREEMENT. IF YOU DO NOT AGREE, YOU MAY NOT USE $oisy_short.",
@@ -756,6 +758,9 @@
 			"assignment": "<strong>11. ASSIGNMENT.</strong> You may not assign this License Agreement without the prior written consent of DFINITY, whether expressly or by operation of law, including in connection with a merger or change of control, and any such attempted assignment shall be void and of no effect. DFINITY may assign this License Agreement without restriction and without any notice to You. Subject to the foregoing, this License Agreement shall be binding on the parties and their respective successors and permitted assigns.",
 			"no_waiver": "<strong>12. NO WAIVER.</strong> The failure to exercise, or delay in exercising, a right, power, or remedy provided in this License Agreement or by law shall not constitute a waiver of that right, power, or remedy. DFINITY 's waiver of any obligation or breach of this License Agreement shall not operate as a waiver of any other obligation or subsequent breach of the License Agreement.",
 			"english_version": "<strong>13. ENGLISH VERSION.</strong> The English language version of this License Agreement shall be the official and controlling version of the agreement if any conflict should arise. All communications and notices made pursuant to this License Agreement must be in the English language."
+		},
+		"alt": {
+			"license_agreement": "The $oisy_name License Agreement"
 		}
 	}
 }
