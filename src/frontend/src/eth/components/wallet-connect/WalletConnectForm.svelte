@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Input, QRCodeReader } from '@dfinity/gix-components';
+	import { QRCodeReader } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import InputText from '$lib/components/ui/InputText.svelte';
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
 		TRACK_COUNT_WALLET_CONNECT_QR_CODE
@@ -83,13 +84,7 @@
 
 	<p class="pb-2 pt-4 text-center">{$i18n.wallet_connect.text.or_use_link}</p>
 
-	<Input
-		name="uri"
-		required
-		inputType="text"
-		placeholder="e.g. wc:a281567bb3e4..."
-		bind:value={uri}
-	/>
+	<InputText name="uri" placeholder="e.g. wc:a281567bb3e4..." bind:value={uri} />
 
 	<ButtonGroup slot="toolbar">
 		<Button disabled={invalid} on:click={onClick}>
