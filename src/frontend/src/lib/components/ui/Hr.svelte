@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let spacing: 'none' | 'lg' = 'none';
+	import type { Size } from '$lib/types/components';
+
+	export let spacing: 'none' | Extract<Size, 'lg'> = 'none';
 </script>
 
 <hr
