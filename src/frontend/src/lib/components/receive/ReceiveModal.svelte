@@ -18,7 +18,7 @@
 
 	<ContentWithToolbar>
 		<ReceiveAddressQRCodeContent
-			testIdCopy={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
+			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 			{address}
 			{addressToken}
 		/>

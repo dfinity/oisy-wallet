@@ -12,7 +12,7 @@
 	export let network: Network;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
-	export let testCopyId: string | undefined = undefined;
+	export let copyButtonTestId: string | undefined = undefined;
 
 	let text = false;
 	$: text = nonNullish($$slots.text);
@@ -40,7 +40,7 @@
 
 			<output id="ic-wallet-address" class="break-all">{address}</output>
 
-			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} {testCopyId} />
+			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} {copyButtonTestId} />
 		</div>
 
 		<slot />

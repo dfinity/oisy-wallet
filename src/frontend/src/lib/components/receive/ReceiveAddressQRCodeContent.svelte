@@ -9,7 +9,7 @@
 	export let addressLabel: string | undefined = undefined;
 	export let addressToken: Token | undefined;
 	export let testId: string | undefined = undefined;
-	export let testIdCopy: string | undefined = undefined;
+	export let copyButtonTestId: string | undefined = undefined;
 </script>
 
 <p class="text-center font-bold">{addressLabel ?? $i18n.wallet.text.address}:</p>
@@ -18,7 +18,7 @@
 		inline
 		value={address ?? ''}
 		text={$i18n.wallet.text.address_copied}
-		testId={testIdCopy}
+		testId={copyButtonTestId}
 	/>
 </p>
 
