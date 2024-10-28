@@ -90,6 +90,8 @@ interface I18nDapps {
 		show_all: string;
 		show_tag: string;
 		open_dapp: string;
+		open_telegram: string;
+		open_open_chat: string;
 		open_twitter: string;
 		source_code_on_github: string;
 		submit_your_dapp: string;
@@ -480,6 +482,7 @@ interface I18nWallet_connect {
 		raw_copied: string;
 		sign_message: string;
 	};
+	alt: { connect_input: string };
 	domain: {
 		title: string;
 		valid: string;
@@ -588,20 +591,12 @@ interface I18nTransactions {
 
 interface I18nAbout {
 	text: { title: string };
-	what: {
+	why_oisy: {
 		text: {
 			label: string;
 			title: string;
 			hold_crypto: string;
-			use_eth_dapps: string;
-			use_ic_dapps: string;
-		};
-	};
-	how: {
-		text: {
-			label: string;
-			title: string;
-			self_custody: string;
+			network_custody: string;
 			fully_on_chain: string;
 			cross_device: string;
 			verifiable_credentials: string;
@@ -644,6 +639,28 @@ interface I18nCarousel {
 	text: { next_slide: string; prev_slide: string; indicator: string };
 }
 
+interface I18nLicense_agreement {
+	text: {
+		title: string;
+		paragraph_1: string;
+		paragraph_2: string;
+		paragraph_3: string;
+		limited_license: string;
+		restrictions: string;
+		applicable_laws: string;
+		reservation_rights: string;
+		feedback: string;
+		termination: string;
+		warranty_liability: string;
+		indemnity: string;
+		governing_law: string;
+		entire_agreement: string;
+		assignment: string;
+		no_waiver: string;
+		english_version: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -669,4 +686,5 @@ interface I18n {
 	about: I18nAbout;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
+	license_agreement: I18nLicense_agreement;
 }
