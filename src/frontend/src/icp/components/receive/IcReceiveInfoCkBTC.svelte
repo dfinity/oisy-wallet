@@ -47,9 +47,7 @@
 	<IcReceiveWalletAddress on:icQRCode />
 
 	{#if nonNullish(btcAddress) && nonNullish(twinToken)}
-		<div class="my-6">
-			<Hr />
-		</div>
+		<Hr spacing="lg" />
 
 		<ReceiveAddress
 			labelRef="bitcoin-address"
