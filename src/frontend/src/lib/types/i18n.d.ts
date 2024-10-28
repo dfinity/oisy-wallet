@@ -641,6 +641,8 @@ interface I18nCarousel {
 
 interface I18nLicense_agreement {
 	text: {
+		accept_terms: string;
+		accept_terms_link: string;
 		title: string;
 		paragraph_1: string;
 		paragraph_2: string;
@@ -659,6 +661,7 @@ interface I18nLicense_agreement {
 		no_waiver: string;
 		english_version: string;
 	};
+	alt: { license_agreement: string };
 }
 
 interface I18n {
