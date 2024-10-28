@@ -30,7 +30,7 @@
 	let addressToken: Token | undefined;
 	let copyAriaLabel: string | undefined;
 
-	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
+	const displayQRCode = ({ detail }: CustomEvent<Omit<ReceiveQRCode, 'qrCodeAriaLabel'>>) => {
 		address = detail.address;
 		addressLabel = detail.addressLabel;
 		addressToken = detail.addressToken;
