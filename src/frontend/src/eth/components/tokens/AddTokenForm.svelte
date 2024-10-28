@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
+	import InputText from '$lib/components/ui/InputText.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let contractAddress = '';
@@ -7,12 +7,9 @@
 
 <div class="stretch">
 	<label for="destination" class="px-4.5 font-bold">{$i18n.tokens.text.contract_address}:</label>
-	<Input
+	<InputText
 		name="contractAddress"
-		inputType="text"
-		required
 		bind:value={contractAddress}
 		placeholder={$i18n.tokens.placeholder.enter_contract_address}
-		spellcheck={false}
 	/>
 </div>
