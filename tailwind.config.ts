@@ -19,6 +19,7 @@ export default {
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
 			'light-grey': '#ced4da',
+			aurometalsaurus: '#6c757d',
 			'light-blue': '#e8f1ff',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'blue-ribbon': '#0066ff',
@@ -69,6 +70,7 @@ export default {
 			screens: {
 				'1.5md': '896px',
 				'1.5lg': '1152px',
+				'1.5xl': '1408px',
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
 			}
