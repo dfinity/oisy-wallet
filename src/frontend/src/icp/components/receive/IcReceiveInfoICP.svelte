@@ -41,7 +41,7 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_all_tokens}</svelte:fragment>
 	</ReceiveAddress>
 
-	<div class="mb-6">
+	<div class="my-6">
 		<Hr />
 	</div>
 
