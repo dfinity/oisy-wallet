@@ -8,7 +8,7 @@
 </script>
 
 <article
-	class="relative flex flex-col items-center rounded-lg py-6"
+	class="relative flex flex-col items-center rounded-lg pb-6"
 	transition:slide={SLIDE_PARAMS}
 >
 	<HeroContent {usdTotal} {summary} />
