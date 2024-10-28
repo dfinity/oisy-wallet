@@ -7,7 +7,7 @@
 	export let onPrevious: () => void;
 </script>
 
-<div class="flex w-[25%] items-center justify-center">
+<div class="mr-3 flex items-center">
 	<ButtonControl ariaLabel={$i18n.carousel.text.prev_slide} styleClass="mr-1" on:click={onPrevious}>
 		<IconWest />
 	</ButtonControl>

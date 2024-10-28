@@ -7,8 +7,8 @@
 	export let onIndicatorClick: (index: number) => void;
 </script>
 
-<div class="flex w-[75%] items-center justify-center">
+<div class="flex items-center">
 	{#each { length: totalSlides } as _, index}
-		<Indicator on:click={() => onIndicatorClick(index)} {index} {currentSlide} />
+		<Indicator on:click={() => onIndicatorClick(index)} {index} {currentSlide} {totalSlides} />
 	{/each}
 </div>

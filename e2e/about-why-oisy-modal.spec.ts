@@ -1,17 +1,20 @@
-import { ABOUT_WHAT_MODAL, ABOUT_WHAT_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 import { test } from '@playwright/test';
+import {
+	ABOUT_WHY_OISY_BUTTON,
+	ABOUT_WHY_OISY_MODAL
+} from '../src/frontend/src/lib/constants/test-ids.constants';
 import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
 
-const ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT = 930;
+const ABOUT_WHY_OISY_MODAL_VIEWPORT_HEIGHT = 1600;
 
-test('should display about-what modal', async ({ page, isMobile }) => {
+test('should display about-why-oisy modal', async ({ page, isMobile }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({
 		page,
 		viewportSize: !isMobile
 			? {
 					width: MODALS_VIEWPORT_WIDTH,
-					height: ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT
+					height: ABOUT_WHY_OISY_MODAL_VIEWPORT_HEIGHT
 				}
 			: undefined
 	});
@@ -19,7 +22,7 @@ test('should display about-what modal', async ({ page, isMobile }) => {
 	await homepageLoggedOut.waitForReady();
 
 	await homepageLoggedOut.testModalSnapshot({
-		modalOpenButtonTestId: ABOUT_WHAT_MODAL_OPEN_BUTTON,
-		modalTestId: ABOUT_WHAT_MODAL
+		modalOpenButtonTestId: ABOUT_WHY_OISY_BUTTON,
+		modalTestId: ABOUT_WHY_OISY_MODAL
 	});
 });

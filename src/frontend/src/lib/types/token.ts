@@ -74,12 +74,13 @@ export type TokenUi = Token & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;
 
-// TODO: remove header and nativeNetwork, since we added nativeToken that has all their data, and they became redundant
-export interface TokenGroupUi {
-	header: TokenMetadata;
-	nativeToken: TokenUi;
-	nativeNetwork: Network;
-	tokens: TokenUi[];
-}
+//todo: separate typing from token id
+export type GroupId = TokenId;
 
-export type TokenUiOrGroupUi = TokenUi | TokenGroupUi;
+export type TokenUiGroup = {
+	id: GroupId;
+	nativeToken: TokenUi;
+	tokens: TokenUi[];
+} & TokenFinancialData;
+
+export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;
