@@ -40,7 +40,7 @@ export const replaceOisyPlaceholders = (text: string): string =>
 		$oisy_description: OISY_DESCRIPTION,
 		$oisy_url: OISY_URL,
 		$oisy_repo_url: OISY_REPO_URL,
-		$oisy_status_url: OISY_STATUS_URL
+		$oisy_status_url: OISY_STATUS_URL,
 		$oisy_twitter_url: OISY_TWITTER_URL
 	});
 
