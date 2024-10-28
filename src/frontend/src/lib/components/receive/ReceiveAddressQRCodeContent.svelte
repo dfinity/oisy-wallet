@@ -12,6 +12,7 @@
 	export let addressToken: Token | undefined;
 
 	export let testId: string | undefined = undefined;
+	export let copyButtonTestId: string | undefined = undefined;
 
 	export let network: Network;
 	export let qrCodeAction: ReceiveQRCodeAction;
@@ -29,6 +30,7 @@
 	{network}
 	{qrCodeAction}
 	{copyAriaLabel}
+	{copyButtonTestId}
 >
 	<svelte:fragment slot="title">{addressLabel ?? $i18n.wallet.text.address}</svelte:fragment>
 </ReceiveAddress>

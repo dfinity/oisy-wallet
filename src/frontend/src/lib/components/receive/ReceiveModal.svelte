@@ -22,12 +22,12 @@
 
 	<ContentWithToolbar>
 		<ReceiveAddressQRCodeContent
+			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 			{address}
 			{addressToken}
 			{network}
 			{copyAriaLabel}
 			qrCodeAction={{ enabled: false }}
-			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 		/>
 
 		<slot name="content" />
