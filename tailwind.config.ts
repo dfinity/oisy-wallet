@@ -1,5 +1,6 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import type { Config } from 'tailwindcss/types/config';
+import { colorsBase } from './src/frontend/src/lib/styles/tailwind/colors/base';
 import { themeVariables } from './src/frontend/src/lib/styles/tailwind/colors/variables';
 
 export default {
@@ -23,7 +24,6 @@ export default {
 			aurometalsaurus: '#6c757d',
 			'light-blue': '#e8f1ff',
 			'blue-ribbon-rgb': '0, 102, 255',
-			'blue-ribbon': '#0066ff',
 			'info-blue': '#0BA5EC',
 			'dark-blue': '#321469',
 			'brandeis-blue': '#016dfc',
@@ -44,11 +44,9 @@ export default {
 			'chocolate-cosmos': '#520c13',
 			'upsdell-red': '#a71d2a',
 			'alice-blue': '#ecf3fb',
-			'american-orange': '#ff8a00',
 			'crayola-yellow': '#ffe57f',
 			'warning-orange': '#FFF3E6',
 			cornsilk: '#fff7d8',
-			cobalt: '#004abe',
 			'resolution-blue': '#012f80',
 			zumthor: '#e8f1ff',
 			onahau: '#d1e3ff',
@@ -56,6 +54,7 @@ export default {
 			beer: '#f7931a',
 			fulvous: '#de7900',
 			water: '#d1e3ff',
+			...colorsBase,
 			...themeVariables
 		},
 		extend: {
