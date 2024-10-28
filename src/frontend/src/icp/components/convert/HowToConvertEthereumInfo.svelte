@@ -20,6 +20,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
 
@@ -154,13 +155,11 @@
 		</div>
 	</div>
 
-	<div slot="toolbar">
+	<svelte:fragment slot="toolbar">
 		{#if formCancelAction === 'back'}
-			<Button fullWidth type="button" on:click={() => dispatch('icBack')}
-				>{$i18n.core.text.back}</Button
-			>
+			<ButtonBack fullWidth on:click={() => dispatch('icBack')} />
 		{:else}
 			<ButtonDone on:click={modalStore.close} />
 		{/if}
-	</div>
+	</svelte:fragment>
 </ContentWithToolbar>

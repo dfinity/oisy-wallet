@@ -35,7 +35,6 @@
 	<Button
 		colorStyle="secondary"
 		fullWidth
-		styleClass="mt-8"
 		on:click={() => dispatch('icBack')}
 		slot="toolbar"
 	>
