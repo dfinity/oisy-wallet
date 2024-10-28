@@ -6,9 +6,9 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -33,11 +33,7 @@
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />
-		<Button
-			{disabled}
-			on:click={() => dispatch('icSend')}
-			testId={REVIEW_FORM_SEND_BUTTON}
-		>
+		<Button {disabled} on:click={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
 			{$i18n.send.text.send}
 		</Button>
 	</ButtonGroup>

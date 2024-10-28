@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
 	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let disabled = false;
 </script>

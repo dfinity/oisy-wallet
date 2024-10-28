@@ -151,5 +151,9 @@
 		{$i18n.receive.ethereum.text.ethereum}
 	</ReceiveAddressWithLogo>
 
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} on:click={modalStore.close} slot="toolbar" />
+	<ButtonDone
+		testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
+		on:click={modalStore.close}
+		slot="toolbar"
+	/>
 </ContentWithToolbar>
