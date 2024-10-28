@@ -122,7 +122,7 @@
 				</div>
 			</div>
 
-			<p class="m-0 my-5 text-sm">
+			<p class="m-0 my-5 text-sm [&_ul]:pl-6 [&_ul]:list-disc">
 				<Html text={description} />
 			</p>
 			<DappTags dAppName={name} {tags} />
