@@ -30,7 +30,7 @@
 		{/if}
 
 		<div
-			class="flex items-center justify-between gap-6 rounded-lg bg-zumthor px-3 py-2"
+			class="flex items-center justify-between gap-4 rounded-lg bg-zumthor px-3 py-2"
 			class:mt-2={!text}
 		>
 			<div class="h-8 w-8">
@@ -42,7 +42,7 @@
 				/>
 			</div>
 
-			<output id="ic-wallet-address" class="break-all" data-tid={testId}>{address}</output>
+			<output id="ic-wallet-address" class="break-all text-sm" data-tid={testId}>{address}</output>
 
 			<ReceiveActions on:click {address} {copyAriaLabel} {qrCodeAction} />
 		</div>
