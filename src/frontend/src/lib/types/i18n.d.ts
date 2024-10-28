@@ -102,7 +102,7 @@ interface I18nDapps {
 
 interface I18nFooter {
 	text: { developed_with: string };
-	alt: { dfinity: string };
+	alt: { dfinity: string; status: string };
 }
 
 interface I18nWallet {
@@ -482,6 +482,7 @@ interface I18nWallet_connect {
 		raw_copied: string;
 		sign_message: string;
 	};
+	alt: { connect_input: string };
 	domain: {
 		title: string;
 		valid: string;
@@ -590,11 +591,12 @@ interface I18nTransactions {
 
 interface I18nAbout {
 	text: { title: string };
-	how: {
+	why_oisy: {
 		text: {
 			label: string;
 			title: string;
-			self_custody: string;
+			hold_crypto: string;
+			network_custody: string;
 			fully_on_chain: string;
 			cross_device: string;
 			verifiable_credentials: string;
@@ -637,8 +639,10 @@ interface I18nCarousel {
 	text: { next_slide: string; prev_slide: string; indicator: string };
 }
 
-interface I18nTerms_and_conditions {
+interface I18nLicense_agreement {
 	text: {
+		accept_terms: string;
+		accept_terms_link: string;
 		title: string;
 		paragraph_1: string;
 		paragraph_2: string;
@@ -657,6 +661,7 @@ interface I18nTerms_and_conditions {
 		no_waiver: string;
 		english_version: string;
 	};
+	alt: { license_agreement: string };
 }
 
 interface I18n {
@@ -684,5 +689,5 @@ interface I18n {
 	about: I18nAbout;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
-	terms_and_conditions: I18nTerms_and_conditions;
+	license_agreement: I18nLicense_agreement;
 }

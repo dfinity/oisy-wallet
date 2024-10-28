@@ -4,7 +4,7 @@
 	import { page } from '$app/stores';
 	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
-	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
+	import AboutWhyOisy from '$lib/components/hero/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
@@ -75,7 +75,7 @@
 			<Hr />
 		{/if}
 
-		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy asMenuItem on:icOpenAboutModal={hidePopover} />
 
 		<ChangelogLink />
 

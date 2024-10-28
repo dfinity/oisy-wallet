@@ -30,7 +30,8 @@
 	data-tid={testId}
 	aria-label={ariaLabel}
 >
-	<div
+	<span
+		class="flex gap-2"
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
@@ -38,5 +39,5 @@
 		aria-hidden={loading}
 	>
 		<slot />
-	</div>
+	</span>
 </button>
