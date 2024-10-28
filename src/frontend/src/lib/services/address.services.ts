@@ -1,4 +1,3 @@
-import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 import {
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
@@ -156,7 +155,7 @@ const loadEthAddress = (): Promise<ResultSuccess> =>
 
 export const loadAddresses = async (tokenIds: TokenId[]): Promise<ResultSuccess> => {
 	const results = await Promise.all([
-		NETWORK_BITCOIN_ENABLED && tokenIds.includes(BTC_MAINNET_TOKEN_ID)
+		tokenIds.includes(BTC_MAINNET_TOKEN_ID)
 			? loadBtcAddressMainnet()
 			: Promise.resolve({ success: true }),
 		tokenIds.includes(ETHEREUM_TOKEN_ID) ? loadEthAddress() : Promise.resolve({ success: true })
@@ -249,12 +248,7 @@ const loadIdbEthAddress = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	});
 
 export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
-	const results = await Promise.all([
-		NETWORK_BITCOIN_ENABLED
-			? loadIdbBtcAddressMainnet()
-			: Promise.resolve<ResultSuccess<LoadIdbAddressError>>({ success: true }),
-		loadIdbEthAddress()
-	]);
+	const results = await Promise.all([loadIdbBtcAddressMainnet(), loadIdbEthAddress()]);
 
 	const { success, err } = reduceResults<LoadIdbAddressError>(results);
 
