@@ -15,6 +15,4 @@
 
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
-<div class="flex w-full content-center items-center">
-	<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" />
-</div>
+<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" />
