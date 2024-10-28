@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import MaxButton from '$lib/components/common/MaxButton.svelte';
+	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { invalidAmount } from '$lib/utils/input.utils';
@@ -56,19 +56,16 @@
 </script>
 
 <label for="amount" class="px-4.5 font-bold">{$i18n.core.text.amount}</label>
-<Input
+<InputCurrency
 	name="amount"
-	inputType="currency"
-	required
 	bind:value={amount}
 	decimals={tokenDecimals}
 	{placeholder}
-	spellcheck={false}
 	testId="amount-input"
 	on:nnsInput={onInput}
 >
 	<MaxButton slot="inner-end" on:click={onMax} disabled={isNullish(calculateMax)} />
-</Input>
+</InputCurrency>
 
 {#if nonNullish(error)}
 	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">{error.message}</p>

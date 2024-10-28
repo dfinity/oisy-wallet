@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconClose, Input } from '@dfinity/gix-components';
+	import { IconClose } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -27,6 +27,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import InputText from '$lib/components/ui/InputText.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkEthereum,
@@ -195,12 +196,11 @@
 </script>
 
 <div class="mb-4">
-	<Input
+	<InputText
 		name="filter"
-		inputType="text"
+		required={false}
 		bind:value={filter}
 		placeholder={$i18n.tokens.placeholder.search_token}
-		spellcheck={false}
 	>
 		<svelte:fragment slot="inner-end">
 			{#if noTokensMatch}
@@ -211,7 +211,7 @@
 				<IconSearch />
 			{/if}
 		</svelte:fragment>
-	</Input>
+	</InputText>
 </div>
 
 {#if nonNullish($selectedNetwork)}

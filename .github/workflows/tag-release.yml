@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v')
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'chore(release)/v')
     runs-on: ubuntu-24.04
 
     steps:
