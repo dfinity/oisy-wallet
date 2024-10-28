@@ -2,8 +2,10 @@
 	import { IconGitHub } from '@dfinity/gix-components';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
+	import { APP_VERSION } from '$lib/constants/app.constants';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -42,6 +44,7 @@
 			>
 				<IconTwitter />
 			</ExternalLinkIcon>
+			<Badge variant="warning">{APP_VERSION}</Badge>
 		</div>
 
 		<div
