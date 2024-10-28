@@ -18,7 +18,7 @@
 		{/if}
 	</output>
 
-	<span class="text-xl font-bold" class:opacity-50={token?.usdBalance ?? 0 === 0}>
+	<span class="text-xl font-bold opacity-50">
 		<TokenExchangeBalance balance={token?.balance} usdBalance={token?.usdBalance} />
 	</span>
 </span>
