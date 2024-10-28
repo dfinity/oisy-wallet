@@ -75,5 +75,20 @@
 		"description": "The Hub of Future Decentralized Finance!<br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly.",
 		"logo": "/images/dapps/icp-swap-logo.svg",
 		"screenshots": ["/images/dapps/icp-swap.webp"]
+	},
+	{
+		"id": "uniswap",
+		"name": "Uniswap",
+		"oneLiner": "The largest onchain marketplace. Buy and sell crypto on Ethereum and 11+ other chains.",
+		"callToAction": "Let’s get swappin'",
+		"website": "https://app.uniswap.org/",
+		"twitter": "https://x.com/Uniswap",
+		"github": "https://github.com/Uniswap",
+		"tags": ["DEX", "WalletConnect"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Uniswap is a decentralized cryptocurrency exchange that uses a set of smart contracts to create liquidity pools for the execution of trades. It is an open source project and falls into the category of a DeFi product because it uses smart contracts to facilitate trades instead of a centralized exchange.",
+		"logo": "/images/dapps/uniswap-logo.svg",
+		"screenshots": ["/images/dapps/uniswap.webp"]
 	}
 ]
