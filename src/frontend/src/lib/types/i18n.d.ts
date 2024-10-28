@@ -482,6 +482,7 @@ interface I18nWallet_connect {
 		raw_copied: string;
 		sign_message: string;
 	};
+	alt: { connect_input: string };
 	domain: {
 		title: string;
 		valid: string;
