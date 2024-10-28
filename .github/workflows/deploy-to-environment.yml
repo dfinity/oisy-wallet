@@ -77,7 +77,6 @@ jobs:
             echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
             echo "VITE_BLOCKSTREAM_API_URL=https://blockstream.info/api" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
@@ -102,7 +101,6 @@ jobs:
             echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}" >> $GITHUB_ENV
-            echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
             echo "VITE_BLOCKSTREAM_API_URL=https://blockstream.info/api" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
