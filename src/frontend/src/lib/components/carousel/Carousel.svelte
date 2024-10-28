@@ -9,6 +9,7 @@
 	export let duration = 300;
 	export let easing = 'ease-out';
 	export let styleClass: string | undefined = undefined;
+	export let controlsWidthStyleClass: string | undefined = undefined;
 
 	/**
 	 * Carousel container element variables
@@ -45,11 +46,9 @@
 	onMount(() => {
 		initializeSlides();
 		initializeCarousel();
-		initialiseAutoplayTimer();
 
 		return () => {
-			clearAutoplayTimer();
-			clearSlideTransformTimer();
+			clearTimers();
 		};
 	});
 
@@ -66,6 +65,14 @@
 	};
 
 	/**
+	 * Clear all timers
+	 */
+	const clearTimers = () => {
+		clearAutoplayTimer();
+		clearSlideTransformTimer();
+	};
+
+	/**
 	 * Build slider frame and set required variables
 	 */
 	const initializeCarousel = () => {
@@ -74,6 +81,12 @@
 		}
 
 		containerWidth = container.offsetWidth;
+
+		// Clear timers and stop further initialisation in case container is rendered but not visible (e.g. display: none)
+		if (containerWidth === 0) {
+			clearTimers();
+			return;
+		}
 
 		// Clean previous HTML if the frame is being re-built (e.g. in case of window resize)
 		sliderFrame.innerHTML = '';
@@ -88,6 +101,11 @@
 			goToSlide({
 				slide: currentSlide
 			});
+
+			// Start autoplay timer if it is not running
+			if (isNullish(autoplayTimer)) {
+				initialiseAutoplayTimer();
+			}
 		}
 	};
 
@@ -225,13 +243,17 @@
 <!-- Resize listener to re-calculate slide frame width -->
 <svelte:window on:resize={onResize} />
 
-<div class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white p-4 pb-16 shadow`}>
+<div
+	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
+>
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>
-	<div class="absolute bottom-4 left-0 flex w-full justify-center">
+	<div
+		class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+	>
 		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 		<Controls {onNext} {onPrevious} />
 	</div>

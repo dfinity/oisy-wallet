@@ -19,6 +19,7 @@ export default {
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
 			'light-grey': '#ced4da',
+			aurometalsaurus: '#6c757d',
 			'light-blue': '#e8f1ff',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'blue-ribbon': '#0066ff',
@@ -44,6 +45,7 @@ export default {
 			'alice-blue': '#ecf3fb',
 			'american-orange': '#ff8a00',
 			'crayola-yellow': '#ffe57f',
+			'warning-orange': '#FFF3E6',
 			cornsilk: '#fff7d8',
 			cobalt: '#004abe',
 			'resolution-blue': '#012f80',
@@ -63,10 +65,13 @@ export default {
 				'pos-100': '100% 100%'
 			},
 			width: {
-				sm: '576px'
+				sm: '576px',
+				md: '768px'
 			},
 			screens: {
 				'1.5md': '896px',
+				'1.5lg': '1152px',
+				'1.5xl': '1408px',
 				'2.5xl': '1728px',
 				'h-md': { raw: '(max-height: 1090px)' }
 			}
