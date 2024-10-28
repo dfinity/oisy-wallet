@@ -3,8 +3,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let disabled = false;
+	export let fullWidth = false;
 </script>
 
-<Button colorStyle="secondary" type="button" {disabled} on:click>
+<Button colorStyle="secondary" type="button" {disabled} {fullWidth} on:click>
 	{$i18n.core.text.back}
 </Button>

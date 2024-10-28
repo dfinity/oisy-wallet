@@ -9,6 +9,7 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -151,13 +152,11 @@
 		</div>
 	</div>
 
-	<div slot="toolbar">
+	<svelte:fragment slot="toolbar">
 		{#if formCancelAction === 'back'}
-			<Button fullWidth type="button" on:click={() => dispatch('icBack')}
-				>{$i18n.core.text.back}</Button
-			>
+			<ButtonBack fullWidth on:click={() => dispatch('icBack')} />
 		{:else}
 			<ButtonDone on:click={modalStore.close} />
 		{/if}
-	</div>
+	</svelte:fragment>
 </ContentWithToolbar>
