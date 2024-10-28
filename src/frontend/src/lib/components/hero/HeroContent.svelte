@@ -33,7 +33,7 @@
 </script>
 
 <div
-	class="class:from-blue-ribbon-light flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-blue-ribbon bg-gradient-to-b from-blue-ribbon via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-blue-ribbon bg-gradient-to-b from-blue-ribbon via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum}
 	class:via-interdimensional-blue={$networkICP}
 	class:to-chinese-purple={$networkICP}
