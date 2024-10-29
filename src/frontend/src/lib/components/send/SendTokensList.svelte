@@ -33,9 +33,7 @@
 					</TokenCardWithOnClick>
 				{/each}
 			</div>
-		{/if}
-
-		{#if tokens.length === 0}
+		{:else}
 			<p class="text-secondary">
 				{$i18n.tokens.manage.text.all_tokens_zero_balance}
 			</p>
