@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Settings from '$lib/components/settings/Settings.svelte';
+	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<h2 class="mb-6 pb-1 text-base lg:mt-20">{$i18n.settings.text.title}</h2>
+<PageTitle>{$i18n.settings.text.title}</PageTitle>
 
 <Settings />

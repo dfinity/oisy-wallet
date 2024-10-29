@@ -5,6 +5,7 @@
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
 	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { dAppDescriptions, type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
@@ -28,7 +29,7 @@
 	);
 </script>
 
-<h1 class="mb-5 mt-6">{$i18n.dapps.text.title}</h1>
+<PageTitle>{$i18n.dapps.text.title}</PageTitle>
 
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-10">
