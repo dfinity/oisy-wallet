@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -31,7 +32,7 @@
 
 	// Source: https://svelte.dev/blog/view-transitions
 	onNavigate((navigation) => {
-		if (!document.startViewTransition) {
+		if (isNullish(document.startViewTransition)) {
 			return;
 		}
 
