@@ -426,7 +426,8 @@
 				"add_the_token": "Add the token",
 				"info": "To display custom token information correctly, $oisy_name requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
 				"github_howto": "Read how ICRC token Integration works",
-				"open_github_howto": "Open information about ICRC token integration on GitHub"
+				"open_github_howto": "Open information about ICRC token integration on GitHub",
+				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",
