@@ -48,6 +48,10 @@ What are the unique ICP technical building blocks enabling the creation of OISY?
 
 - (Upcoming) **HTTP outcalls:** for now, OISY calls centralized Ethereum endpoints, such as Infura or Alchemy, from the frontend. In the future, OISY might be improved to use [HTTP outcalls](https://internetcomputer.org/https-outcalls) to call these endpoints in a decentralized fashion. Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to explore how to use Web 2.0 services on ICP.
 
+## Submit your dApp
+
+To file a request to have your dApp listed in the dApps explorer of OISY Wallet, please submit this [dApp Submission Request](https://github.com/dfinity/oisy-wallet/issues/new?assignees=&labels=&projects=&template=dapp_submission_request.md&title=Request+a+dApp+to+be+listed+on+the+OISY+Wallet+dApp+Explorer).
+
 ## Status
 
 Please note that this is a **beta version** of OISY Wallet which is still undergoing final testing before its official release.
