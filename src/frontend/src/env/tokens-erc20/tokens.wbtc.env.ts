@@ -2,7 +2,6 @@ import { ETHEREUM_NETWORK } from '$env/networks.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wbtc from '$icp-eth/assets/wbtc.svg';
 import type { TokenId } from '$lib/types/token';
-
 import { parseTokenId } from '$lib/validation/token.validation';
 
 export const WBTC_DECIMALS = 8;
