@@ -7,10 +7,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		dAppDescriptions,
-		type FeaturedOisyDappDescription
-	} from '$lib/types/oisyDappDescription';
+	import { dAppDescriptions, type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// For the moment only the first featured dapp is highlighted

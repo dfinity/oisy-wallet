@@ -5,7 +5,7 @@
 	import {
 		dAppDescriptions,
 		type CarouselSlideOisyDappDescription
-	} from '$lib/types/oisyDappDescription';
+	} from '$lib/types/dapp-description';
 
 	export let styleClass: string | undefined = undefined;
 
