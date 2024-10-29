@@ -83,9 +83,11 @@
 		{/if}
 	</div>
 
-	<p class="pb-2 pt-4 text-center">{$i18n.wallet_connect.text.or_use_link}</p>
+	<p class="mb-1 pt-4 text-center">{$i18n.wallet_connect.text.or_use_link}</p>
 
-	<InputText name="uri" placeholder={$i18n.wallet_connect.alt.connect_input} bind:value={uri} />
+	<div class="mb-4">
+		<InputText name="uri" placeholder={$i18n.wallet_connect.alt.connect_input} bind:value={uri} />
+	</div>
 
 	<ButtonGroup slot="toolbar">
 		<Button disabled={invalid} on:click={onClick}>
@@ -103,7 +105,7 @@
 		--primary-rgb: 59, 0, 185;
 		overflow: hidden;
 
-		margin: var(--padding-4x) auto 0;
+		margin: 0 auto;
 
 		width: 100%;
 		max-width: calc(100% - var(--padding-3x));
