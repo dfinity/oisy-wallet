@@ -13,7 +13,6 @@ on:
         options:
           - staging
           - beta
-        default: staging
       canister:
         required: true
         type: choice
@@ -21,14 +20,17 @@ on:
         options:
           - frontend
           - backend
-        default: frontend
       force-backend:
         required: false
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
         default: false
 
-run-name: Deploying ${{ inputs.canister }} to ${{ inputs.network }}
+run-name: >-
+  ${{ 
+    github.event_name == 'push' && 'Deploying Frontend / Backend to Staging'
+    || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
+    || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
