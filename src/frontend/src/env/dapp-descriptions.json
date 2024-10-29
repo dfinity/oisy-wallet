@@ -8,7 +8,7 @@
 		"github": "https://github.com/KongSwap",
 		"openChat": "https://oc.app/community/maceh-niaaa-aaaaf-bm37q-cai/channel/143833652212619352659918759629305427896",
 		"telegram": "https://t.me/kong_swap",
-		"tags": ["DEX", "Signer Standard"],
+		"tags": ["DEX"],
 		"description": "KongSwap is a fully decentralized exchange (DEX) offering bridgeless cross-chain trading across ICP, Bitcoin, Ethereum, and Solana. <br/><br/>Using Chain Fusion technology and the Internet Computer Protocol, it reduces fees, simplifies user experience, and avoids liquidity fragmentation. Both frontend and backend operate on-chain via smart contracts, delivering a seamless DeFi experience.",
 		"usesInternetIdentity": false,
 		"display": "Large",
