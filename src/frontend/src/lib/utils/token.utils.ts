@@ -6,13 +6,13 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
-import {
-	type RequiredTokenWithLinkedData,
-	type Token,
-	type TokenStandard,
-	type TokenUi,
-	type TokenUiGroup,
-	type TokenUiOrGroupUi
+import type {
+	RequiredTokenWithLinkedData,
+	Token,
+	TokenStandard,
+	TokenUi,
+	TokenUiGroup,
+	TokenUiOrGroupUi
 } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
