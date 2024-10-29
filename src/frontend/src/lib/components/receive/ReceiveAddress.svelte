@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -47,12 +47,12 @@
 				/>
 			</div>
 
-			{#if isNullish(address)}
-				<span class="w-full"><SkeletonText /></span>
-			{:else}
+			{#if nonNullish(address)}
 				<output id="ic-wallet-address" class="break-all text-sm" data-tid={testId} in:fade
 					>{address}</output
 				>
+			{:else}
+				<span class="w-full"><SkeletonText /></span>
 			{/if}
 
 			{#if nonNullish(address)}
