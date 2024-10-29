@@ -140,6 +140,10 @@
 			testId={RECEIVE_TOKENS_MODAL_ETH_SECTION}
 		>
 			<svelte:fragment slot="title">{$i18n.receive.ethereum.text.ethereum}</svelte:fragment>
+
+			<span slot="text" class="text-secondary text-sm"
+				>{$i18n.receive.icp.text.your_private_eth_address}</span
+			>
 		</ReceiveAddress>
 
 		<ReceiveAddress
