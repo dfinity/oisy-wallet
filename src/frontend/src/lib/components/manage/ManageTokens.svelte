@@ -44,6 +44,8 @@
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
+	import { parseTokenId } from '$lib/validation/token.validation';
+
 	const dispatch = createEventDispatcher();
 
 	// The list of ICRC tokens (SNSes) is defined as environment variables.
@@ -58,7 +60,7 @@
 	onMount(() => {
 		const tokens = buildIcrcCustomTokens();
 		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
+			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
 
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});

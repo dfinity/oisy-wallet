@@ -6,7 +6,8 @@ import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
-import type { RequiredToken, RequiredTokenWithLinkedData } from '$lib/types/token';
+import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 /**
  * Ethereum
@@ -15,7 +16,7 @@ export const ETHEREUM_DEFAULT_DECIMALS = 18;
 
 const ETHEREUM_SYMBOL = 'ETH';
 
-export const ETHEREUM_TOKEN_ID: unique symbol = Symbol(ETHEREUM_SYMBOL);
+export const ETHEREUM_TOKEN_ID: TokenId = parseTokenId(ETHEREUM_SYMBOL);
 
 export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	id: ETHEREUM_TOKEN_ID,
@@ -34,7 +35,7 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 
 export const SEPOLIA_SYMBOL = 'SepoliaETH';
 
-export const SEPOLIA_TOKEN_ID: unique symbol = Symbol(SEPOLIA_SYMBOL);
+export const SEPOLIA_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_SYMBOL);
 
 export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 	id: SEPOLIA_TOKEN_ID,
@@ -64,7 +65,7 @@ export const SUPPORTED_ETHEREUM_TOKEN_IDS: symbol[] = SUPPORTED_ETHEREUM_TOKENS.
  */
 export const ICP_SYMBOL = 'ICP';
 
-export const ICP_TOKEN_ID = Symbol(ICP_SYMBOL);
+export const ICP_TOKEN_ID: TokenId = parseTokenId(ICP_SYMBOL);
 
 export const ICP_TOKEN: RequiredToken<IcToken> = {
 	id: ICP_TOKEN_ID,

@@ -1,12 +1,14 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import link from '$icp-eth/assets/link.svg';
+import type { TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 export const LINK_DECIMALS = 18;
 
 export const LINK_SYMBOL = 'LINK';
 
-export const LINK_TOKEN_ID: unique symbol = Symbol(LINK_SYMBOL);
+export const LINK_TOKEN_ID: TokenId = parseTokenId(LINK_SYMBOL);
 
 export const LINK_TOKEN: RequiredErc20Token = {
 	id: LINK_TOKEN_ID,
@@ -27,7 +29,7 @@ export const LINK_TOKEN: RequiredErc20Token = {
 
 export const SEPOLIA_LINK_SYMBOL = 'SepoliaLINK';
 
-export const SEPOLIA_LINK_TOKEN_ID: unique symbol = Symbol(SEPOLIA_LINK_SYMBOL);
+export const SEPOLIA_LINK_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_LINK_SYMBOL);
 
 export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_LINK_TOKEN_ID,

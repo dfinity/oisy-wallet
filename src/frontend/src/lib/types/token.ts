@@ -2,8 +2,11 @@ import type { OptionBalance } from '$lib/types/balance';
 import type { Network } from '$lib/types/network';
 import type { OnramperId } from '$lib/types/onramper';
 import type { AtLeastOne, Option, RequiredExcept } from '$lib/types/utils';
+import { z } from 'zod';
 
-export type TokenId = symbol;
+export const TokenIdSchema = z.symbol().brand<'TokenId'>();
+
+export type TokenId = z.infer<typeof TokenIdSchema>;
 
 export type TokenStandard = 'ethereum' | 'erc20' | 'icp' | 'icrc' | 'bitcoin';
 
