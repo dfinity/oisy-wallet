@@ -4,7 +4,7 @@
 	import Tokens from '$lib/components/tokens/Tokens.svelte';
 </script>
 
-<div in:fade class="mb-6 flex justify-center xl:hidden">
+<div in:fade out:fade class="mb-6 flex justify-center xl:hidden">
 	<DappsCarousel />
 </div>
 
