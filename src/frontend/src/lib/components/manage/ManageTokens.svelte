@@ -26,7 +26,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import InputText from '$lib/components/ui/InputText.svelte';
+	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkEthereum,
@@ -195,7 +195,7 @@
 </script>
 
 <div class="mb-4">
-	<InputText
+	<InputTextWithAction
 		name="filter"
 		required={false}
 		bind:value={filter}
@@ -210,7 +210,7 @@
 				<IconSearch />
 			{/if}
 		</svelte:fragment>
-	</InputText>
+	</InputTextWithAction>
 </div>
 
 {#if nonNullish($selectedNetwork)}
