@@ -11,7 +11,7 @@ import {
 	type RequiredTokenWithLinkedData,
 	type TokenId
 } from '$lib/types/token';
-import { parseTokenId } from '$lib/utils/token.utils';
+import { parseTokenId } from '$lib/utils/zod.utils';
 
 /**
  * Ethereum

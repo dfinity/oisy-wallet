@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import link from '$icp-eth/assets/link.svg';
 import type { TokenId } from '$lib/types/token';
-import { parseTokenId } from '$lib/utils/token.utils';
+import { parseTokenId } from '$lib/utils/zod.utils';
 
 export const LINK_DECIMALS = 18;
 
