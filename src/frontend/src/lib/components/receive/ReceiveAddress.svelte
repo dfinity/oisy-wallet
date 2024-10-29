@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
