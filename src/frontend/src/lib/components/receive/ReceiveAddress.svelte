@@ -33,7 +33,7 @@
 
 		<div
 			class="flex items-center justify-between gap-4 rounded-lg bg-zumthor px-3 py-2"
-			class:mt-2={!text}
+			class:mt-3={!text}
 		>
 			<div class="h-8 w-8">
 				<Logo
