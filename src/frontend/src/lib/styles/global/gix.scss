@@ -1,4 +1,5 @@
 @use '../mixins/media';
+@use '../mixins/modal';
 
 :root {
 	--positive-emphasis: var(--color-green-crayola);
@@ -181,13 +182,7 @@ div.modal {
 
 			padding: var(--padding-3x) var(--padding-2_5x) 0;
 
-			&.fullWidth {
-				padding: var(--padding-3x) 0;
-			}
-
-			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
-			border-radius: var(--border-radius-lg);
-			background: var(--color-white);
+			@include modal.content;
 		}
 	}
 }

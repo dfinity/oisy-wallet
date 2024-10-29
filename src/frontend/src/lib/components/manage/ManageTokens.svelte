@@ -214,29 +214,29 @@
 	</InputText>
 </div>
 
-<div class="stretch fullWidth">
-	{#if nonNullish($selectedNetwork)}
-		<p class="mb-4 pb-2 pt-1 text-misty-rose">
-			{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
-				$network: $selectedNetwork.name
-			})}
-		</p>
-	{/if}
+{#if nonNullish($selectedNetwork)}
+	<p class="mb-4 pb-2 pt-1 text-misty-rose">
+		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
+			$network: $selectedNetwork.name
+		})}
+	</p>
+{/if}
 
-	{#if noTokensMatch}
-		<button
-			class="flex w-full flex-col items-center justify-center py-16"
-			in:fade
-			on:click={() => dispatch('icAddToken')}
+{#if noTokensMatch}
+	<button
+		class="flex w-full flex-col items-center justify-center py-16"
+		in:fade
+		on:click={() => dispatch('icAddToken')}
+	>
+		<span class="text-7xl">🤔</span>
+
+		<span class="py-4 text-center font-bold text-blue-ribbon no-underline"
+			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
-			<span class="text-7xl">🤔</span>
-
-			<span class="py-4 text-center font-bold text-blue-ribbon no-underline"
-				>+ {$i18n.tokens.manage.text.do_not_see_import}</span
-			>
-		</button>
-	{:else}
-		<div class="container overflow-y-auto overscroll-contain pl-4 pr-2 pt-1 md:max-h-[26rem]">
+	</button>
+{:else}
+	<div class="tokens flex flex-col overflow-y-hidden md:max-h-[26rem]">
+		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain pl-4 pr-2 pt-1">
 			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 				<Card>
 					<TokenName data={token} />
@@ -259,15 +259,13 @@
 				</Card>
 			{/each}
 		</div>
+	</div>
 
-		<Hr />
-
-		<button
-			class="flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
-			on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
-		>
-	{/if}
-</div>
+	<button
+		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
+		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
+	>
+{/if}
 
 {#if !noTokensMatch}
 	<ButtonGroup>
@@ -279,9 +277,17 @@
 {/if}
 
 <style lang="scss">
-	.container {
+	@use '../../styles/mixins/modal';
+
+	.tokens {
+		padding: var(--padding-1_5x) 0;
+
+		@include modal.content;
+	}
+
+	.tokens-scroll {
 		&::-webkit-scrollbar-thumb {
-			background-color: #d9d9d9;
+			background-color: rgba(var(--color-black-rgb), 0.2);
 		}
 
 		&::-webkit-scrollbar-track {
