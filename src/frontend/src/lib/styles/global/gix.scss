@@ -182,15 +182,15 @@ div.modal {
 		> div.stretch {
 			flex: 1;
 
+			@include modal.content;
+
+			padding: var(--padding-3x) var(--padding-2_5x) 0;
+
 			margin: 0 0 var(--padding-0_5x);
 
 			&:has(+ *) {
 				margin: 0 0 var(--padding-3x);
 			}
-
-			padding: var(--padding-3x) var(--padding-2_5x) 0;
-
-			@include modal.content;
 		}
 	}
 }
