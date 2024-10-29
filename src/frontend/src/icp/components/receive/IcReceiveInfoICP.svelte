@@ -51,9 +51,7 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_all_tokens}</svelte:fragment>
 	</ReceiveAddress>
 
-	<div class="my-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<ReceiveAddress
 		labelRef="icp-account-id"

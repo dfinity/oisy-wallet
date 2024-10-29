@@ -76,9 +76,7 @@
 		>
 	</ReceiveAddressWithLogo>
 
-	<div class="my-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<ReceiveAddressWithLogo
 		on:click={() =>
@@ -134,9 +132,7 @@
 		{/if}
 	{/if}
 
-	<div class="my-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<ReceiveAddressWithLogo
 		on:click={() =>
