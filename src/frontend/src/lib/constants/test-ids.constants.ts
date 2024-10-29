@@ -20,11 +20,16 @@ export const RECEIVE_TOKENS_MODAL = 'receive-tokens-modal';
 
 export const RECEIVE_TOKENS_MODAL_ICRC_SECTION = 'receive-tokens-modal-icrc-section';
 export const RECEIVE_TOKENS_MODAL_ICP_SECTION = 'receive-tokens-modal-icp-section';
-export const RECEIVE_TOKENS_MODAL_BTC_SECTION = 'receive-tokens-modal-btc-section';
+export const RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION = 'receive-tokens-modal-btc-mainnet-section';
+export const RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION = 'receive-tokens-modal-btc-testnet-section';
+export const RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION = 'receive-tokens-modal-btc-regtest-section';
 export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-section';
+
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
+
 export const RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON = 'receive-tokens-modal-qr-code-button';
 export const RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT = 'receive-tokens-modal-qr-code-output';
+
 export const RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON = 'receive-tokens-modal-copy-address-button';
 export const RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON =
 	'receive-tokens-modal-copy-icp-address-button';
