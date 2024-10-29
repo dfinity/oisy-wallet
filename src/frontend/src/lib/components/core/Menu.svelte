@@ -8,6 +8,7 @@
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -102,5 +103,11 @@
 		<Hr />
 
 		<SignOut on:icLogoutTriggered={hidePopover} />
+
+		<Hr />
+
+		<span class="text-center text-sm text-aurometalsaurus">
+			<LicenseLink noUnderline />
+		</span>
 	</div>
 </Popover>
