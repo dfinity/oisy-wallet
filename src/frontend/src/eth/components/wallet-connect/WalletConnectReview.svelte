@@ -46,7 +46,9 @@
 
 {#if nonNullish(proposal) && nonNullish(params)}
 	<div class="stretch" in:fade>
-		<p class="mb-0 font-bold">{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}</p>
+		<p class="mb-0 font-bold">
+			{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}
+		</p>
 		<p class="mb-0">{params.proposer.metadata.description}</p>
 		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
 			>{params.proposer.metadata.url}</a
