@@ -1,4 +1,5 @@
 @use '../mixins/media';
+@use '../mixins/modal';
 
 :root {
 	--positive-emphasis: var(--color-green-crayola);
@@ -115,9 +116,9 @@ div.input-field input[id]::placeholder {
 }
 
 div.modal {
-	--overlay-background: var(--color-white);
+	--overlay-background: var(--color-ghost-white);
 	--overlay-background-contrast: var(--color-secondary);
-	--overlay-content-background: var(--color-white);
+	--overlay-content-background: var(--color-ghost-white);
 	--overlay-content-background-contrast: var(--color-secondary);
 
 	color: var(--color-secondary);
@@ -126,7 +127,7 @@ div.modal {
 	div.wrapper.dialog {
 		color: var(--color-secondary);
 		padding-block: var(--padding-3x);
-		padding-inline: var(--padding-0_5x);
+		padding-inline: var(--padding);
 	}
 
 	div.wrapper.dialog div.header {
@@ -138,17 +139,20 @@ div.modal {
 		margin-inline: calc(3 / 2 * var(--padding));
 
 		--color-grey: rgba(0, 0, 0, 0.05);
-		border-bottom: 1px solid var(--color-grey);
 	}
 
 	div.wrapper.dialog div.container-wrapper {
-		margin: var(--padding-3x) 0 0;
+		margin: 0;
 
 		div.container {
 			border-radius: 0;
 
 			div.content {
 				padding-inline: var(--padding-2_5x);
+
+				@include media.min-width(medium) {
+					padding-inline: var(--padding-2_5x);
+				}
 			}
 		}
 	}
@@ -171,9 +175,22 @@ div.modal {
 		flex-direction: column;
 		min-height: 100%;
 
+		&.min-h-auto {
+			min-height: auto;
+		}
+
 		> div.stretch {
 			flex: 1;
-			margin: 0 0 var(--padding-3x);
+
+			@include modal.content;
+
+			padding: var(--padding-3x) var(--padding-2_5x) 0;
+
+			margin: 0 0 var(--padding-0_5x);
+
+			&:has(+ *) {
+				margin: 0 0 var(--padding-3x);
+			}
 		}
 	}
 }
