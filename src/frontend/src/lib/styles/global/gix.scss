@@ -139,6 +139,10 @@ div.modal {
 		margin-inline: calc(3 / 2 * var(--padding));
 
 		--color-grey: rgba(0, 0, 0, 0.05);
+
+		h2 {
+			font-size: var(--font-size-h3);
+		}
 	}
 
 	div.wrapper.dialog div.container-wrapper {
