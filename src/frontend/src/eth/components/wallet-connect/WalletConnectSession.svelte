@@ -18,8 +18,10 @@
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
+	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
@@ -336,12 +338,25 @@
 	$: walletConnectPaired.set(nonNullish(listener));
 
 	onDestroy(() => walletConnectPaired.set(false));
+
+	const openWalletConnectAuth = async () => {
+		modalStore.openWalletConnectAuth();
+
+		await trackEvent({
+			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
+		});
+	};
 </script>
 
 {#if nonNullish(listener)}
 	<WalletConnectButton on:click={disconnect}
 		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
 	>
+{:else}
+	<WalletConnectButton
+		ariaLabel={$i18n.wallet_connect.text.name}
+		on:click={openWalletConnectAuth}
+	/>
 {/if}
 
 {#if $modalWalletConnectAuth}
