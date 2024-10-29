@@ -11,10 +11,11 @@
 	export let data: CardData;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 	export let logoSize: LogoSize = 'lg';
+	export let hideNetworkLogo = false;
 </script>
 
 <Card noMargin testId={`${testIdPrefix}-${data.symbol}`}>
-	<TokenSymbol {data} />
+	<TokenSymbol {data} {hideNetworkLogo} />
 
 	<TokenName {data} slot="description" />
 

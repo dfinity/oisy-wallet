@@ -6,12 +6,13 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let data: CardData;
+	export let hideNetworkLogo = false;
 </script>
 
 <div class="flex flex-row items-center justify-between gap-2">
 	{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
 
-	{#if nonNullish(data.network.iconBW)}
+	{#if nonNullish(data.network.iconBW) && !hideNetworkLogo}
 		<Logo
 			src={data.network.iconBW}
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: data.network.name })}
