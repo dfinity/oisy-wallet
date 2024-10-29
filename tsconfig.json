@@ -9,7 +9,7 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"types": ["node"]
+		"types": ["node", "@types/dom-view-transitions"]
 	},
 	"exclude": ["src/frontend/src/tests/**/*"]
 }

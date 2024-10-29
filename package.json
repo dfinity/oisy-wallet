@@ -82,6 +82,7 @@
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@testing-library/jest-dom": "^6.6.2",
 		"@testing-library/svelte": "^5.2.3",
+		"@types/dom-view-transitions": "^1.0.5",
 		"@types/node": "^20.14.9",
 		"autoprefixer": "^10.4.20",
 		"dotenv": "^16.4.5",
