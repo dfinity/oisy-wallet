@@ -6,11 +6,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
-import {
-	type RequiredToken,
-	type RequiredTokenWithLinkedData,
-	type TokenId
-} from '$lib/types/token';
+import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/utils/zod.utils';
 
 /**
