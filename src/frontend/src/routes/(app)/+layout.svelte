@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
@@ -27,6 +28,20 @@
 				: 'tokens';
 
 	$: token.set($pageToken);
+
+	// Source: https://svelte.dev/blog/view-transitions
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) {
+			return;
+		}
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 </script>
 
 <div
