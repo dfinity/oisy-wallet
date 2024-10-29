@@ -5,11 +5,11 @@
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
 	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { dAppDescriptions, type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedOisyDappDescription | undefined =>
