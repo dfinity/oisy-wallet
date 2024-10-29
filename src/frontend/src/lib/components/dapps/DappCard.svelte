@@ -10,14 +10,14 @@
 </script>
 
 <button
-	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppname: name })}
+	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: name })}
 	on:click
 	class="relative h-44 flex-1 rounded-lg bg-white p-4 pt-12 shadow md:h-60"
 >
 	<span class="absolute -top-5 left-4">
 		<Logo
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
+			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: name })}
 			size="xl"
 			ring
 			color="white"

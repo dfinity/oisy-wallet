@@ -20,7 +20,7 @@
 			width="64"
 			rounded
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
+			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: name })}
 		/>
 	</div>
 	<div>
@@ -29,7 +29,7 @@
 			on:click={() => {
 				modalStore.openDappDetails(dappsCarouselSlide);
 			}}
-			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppname: name })}
+			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: name })}
 			class="text-primary text-sm font-semibold"
 		>
 			{callToAction} →
