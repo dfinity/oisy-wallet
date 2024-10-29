@@ -44,6 +44,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { parseTokenId } from '$lib/utils/zod.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -59,7 +60,7 @@
 	onMount(() => {
 		const tokens = buildIcrcCustomTokens();
 		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
+			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
 
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
