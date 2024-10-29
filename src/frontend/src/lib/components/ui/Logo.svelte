@@ -40,7 +40,7 @@
 	class:bg-off-white={color === 'off-white' && !loaded}
 	class:bg-white={color === 'white' && !loaded}
 	class:opacity-10={!loaded}
-	class:ring-1={ring}
+	class:ring-2={ring}
 	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 >
 	{#if nonNullish(src) && !loadingError}
