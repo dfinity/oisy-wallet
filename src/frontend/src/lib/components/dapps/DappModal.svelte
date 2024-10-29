@@ -58,7 +58,7 @@
 			</div>
 		{/if}
 
-		<article class="rounded-3xl p-5 shadow">
+		<article class="py-5">
 			<div class="flex flex-wrap items-center justify-start gap-4 border-b border-light-grey pb-5">
 				<Logo
 					size="md"
@@ -127,19 +127,19 @@
 			</p>
 			<DappTags dAppName={name} {tags} />
 		</article>
-
-		{#if nonNullish(websiteURL)}
-			<ExternalLink
-				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
-					$dAppname: name
-				})}
-				styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
-				href={websiteURL.toString()}
-				>{callToAction ??
-					replacePlaceholders($i18n.dapps.text.open_dapp, {
-						$dAppname: name
-					})}</ExternalLink
-			>
-		{/if}
 	</div>
+
+	{#if nonNullish(websiteURL)}
+		<ExternalLink
+			ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
+				$dAppname: name
+			})}
+			styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
+			href={websiteURL.toString()}
+			>{callToAction ??
+				replacePlaceholders($i18n.dapps.text.open_dapp, {
+					$dAppname: name
+				})}</ExternalLink
+		>
+	{/if}
 </Modal>
