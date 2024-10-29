@@ -214,58 +214,62 @@
 	</InputText>
 </div>
 
-{#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pb-2 pt-1 text-misty-rose">
-		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
-			$network: $selectedNetwork.name
-		})}
-	</p>
-{/if}
+<div class="stretch fullWidth">
+	{#if nonNullish($selectedNetwork)}
+		<p class="mb-4 pb-2 pt-1 text-misty-rose">
+			{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
+				$network: $selectedNetwork.name
+			})}
+		</p>
+	{/if}
 
-{#if noTokensMatch}
-	<button
-		class="flex w-full flex-col items-center justify-center py-16"
-		in:fade
-		on:click={() => dispatch('icAddToken')}
-	>
-		<span class="text-7xl">🤔</span>
-
-		<span class="py-4 text-center font-bold text-blue-ribbon no-underline"
-			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
+	{#if noTokensMatch}
+		<button
+			class="flex w-full flex-col items-center justify-center py-16"
+			in:fade
+			on:click={() => dispatch('icAddToken')}
 		>
-	</button>
-{:else}
-	<div class="container overflow-y-auto overscroll-contain pr-2 pt-1 md:max-h-[26rem]">
-		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
-			<Card>
-				<TokenName data={token} />
+			<span class="text-7xl">🤔</span>
 
-				<TokenLogo slot="icon" color="white" data={token} badge={{ type: 'network' }} />
+			<span class="py-4 text-center font-bold text-blue-ribbon no-underline"
+				>+ {$i18n.tokens.manage.text.do_not_see_import}</span
+			>
+		</button>
+	{:else}
+		<div class="container overflow-y-auto overscroll-contain pl-4 pr-2 pt-1 md:max-h-[26rem]">
+			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
+				<Card>
+					<TokenName data={token} />
 
-				<span class="break-all" slot="description">
-					{token.symbol}
-				</span>
+					<TokenLogo slot="icon" color="white" data={token} badge={{ type: 'network' }} />
 
-				<svelte:fragment slot="action">
-					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if icTokenEthereumUserToken(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
-					{/if}
-				</svelte:fragment>
-			</Card>
-		{/each}
-	</div>
+					<span class="break-all" slot="description">
+						{token.symbol}
+					</span>
 
-	<Hr />
+					<svelte:fragment slot="action">
+						{#if icTokenIcrcCustomToken(token)}
+							<IcManageTokenToggle {token} on:icToken={onToggle} />
+						{:else if icTokenEthereumUserToken(token)}
+							<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
+						{:else if isBitcoinToken(token)}
+							<BtcManageTokenToggle />
+						{/if}
+					</svelte:fragment>
+				</Card>
+			{/each}
+		</div>
 
-	<button
-		class="flex w-full justify-center pb-5 pt-4 text-center font-bold text-blue-ribbon no-underline"
-		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
-	>
+		<Hr />
 
+		<button
+				class="flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
+				on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
+		>
+	{/if}
+</div>
+
+{#if !noTokensMatch}
 	<ButtonGroup>
 		<ButtonCancel on:click={() => dispatch('icClose')} />
 		<Button disabled={saveDisabled} on:click={save}>
