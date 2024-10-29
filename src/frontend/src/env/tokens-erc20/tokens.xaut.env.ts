@@ -2,7 +2,8 @@ import { ETHEREUM_NETWORK } from '$env/networks.env';
 import xaut from '$eth/assets/xaut.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
-import { parseTokenId } from '$lib/utils/zod.utils';
+
+import { parseTokenId } from '$lib/validation/token.validation';
 
 export const XAUT_DECIMALS = 6;
 

@@ -44,7 +44,8 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import { parseTokenId } from '$lib/utils/zod.utils';
+
+	import { parseTokenId } from '$lib/validation/token.validation';
 
 	const dispatch = createEventDispatcher();
 
