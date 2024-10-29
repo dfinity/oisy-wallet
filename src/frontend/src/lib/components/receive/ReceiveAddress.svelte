@@ -47,12 +47,12 @@
 				/>
 			</div>
 
-			{#if isNullish(address)}
-				<span class="w-full"><SkeletonText /></span>
-			{:else}
+			{#if nonNullish(address)}
 				<output id="ic-wallet-address" class="break-all text-sm" data-tid={testId} in:fade
 					>{address}</output
 				>
+			{:else}
+				<span class="w-full"><SkeletonText /></span>
 			{/if}
 
 			{#if nonNullish(address)}
