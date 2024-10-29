@@ -10,7 +10,7 @@
 	import {
 		dAppDescriptions,
 		type FeaturedOisyDappDescription
-	} from '$lib/types/oisyDappDescription';
+	} from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// For the moment only the first featured dapp is highlighted
