@@ -44,55 +44,6 @@
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
 		<ReceiveAddress
-			labelRef="icrcTokenAddress"
-			on:click={() =>
-				displayQRCode({
-					address: $icrcAccountIdentifierText ?? '',
-					addressLabel: $i18n.receive.icp.text.principal,
-					addressToken: ICP_TOKEN,
-					copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied
-				})}
-			address={$icrcAccountIdentifierText}
-			network={ICP_NETWORK}
-			qrCodeAction={{
-				enabled: true,
-				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-				ariaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr
-			}}
-			copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
-			testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
-		>
-			<svelte:fragment slot="title">{$i18n.receive.icp.text.principal}</svelte:fragment>
-
-			<span slot="text" class="text-secondary text-sm"
-				>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
-			>
-		</ReceiveAddress>
-
-		<ReceiveAddress
-			labelRef="icpTokenAddress"
-			on:click={() =>
-				displayQRCode({
-					address: $icpAccountIdentifierText ?? '',
-					addressLabel: $i18n.receive.icp.text.icp_account,
-					addressToken: ICP_TOKEN,
-					copyAriaLabel: $i18n.receive.icp.text.icp_account_copied
-				})}
-			address={$icpAccountIdentifierText}
-			network={ICP_NETWORK}
-			qrCodeAction={{
-				enabled: true,
-
-				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-				ariaLabel: $i18n.receive.icp.text.display_icp_account_qr
-			}}
-			copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
-			testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
-		>
-			<svelte:fragment slot="title">{$i18n.receive.icp.text.icp_account}</svelte:fragment>
-		</ReceiveAddress>
-
-		<ReceiveAddress
 			labelRef="btcAddressMainnet"
 			on:click={() =>
 				displayQRCode({
@@ -189,6 +140,55 @@
 			testId={RECEIVE_TOKENS_MODAL_ETH_SECTION}
 		>
 			<svelte:fragment slot="title">{$i18n.receive.ethereum.text.ethereum}</svelte:fragment>
+		</ReceiveAddress>
+
+		<ReceiveAddress
+			labelRef="icrcTokenAddress"
+			on:click={() =>
+				displayQRCode({
+					address: $icrcAccountIdentifierText ?? '',
+					addressLabel: $i18n.receive.icp.text.principal,
+					addressToken: ICP_TOKEN,
+					copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied
+				})}
+			address={$icrcAccountIdentifierText}
+			network={ICP_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr
+			}}
+			copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+			testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
+		>
+			<svelte:fragment slot="title">{$i18n.receive.icp.text.principal}</svelte:fragment>
+
+			<span slot="text" class="text-secondary text-sm"
+				>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
+			>
+		</ReceiveAddress>
+
+		<ReceiveAddress
+			labelRef="icpTokenAddress"
+			on:click={() =>
+				displayQRCode({
+					address: $icpAccountIdentifierText ?? '',
+					addressLabel: $i18n.receive.icp.text.icp_account,
+					addressToken: ICP_TOKEN,
+					copyAriaLabel: $i18n.receive.icp.text.icp_account_copied
+				})}
+			address={$icpAccountIdentifierText}
+			network={ICP_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: $i18n.receive.icp.text.display_icp_account_qr
+			}}
+			copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
+			testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
+		>
+			<svelte:fragment slot="title">{$i18n.receive.icp.text.icp_account}</svelte:fragment>
 		</ReceiveAddress>
 	</div>
 
