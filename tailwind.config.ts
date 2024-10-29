@@ -15,6 +15,7 @@ export default {
 			'black-rgb': '0, 0, 0',
 			white: 'rgb(255 255 255)',
 			'white-rgb': '255, 255, 255',
+			'ghost-white': '#f8f9fa',
 			'off-white': '#fcfaf6',
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
