@@ -5,12 +5,10 @@
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
 	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		dAppDescriptions,
-		type FeaturedOisyDappDescription
-	} from '$lib/types/oisyDappDescription';
+	import { dAppDescriptions, type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// For the moment only the first featured dapp is highlighted
@@ -31,7 +29,7 @@
 	);
 </script>
 
-<h1 class="mb-5 mt-6">{$i18n.dapps.text.title}</h1>
+<PageTitle>{$i18n.dapps.text.title}</PageTitle>
 
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-10">
@@ -62,7 +60,7 @@
 	{/each}
 </div>
 
-<ul class="mt-8 grid list-none grid-cols-1 gap-x-4 gap-y-7 md:grid-cols-3">
+<ul class="mt-10 grid list-none grid-cols-1 gap-x-4 gap-y-10 md:grid-cols-3">
 	{#each filteredDapps as dApp}
 		<li class="flex" in:fade>
 			<DappCard

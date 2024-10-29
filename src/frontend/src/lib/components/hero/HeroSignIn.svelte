@@ -1,12 +1,10 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
-	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let infoList: { label: string; icon: ComponentType }[];
 	$: infoList = [
@@ -45,16 +43,5 @@
 		{/each}
 	</div>
 
-	<ButtonAuthenticate on:click={async () => await signIn({})} />
-
-	<div class="mt-4 flex flex-col text-sm text-aurometalsaurus">
-		<span>{$i18n.license_agreement.text.accept_terms}</span>
-
-		<a
-			href="/license-agreement"
-			aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
-		>
-			{$i18n.license_agreement.text.accept_terms_link}
-		</a>
-	</div>
+	<ButtonAuthenticateWithLicense />
 </div>

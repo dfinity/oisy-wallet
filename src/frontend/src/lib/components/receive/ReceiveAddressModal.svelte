@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import type { ComponentType } from 'svelte';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
@@ -24,42 +25,46 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	let qrCodeAddress: undefined | string;
-	let qrCodeAddressLabel: undefined | string;
-	let qrCodeAddressToken: Token | undefined;
+	let address: undefined | string;
+	let addressLabel: undefined | string;
+	let addressToken: Token | undefined;
+	let copyAriaLabel: string | undefined;
 
-	const displayQRCode = ({
-		detail: { address, addressLabel, addressToken }
-	}: CustomEvent<ReceiveQRCode>) => {
-		qrCodeAddress = address;
-		qrCodeAddressLabel = addressLabel;
-		qrCodeAddressToken = addressToken;
+	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
+		address = detail.address;
+		addressLabel = detail.addressLabel;
+		addressToken = detail.addressToken;
+		copyAriaLabel = detail.copyAriaLabel;
 		modal.next();
 	};
 
 	const displayAddresses = () => {
 		modal.back();
-		qrCodeAddress = undefined;
-		qrCodeAddressLabel = undefined;
-		qrCodeAddressToken = undefined;
+		address = undefined;
+		addressLabel = undefined;
+		addressToken = undefined;
+		copyAriaLabel = undefined;
 	};
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose testId={RECEIVE_TOKENS_MODAL}>
 	<svelte:fragment slot="title">
 		{#if currentStep?.name === steps[1].name}
-			<ReceiveTitle addressToken={qrCodeAddressToken} />
+			<ReceiveTitle {addressToken} />
 		{:else}
 			{$i18n.receive.text.receive}
 		{/if}</svelte:fragment
 	>
 
-	{#if currentStep?.name === steps[1].name}
+	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
 		<ReceiveAddressQRCode
 			on:icBack={displayAddresses}
-			address={qrCodeAddress}
-			addressLabel={qrCodeAddressLabel}
-			addressToken={qrCodeAddressToken}
+			{address}
+			{addressLabel}
+			{addressToken}
+			network={addressToken.network}
+			qrCodeAction={{ enabled: false }}
+			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 		/>
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />

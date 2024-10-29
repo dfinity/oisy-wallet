@@ -7,12 +7,14 @@
 	export let text: string;
 	export let inline = false;
 	export let color: 'blue' | 'inherit' = 'blue';
+	export let testId: string | undefined = undefined;
 </script>
 
 <button
 	on:click|preventDefault|stopPropagation={async () => await copyToClipboard({ value, text })}
 	aria-label={`${$i18n.core.text.copy}: ${value}`}
 	class="pl-0.5"
+	data-tid={testId}
 	class:py-2={!inline}
 	class:inline-block={inline}
 	class:text-primary={color === 'blue'}

@@ -13,7 +13,6 @@ on:
         options:
           - staging
           - beta
-        default: staging
       canister:
         required: true
         type: choice
@@ -21,14 +20,17 @@ on:
         options:
           - frontend
           - backend
-        default: frontend
       force-backend:
         required: false
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
         default: false
 
-run-name: Deploying ${{ inputs.canister }} to ${{ inputs.network }}
+run-name: >-
+  ${{ 
+    github.event_name == 'push' && 'Deploying Frontend / Backend to Staging'
+    || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
+    || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -77,7 +79,7 @@ jobs:
             echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED=${{ secrets.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
             echo "VITE_BLOCKSTREAM_API_URL=https://blockstream.info/api" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
@@ -102,7 +104,7 @@ jobs:
             echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}" >> $GITHUB_ENV
-            echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED=${{ secrets.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
             echo "VITE_BLOCKSTREAM_API_URL=https://blockstream.info/api" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV

@@ -102,7 +102,7 @@ interface I18nDapps {
 
 interface I18nFooter {
 	text: { developed_with: string };
-	alt: { dfinity: string };
+	alt: { dfinity: string; status: string };
 }
 
 interface I18nWallet {
@@ -160,7 +160,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; use_with_caution: string; learn_more_about_erc20_icp: string };
+	text: { available_balance: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -388,6 +388,7 @@ interface I18nTokens {
 			info: string;
 			github_howto: string;
 			open_github_howto: string;
+			custom_tokens_not_supported: string;
 		};
 		error: {
 			loading_metadata: string;

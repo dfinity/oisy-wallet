@@ -4,7 +4,7 @@ import type { OnramperId } from '$lib/types/onramper';
 import type { AtLeastOne, Option, RequiredExcept } from '$lib/types/utils';
 import { z } from 'zod';
 
-const TokenIdSchema = z.symbol().brand<'TokenId'>();
+export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
 const TokenStandardSchema = z.enum(['ethereum', 'erc20', 'icp', 'icrc', 'bitcoin']);
 

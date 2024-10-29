@@ -11,7 +11,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OisyDappDescription } from '$lib/types/oisyDappDescription';
+	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -45,7 +45,7 @@
 		<span class="text-center text-xl">{name}</span>
 	</svelte:fragment>
 
-	<div class="stretch flex flex-col gap-4">
+	<div class="flex flex-col gap-4">
 		{#if nonNullish(screenshots) && screenshots.length > 0}
 			<div class="overflow-hidden rounded-3xl">
 				<ImgBanner
@@ -58,7 +58,7 @@
 			</div>
 		{/if}
 
-		<article class="rounded-3xl p-5 shadow">
+		<article class="py-5">
 			<div class="flex flex-wrap items-center justify-start gap-4 border-b border-light-grey pb-5">
 				<Logo
 					size="md"
@@ -122,24 +122,35 @@
 				</div>
 			</div>
 
-			<p class="m-0 my-5 text-sm">
+			<p class="m-0 my-5 text-sm [&_ul]:list-disc [&_ul]:pl-6">
 				<Html text={description} />
 			</p>
 			<DappTags dAppName={name} {tags} />
 		</article>
-
-		{#if nonNullish(websiteURL)}
-			<ExternalLink
-				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
-					$dAppname: name
-				})}
-				styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
-				href={websiteURL.toString()}
-				>{callToAction ??
-					replacePlaceholders($i18n.dapps.text.open_dapp, {
-						$dAppname: name
-					})}</ExternalLink
-			>
-		{/if}
 	</div>
+
+	{#if nonNullish(websiteURL)}
+		<ExternalLink
+			ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
+				$dAppname: name
+			})}
+			styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
+			href={websiteURL.toString()}
+			>{callToAction ??
+				replacePlaceholders($i18n.dapps.text.open_dapp, {
+					$dAppname: name
+				})}</ExternalLink
+		>
+	{/if}
 </Modal>
+
+<style lang="scss">
+	@use '../../styles/mixins/modal';
+
+	article {
+		@include modal.content;
+
+		padding: var(--padding-3x) var(--padding-2_5x);
+		margin: 0 0 var(--padding-3x);
+	}
+</style>
