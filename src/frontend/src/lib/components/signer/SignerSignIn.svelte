@@ -1,7 +1,6 @@
 <script lang="ts">
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import SignerAnimatedAstronaut from '$lib/components/signer/SignerAnimatedAstronaut.svelte';
-	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
@@ -16,4 +15,4 @@
 
 <p class="mb-12 text-center">{$i18n.signer.sign_in.text.open_or_create}</p>
 
-<ButtonAuthenticate fullWidth on:click={async () => await signIn({})} />
+<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" />

@@ -5,13 +5,10 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
-	import { OISY_REPO_URL, OISY_STATUS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_REPO_URL, OISY_STATUS_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-
-	// TODO: set up a correct twitter account for Oisy and move this value to the oisy.contants module.
-	const OISY_TWITTER_URL = 'https://x.com/dfinity';
 </script>
 
 <footer

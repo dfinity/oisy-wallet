@@ -12,8 +12,10 @@
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
-		RECEIVE_TOKENS_MODAL_BTC_SECTION,
-		RECEIVE_TOKENS_MODAL_DONE_BUTTON
+		RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -28,7 +30,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (details: Required<ReceiveQRCode>) => dispatch('icQRCode', details);
+	const displayQRCode = (details: Omit<Required<ReceiveQRCode>, 'qrCodeAriaLabel'>) =>
+		dispatch('icQRCode', details);
 </script>
 
 <ContentWithToolbar>
@@ -37,7 +40,8 @@
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.principal,
-				addressToken: ICP_TOKEN
+				addressToken: ICP_TOKEN,
+				copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied
 			})}
 		address={$icrcAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
@@ -57,7 +61,8 @@
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.icp_account,
-				addressToken: ICP_TOKEN
+				addressToken: ICP_TOKEN,
+				copyAriaLabel: $i18n.receive.icp.text.icp_account_copied
 			})}
 		address={$icpAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
@@ -73,22 +78,21 @@
 		>
 	</ReceiveAddressWithLogo>
 
-	<div class="my-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<ReceiveAddressWithLogo
 		on:click={() =>
 			displayQRCode({
 				address: $btcAddressMainnet ?? '',
 				addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
-				addressToken: BTC_MAINNET_TOKEN
+				addressToken: BTC_MAINNET_TOKEN,
+				copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 			})}
 		address={$btcAddressMainnet}
 		token={BTC_MAINNET_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
-		testId={RECEIVE_TOKENS_MODAL_BTC_SECTION}
+		testId={RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION}
 	>
 		{$i18n.receive.bitcoin.text.bitcoin_address}
 	</ReceiveAddressWithLogo>
@@ -99,12 +103,14 @@
 				displayQRCode({
 					address: $btcAddressTestnet ?? '',
 					addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
-					addressToken: BTC_TESTNET_TOKEN
+					addressToken: BTC_TESTNET_TOKEN,
+					copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 				})}
 			address={$btcAddressTestnet}
 			token={BTC_TESTNET_TOKEN}
 			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			testId={RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION}
 		>
 			{$i18n.receive.bitcoin.text.bitcoin_testnet_address}
 		</ReceiveAddressWithLogo>
@@ -116,28 +122,29 @@
 					displayQRCode({
 						address: $btcAddressRegtest ?? '',
 						addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
-						addressToken: BTC_REGTEST_TOKEN
+						addressToken: BTC_REGTEST_TOKEN,
+						copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 					})}
 				address={$btcAddressRegtest}
 				token={BTC_REGTEST_TOKEN}
 				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+				testId={RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION}
 			>
 				{$i18n.receive.bitcoin.text.bitcoin_regtest_address}
 			</ReceiveAddressWithLogo>
 		{/if}
 	{/if}
 
-	<div class="my-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<ReceiveAddressWithLogo
 		on:click={() =>
 			displayQRCode({
 				address: $ethAddress ?? '',
 				addressLabel: $i18n.receive.ethereum.text.ethereum_address,
-				addressToken: ETHEREUM_TOKEN
+				addressToken: ETHEREUM_TOKEN,
+				copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied
 			})}
 		address={$ethAddress ?? ''}
 		token={ETHEREUM_TOKEN}

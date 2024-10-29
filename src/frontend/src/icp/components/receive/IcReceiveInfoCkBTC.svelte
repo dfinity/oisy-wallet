@@ -29,7 +29,8 @@
 		dispatch('icQRCode', {
 			address,
 			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
-			addressToken: twinToken
+			addressToken: twinToken,
+			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 		});
 
 	let btcAddress: string | undefined = undefined;
@@ -46,15 +47,16 @@
 	<IcReceiveWalletAddress on:icQRCode />
 
 	{#if nonNullish(btcAddress) && nonNullish(twinToken)}
-		<div class="my-6">
-			<Hr />
-		</div>
+		<Hr spacing="lg" />
 
 		<ReceiveAddress
 			labelRef="bitcoin-address"
 			address={btcAddress}
 			network={twinToken.network}
-			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+			qrCodeAction={{
+				enabled: true,
+				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+			}}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			on:click={() => displayQRCode(btcAddress ?? '')}
 		>
