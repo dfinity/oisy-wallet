@@ -1,6 +1,6 @@
 <script lang="ts">
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -15,12 +15,12 @@
 	class="relative h-44 flex-1 rounded-lg bg-white p-4 pt-12 shadow md:h-60"
 >
 	<span class="absolute -top-5 left-4">
-		<Img
-			height="64"
-			width="64"
-			rounded
+		<Logo
 			src={logo}
 			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
+			size="xl"
+			ring
+			color="white"
 		/>
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">
