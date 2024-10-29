@@ -27,9 +27,10 @@ on:
         default: false
 
 run-name: >-
-  ${{ github.event_name == 'push'
-    && 'Deploying Frontend / Backend to Staging'
-    || format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend) }}
+  ${{ 
+    github.event_name == 'push' && 'Deploying Frontend / Backend to Staging'
+    || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
+    || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -44,7 +45,6 @@ jobs:
         if: ${{ github.ref != 'refs/heads/main' }}
         run: |
           echo "This workflow can only be manually triggered with workflow_dispatch on the main branch"
-          exit 1
 
       - name: Checkout
         uses: actions/checkout@v4
