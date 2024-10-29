@@ -1,18 +1,17 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import TokenExchangeValueSkeleton from '$lib/components/tokens/TokenExchangeValueSkeleton.svelte';
 	import type { TokenUi } from '$lib/types/token';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import type { CardData } from '$lib/types/token-card';
 
-	export let token: TokenUi;
+	export let data: CardData;
+
+	let balance: TokenUi['balance'];
+	let usdBalance: TokenUi['usdBalance'];
+
+	$: ({ balance, usdBalance } = data);
 </script>
 
-<TokenExchangeValueSkeleton {token}>
-	<output class="break-all">
-		{#if nonNullish(token.balance) && nonNullish(token.usdBalance)}
-			{formatUSD({ value: token.usdBalance })}
-		{:else}
-			{formatUSD({ value: 0, options: { minFraction: 0, maxFraction: 0 } }).replace('0', '-')}
-		{/if}
-	</output>
+<TokenExchangeValueSkeleton {data}>
+	<TokenExchangeBalance {balance} {usdBalance} />
 </TokenExchangeValueSkeleton>

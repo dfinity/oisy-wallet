@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { ETHEREUM_NETWORK } from '$env/networks.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
@@ -8,6 +9,7 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -82,7 +84,11 @@
 		<ReceiveAddress
 			labelRef="eth-wallet-address"
 			address={$ethAddress ?? ''}
-			qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+			network={ETHEREUM_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+			}}
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}
 		>
@@ -149,13 +155,11 @@
 		</div>
 	</div>
 
-	<div slot="toolbar">
+	<svelte:fragment slot="toolbar">
 		{#if formCancelAction === 'back'}
-			<Button fullWidth type="button" on:click={() => dispatch('icBack')}
-				>{$i18n.core.text.back}</Button
-			>
+			<ButtonBack fullWidth on:click={() => dispatch('icBack')} />
 		{:else}
 			<ButtonDone on:click={modalStore.close} />
 		{/if}
-	</div>
+	</svelte:fragment>
 </ContentWithToolbar>

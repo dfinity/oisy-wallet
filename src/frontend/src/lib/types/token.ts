@@ -2,12 +2,19 @@ import type { OptionBalance } from '$lib/types/balance';
 import type { Network } from '$lib/types/network';
 import type { OnramperId } from '$lib/types/onramper';
 import type { AtLeastOne, Option, RequiredExcept } from '$lib/types/utils';
+import { z } from 'zod';
 
-export type TokenId = symbol;
+export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
-export type TokenStandard = 'ethereum' | 'erc20' | 'icp' | 'icrc' | 'bitcoin';
+const TokenStandardSchema = z.enum(['ethereum', 'erc20', 'icp', 'icrc', 'bitcoin']);
 
-export type TokenCategory = 'default' | 'custom';
+const TokenCategorySchema = z.enum(['default', 'custom']);
+
+export type TokenId = z.infer<typeof TokenIdSchema>;
+
+export type TokenStandard = z.infer<typeof TokenStandardSchema>;
+
+export type TokenCategory = z.infer<typeof TokenCategorySchema>;
 
 export type Token = {
 	id: TokenId;
@@ -26,11 +33,16 @@ export interface TokenMetadata {
 }
 
 export interface TokenAppearance {
+	oisySymbol?: TokenOisySymbol;
 	oisyName?: TokenOisyName;
 }
 
+export interface TokenOisySymbol {
+	oisySymbol: string;
+}
+
 export interface TokenOisyName {
-	prefix: string | undefined;
+	prefix?: string;
 	oisyName: string;
 }
 
@@ -60,17 +72,22 @@ export type OptionTokenStandard = Option<TokenStandard>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
-interface TokenFinancialData {
+export interface TokenFinancialData {
 	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
 }
 
 export type TokenUi = Token & TokenFinancialData;
 
-export interface TokenGroupUi {
-	header: TokenMetadata;
-	nativeNetwork: Network;
-	tokens: TokenUi[];
-}
+export type OptionTokenUi = Option<TokenUi>;
 
-export type TokenUiOrGroupUi = TokenUi | TokenGroupUi;
+//todo: separate typing from token id
+export type GroupId = TokenId;
+
+export type TokenUiGroup = {
+	id: GroupId;
+	nativeToken: TokenUi;
+	tokens: TokenUi[];
+} & TokenFinancialData;
+
+export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;

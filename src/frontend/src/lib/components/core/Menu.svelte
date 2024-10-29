@@ -2,12 +2,13 @@
 	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
+	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
-	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
-	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
+	import AboutWhyOisy from '$lib/components/hero/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
+	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -17,7 +18,7 @@
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteSettings, networkParam } from '$lib/utils/nav.utils';
+	import { isRouteDappExplorer, isRouteSettings, networkParam } from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -28,12 +29,19 @@
 		hidePopover();
 		await goto(`/settings?${networkParam($networkId)}`);
 	};
+	const goToDappExplorer = async () => {
+		hidePopover();
+		await goto(`/explore`);
+	};
 
 	let settingsRoute = false;
 	$: settingsRoute = isRouteSettings($page);
 
-	let walletOptions = true;
-	$: walletOptions = !settingsRoute;
+	let dAppExplorerRoute = false;
+	$: dAppExplorerRoute = isRouteDappExplorer($page);
+
+	let addressesOption = true;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute;
 </script>
 
 <ButtonIcon
@@ -48,8 +56,15 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
-		{#if walletOptions}
-			<MenuWallet on:icMenuClick={hidePopover} />
+		{#if addressesOption}
+			<MenuAddresses on:icMenuClick={hidePopover} />
+		{/if}
+
+		{#if !dAppExplorerRoute && !settingsRoute}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.dapp_explorer} on:click={goToDappExplorer}>
+				<IconlyUfo size="20" />
+				{$i18n.navigation.text.dapp_explorer}
+			</ButtonMenu>
 		{/if}
 
 		{#if !settingsRoute}
@@ -61,8 +76,7 @@
 			<Hr />
 		{/if}
 
-		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
-		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy asMenuItem on:icOpenAboutModal={hidePopover} />
 
 		<ChangelogLink />
 
@@ -89,5 +103,11 @@
 		<Hr />
 
 		<SignOut on:icLogoutTriggered={hidePopover} />
+
+		<Hr />
+
+		<span class="text-center text-sm text-aurometalsaurus">
+			<LicenseLink noUnderline />
+		</span>
 	</div>
 </Popover>

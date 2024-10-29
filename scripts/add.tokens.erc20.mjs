@@ -160,6 +160,8 @@ const manageEnvFile = async ({ mainSymbol: symbol, contractAddress, testnetContr
 			? existingFileContent
 			: `import type { RequiredErc20Token } from '$eth/types/erc20';
 import ${icon} from '$icp-eth/assets/${icon}.svg';
+import type { TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/utils/zod.utils';
 `;
 
 	const { content: fileContentFirstPartWithImports } = updateImportsInContent({
@@ -181,7 +183,7 @@ import ${icon} from '$icp-eth/assets/${icon}.svg';
 			? `
 export const ${symbol}_SYMBOL = '${mainnetSymbol}';
 
-export const ${symbol}_TOKEN_ID: unique symbol = Symbol(${symbol}_SYMBOL);
+export const ${symbol}_TOKEN_ID: TokenId = parseTokenId(${symbol}_SYMBOL);
 
 export const ${mainnetToken}: RequiredErc20Token = {
 	id: ${symbol}_TOKEN_ID,
@@ -204,7 +206,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 			? `
 export const SEPOLIA_${symbol}_SYMBOL = 'Sepolia${testnetSymbol}';
 
-export const SEPOLIA_${symbol}_TOKEN_ID: unique symbol = Symbol(SEPOLIA_${symbol}_SYMBOL);
+export const SEPOLIA_${symbol}_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_${symbol}_SYMBOL);
 
 export const ${testnetToken}: RequiredErc20Token = {
 	id: SEPOLIA_${symbol}_TOKEN_ID,

@@ -1,15 +1,17 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-import type { TokenGroupUi, TokenStandard, TokenUi } from '$lib/types/token';
+import type { TokenStandard, TokenUi, TokenUiGroup } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdBalance,
 	getMaxTransactionAmount,
 	groupTokensByTwin,
-	mapTokenUi
+	mapTokenUi,
+	sumTokenBalances,
+	sumUsdBalances
 } from '$lib/utils/token.utils';
-import { $balances, bn3 } from '$tests/mocks/balances.mock';
+import { $balances, bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
 import { $exchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
@@ -267,17 +269,96 @@ describe('mapTokenUi', () => {
 			usdBalance: 0
 		});
 	});
+});
 
+describe('sumTokenBalances', () => {
+	// We mock ETH to be a twin of ICP
+	const token1: TokenUi = { ...ICP_TOKEN, balance: bn1, decimals: 18 };
+	const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2, decimals: 18 };
+
+	it('should sum token balances when both balances are non-null and decimals match', () => {
+		const result = sumTokenBalances([token1, token2]);
+
+		expect(result).toStrictEqual(bn1.add(bn2));
+	});
+
+	it('should return null when decimals do not match', () => {
+		expect(sumTokenBalances([token1, { ...token2, decimals: 8 }])).toBeNull();
+	});
+
+	it('should return the first balance when the second balance is nullish', () => {
+		expect(sumTokenBalances([token1, { ...token2, balance: null }])).toBe(bn1);
+
+		expect(sumTokenBalances([token1, { ...token2, balance: undefined }])).toBe(bn1);
+	});
+
+	it('should return the second balance when the first balance is nullish', () => {
+		expect(sumTokenBalances([{ ...token1, balance: null }, token2])).toBe(bn2);
+
+		expect(sumTokenBalances([{ ...token1, balance: undefined }, token2])).toBe(bn2);
+	});
+
+	it('should return the first balance nullish value when both balances are nullish', () => {
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: null },
+				{ ...token2, balance: null }
+			])
+		).toBeNull();
+
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: null },
+				{ ...token2, balance: undefined }
+			])
+		).toBeNull();
+
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: undefined },
+				{ ...token2, balance: null }
+			])
+		).toBeUndefined();
+
+		expect(
+			sumTokenBalances([
+				{ ...token1, balance: undefined },
+				{ ...token2, balance: undefined }
+			])
+		).toBeUndefined();
+	});
+});
+
+describe('sumUsdBalances', () => {
+	it('should sum token balances when both balances are non-null', () => {
+		const result = sumUsdBalances([100, 200]);
+
+		expect(result).toEqual(300);
+	});
+
+	it('should return the first balance when the second balance is nullish', () => {
+		expect(sumUsdBalances([100, undefined])).toBe(100);
+	});
+
+	it('should return the second balance when the first balance is nullish', () => {
+		expect(sumUsdBalances([undefined, 200])).toBe(200);
+	});
+
+	it('should return undefined when both balances are nullish', () => {
+		expect(sumUsdBalances([undefined, undefined])).toBeUndefined();
+	});
+});
+
+describe('groupTokensByTwin', () => {
 	it('should group tokens with matching twinTokenSymbol', () => {
 		const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 		expect(groupedTokens).toHaveLength(3);
 
 		const btcGroup = groupedTokens[0];
-		expect(btcGroup).toHaveProperty('header');
 		expect(btcGroup).toHaveProperty('tokens');
-		expect((btcGroup as TokenGroupUi).tokens).toHaveLength(2);
-		expect((btcGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('BTC');
-		expect((btcGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('ckBTC');
+		expect((btcGroup as TokenUiGroup).tokens).toHaveLength(2);
+		expect((btcGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('BTC');
+		expect((btcGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('ckBTC');
 
 		const icpToken = groupedTokens[2];
 		expect(icpToken).toHaveProperty('symbol', 'ICP');
@@ -295,8 +376,8 @@ describe('mapTokenUi', () => {
 		const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 		const firstGroup = groupedTokens[0];
 		expect(firstGroup).toHaveProperty('tokens');
-		expect((firstGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('BTC');
-		expect((firstGroup as TokenGroupUi).tokens.map((t) => t.symbol)).toContain('ckBTC');
+		expect((firstGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('BTC');
+		expect((firstGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('ckBTC');
 	});
 
 	it('should not duplicate tokens in the result', () => {
@@ -331,7 +412,7 @@ describe('mapTokenUi', () => {
 		const btcGroup = groupedTokens.find(
 			(groupOrToken) =>
 				'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'BTC')
-		) as TokenGroupUi;
+		) as TokenUiGroup;
 
 		expect(btcGroup).toBeDefined();
 		expect(btcGroup.tokens).toHaveLength(2);
@@ -341,7 +422,7 @@ describe('mapTokenUi', () => {
 		const ethGroup = groupedTokens.find(
 			(groupOrToken) =>
 				'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'ETH')
-		) as TokenGroupUi;
+		) as TokenUiGroup;
 
 		expect(ethGroup).toBeDefined();
 		expect(ethGroup.tokens).toHaveLength(2);

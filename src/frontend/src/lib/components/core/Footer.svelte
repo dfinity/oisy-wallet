@@ -2,15 +2,13 @@
 	import { IconGitHub } from '@dfinity/gix-components';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
-	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { OISY_REPO_URL, OISY_STATUS_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-
-	// TODO: set up a correct twitter account for Oisy and move this value to the oisy.contants module.
-	const OISY_TWITTER_URL = 'https://x.com/dfinity';
 </script>
 
 <footer
@@ -19,12 +17,14 @@
 	class:md:h-md:grid={$authNotSignedIn}
 	class:md:h-md:grid-cols-2={$authNotSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
-	class:sm:fixed={$authSignedIn}
-	class:sm:inset-x-0={$authSignedIn}
-	class:sm:bottom-0={$authSignedIn}
+	class:md:fixed={$authSignedIn}
+	class:md:inset-x-0={$authSignedIn}
+	class:md:bottom-0={$authSignedIn}
 >
 	<div
-		class="pointer-events-none flex w-full flex-col items-center justify-between sm:flex-row sm:gap-4"
+		class="pointer-events-none flex w-full flex-col items-center justify-between md:flex-row md:gap-4"
+		class:sm:flex-row={$authNotSignedIn}
+		class:sm:gap-4={$authNotSignedIn}
 	>
 		<div class="pointer-events-auto flex flex-row items-center gap-4">
 			<ExternalLinkIcon
@@ -40,16 +40,29 @@
 			>
 				<IconTwitter />
 			</ExternalLinkIcon>
+
+			<a
+				href={OISY_STATUS_URL}
+				rel="external noopener noreferrer"
+				target="_blank"
+				class="mx-auto no-underline"
+				aria-label={replaceOisyPlaceholders($i18n.footer.alt.status)}
+			>
+				<Badge variant="warning">beta</Badge>
+			</a>
 		</div>
 
 		<div
-			class="item pointer-events-auto flex flex-row items-center justify-end gap-2 text-sm transition-all duration-200 ease-in-out lg:max-w-48 xl:max-w-none"
+			class="item pointer-events-auto flex flex-row items-center justify-end gap-2 text-sm lg:max-w-48 xl:max-w-none"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
 			class:md:h-md:pr-4={$authNotSignedIn}
-			class:sm:invisible={$authSignedIn}
+			class:md:transition-all={$authSignedIn}
+			class:md:duration-200={$authSignedIn}
+			class:md:ease-in-out={$authSignedIn}
+			class:md:invisible={$authSignedIn}
 			class:1.5md:visible={$authSignedIn}
-			class:sm:translate-x-full={$authSignedIn}
+			class:md:translate-x-full={$authSignedIn}
 			class:1.5md:translate-x-0={$authSignedIn}
 		>
 			<ExternalLink
@@ -60,7 +73,7 @@
 				<div class="flex flex-row items-center gap-2">
 					<IconDfinity />
 					<span
-						class:sm:hidden={$authSignedIn}
+						class:md:hidden={$authSignedIn}
 						class:xl:flex={$authSignedIn}
 						class:md:h-md:hidden={$authNotSignedIn}
 						class:1.5md:h-md:flex={$authNotSignedIn}

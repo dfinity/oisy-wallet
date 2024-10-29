@@ -41,6 +41,10 @@ export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'
 );
+export const modalConvertBTCToCkBTC: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'convert-btc-ckbtc'
+);
 export const modalConvertToTwinTokenCkEth: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-to-twin-token-cketh'
@@ -101,13 +105,9 @@ export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive-bitcoin'
 );
-export const modalAboutWhat: Readable<boolean> = derived(
+export const modalAboutWhyOisy: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'about-what'
-);
-export const modalAboutHow: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'about-how'
+	($modalStore) => $modalStore?.type === 'about-why-oisy'
 );
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,

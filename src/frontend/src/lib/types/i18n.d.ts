@@ -20,6 +20,7 @@ interface I18nCore {
 		reject: string;
 		approve: string;
 		view: string;
+		copy: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -30,6 +31,7 @@ interface I18nNavigation {
 	text: {
 		tokens: string;
 		settings: string;
+		dapp_explorer: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -39,6 +41,7 @@ interface I18nNavigation {
 	alt: {
 		tokens: string;
 		settings: string;
+		dapp_explorer: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
@@ -53,9 +56,9 @@ interface I18nAuth {
 		title_part_2: string;
 		logout: string;
 		authenticate: string;
-		safe_access: string;
-		privacy_and_security: string;
-		powered_by_chain_fusion: string;
+		asset_types: string;
+		instant_and_private: string;
+		advanced_cryptography: string;
 	};
 	alt: { sign_in: string; preview: string };
 	warning: { not_signed_in: string; session_expired: string };
@@ -73,13 +76,25 @@ interface I18nAuth {
 }
 
 interface I18nDapps {
-	text: { all_dapps: string; featured: string; open_dapp: string };
-	alt: {
-		logo: string;
-		learn_more: string;
+	text: {
+		all_dapps: string;
+		featured: string;
+		sign_in: string;
+		title: string;
 		open_dapp: string;
+		submit_your_dapp: string;
+	};
+	alt: {
+		learn_more: string;
+		logo: string;
+		show_all: string;
+		show_tag: string;
+		open_dapp: string;
+		open_telegram: string;
+		open_open_chat: string;
 		open_twitter: string;
 		source_code_on_github: string;
+		submit_your_dapp: string;
 		tags: string;
 		website: string;
 	};
@@ -87,7 +102,7 @@ interface I18nDapps {
 
 interface I18nFooter {
 	text: { developed_with: string };
-	alt: { dfinity: string };
+	alt: { dfinity: string; status: string };
 }
 
 interface I18nWallet {
@@ -101,7 +116,7 @@ interface I18nWallet {
 		icp_deposits: string;
 		use_address_from_to: string;
 	};
-	alt: { open_etherscan: string };
+	alt: { open_etherscan: string; qrcode_address: string };
 }
 
 interface I18nInit {
@@ -145,7 +160,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; use_with_caution: string; learn_more_about_erc20_icp: string };
+	text: { available_balance: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -179,13 +194,14 @@ interface I18nNetworks {
 }
 
 interface I18nReceive {
-	text: { receive: string; address: string };
+	text: { receive: string; address: string; receive_token: string };
 	icp: {
 		text: {
 			account_id: string;
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
+			your_private_eth_address: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
@@ -373,6 +389,7 @@ interface I18nTokens {
 			info: string;
 			github_howto: string;
 			open_github_howto: string;
+			custom_tokens_not_supported: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -406,6 +423,7 @@ interface I18nTokens {
 		open_etherscan: string;
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
+		token_group_number: string;
 	};
 	placeholder: { enter_contract_address: string; search_token: string };
 	warning: { trust_token: string };
@@ -466,6 +484,7 @@ interface I18nWallet_connect {
 		raw_copied: string;
 		sign_message: string;
 	};
+	alt: { connect_input: string };
 	domain: {
 		title: string;
 		valid: string;
@@ -574,20 +593,12 @@ interface I18nTransactions {
 
 interface I18nAbout {
 	text: { title: string };
-	what: {
+	why_oisy: {
 		text: {
 			label: string;
 			title: string;
 			hold_crypto: string;
-			use_eth_dapps: string;
-			use_ic_dapps: string;
-		};
-	};
-	how: {
-		text: {
-			label: string;
-			title: string;
-			self_custody: string;
+			network_custody: string;
 			fully_on_chain: string;
 			cross_device: string;
 			verifiable_credentials: string;
@@ -626,6 +637,35 @@ interface I18nSigner {
 	};
 }
 
+interface I18nCarousel {
+	text: { next_slide: string; prev_slide: string; indicator: string };
+}
+
+interface I18nLicense_agreement {
+	text: {
+		accept_terms: string;
+		accept_terms_link: string;
+		title: string;
+		paragraph_1: string;
+		paragraph_2: string;
+		paragraph_3: string;
+		limited_license: string;
+		restrictions: string;
+		applicable_laws: string;
+		reservation_rights: string;
+		feedback: string;
+		termination: string;
+		warranty_liability: string;
+		indemnity: string;
+		governing_law: string;
+		entire_agreement: string;
+		assignment: string;
+		no_waiver: string;
+		english_version: string;
+	};
+	alt: { license_agreement: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -650,4 +690,6 @@ interface I18n {
 	transactions: I18nTransactions;
 	about: I18nAbout;
 	signer: I18nSigner;
+	carousel: I18nCarousel;
+	license_agreement: I18nLicense_agreement;
 }

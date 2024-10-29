@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconClose, Input } from '@dfinity/gix-components';
+	import { IconClose } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -26,7 +26,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkEthereum,
@@ -44,6 +44,8 @@
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
+	import { parseTokenId } from '$lib/validation/token.validation';
+
 	const dispatch = createEventDispatcher();
 
 	// The list of ICRC tokens (SNSes) is defined as environment variables.
@@ -58,7 +60,7 @@
 	onMount(() => {
 		const tokens = buildIcrcCustomTokens();
 		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
+			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
 
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
@@ -195,12 +197,11 @@
 </script>
 
 <div class="mb-4">
-	<Input
+	<InputTextWithAction
 		name="filter"
-		inputType="text"
+		required={false}
 		bind:value={filter}
 		placeholder={$i18n.tokens.placeholder.search_token}
-		spellcheck={false}
 	>
 		<svelte:fragment slot="inner-end">
 			{#if noTokensMatch}
@@ -211,7 +212,7 @@
 				<IconSearch />
 			{/if}
 		</svelte:fragment>
-	</Input>
+	</InputTextWithAction>
 </div>
 
 {#if nonNullish($selectedNetwork)}
@@ -235,34 +236,34 @@
 		>
 	</button>
 {:else}
-	<div class="container overflow-y-auto overscroll-contain pr-2 pt-1 md:max-h-[26rem]">
-		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
-			<Card>
-				<TokenName {token} />
+	<div class="tokens flex flex-col overflow-y-hidden md:max-h-[26rem]">
+		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain pl-4 pr-2 pt-1">
+			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
+				<Card>
+					<TokenName data={token} />
 
-				<TokenLogo slot="icon" color="white" {token} />
+					<TokenLogo slot="icon" color="white" data={token} badge={{ type: 'network' }} />
 
-				<span class="break-all" slot="description">
-					{token.symbol}
-				</span>
+					<span class="break-all" slot="description">
+						{token.symbol}
+					</span>
 
-				<svelte:fragment slot="action">
-					{#if icTokenIcrcCustomToken(token)}
-						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if icTokenEthereumUserToken(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
-					{/if}
-				</svelte:fragment>
-			</Card>
-		{/each}
+					<svelte:fragment slot="action">
+						{#if icTokenIcrcCustomToken(token)}
+							<IcManageTokenToggle {token} on:icToken={onToggle} />
+						{:else if icTokenEthereumUserToken(token)}
+							<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
+						{:else if isBitcoinToken(token)}
+							<BtcManageTokenToggle />
+						{/if}
+					</svelte:fragment>
+				</Card>
+			{/each}
+		</div>
 	</div>
 
-	<Hr />
-
 	<button
-		class="flex w-full justify-center pb-5 pt-4 text-center font-bold text-blue-ribbon no-underline"
+		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 
@@ -275,9 +276,17 @@
 {/if}
 
 <style lang="scss">
-	.container {
+	@use '../../styles/mixins/modal';
+
+	.tokens {
+		padding: var(--padding-1_5x) 0;
+
+		@include modal.content;
+	}
+
+	.tokens-scroll {
 		&::-webkit-scrollbar-thumb {
-			background-color: #d9d9d9;
+			background-color: rgba(var(--color-black-rgb), 0.2);
 		}
 
 		&::-webkit-scrollbar-track {

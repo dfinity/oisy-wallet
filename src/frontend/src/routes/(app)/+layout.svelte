@@ -1,9 +1,13 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
+	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
@@ -11,16 +15,34 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 
-	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
+	// TODO: We should consider adding a description for the pages, as this block of code is now appearing in two places.
+	// Other areas, like the Menu, are also somewhat disorganized, with navigation logic spread across multiple locations.
+	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
-		: isRouteTransactions($page)
-			? 'transactions'
-			: 'tokens';
+		: isRouteDappExplorer($page)
+			? 'explore'
+			: isRouteTransactions($page)
+				? 'transactions'
+				: 'tokens';
 
 	$: token.set($pageToken);
+
+	// Source: https://svelte.dev/blog/view-transitions
+	onNavigate((navigation) => {
+		if (isNullish(document.startViewTransition)) {
+			return;
+		}
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 </script>
 
 <div
@@ -33,18 +55,20 @@
 	class:md:flex-col={$authNotSignedIn}
 	class:md:h-full={$authNotSignedIn}
 >
-	<Header back={route === 'settings'} />
+	<Header />
 
 	<AuthGuard>
 		<SplitPane>
-			<NavigationMenu slot="menu" />
+			<NavigationMenu slot="menu">
+				{#if route === 'tokens'}
+					<div transition:fade class="hidden xl:block">
+						<DappsCarousel />
+					</div>
+				{/if}
+			</NavigationMenu>
 
-			{#if route !== 'settings'}
-				<Hero
-					usdTotal={route === 'tokens'}
-					summary={route === 'transactions'}
-					back={route === 'transactions'}
-				/>
+			{#if route !== 'settings' && route !== 'explore'}
+				<Hero usdTotal={route === 'tokens'} summary={route === 'transactions'} />
 			{/if}
 
 			<LoadersGuard>

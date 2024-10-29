@@ -1,25 +1,24 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
-	import IconGlasses from '$lib/components/icons/lucide/IconGlasses.svelte';
-	import IconInfinity from '$lib/components/icons/lucide/IconInfinity.svelte';
-	import IconShieldAlert from '$lib/components/icons/lucide/IconShieldAlert.svelte';
-	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { signIn } from '$lib/services/auth.services';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
+	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
+	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let infoList: { label: string; icon: ComponentType }[];
 	$: infoList = [
 		{
-			label: $i18n.auth.text.safe_access,
-			icon: IconShieldAlert
+			label: $i18n.auth.text.asset_types,
+			icon: IconWallet
 		},
 		{
-			label: $i18n.auth.text.privacy_and_security,
-			icon: IconGlasses
+			label: $i18n.auth.text.instant_and_private,
+			icon: IconScanFace
 		},
 		{
-			label: $i18n.auth.text.powered_by_chain_fusion,
-			icon: IconInfinity
+			label: $i18n.auth.text.advanced_cryptography,
+			icon: IconShieldCheck
 		}
 	];
 </script>
@@ -44,5 +43,5 @@
 		{/each}
 	</div>
 
-	<ButtonAuthenticate on:click={async () => await signIn({})} />
+	<ButtonAuthenticateWithLicense />
 </div>

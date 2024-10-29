@@ -1,21 +1,34 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
+	import { Html, IconGitHub, Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
-	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconOpenChat from '$lib/components/icons/IconOpenChat.svelte';
+	import IconTelegram from '$lib/components/icons/IconTelegram.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { DappDescription } from '$lib/types/dappDescription';
+	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: DappDescription;
-	$: ({ website, screenshots, twitter, github, tags, name, description, logo } = dAppDescription);
+	export let dAppDescription: OisyDappDescription;
+	$: ({
+		website,
+		screenshots,
+		twitter,
+		github,
+		tags,
+		name,
+		description,
+		logo,
+		callToAction,
+		telegram,
+		openChat
+	} = dAppDescription);
 
 	let websiteURL: Option<URL>;
 	$: {
@@ -32,25 +45,27 @@
 		<span class="text-center text-xl">{name}</span>
 	</svelte:fragment>
 
-	<div class="stretch flex flex-col gap-4 pt-4">
+	<div class="flex flex-col gap-4">
 		{#if nonNullish(screenshots) && screenshots.length > 0}
 			<div class="overflow-hidden rounded-3xl">
 				<ImgBanner
+					fitHeight={true}
+					height="100%"
+					width="100%"
 					src={screenshots[0]}
 					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: name })}
 				/>
 			</div>
 		{/if}
 
-		<article class="rounded-3xl p-5 shadow">
-			<div class="flex items-center gap-4 border-b border-light-grey pb-5">
-				<Img
-					width="40"
-					height="40"
+		<article class="py-5">
+			<div class="flex flex-wrap items-center justify-start gap-4 border-b border-light-grey pb-5">
+				<Logo
+					size="md"
 					src={logo}
 					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
 				/>
-				<div>
+				<div class="mr-auto">
 					<div class="text-lg font-bold">{name}</div>
 					{#if nonNullish(websiteURL)}
 						<ExternalLink
@@ -63,7 +78,27 @@
 						>
 					{/if}
 				</div>
-				<div class="ml-auto flex space-x-4">
+				<div class="flex space-x-3">
+					{#if nonNullish(telegram)}
+						<ExternalLinkIcon
+							href={telegram}
+							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_telegram, {
+								$dAppname: name
+							})}
+						>
+							<IconTelegram size="22" />
+						</ExternalLinkIcon>
+					{/if}
+					{#if nonNullish(openChat)}
+						<ExternalLinkIcon
+							href={openChat}
+							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_open_chat, {
+								$dAppname: name
+							})}
+						>
+							<IconOpenChat size="22" />
+						</ExternalLinkIcon>
+					{/if}
 					{#if nonNullish(twitter)}
 						<ExternalLinkIcon
 							href={twitter}
@@ -81,29 +116,41 @@
 								$dAppname: name
 							})}
 						>
-							<IconGitHub />
+							<IconGitHub size="22" />
 						</ExternalLinkIcon>
 					{/if}
 				</div>
 			</div>
 
-			<p class="m-0 my-5 text-sm">
+			<p class="m-0 my-5 text-sm [&_ul]:list-disc [&_ul]:pl-6">
 				<Html text={description} />
 			</p>
 			<DappTags dAppName={name} {tags} />
 		</article>
+	</div>
 
-		{#if nonNullish(websiteURL)}
-			<ExternalLink
-				ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
-					$dAppname: name
-				})}
-				styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
-				href={websiteURL.toString()}
-				>{replacePlaceholders($i18n.dapps.text.open_dapp, {
+	{#if nonNullish(websiteURL)}
+		<ExternalLink
+			ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
+				$dAppname: name
+			})}
+			styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
+			href={websiteURL.toString()}
+			>{callToAction ??
+				replacePlaceholders($i18n.dapps.text.open_dapp, {
 					$dAppname: name
 				})}</ExternalLink
-			>
-		{/if}
-	</div>
+		>
+	{/if}
 </Modal>
+
+<style lang="scss">
+	@use '../../styles/mixins/modal';
+
+	article {
+		@include modal.content;
+
+		padding: var(--padding-3x) var(--padding-2_5x);
+		margin: 0 0 var(--padding-3x);
+	}
+</style>

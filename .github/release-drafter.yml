@@ -1,0 +1,43 @@
+# .github/release-drafter.yml
+
+name-template: 'Release v{{version}}'
+tag-template: 'v{{version}}'
+categories:
+  - title: '🚀 Features'
+    label: 'feat'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+      - 'fix'
+  - title: '🛠 Maintenance'
+    label: 'chore'
+  - title: '🔧 Build System'
+    label: 'build'
+  - title: '📦 CI/CD'
+    label: 'ci'
+  - title: '📝 Documentation'
+    label: 'docs'
+  - title: '💄 Style'
+    label: 'style'
+  - title: '♻️ Refactoring'
+    label: 'refactor'
+  - title: '⚡️ Performance Improvements'
+    label: 'perf'
+  - title: '🧪 Testing'
+    label: 'test'
+
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+
+template: |
+  ## What's Changed
+
+  ### Detailed Changes
+  {% for change in changes %}
+  - **Title**: {{ change.title }}
+  - **PR**: [#{{ change.number }}]({{ change.html_url }})
+  - **Author**: @{{ change.author.login }}
+  - **Motivation**:
+    {{ change.body | paragraph_start_with("# Motivation") | default("No specific motivation provided.") }}
+  - **Changes**:
+    {{ change.body | paragraph_start_with("# Changes") | default("No detailed changes provided.") }}
+  {% endfor %}

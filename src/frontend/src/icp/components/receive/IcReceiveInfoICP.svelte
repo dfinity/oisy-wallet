@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -9,45 +11,63 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import {
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON,
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (details: { address: string; addressLabel: string }) =>
-		dispatch('icQRCode', details);
+	const displayQRCode = (details: Omit<ReceiveQRCode, 'addressToken'>) =>
+		dispatch('icQRCode', {
+			...details,
+			addressToken: ICP_TOKEN
+		});
 </script>
 
 <ContentWithToolbar>
 	<ReceiveAddress
 		labelRef="wallet-address"
 		address={$icrcAccountIdentifierText ?? ''}
-		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+		network={ICP_NETWORK}
+		qrCodeAction={{
+			enabled: true,
+			ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+		}}
 		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
-				addressLabel: $i18n.wallet.text.wallet_address
+				addressLabel: $i18n.wallet.text.wallet_address,
+				copyAriaLabel: $i18n.wallet.text.wallet_address_copied
 			})}
 	>
 		<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_all_tokens}</svelte:fragment>
 	</ReceiveAddress>
 
-	<div class="mb-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<ReceiveAddress
 		labelRef="icp-account-id"
 		address={$icpAccountIdentifierText ?? ''}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_account_id_qr}
+		network={ICP_NETWORK}
+		qrCodeAction={{
+			enabled: true,
+			ariaLabel: $i18n.receive.icp.text.display_account_id_qr
+		}}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
+		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.account_id
+				addressLabel: $i18n.receive.icp.text.account_id,
+				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
 			})}
 	>
 		<svelte:fragment slot="title">{$i18n.receive.icp.text.account_id}</svelte:fragment>
