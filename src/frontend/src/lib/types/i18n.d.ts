@@ -388,6 +388,7 @@ interface I18nTokens {
 			info: string;
 			github_howto: string;
 			open_github_howto: string;
+			custom_tokens_not_supported: string;
 		};
 		error: {
 			loading_metadata: string;

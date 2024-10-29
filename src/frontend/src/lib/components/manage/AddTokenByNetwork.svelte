@@ -13,7 +13,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdICP, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdICP,
+		isNetworkIdEthereum,
+		isNetworkIdBitcoin
+	} from '$lib/utils/network.utils';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
@@ -55,7 +59,10 @@
 	$: enabledNetworkSelector = isNullish($selectedNetwork);
 
 	let availableNetworks: Network[] = [];
-	$: availableNetworks = $selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets;
+	// filter out BTC networks - they do not have custom tokens
+	$: availableNetworks = (
+		$selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets
+	).filter(({ id }) => !isNetworkIdBitcoin(id));
 </script>
 
 {#if enabledNetworkSelector}
@@ -80,6 +87,8 @@
 		<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 	{:else if isNetworkIdEthereum(network?.id)}
 		<AddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+	{:else}
+		<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 	{/if}
 
 	<AddTokenByNetworkToolbar {invalid} on:icBack />
