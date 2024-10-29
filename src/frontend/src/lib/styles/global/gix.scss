@@ -149,6 +149,10 @@ div.modal {
 
 			div.content {
 				padding-inline: var(--padding-2_5x);
+
+				@include media.min-width(medium) {
+					padding-inline: var(--padding-2_5x);
+				}
 			}
 		}
 	}
