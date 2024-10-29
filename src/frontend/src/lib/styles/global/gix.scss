@@ -152,7 +152,7 @@ div.modal {
 			border-radius: 0;
 
 			div.content {
-				padding-inline: var(--padding-2_5x);
+				padding-inline: var(--padding-1_5x);
 
 				@include media.min-width(medium) {
 					padding-inline: var(--padding-2_5x);

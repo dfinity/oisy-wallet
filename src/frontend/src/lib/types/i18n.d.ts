@@ -201,6 +201,7 @@ interface I18nReceive {
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
+			your_private_eth_address: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
