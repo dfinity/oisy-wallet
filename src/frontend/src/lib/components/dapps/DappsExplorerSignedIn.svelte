@@ -9,6 +9,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { dAppDescriptions, type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedOisyDappDescription | undefined =>
@@ -28,7 +29,7 @@
 	);
 </script>
 
-<h1 class="mb-5 mt-6">{$i18n.dapps.text.title}</h1>
+<PageTitle>{$i18n.dapps.text.title}</PageTitle>
 
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
 	<div class="mb-10">
