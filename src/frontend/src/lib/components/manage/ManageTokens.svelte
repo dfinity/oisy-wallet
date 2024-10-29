@@ -263,8 +263,8 @@
 		<Hr />
 
 		<button
-				class="flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
-				on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
+			class="flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
+			on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 		>
 	{/if}
 </div>
