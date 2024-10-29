@@ -7,10 +7,8 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import {
-	TokenIdSchema,
 	type RequiredTokenWithLinkedData,
 	type Token,
-	type TokenId,
 	type TokenStandard,
 	type TokenUi,
 	type TokenUiGroup,
@@ -267,6 +265,3 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		(t) => isTokenUiGroup(t) || !groupedTokenTwins.has(t.symbol)
 	);
 };
-
-export const parseTokenId = (tokenIdString: string): TokenId =>
-	TokenIdSchema.parse(Symbol(tokenIdString));
