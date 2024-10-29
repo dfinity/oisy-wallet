@@ -173,7 +173,7 @@ div.modal {
 		display: flex;
 		flex: 1;
 		flex-direction: column;
-		min-height: 100%;
+		min-height: auto;
 
 		> div.stretch {
 			flex: 1;
