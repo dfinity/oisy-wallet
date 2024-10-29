@@ -12,8 +12,10 @@
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
-		RECEIVE_TOKENS_MODAL_BTC_SECTION,
-		RECEIVE_TOKENS_MODAL_DONE_BUTTON
+		RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -90,7 +92,7 @@
 		token={BTC_MAINNET_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
-		testId={RECEIVE_TOKENS_MODAL_BTC_SECTION}
+		testId={RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION}
 	>
 		{$i18n.receive.bitcoin.text.bitcoin_address}
 	</ReceiveAddressWithLogo>
@@ -108,6 +110,7 @@
 			token={BTC_TESTNET_TOKEN}
 			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			testId={RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION}
 		>
 			{$i18n.receive.bitcoin.text.bitcoin_testnet_address}
 		</ReceiveAddressWithLogo>
@@ -126,6 +129,7 @@
 				token={BTC_REGTEST_TOKEN}
 				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+				testId={RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION}
 			>
 				{$i18n.receive.bitcoin.text.bitcoin_regtest_address}
 			</ReceiveAddressWithLogo>
