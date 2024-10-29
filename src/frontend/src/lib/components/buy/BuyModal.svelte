@@ -11,7 +11,7 @@
 		>{isOnRamperDev ? $i18n.buy.text.buy_dev : $i18n.buy.text.buy}</svelte:fragment
 	>
 
-	<div class="stretch">
+	<div class="stretch overflow-hidden">
 		<OnramperWidget />
 	</div>
 </Modal>
