@@ -87,7 +87,7 @@
 		<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 	{:else if isNetworkIdEthereum(network?.id)}
 		<AddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
-	{:else}
+	{:else if nonNullish($selectedNetwork)}
 		<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 	{/if}
 
