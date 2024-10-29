@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { OptionString } from '$lib/types/string';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { fade } from 'svelte/transition';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let labelRef: string;
 	export let address: OptionString;
