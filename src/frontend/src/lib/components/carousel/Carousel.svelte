@@ -99,7 +99,8 @@
 
 		if (nonNullish(sliderFrame.children)) {
 			goToSlide({
-				slide: currentSlide
+				slide: currentSlide,
+				withTransition: false
 			});
 
 			// Start autoplay timer if it is not running
