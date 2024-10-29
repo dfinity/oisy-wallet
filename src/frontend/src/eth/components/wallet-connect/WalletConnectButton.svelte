@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
-	import { fade } from 'svelte/transition';
 
 	export let ariaLabel: string | undefined = undefined;
 </script>
