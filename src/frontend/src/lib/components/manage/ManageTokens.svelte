@@ -26,7 +26,6 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
