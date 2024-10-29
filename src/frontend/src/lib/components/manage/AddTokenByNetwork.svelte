@@ -82,7 +82,7 @@
 	</Value>
 {/if}
 
-<form on:submit={() => dispatch('icNext')} method="POST" in:fade>
+<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
 	{#if isNetworkIdICP(network?.id)}
 		<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 	{:else if isNetworkIdEthereum(network?.id)}

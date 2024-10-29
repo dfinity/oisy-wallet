@@ -32,6 +32,6 @@
 	$: progressStep, updateSteps();
 </script>
 
-<div class="px-2">
+<div class="px-2 pb-3">
 	<svelte:component this={cmp} steps={dynamicSteps} />
 </div>
