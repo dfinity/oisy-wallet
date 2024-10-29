@@ -2,7 +2,7 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import QRButton from '$lib/components/common/QRButton.svelte';
-	import InputText from '$lib/components/ui/InputText.svelte';
+	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -22,13 +22,18 @@
 </script>
 
 <label for="destination" class="px-4.5 font-bold">{$i18n.send.text.destination}:</label>
-<InputText name="destination" bind:value={destination} placeholder={inputPlaceholder} on:nnsInput>
+<InputTextWithAction
+	name="destination"
+	bind:value={destination}
+	placeholder={inputPlaceholder}
+	on:nnsInput
+>
 	<svelte:fragment slot="inner-end">
 		{#if nonNullish(onQRButtonClick)}
 			<QRButton on:click={onQRButtonClick} />
 		{/if}
 	</svelte:fragment>
-</InputText>
+</InputTextWithAction>
 
 {#if invalidDestination}
 	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">
