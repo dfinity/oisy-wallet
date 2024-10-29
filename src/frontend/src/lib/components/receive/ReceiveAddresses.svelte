@@ -1,9 +1,16 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import {
+		BTC_MAINNET_NETWORK,
+		BTC_REGTEST_NETWORK,
+		BTC_TESTNET_NETWORK,
+		ETHEREUM_NETWORK,
+		ICP_NETWORK
+	} from '$env/networks.env';
 	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -35,7 +42,8 @@
 </script>
 
 <ContentWithToolbar>
-	<ReceiveAddressWithLogo
+	<ReceiveAddress
+		labelRef="icrcTokenAddress"
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
@@ -44,19 +52,23 @@
 				copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied
 			})}
 		address={$icrcAccountIdentifierText ?? ''}
-		token={ICP_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
+		network={ICP_NETWORK}
+		qrCodeAction={{
+			enabled: true,
+			ariaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr
+		}}
 		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 		testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
 	>
-		{$i18n.receive.icp.text.principal}
+		<svelte:fragment slot="title">{$i18n.receive.icp.text.principal}</svelte:fragment>
 
-		<span slot="notes" class="text-secondary text-sm"
+		<span slot="text" class="text-secondary text-sm"
 			>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
 		>
-	</ReceiveAddressWithLogo>
+	</ReceiveAddress>
 
-	<ReceiveAddressWithLogo
+	<ReceiveAddress
+		labelRef="icpTokenAddress"
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
@@ -65,22 +77,25 @@
 				copyAriaLabel: $i18n.receive.icp.text.icp_account_copied
 			})}
 		address={$icpAccountIdentifierText ?? ''}
-		token={ICP_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_account_qr}
+		network={ICP_NETWORK}
+		qrCodeAction={{
+			enabled: true,
+			ariaLabel: $i18n.receive.icp.text.display_icp_account_qr
+		}}
 		copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
 		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
-		invisibleLogo
 	>
-		{$i18n.receive.icp.text.icp_account}
+		<svelte:fragment slot="title">{$i18n.receive.icp.text.icp_account}</svelte:fragment>
 
-		<span slot="notes" class="text-secondary text-sm"
+		<span slot="text" class="text-secondary text-sm"
 			>{$i18n.receive.icp.text.use_for_icp_deposit}</span
 		>
-	</ReceiveAddressWithLogo>
+	</ReceiveAddress>
 
 	<Hr spacing="lg" />
 
-	<ReceiveAddressWithLogo
+	<ReceiveAddress
+		labelRef="btcAddressMainnet"
 		on:click={() =>
 			displayQRCode({
 				address: $btcAddressMainnet ?? '',
@@ -88,17 +103,21 @@
 				addressToken: BTC_MAINNET_TOKEN,
 				copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 			})}
-		address={$btcAddressMainnet}
-		token={BTC_MAINNET_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+		address={$btcAddressMainnet ?? ''}
+		network={BTC_MAINNET_NETWORK}
+		qrCodeAction={{
+			enabled: true,
+			ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+		}}
 		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 		testId={RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION}
 	>
-		{$i18n.receive.bitcoin.text.bitcoin_address}
-	</ReceiveAddressWithLogo>
+		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
+	</ReceiveAddress>
 
 	{#if $testnets}
-		<ReceiveAddressWithLogo
+		<ReceiveAddress
+			labelRef="btcAddressTestnet"
 			on:click={() =>
 				displayQRCode({
 					address: $btcAddressTestnet ?? '',
@@ -106,18 +125,24 @@
 					addressToken: BTC_TESTNET_TOKEN,
 					copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 				})}
-			address={$btcAddressTestnet}
-			token={BTC_TESTNET_TOKEN}
-			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+			address={$btcAddressTestnet ?? ''}
+			network={BTC_TESTNET_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+			}}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			testId={RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION}
 		>
-			{$i18n.receive.bitcoin.text.bitcoin_testnet_address}
-		</ReceiveAddressWithLogo>
+			<svelte:fragment slot="title"
+				>{$i18n.receive.bitcoin.text.bitcoin_testnet_address}</svelte:fragment
+			>
+		</ReceiveAddress>
 
 		{#if LOCAL}
 			<!-- Same address for Regtest and for Testnet are used. -->
-			<ReceiveAddressWithLogo
+			<ReceiveAddress
+				labelRef="btcAddressRegtest"
 				on:click={() =>
 					displayQRCode({
 						address: $btcAddressRegtest ?? '',
@@ -125,20 +150,26 @@
 						addressToken: BTC_REGTEST_TOKEN,
 						copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 					})}
-				address={$btcAddressRegtest}
-				token={BTC_REGTEST_TOKEN}
-				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+				address={$btcAddressRegtest ?? ''}
+				network={BTC_REGTEST_NETWORK}
+				qrCodeAction={{
+					enabled: true,
+					ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+				}}
 				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 				testId={RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION}
 			>
-				{$i18n.receive.bitcoin.text.bitcoin_regtest_address}
-			</ReceiveAddressWithLogo>
+				<svelte:fragment slot="title"
+					>{$i18n.receive.bitcoin.text.bitcoin_regtest_address}</svelte:fragment
+				>
+			</ReceiveAddress>
 		{/if}
 	{/if}
 
 	<Hr spacing="lg" />
 
-	<ReceiveAddressWithLogo
+	<ReceiveAddress
+		labelRef="ethAddress"
 		on:click={() =>
 			displayQRCode({
 				address: $ethAddress ?? '',
@@ -147,13 +178,16 @@
 				copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied
 			})}
 		address={$ethAddress ?? ''}
-		token={ETHEREUM_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.ethereum.text.display_ethereum_address_qr}
+		network={ETHEREUM_NETWORK}
+		qrCodeAction={{
+			enabled: true,
+			ariaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr
+		}}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
 		testId={RECEIVE_TOKENS_MODAL_ETH_SECTION}
 	>
-		{$i18n.receive.ethereum.text.ethereum}
-	</ReceiveAddressWithLogo>
+		<svelte:fragment slot="title">{$i18n.receive.ethereum.text.ethereum}</svelte:fragment>
+	</ReceiveAddress>
 
 	<ButtonDone
 		testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
