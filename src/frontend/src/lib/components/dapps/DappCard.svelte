@@ -2,7 +2,7 @@
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OisyDappDescription } from '$lib/types/oisyDappDescription';
+	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: OisyDappDescription;

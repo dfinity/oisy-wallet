@@ -1,12 +1,14 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wsteth from '$icp-eth/assets/wsteth.svg';
+import type { TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 export const WSTETH_DECIMALS = 18;
 
 export const WSTETH_SYMBOL = 'wstETH';
 
-export const WSTETH_TOKEN_ID: unique symbol = Symbol(WSTETH_SYMBOL);
+export const WSTETH_TOKEN_ID: TokenId = parseTokenId(WSTETH_SYMBOL);
 
 export const WSTETH_TOKEN: RequiredErc20Token = {
 	id: WSTETH_TOKEN_ID,
