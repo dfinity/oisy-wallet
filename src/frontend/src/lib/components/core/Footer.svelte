@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { IconGitHub } from '@dfinity/gix-components';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
+	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -28,17 +28,17 @@
 	>
 		<div class="pointer-events-auto flex flex-row items-center gap-4">
 			<ExternalLinkIcon
-				href={OISY_REPO_URL}
-				ariaLabel={$i18n.navigation.text.source_code_on_github}
-			>
-				<IconGitHub />
-			</ExternalLinkIcon>
-
-			<ExternalLinkIcon
 				href={OISY_TWITTER_URL}
 				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 			>
 				<IconTwitter />
+			</ExternalLinkIcon>
+
+			<ExternalLinkIcon
+				href={OISY_REPO_URL}
+				ariaLabel={$i18n.navigation.text.source_code_on_github}
+			>
+				<IconGitHub />
 			</ExternalLinkIcon>
 
 			<a
