@@ -264,9 +264,7 @@
 		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
-{/if}
 
-{#if !noTokensMatch}
 	<ButtonGroup>
 		<ButtonCancel on:click={() => dispatch('icClose')} />
 		<Button disabled={saveDisabled} on:click={save}>
