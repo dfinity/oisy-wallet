@@ -1,4 +1,5 @@
 import dAppDescriptionsJson from '$env/dapp-descriptions.json';
+import { UrlSchema } from '$lib/validation/url.validation';
 import { z } from 'zod';
 
 // see https://github.com/dfinity/portal/tree/95c67a5cfe201e4e5cb79f3cf5d18fe16498cd8c?tab=readme-ov-file#object-schema
@@ -7,8 +8,7 @@ const DAppDescriptionSchema = z.object({
 	name: z.string(),
 	// TODO replicate logic from https://github.com/dfinity/portal/blob/34a0328ed4792f5a7f3943be73f13f5abaefb4b8/plugins/validate-showcase.js#L179
 	oneLiner: z.string(),
-	// TODO validate that this URL starts with HTTPs
-	website: z.string().url(),
+	website: UrlSchema,
 
 	tags: z.array(z.string()),
 	description: z.string(),
@@ -18,9 +18,9 @@ const DAppDescriptionSchema = z.object({
 	usesInternetIdentity: z.boolean(),
 	authOrigins: z.array(z.string()).optional(),
 
-	github: z.string().url().optional(),
-	youtube: z.string().url().optional(),
-	twitter: z.string().url().optional(),
+	github: UrlSchema.optional(),
+	youtube: UrlSchema.optional(),
+	twitter: UrlSchema.optional(),
 
 	screenshots: z.array(z.string()).optional(),
 
@@ -39,8 +39,8 @@ const CarouselDappDescriptionSchema = z.object({
 const OisyDappDescriptionSchema = DAppDescriptionSchema.extend({
 	featured: z.boolean().optional(),
 	callToAction: z.string().optional(),
-	telegram: z.string().url().optional(),
-	openChat: z.string().url().optional(),
+	telegram: UrlSchema.optional(),
+	openChat: UrlSchema.optional(),
 	carousel: CarouselDappDescriptionSchema.optional()
 });
 
