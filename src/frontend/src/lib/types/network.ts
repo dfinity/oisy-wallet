@@ -15,19 +15,19 @@ const NetworkAppMetadataSchema = z.object({
 	explorerUrl: z.string()
 });
 
-export const NetworkSchema = z.object({
-	id: NetworkIdSchema,
-	env: NetworkEnvironmentSchema,
-	name: z.string(),
-	icon: z.string().optional(),
-	iconBW: z.string().optional(),
-	buy: NetworkBuySchema.optional()
-});
-
 export type NetworkId = z.infer<typeof NetworkIdSchema>;
 
 export type NetworkEnvironment = z.infer<typeof NetworkEnvironmentSchema>;
 
-export type Network = z.infer<typeof NetworkSchema>;
+export interface Network {
+	id: NetworkId;
+	env: NetworkEnvironment;
+	name: string;
+	icon?: string;
+	iconBW?: string;
+	buy?: AtLeastOne<NetworkBuy>;
+}
+
+export type NetworkBuy = z.infer<typeof NetworkBuySchema>;
 
 export type NetworkAppMetadata = z.infer<typeof NetworkAppMetadataSchema>;
