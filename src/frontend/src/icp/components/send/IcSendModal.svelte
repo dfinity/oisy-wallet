@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
-	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
