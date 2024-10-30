@@ -32,7 +32,7 @@
 	{/each}
 
 	{#if $sortedBtcTransactions.length === 0}
-		<TransactionsPlaceholder/>
+		<TransactionsPlaceholder />
 	{/if}
 </TokensSkeletons>
 

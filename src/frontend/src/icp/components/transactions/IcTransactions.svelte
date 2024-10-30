@@ -112,7 +112,7 @@
 		{/if}
 
 		{#if $icTransactions.length === 0}
-			<TransactionsPlaceholder/>
+			<TransactionsPlaceholder />
 		{/if}
 	</svelte:component>
 </IcTransactionsSkeletons>

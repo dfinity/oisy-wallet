@@ -93,7 +93,7 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<TransactionsPlaceholder/>
+		<TransactionsPlaceholder />
 	{/if}
 </TransactionsSkeletons>
 
