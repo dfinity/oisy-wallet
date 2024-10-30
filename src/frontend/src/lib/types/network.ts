@@ -1,7 +1,10 @@
 import type { OnramperNetworkId } from '$lib/types/onramper';
 import type { AtLeastOne } from '$lib/types/utils';
+import { z } from 'zod';
 
-export type NetworkId = symbol;
+export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
+
+export type NetworkId = z.infer<typeof NetworkIdSchema>;
 
 export type NetworkEnvironment = 'mainnet' | 'testnet';
 
