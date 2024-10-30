@@ -20,7 +20,7 @@
 			{formatToken({
 				value: ZERO,
 				unitName: data.decimals
-			})}
+			}).replace('0', '-')}
 		{/if}
 	</output>
 </TokenBalanceSkeleton>
