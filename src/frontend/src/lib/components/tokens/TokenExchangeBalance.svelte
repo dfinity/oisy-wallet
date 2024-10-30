@@ -11,11 +11,6 @@
 	{#if nonNullish(balance) && nonNullish(usdBalance)}
 		{formatUSD({ value: usdBalance })}
 	{:else}
-		<span class:animate-pulse={isNullish(balance)}
-			>{formatUSD({
-				value: 0,
-				options: { minFraction: 0, maxFraction: 0 }
-			}).replace('0', '-')}
-		</span>
+		<span class:animate-pulse={isNullish(balance)}>{formatUSD({ value: 0 })} </span>
 	{/if}
 </output>
