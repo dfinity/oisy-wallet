@@ -102,7 +102,7 @@ interface I18nDapps {
 
 interface I18nFooter {
 	text: { developed_with: string };
-	alt: { dfinity: string };
+	alt: { dfinity: string; status: string };
 }
 
 interface I18nWallet {
@@ -160,7 +160,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; use_with_caution: string; learn_more_about_erc20_icp: string };
+	text: { available_balance: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -201,6 +201,7 @@ interface I18nReceive {
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
+			your_private_eth_address: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
@@ -388,6 +389,7 @@ interface I18nTokens {
 			info: string;
 			github_howto: string;
 			open_github_howto: string;
+			custom_tokens_not_supported: string;
 		};
 		error: {
 			loading_metadata: string;
@@ -482,6 +484,7 @@ interface I18nWallet_connect {
 		raw_copied: string;
 		sign_message: string;
 	};
+	alt: { connect_input: string };
 	domain: {
 		title: string;
 		valid: string;
@@ -640,6 +643,8 @@ interface I18nCarousel {
 
 interface I18nLicense_agreement {
 	text: {
+		accept_terms: string;
+		accept_terms_link: string;
 		title: string;
 		paragraph_1: string;
 		paragraph_2: string;
@@ -658,6 +663,7 @@ interface I18nLicense_agreement {
 		no_waiver: string;
 		english_version: string;
 	};
+	alt: { license_agreement: string };
 }
 
 interface I18n {

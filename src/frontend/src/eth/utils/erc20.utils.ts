@@ -13,13 +13,14 @@ import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-to
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 import type { UserTokenState } from '$lib/types/token-toggleable';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 type MapErc20TokenParams = Erc20Contract &
 	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'> &
 	Partial<Pick<Token, 'id'>>;
 
 export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams): Erc20Token => ({
-	id: id ?? Symbol(symbol),
+	id: id ?? parseTokenId(symbol),
 	standard: 'erc20',
 	name,
 	symbol,
@@ -34,7 +35,7 @@ export const mapErc20UserToken = ({
 	network,
 	...rest
 }: MapErc20TokenParams & UserTokenState): Erc20UserToken => ({
-	id: id ?? Symbol(`user-token#${symbol}#${network.chainId}`),
+	id: id ?? parseTokenId(`user-token#${symbol}#${network.chainId}`),
 	standard: 'erc20',
 	name,
 	symbol,

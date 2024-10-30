@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
+	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
-	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
-	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let infoList: { label: string; icon: ComponentType }[];
@@ -44,5 +43,5 @@
 		{/each}
 	</div>
 
-	<ButtonAuthenticate on:click={async () => await signIn({})} />
+	<ButtonAuthenticateWithLicense />
 </div>
