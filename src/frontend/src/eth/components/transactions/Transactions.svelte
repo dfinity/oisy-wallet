@@ -13,6 +13,7 @@
 	import { mapTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -24,7 +25,6 @@
 	import type { TokenId } from '$lib/types/token';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
 	$: ckMinterInfoAddresses = toCkMinterInfoAddresses({
@@ -93,7 +93,7 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<TransactionsPlaceholder/>
+		<TransactionsPlaceholder />
 	{/if}
 </TransactionsSkeletons>
 

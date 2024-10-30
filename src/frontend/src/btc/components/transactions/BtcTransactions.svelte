@@ -10,11 +10,10 @@
 	} from '$btc/derived/btc-transactions.derived';
 	import type { BtcTransactionUi } from '$btc/types/btc';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalBtcTransaction } from '$lib/derived/modal.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 
 	let selectedTransaction: BtcTransactionUi | undefined;
 	$: selectedTransaction = $modalBtcTransaction
@@ -32,7 +31,7 @@
 	{/each}
 
 	{#if $sortedBtcTransactions.length === 0}
-		<TransactionsPlaceholder/>
+		<TransactionsPlaceholder />
 	{/if}
 </TokensSkeletons>
 

@@ -22,6 +22,7 @@
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { IcTransactionUi } from '$icp/types/ic';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -31,7 +32,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { last } from '$lib/utils/array.utils';
-	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -112,7 +112,7 @@
 		{/if}
 
 		{#if $icTransactions.length === 0}
-			<TransactionsPlaceholder/>
+			<TransactionsPlaceholder />
 		{/if}
 	</svelte:component>
 </IcTransactionsSkeletons>

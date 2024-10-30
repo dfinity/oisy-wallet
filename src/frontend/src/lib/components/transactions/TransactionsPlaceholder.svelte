@@ -1,10 +1,9 @@
 <script lang="ts">
-
-	import { i18n } from '$lib/stores/i18n.store';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import IconlyArrowUpRight from '$lib/components/icons/iconly/IconlyArrowUpRight.svelte';
 	import IconlyArrowRightLeft from '$lib/components/icons/iconly/IconlyArrowRightLeft.svelte';
+	import IconlyArrowUpRight from '$lib/components/icons/iconly/IconlyArrowUpRight.svelte';
 	import IconlyCreditCard from '$lib/components/icons/iconly/IconlyCreditCard.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class="py-12">
@@ -25,12 +24,14 @@
 
 	<div class="space-y-4">
 		<p class="m-0 text-center text-lg font-bold">{$i18n.transactions.text.transaction_history}</p>
-		<p class="text-secondary m-0 text-center opacity-50">{$i18n.transactions.text.buy_or_receive}</p>
+		<p class="text-secondary m-0 text-center opacity-50">
+			{$i18n.transactions.text.buy_or_receive}
+		</p>
 	</div>
 </div>
 
 <style lang="postcss">
-    .transaction-action-icon {
-        @apply flex items-center justify-center p-3.5 bg-onahau rounded-full ring-2 ring-light-blue;
-    }
+	.transaction-action-icon {
+		@apply flex items-center justify-center rounded-full bg-onahau p-3.5 ring-2 ring-light-blue;
+	}
 </style>
