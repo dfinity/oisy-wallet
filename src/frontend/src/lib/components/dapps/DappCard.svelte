@@ -6,18 +6,18 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: OisyDappDescription;
-	$: ({ name, logo, oneLiner, tags } = dAppDescription);
+	$: ({ name: dAppName, logo, oneLiner, tags } = dAppDescription);
 </script>
 
 <button
-	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppname: name })}
+	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
 	on:click
 	class="relative h-44 flex-1 rounded-lg bg-white p-4 pt-12 shadow md:h-60"
 >
 	<span class="absolute -top-5 left-4">
 		<Logo
 			src={logo}
-			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
+			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
 			size="xl"
 			ring
 			color="white"
@@ -25,7 +25,7 @@
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">
 		<section>
-			<p class="m-0 text-start text-lg font-semibold">{name}</p>
+			<p class="m-0 text-start text-lg font-semibold">{dAppName}</p>
 			<p
 				title={oneLiner}
 				class="m-0 mt-2 line-clamp-2 text-ellipsis text-start text-xs text-misty-rose md:line-clamp-4"
@@ -34,7 +34,7 @@
 			</p>
 		</section>
 		<section>
-			<DappTags dAppName={name} {tags} />
+			<DappTags {dAppName} {tags} />
 		</section>
 	</article>
 </button>
