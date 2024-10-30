@@ -2,6 +2,7 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 import type { Config } from 'tailwindcss/types/config';
 import { themePrimitives } from './src/frontend/src/lib/styles/tailwind/colors/theme-primitives';
 import { themeVariables } from './src/frontend/src/lib/styles/tailwind/colors/theme-variables';
+import { colorsBase } from './src/frontend/src/lib/styles/tailwind/colors/base';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -54,6 +55,8 @@ export default {
 			beer: '#f7931a',
 			fulvous: '#de7900',
 			water: '#d1e3ff',
+			// TODO after migrating all colors, colorsBase should be removed here
+			...colorsBase,
 			...themePrimitives,
 			...themeVariables
 		},
