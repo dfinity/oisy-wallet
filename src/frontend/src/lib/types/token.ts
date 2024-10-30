@@ -10,6 +10,27 @@ const TokenStandardSchema = z.enum(['ethereum', 'erc20', 'icp', 'icrc', 'bitcoin
 
 const TokenCategorySchema = z.enum(['default', 'custom']);
 
+const TokenMetadataSchema = z.object({
+	name: z.string(),
+	symbol: z.string(),
+	decimals: z.number(),
+	icon: z.string().optional()
+});
+
+const TokenOisySymbolSchema = z.object({
+	oisySymbol: z.string()
+});
+
+const TokenOisyNameSchema = z.object({
+	prefix: z.string().optional(),
+	oisyName: z.string()
+});
+
+const TokenAppearanceSchema = z.object({
+	oisySymbol: TokenOisySymbolSchema.optional(),
+	oisyName: TokenOisyNameSchema.optional()
+});
+
 export type TokenId = z.infer<typeof TokenIdSchema>;
 
 export type TokenStandard = z.infer<typeof TokenStandardSchema>;
@@ -25,26 +46,9 @@ export type Token = {
 	TokenAppearance &
 	TokenBuyable;
 
-export interface TokenMetadata {
-	name: string;
-	symbol: string;
-	decimals: number;
-	icon?: string;
-}
+export type TokenMetadata = z.infer<typeof TokenMetadataSchema>;
 
-export interface TokenAppearance {
-	oisySymbol?: TokenOisySymbol;
-	oisyName?: TokenOisyName;
-}
-
-export interface TokenOisySymbol {
-	oisySymbol: string;
-}
-
-export interface TokenOisyName {
-	prefix?: string;
-	oisyName: string;
-}
+export type TokenAppearance = z.infer<typeof TokenAppearanceSchema>;
 
 export interface TokenBuyable {
 	buy?: AtLeastOne<TokenBuy>;
