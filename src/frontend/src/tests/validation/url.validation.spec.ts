@@ -1,4 +1,4 @@
-import { UrlSchema } from '$lib/validation/url';
+import { UrlSchema } from '$lib/validation/url.validation';
 
 describe('UrlSchema', () => {
 	it('should accept valid https URLs', () => {
