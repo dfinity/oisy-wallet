@@ -1,6 +1,5 @@
 import type { TokenId, TokenUi, TokenUiGroup } from '$lib/types/token';
 import { isToken, sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
 
 /**
  * Function to create a list of TokenUiGroup by grouping a provided list of tokens.
@@ -21,8 +20,8 @@ import { nonNullish } from '@dfinity/utils';
  * @returns {TokenUiGroup[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
  */
 export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
-	const tokenGroups: { [id: TokenId]: TokenUiGroup } = tokens.reduce<{
-		[id: TokenId]: TokenUiGroup;
+	const tokenGroupsMap = tokens.reduce<{
+		[id: TokenId]: TokenUiGroup | undefined;
 	}>((acc, token) => {
 		// If the token has a twinToken, and both have the same decimals, group them together.
 		// The twinToken is the "main token" in this case.
@@ -33,28 +32,18 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 		) {
 			const { id: twinTokenId } = token.twinToken;
 
-			const existingGroup: TokenUiGroup = acc[twinTokenId];
-
-			acc = {
-				...acc,
-				[twinTokenId]: nonNullish(existingGroup)
-					? // If a group already exists for the "main token" of the current token, add it to the existing group.
-						{
-							...existingGroup,
-							tokens: [...existingGroup.tokens, token],
-							balance: sumBalances([existingGroup.balance, token.balance]),
-							usdBalance: sumUsdBalances([existingGroup.usdBalance, token.usdBalance])
-						}
-					: // Otherwise, create a new group with the current token as "main token", as placeholder.
-						// This is to avoid that the group is created with an empty "main token", if the current token's "main token" is not in the list.
-						// Instead, it should be considered a single-element group, until the "main token" may or may not be found.
-						{
-							id: token.id,
-							nativeToken: token,
-							tokens: [token],
-							balance: token.balance,
-							usdBalance: token.usdBalance
-						}
+			// If a group already exists for the "main token" of the current token, add it to the existing group.
+			// Otherwise, create a new group with the current token as a placeholder "main token".
+			// This is to avoid that the group is created with an empty "main token", if the current token's "main token" is not in the list.
+			// Instead, it should be considered a single-element group, until the "main token" may or may not be found.
+			acc[twinTokenId] = {
+				...(acc[twinTokenId] ?? {
+					id: token.id,
+					nativeToken: token
+				}),
+				tokens: [...(acc[twinTokenId]?.tokens ?? []), token],
+				balance: sumBalances([acc[twinTokenId]?.balance, token.balance]),
+				usdBalance: sumUsdBalances([acc[twinTokenId]?.usdBalance, token.usdBalance])
 			};
 
 			return acc;
@@ -62,31 +51,20 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 
 		// If the token has no "main token", it is either a "main token" for an existing group,
 		// or a "main token" for a group that still does not exist, or a single-element group (but still its "main token").
-		acc = {
-			...acc,
-			[token.id]: nonNullish(acc[token.id])
-				? // If a group already exists for the token, then the token is the "main token" of the group.
-					// It overrides the "main token" placeholder, if it was created before.
-					{
-						...acc[token.id],
-						id: token.id,
-						nativeToken: token,
-						tokens: [...acc[token.id].tokens, token],
-						balance: sumBalances([acc[token.id].balance, token.balance]),
-						usdBalance: sumUsdBalances([acc[token.id].usdBalance, token.usdBalance])
-					}
-				: // If a group does not exist for the token, create a new group with the token as the "main token".
-					{
-						id: token.id,
-						nativeToken: token,
-						tokens: [token],
-						balance: token.balance,
-						usdBalance: token.usdBalance
-					}
+		acc[token.id] = {
+			...(acc[token.id] ?? {}),
+			// It overrides the "main token" placeholder, if it was created before or not.
+			id: token.id,
+			nativeToken: token,
+			tokens: [...(acc[token.id]?.tokens ?? []), token],
+			balance: sumBalances([acc[token.id]?.balance, token.balance]),
+			usdBalance: sumUsdBalances([acc[token.id]?.usdBalance, token.usdBalance])
 		};
 
 		return acc;
 	}, {});
 
-	return Object.getOwnPropertySymbols(tokenGroups).map((id) => tokenGroups[id]);
+	return Object.getOwnPropertySymbols(tokenGroupsMap).map(
+		(id) => tokenGroupsMap[id as TokenId] as TokenUiGroup
+	);
 };
