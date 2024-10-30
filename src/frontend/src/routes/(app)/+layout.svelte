@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
@@ -27,6 +29,20 @@
 				: 'tokens';
 
 	$: token.set($pageToken);
+
+	// Source: https://svelte.dev/blog/view-transitions
+	onNavigate((navigation) => {
+		if (isNullish(document.startViewTransition)) {
+			return;
+		}
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 </script>
 
 <div
@@ -45,7 +61,7 @@
 		<SplitPane>
 			<NavigationMenu slot="menu">
 				{#if route === 'tokens'}
-					<div in:fade class="hidden xl:block">
+					<div transition:fade class="hidden xl:block">
 						<DappsCarousel />
 					</div>
 				{/if}

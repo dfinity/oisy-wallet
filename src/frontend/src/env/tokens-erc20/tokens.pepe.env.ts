@@ -1,12 +1,14 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import pepe from '$icp-eth/assets/pepe.svg';
+import type { TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 export const PEPE_DECIMALS = 18;
 
 export const PEPE_SYMBOL = 'PEPE';
 
-export const PEPE_TOKEN_ID: unique symbol = Symbol(PEPE_SYMBOL);
+export const PEPE_TOKEN_ID: TokenId = parseTokenId(PEPE_SYMBOL);
 
 export const PEPE_TOKEN: RequiredErc20Token = {
 	id: PEPE_TOKEN_ID,
@@ -27,7 +29,7 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 
 export const SEPOLIA_PEPE_SYMBOL = 'SepoliaPEPE';
 
-export const SEPOLIA_PEPE_TOKEN_ID: unique symbol = Symbol(SEPOLIA_PEPE_SYMBOL);
+export const SEPOLIA_PEPE_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_PEPE_SYMBOL);
 
 export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_PEPE_TOKEN_ID,

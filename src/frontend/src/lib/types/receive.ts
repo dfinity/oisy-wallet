@@ -4,4 +4,10 @@ export interface ReceiveQRCode {
 	address: string;
 	addressLabel?: string;
 	addressToken: Token;
+	qrCodeAriaLabel?: string;
+	copyAriaLabel: string;
 }
+
+export type ReceiveQRCodeAction =
+	| { enabled: true; ariaLabel: string; testId?: string }
+	| { enabled: false };

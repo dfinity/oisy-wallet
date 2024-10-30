@@ -2,7 +2,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { FeaturedOisyDappDescription } from '$lib/types/oisyDappDescription';
+	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: FeaturedOisyDappDescription;
@@ -17,7 +17,7 @@
 				width="100%"
 				styleClass="object-cover"
 				src={dAppDescription.screenshots[0]}
-				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: dAppDescription.name })}
+				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
 			/>
 		</div>
 	{/if}
@@ -26,7 +26,7 @@
 			<div class="h-12 w-12 rounded-full">
 				<Img
 					src={dAppDescription.logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dAppDescription.name })}
+					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppDescription.name })}
 				/>
 			</div>
 			<div class="flex-1">

@@ -62,7 +62,7 @@
 			"authenticate": "Open or Create",
 			"asset_types": "Bitcoin, Ethereum, ICP and more",
 			"instant_and_private": "Instant and private access anywhere",
-			"advanced_cryptography": "Peace of mind through advanced cryptography"
+			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
@@ -90,22 +90,22 @@
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
 			"title": "Explore Web3 Ecosystem",
-			"open_dapp": "Open $dAppname",
+			"open_dapp": "Open $dAppName",
 			"submit_your_dapp": "Submit your dapp"
 		},
 		"alt": {
-			"learn_more": "Learn more about $dAppname",
-			"logo": "Logo of $dAppname",
+			"learn_more": "Learn more about $dAppName",
+			"logo": "Logo of $dAppName",
 			"show_all": "Show all decentralised applications",
 			"show_tag": "Show decentralised applications with the tag $tag",
-			"open_dapp": "Open the app $dAppname",
-			"open_telegram": "Open $dAppname on Telegram",
-			"open_open_chat": "Open $dAppname on OpenChat",
-			"open_twitter": "Open the $dAppname X/Twitter feed",
-			"source_code_on_github": "View source code of $dAppname on github",
+			"open_dapp": "Open the app $dAppName",
+			"open_telegram": "Open $dAppName on Telegram",
+			"open_open_chat": "Open $dAppName on OpenChat",
+			"open_twitter": "Open the $dAppName X/Twitter feed",
+			"source_code_on_github": "View source code of $dAppName on github",
 			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
-			"tags": "Tags related to $dAppname",
-			"website": "Image of $dAppname"
+			"tags": "Tags related to $dAppName",
+			"website": "Image of $dAppName"
 		}
 	},
 	"footer": {
@@ -113,7 +113,8 @@
 			"developed_with": "© 2024 Developed with ❤\uFE0F at DFINITY"
 		},
 		"alt": {
-			"dfinity": "Go to DFINITY Foundation website"
+			"dfinity": "Go to DFINITY Foundation website",
+			"status": "Find more details about the current status of $oisy_short's development."
 		}
 	},
 	"wallet": {
@@ -181,7 +182,6 @@
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
-			"use_with_caution": "This is an alpha version. Use with caution.",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
@@ -230,6 +230,7 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
+				"your_private_eth_address": "Your private address for all ERC20 tokens.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
@@ -363,6 +364,7 @@
 		"text": {
 			"converting": "Converting...",
 			"convert_to_btc": "Convert to BTC",
+			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
 			"convert_to_cketh": "Convert to ckETH",
 			"convert_to_ckerc20": "Convert to $ckErc20",
@@ -426,7 +428,8 @@
 				"add_the_token": "Add the token",
 				"info": "To display custom token information correctly, $oisy_name requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
 				"github_howto": "Read how ICRC token Integration works",
-				"open_github_howto": "Open information about ICRC token integration on GitHub"
+				"open_github_howto": "Open information about ICRC token integration on GitHub",
+				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",

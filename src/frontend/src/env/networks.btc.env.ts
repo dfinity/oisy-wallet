@@ -18,6 +18,6 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 export const BTC_MAINNET_ENABLED =
 	JSON.parse(import.meta.env.VITE_BITCOIN_MAINNET_DISABLED ?? false) === false;
 
-// TODO: to be removed when we have finished implementing all the Bitcoin features
-export const NETWORK_BITCOIN_ENABLED =
-	JSON.parse(import.meta.env.VITE_NETWORK_BITCOIN_ENABLED ?? false) === true;
+// TODO: to be removed when the feature is fully implemented
+export const BTC_TO_CKBTC_EXCHANGE_ENABLED =
+	JSON.parse(import.meta.env.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED ?? false) === true;

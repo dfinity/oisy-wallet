@@ -3,7 +3,7 @@
 	import DappModal from '$lib/components/dapps/DappModal.svelte';
 	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OisyDappDescription } from '$lib/types/oisyDappDescription';
+	import type { OisyDappDescription } from '$lib/types/dapp-description';
 
 	let selectedDapp: OisyDappDescription | undefined = undefined;
 	$: selectedDapp = $modalDAppDetails

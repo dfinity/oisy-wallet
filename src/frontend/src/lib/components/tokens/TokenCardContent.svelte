@@ -8,10 +8,11 @@
 
 	export let data: CardData;
 	export let logoSize: LogoSize = 'lg';
+	export let hideNetworkLogo = false;
 	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
 </script>
 
-<TokenCard {data} {logoSize} {testIdPrefix}>
+<TokenCard {data} {logoSize} {hideNetworkLogo} {testIdPrefix}>
 	<TokenBalance {data} slot="balance" />
 
 	<ExchangeTokenValue {data} slot="exchange" />
