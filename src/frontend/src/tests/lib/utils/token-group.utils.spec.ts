@@ -9,7 +9,7 @@ describe('groupTokens', () => {
 		expect(groupTokens([]).length).toBe(0);
 	});
 
-	it('should create groups of single-element tokens if none of them have a "native token"', () => {
+	it('should create groups of single-element tokens if none of them have a "main token"', () => {
 		const tokens = [
 			{ ...ICP_TOKEN, balance: bn1, usdBalance: 100 },
 			{ ...SEPOLIA_TOKEN, balance: bn2, usdBalance: 200 },
@@ -45,8 +45,8 @@ describe('groupTokens', () => {
 		expect(result[2].tokens[0]).toBe(tokens[2]);
 	});
 
-	it('should group tokens with the same "native token" and same decimals', () => {
-		// We mock the tokens to have the same "native token"
+	it('should group tokens with the same "main token" and same decimals', () => {
+		// We mock the tokens to have the same "main token"
 		const tokens = [
 			{ ...ICP_TOKEN, balance: bn1, usdBalance: 100 },
 			{
@@ -90,8 +90,8 @@ describe('groupTokens', () => {
 		expect(result[0].tokens[2]).toBe(tokens[3]);
 	});
 
-	it('should group tokens with the same "native token" but not the ones with different decimals', () => {
-		// We mock the tokens to have the same "native token"
+	it('should group tokens with the same "main token" but not the ones with different decimals', () => {
+		// We mock the tokens to have the same "main token"
 		const tokens = [
 			{ ...ICP_TOKEN, balance: bn1, usdBalance: 100 },
 			{
@@ -139,8 +139,8 @@ describe('groupTokens', () => {
 		expect(result[0].tokens[1]).toBe(tokens[1]);
 	});
 
-	it('should group tokens with the same "native token" respecting the order they arrive in', () => {
-		// We mock the tokens to have the same "native token"
+	it('should group tokens with the same "main token" respecting the order they arrive in', () => {
+		// We mock the tokens to have the same "main token"
 		const tokens = [
 			{
 				...SEPOLIA_TOKEN,
@@ -184,8 +184,8 @@ describe('groupTokens', () => {
 		expect(result[0].tokens[2]).toBe(tokens[3]);
 	});
 
-	it('should should create single-element group for the token with no "native token" in the list', () => {
-		// We mock the tokens to have the same "native token"
+	it('should should create single-element group for the token with no "main token" in the list', () => {
+		// We mock the tokens to have the same "main token"
 		const tokens = [
 			{
 				...ICP_TOKEN,
@@ -222,7 +222,7 @@ describe('groupTokens', () => {
 	});
 
 	it('should not re-sort the groups even if the total balance of a group would put it in a higher position in the list', () => {
-		// We mock the tokens to have the same "native token"
+		// We mock the tokens to have the same "main token"
 		const tokens = [
 			{ ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 },
 			{ ...ICP_TOKEN, balance: bn1, usdBalance: 100 },
