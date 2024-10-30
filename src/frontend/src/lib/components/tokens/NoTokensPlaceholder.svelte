@@ -9,12 +9,12 @@
 <div class="py-12">
 	<div class="mb-5 flex justify-center p-2">
 		<span class="-mr-4">
-			<Logo color="white" ring size="lg" src={icpDark}></Logo>
+			<Logo ring size="lg" src={icpDark}></Logo>
 		</span>
 		<span class="-mr-4">
-			<Logo color="white" ring size="lg" src={eth}></Logo>
+			<Logo ring size="lg" src={eth}></Logo>
 		</span>
-		<Logo color="white" ring size="lg" src={bitcoin}></Logo>
+		<Logo ring size="lg" src={bitcoin}></Logo>
 	</div>
 
 	<div class="space-y-4">
