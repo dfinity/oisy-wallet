@@ -10,7 +10,9 @@
 <output class="break-all">
 	{#if nonNullish(balance) && nonNullish(usdBalance)}
 		{formatUSD({ value: usdBalance })}
+	{:else if isNullish(balance)}
+		<span class:animate-pulse={isNullish(balance)}>-</span>
 	{:else}
-		<span class:animate-pulse={isNullish(balance)}>{formatUSD({ value: 0 })} </span>
+		<span class:animate-pulse={isNullish(balance)}>n/a</span>
 	{/if}
 </output>
