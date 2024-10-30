@@ -26,7 +26,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import InputText from '$lib/components/ui/InputText.svelte';
+	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkEthereum,
@@ -44,6 +44,8 @@
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
+	import { parseTokenId } from '$lib/validation/token.validation';
+
 	const dispatch = createEventDispatcher();
 
 	// The list of ICRC tokens (SNSes) is defined as environment variables.
@@ -58,7 +60,7 @@
 	onMount(() => {
 		const tokens = buildIcrcCustomTokens();
 		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
+			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
 
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
@@ -195,7 +197,7 @@
 </script>
 
 <div class="mb-4">
-	<InputText
+	<InputTextWithAction
 		name="filter"
 		required={false}
 		bind:value={filter}
@@ -210,7 +212,7 @@
 				<IconSearch />
 			{/if}
 		</svelte:fragment>
-	</InputText>
+	</InputTextWithAction>
 </div>
 
 {#if nonNullish($selectedNetwork)}

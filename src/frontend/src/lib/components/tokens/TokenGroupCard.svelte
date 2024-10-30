@@ -31,7 +31,7 @@
 				? 'bg-white rounded-b-none'
 				: ''}"
 		>
-			<TokenCardContent data={headerData} testIdPrefix={TOKEN_GROUP} />
+			<TokenCardContent data={headerData} hideNetworkLogo testIdPrefix={TOKEN_GROUP} />
 		</TokenCardWithOnClick>
 	</MultipleListeners>
 

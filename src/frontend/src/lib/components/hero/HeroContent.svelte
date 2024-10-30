@@ -43,7 +43,7 @@
 	class:to-bright-lilac={$networkEthereum}
 >
 	{#if summary}
-		<div transition:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
+		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
 
@@ -71,12 +71,12 @@
 	{/if}
 
 	{#if usdTotal}
-		<div transition:slide={SLIDE_PARAMS}>
+		<div in:slide={SLIDE_PARAMS}>
 			<ExchangeBalance />
 		</div>
 	{/if}
 
-	<div transition:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
+	<div in:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
 		<Actions />
 	</div>
 

@@ -15,4 +15,7 @@
 	{placeholder}
 	spellcheck={false}
 	autocomplete="off"
-/>
+	on:nnsInput
+>
+	<slot name="inner-end" slot="inner-end" />
+</Input>

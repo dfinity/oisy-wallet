@@ -1,12 +1,14 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
+import type { TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 export const USDC_DECIMALS = 6;
 
 export const USDC_SYMBOL = 'USDC';
 
-export const USDC_TOKEN_ID: unique symbol = Symbol(USDC_SYMBOL);
+export const USDC_TOKEN_ID: TokenId = parseTokenId(USDC_SYMBOL);
 
 export const USDC_TOKEN: RequiredErc20Token = {
 	id: USDC_TOKEN_ID,
@@ -27,7 +29,7 @@ export const USDC_TOKEN: RequiredErc20Token = {
 
 export const SEPOLIA_USDC_SYMBOL = 'SepoliaUSDC';
 
-export const SEPOLIA_USDC_TOKEN_ID: unique symbol = Symbol(SEPOLIA_USDC_SYMBOL);
+export const SEPOLIA_USDC_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_USDC_SYMBOL);
 
 export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_USDC_TOKEN_ID,
