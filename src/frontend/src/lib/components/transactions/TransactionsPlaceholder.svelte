@@ -8,18 +8,18 @@
 
 <div class="py-12">
 	<div class="mb-5 flex justify-center p-2">
-		<div class="transaction-action-icon -mr-3.5">
+		<span class="transaction-action-icon -mr-3.5">
 			<IconReceive />
-		</div>
-		<div class="transaction-action-icon -mr-3.5">
+		</span>
+		<span class="transaction-action-icon -mr-3.5">
 			<IconlyArrowUpRight />
-		</div>
-		<div class="transaction-action-icon -mr-3.5">
+		</span>
+		<span class="transaction-action-icon -mr-3.5">
 			<IconlyArrowRightLeft />
-		</div>
-		<div class="transaction-action-icon">
+		</span>
+		<span class="transaction-action-icon">
 			<IconlyCreditCard />
-		</div>
+		</span>
 	</div>
 
 	<div class="space-y-4">
