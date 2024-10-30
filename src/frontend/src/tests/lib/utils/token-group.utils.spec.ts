@@ -179,8 +179,8 @@ describe('groupTokens', () => {
 		expect(result[0].usdBalance).toBe(100 + 200 + 400);
 		expect(result[1].usdBalance).toBe(300);
 
-		expect(result[0].tokens[0]).toBe(tokens[2]);
-		expect(result[0].tokens[1]).toBe(tokens[0]);
+		expect(result[0].tokens[0]).toBe(tokens[0]);
+		expect(result[0].tokens[1]).toBe(tokens[2]);
 		expect(result[0].tokens[2]).toBe(tokens[3]);
 	});
 

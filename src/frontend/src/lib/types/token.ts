@@ -87,7 +87,7 @@ export type GroupId = TokenId;
 export type TokenUiGroup = {
 	id: GroupId;
 	nativeToken: TokenUi;
-	tokens: TokenUi[];
+	tokens: [TokenUi, ...TokenUi[]];
 } & TokenFinancialData;
 
 export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;
