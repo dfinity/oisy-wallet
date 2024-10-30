@@ -19,6 +19,10 @@
 	</output>
 
 	<span class="text-xl font-bold opacity-50">
-		<TokenExchangeBalance balance={token?.balance} usdBalance={token?.usdBalance} />
+		<TokenExchangeBalance
+			balance={token?.balance}
+			usdBalance={token?.usdBalance}
+			nullishBalanceMessage="$ value is not available"
+		/>
 	</span>
 </span>
