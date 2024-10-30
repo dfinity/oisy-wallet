@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconlyArrowRightLeft from '$lib/components/icons/iconly/IconlyArrowRightLeft.svelte';
 	import IconlyArrowUpRight from '$lib/components/icons/iconly/IconlyArrowUpRight.svelte';
 	import IconlyCreditCard from '$lib/components/icons/iconly/IconlyCreditCard.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class="py-12">
