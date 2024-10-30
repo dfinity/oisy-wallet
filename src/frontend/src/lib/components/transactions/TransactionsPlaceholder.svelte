@@ -1,0 +1,36 @@
+<script lang="ts">
+
+	import { i18n } from '$lib/stores/i18n.store';
+	import IconReceive from '$lib/components/icons/IconReceive.svelte';
+	import IconlyArrowUpRight from '$lib/components/icons/iconly/IconlyArrowUpRight.svelte';
+	import IconlyArrowRightLeft from '$lib/components/icons/iconly/IconlyArrowRightLeft.svelte';
+	import IconlyCreditCard from '$lib/components/icons/iconly/IconlyCreditCard.svelte';
+</script>
+
+<div class="py-12">
+	<div class="mb-5 flex justify-center p-2">
+		<div class="transaction-action-icon z-0 -mr-3.5">
+			<IconReceive />
+		</div>
+		<div class="transaction-action-icon z-[1] -mr-3.5">
+			<IconlyArrowUpRight />
+		</div>
+		<div class="transaction-action-icon z-[2] -mr-3.5">
+			<IconlyArrowRightLeft />
+		</div>
+		<div class="transaction-action-icon z-[3]">
+			<IconlyCreditCard />
+		</div>
+	</div>
+
+	<div class="space-y-4">
+		<p class="m-0 text-center text-lg font-bold">{$i18n.transactions.text.transaction_history}</p>
+		<p class="text-secondary m-0 text-center opacity-50">{$i18n.transactions.text.buy_or_receive}</p>
+	</div>
+</div>
+
+<style lang="postcss">
+    .transaction-action-icon {
+        @apply flex items-center justify-center p-3.5 bg-onahau rounded-full ring-2 ring-light-blue;
+    }
+</style>
