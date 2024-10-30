@@ -11,6 +11,6 @@
 
 <div class="relative block" class:h-56={size === 'big'} class:h-40={size === 'small'}>
 	<div class="absolute h-full w-full">
-		<Img {src} {alt} {width} {height} {fitHeight} />
+		<Img {src} {alt} {width} {height} {fitHeight} styleClass="object-cover" />
 	</div>
 </div>

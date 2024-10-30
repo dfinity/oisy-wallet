@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -11,11 +12,10 @@
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
 		<div class="absolute inset-0 bg-onahau">
-			<Img
+			<ImgBanner
 				fitHeight={true}
 				height="100%"
 				width="100%"
-				styleClass="object-cover"
 				src={dAppDescription.screenshots[0]}
 				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
 			/>
