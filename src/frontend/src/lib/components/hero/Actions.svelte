@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
+	import ConvertToCkBTC from '$btc/convert/ConvertToCkBTC.svelte';
+	import { BTC_TO_CKBTC_EXCHANGE_ENABLED } from '$env/networks.btc.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -18,10 +20,12 @@
 		networkEthereum,
 		networkICP,
 		networkBitcoin,
-		pseudoNetworkChainFusion
+		pseudoNetworkChainFusion,
+		networkId
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -29,8 +33,11 @@
 	let convertErc20 = false;
 	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
+	let convertCkBtc = false;
+	$: convertCkBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
+
 	let convertBtc = false;
-	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertBtc = BTC_TO_CKBTC_EXCHANGE_ENABLED && isNetworkIdBTCMainnet($networkId);
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
@@ -67,8 +74,12 @@
 				{/if}
 			{/if}
 
-			{#if convertBtc}
+			{#if convertCkBtc}
 				<ConvertToBTC />
+			{/if}
+
+			{#if convertBtc}
+				<ConvertToCkBTC />
 			{/if}
 		{/if}
 
