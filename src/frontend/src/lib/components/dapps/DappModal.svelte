@@ -22,7 +22,7 @@
 		twitter,
 		github,
 		tags,
-		name,
+		name: dAppName,
 		description,
 		logo,
 		callToAction,
@@ -42,7 +42,7 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">
-		<span class="text-center text-xl">{name}</span>
+		<span class="text-center text-xl">{dAppName}</span>
 	</svelte:fragment>
 
 	<div class="flex flex-col gap-4">
@@ -53,7 +53,7 @@
 					height="100%"
 					width="100%"
 					src={screenshots[0]}
-					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: name })}
+					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppName })}
 				/>
 			</div>
 		{/if}
@@ -63,15 +63,15 @@
 				<Logo
 					size="md"
 					src={logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: name })}
+					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
 				/>
 				<div class="mr-auto">
-					<div class="text-lg font-bold">{name}</div>
+					<div class="text-lg font-bold">{dAppName}</div>
 					{#if nonNullish(websiteURL)}
 						<ExternalLink
 							iconVisible={false}
 							ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
-								$dAppname: name
+								$dAppName: dAppName
 							})}
 							href={websiteURL.toString()}
 							styleClass="text-sm text-misty-rose">{websiteURL.hostname}</ExternalLink
@@ -83,7 +83,7 @@
 						<ExternalLinkIcon
 							href={telegram}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_telegram, {
-								$dAppname: name
+								$dAppName: dAppName
 							})}
 						>
 							<IconTelegram size="22" />
@@ -93,7 +93,7 @@
 						<ExternalLinkIcon
 							href={openChat}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_open_chat, {
-								$dAppname: name
+								$dAppName: dAppName
 							})}
 						>
 							<IconOpenChat size="22" />
@@ -103,7 +103,7 @@
 						<ExternalLinkIcon
 							href={twitter}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.open_twitter, {
-								$dAppname: name
+								$dAppName: dAppName
 							})}
 						>
 							<IconTwitter />
@@ -113,7 +113,7 @@
 						<ExternalLinkIcon
 							href={github}
 							ariaLabel={replacePlaceholders($i18n.dapps.alt.source_code_on_github, {
-								$dAppname: name
+								$dAppName: dAppName
 							})}
 						>
 							<IconGitHub size="22" />
@@ -125,20 +125,20 @@
 			<p class="m-0 my-5 text-sm [&_ul]:list-disc [&_ul]:pl-6">
 				<Html text={description} />
 			</p>
-			<DappTags dAppName={name} {tags} />
+			<DappTags {dAppName} {tags} />
 		</article>
 	</div>
 
 	{#if nonNullish(websiteURL)}
 		<ExternalLink
 			ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
-				$dAppname: name
+				$dAppName: dAppName
 			})}
 			styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
 			href={websiteURL.toString()}
 			>{callToAction ??
 				replacePlaceholders($i18n.dapps.text.open_dapp, {
-					$dAppname: name
+					$dAppName: dAppName
 				})}</ExternalLink
 		>
 	{/if}
