@@ -364,6 +364,7 @@
 		"text": {
 			"converting": "Converting...",
 			"convert_to_btc": "Convert to BTC",
+			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
 			"convert_to_cketh": "Convert to ckETH",
 			"convert_to_ckerc20": "Convert to $ckErc20",
