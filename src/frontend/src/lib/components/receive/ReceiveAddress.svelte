@@ -5,6 +5,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
@@ -37,6 +38,7 @@
 		<div
 			class="flex items-center justify-between gap-4 rounded-lg bg-zumthor px-3 py-2"
 			class:mt-3={!text}
+			data-tid={testId}
 		>
 			<div class="h-8 w-8">
 				<Logo
@@ -48,8 +50,11 @@
 			</div>
 
 			{#if nonNullish(address)}
-				<output id="ic-wallet-address" class="break-all text-sm" data-tid={testId} in:fade
-					>{address}</output
+				<output
+					id="ic-wallet-address"
+					class="break-all text-sm"
+					data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
+					in:fade>{address}</output
 				>
 			{:else}
 				<span class="w-full"><SkeletonText /></span>
