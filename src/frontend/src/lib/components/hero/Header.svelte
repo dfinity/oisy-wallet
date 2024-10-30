@@ -13,7 +13,7 @@
 	class:lg:fixed={$authSignedIn}
 	class:lg:top-0={$authSignedIn}
 	class:lg:inset-x-0={$authSignedIn}
-	class:lg:z-20={$authSignedIn}
+	class:lg:z-[12]={$authSignedIn}
 	class:pb-10={$authNotSignedIn}
 	class:sm:pb-8={$authNotSignedIn}
 >
