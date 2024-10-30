@@ -24,6 +24,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
 	$: ckMinterInfoAddresses = toCkMinterInfoAddresses({
@@ -92,7 +93,7 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="text-secondary mt-4 opacity-50">{$i18n.transactions.text.no_transactions}</p>
+		<TransactionsPlaceholder/>
 	{/if}
 </TransactionsSkeletons>
 

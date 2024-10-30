@@ -31,6 +31,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { last } from '$lib/utils/array.utils';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -111,7 +112,7 @@
 		{/if}
 
 		{#if $icTransactions.length === 0}
-			<p class="text-secondary mt-4 opacity-50">{$i18n.transactions.text.no_transactions}</p>
+			<TransactionsPlaceholder/>
 		{/if}
 	</svelte:component>
 </IcTransactionsSkeletons>

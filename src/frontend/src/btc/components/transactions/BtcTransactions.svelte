@@ -14,6 +14,7 @@
 	import { modalBtcTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 
 	let selectedTransaction: BtcTransactionUi | undefined;
 	$: selectedTransaction = $modalBtcTransaction
@@ -31,7 +32,7 @@
 	{/each}
 
 	{#if $sortedBtcTransactions.length === 0}
-		<p class="text-secondary mt-4 opacity-50">{$i18n.transactions.text.no_transactions}</p>
+		<TransactionsPlaceholder/>
 	{/if}
 </TokensSkeletons>
 
