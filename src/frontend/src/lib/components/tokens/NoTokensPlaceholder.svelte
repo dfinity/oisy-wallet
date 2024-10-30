@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
-	import { ETHEREUM_TOKEN } from '$env/tokens.env';
 	import icpDark from '$eth/assets/icp_dark.svg';
+	import bitcoin from '$icp/assets/bitcoin.svg';
+	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
@@ -12,9 +12,9 @@
 			<Logo color="white" ring size="lg" src={icpDark}></Logo>
 		</span>
 		<span class="-mr-4">
-			<Logo color="white" ring size="lg" src={ETHEREUM_TOKEN.icon}></Logo>
+			<Logo color="white" ring size="lg" src={eth}></Logo>
 		</span>
-		<Logo color="white" ring size="lg" src={BTC_MAINNET_TOKEN.icon}></Logo>
+		<Logo color="white" ring size="lg" src={bitcoin}></Logo>
 	</div>
 
 	<div class="space-y-4">
