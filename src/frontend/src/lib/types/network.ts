@@ -8,7 +8,7 @@ const NetworkEnvironmentSchema = z.enum(['mainnet', 'testnet']);
 
 // TODO: use Zod to validate the OnramperNetworkId
 const NetworkBuySchema = z.object({
-	onramperId: z.custom<AtLeastOne<OnramperNetworkId>>().optional()
+	onramperId: z.custom<OnramperNetworkId>().optional()
 });
 
 const NetworkAppMetadataSchema = z.object({
