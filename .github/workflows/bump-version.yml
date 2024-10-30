@@ -28,10 +28,10 @@ jobs:
     - name: Prepare
       uses: ./.github/actions/prepare
     
-    - name: Set up Git
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions@github.com"
+#    - name: Set up Git
+#      run: |
+#        git config user.name "github-actions[bot]"
+#        git config user.email "github-actions@github.com"
 
     - name: Bump version
       id: bump_version
