@@ -18,14 +18,15 @@ import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
 import icpBW from '$lib/assets/networks/icp-bw.svg';
 import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
 import { LOCAL } from '$lib/constants/app.constants';
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
+import { parseNetworkId } from '$lib/validation/network.validation';
 
 /**
  * Ethereum
  */
 export const ETHEREUM_NETWORK_SYMBOL = 'ETH';
 
-export const ETHEREUM_NETWORK_ID: unique symbol = Symbol(ETHEREUM_NETWORK_SYMBOL);
+export const ETHEREUM_NETWORK_ID: NetworkId = parseNetworkId(ETHEREUM_NETWORK_SYMBOL);
 
 export const ETHEREUM_NETWORK: EthereumNetwork = {
 	id: ETHEREUM_NETWORK_ID,
@@ -42,7 +43,7 @@ export const { chainId: ETHEREUM_NETWORK_CHAIN_ID } = ETHEREUM_NETWORK;
 
 export const SEPOLIA_NETWORK_SYMBOL = 'SepoliaETH';
 
-export const SEPOLIA_NETWORK_ID: unique symbol = Symbol(SEPOLIA_NETWORK_SYMBOL);
+export const SEPOLIA_NETWORK_ID: NetworkId = parseNetworkId(SEPOLIA_NETWORK_SYMBOL);
 
 export const SEPOLIA_NETWORK: EthereumNetwork = {
 	id: SEPOLIA_NETWORK_ID,
@@ -78,7 +79,7 @@ export const SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS: EthereumChainId[] =
  */
 export const ICP_NETWORK_SYMBOL = 'ICP';
 
-export const ICP_NETWORK_ID = Symbol(ICP_NETWORK_SYMBOL);
+export const ICP_NETWORK_ID: NetworkId = parseNetworkId(ICP_NETWORK_SYMBOL);
 
 export const ICP_NETWORK: Network = {
 	id: ICP_NETWORK_ID,
@@ -94,7 +95,7 @@ export const ICP_NETWORK: Network = {
  */
 export const BTC_MAINNET_NETWORK_SYMBOL = 'BTC';
 
-export const BTC_MAINNET_NETWORK_ID = Symbol(BTC_MAINNET_NETWORK_SYMBOL);
+export const BTC_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(BTC_MAINNET_NETWORK_SYMBOL);
 
 export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	id: BTC_MAINNET_NETWORK_ID,
@@ -108,7 +109,7 @@ export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 
 export const BTC_TESTNET_NETWORK_SYMBOL = 'BTC (Testnet)';
 
-export const BTC_TESTNET_NETWORK_ID = Symbol(BTC_TESTNET_NETWORK_SYMBOL);
+export const BTC_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(BTC_TESTNET_NETWORK_SYMBOL);
 
 export const BTC_TESTNET_NETWORK: BitcoinNetwork = {
 	id: BTC_TESTNET_NETWORK_ID,
@@ -121,7 +122,7 @@ export const BTC_TESTNET_NETWORK: BitcoinNetwork = {
 
 export const BTC_REGTEST_NETWORK_SYMBOL = 'BTC (Regtest)';
 
-export const BTC_REGTEST_NETWORK_ID = Symbol(BTC_REGTEST_NETWORK_SYMBOL);
+export const BTC_REGTEST_NETWORK_ID: NetworkId = parseNetworkId(BTC_REGTEST_NETWORK_SYMBOL);
 
 export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	id: BTC_REGTEST_NETWORK_ID,
