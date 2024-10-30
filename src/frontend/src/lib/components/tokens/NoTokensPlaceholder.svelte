@@ -8,13 +8,16 @@
 
 <div class="py-12">
 	<div class="mb-5 flex justify-center p-2">
-		<span class="-mr-4">
+		<span class="-mr-4 z-[0]">
 			<Logo ring size="lg" src={icpDark}></Logo>
 		</span>
-		<span class="-mr-4">
+		<span class="-mr-4 z-[1]">
 			<Logo ring size="lg" src={eth}></Logo>
 		</span>
-		<Logo ring size="lg" src={bitcoin}></Logo>
+		<span class="z-[2]">
+			<Logo ring size="lg" src={bitcoin}></Logo>
+		</span>
+
 	</div>
 
 	<div class="space-y-4">
