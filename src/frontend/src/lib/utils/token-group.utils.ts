@@ -173,13 +173,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 			isToken(token.twinToken) &&
 			token.decimals === token.twinToken.decimals
 		) {
-			const { id: twinTokenId } = token.twinToken;
-
-			// If a group already exists for the "main token" of the current token, add it to the existing group.
-			// Otherwise, create a new group with the current token as a placeholder "main token".
-			// This is to avoid that the group is created with an empty "main token", if the current token's "main token" is not in the list.
-			// Instead, it should be considered a single-element group, until the "main token" may or may not be found.
-			acc[twinTokenId] = groupSecondaryToken({ token, tokenGroup: acc[twinTokenId] });
+			acc[token.twinToken.id] = groupSecondaryToken({ token, tokenGroup: acc[token.twinToken.id] });
 
 			return acc;
 		}
