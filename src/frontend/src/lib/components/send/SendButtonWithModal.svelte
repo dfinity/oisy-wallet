@@ -9,7 +9,7 @@
 	const modalId = Symbol();
 </script>
 
-<SendButton disabled={disabled} on:click={() => open(modalId)} />
+<SendButton {disabled} on:click={() => open(modalId)} />
 
 {#if isOpen && $modalStore?.data === modalId}
 	<slot name="modal" />

@@ -17,7 +17,7 @@
 </script>
 
 <ConvertETH
-	disabled={disabled}
+	{disabled}
 	nativeTokenId={$ckEthereumNativeTokenId}
 	nativeNetworkId={$ckEthereumNativeToken.network.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {

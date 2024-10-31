@@ -8,6 +8,6 @@
 	export let disabled = false;
 </script>
 
-<SendButtonWithModal disabled={disabled} open={modalStore.openSend} isOpen={$modalSend}>
+<SendButtonWithModal {disabled} open={modalStore.openSend} isOpen={$modalSend}>
 	<SendModal {isTransactionsPage} on:nnsClose slot="modal" />
 </SendButtonWithModal>

@@ -32,7 +32,7 @@
 </script>
 
 <ConvertETH
-	disabled={disabled}
+	{disabled}
 	nativeTokenId={$ethereumTokenId}
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {

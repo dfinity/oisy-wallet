@@ -6,7 +6,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let disabled = false;
-
 </script>
 
 <ButtonHero

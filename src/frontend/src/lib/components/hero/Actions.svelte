@@ -60,15 +60,15 @@
 				{#if $networkICP}
 					<ConvertToEthereum disabled={disableExpenseActions} />
 				{:else}
-					<ConvertToCkETH disabled={disableExpenseActions}/>
+					<ConvertToCkETH disabled={disableExpenseActions} />
 				{/if}
 			{/if}
 
 			{#if convertErc20}
 				{#if $networkICP}
-					<ConvertToEthereum disabled={disableExpenseActions}/>
+					<ConvertToEthereum disabled={disableExpenseActions} />
 				{:else}
-					<ConvertToCkERC20 disabled={disableExpenseActions}/>
+					<ConvertToCkERC20 disabled={disableExpenseActions} />
 				{/if}
 			{/if}
 

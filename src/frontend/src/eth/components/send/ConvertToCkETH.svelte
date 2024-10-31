@@ -25,7 +25,7 @@
 </script>
 
 <ConvertETH
-	disabled={disabled}
+	{disabled}
 	nativeTokenId={$ethereumTokenId}
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={$i18n.convert.text.convert_to_cketh}
