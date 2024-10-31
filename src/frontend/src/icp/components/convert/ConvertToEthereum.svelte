@@ -12,9 +12,12 @@
 	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	export let disabled = false;
 </script>
 
 <ConvertETH
+	disabled={disabled}
 	nativeTokenId={$ckEthereumNativeTokenId}
 	nativeNetworkId={$ckEthereumNativeToken.network.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {

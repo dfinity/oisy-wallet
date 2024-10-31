@@ -4,11 +4,12 @@
 
 	export let open: (modalId: symbol) => void;
 	export let isOpen: boolean;
+	export let disabled = false;
 
 	const modalId = Symbol();
 </script>
 
-<SendButton on:click={() => open(modalId)} />
+<SendButton disabled={disabled} on:click={() => open(modalId)} />
 
 {#if isOpen && $modalStore?.data === modalId}
 	<slot name="modal" />

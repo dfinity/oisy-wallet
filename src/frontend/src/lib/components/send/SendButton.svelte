@@ -4,11 +4,14 @@
 	import { SEND_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	export let disabled = false;
+
 </script>
 
 <ButtonHero
 	on:click
-	disabled={$isBusy}
+	disabled={$isBusy || disabled}
 	ariaLabel={$i18n.send.text.send}
 	testId={SEND_TOKENS_MODAL_OPEN_BUTTON}
 >

@@ -16,6 +16,8 @@
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 
+	export let disabled = false;
+
 	const isDisabled = (): boolean =>
 		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
@@ -34,7 +36,7 @@
 </script>
 
 <ButtonHero
-	disabled={$isBusy}
+	disabled={$isBusy || disabled}
 	on:click={async () => await openSend()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >

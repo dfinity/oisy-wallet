@@ -23,6 +23,7 @@
 	export let ariaLabel: string;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let nativeNetworkId: NetworkId;
+	export let disabled = false;
 
 	const isDisabled = (): boolean =>
 		$ethAddressNotLoaded ||
@@ -75,7 +76,7 @@
 </script>
 
 <CkEthLoader {nativeTokenId}>
-	<ButtonHero on:click={async () => await openSend()} disabled={$isBusy} {ariaLabel}>
+	<ButtonHero on:click={async () => await openSend()} disabled={$isBusy || disabled} {ariaLabel}>
 		<slot name="icon" slot="icon" />
 		<slot />
 	</ButtonHero>

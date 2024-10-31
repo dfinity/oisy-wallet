@@ -15,6 +15,8 @@
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	export let disabled = false;
+
 	/**
 	 * Send modal context store
 	 */
@@ -30,6 +32,7 @@
 </script>
 
 <ConvertETH
+	disabled={disabled}
 	nativeTokenId={$ethereumTokenId}
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {

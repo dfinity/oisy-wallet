@@ -5,8 +5,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	export let isTransactionsPage: boolean;
+	export let disabled = false;
 </script>
 
-<SendButtonWithModal open={modalStore.openSend} isOpen={$modalSend}>
+<SendButtonWithModal disabled={disabled} open={modalStore.openSend} isOpen={$modalSend}>
 	<SendModal {isTransactionsPage} on:nnsClose slot="modal" />
 </SendButtonWithModal>
