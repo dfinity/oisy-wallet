@@ -16,7 +16,7 @@ const NetworkAppMetadataSchema = z.object({
 	explorerUrl: UrlSchema
 });
 
-const NetworkSchema = z.object({
+export const NetworkSchema = z.object({
 	id: NetworkIdSchema,
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
