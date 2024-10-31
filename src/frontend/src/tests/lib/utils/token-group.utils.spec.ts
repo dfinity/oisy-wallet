@@ -4,6 +4,7 @@ import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import {
+	groupMainToken,
 	groupSecondaryToken,
 	groupTokens,
 	groupTokensByTwin,
@@ -272,6 +273,83 @@ describe('updateTokenGroup', () => {
 			...expectedGroup,
 			tokens: [anotherToken, { ...token, usdBalance: undefined }],
 			usdBalance: tokenGroup.usdBalance
+		});
+	});
+});
+
+describe('groupMainToken', () => {
+	const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
+	const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+
+	// We mock the tokens to have the same "main token"
+	const twinToken = {
+		...SEPOLIA_TOKEN,
+		balance: bn2,
+		usdBalance: 250,
+		twinToken: ICP_TOKEN,
+		decimals: ICP_TOKEN.decimals
+	};
+
+	it('creates a new group when no tokenGroup exists', () => {
+		expect(groupMainToken({ token, tokenGroup: undefined })).toEqual({
+			id: token.id,
+			nativeToken: token,
+			tokens: [token],
+			balance: token.balance,
+			usdBalance: token.usdBalance
+		});
+	});
+
+	it('adds token to existing group and updates balances', () => {
+		const tokenGroup: TokenUiGroup = {
+			id: token.id,
+			nativeToken: token,
+			tokens: [twinToken],
+			balance: bn3,
+			usdBalance: 300
+		};
+
+		expect(groupMainToken({ token, tokenGroup })).toEqual({
+			...tokenGroup,
+			tokens: [...tokenGroup.tokens, token],
+			balance: tokenGroup.balance!.add(token.balance),
+			usdBalance: tokenGroup.usdBalance! + token.usdBalance
+		});
+	});
+
+	it('adds token to existing group with more than one token already', () => {
+		const tokenGroup: TokenUiGroup = {
+			id: token.id,
+			nativeToken: token,
+			tokens: [twinToken, anotherToken],
+			balance: bn3,
+			usdBalance: 300
+		};
+
+		expect(groupMainToken({ token, tokenGroup })).toEqual({
+			...tokenGroup,
+			tokens: [...tokenGroup.tokens, token],
+			balance: tokenGroup.balance!.add(token.balance),
+			usdBalance: tokenGroup.usdBalance! + token.usdBalance
+		});
+	});
+
+	it('overrides the "main token" props if the group was created by a "secondary token"', () => {
+		const tokenGroup: TokenUiGroup = {
+			id: twinToken.id,
+			nativeToken: twinToken,
+			tokens: [twinToken],
+			balance: bn3,
+			usdBalance: 300
+		};
+
+		expect(groupMainToken({ token, tokenGroup })).toEqual({
+			...tokenGroup,
+			id: token.id,
+			nativeToken: token,
+			tokens: [...tokenGroup.tokens, token],
+			balance: tokenGroup.balance!.add(token.balance),
+			usdBalance: tokenGroup.usdBalance! + token.usdBalance
 		});
 	});
 });
