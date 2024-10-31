@@ -4,7 +4,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Alert from '$lib/components/ui/Alert.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
-	import Warning from '$lib/components/ui/Warning.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
