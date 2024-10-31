@@ -1,5 +1,6 @@
 import type { IcCkToken } from '$icp/types/ic';
 import { isIcCkToken } from '$icp/utils/icrc.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import {
@@ -81,7 +82,11 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		return token;
 	});
 
-	return mappedTokensWithGroups.filter(
-		(t) => isTokenUiGroup(t) || !groupedTokenTwins.has(t.symbol)
-	);
+	return mappedTokensWithGroups
+		.filter((t) => isTokenUiGroup(t) || !groupedTokenTwins.has(t.symbol))
+		.sort(
+			(a, b) =>
+				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
+				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO)
+		);
 };
