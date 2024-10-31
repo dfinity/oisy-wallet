@@ -89,6 +89,27 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	);
 };
 
+const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
+	id: token.id,
+	nativeToken: token,
+	tokens: [token],
+	balance: token.balance,
+	usdBalance: token.usdBalance
+});
+
+export const updateTokenGroup = ({
+	token,
+	tokenGroup
+}: {
+	token: TokenUi;
+	tokenGroup: TokenUiGroup;
+}): TokenUiGroup => ({
+	...tokenGroup,
+	tokens: [...tokenGroup.tokens, token],
+	balance: sumBalances([tokenGroup.balance, token.balance]),
+	usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
+});
+
 /** Function to group a "main token" with an existing group or create a new group with the token as the "main token".
  *
  * If the token has no "main token", it is either a "main token" for an existing group,
@@ -103,18 +124,15 @@ const groupMainToken = ({
 }: {
 	token: TokenUi;
 	tokenGroup: TokenUiGroup | undefined;
-}): TokenUiGroup => ({
-	...(tokenGroup ?? {}),
-	// It overrides any possible "main token" placeholder, if it was created before or not.
-	id: token.id,
-	nativeToken: token,
-	tokens: [...(tokenGroup?.tokens ?? []), token],
-	balance:
-		'balance' in (tokenGroup ?? {})
-			? sumBalances([tokenGroup?.balance, token.balance])
-			: token.balance,
-	usdBalance: sumUsdBalances([tokenGroup?.usdBalance, token.usdBalance])
-});
+}): TokenUiGroup =>
+	nonNullish(tokenGroup)
+		? {
+				...updateTokenGroup({ token, tokenGroup }),
+				// It overrides any possible "main token" placeholder.
+				id: token.id,
+				nativeToken: token
+			}
+		: mapNewTokenGroup(token);
 
 /** Function to group a "secondary token" with an existing group or create a new group with the token as a "secondary token".
  *
@@ -133,20 +151,7 @@ export const groupSecondaryToken = ({
 	token: TokenUi;
 	tokenGroup: TokenUiGroup | undefined;
 }): TokenUiGroup =>
-	nonNullish(tokenGroup)
-		? {
-				...tokenGroup,
-				tokens: [...tokenGroup.tokens, token],
-				balance: sumBalances([tokenGroup.balance, token.balance]),
-				usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
-			}
-		: {
-				id: token.id,
-				nativeToken: token,
-				tokens: [token],
-				balance: token.balance,
-				usdBalance: token.usdBalance
-			};
+	nonNullish(tokenGroup) ? updateTokenGroup({ token, tokenGroup }) : mapNewTokenGroup(token);
 
 /**
  * Function to create a list of TokenUiGroup by grouping a provided list of tokens.
