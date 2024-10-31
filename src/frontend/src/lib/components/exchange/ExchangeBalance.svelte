@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -19,7 +20,7 @@
 			<span class="animate-pulse">{formatUSD({ value: 0 })}</span>
 		{/if}
 	</output>
-	<span class="text-xl font-medium text-onahau">
-		{$i18n.hero.text.available_balance}
+	<span class="max-w-48 text-xl font-medium text-onahau sm:max-w-none">
+		{$anyBalanceNonZero ? $i18n.hero.text.available_balance : $i18n.hero.text.top_up}
 	</span>
 </span>
