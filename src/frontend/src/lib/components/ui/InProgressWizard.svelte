@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
-	import Warning from '$lib/components/ui/Warning.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -28,11 +28,9 @@
 </script>
 
 <div class="stretch">
-	<Warning>
-		<span>{$i18n.core.warning.may_take_a_few_seconds}</span>
-		<br />
+	<MessageBox level="light-warning">
 		<span>{$i18n.core.warning.do_not_close}</span>
-	</Warning>
+	</MessageBox>
 
 	<InProgress {progressStep} {steps} />
 </div>

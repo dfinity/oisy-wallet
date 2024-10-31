@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import Info from '$lib/components/ui/Info.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -16,7 +16,7 @@
 </script>
 
 {#if displayInfo}
-	<Info>
+	<MessageBox>
 		<span>
 			{#if sendPurpose === 'convert-eth-to-cketh'}
 				{$i18n.convert.text.cketh_conversions_may_take}
@@ -26,5 +26,5 @@
 				})}
 			{/if}
 		</span>
-	</Info>
+	</MessageBox>
 {/if}
