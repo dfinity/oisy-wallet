@@ -14,7 +14,9 @@ import {
  * @param tokenUiOrGroupUi - The object to check.
  * @returns A boolean indicating whether the object is a TokenUiGroup.
  */
-const isTokenUiGroup = (tokenUiOrGroupUi: TokenUiOrGroupUi): tokenUiOrGroupUi is TokenUiGroup =>
+export const isTokenUiGroup = (
+	tokenUiOrGroupUi: TokenUiOrGroupUi
+): tokenUiOrGroupUi is TokenUiGroup =>
 	typeof tokenUiOrGroupUi === 'object' &&
 	'nativeToken' in tokenUiOrGroupUi &&
 	'tokens' in tokenUiOrGroupUi;
