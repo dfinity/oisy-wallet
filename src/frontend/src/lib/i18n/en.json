@@ -28,8 +28,7 @@
 			"back": "Go back to the previous page"
 		},
 		"warning": {
-			"may_take_a_few_seconds": "This may take a few seconds.",
-			"do_not_close": "Please do not close your browser tab."
+			"do_not_close": "Don't close this tab until the transaction is done"
 		}
 	},
 	"navigation": {
