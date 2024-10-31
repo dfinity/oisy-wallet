@@ -29,8 +29,7 @@ export const convertCkBTCToBtc = async ({
 		canisters: { ledgerCanisterId, minterCanisterId },
 		identity,
 		progress,
-		amount,
-		to
+		amount
 	});
 
 	progress(ProgressStepsSendIc.SEND);
@@ -79,8 +78,7 @@ export const convertCkErc20ToErc20 = async ({
 		identity,
 		progress,
 		progressStep: ProgressStepsSendIc.APPROVE_FEES,
-		amount: ckErc20ToErc20MaxCkEthFees,
-		to
+		amount: ckErc20ToErc20MaxCkEthFees
 	});
 
 	// 2. Approve amount on ckErc20 Ledger for minter
@@ -91,8 +89,7 @@ export const convertCkErc20ToErc20 = async ({
 		canisters: { ledgerCanisterId, minterCanisterId },
 		identity,
 		progress,
-		amount,
-		to
+		amount
 	});
 
 	// 3. Withdraw Erc20
@@ -125,8 +122,7 @@ export const convertCkETHToEth = async ({
 		canisters: { ledgerCanisterId, minterCanisterId },
 		identity,
 		progress,
-		amount,
-		to
+		amount
 	});
 
 	progress(ProgressStepsSendIc.SEND);
@@ -145,7 +141,10 @@ const approveTransfer = ({
 	progressStep = ProgressStepsSendIc.APPROVE_TRANSFER,
 	amount,
 	identity
-}: Omit<IcTransferParams, 'amount'> & { amount: bigint; progressStep?: ProgressStepsSendIc } & {
+}: Omit<IcTransferParams, 'amount' | 'to'> & {
+	amount: bigint;
+	progressStep?: ProgressStepsSendIc;
+} & {
 	canisters: Pick<IcCanisters, 'ledgerCanisterId'> & IcCkMetadata;
 }): Promise<IcrcBlockIndex> => {
 	progress(progressStep);
