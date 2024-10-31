@@ -12,8 +12,8 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TokenUiOrGroupUi } from '$lib/types/token';
-	import { isTokenUiGroup } from '$lib/utils/token.utils';
+	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined;
 

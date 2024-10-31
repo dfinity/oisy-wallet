@@ -49,7 +49,7 @@
 </script>
 
 <div class="stretch min-h-[20vh]">
-	<div class="mb-4 rounded-lg bg-light-blue p-4">
+	<div class="mb-4 rounded-lg bg-background-brand-subtle p-4">
 		{#if isNullish(token)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 		{:else}
