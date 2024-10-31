@@ -22,6 +22,8 @@
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { balance, balanceZero } from '$lib/derived/balances.derived';
+	import { isNullish } from '@dfinity/utils';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -34,6 +36,9 @@
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
+
+	let disableExpenseActions = true;
+	$: disableExpenseActions = isTransactionsPage && ($balanceZero || isNullish($balance));
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
@@ -48,27 +53,27 @@
 			<Receive />
 		{/if}
 
-		<Send {isTransactionsPage} />
+		<Send disabled={disableExpenseActions} {isTransactionsPage} />
 
 		{#if isTransactionsPage}
 			{#if convertEth}
 				{#if $networkICP}
-					<ConvertToEthereum />
+					<ConvertToEthereum disabled={disableExpenseActions} />
 				{:else}
-					<ConvertToCkETH />
+					<ConvertToCkETH disabled={disableExpenseActions}/>
 				{/if}
 			{/if}
 
 			{#if convertErc20}
 				{#if $networkICP}
-					<ConvertToEthereum />
+					<ConvertToEthereum disabled={disableExpenseActions}/>
 				{:else}
-					<ConvertToCkERC20 />
+					<ConvertToCkERC20 disabled={disableExpenseActions}/>
 				{/if}
 			{/if}
 
 			{#if convertBtc}
-				<ConvertToBTC />
+				<ConvertToBTC disabled={disableExpenseActions} />
 			{/if}
 		{/if}
 
