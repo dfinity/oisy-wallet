@@ -61,6 +61,10 @@ abstract class Homepage {
 		this.#viewportSize = viewportSize;
 	}
 
+	protected async clickByTestId(testId: string): Promise<void> {
+		await this.#page.getByTestId(testId).click();
+	}
+
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
 		return await this.#page.isVisible(selector);
 	}
@@ -121,7 +125,7 @@ abstract class Homepage {
 		modalOpenButtonTestId,
 		modalTestId
 	}: WaitForModalParams): Promise<Locator> {
-		await this.#page.getByTestId(modalOpenButtonTestId).click();
+		await this.clickByTestId(modalOpenButtonTestId);
 		const modal = this.#page.getByTestId(modalTestId);
 		await modal.waitFor();
 
@@ -150,10 +154,10 @@ abstract class Homepage {
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
-		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).click();
+		await this.clickByTestId(NAVIGATION_MENU_BUTTON);
 		await this.waitForNavigationMenu();
 
-		await this.#page.getByTestId(menuItemTestId).click();
+		await this.clickByTestId(menuItemTestId);
 	}
 
 	protected async clickSelector({ selector }: SelectorOperationParams): Promise<void> {
