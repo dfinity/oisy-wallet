@@ -122,7 +122,6 @@ const groupMainToken = ({
  * This is to avoid that the group is created with an empty "main token", if the current token's "main token" is not in the list.
  * Instead, it should be considered a single-element group, until the "main token" may or may not be found.
  *
- *
  * @param {TokenUi} token - The "secondary token" to group.
  * @param {TokenUiGroup} tokenGroup - The group where the "secondary token" should be added, if it exists.
  */
@@ -173,14 +172,16 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 			isToken(token.twinToken) &&
 			token.decimals === token.twinToken.decimals
 		) {
-			acc[token.twinToken.id] = groupSecondaryToken({ token, tokenGroup: acc[token.twinToken.id] });
-
-			return acc;
+			return {
+				...acc,
+				[token.twinToken.id]: groupSecondaryToken({ token, tokenGroup: acc[token.twinToken.id] })
+			};
 		}
 
-		acc[token.id] = groupMainToken({ token, tokenGroup: acc[token.id] });
-
-		return acc;
+		return {
+			...acc,
+			[token.id]: groupMainToken({ token, tokenGroup: acc[token.id] })
+		};
 	}, {});
 
 	return Object.getOwnPropertySymbols(tokenGroupsMap).map(
