@@ -28,8 +28,7 @@
 			"back": "Go back to the previous page"
 		},
 		"warning": {
-			"may_take_a_few_seconds": "This may take a few seconds.",
-			"do_not_close": "Please do not close your browser tab."
+			"do_not_close": "Don't close this tab until the transaction is done"
 		}
 	},
 	"navigation": {
@@ -182,6 +181,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
+			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
