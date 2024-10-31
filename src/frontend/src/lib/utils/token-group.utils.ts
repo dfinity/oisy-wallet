@@ -88,6 +88,63 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	);
 };
 
+/** Function to group a "main token" with an existing group or create a new group with the token as the "main token".
+ *
+ * If the token has no "main token", it is either a "main token" for an existing group,
+ * or a "main token" for a group that still does not exist, or a single-element group (but still its "main token").
+ *
+ * @param {TokenUi} token - The "main token" to group.
+ * @param {TokenUiGroup} tokenGroup - The group where the "main token" should be added, if it exists.
+ */
+const groupMainToken = ({
+	token,
+	tokenGroup
+}: {
+	token: TokenUi;
+	tokenGroup: TokenUiGroup | undefined;
+}): TokenUiGroup => ({
+	...(tokenGroup ?? {}),
+	// It overrides any possible "main token" placeholder, if it was created before or not.
+	id: token.id,
+	nativeToken: token,
+	tokens: [...(tokenGroup?.tokens ?? []), token],
+	balance:
+		'balance' in (tokenGroup ?? {})
+			? sumBalances([tokenGroup?.balance, token.balance])
+			: token.balance,
+	usdBalance: sumUsdBalances([tokenGroup?.usdBalance, token.usdBalance])
+});
+
+/** Function to group a "secondary token" with an existing group or create a new group with the token as a "secondary token".
+ *
+ * If a group already exists for the "main token" of the current token, add it to the existing group.
+ * Otherwise, create a new group with the current token as a placeholder "main token".
+ * This is to avoid that the group is created with an empty "main token", if the current token's "main token" is not in the list.
+ * Instead, it should be considered a single-element group, until the "main token" may or may not be found.
+ *
+ *
+ * @param {TokenUi} token - The "secondary token" to group.
+ * @param {TokenUiGroup} tokenGroup - The group where the "secondary token" should be added, if it exists.
+ */
+const groupSecondaryToken = ({
+	token,
+	tokenGroup
+}: {
+	token: TokenUi;
+	tokenGroup: TokenUiGroup | undefined;
+}): TokenUiGroup => ({
+	...(tokenGroup ?? {
+		id: token.id,
+		nativeToken: token
+	}),
+	tokens: [...(tokenGroup?.tokens ?? []), token],
+	balance:
+		'balance' in (tokenGroup ?? {})
+			? sumBalances([tokenGroup?.balance, token.balance])
+			: token.balance,
+	usdBalance: sumUsdBalances([tokenGroup?.usdBalance, token.usdBalance])
+});
+
 /**
  * Function to create a list of TokenUiGroup by grouping a provided list of tokens.
  *
@@ -111,7 +168,6 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 		[id: TokenId]: TokenUiGroup | undefined;
 	}>((acc, token) => {
 		// If the token has a twinToken, and both have the same decimals, group them together.
-		// The twinToken is the "main token" in this case.
 		if (
 			'twinToken' in token &&
 			isToken(token.twinToken) &&
@@ -123,36 +179,15 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 			// Otherwise, create a new group with the current token as a placeholder "main token".
 			// This is to avoid that the group is created with an empty "main token", if the current token's "main token" is not in the list.
 			// Instead, it should be considered a single-element group, until the "main token" may or may not be found.
-			acc[twinTokenId] = {
-				...(acc[twinTokenId] ?? {
-					id: token.id,
-					nativeToken: token
-				}),
-				tokens: [...(acc[twinTokenId]?.tokens ?? []), token],
-				balance:
-					'balance' in (acc[twinTokenId] ?? {})
-						? sumBalances([acc[twinTokenId]?.balance, token.balance])
-						: token.balance,
-				usdBalance: sumUsdBalances([acc[twinTokenId]?.usdBalance, token.usdBalance])
-			};
+			acc[twinTokenId] = groupSecondaryToken({
+				token,
+				tokenGroup: acc[twinTokenId]
+			});
 
 			return acc;
 		}
 
-		// If the token has no "main token", it is either a "main token" for an existing group,
-		// or a "main token" for a group that still does not exist, or a single-element group (but still its "main token").
-		acc[token.id] = {
-			...(acc[token.id] ?? {}),
-			// It overrides the "main token" placeholder, if it was created before or not.
-			id: token.id,
-			nativeToken: token,
-			tokens: [...(acc[token.id]?.tokens ?? []), token],
-			balance:
-				'balance' in (acc[token.id] ?? {})
-					? sumBalances([acc[token.id]?.balance, token.balance])
-					: token.balance,
-			usdBalance: sumUsdBalances([acc[token.id]?.usdBalance, token.usdBalance])
-		};
+		acc[token.id] = groupMainToken({ token, tokenGroup: acc[token.id] });
 
 		return acc;
 	}, {});
