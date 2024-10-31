@@ -1,17 +1,36 @@
 export const themeVariables = {
 	background: {
-		primary: 'var(--color-background-primary)',
-		secondary: 'var(--color-background-secondary)',
-		tertiary: 'var(--color-background-tertiary)'
+		brand: {
+			'subtle': 'var(--color-brand-100)',
+			'subtle-alt': 'var(--color-brand-200)',
+			'subtle2-alt': 'var(--color-brand-300)',
+			'primary': 'var(--color-brand-base)',
+			'secondary': 'var(--color-brand-500)',
+			'tertiary': 'var(--color-brand-600)',
+			'disabled': 'var(--color-brand-100)'
+		}
 	},
 	border: {
-		primary: 'var(--color-border-primary)',
-		secondary: 'var(--color-border-secondary)',
-		tertiary: 'var(--color-border-tertiary)'
+		brand: {
+			'subtle': 'var(--color-brand-100)',
+			'subtle-alt': 'var(--color-brand-200)',
+			'subtle2-alt': 'var(--color-brand-300)',
+			'primary': 'var(--color-brand-base)',
+			'secondary': 'var(--color-brand-500)',
+			'tertiary': 'var(--color-brand-600)',
+			'disabled': 'var(--color-brand-100)'
+		}
 	},
 	foreground: {
-		primary: 'var(--color-foreground-primary)',
-		secondary: 'var(--color-foreground-secondary)',
-		tertiary: 'var(--color-foreground-tertiary)'
+		brand: {
+			'primary': 'var(--color-brand-100)',
+			'primary-alt': 'var(--color-brand-100)',
+			'secondary': 'var(--color-brand-500)',
+			'secondary-alt': 'var(--color-brand-200)',
+			'tertiary': 'var(--color-brand-600)',
+			'tertiary-alt': 'var(--color-brand-300)',
+			'disabled': 'var(--color-brand-300)'
+		}
+
 	}
 };

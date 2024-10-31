@@ -1,15 +1,11 @@
 @import 'base-colors';
 
 :root {
-	--color-background-primary: #{$neutral-white};
-	--color-background-secondary: #{$neutral-100};
-	--color-background-tertiary: #{$neutral-200};
-
-	--color-border-primary: #{$neutral-200};
-	--color-border-secondary: #{$neutral-300};
-	--color-border-tertiary: #{$neutral-400};
-
-	--color-foreground-primary: #{$neutral-black};
-	--color-foreground-secondary: #{$neutral-900};
-	--color-foreground-tertiary: #{$neutral-600};
+	--color-brand-100: #{$alice-blue};
+	--color-brand-200: #{$water};
+	--color-brand-300: #{$pale-cornflower-blue};
+	--color-brand-400: #{$french-sky-blue};
+	--color-brand-500: #{$crayola};
+	--color-brand-base: #{$brandeis-blue};
+	--color-brand-600: #{$catalina-blue};
 }
