@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ONRAMPER_API_KEY } from '$env/onramper.env';
+	import { ONRAMPER_API_KEY } from '$env/rest/onramper.env';
 	import IconlyBuy from '$lib/components/icons/iconly/IconlyBuy.svelte';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
