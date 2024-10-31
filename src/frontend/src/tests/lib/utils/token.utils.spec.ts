@@ -288,38 +288,28 @@ describe('sumTokenBalances', () => {
 
 	it('should return the first balance when the second balance is nullish', () => {
 		expect(sumTokenBalances([token1, { ...token2, balance: null }])).toBe(bn1);
-
-		expect(sumTokenBalances([token1, { ...token2, balance: undefined }])).toBe(bn1);
 	});
 
 	it('should return the second balance when the first balance is nullish', () => {
 		expect(sumTokenBalances([{ ...token1, balance: null }, token2])).toBe(bn2);
-
-		expect(sumTokenBalances([{ ...token1, balance: undefined }, token2])).toBe(bn2);
 	});
 
-	it('should return the first balance nullish value when both balances are nullish', () => {
+	it('should return the first balance nullish value when both balances are nullish but not undefined', () => {
 		expect(
 			sumTokenBalances([
 				{ ...token1, balance: null },
 				{ ...token2, balance: null }
 			])
 		).toBeNull();
+	});
 
-		expect(
-			sumTokenBalances([
-				{ ...token1, balance: null },
-				{ ...token2, balance: undefined }
-			])
-		).toBeNull();
+	it('should return undefined when one of the balances is undefined', () => {
+		expect(sumTokenBalances([token1, { ...token2, balance: undefined }])).toBeUndefined();
 
-		expect(
-			sumTokenBalances([
-				{ ...token1, balance: undefined },
-				{ ...token2, balance: null }
-			])
-		).toBeUndefined();
+		expect(sumTokenBalances([{ ...token1, balance: undefined }, token2])).toBeUndefined();
+	});
 
+	it('should return undefined when both balances are undefined', () => {
 		expect(
 			sumTokenBalances([
 				{ ...token1, balance: undefined },

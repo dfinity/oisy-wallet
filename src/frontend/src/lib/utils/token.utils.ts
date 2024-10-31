@@ -145,14 +145,19 @@ const sumBalances = ([balance1, balance2]: [
 	TokenUi['balance'],
 	TokenUi['balance']
 ]): TokenUi['balance'] =>
-	nonNullish(balance1) && nonNullish(balance2) ? balance1.add(balance2) : (balance2 ?? balance1);
+	nonNullish(balance1) && nonNullish(balance2)
+		? balance1.add(balance2)
+		: balance1 === undefined || balance2 === undefined
+			? undefined
+			: (balance2 ?? balance1);
 
 /** Function to sum the balances of two tokens.
  *
  * If the decimals of the tokens are the same, the balances are added together.
  * If the decimals are different, the function returns null.
- * If one of the balances is nullish, the function returns the other balance.
- * If both balances are nullish, the function prioritize the first token
+ * If one of the balances is undefined (meaning that it is still not loaded), the function returns undefined, because we don't want to show a possible wrong balance.
+ * If one of the balances is nullish, but not undefined, the function returns the other balance.
+ * If both balances are nullish, the function prioritize the first token (that, by exclusion of cases, is null).
  * NOTE: the function assumes that the two tokens are always 1:1 twins, for example BTC and ckBTC, or ETH and SepoliaETH
  *
  * @param token1
