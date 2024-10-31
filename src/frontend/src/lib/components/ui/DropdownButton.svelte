@@ -8,13 +8,13 @@
 </script>
 
 <button
-	class="text-secondary min-w-72 justify-between gap-2 rounded-xl border border-light-grey bg-white px-4 py-3 text-left font-medium leading-5 text-inherit hover:border-blue-ribbon"
+	class="text-secondary min-w-72 justify-between gap-2 rounded-xl border border-light-grey bg-white px-4 py-3 text-left font-medium leading-5 text-inherit hover:border-border-brand-primary"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
 	{disabled}
 	class:opacity-50={disabled}
-	class:border-blue-ribbon={opened}
+	class:border-border-brand-primary={opened}
 >
 	<slot />
 	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>

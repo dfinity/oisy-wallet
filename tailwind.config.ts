@@ -1,5 +1,6 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import type { Config } from 'tailwindcss/types/config';
+import { themeVariables } from './src/frontend/src/lib/styles/tailwind/theme-variables';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -55,7 +56,8 @@ export default {
 			anakiwa: '#b0cdff',
 			beer: '#f7931a',
 			fulvous: '#de7900',
-			water: '#d1e3ff'
+			water: '#d1e3ff',
+			...themeVariables
 		},
 		extend: {
 			backgroundSize: {
