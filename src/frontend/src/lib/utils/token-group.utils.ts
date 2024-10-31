@@ -9,6 +9,7 @@ import {
 	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 
 /**
  * Type guard to check if an object is of type TokenUiGroup.
@@ -125,24 +126,27 @@ const groupMainToken = ({
  * @param {TokenUi} token - The "secondary token" to group.
  * @param {TokenUiGroup} tokenGroup - The group where the "secondary token" should be added, if it exists.
  */
-const groupSecondaryToken = ({
+export const groupSecondaryToken = ({
 	token,
 	tokenGroup
 }: {
 	token: TokenUi;
 	tokenGroup: TokenUiGroup | undefined;
-}): TokenUiGroup => ({
-	...(tokenGroup ?? {
-		id: token.id,
-		nativeToken: token
-	}),
-	tokens: [...(tokenGroup?.tokens ?? []), token],
-	balance:
-		'balance' in (tokenGroup ?? {})
-			? sumBalances([tokenGroup?.balance, token.balance])
-			: token.balance,
-	usdBalance: sumUsdBalances([tokenGroup?.usdBalance, token.usdBalance])
-});
+}): TokenUiGroup =>
+	nonNullish(tokenGroup)
+		? {
+				...tokenGroup,
+				tokens: [...tokenGroup.tokens, token],
+				balance: sumBalances([tokenGroup.balance, token.balance]),
+				usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
+			}
+		: {
+				id: token.id,
+				nativeToken: token,
+				tokens: [token],
+				balance: token.balance,
+				usdBalance: token.usdBalance
+			};
 
 /**
  * Function to create a list of TokenUiGroup by grouping a provided list of tokens.

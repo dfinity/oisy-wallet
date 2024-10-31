@@ -3,7 +3,7 @@ import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/to
 import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
-import { groupTokens, groupTokensByTwin } from '$lib/utils/token-group.utils';
+import { groupSecondaryToken, groupTokens, groupTokensByTwin } from '$lib/utils/token-group.utils';
 import { bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it } from 'vitest';
@@ -174,6 +174,80 @@ describe('groupTokensByTwin', () => {
 	});
 });
 
+describe('groupSecondaryToken', () => {
+	const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
+
+	// We mock the tokens to have the same "main token"
+	const twinToken = {
+		...SEPOLIA_TOKEN,
+		balance: bn2,
+		usdBalance: 250,
+		twinToken: ICP_TOKEN,
+		decimals: ICP_TOKEN.decimals
+	};
+
+	it('creates a new group when no tokenGroup exists', () => {
+		expect(groupSecondaryToken({ token: twinToken, tokenGroup: undefined })).toEqual({
+			id: twinToken.id,
+			nativeToken: twinToken,
+			tokens: [twinToken],
+			balance: twinToken.balance,
+			usdBalance: twinToken.usdBalance
+		});
+	});
+
+	it('adds token to existing group and updates balances', () => {
+		const tokenGroup: TokenUiGroup = {
+			id: token.id,
+			nativeToken: token,
+			tokens: [token],
+			balance: bn3,
+			usdBalance: 300
+		};
+
+		expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
+			...tokenGroup,
+			tokens: [...tokenGroup.tokens, twinToken],
+			balance: tokenGroup.balance!.add(twinToken.balance),
+			usdBalance: tokenGroup.usdBalance! + twinToken.usdBalance
+		});
+	});
+
+	it('handles undefined balances correctly', () => {
+		const tokenGroup: TokenUiGroup = {
+			id: token.id,
+			nativeToken: token,
+			tokens: [token],
+			balance: undefined,
+			usdBalance: undefined
+		};
+
+		expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
+			...tokenGroup,
+			tokens: [...tokenGroup.tokens, twinToken],
+			balance: undefined,
+			usdBalance: twinToken.usdBalance
+		});
+	});
+
+	it('handles null balances correctly', () => {
+		const tokenGroup: TokenUiGroup = {
+			id: token.id,
+			nativeToken: token,
+			tokens: [token],
+			balance: null,
+			usdBalance: undefined
+		};
+
+		expect(groupSecondaryToken({ token: twinToken, tokenGroup })).toEqual({
+			...tokenGroup,
+			tokens: [...tokenGroup.tokens, twinToken],
+			balance: twinToken.balance,
+			usdBalance: twinToken.usdBalance
+		});
+	});
+});
+
 describe('groupTokens', () => {
 	const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
 	const anotherToken = { ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 };
@@ -184,15 +258,15 @@ describe('groupTokens', () => {
 		...SEPOLIA_TOKEN,
 		balance: bn2,
 		usdBalance: 250,
-		twinToken: ICP_TOKEN,
-		decimals: ICP_TOKEN.decimals
+		twinToken: token,
+		decimals: token.decimals
 	};
 	const twinToken2 = {
 		...BTC_REGTEST_TOKEN,
 		balance: bn1,
 		usdBalance: 450,
-		twinToken: ICP_TOKEN,
-		decimals: ICP_TOKEN.decimals
+		twinToken: token,
+		decimals: token.decimals
 	};
 
 	it('should return an empty array if no tokens are provided', () => {
