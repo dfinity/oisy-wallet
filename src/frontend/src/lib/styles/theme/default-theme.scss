@@ -1,4 +1,4 @@
-@import 'base-colors';
+@use 'base-colors' as *;
 
 :root {
 	--color-brand-100: #{$alice-blue};
