@@ -26,7 +26,6 @@ export default {
 			'blue-ribbon': '#0066ff',
 			'info-blue': '#0BA5EC',
 			'dark-blue': '#321469',
-			'brandeis-blue': '#016dfc',
 			'absolute-blue': '#004eb5',
 			'interdimensional-blue': '#3b00b9',
 			'united-nations-blue': '#627eea',
