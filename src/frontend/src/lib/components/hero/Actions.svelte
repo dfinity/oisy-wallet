@@ -17,7 +17,6 @@
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import { totalUsdBalanceNonZero } from '$lib/derived/exchange-balances.derived';
-	import { fade } from 'svelte/transition';
 	import {
 		networkEthereum,
 		networkICP,

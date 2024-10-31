@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { totalUsdBalance, totalUsdBalanceZero } from '$lib/derived/exchange-balances.derived';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
-	import { totalUsdBalance, totalUsdBalanceZero } from '$lib/derived/exchange-balances.derived';
 </script>
 
 <span class="flex flex-col gap-2">
