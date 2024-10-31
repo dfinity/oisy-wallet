@@ -28,8 +28,19 @@ jobs:
       - name: Lint
         run: npm run check
 
+  test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Test
+        run: npm run test
+
   may-merge:
-    needs: ['check', 'lint']
+    needs: ['lint', 'check', 'test']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
