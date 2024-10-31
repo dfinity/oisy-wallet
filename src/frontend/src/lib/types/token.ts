@@ -1,4 +1,5 @@
 import type { OptionBalance } from '$lib/types/balance';
+import { NetworkSchema } from '$lib/types/network';
 import type { OnramperId } from '$lib/types/onramper';
 import type { AtLeastOne, Option, RequiredExcept } from '$lib/types/utils';
 import { z } from 'zod';
@@ -42,7 +43,7 @@ const TokenBuyableSchema = z.object({
 const TokenSchema = z
 	.object({
 		id: TokenIdSchema,
-		// network: NetworkSchema,
+		network: NetworkSchema,
 		standard: TokenStandardSchema,
 		category: TokenCategorySchema
 	})
