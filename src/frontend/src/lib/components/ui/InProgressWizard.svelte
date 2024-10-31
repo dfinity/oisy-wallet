@@ -2,6 +2,7 @@
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import Alert from '$lib/components/ui/Alert.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import Warning from '$lib/components/ui/Warning.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -28,11 +29,9 @@
 </script>
 
 <div class="stretch">
-	<Warning>
-		<span>{$i18n.core.warning.may_take_a_few_seconds}</span>
-		<br />
+	<Alert alertType="light-warning">
 		<span>{$i18n.core.warning.do_not_close}</span>
-	</Warning>
+	</Alert>
 
 	<InProgress {progressStep} {steps} />
 </div>
