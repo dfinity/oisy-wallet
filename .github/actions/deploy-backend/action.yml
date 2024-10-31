@@ -11,14 +11,6 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Restore npm cache
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-e2e-npm-${{ hashFiles('package-lock.json', 'package.json') }}
-        restore-keys: |
-            ${{ runner.os }}-e2e-npm-
-
     - name: Restore cargo cache
       uses: actions/cache@v4
       with:
