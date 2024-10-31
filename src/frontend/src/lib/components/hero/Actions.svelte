@@ -27,8 +27,6 @@
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
-	import { balance, balanceZero } from '$lib/derived/balances.derived';
-	import { isNullish } from '@dfinity/utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	let convertEth = false;
