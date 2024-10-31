@@ -182,6 +182,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
+			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
