@@ -1,4 +1,4 @@
-import { TokenIdSchema, type Token, type TokenId } from '$lib/types/token';
+import { TokenIdSchema, TokenSchema, type Token, type TokenId } from '$lib/types/token';
 
 export const parseTokenId = (tokenIdString: string): TokenId =>
 	TokenIdSchema.parse(Symbol(tokenIdString));
