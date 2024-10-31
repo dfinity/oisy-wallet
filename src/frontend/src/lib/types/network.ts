@@ -1,5 +1,6 @@
 import type { OnramperNetworkId } from '$lib/types/onramper';
 import type { AtLeastOne } from '$lib/types/utils';
+import { UrlSchema } from '$lib/validation/url.validation';
 import { z } from 'zod';
 
 export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
@@ -12,7 +13,7 @@ const NetworkBuySchema = z.object({
 });
 
 const NetworkAppMetadataSchema = z.object({
-	explorerUrl: z.string()
+	explorerUrl: UrlSchema
 });
 
 export type NetworkId = z.infer<typeof NetworkIdSchema>;
