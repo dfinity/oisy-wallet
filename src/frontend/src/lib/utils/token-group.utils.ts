@@ -1,6 +1,7 @@
 import type { IcCkToken } from '$icp/types/ic';
 import { isIcCkToken } from '$icp/utils/icrc.utils';
-import type { TokenUi, TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import {
 	isRequiredTokenWithLinkedData,
 	sumTokenBalances,

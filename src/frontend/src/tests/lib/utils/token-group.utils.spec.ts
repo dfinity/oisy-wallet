@@ -1,7 +1,8 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-import type { TokenUi, TokenUiGroup } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token';
+import type { TokenUiGroup } from '$lib/types/token-group';
 import { groupTokensByTwin } from '$lib/utils/token-group.utils';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it } from 'vitest';
