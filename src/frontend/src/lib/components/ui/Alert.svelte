@@ -5,12 +5,12 @@
 </script>
 
 <div
-	class="mb-4 flex items-center gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
+	class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
 	class:bg-onahau={alertType === 'info'}
 	class:bg-warning-orange={alertType === 'light-warning'}
 >
 	<div
-		class="min-w-5"
+		class="min-w-5 py-0 sm:py-0.5"
 		class:text-blue-ribbon={alertType === 'info'}
 		class:text-american-orange={alertType === 'light-warning'}
 	>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import Alert from '$lib/components/ui/Alert.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Alert from '$lib/components/ui/Alert.svelte';
 </script>
 
 <Alert alertType="light-warning">
