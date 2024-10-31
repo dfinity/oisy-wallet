@@ -1,5 +1,5 @@
-import type { TokenUiGroup } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
+import type { TokenUiGroup } from '$lib/types/token-group';
 
 /** Maps the token group to the card data of the card that will be used as "summary" for the group.
  *
