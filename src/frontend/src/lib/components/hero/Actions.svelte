@@ -16,7 +16,7 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
-	import { totalUsdBalanceNonZero } from '$lib/derived/exchange-balances.derived';
+	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -44,7 +44,7 @@
 	$: isTransactionsPage = isRouteTransactions($page);
 
 	let sendAction = false;
-	$: sendAction = $totalUsdBalanceNonZero || isTransactionsPage;
+	$: sendAction = $anyBalanceNonZero || isTransactionsPage;
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
