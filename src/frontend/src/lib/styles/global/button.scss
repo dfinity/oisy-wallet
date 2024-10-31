@@ -91,7 +91,7 @@ a.as-button {
 	}
 
 	&.primary:not([disabled]):not(.disabled):not(.loading) {
-		background: var(--color-blue-ribbon);
+		@apply bg-background-brand-primary;
 		color: var(--color-white);
 
 		&:hover {
@@ -170,7 +170,7 @@ a.as-button {
 	&.text {
 		&:hover,
 		&:active {
-			color: var(--color-blue-ribbon);
+			@apply text-foreground-brand-primary;
 		}
 	}
 

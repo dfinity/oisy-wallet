@@ -23,7 +23,7 @@ export const themeVariables = {
 	},
 	foreground: {
 		brand: {
-			'primary': 'var(--color-brand-100)',
+			'primary': 'var(--color-brand-base)',
 			'primary-alt': 'var(--color-brand-100)',
 			'secondary': 'var(--color-brand-500)',
 			'secondary-alt': 'var(--color-brand-200)',
