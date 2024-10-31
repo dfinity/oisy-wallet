@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { page } from '$app/stores';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
@@ -16,6 +17,7 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
+	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -80,11 +82,11 @@
 			{/if}
 
 			{#if convertCkBtc}
-				<ConvertToBTC />
+				<ConvertToBTC disabled={disableExpenseActions} />
 			{/if}
 
 			{#if convertBtc}
-				<ConvertToCkBTC disabled={disableExpenseActions}/>
+				<ConvertToCkBTC disabled={disableExpenseActions} />
 			{/if}
 		{/if}
 
