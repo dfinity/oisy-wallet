@@ -21,6 +21,6 @@
 		{/if}
 	</output>
 	<span class="text-xl font-medium text-onahau">
-		{$anyBalanceNonZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
+		{$anyBalanceNonZero ? $i18n.hero.text.available_balance : $i18n.hero.text.top_up}
 	</span>
 </span>
