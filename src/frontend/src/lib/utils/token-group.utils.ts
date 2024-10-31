@@ -129,7 +129,10 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 					nativeToken: token
 				}),
 				tokens: [...(acc[twinTokenId]?.tokens ?? []), token],
-				balance: sumBalances([acc[twinTokenId]?.balance, token.balance]),
+				balance:
+					'balance' in (acc[twinTokenId] ?? {})
+						? sumBalances([acc[twinTokenId]?.balance, token.balance])
+						: token.balance,
 				usdBalance: sumUsdBalances([acc[twinTokenId]?.usdBalance, token.usdBalance])
 			};
 
@@ -144,7 +147,10 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 			id: token.id,
 			nativeToken: token,
 			tokens: [...(acc[token.id]?.tokens ?? []), token],
-			balance: sumBalances([acc[token.id]?.balance, token.balance]),
+			balance:
+				'balance' in (acc[token.id] ?? {})
+					? sumBalances([acc[token.id]?.balance, token.balance])
+					: token.balance,
 			usdBalance: sumUsdBalances([acc[token.id]?.usdBalance, token.usdBalance])
 		};
 
