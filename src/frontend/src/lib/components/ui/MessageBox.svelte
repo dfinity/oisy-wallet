@@ -6,7 +6,7 @@
 
 <div
 	class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
-	class:bg-onahau={level === 'info'}
+	class:bg-background-brand-subtle-alt={level === 'info'}
 	class:bg-warning-orange={level === 'light-warning'}
 >
 	<div

@@ -22,7 +22,6 @@ export default {
 			grey: '#c0bbc4',
 			'light-grey': '#ced4da',
 			aurometalsaurus: '#6c757d',
-			'light-blue': '#e8f1ff',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'blue-ribbon': '#0066ff',
 			'info-blue': '#0BA5EC',
@@ -50,13 +49,9 @@ export default {
 			'warning-orange': '#FFF3E6',
 			cornsilk: '#fff7d8',
 			cobalt: '#004abe',
-			'resolution-blue': '#012f80',
 			zumthor: '#e8f1ff',
-			onahau: '#d1e3ff',
-			anakiwa: '#b0cdff',
 			beer: '#f7931a',
 			fulvous: '#de7900',
-			water: '#d1e3ff',
 			...themeVariables
 		},
 		extend: {
