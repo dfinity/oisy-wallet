@@ -165,24 +165,28 @@ const groupSecondaryToken = ({
 export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 	const tokenGroupsMap = tokens.reduce<{
 		[id: TokenId]: TokenUiGroup | undefined;
-	}>((acc, token) => {
-		// If the token has a twinToken, and both have the same decimals, group them together.
-		if (
-			'twinToken' in token &&
+	}>(
+		(acc, token) => ({
+			...acc,
+			...('twinToken' in token &&
 			isToken(token.twinToken) &&
 			token.decimals === token.twinToken.decimals
-		) {
-			return {
-				...acc,
-				[token.twinToken.id]: groupSecondaryToken({ token, tokenGroup: acc[token.twinToken.id] })
-			};
-		}
-
-		return {
-			...acc,
-			[token.id]: groupMainToken({ token, tokenGroup: acc[token.id] })
-		};
-	}, {});
+				? // If the token has a twinToken, and both have the same decimals, group them together.
+					{
+						[token.twinToken.id]: groupSecondaryToken({
+							token,
+							tokenGroup: acc[token.twinToken.id]
+						})
+					}
+				: {
+						[token.id]: groupMainToken({
+							token,
+							tokenGroup: acc[token.id]
+						})
+					})
+		}),
+		{}
+	);
 
 	return Object.getOwnPropertySymbols(tokenGroupsMap).map(
 		(id) => tokenGroupsMap[id as TokenId] as TokenUiGroup
