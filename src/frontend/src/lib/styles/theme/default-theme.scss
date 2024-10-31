@@ -1,0 +1,11 @@
+@use 'base-colors' as *;
+
+:root {
+	--color-brand-100: #{$alice-blue};
+	--color-brand-200: #{$water};
+	--color-brand-300: #{$pale-cornflower-blue};
+	--color-brand-400: #{$french-sky-blue};
+	--color-brand-500: #{$cobalt};
+	--color-brand-base: #{$brandeis-blue};
+	--color-brand-600: #{$catalina-blue};
+}

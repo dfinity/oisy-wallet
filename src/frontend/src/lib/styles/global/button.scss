@@ -91,28 +91,27 @@ a.as-button {
 	}
 
 	&.primary:not([disabled]):not(.disabled):not(.loading) {
-		background: var(--color-blue-ribbon);
+		@apply bg-background-brand-primary;
 		color: var(--color-white);
 
 		&:hover {
-			background: var(--color-cobalt);
+			@apply bg-background-brand-secondary;
 		}
 
 		&:active {
-			background: var(--color-resolution-blue);
+			@apply bg-background-brand-tertiary;
 		}
 	}
 
 	&.secondary:not([disabled]):not(.disabled):not(.loading) {
-		background: var(--color-zumthor);
-		color: var(--color-primary);
+		@apply text-foreground-brand-primary bg-background-brand-subtle;
 
 		&:hover {
-			background: var(--color-onahau);
+			@apply bg-background-brand-subtle-alt;
 		}
 
 		&:active {
-			background: var(--color-anakiwa);
+			@apply bg-background-brand-subtle2-alt;
 		}
 	}
 
@@ -120,23 +119,23 @@ a.as-button {
 		background: var(--color-white);
 
 		&:hover {
-			color: var(--color-primary);
+			@apply text-foreground-brand-primary;
 		}
 
 		&:active {
-			background: var(--color-onahau);
+			@apply bg-background-brand-subtle-alt;
 			color: currentColor;
 		}
 
 		&.link {
-			color: var(--color-primary);
+			@apply text-foreground-brand-primary;
 
 			&:hover {
-				color: var(--color-cobalt);
+				@apply text-foreground-brand-secondary;
 			}
 
 			&:active {
-				color: var(--color-cobalt);
+				@apply text-foreground-brand-secondary;
 			}
 		}
 	}
@@ -170,7 +169,7 @@ a.as-button {
 	&.text {
 		&:hover,
 		&:active {
-			color: var(--color-blue-ribbon);
+			@apply text-foreground-brand-primary;
 		}
 	}
 

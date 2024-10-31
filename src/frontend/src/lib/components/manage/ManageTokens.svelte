@@ -231,7 +231,7 @@
 	>
 		<span class="text-7xl">🤔</span>
 
-		<span class="py-4 text-center font-bold text-blue-ribbon no-underline"
+		<span class="py-4 text-center font-bold text-foreground-brand-primary no-underline"
 			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
@@ -263,7 +263,7 @@
 	</div>
 
 	<button
-		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
+		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-foreground-brand-primary no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 
