@@ -7,7 +7,6 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 
 	export let token: OptionTokenUi;
-	``;
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
