@@ -16,6 +16,8 @@
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 
+	export let loading = false;
+
 	const isDisabled = (): boolean =>
 		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
@@ -37,6 +39,7 @@
 	disabled={$isBusy}
 	on:click={async () => await openSend()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
+	{loading}
 >
 	<IconCkConvert size="28" slot="icon" />
 	{BTC_MAINNET_SYMBOL}

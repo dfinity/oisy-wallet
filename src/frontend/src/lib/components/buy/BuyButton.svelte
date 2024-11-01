@@ -5,12 +5,15 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+
+	export let loading = false;
 </script>
 
 <ButtonHero
 	on:click
 	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY)}
 	ariaLabel={$i18n.send.text.send}
+	{loading}
 >
 	<IconlyBuy size="28" slot="icon" />
 	{$i18n.buy.text.buy}
