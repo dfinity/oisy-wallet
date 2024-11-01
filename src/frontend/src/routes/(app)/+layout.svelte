@@ -15,11 +15,12 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
+	import type { Route } from '$lib/types/route';
 	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	// TODO: We should consider adding a description for the pages, as this block of code is now appearing in two places.
 	// Other areas, like the Menu, are also somewhat disorganized, with navigation logic spread across multiple locations.
-	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
+	let route: Route = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
 		: isRouteDappExplorer($page)
@@ -67,8 +68,8 @@
 				{/if}
 			</NavigationMenu>
 
-			{#if route !== 'settings' && route !== 'explore'}
-				<Hero usdTotal={route === 'tokens'} summary={route === 'transactions'} />
+			{#if route === 'tokens' || route === 'transactions'}
+				<Hero {route} />
 			{/if}
 
 			<LoadersGuard>

@@ -7,6 +7,7 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Route } from '$lib/types/route';
 	import {
 		isRouteDappExplorer,
 		isRouteSettings,
@@ -14,7 +15,7 @@
 		networkParam
 	} from '$lib/utils/nav.utils.js';
 
-	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
+	let route: Route = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
 		: isRouteDappExplorer($page)
