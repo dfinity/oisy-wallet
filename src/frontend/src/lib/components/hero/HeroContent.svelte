@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import Back from '$lib/components/core/Back.svelte';
@@ -12,11 +14,14 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { exchanges } from '$lib/derived/exchange.derived';
+	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { type HeroContext, initHeroContext } from '$lib/stores/hero.store';
+	import { HERO_CONTEXT_KEY } from '$lib/stores/hero.store.js';
 	import type { OptionTokenUi } from '$lib/types/token';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	export let usdTotal = false;
@@ -30,6 +35,13 @@
 				$exchanges: $exchanges
 			})
 		: undefined;
+
+	const { loading, ...rest } = initHeroContext();
+	setContext<HeroContext>(HERO_CONTEXT_KEY, { loading, ...rest });
+
+	$: loading.set(
+		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
+	);
 </script>
 
 <div
