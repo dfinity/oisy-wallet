@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade, slide } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import Back from '$lib/components/core/Back.svelte';
@@ -17,6 +18,7 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import type { OptionTokenUi } from '$lib/types/token';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	export let usdTotal = false;
@@ -32,7 +34,7 @@
 		: undefined;
 
 	let loading = true;
-	$: loading = !$exchangeInitialized;
+	$: loading = isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized;
 </script>
 
 <div
@@ -69,7 +71,7 @@
 				<ContextMenu />
 			</div>
 
-			<Balance token={pageTokenUi} />
+			<Balance token={pageTokenUi} {loading} />
 		</div>
 	{/if}
 
