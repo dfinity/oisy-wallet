@@ -290,7 +290,7 @@ describe('groupMainToken', () => {
 		decimals: ICP_TOKEN.decimals
 	};
 
-	it('creates a new group when no tokenGroup exists', () => {
+	it('should create a new group when no tokenGroup exists', () => {
 		expect(groupMainToken({ token, tokenGroup: undefined })).toEqual({
 			id: token.id,
 			nativeToken: token,
@@ -300,7 +300,7 @@ describe('groupMainToken', () => {
 		});
 	});
 
-	it('adds token to existing group and updates balances', () => {
+	it('should add token to existing group and update balances', () => {
 		const tokenGroup: TokenUiGroup = {
 			id: token.id,
 			nativeToken: token,
@@ -317,7 +317,7 @@ describe('groupMainToken', () => {
 		});
 	});
 
-	it('adds token to existing group with more than one token already', () => {
+	it('should add token to existing group with more than one token already', () => {
 		const tokenGroup: TokenUiGroup = {
 			id: token.id,
 			nativeToken: token,
@@ -334,7 +334,7 @@ describe('groupMainToken', () => {
 		});
 	});
 
-	it('overrides the "main token" props if the group was created by a "secondary token"', () => {
+	it('should override the "main token" props if the group was created by a "secondary token"', () => {
 		const tokenGroup: TokenUiGroup = {
 			id: twinToken.id,
 			nativeToken: twinToken,
@@ -367,7 +367,7 @@ describe('groupSecondaryToken', () => {
 		decimals: ICP_TOKEN.decimals
 	};
 
-	it('creates a new group when no tokenGroup exists', () => {
+	it('should create a new group when no tokenGroup exists', () => {
 		expect(groupSecondaryToken({ token: twinToken, tokenGroup: undefined })).toEqual({
 			id: twinToken.id,
 			nativeToken: twinToken,
@@ -377,7 +377,7 @@ describe('groupSecondaryToken', () => {
 		});
 	});
 
-	it('adds token to existing group and updates balances', () => {
+	it('should add token to existing group and update balances', () => {
 		const tokenGroup: TokenUiGroup = {
 			id: token.id,
 			nativeToken: token,
@@ -394,7 +394,7 @@ describe('groupSecondaryToken', () => {
 		});
 	});
 
-	it('adds token to existing group with more than one token already', () => {
+	it('should add token to existing group with more than one token already', () => {
 		const tokenGroup: TokenUiGroup = {
 			id: token.id,
 			nativeToken: token,
