@@ -10,6 +10,8 @@
 	import { modalIcrcReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
+	export let loading = true;
+
 	const { open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const openReceive = (modalId: symbol) => {
@@ -19,6 +21,6 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalIcrcReceive}>
+<ReceiveButtonWithModal open={openModal} isOpen={$modalIcrcReceive} {loading}>
 	<ReceiveAddressModal infoCmp={IcReceiveInfoIcrc} on:nnsClose={close} slot="modal" />
 </ReceiveButtonWithModal>

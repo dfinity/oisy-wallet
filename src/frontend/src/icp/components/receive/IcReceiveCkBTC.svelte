@@ -16,6 +16,8 @@
 	import { modalCkBTCReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
+	export let loading = true;
+
 	const { token, tokenId, ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -45,7 +47,7 @@
 
 <svelte:window on:oisyReceiveCkBTC={async () => await openModal(modalId)} />
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkBTCReceive} {modalId}>
+<ReceiveButtonWithModal open={openModal} isOpen={$modalCkBTCReceive} {modalId} {loading}>
 	<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} slot="modal" />
 </ReceiveButtonWithModal>
 

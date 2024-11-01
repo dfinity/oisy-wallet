@@ -12,6 +12,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 
+	export let loading = true;
+
 	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const openReceive = (modalId: symbol) => {
@@ -26,6 +28,6 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalIcpReceive}>
+<ReceiveButtonWithModal open={openModal} isOpen={$modalIcpReceive} {loading}>
 	<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} slot="modal" />
 </ReceiveButtonWithModal>
