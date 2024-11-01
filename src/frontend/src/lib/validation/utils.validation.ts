@@ -1,15 +1,19 @@
 import { ZodType, type ZodTypeDef } from 'zod';
 
+interface SafeParseParams<T, Fallback> {
+	schema: ZodType<T, ZodTypeDef, unknown>;
+	value: unknown;
+	fallback?: Fallback;
+}
+
+type SafeParseReturn<T, Fallback> = Fallback extends undefined ? T | undefined : T;
+
 export const safeParse = <T, Fallback extends T | undefined = undefined>({
 	schema,
 	value,
 	fallback = undefined
-}: {
-	schema: ZodType<T, ZodTypeDef, unknown>;
-	value: unknown;
-	fallback?: Fallback;
-}): Fallback extends undefined ? T | undefined : T => {
+}: SafeParseParams<T, Fallback>): SafeParseReturn<T, Fallback> => {
 	const { success, data } = schema.safeParse(value);
 
-	return success ? data : (fallback as Fallback extends undefined ? T | undefined : T);
+	return success ? data : (fallback as SafeParseReturn<T, Fallback>);
 };

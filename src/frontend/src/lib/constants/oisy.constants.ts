@@ -2,8 +2,6 @@ import metadata from '$env/oisy.metadata.json';
 import { oisyMetadata } from '$env/types/env-oisy-metadata';
 import { safeParse } from '$lib/validation/utils.validation';
 
-const parsedMetadata = oisyMetadata.safeParse(metadata);
-
 export const {
 	OISY_SHORT,
 	OISY_NAME,
