@@ -36,8 +36,8 @@
 			})
 		: undefined;
 
-	const {loading, ...rest} = initHeroContext();
-	setContext<HeroContext>(HERO_CONTEXT_KEY, {loading, ...rest});
+	const { loading, ...rest } = initHeroContext();
+	setContext<HeroContext>(HERO_CONTEXT_KEY, { loading, ...rest });
 
 	$: loading.set(
 		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
