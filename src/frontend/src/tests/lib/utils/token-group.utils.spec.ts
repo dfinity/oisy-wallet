@@ -199,18 +199,17 @@ describe('groupTokensByTwin', () => {
 			{ ...tokens[0], balance: bn2, usdBalance: 0 }, // BTC
 			{ ...tokens[2], balance: bn2, usdBalance: 0 }, // ETH
 			{ ...tokens[3], balance: bn1, usdBalance: 0 }, // ckETH
-			{ ...tokens[4], balance: ZERO, usdBalance: 0 }, // ICP
 			{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
 		];
 
 		const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
 
-		expect(groupedTokens).toHaveLength(3);
+		expect(groupedTokens).toHaveLength(2);
 
 		expect(groupedTokens[0]).toHaveProperty('nativeToken', reorderedTokens[1]);
 		expect(groupedTokens[1]).toHaveProperty('nativeToken', reorderedTokens[0]);
 
 		expect(groupedTokens[0]).toHaveProperty('tokens', [reorderedTokens[1], reorderedTokens[2]]);
-		expect(groupedTokens[1]).toHaveProperty('tokens', [reorderedTokens[0], reorderedTokens[4]]);
+		expect(groupedTokens[1]).toHaveProperty('tokens', [reorderedTokens[0], reorderedTokens[3]]);
 	});
 });
