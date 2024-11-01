@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
-	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
