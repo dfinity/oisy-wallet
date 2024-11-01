@@ -41,13 +41,9 @@
 
 	const { loading } = context;
 
-	$: console.log('pageTokenUi123123', $loading);
-
 	$: context.loading.set(
 		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
 	);
-
-	$: console.log('pageTokenUi', context);
 </script>
 
 <div

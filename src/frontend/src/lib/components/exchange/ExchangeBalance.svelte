@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
-	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -9,8 +8,6 @@
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
 	const { loaded } = getContext<HeroContext>(HERO_CONTEXT_KEY);
-
-	$: console.log('asdasd', $loaded);
 
 	let totalUsd: number;
 	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
