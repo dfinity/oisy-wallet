@@ -3,7 +3,7 @@
 
 	export let icon: ComponentType;
 	export let iconSize = '2.9rem';
-	export let backgroundStyleClass = 'bg-onahau';
+	export let backgroundStyleClass = 'bg-background-brand-subtle-alt';
 	export let iconStyleClass = '';
 	export let additionalStyleClass = '';
 </script>
