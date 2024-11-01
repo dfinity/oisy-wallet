@@ -8,6 +8,13 @@ export const themeVariables = {
 			secondary: 'var(--color-brand-500)',
 			tertiary: 'var(--color-brand-600)',
 			disabled: 'var(--color-brand-100)'
+		},
+		warning: {
+			subtle: 'var(--color-warning-lightest)',
+			'subtle-alt': 'var(--color-warning-lighter)',
+			solid: 'var(--color-warning-default)',
+			'solid-alt': 'var(--color-warning-dark)',
+			'solid-alt2': 'var(--color-warning-darker)'
 		}
 	},
 	border: {
@@ -19,6 +26,12 @@ export const themeVariables = {
 			secondary: 'var(--color-brand-500)',
 			tertiary: 'var(--color-brand-600)',
 			disabled: 'var(--color-brand-100)'
+		},
+		warning: {
+			subtle: 'var(--color-warning-lightest)',
+			'subtle-alt': 'var(--color-warning-lighter)',
+			solid: 'var(--color-warning-default)',
+			'solid-alt': 'var(--color-warning-dark)'
 		}
 	},
 	foreground: {
@@ -30,6 +43,8 @@ export const themeVariables = {
 			tertiary: 'var(--color-brand-600)',
 			'tertiary-alt': 'var(--color-brand-300)',
 			disabled: 'var(--color-brand-300)'
-		}
+		},
+		warning: 'var(--color-warning-default)',
+		'warning-alt': 'var(--color-warning-light)'
 	}
 };
