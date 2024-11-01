@@ -19,11 +19,6 @@ jobs:
     - name: Prepare
       uses: ./.github/actions/prepare
 
-    - name: Set up Git
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions@github.com"
-
     - name: Get version from package.json
       id: get_version
       run: |
@@ -33,7 +28,7 @@ jobs:
   
     - name: Create Git tag
       run: |
-        git tag -a "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
+        git tag "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
         git push origin "v${{ steps.get_version.outputs.version }}"
 
     - name: Draft Release Notes
