@@ -15,6 +15,8 @@
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	export let loading = true;
+
 	/**
 	 * Send modal context store
 	 */
@@ -35,6 +37,7 @@
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
 		$ckErc20: convertToSymbol
 	})}
+	{loading}
 >
 	<IconCkConvert size="28" slot="icon" />
 	<span>{convertToSymbol}</span>

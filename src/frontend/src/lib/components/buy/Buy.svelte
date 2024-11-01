@@ -4,10 +4,12 @@
 	import { modalBuy } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
+	export let loading = true;
+
 	const modalId = Symbol();
 </script>
 
-<BuyButton on:click={() => modalStore.openBuy(modalId)} />
+<BuyButton on:click={() => modalStore.openBuy(modalId)} {loading} />
 
 {#if $modalBuy && $modalStore?.data === modalId}
 	<BuyModal />

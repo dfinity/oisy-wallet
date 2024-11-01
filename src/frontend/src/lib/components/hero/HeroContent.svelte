@@ -12,7 +12,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { exchanges } from '$lib/derived/exchange.derived';
+	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -30,6 +30,9 @@
 				$exchanges: $exchanges
 			})
 		: undefined;
+
+	let loading = true;
+	$: loading = !$exchangeInitialized;
 </script>
 
 <div
@@ -72,12 +75,12 @@
 
 	{#if usdTotal}
 		<div in:slide={SLIDE_PARAMS}>
-			<ExchangeBalance />
+			<ExchangeBalance {loading} />
 		</div>
 	{/if}
 
 	<div in:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
-		<Actions />
+		<Actions {loading} />
 	</div>
 
 	{#if isErc20Icp($pageToken)}

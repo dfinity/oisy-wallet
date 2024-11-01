@@ -12,6 +12,7 @@
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
+	export let loading = true;
 
 	const isDisabled = (): boolean => $ethAddressNotCertified || $metamaskNotInitialized;
 
@@ -28,7 +29,7 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
+<ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive} {loading}>
 	<ReceiveModal
 		slot="modal"
 		address={$networkAddress}

@@ -14,6 +14,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
+	export let loading = true;
+
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -49,6 +51,6 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
+<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive} {loading}>
 	<IcReceiveCkEthereumModal on:nnsClose={close} slot="modal" />
 </ReceiveButtonWithModal>

@@ -6,6 +6,8 @@
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
+	export let loading = true;
+
 	let totalUsd: number;
 	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 </script>
@@ -14,7 +16,7 @@
 	<output
 		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} mt-8 inline-block`}
 	>
-		{#if $exchangeInitialized}
+		{#if !loading}
 			{formatUSD({ value: totalUsd })}
 		{:else}
 			<span class="animate-pulse">{formatUSD({ value: 0 })}</span>

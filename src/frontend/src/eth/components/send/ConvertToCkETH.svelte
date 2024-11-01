@@ -11,6 +11,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
+	export let loading = true;
+
 	/**
 	 * Send modal context store
 	 */
@@ -26,6 +28,7 @@
 	nativeTokenId={$ethereumTokenId}
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={$i18n.convert.text.convert_to_cketh}
+	{loading}
 >
 	<IconCkConvert size="28" slot="icon" />
 	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>

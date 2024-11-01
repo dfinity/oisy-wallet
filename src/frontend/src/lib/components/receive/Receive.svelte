@@ -5,11 +5,13 @@
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
+	export let loading = true;
+
 	const modalId = Symbol();
 </script>
 
 <svelte:window on:oisyReceive={() => modalStore.openReceive(modalId)} />
 
-<ReceiveButtonWithModal open={modalStore.openReceive} isOpen={$modalReceive} {modalId}>
+<ReceiveButtonWithModal open={modalStore.openReceive} isOpen={$modalReceive} {modalId} {loading}>
 	<ReceiveAddressModal infoCmp={ReceiveAddresses} on:nnsClose={modalStore.close} slot="modal" />
 </ReceiveButtonWithModal>

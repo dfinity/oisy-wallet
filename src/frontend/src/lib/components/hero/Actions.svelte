@@ -28,6 +28,8 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
+	export let loading = true;
+
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
 
@@ -50,45 +52,45 @@
 <div role="toolbar" class="flex w-full justify-center pt-10">
 	<HeroButtonGroup>
 		{#if $networkICP}
-			<IcReceive token={$tokenWithFallback} />
+			<IcReceive token={$tokenWithFallback} {loading} />
 		{:else if $networkEthereum}
-			<EthReceive token={$tokenWithFallback} />
+			<EthReceive token={$tokenWithFallback} {loading} />
 		{:else if $networkBitcoin}
-			<BtcReceive />
+			<BtcReceive {loading} />
 		{:else if $pseudoNetworkChainFusion}
-			<Receive />
+			<Receive {loading} />
 		{/if}
 
 		{#if sendAction}
-			<Send {isTransactionsPage} />
+			<Send {isTransactionsPage} {loading} />
 		{/if}
 
 		{#if isTransactionsPage}
 			{#if convertEth}
 				{#if $networkICP}
-					<ConvertToEthereum />
+					<ConvertToEthereum {loading} />
 				{:else}
-					<ConvertToCkETH />
+					<ConvertToCkETH {loading} />
 				{/if}
 			{/if}
 
 			{#if convertErc20}
 				{#if $networkICP}
-					<ConvertToEthereum />
+					<ConvertToEthereum {loading} />
 				{:else}
-					<ConvertToCkERC20 />
+					<ConvertToCkERC20 {loading} />
 				{/if}
 			{/if}
 
 			{#if convertCkBtc}
-				<ConvertToBTC />
+				<ConvertToBTC {loading} />
 			{/if}
 
 			{#if convertBtc}
-				<ConvertToCkBTC />
+				<ConvertToCkBTC {loading} />
 			{/if}
 		{/if}
 
-		<Buy />
+		<Buy {loading} />
 	</HeroButtonGroup>
 </div>

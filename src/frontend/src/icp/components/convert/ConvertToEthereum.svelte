@@ -12,6 +12,8 @@
 	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	export let loading = true;
 </script>
 
 <ConvertETH
@@ -20,6 +22,7 @@
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
 		$token: $ckEthereumTwinToken.symbol
 	})}
+	{loading}
 >
 	<IconCkConvert size="28" slot="icon" />
 	<span>{$ckEthereumTwinToken.symbol}</span>

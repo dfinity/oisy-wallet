@@ -22,6 +22,7 @@
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
+	export let loading = true;
 
 	let ckEthereum = false;
 	$: ckEthereum = isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token);
@@ -55,11 +56,11 @@
 </script>
 
 {#if ckEthereum}
-	<IcReceiveCkEthereum />
+	<IcReceiveCkEthereum {loading} />
 {:else if ckBTC}
-	<IcReceiveCkBTC />
+	<IcReceiveCkBTC {loading} />
 {:else if icrc}
-	<IcReceiveIcrc />
+	<IcReceiveIcrc {loading} />
 {:else}
-	<IcReceiveIcp />
+	<IcReceiveIcp {loading} />
 {/if}

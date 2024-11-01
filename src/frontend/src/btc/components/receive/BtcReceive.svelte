@@ -18,6 +18,8 @@
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
+	export let loading = true;
+
 	let addressData: StorageAddressData<BtcAddress>;
 	$: addressData = isNetworkIdBTCTestnet($networkId)
 		? $btcAddressTestnetStore
@@ -47,7 +49,7 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalBtcReceive}>
+<ReceiveButtonWithModal open={openReceive} isOpen={$modalBtcReceive} {loading}>
 	<ReceiveModal
 		slot="modal"
 		address={addressData?.data}

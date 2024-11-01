@@ -21,6 +21,7 @@
 
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
+	export let loading = true;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let nativeNetworkId: NetworkId;
 
@@ -75,7 +76,7 @@
 </script>
 
 <CkEthLoader {nativeTokenId}>
-	<ButtonHero on:click={async () => await openSend()} disabled={$isBusy} {ariaLabel}>
+	<ButtonHero on:click={async () => await openSend()} disabled={$isBusy} {ariaLabel} {loading}>
 		<slot name="icon" slot="icon" />
 		<slot />
 	</ButtonHero>
