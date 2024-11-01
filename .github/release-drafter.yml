@@ -28,16 +28,9 @@ categories:
 
 change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
 
-template: |
-  ## What's Changed
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
 
-  ### Detailed Changes
-  {% for change in changes %}
-  - **Title**: {{ change.title }}
-  - **PR**: [#{{ change.number }}]({{ change.html_url }})
-  - **Author**: @{{ change.author.login }}
-  - **Motivation**:
-    {{ change.body | paragraph_start_with("# Motivation") | default("No specific motivation provided.") }}
-  - **Changes**:
-    {{ change.body | paragraph_start_with("# Changes") | default("No detailed changes provided.") }}
-  {% endfor %}
+template: |
+  ## Changes
+
+  $CHANGES  
