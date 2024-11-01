@@ -1,8 +1,9 @@
 import ckErc20Tokens from '$env/tokens.ckerc20.json';
 import { envTokensCkErc20 } from '$env/types/env-token-ckerc20';
+import { safeParse } from '$lib/validation/utils.validation';
 
-const ckErc20 = envTokensCkErc20.safeParse(ckErc20Tokens);
-
-export const { production: ckErc20Production, staging: ckErc20Staging } = ckErc20.success
-	? ckErc20.data
-	: { production: {}, staging: {} };
+export const { production: ckErc20Production, staging: ckErc20Staging } = safeParse({
+	schema: envTokensCkErc20,
+	value: ckErc20Tokens,
+	fallback: { production: {}, staging: {} }
+});
