@@ -1,9 +1,11 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { groupTokensByTwin } from '$lib/utils/token-group.utils';
+import { bn1, bn2 } from '$tests/mocks/balances.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it } from 'vitest';
 
@@ -170,5 +172,44 @@ describe('groupTokensByTwin', () => {
 		const icpToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'ICP');
 
 		expect(icpToken).toBeDefined();
+	});
+
+	it('should re-sort groups if their total USD balance made them out of order', () => {
+		const reorderedTokens = [
+			{ ...tokens[0], usdBalance: 5 }, // BTC
+			{ ...tokens[2], usdBalance: 4 }, // ETH
+			{ ...tokens[3], usdBalance: 3 }, // ckETH
+			{ ...tokens[4], usdBalance: 0 }, // ICP
+			{ ...tokens[1], usdBalance: 0 } // ckBTC
+		];
+
+		const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
+
+		expect(groupedTokens).toHaveLength(3);
+
+		expect(groupedTokens[0]).toHaveProperty('nativeToken', reorderedTokens[1]);
+		expect(groupedTokens[1]).toHaveProperty('nativeToken', reorderedTokens[0]);
+
+		expect(groupedTokens[0]).toHaveProperty('tokens', [reorderedTokens[1], reorderedTokens[2]]);
+		expect(groupedTokens[1]).toHaveProperty('tokens', [reorderedTokens[0], reorderedTokens[4]]);
+	});
+
+	it('should re-sort groups if their total balance made them out of order', () => {
+		const reorderedTokens = [
+			{ ...tokens[0], balance: bn2, usdBalance: 0 }, // BTC
+			{ ...tokens[2], balance: bn2, usdBalance: 0 }, // ETH
+			{ ...tokens[3], balance: bn1, usdBalance: 0 }, // ckETH
+			{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
+		];
+
+		const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
+
+		expect(groupedTokens).toHaveLength(2);
+
+		expect(groupedTokens[0]).toHaveProperty('nativeToken', reorderedTokens[1]);
+		expect(groupedTokens[1]).toHaveProperty('nativeToken', reorderedTokens[0]);
+
+		expect(groupedTokens[0]).toHaveProperty('tokens', [reorderedTokens[1], reorderedTokens[2]]);
+		expect(groupedTokens[1]).toHaveProperty('tokens', [reorderedTokens[0], reorderedTokens[3]]);
 	});
 });
