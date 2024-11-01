@@ -7,8 +7,8 @@
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
-	import type { TokenUiGroup } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
+	import type { TokenUiGroup } from '$lib/types/token-group';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 
 	export let tokenGroup: TokenUiGroup;

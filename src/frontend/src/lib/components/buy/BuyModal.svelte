@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { isOnRamperDev } from '$env/onramper.env';
+	import { isOnRamperDev } from '$env/rest/onramper.env';
 	import OnramperWidget from '$lib/components/onramper/OnramperWidget.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
