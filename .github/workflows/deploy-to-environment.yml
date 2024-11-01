@@ -72,7 +72,6 @@ jobs:
             echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_COINGECKO_API_URL=${{ secrets.VITE_COINGECKO_API_URL_STAGING }}" >> $GITHUB_ENV
             echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}" >> $GITHUB_ENV
             echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}" >> $GITHUB_ENV
@@ -97,7 +96,6 @@ jobs:
             echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_BETA }}" >> $GITHUB_ENV
             echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_BETA }}" >> $GITHUB_ENV
             echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_BETA }}" >> $GITHUB_ENV
-            echo "VITE_COINGECKO_API_URL=${{ secrets.VITE_COINGECKO_API_URL_BETA }}" >> $GITHUB_ENV
             echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}" >> $GITHUB_ENV
             echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}" >> $GITHUB_ENV

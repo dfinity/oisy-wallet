@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import Warning from '$lib/components/ui/Warning.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<Warning>
+<MessageBox level="light-warning">
 	<span>
 		<Html text={$i18n.tokens.warning.trust_token} />
 	</span>
-</Warning>
+</MessageBox>
 
 <style lang="scss">
 	span {

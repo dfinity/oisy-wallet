@@ -28,7 +28,7 @@ jobs:
   
     - name: Create Git tag
       run: |
-        git tag -a "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
+        git tag "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
         git push origin "v${{ steps.get_version.outputs.version }}"
 
     - name: Draft Release Notes
@@ -36,3 +36,4 @@ jobs:
       uses: release-drafter/release-drafter@v6
       with:
         version: "v${{ steps.get_version.outputs.version }}"
+        token: ${{ secrets.GIX_CREATE_PR_PAT }}
