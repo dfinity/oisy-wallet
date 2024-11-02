@@ -4,7 +4,7 @@
 	const variantClassNames = {
 		default: 'border border-light-grey bg-dust/30',
 		info: 'bg-background-brand-subtle text-foreground-brand-primary',
-		error: 'bg-rusty-red/20 text-rusty-red',
+		error: 'bg-background-error-subtle text-foreground-error',
 		warning: 'bg-background-warning-subtle text-foreground-warning',
 		success: 'bg-background-success-subtle text-foreground-success',
 		outline: 'border border-light-grey bg-off-white'
