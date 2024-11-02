@@ -8,7 +8,7 @@
 	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';

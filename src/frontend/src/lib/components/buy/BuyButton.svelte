@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ONRAMPER_API_KEY } from '$env/rest/onramper.env';
+	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconlyBuy from '$lib/components/icons/iconly/IconlyBuy.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
