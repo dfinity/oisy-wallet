@@ -179,6 +179,8 @@ div.modal {
 		flex-direction: column;
 		min-height: 100%;
 
+		--stretch-padding-bottom: 0;
+
 		&.min-h-auto {
 			min-height: auto;
 		}
@@ -188,7 +190,7 @@ div.modal {
 
 			@include modal.content;
 
-			padding: var(--padding-3x) var(--padding-2_5x) 0;
+			padding: var(--padding-3x) var(--padding-2_5x) var(--stretch-padding-bottom);
 
 			margin: 0 0 var(--padding-0_5x);
 
