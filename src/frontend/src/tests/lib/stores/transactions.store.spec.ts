@@ -103,6 +103,26 @@ describe('transactions.store', () => {
 					done();
 				})();
 			}));
+
+		it('should do nothing if specified transactions do no exist', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				const transactions = [
+					createCertifiedTransaction('tx1'),
+					createCertifiedTransaction('tx2'),
+					createCertifiedTransaction('tx3')
+				];
+
+				store.append({ tokenId, transactions });
+				store.cleanUp({ tokenId, transactionIds: ['tx4', 'tx5'] });
+
+				store.subscribe((state) => {
+					expect(state?.[tokenId]).toHaveLength(3);
+
+					done();
+				})();
+			}));
 	});
 
 	describe('reset', () => {
