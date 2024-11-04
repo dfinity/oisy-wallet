@@ -1,5 +1,4 @@
 import { buildCarouselSliderFrameItem, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
-import { describe, expect } from 'vitest';
 
 const slides = [
 	document.createTextNode('Slide 1.'),
