@@ -8,4 +8,25 @@
 	--color-brand-500: #{$cobalt};
 	--color-brand-base: #{$brandeis-blue};
 	--color-brand-600: #{$catalina-blue};
+
+	--color-warning-lightest: #{$warning-orange};
+	--color-warning-lighter: #{$peach-orange};
+	--color-warning-light: #{$rajah};
+	--color-warning-default: #{$american-orange};
+	--color-warning-dark: #{$mustard-brown};
+	--color-warning-darker: #{$philippine-bronze};
+
+	--color-error-lightest: #{$snow};
+	--color-error-lighter: #{$pale-pink};
+	--color-error-light: #{$amaranth-pink};
+	--color-error-default: #{$rusty-red};
+	--color-error-dark: #{$upsdell-red};
+	--color-error-darker: #{$chocolate-cosmos};
+
+	--color-success-lightest: #{$aero-blue};
+	--color-success-lighter: #{$sea-foam-green};
+	--color-success-light: #{$medium-aquamarine};
+	--color-success-default: #{$green-crayola};
+	--color-success-dark: #{$dartmouth-green};
+	--color-success-darker: #{$british-racing-green};
 }

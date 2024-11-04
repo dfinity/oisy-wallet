@@ -4,7 +4,7 @@
 </script>
 
 <SignerCenteredContent>
-	<div class="text-foreground-brand-primary">
+	<div class="text-brand-primary">
 		<Spinner inline />
 	</div>
 	<span><slot /></span>
