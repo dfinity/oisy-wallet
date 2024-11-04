@@ -8,7 +8,7 @@
 	export let indexCanisterId = '';
 </script>
 
-<p class="mb-2 mt-1 text-dark-blue">{replaceOisyPlaceholders($i18n.tokens.import.text.info)}</p>
+<p class="mb-2 mt-1">{replaceOisyPlaceholders($i18n.tokens.import.text.info)}</p>
 
 <p class="mb-4 font-bold text-brand-primary">
 	<ExternalLink
