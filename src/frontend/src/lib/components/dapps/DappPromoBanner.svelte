@@ -10,7 +10,7 @@
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="absolute inset-0 bg-background-brand-subtle-alt">
+		<div class="absolute inset-0 bg-brand-subtle-alt">
 			<Img
 				fitHeight={true}
 				height="100%"

@@ -90,7 +90,7 @@
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="mb-6 rounded-lg border border-border-brand-subtle bg-background-brand-subtle p-6">
+		<div class="mb-6 rounded-lg border border-brand-subtle bg-brand-subtle p-6">
 			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">

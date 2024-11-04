@@ -23,7 +23,7 @@
 			<span class="animate-pulse">{formatUSD({ value: 0 })}</span>
 		{/if}
 	</output>
-	<span class="max-w-48 text-xl font-medium text-foreground-brand-secondary-alt sm:max-w-none">
+	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
 		{$anyBalanceNonZero ? $i18n.hero.text.available_balance : $i18n.hero.text.top_up}
 	</span>
 </span>
