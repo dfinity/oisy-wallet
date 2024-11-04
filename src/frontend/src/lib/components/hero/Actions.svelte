@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
-	import ConvertToCkBTC from '$btc/convert/ConvertToCkBTC.svelte';
 	import { BTC_TO_CKBTC_EXCHANGE_ENABLED } from '$env/networks.btc.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
@@ -16,6 +16,7 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
+	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -41,6 +42,9 @@
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
+
+	let sendAction = false;
+	$: sendAction = $anyBalanceNonZero || isTransactionsPage;
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
@@ -55,7 +59,9 @@
 			<Receive />
 		{/if}
 
-		<Send {isTransactionsPage} />
+		{#if sendAction}
+			<Send {isTransactionsPage} />
+		{/if}
 
 		{#if isTransactionsPage}
 			{#if convertEth}
