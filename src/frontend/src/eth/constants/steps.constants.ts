@@ -1,4 +1,4 @@
-import { ProgressStepsSend } from '$lib/enums/progress-steps';
+import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import type { ProgressStep } from '@dfinity/gix-components';
 
 export const sendSteps = ({
@@ -59,17 +59,17 @@ export const walletConnectSendSteps = ({
 
 export const walletConnectSignSteps = (i18n: I18n): [ProgressStep, ...ProgressStep[]] => [
 	{
-		step: ProgressStepsSend.INITIALIZATION,
+		step: ProgressStepsSign.INITIALIZATION,
 		text: i18n.send.text.initializing,
 		state: 'in_progress'
 	} as ProgressStep,
 	{
-		step: ProgressStepsSend.SIGN_TRANSFER,
+		step: ProgressStepsSign.SIGN,
 		text: i18n.send.text.signing_message,
 		state: 'next'
 	} as ProgressStep,
 	{
-		step: ProgressStepsSend.TRANSFER,
+		step: ProgressStepsSign.APPROVE,
 		text: i18n.send.text.approving,
 		state: 'next'
 	} as ProgressStep
