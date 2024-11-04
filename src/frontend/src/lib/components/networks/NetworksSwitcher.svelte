@@ -58,7 +58,7 @@
 			</ul>
 		{/if}
 
-		<hr class="my-4 w-10/12 bg-dark-blue opacity-10" style="border: 0.05rem solid" />
+		<hr class="my-4 w-10/12 opacity-10" style="border: 0.05rem solid" />
 
 		<ul class="flex list-none flex-col gap-4 font-normal">
 			<li class="flex items-center justify-between">

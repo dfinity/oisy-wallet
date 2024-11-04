@@ -40,7 +40,7 @@
 	const { loading, outflowActionsDisabled, ...rest } = initHeroContext();
 	setContext<HeroContext>(HERO_CONTEXT_KEY, {
 		loading,
-		outflowActionsDisabled: outflowActionsDisabled,
+		outflowActionsDisabled,
 		...rest
 	});
 
