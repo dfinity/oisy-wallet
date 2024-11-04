@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
@@ -15,6 +16,7 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
+	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
@@ -23,6 +25,8 @@
 	export let ariaLabel: string;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let nativeNetworkId: NetworkId;
+
+	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	const isDisabled = (): boolean =>
 		$ethAddressNotLoaded ||
@@ -75,7 +79,11 @@
 </script>
 
 <CkEthLoader {nativeTokenId}>
-	<ButtonHero on:click={async () => await openSend()} disabled={$isBusy} {ariaLabel}>
+	<ButtonHero
+		on:click={async () => await openSend()}
+		disabled={$isBusy || $outflowActionsDisabled}
+		{ariaLabel}
+	>
 		<slot name="icon" slot="icon" />
 		<slot />
 	</ButtonHero>

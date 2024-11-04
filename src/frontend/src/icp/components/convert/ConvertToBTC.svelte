@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
 	import { BTC_MAINNET_SYMBOL } from '$env/tokens.btc.env';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
@@ -11,6 +12,7 @@
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
+	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
@@ -31,10 +33,12 @@
 
 	let networkId: NetworkId;
 	$: networkId = ($token as OptionIcCkToken)?.twinToken?.network.id ?? BTC_MAINNET_NETWORK_ID;
+
+	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
-	disabled={$isBusy}
+	disabled={$isBusy || $outflowActionsDisabled}
 	on:click={async () => await openSend()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
