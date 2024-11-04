@@ -28,8 +28,7 @@
 			"back": "Go back to the previous page"
 		},
 		"warning": {
-			"may_take_a_few_seconds": "This may take a few seconds.",
-			"do_not_close": "Please do not close your browser tab."
+			"do_not_close": "Don't close this tab until the transaction is done"
 		}
 	},
 	"navigation": {
@@ -89,7 +88,7 @@
 			"all_dapps": "All dapps",
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
-			"title": "Explore Web3 Ecosystem",
+			"title": "Explore Apps",
 			"open_dapp": "Open $dAppName",
 			"submit_your_dapp": "Submit your dapp"
 		},
@@ -182,6 +181,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
+			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
@@ -364,12 +364,13 @@
 		"text": {
 			"converting": "Converting...",
 			"convert_to_btc": "Convert to BTC",
+			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
 			"convert_to_cketh": "Convert to ckETH",
 			"convert_to_ckerc20": "Convert to $ckErc20",
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
-			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes.",
-			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes.",
+			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
+			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
 			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
@@ -642,7 +643,8 @@
 	"transactions": {
 		"text": {
 			"title": "Transactions",
-			"no_transactions": "You have no transactions.",
+			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
+			"transaction_history": "Your transaction history will appear here",
 			"sign_in": "Sign in to view your transactions.",
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified."
