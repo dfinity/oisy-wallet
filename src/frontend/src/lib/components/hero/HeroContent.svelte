@@ -37,8 +37,12 @@
 			})
 		: undefined;
 
-	const { loading, isExpenseActionsDisabled, ...rest } = initHeroContext();
-	setContext<HeroContext>(HERO_CONTEXT_KEY, { loading, isExpenseActionsDisabled, ...rest });
+	const { loading, outflowActionsDisabled, ...rest } = initHeroContext();
+	setContext<HeroContext>(HERO_CONTEXT_KEY, {
+		loading,
+		outflowActionsDisabled: outflowActionsDisabled,
+		...rest
+	});
 
 	$: loading.set(
 		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
@@ -47,7 +51,7 @@
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
 
-	$: isExpenseActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+	$: outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
 </script>
 
 <div

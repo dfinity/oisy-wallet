@@ -34,11 +34,11 @@
 	let networkId: NetworkId;
 	$: networkId = ($token as OptionIcCkToken)?.twinToken?.network.id ?? BTC_MAINNET_NETWORK_ID;
 
-	const { isExpenseActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
+	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
-	disabled={$isBusy || $isExpenseActionsDisabled}
+	disabled={$isBusy || $outflowActionsDisabled}
 	on:click={async () => await openSend()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >

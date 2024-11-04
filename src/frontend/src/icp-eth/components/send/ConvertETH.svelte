@@ -26,7 +26,7 @@
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let nativeNetworkId: NetworkId;
 
-	const { isExpenseActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
+	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
 	const isDisabled = (): boolean =>
 		$ethAddressNotLoaded ||
@@ -81,7 +81,7 @@
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
 		on:click={async () => await openSend()}
-		disabled={$isBusy || $isExpenseActionsDisabled}
+		disabled={$isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>
 		<slot name="icon" slot="icon" />

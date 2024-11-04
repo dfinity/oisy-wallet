@@ -7,12 +7,12 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	const { isExpenseActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
+	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
 	on:click
-	disabled={$isBusy || $isExpenseActionsDisabled}
+	disabled={$isBusy || $outflowActionsDisabled}
 	ariaLabel={$i18n.send.text.send}
 	testId={SEND_TOKENS_MODAL_OPEN_BUTTON}
 >
