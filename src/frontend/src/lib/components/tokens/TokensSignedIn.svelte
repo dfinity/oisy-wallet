@@ -5,13 +5,13 @@
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import TokenGroupCard from '$lib/components/tokens/TokenGroupCard.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 
@@ -64,7 +64,7 @@
 		</div>
 
 		{#if tokens?.length === 0}
-			<p class="text-secondary mt-4 opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
+			<NoTokensPlaceholder />
 		{/if}
 
 		{#if $modalManageTokens}
