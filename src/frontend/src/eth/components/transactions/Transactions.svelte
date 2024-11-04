@@ -13,6 +13,7 @@
 	import { mapTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -92,7 +93,7 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="text-secondary mt-4 opacity-50">{$i18n.transactions.text.no_transactions}</p>
+		<TransactionsPlaceholder />
 	{/if}
 </TransactionsSkeletons>
 

@@ -642,7 +642,8 @@
 	"transactions": {
 		"text": {
 			"title": "Transactions",
-			"no_transactions": "You have no transactions.",
+			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
+			"transaction_history": "Your transaction history will appear here",
 			"sign_in": "Sign in to view your transactions.",
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified."
