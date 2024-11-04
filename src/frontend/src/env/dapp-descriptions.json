@@ -135,8 +135,8 @@
 		"description": "Compound Finance is <b>a decentralized money market and lending protocol built on Ethereum</b>. Its Compound III (Comet) protocol enables users to borrow or lend from single-collateral pools of “base assets.” Compound III supports base assets (e.g., USDC, WETH, etc.) on Ethereum, Polygon, Base, and Arbitrum.",
 		"logo": "/images/dapps/compound-finance-logo.svg",
 		"screenshots": ["/images/dapps/compound-finance.webp"]
-  },
-  {
+	},
+	{
 		"id": "aave",
 		"name": "aave",
 		"oneLiner": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers.",
