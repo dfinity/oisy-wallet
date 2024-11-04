@@ -24,7 +24,6 @@ import {
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockAccountIdentifierText, mockPrincipalText } from '$tests/mocks/identity.mock';
-import { describe, expect, it } from 'vitest';
 
 describe('buildOnramperLink', () => {
 	it('should build the correct URL with all parameters', () => {

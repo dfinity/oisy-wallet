@@ -1,5 +1,3 @@
-import { afterAll, describe } from 'vitest';
-
 describe('auth utils', () => {
 	describe('getOptionalDerivationOrigin', () => {
 		let originalWindowLocation: Location;

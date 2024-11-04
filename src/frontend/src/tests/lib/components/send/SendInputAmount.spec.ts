@@ -2,7 +2,6 @@ import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { expect } from 'vitest';
 
 describe('SendInputAmount', () => {
 	const amount = 10.25;

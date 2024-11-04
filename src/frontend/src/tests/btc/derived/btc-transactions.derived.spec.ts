@@ -5,7 +5,6 @@ import { BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { token } from '$lib/stores/token.store';
 import { get } from 'svelte/store';
-import { describe, expect, it } from 'vitest';
 
 describe('btc-transactions.derived', () => {
 	describe('sortedBtcTransactions', () => {

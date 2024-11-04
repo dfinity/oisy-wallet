@@ -1,7 +1,6 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { get } from 'svelte/store';
-import { beforeEach, describe, expect, it } from 'vitest';
 
 const pendingTransactionMock1 = {
 	txid: new Uint8Array([1, 2, 3]),

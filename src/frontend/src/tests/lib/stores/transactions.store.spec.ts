@@ -2,7 +2,6 @@ import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$env/tokens.env';
 import type { IcTransactionUi } from '$icp/types/ic';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { initTransactionsStore } from '$lib/stores/transactions.store';
-import { expect } from 'vitest';
 
 describe('transactions.store', () => {
 	const createMockTransaction = (id: string): IcTransactionUi => ({

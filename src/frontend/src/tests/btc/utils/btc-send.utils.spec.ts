@@ -1,5 +1,4 @@
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { describe, expect } from 'vitest';
 
 describe('convertNumberToSatoshis', () => {
 	it('converts number to Satoshis correctly', () => {
