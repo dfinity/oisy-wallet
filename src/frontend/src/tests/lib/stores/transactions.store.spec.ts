@@ -2,6 +2,7 @@ import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$env/tokens.env';
 import type { IcTransactionUi } from '$icp/types/ic';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { initTransactionsStore } from '$lib/stores/transactions.store';
+import { expect } from 'vitest';
 
 describe('transactions.store', () => {
 	const createMockTransaction = (id: string): IcTransactionUi => ({
@@ -76,6 +77,28 @@ describe('transactions.store', () => {
 					expect(state?.[tokenId]).toHaveLength(2);
 					expect(state?.[tokenId]?.[0].data.id).toBe('tx1');
 					expect(state?.[tokenId]?.[1].data.id).toBe('tx2');
+
+					done();
+				})();
+			}));
+
+		it('should duplicate transactions with same id', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				const tx = createCertifiedTransaction('tx1');
+				store.append({ tokenId, transactions: [tx] });
+
+				const newTx = [createCertifiedTransaction('tx2')];
+				store.append({ tokenId, transactions: newTx });
+
+				store.append({ tokenId, transactions: [tx] });
+
+				store.subscribe((state) => {
+					expect(state?.[tokenId]).toHaveLength(3);
+					expect(
+						(state?.[tokenId] ?? []).filter(({ data: { id } }) => id === tx.data.id)
+					).toHaveLength(2);
 
 					done();
 				})();
