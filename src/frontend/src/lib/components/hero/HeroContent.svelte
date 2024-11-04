@@ -3,6 +3,7 @@
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/stores';
+	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import Back from '$lib/components/core/Back.svelte';
@@ -45,7 +46,9 @@
 	});
 
 	$: loading.set(
-		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
+		isRouteTransactions($page)
+			? isNullish(pageTokenUi?.balance)
+			: !EXCHANGE_DISABLED && !$exchangeInitialized
 	);
 
 	let isTransactionsPage = false;
