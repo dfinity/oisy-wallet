@@ -3,6 +3,6 @@
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 </script>
 
-	<SettingsSignedIn />
+<SettingsSignedIn />
 
 <SettingsVersion />
