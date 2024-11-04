@@ -120,5 +120,20 @@
 		"description": "1inch Network offers a DeFi ecosystem with products like 1inch dApp, Wallet, Developer Portal, Portfolio, and Fusion for secure Web3 operations. 1inch provides access to hundreds of liquidity sources across multiple blockchains.<br/><br/>Powered by the 1inch Swap Engine, Fusion mode enables users to swap tokens without paying any network fees and at the most favorable rates. In addition, Fusion mode offers users extra MEV protection. All swaps in Fusion mode are executed by resolvers – professional traders, who use the most sophisticated and efficient ways of protecting users’ swaps from MEV.",
 		"logo": "/images/dapps/1-inch-logo.svg",
 		"screenshots": ["/images/dapps/1-inch.webp"]
+	},
+	{
+		"id": "aave",
+		"name": "aave",
+		"oneLiner": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers.",
+		"callToAction": "Access the full power of DeFi",
+		"website": "https://aave.com/",
+		"twitter": "https://x.com/aave",
+		"github": "https://github.com/aave",
+		"tags": ["WalletConnect", "Liquidity", "Staking"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market while earning interest, and borrowers can access liquidity by providing collateral that exceeds the borrowed amount.\nIt is completely permissionless, meaning anyone can access and interact with Aave through a user-friendly interface or directly with its smart contracts on supported blockchain networks.",
+		"logo": "/images/dapps/aave-logo.svg",
+		"screenshots": ["/images/dapps/aave.webp"]
 	}
 ]
