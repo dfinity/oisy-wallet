@@ -576,7 +576,8 @@ interface I18nTransaction {
 interface I18nTransactions {
 	text: {
 		title: string;
-		no_transactions: string;
+		buy_or_receive: string;
+		transaction_history: string;
 		sign_in: string;
 		open_transactions: string;
 		mainnet_btc_transactions_info: string;
