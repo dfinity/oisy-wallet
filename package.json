@@ -37,7 +37,7 @@
 		"deploy": "scripts/deploy.sh",
 		"tags": "node_modules/.bin/semver $(git tag)",
 		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts",
-		"playwright:install": "playwright install && playwright install-deps",
+		"playwright:install": "playwright install --with-deps",
 		"e2e": "npm run playwright:install && playwright test",
 		"e2e:dev": "npm run playwright:install && NODE_ENV=development playwright test",
 		"e2e:ci": "npm run playwright:install && playwright test --reporter=html",
