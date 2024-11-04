@@ -9,7 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div >
+<div>
 	<Header>
 		{#if $testnetsEnabled}
 			<NetworksSwitcher />
@@ -20,9 +20,9 @@
 		<TokensMenu slot="end" />
 	</Header>
 
-		<TokensSignedIn />
+	<TokensSignedIn />
 
-		<div transition:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
-			<ManageTokensButton />
-		</div>
+	<div transition:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
+		<ManageTokensButton />
+	</div>
 </div>
