@@ -9,12 +9,26 @@ export const themeVariables = {
 			tertiary: 'var(--color-brand-600)',
 			disabled: 'var(--color-brand-100)'
 		},
+		success: {
+			subtle: 'var(--color-success-lightest)',
+			'subtle-alt': 'var(--color-success-lighter)',
+			solid: 'var(--color-success-default)',
+			'solid-alt': 'var(--color-success-dark)',
+			'solid-alt2': 'var(--color-success-darker)'
+		},
 		warning: {
 			subtle: 'var(--color-warning-lightest)',
 			'subtle-alt': 'var(--color-warning-lighter)',
 			solid: 'var(--color-warning-default)',
 			'solid-alt': 'var(--color-warning-dark)',
 			'solid-alt2': 'var(--color-warning-darker)'
+		},
+		error: {
+			subtle: 'var(--color-error-lightest)',
+			'subtle-alt': 'var(--color-error-lighter)',
+			solid: 'var(--color-error-default)',
+			'solid-alt': 'var(--color-error-dark)',
+			'solid-alt2': 'var(--color-error-darker)'
 		}
 	},
 	border: {
@@ -27,11 +41,23 @@ export const themeVariables = {
 			tertiary: 'var(--color-brand-600)',
 			disabled: 'var(--color-brand-100)'
 		},
+		success: {
+			subtle: 'var(--color-success-lightest)',
+			'subtle-alt': 'var(--color-success-lighter)',
+			solid: 'var(--color-success-default)',
+			'solid-alt': 'var(--color-success-dark)'
+		},
 		warning: {
 			subtle: 'var(--color-warning-lightest)',
 			'subtle-alt': 'var(--color-warning-lighter)',
 			solid: 'var(--color-warning-default)',
 			'solid-alt': 'var(--color-warning-dark)'
+		},
+		error: {
+			subtle: 'var(--color-error-lightest)',
+			'subtle-alt': 'var(--color-error-lighter)',
+			solid: 'var(--color-error-default)',
+			'solid-alt': 'var(--color-error-dark)'
 		}
 	},
 	foreground: {
@@ -44,7 +70,11 @@ export const themeVariables = {
 			'tertiary-alt': 'var(--color-brand-300)',
 			disabled: 'var(--color-brand-300)'
 		},
+		success: 'var(--color-success-default)',
+		'success-alt': 'var(--color-success-light)',
 		warning: 'var(--color-warning-default)',
-		'warning-alt': 'var(--color-warning-light)'
+		'warning-alt': 'var(--color-warning-light)',
+		error: 'var(--color-error-default)',
+		'error-alt': 'var(--color-error-light)'
 	}
 };
