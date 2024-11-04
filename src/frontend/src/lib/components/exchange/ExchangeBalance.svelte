@@ -24,6 +24,6 @@
 		{/if}
 	</output>
 	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
-		{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance }
+		{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
 	</span>
 </span>

@@ -17,6 +17,7 @@
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
+	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -25,11 +26,10 @@
 		networkId
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { enabledTokens } from '$lib/derived/tokens.derived';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
