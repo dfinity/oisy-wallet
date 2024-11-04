@@ -182,7 +182,7 @@ describe('transactions.store', () => {
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
-				const transactions = [createCertifiedTransaction('tx1')];
+				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
 				store.append({ tokenId: ETHEREUM_TOKEN_ID, transactions });
 				store.nullify(tokenId);
 
@@ -199,7 +199,7 @@ describe('transactions.store', () => {
 
 				store.nullify(tokenId);
 
-				const initialTx = [createCertifiedTransaction('tx1')];
+				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
 				store.prepend({ tokenId, transactions: initialTx });
 
 				store.subscribe((state) => {
@@ -216,7 +216,7 @@ describe('transactions.store', () => {
 
 				store.nullify(tokenId);
 
-				const initialTx = [createCertifiedTransaction('tx1')];
+				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
 				store.append({ tokenId, transactions: initialTx });
 
 				store.subscribe((state) => {

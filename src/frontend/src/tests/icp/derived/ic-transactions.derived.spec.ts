@@ -27,6 +27,21 @@ describe('ic-transactions.derived', () => {
 		expect(result).toEqual([]);
 	});
 
+	it('should return empty if transactions is nullish', () => {
+		token.set(ICP_TOKEN);
+
+		icTransactionsStore.append({
+			tokenId: ICP_TOKEN_ID,
+			transactions
+		});
+
+		icTransactionsStore.nullify(ICP_TOKEN_ID);
+
+		const result = get(icTransactions);
+		expect(result).toHaveLength(0);
+		expect(result).toEqual([]);
+	});
+
 	describe('with ic transactions only', () => {
 		beforeEach(() => {
 			token.set(ICP_TOKEN);
