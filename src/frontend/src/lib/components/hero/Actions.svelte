@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
 	import { page } from '$app/stores';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
@@ -17,7 +16,7 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
-	import { anyBalanceNonZero, balance, balanceZero } from '$lib/derived/balances.derived';
+	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -44,9 +43,6 @@
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
 
-	let disableExpenseActions = true;
-	$: disableExpenseActions = isTransactionsPage && ($balanceZero || isNullish($balance));
-
 	let sendAction = false;
 	$: sendAction = $anyBalanceNonZero || isTransactionsPage;
 </script>
@@ -64,32 +60,32 @@
 		{/if}
 
 		{#if sendAction}
-			<Send disabled={disableExpenseActions} {isTransactionsPage} />
+			<Send {isTransactionsPage} />
 		{/if}
 
 		{#if isTransactionsPage}
 			{#if convertEth}
 				{#if $networkICP}
-					<ConvertToEthereum disabled={disableExpenseActions} />
+					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkETH disabled={disableExpenseActions} />
+					<ConvertToCkETH />
 				{/if}
 			{/if}
 
 			{#if convertErc20}
 				{#if $networkICP}
-					<ConvertToEthereum disabled={disableExpenseActions} />
+					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkERC20 disabled={disableExpenseActions} />
+					<ConvertToCkERC20 />
 				{/if}
 			{/if}
 
 			{#if convertCkBtc}
-				<ConvertToBTC disabled={disableExpenseActions} />
+				<ConvertToBTC />
 			{/if}
 
 			{#if convertBtc}
-				<ConvertToCkBTC disabled={disableExpenseActions} />
+				<ConvertToCkBTC />
 			{/if}
 		{/if}
 

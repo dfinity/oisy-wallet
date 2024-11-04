@@ -11,8 +11,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
-	export let disabled = false;
-
 	/**
 	 * Send modal context store
 	 */
@@ -25,7 +23,6 @@
 </script>
 
 <ConvertETH
-	{disabled}
 	nativeTokenId={$ethereumTokenId}
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={$i18n.convert.text.convert_to_cketh}
