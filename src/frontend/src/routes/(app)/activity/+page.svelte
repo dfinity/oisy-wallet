@@ -1,3 +1,2 @@
 <!--TODO: Add unified transaction component here.-->
 Working on it...
-<slot />
