@@ -1,7 +1,7 @@
 import { SEPOLIA_NETWORK } from '$env/networks.env';
 import { ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import type { TokenUiGroup } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
+import type { TokenUiGroup } from '$lib/types/token-group';
 import { mapHeaderData } from '$lib/utils/token-card.utils';
 import { bn1 } from '$tests/mocks/balances.mock';
 import { describe, expect, it } from 'vitest';
@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 describe('mapHeaderData', () => {
 	// We mock the token group with a mix of data just to verify that the function works correctly
 	const tokenGroup: TokenUiGroup = {
+		id: SEPOLIA_TOKEN.id,
 		nativeToken: SEPOLIA_TOKEN,
 		tokens: [SEPOLIA_TOKEN, ICP_TOKEN],
 		balance: bn1,
