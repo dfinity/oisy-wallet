@@ -38,7 +38,7 @@
 </script>
 
 <article
-	class="mb-10 flex min-h-96 flex-col rounded-lg border border-border-brand-subtle-alt bg-white px-5 py-6"
+	class="mb-10 flex min-h-96 flex-col rounded-lg border border-brand-subtle-alt bg-white px-5 py-6"
 >
 	{#if $authNotSignedIn}
 		<SignerSignIn />
