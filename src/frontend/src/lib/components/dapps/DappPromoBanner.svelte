@@ -11,13 +11,11 @@
 
 <article class="relative flex items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="absolute inset-0 bg-background-brand-subtle-alt">
-			<ImgBanner
-				styleClass="bg-onahau h-64 max-h-64"
-				src={dAppDescription.screenshots[0]}
-				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
-			/>
-		</div>
+		<ImgBanner
+			styleClass="bg-onahau h-64 max-h-64"
+			src={dAppDescription.screenshots[0]}
+			alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
+		/>
 		<div class="absolute start-0 w-full flex-1 bg-black/30 px-4 py-4 backdrop-blur-sm">
 			<div class="flex items-center gap-x-2">
 				<div class="h-12 w-12 rounded-full">
