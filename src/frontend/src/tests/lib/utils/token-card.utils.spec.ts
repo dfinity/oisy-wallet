@@ -4,7 +4,6 @@ import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { mapHeaderData } from '$lib/utils/token-card.utils';
 import { bn1 } from '$tests/mocks/balances.mock';
-import { describe, expect, it } from 'vitest';
 
 describe('mapHeaderData', () => {
 	// We mock the token group with a mix of data just to verify that the function works correctly
