@@ -7,12 +7,15 @@ import { nonNullish } from '@dfinity/utils';
 
 export type CertifiedTransaction<T> = CertifiedData<T>;
 
-export type TransactionsData<T> = CertifiedTransaction<T>[];
+export type NullableCertifiedTransactions = null;
+
+export type TransactionsData<T> = CertifiedTransaction<T>[] | NullableCertifiedTransactions;
 
 export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>> {
 	prepend: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
 	append: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
 	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
+	nullify: (tokenId: TokenId) => void;
 }
 
 export const initTransactionsStore = <
@@ -54,6 +57,11 @@ export const initTransactionsStore = <
 				[tokenId]: ((state ?? {})[tokenId] ?? []).filter(
 					({ data: { id } }) => !transactionIds.includes(`${id}`)
 				)
+			})),
+		nullify: (tokenId) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: null
 			})),
 		reset,
 		subscribe
