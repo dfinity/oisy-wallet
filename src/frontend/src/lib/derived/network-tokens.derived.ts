@@ -10,7 +10,7 @@ import { derived, type Readable } from 'svelte/store';
 /**
  * All user-enabled tokens matching the selected network or chain fusion.
  */
-const enabledNetworkTokens: Readable<Token[]> = derived(
+export const enabledNetworkTokens: Readable<Token[]> = derived(
 	[enabledTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );

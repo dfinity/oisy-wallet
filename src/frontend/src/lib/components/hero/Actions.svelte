@@ -16,7 +16,7 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
-	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
+	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -27,6 +27,9 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -43,8 +46,8 @@
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
 
-	let sendAction = false;
-	$: sendAction = $anyBalanceNonZero || isTransactionsPage;
+	let sendAction = true;
+	$: sendAction = !$allBalancesZero || isTransactionsPage;
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">

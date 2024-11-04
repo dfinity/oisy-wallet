@@ -8,7 +8,7 @@ import {
 	ethAddressNotLoaded
 } from '$lib/derived/address.derived';
 import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-import { balance, balanceZero } from '$lib/derived/balances.derived';
+import { allBalancesZero, balance, balanceZero } from '$lib/derived/balances.derived';
 import { isBusy } from '$lib/derived/busy.derived';
 import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
@@ -51,6 +51,7 @@ import type { Readable, Unsubscriber } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 const derivedList: Record<string, Readable<unknown>> = {
+	allBalancesZero,
 	authIdentity,
 	authNotSignedIn,
 	authSignedIn,

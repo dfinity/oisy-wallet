@@ -1,7 +1,8 @@
+import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { token } from '$lib/stores/token.store';
 import type { OptionBalance } from '$lib/types/balance';
-import { checkAnyNonZeroBalance } from '$lib/utils/balances.utils';
+import { checkAllBalancesZero } from '$lib/utils/balances.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -19,6 +20,11 @@ export const balanceZero: Readable<boolean> = derived(
 		$balanceStore[$token.id]?.data.isZero() === true
 );
 
-export const anyBalanceNonZero: Readable<boolean> = derived([balancesStore], ([$balanceStore]) =>
-	checkAnyNonZeroBalance($balanceStore)
+export const allBalancesZero: Readable<boolean> = derived(
+	[balancesStore, enabledNetworkTokens],
+	([$balancesStore, $enabledNetworkTokens]) =>
+		checkAllBalancesZero({
+			$balancesStore: $balancesStore,
+			minLength: $enabledNetworkTokens.length
+		})
 );
