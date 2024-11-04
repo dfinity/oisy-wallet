@@ -26,12 +26,12 @@
 </script>
 
 <ContentWithToolbar>
-	<p class="font-bold">{$i18n.wallet_connect.text.method}</p>
+	<p class="mb-0 font-bold">{$i18n.wallet_connect.text.method}:</p>
 	<p class="mb-4 font-normal">
 		{request.params.request.method}
 	</p>
 
-	<p class="font-bold">{$i18n.wallet_connect.text.message}</p>
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 	{#if nonNullish(json)}
 		<div class="mt-4 rounded-sm bg-dust p-4">
 			<Json {json} _collapsed={true} />
