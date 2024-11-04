@@ -11,7 +11,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockCkBtcMinterInfo, mockPendingUtxo } from '$tests/mocks/ckbtc.mock';
 
-export const setupCkBTCStores = () => {
+export const setupCkBTCStores = (): TokenId => {
 	const tokenId: TokenId = parseTokenId('test');
 
 	const mockToken: IcCkToken = {
@@ -39,4 +39,6 @@ export const setupCkBTCStores = () => {
 			certified: true
 		}
 	});
+
+	return tokenId;
 };

@@ -1,25 +1,10 @@
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$env/tokens.env';
 import type { IcTransactionUi } from '$icp/types/ic';
-import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { initTransactionsStore } from '$lib/stores/transactions.store';
+import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { expect } from 'vitest';
 
 describe('transactions.store', () => {
-	const createMockTransaction = (id: string): IcTransactionUi => ({
-		id,
-		timestamp: nowInBigIntNanoSeconds(),
-		type: 'send',
-		value: BigInt(100),
-		from: 'sender',
-		to: 'receiver',
-		status: 'pending'
-	});
-
-	const createCertifiedTransaction = (id: string) => ({
-		certified: true,
-		data: createMockTransaction(id)
-	});
-
 	const tokenId = ICP_TOKEN_ID;
 
 	describe('prepend', () => {
@@ -27,10 +12,10 @@ describe('transactions.store', () => {
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
-				const initialTx = [createCertifiedTransaction('tx1')];
+				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
 				store.prepend({ tokenId, transactions: initialTx });
 
-				const newTx = [createCertifiedTransaction('tx2')];
+				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
 				store.prepend({ tokenId, transactions: newTx });
 
 				store.subscribe((state) => {
@@ -46,10 +31,10 @@ describe('transactions.store', () => {
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
-				const tx = createCertifiedTransaction('tx1');
+				const tx = createCertifiedIcTransactionUiMock('tx1');
 				store.prepend({ tokenId, transactions: [tx] });
 
-				const newTx = [createCertifiedTransaction('tx2')];
+				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
 				store.prepend({ tokenId, transactions: newTx });
 
 				store.prepend({ tokenId, transactions: [tx] });
@@ -67,10 +52,10 @@ describe('transactions.store', () => {
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
-				const tx1 = [createCertifiedTransaction('tx1')];
+				const tx1 = [createCertifiedIcTransactionUiMock('tx1')];
 				store.append({ tokenId, transactions: tx1 });
 
-				const tx2 = [createCertifiedTransaction('tx2')];
+				const tx2 = [createCertifiedIcTransactionUiMock('tx2')];
 				store.append({ tokenId, transactions: tx2 });
 
 				store.subscribe((state) => {
@@ -86,10 +71,10 @@ describe('transactions.store', () => {
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
-				const tx = createCertifiedTransaction('tx1');
+				const tx = createCertifiedIcTransactionUiMock('tx1');
 				store.append({ tokenId, transactions: [tx] });
 
-				const newTx = [createCertifiedTransaction('tx2')];
+				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
 				store.append({ tokenId, transactions: newTx });
 
 				store.append({ tokenId, transactions: [tx] });
@@ -111,9 +96,9 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const transactions = [
-					createCertifiedTransaction('tx1'),
-					createCertifiedTransaction('tx2'),
-					createCertifiedTransaction('tx3')
+					createCertifiedIcTransactionUiMock('tx1'),
+					createCertifiedIcTransactionUiMock('tx2'),
+					createCertifiedIcTransactionUiMock('tx3')
 				];
 
 				store.append({ tokenId, transactions });
@@ -132,9 +117,9 @@ describe('transactions.store', () => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
 				const transactions = [
-					createCertifiedTransaction('tx1'),
-					createCertifiedTransaction('tx2'),
-					createCertifiedTransaction('tx3')
+					createCertifiedIcTransactionUiMock('tx1'),
+					createCertifiedIcTransactionUiMock('tx2'),
+					createCertifiedIcTransactionUiMock('tx3')
 				];
 
 				store.append({ tokenId, transactions });
@@ -153,7 +138,7 @@ describe('transactions.store', () => {
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
-				const transactions = [createCertifiedTransaction('tx1')];
+				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
 				store.append({ tokenId, transactions });
 				store.reset(tokenId);
 
@@ -168,7 +153,7 @@ describe('transactions.store', () => {
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
-				const transactions = [createCertifiedTransaction('tx1')];
+				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
 				store.append({ tokenId, transactions });
 				store.reset(ETHEREUM_TOKEN_ID);
 
