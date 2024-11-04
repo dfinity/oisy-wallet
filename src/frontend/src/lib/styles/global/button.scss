@@ -91,27 +91,27 @@ a.as-button {
 	}
 
 	&.primary:not([disabled]):not(.disabled):not(.loading) {
-		@apply bg-background-brand-primary;
+		@apply bg-brand-primary;
 		color: var(--color-white);
 
 		&:hover {
-			@apply bg-background-brand-secondary;
+			@apply bg-brand-secondary;
 		}
 
 		&:active {
-			@apply bg-background-brand-tertiary;
+			@apply bg-brand-tertiary;
 		}
 	}
 
 	&.secondary:not([disabled]):not(.disabled):not(.loading) {
-		@apply text-foreground-brand-primary bg-background-brand-subtle;
+		@apply text-brand-primary bg-brand-subtle;
 
 		&:hover {
-			@apply bg-background-brand-subtle-alt;
+			@apply bg-brand-subtle-alt;
 		}
 
 		&:active {
-			@apply bg-background-brand-subtle2-alt;
+			@apply bg-brand-subtle2-alt;
 		}
 	}
 
@@ -119,23 +119,23 @@ a.as-button {
 		background: var(--color-white);
 
 		&:hover {
-			@apply text-foreground-brand-primary;
+			@apply text-brand-primary;
 		}
 
 		&:active {
-			@apply bg-background-brand-subtle-alt;
+			@apply bg-brand-subtle-alt;
 			color: currentColor;
 		}
 
 		&.link {
-			@apply text-foreground-brand-primary;
+			@apply text-brand-primary;
 
 			&:hover {
-				@apply text-foreground-brand-secondary;
+				@apply text-brand-secondary;
 			}
 
 			&:active {
-				@apply text-foreground-brand-secondary;
+				@apply text-brand-secondary;
 			}
 		}
 	}
@@ -169,7 +169,7 @@ a.as-button {
 	&.text {
 		&:hover,
 		&:active {
-			@apply text-foreground-brand-primary;
+			@apply text-brand-primary;
 		}
 	}
 
