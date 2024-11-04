@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { readCanisterIds } from './env.utils';
 
 dotenv.populate(
-	process.env as DotenvPopulateInput,
+	{ ...process.env, VITE_EXCHANGE_DISABLED: 'true' } as DotenvPopulateInput,
 	readCanisterIds({
 		filePath: join(process.cwd(), 'canister_e2e_ids.json'),
 		prefix: 'E2E_'
