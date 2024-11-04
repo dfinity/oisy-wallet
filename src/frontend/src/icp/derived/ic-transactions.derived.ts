@@ -6,7 +6,7 @@ import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { derived, type Readable } from 'svelte/store';
 
-const icExtendedTransactions: Readable<IcTransactionsData> = derived(
+const icExtendedTransactions: Readable<NonNullable<IcTransactionsData>> = derived(
 	[tokenWithFallback, icTransactionsStore, btcStatusesStore],
 	([$token, $icTransactionsStore, $btcStatusesStore]) =>
 		($icTransactionsStore?.[$token.id] ?? []).map((transaction) =>
@@ -18,7 +18,7 @@ const icExtendedTransactions: Readable<IcTransactionsData> = derived(
 		)
 );
 
-export const icTransactions: Readable<IcTransactionsData> = derived(
+export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived(
 	[ckBtcPendingUtxoTransactions, ckEthPendingTransactions, icExtendedTransactions],
 	([$ckBtcPendingUtxoTransactions, $ckEthPendingTransactions, $icExtendedTransactions]) => [
 		...$ckBtcPendingUtxoTransactions,
