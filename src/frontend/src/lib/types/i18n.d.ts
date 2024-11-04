@@ -361,6 +361,7 @@ interface I18nTokens {
 		hide_zero_balances: string;
 		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
+		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
 		show_token: string;
