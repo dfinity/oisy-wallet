@@ -1,4 +1,4 @@
-import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/onramper.env';
+import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
 import type { Network } from '$lib/types/network';
 import type {
 	OnramperCryptoWallet,
