@@ -5,9 +5,11 @@ import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import {
 	isRequiredTokenWithLinkedData,
+	sumBalances,
 	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 
 /**
  * Type guard to check if an object is of type TokenUiGroup.
@@ -90,3 +92,75 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO)
 		);
 };
+
+const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
+	id: token.id,
+	nativeToken: token,
+	tokens: [token],
+	balance: token.balance,
+	usdBalance: token.usdBalance
+});
+
+interface GroupTokenParams {
+	token: TokenUi;
+	tokenGroup: TokenUiGroup | undefined;
+}
+
+interface UpdateTokenGroupParams extends GroupTokenParams {
+	tokenGroup: TokenUiGroup;
+}
+
+/**
+ * Function to update a token group with a new token.
+ *
+ * This function purely adds the token to the group, updating the group's balance and USD balance.
+ * It does not concern itself with whether the token is a "main token" or a "secondary token".
+ *
+ * @param {UpdateTokenGroupParams} params - The parameters for the function.
+ * @param {TokenUi} params.token - The token to add to the group.
+ * @param {TokenUiGroup} params.tokenGroup - The group where the token should be added.
+ * @returns {TokenUiGroup} The updated group with the new token.
+ */
+export const updateTokenGroup = ({ token, tokenGroup }: UpdateTokenGroupParams): TokenUiGroup => ({
+	...tokenGroup,
+	tokens: [...tokenGroup.tokens, token],
+	balance: sumBalances([tokenGroup.balance, token.balance]),
+	usdBalance: sumUsdBalances([tokenGroup.usdBalance, token.usdBalance])
+});
+
+/**
+ * Function to group a "main token" with an existing group or create a new group with the token as the "main token".
+ *
+ * If the token has no "main token", it is either a "main token" for an existing group,
+ * or a "main token" for a group that still does not exist, or a single-element group (but still its "main token").
+ *
+ * @param {GroupTokenParams} params - The parameters for the function.
+ * @param {TokenUi} params.token - The "main token" to group.
+ * @param {TokenUiGroup} params.tokenGroup - The group where the "main token" should be added, if it exists.
+ * @returns {TokenUiGroup} The updated group with the "main token", or a new group with the "main token".
+ */
+export const groupMainToken = ({ token, tokenGroup }: GroupTokenParams): TokenUiGroup =>
+	nonNullish(tokenGroup)
+		? {
+				...updateTokenGroup({ token, tokenGroup }),
+				// It overrides any possible "main token" placeholder.
+				id: token.id,
+				nativeToken: token
+			}
+		: mapNewTokenGroup(token);
+
+/**
+ * Function to group a "secondary token" with an existing group or create a new group with the token as a "secondary token".
+ *
+ * If a group already exists for the "main token" of the current token, add it to the existing group.
+ * Otherwise, create a new group with the current token as a placeholder "main token".
+ * This is to avoid that the group is created with an empty "main token", if the current token's "main token" is not in the list.
+ * Instead, it should be considered a single-element group, until the "main token" may or may not be found.
+ *
+ * @param {GroupTokenParams} params - The parameters for the function.
+ * @param {TokenUi} params.token - The "secondary token" to group.
+ * @param {TokenUiGroup} params.tokenGroup - The group where the "secondary token" should be added, if it exists.
+ * @returns {TokenUiGroup} The updated group with the "secondary token", or a new group with the "secondary token".
+ */
+export const groupSecondaryToken = ({ token, tokenGroup }: GroupTokenParams): TokenUiGroup =>
+	nonNullish(tokenGroup) ? updateTokenGroup({ token, tokenGroup }) : mapNewTokenGroup(token);
