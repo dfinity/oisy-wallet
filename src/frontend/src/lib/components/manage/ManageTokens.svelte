@@ -101,8 +101,7 @@
 			...(manageEthereumTokens ? allErc20Tokens : []),
 			...(manageIcTokens ? allIcrcTokens : [])
 		],
-		$selectedNetwork,
-		$pseudoNetworkChainFusion
+		$selectedNetwork
 	]);
 
 	let allTokensSorted: Token[] = [];

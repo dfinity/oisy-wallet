@@ -11,7 +11,7 @@ import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
 
@@ -45,18 +45,17 @@ export const mapNetworkIdToBitcoinNetwork = (networkId: NetworkId): BitcoinNetwo
 /**
  * Filter the tokens that either lives on the selected network or, if no network is provided, pseud Chain Fusion, then those that are not testnets.
  */
-export const filterTokensForSelectedNetwork = <T extends Token>([
-	$tokens,
-	$selectedNetwork,
-	$pseudoNetworkChainFusion
-]: [T[], Network | undefined, boolean]): T[] =>
+export const filterTokensForSelectedNetwork = <T extends Token>([$tokens, $selectedNetwork]: [
+	T[],
+	Network | undefined
+]): T[] =>
 	$tokens.filter((token) => {
 		const {
 			network: { id: networkId, env }
 		} = token;
 
 		return (
-			($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && env !== 'testnet') ||
+			(isNullish($selectedNetwork) && !isTokenIcrcTestnet(token) && env !== 'testnet') ||
 			$selectedNetwork?.id === networkId
 		);
 	});
