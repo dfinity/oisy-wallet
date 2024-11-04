@@ -126,8 +126,7 @@ div.modal {
 
 	div.wrapper.dialog {
 		color: var(--color-secondary);
-		padding-top: calc(var(--padding-3x) + env(safe-area-inset-top, 100px));
-		padding-bottom: calc(var(--padding-3x) + env(safe-area-inset-bottom, 100px));
+		padding-block: var(--padding-3x);
 		padding-inline: var(--padding);
 	}
 
