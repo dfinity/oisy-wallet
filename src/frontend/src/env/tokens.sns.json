@@ -462,5 +462,21 @@
 			"url": "https://mnc6b-aaaaa-aaaap-qhnrq-cai.icp0.io/"
 		},
 		"indexCanisterVersion": "up-to-date"
+	},
+	{
+		"ledgerCanisterId": "o7oak-iyaaa-aaaaq-aadzq-cai",
+		"rootCanisterId": "ormnc-tiaaa-aaaaq-aadyq-cai",
+		"indexCanisterId": "onixt-eiaaa-aaaaq-aad2q-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "KongSwap",
+			"symbol": "KONG",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "KongSwap",
+			"url": "https://www.kongswap.io/"
+		},
+		"indexCanisterVersion": "up-to-date"
 	}
 ]
