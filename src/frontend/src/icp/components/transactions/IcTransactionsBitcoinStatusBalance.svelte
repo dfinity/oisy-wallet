@@ -86,7 +86,7 @@
 		</div>{:else}
 		<button
 			in:blur
-			class="text flex gap-2 border-0 text-foreground-brand-primary"
+			class="text flex gap-2 border-0 text-brand-primary"
 			on:click={async () => await receive()}
 			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>

@@ -22,6 +22,7 @@
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { IcTransactionUi } from '$icp/types/ic';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -111,7 +112,7 @@
 		{/if}
 
 		{#if $icTransactions.length === 0}
-			<p class="text-secondary mt-4 opacity-50">{$i18n.transactions.text.no_transactions}</p>
+			<TransactionsPlaceholder />
 		{/if}
 	</svelte:component>
 </IcTransactionsSkeletons>
