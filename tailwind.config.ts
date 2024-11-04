@@ -48,10 +48,14 @@ export default {
 			cobalt: '#004abe',
 			zumthor: '#e8f1ff',
 			beer: '#f7931a',
-			fulvous: '#de7900',
-			...themeVariables
+			fulvous: '#de7900'
 		},
 		extend: {
+			backgroundColor: themeVariables.background,
+			gradientColorStops: themeVariables.background,
+			borderColor: themeVariables.border,
+			ringColor: themeVariables.border,
+			textColor: themeVariables.foreground,
 			backgroundSize: {
 				'size-200': '200% 200%'
 			},

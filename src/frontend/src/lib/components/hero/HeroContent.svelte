@@ -14,6 +14,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -36,16 +37,25 @@
 			})
 		: undefined;
 
-	const { loading, ...rest } = initHeroContext();
-	setContext<HeroContext>(HERO_CONTEXT_KEY, { loading, ...rest });
+	const { loading, outflowActionsDisabled, ...rest } = initHeroContext();
+	setContext<HeroContext>(HERO_CONTEXT_KEY, {
+		loading,
+		outflowActionsDisabled: outflowActionsDisabled,
+		...rest
+	});
 
 	$: loading.set(
 		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
 	);
+
+	let isTransactionsPage = false;
+	$: isTransactionsPage = isRouteTransactions($page);
+
+	$: outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-background-brand-primary bg-gradient-to-b from-background-brand-primary via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum}
 	class:via-interdimensional-blue={$networkICP}
 	class:to-chinese-purple={$networkICP}
