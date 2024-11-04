@@ -75,7 +75,7 @@ describe('btc-transactions.derived', () => {
 			expect(result).toEqual([]);
 		});
 
-		it('should return empty when no transactions is set to nullish', () => {
+		it('should return empty when transactions is set to nullish', () => {
 			btcTransactionsStore.nullify(BTC_MAINNET_TOKEN_ID);
 
 			const result = get(sortedBtcTransactions);
