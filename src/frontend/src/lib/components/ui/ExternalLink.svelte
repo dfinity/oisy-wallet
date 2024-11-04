@@ -21,8 +21,8 @@
 	class:text-primary={color === 'blue'}
 	class:hover:text-inherit={color === 'blue'}
 	class:active:text-inherit={color === 'blue'}
-	class:hover:text-foreground-brand-primary={color === 'inherit'}
-	class:active:text-foreground-brand-primary={color === 'inherit'}
+	class:hover:text-brand-primary={color === 'inherit'}
+	class:active:text-brand-primary={color === 'inherit'}
 	class:w-full={fullWidth}
 >
 	{#if iconVisible}
