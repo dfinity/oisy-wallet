@@ -32,6 +32,6 @@
 
 <style lang="postcss">
 	.transaction-action-icon {
-		@apply bg-brand-subtle-alt ring-brand-subtle flex items-center justify-center rounded-full p-3.5 ring-2;
+		@apply flex items-center justify-center rounded-full bg-brand-subtle-alt p-3.5 ring-2 ring-brand-subtle;
 	}
 </style>
