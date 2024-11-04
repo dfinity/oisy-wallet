@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import type { OptionTokenUi } from '$lib/types/token';
 
 	export let token: OptionTokenUi;
+
+	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <span class="flex flex-col gap-2">
@@ -14,7 +18,7 @@
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !token.balance.isZero()}
 			<span><Amount amount={token.balance} /> {token.symbol}</span>
 		{:else}
-			<span class:animate-pulse={isNullish(token?.balance)}>0.00</span>
+			<span class:animate-pulse={$loading}>0.00</span>
 		{/if}
 	</output>
 

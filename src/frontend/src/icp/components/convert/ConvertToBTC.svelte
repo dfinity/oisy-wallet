@@ -5,8 +5,8 @@
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import type { OptionIcCkToken } from '$icp/types/ic';
+	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
 	import { tokenId } from '$lib/derived/token.derived';

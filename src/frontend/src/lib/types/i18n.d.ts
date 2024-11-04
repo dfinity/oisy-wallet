@@ -24,7 +24,7 @@ interface I18nCore {
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
-	warning: { may_take_a_few_seconds: string; do_not_close: string };
+	warning: { do_not_close: string };
 }
 
 interface I18nNavigation {
@@ -160,7 +160,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; learn_more_about_erc20_icp: string };
+	text: { available_balance: string; top_up: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -576,7 +576,8 @@ interface I18nTransaction {
 interface I18nTransactions {
 	text: {
 		title: string;
-		no_transactions: string;
+		buy_or_receive: string;
+		transaction_history: string;
 		sign_in: string;
 		open_transactions: string;
 		mainnet_btc_transactions_info: string;

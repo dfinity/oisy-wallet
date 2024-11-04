@@ -1,6 +1,6 @@
 <script lang="ts">
+	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { SEND_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
