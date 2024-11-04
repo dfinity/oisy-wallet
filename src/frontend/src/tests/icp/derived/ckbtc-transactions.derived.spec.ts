@@ -63,7 +63,7 @@ describe('ckBtcPendingUtxoTransactions', () => {
 			});
 		});
 
-		it('devive pending UTXOs correctly', () => {
+		it('should derive pending UTXOs correctly', () => {
 			const result = get(ckBtcPendingUtxoTransactions);
 
 			expect(result).toHaveLength(1);
