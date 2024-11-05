@@ -33,6 +33,8 @@ describe('Route Check Functions', () => {
 			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
 
 			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+			expect(isRouteTransactions(mockPage(`/anotherGroup/${AppPath.Transactions}`))).toBe(false);
 		});
 	});
 
@@ -47,6 +49,8 @@ describe('Route Check Functions', () => {
 			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
 
 			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+			expect(isRouteSettings(mockPage(`/anotherGroup/${AppPath.Settings}`))).toBe(false);
 		});
 	});
 
@@ -61,6 +65,8 @@ describe('Route Check Functions', () => {
 			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
 
 			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+			expect(isRouteDappExplorer(mockPage(`/anotherGroup/${AppPath.Explore}`))).toBe(false);
 		});
 	});
 
@@ -75,6 +81,8 @@ describe('Route Check Functions', () => {
 			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
 
 			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
+
+			expect(isRouteTokens(mockPage('/anotherGroup'))).toBe(false);
 		});
 	});
 });
