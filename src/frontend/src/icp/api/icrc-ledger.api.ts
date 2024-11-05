@@ -1,4 +1,5 @@
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -10,6 +11,7 @@ import {
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse
 } from '@dfinity/ledger-icrc';
+import type { Tokens } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -26,6 +28,23 @@ export const metadata = async ({
 	const { metadata } = await ledgerCanister({ identity, ...rest });
 
 	return metadata({ certified });
+};
+
+export const balance = async ({
+	certified = true,
+	owner,
+	identity,
+	...rest
+}: {
+	owner: Principal;
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<Tokens> => {
+	assertNonNullish(identity);
+
+	const { balance } = await ledgerCanister({ identity, ...rest });
+
+	return balance({ certified, ...getIcrcAccount(owner) });
 };
 
 export const transfer = async ({
