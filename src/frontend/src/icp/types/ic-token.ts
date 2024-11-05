@@ -1,6 +1,7 @@
 import {
 	IcAppMetadataSchema,
-	IcCanistersSchema, IcCanistersStrictSchema,
+	IcCanistersSchema,
+	IcCanistersStrictSchema,
 	IcCkInterfaceSchema,
 	IcCkLinkedAssetsSchema,
 	IcCkMetadataSchema,
