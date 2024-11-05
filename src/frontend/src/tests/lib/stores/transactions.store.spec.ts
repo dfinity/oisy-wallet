@@ -1,5 +1,5 @@
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$env/tokens.env';
-import type { IcTransactionUi } from '$icp/types/ic';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { initTransactionsStore } from '$lib/stores/transactions.store';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 
@@ -158,6 +158,70 @@ describe('transactions.store', () => {
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(1);
+
+					done();
+				})();
+			}));
+	});
+
+	describe('nullify', () => {
+		it('should set no transactions', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				store.nullify(tokenId);
+
+				store.subscribe((state) => {
+					expect(state).toEqual({ [tokenId]: null });
+
+					done();
+				})();
+			}));
+
+		it('should not clear other token transactions', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
+				store.append({ tokenId: ETHEREUM_TOKEN_ID, transactions });
+				store.nullify(tokenId);
+
+				store.subscribe((state) => {
+					expect(state?.[ETHEREUM_TOKEN_ID]).toHaveLength(1);
+
+					done();
+				})();
+			}));
+
+		it('should prepend transactions if previously null', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				store.nullify(tokenId);
+
+				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
+				store.prepend({ tokenId, transactions: initialTx });
+
+				store.subscribe((state) => {
+					expect(state?.[tokenId]).toHaveLength(1);
+					expect(state?.[tokenId]?.[0].data.id).toBe('tx1');
+
+					done();
+				})();
+			}));
+
+		it('should append transactions if previously null', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				store.nullify(tokenId);
+
+				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
+				store.append({ tokenId, transactions: initialTx });
+
+				store.subscribe((state) => {
+					expect(state?.[tokenId]).toHaveLength(1);
+					expect(state?.[tokenId]?.[0].data.id).toBe('tx1');
 
 					done();
 				})();

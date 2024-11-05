@@ -4,7 +4,7 @@ import {
 	CKERC20_LEDGER_CANISTER_IDS,
 	CKETH_LEDGER_CANISTER_IDS
 } from '$env/networks.icrc.env';
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';

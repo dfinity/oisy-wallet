@@ -7,7 +7,8 @@ import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens.env';
 import { icTransactions } from '$icp/derived/ic-transactions.derived';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { IcCkToken, IcTransactionUi } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -24,6 +25,21 @@ describe('ic-transactions.derived', () => {
 
 	it('should return an empty array when all source stores are empty', () => {
 		const result = get(icTransactions);
+		expect(result).toEqual([]);
+	});
+
+	it('should return empty if transactions is nullish', () => {
+		token.set(ICP_TOKEN);
+
+		icTransactionsStore.append({
+			tokenId: ICP_TOKEN_ID,
+			transactions
+		});
+
+		icTransactionsStore.nullify(ICP_TOKEN_ID);
+
+		const result = get(icTransactions);
+		expect(result).toHaveLength(0);
 		expect(result).toEqual([]);
 	});
 
