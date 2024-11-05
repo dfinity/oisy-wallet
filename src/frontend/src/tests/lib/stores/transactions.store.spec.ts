@@ -1,5 +1,5 @@
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$env/tokens.env';
-import type { IcTransactionUi } from '$icp/types/ic';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { initTransactionsStore } from '$lib/stores/transactions.store';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 
