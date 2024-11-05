@@ -22,6 +22,7 @@
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isIcToken, isIcTokenCanistersStrict } from '$icp/utils/ic-token.utils';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
@@ -32,7 +33,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { last } from '$lib/utils/array.utils';
-	import { isIcToken, isIcTokenCanistersStrict } from '$icp/utils/ic-token.utils';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
