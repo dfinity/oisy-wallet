@@ -2,7 +2,6 @@ import { mapTransactionUi } from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Transaction } from '$lib/types/transaction';
-import { expect } from 'vitest';
 
 const transaction: Transaction = {
 	blockNumber: 123456,

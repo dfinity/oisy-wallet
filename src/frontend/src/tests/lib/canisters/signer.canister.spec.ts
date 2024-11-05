@@ -1,7 +1,7 @@
 import type {
 	EthAddressResponse,
+	EthSignTransactionRequest,
 	RejectionCode_1,
-	SignRequest,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -15,7 +15,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -60,7 +59,7 @@ describe('signer.canister', () => {
 			max_fee_per_gas: 5n,
 			chain_id: 10n,
 			nonce: 10n
-		} as SignRequest
+		} as EthSignTransactionRequest
 	};
 	const personalSignParams = {
 		message: 'message'

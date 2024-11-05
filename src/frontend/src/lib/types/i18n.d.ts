@@ -361,6 +361,7 @@ interface I18nTokens {
 		hide_zero_balances: string;
 		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
+		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
 		show_token: string;
@@ -578,7 +579,6 @@ interface I18nTransactions {
 		title: string;
 		buy_or_receive: string;
 		transaction_history: string;
-		sign_in: string;
 		open_transactions: string;
 		mainnet_btc_transactions_info: string;
 	};

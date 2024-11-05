@@ -12,7 +12,6 @@ import {
 } from '$lib/utils/token-group.utils';
 import { bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
 import { BigNumber } from 'alchemy-sdk';
-import { describe, expect, it } from 'vitest';
 
 const tokens = [
 	{
