@@ -16,7 +16,8 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import {
 		balance,
-		balanceZero, noPositiveBalanceAndNotAllBalancesZero
+		balanceZero,
+		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
 	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
