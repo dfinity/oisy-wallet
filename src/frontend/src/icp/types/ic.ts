@@ -1,9 +1,17 @@
-import { CanisterIdTextSchema } from '$lib/types/canister';
-import { CoingeckoCoinsIdSchema } from '$lib/types/coingecko';
-import { TokenSchema } from '$lib/types/token';
+import {
+	IcAppMetadataSchema,
+	IcCanistersSchema,
+	IcCkInterfaceSchema,
+	IcCkLinkedAssetsSchema,
+	IcCkMetadataSchema,
+	IcCkTokenSchema,
+	IcFeeSchema,
+	IcInterfaceSchema,
+	IcTokenSchema,
+	IcTokenWithoutIdSchema
+} from '$icp/validation/ic-token.validation';
 import type { TransactionType } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
-import { UrlSchema } from '$lib/validation/url.validation';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type {
 	IcrcTransaction as IcrcTransactionCandid,
@@ -51,53 +59,24 @@ export interface IcTransactionUi {
 	txExplorerUrl?: string;
 }
 
-const IcFeeSchema = z.object({
-	fee: z.bigint()
-});
-
 export type IcFee = z.infer<typeof IcFeeSchema>;
-
-const IcAppMetadataSchema = z.object({
-	exchangeCoinId: CoingeckoCoinsIdSchema.optional(),
-	position: z.number(),
-	explorerUrl: UrlSchema.optional()
-});
 
 export type IcAppMetadata = z.infer<typeof IcAppMetadataSchema>;
 
-const IcCanistersSchema = z.object({
-	ledgerCanisterId: CanisterIdTextSchema,
-	indexCanisterId: CanisterIdTextSchema
-});
-
 export type IcCanisters = z.infer<typeof IcCanistersSchema>;
-
-const IcCkLinkedAssetsSchema = z.object({
-	twinToken: TokenSchema,
-	feeLedgerCanisterId: CanisterIdTextSchema.optional()
-});
 
 export type IcCkLinkedAssets = z.infer<typeof IcCkLinkedAssetsSchema>;
 
-const IcCkMetadataSchema = IcCkLinkedAssetsSchema.partial().extend({
-	minterCanisterId: CanisterIdTextSchema
-});
-
 export type IcCkMetadata = z.infer<typeof IcCkMetadataSchema>;
 
-const IcInterfaceSchema = IcCanistersSchema.merge(IcAppMetadataSchema);
 export type IcInterface = z.infer<typeof IcInterfaceSchema>;
 
-const IcTokenSchema = TokenSchema.merge(IcFeeSchema).merge(IcInterfaceSchema);
 export type IcToken = z.infer<typeof IcTokenSchema>;
 
-const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true });
 export type IcTokenWithoutId = z.infer<typeof IcTokenWithoutIdSchema>;
 
-const IcCkTokenSchema = IcTokenSchema.merge(IcCkMetadataSchema.partial());
 export type IcCkToken = z.infer<typeof IcCkTokenSchema>;
 
-const IcCkInterfaceSchema = IcInterfaceSchema.merge(IcCkMetadataSchema);
 export type IcCkInterface = z.infer<typeof IcCkInterfaceSchema>;
 
 export type OptionIcToken = Option<IcToken>;
