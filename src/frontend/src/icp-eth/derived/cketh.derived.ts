@@ -9,7 +9,7 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
