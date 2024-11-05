@@ -40,5 +40,16 @@ describe('icrc-ledger.api', () => {
 				...account
 			});
 		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(
+				balance({
+					certified: true,
+					owner: mockPrincipal,
+					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+					identity: undefined
+				})
+			).rejects.toThrow();
+		});
 	});
 });
