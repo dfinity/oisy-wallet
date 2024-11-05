@@ -3,8 +3,11 @@ import type { Option } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import type { CanisterOptions } from '@dfinity/utils';
+import { z } from 'zod';
 
-export type CanisterIdText = string;
+export const CanisterIdTextSchema = z.string();
+
+export type CanisterIdText = z.infer<typeof CanisterIdTextSchema>;
 
 export type OptionCanisterIdText = Option<CanisterIdText>;
 

@@ -40,7 +40,7 @@ const TokenBuyableSchema = z.object({
 	buy: z.custom<AtLeastOne<TokenBuy>>().optional()
 });
 
-const TokenSchema = z
+export const TokenSchema = z
 	.object({
 		id: TokenIdSchema,
 		network: NetworkSchema,

@@ -4,8 +4,11 @@
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { EthAddress } from '$lib/types/address';
+import { z } from 'zod';
 
-export type CoingeckoCoinsId = 'ethereum' | 'bitcoin' | 'internet-computer';
+export const CoingeckoCoinsIdSchema = z.enum(['ethereum', 'bitcoin', 'internet-computer']);
+
+export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
 
 // We are interested only in the ERC20 <> USD on Ethereum and in the ICRC <> USD on Internet Computer, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/asset_platforms
