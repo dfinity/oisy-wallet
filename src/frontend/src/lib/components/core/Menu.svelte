@@ -15,6 +15,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -27,11 +28,11 @@
 
 	const gotoSettings = async () => {
 		hidePopover();
-		await goto(`/settings?${networkParam($networkId)}`);
+		await goto(`${AppPath.Settings}?${networkParam($networkId)}`);
 	};
 	const goToDappExplorer = async () => {
 		hidePopover();
-		await goto(`/explore`);
+		await goto(AppPath.Explore);
 	};
 
 	let settingsRoute = false;
