@@ -5,15 +5,6 @@ import { get } from 'svelte/store';
 
 describe('exchange.derived', () => {
 	describe('exchangeInitialized', () => {
-		beforeEach(() => {
-			// exchangeStore.reset();
-			// setViteExchangeDisabled(undefined);
-		});
-
-		afterAll(() => {
-			vi.unstubAllEnvs();
-		});
-
 		it('should return false when exchange store is empty', () => {
 			expect(get(exchangeInitialized)).toBe(false);
 		});
