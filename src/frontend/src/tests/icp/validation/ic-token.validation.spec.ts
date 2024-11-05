@@ -7,6 +7,7 @@ import {
 import {
 	IcAppMetadataSchema,
 	IcCanistersSchema,
+	IcCanistersStrictSchema,
 	IcCkInterfaceSchema,
 	IcCkLinkedAssetsSchema,
 	IcCkMetadataSchema,
@@ -98,6 +99,14 @@ describe('Schema Validation Tests', () => {
 			expect(IcCanistersSchema.parse(validData)).toEqual(validData);
 		});
 
+		// TODO: uncomment when Index canister becomes optional
+		// it('should validate with ledger canister only', () => {
+		// 	const validData = {
+		// 		ledgerCanisterId: mockCanisters.ledgerCanisterId
+		// 	};
+		// 	expect(IcCanistersSchema.parse(validData)).toEqual(validData);
+		// });
+
 		it('should fail with invalid ledger canister id', () => {
 			const invalidData = {
 				...validData,
@@ -120,12 +129,39 @@ describe('Schema Validation Tests', () => {
 			};
 			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
 		});
+	});
+
+	describe('IcCanistersStrictSchema', () => {
+		const validToken = {
+			...mockToken,
+			...mockFee,
+			...mockCanisters,
+			...mockApp
+		};
+
+		it('should validate with correct data', () => {
+			const validData = {
+				ledgerCanisterId: mockCanisters.ledgerCanisterId,
+				indexCanisterId: mockCanisters.ledgerCanisterId
+			};
+
+			expect(IcCanistersSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should validate a token with index canister correct data', () => {
+			expect(() => IcCanistersStrictSchema.parse(validToken)).not.toThrow();
+		});
 
 		it('should fail with missing index canister field', () => {
 			const invalidData = {
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 			};
-			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
+			expect(() => IcCanistersStrictSchema.parse(invalidData)).toThrow();
+		});
+
+		it('should fail for token with missing index canister field', () => {
+			const { indexCanisterId: _, ...tokenWithoutIndexCanisterId } = validToken;
+			expect(() => IcCanistersStrictSchema.parse(tokenWithoutIndexCanisterId)).toThrow();
 		});
 	});
 
@@ -182,6 +218,12 @@ describe('Schema Validation Tests', () => {
 		it('should validate with correct data', () => {
 			expect(IcInterfaceSchema.parse(validData)).toEqual(validData);
 		});
+
+		// TODO: uncomment when Index canister becomes optional
+		// it('should validate without Index canister', () => {
+		// 	const { indexCanisterId: _, ...restValidData } = validData;
+		// 	expect(IcInterfaceSchema.parse(restValidData)).toEqual(restValidData);
+		// });
 
 		it('should fail with incorrect IcCanisters data', () => {
 			const invalidData = {
