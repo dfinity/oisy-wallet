@@ -1,4 +1,4 @@
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-tokens';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,

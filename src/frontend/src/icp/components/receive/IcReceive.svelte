@@ -11,7 +11,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import type { IcToken } from '$icp/types/ic';
+	import type { IcToken } from '$icp/types/ic-tokens';
 	import {
 		isTokenCkBtcLedger,
 		isTokenCkErc20Ledger,
