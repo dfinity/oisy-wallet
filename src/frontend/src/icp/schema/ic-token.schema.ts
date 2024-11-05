@@ -1,6 +1,6 @@
+import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
-import { TokenSchema } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { z } from 'zod';
 

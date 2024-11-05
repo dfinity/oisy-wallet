@@ -16,10 +16,10 @@ import {
 	IcInterfaceSchema,
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
-} from '$icp/validation/ic-token.validation';
+} from '$icp/schema/ic-token.schema';
 import { parseTokenId } from '$lib/validation/token.validation';
 
-describe('Schema Validation Tests', () => {
+describe('ic-token.schema', () => {
 	const { chainId: _, explorerUrl: __, ...mockNetwork } = SEPOLIA_NETWORK;
 
 	const mockToken = {

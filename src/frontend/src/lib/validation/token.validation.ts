@@ -1,62 +1,10 @@
-import { NetworkSchema } from '$lib/types/network';
-import type { OnramperId } from '$lib/types/onramper';
-import type { TokenBuy } from '$lib/types/token';
-import type { AtLeastOne } from '$lib/types/utils';
+import { TokenIdSchema } from '$lib/schema/token.schema';
+import type { TokenId } from '$lib/types/token';
 import { z } from 'zod';
-
-export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
 const TokenIdStringSchema = z.string();
 
-// We are not using the Token type as return value to avoid recursive imports
-export const parseTokenId = (
-	tokenIdString: z.infer<typeof TokenIdStringSchema>
-): z.infer<typeof TokenIdSchema> => {
+export const parseTokenId = (tokenIdString: z.infer<typeof TokenIdStringSchema>): TokenId => {
 	const validString = TokenIdStringSchema.parse(tokenIdString);
 	return TokenIdSchema.parse(Symbol(validString));
 };
-
-export const TokenStandardSchema = z.enum(['ethereum', 'erc20', 'icp', 'icrc', 'bitcoin']);
-
-export const TokenCategorySchema = z.enum(['default', 'custom']);
-
-export const TokenMetadataSchema = z.object({
-	name: z.string(),
-	symbol: z.string(),
-	decimals: z.number(),
-	icon: z.string().optional()
-});
-
-const TokenOisySymbolSchema = z.object({
-	oisySymbol: z.string()
-});
-
-const TokenOisyNameSchema = z.object({
-	prefix: z.string().optional(),
-	oisyName: z.string()
-});
-
-export const TokenAppearanceSchema = z.object({
-	oisySymbol: TokenOisySymbolSchema.optional(),
-	oisyName: TokenOisyNameSchema.optional()
-});
-
-// TODO: use Zod to validate the OnramperId
-export const TokenBuySchema = z.object({
-	onramperId: z.custom<OnramperId>().optional()
-});
-
-export const TokenBuyableSchema = z.object({
-	buy: z.custom<AtLeastOne<TokenBuy>>().optional()
-});
-
-export const TokenSchema = z
-	.object({
-		id: TokenIdSchema,
-		network: NetworkSchema,
-		standard: TokenStandardSchema,
-		category: TokenCategorySchema
-	})
-	.merge(TokenMetadataSchema)
-	.merge(TokenAppearanceSchema)
-	.merge(TokenBuyableSchema);
