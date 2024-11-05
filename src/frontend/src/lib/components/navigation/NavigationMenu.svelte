@@ -5,6 +5,7 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -36,7 +37,7 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={`/explore`}
+			href={AppPath.Explore}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
 			selected={route === 'explore'}
 		>
@@ -45,7 +46,7 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={`/settings?${networkParam($networkId)}`}
+			href={`${AppPath.Settings}?${networkParam($networkId)}`}
 			ariaLabel={$i18n.navigation.alt.settings}
 			selected={route === 'settings'}
 		>
