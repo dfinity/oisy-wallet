@@ -54,7 +54,7 @@
 				class:md:line-clamp-2={clamp === 2}
 				class:md:line-clamp-4={clamp === 4}
 				class:md:line-clamp-6={clamp === 6}
-				class="m-0 mt-2 overflow-hidden text-ellipsis text-start text-xs text-misty-rose line-clamp-2"
+				class="m-0 mt-2 line-clamp-2 overflow-hidden text-ellipsis text-start text-xs text-misty-rose"
 			>
 				{oneLiner}
 			</p>
