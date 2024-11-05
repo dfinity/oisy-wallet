@@ -139,7 +139,16 @@ describe('Schema Validation Tests', () => {
 		};
 
 		it('should validate with correct data', () => {
-			expect(IcCanistersSchema.parse(validToken)).toEqual(validToken);
+			const validData = {
+				ledgerCanisterId: mockCanisters.ledgerCanisterId,
+				indexCanisterId: mockCanisters.ledgerCanisterId
+			};
+
+			expect(IcCanistersSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should validate a token with index canister correct data', () => {
+			expect(() => IcCanistersStrictSchema.parse(validToken)).not.toThrow();
 		});
 
 		it('should fail with missing index canister field', () => {
