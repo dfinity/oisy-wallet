@@ -1,4 +1,4 @@
-import type { IcTransactionUi } from '$icp/types/ic';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import type { CertifiedData } from '$lib/types/store';
 

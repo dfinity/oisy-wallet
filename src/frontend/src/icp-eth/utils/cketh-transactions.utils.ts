@@ -1,5 +1,6 @@
 import type { EthereumNetwork } from '$eth/types/network';
-import type { IcCkLinkedAssets, IcToken, IcTransactionUi } from '$icp/types/ic';
+import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { isNetworkIdETH, isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';

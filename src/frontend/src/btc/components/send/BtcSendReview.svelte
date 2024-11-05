@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Readable } from 'svelte/store';
-	import BtcSendWarnings from './BtcSendWarnings.svelte';
 	import BtcReviewNetwork from '$btc/components/send/BtcReviewNetwork.svelte';
+	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import {
 		BtcPendingSentTransactionsStatus,
