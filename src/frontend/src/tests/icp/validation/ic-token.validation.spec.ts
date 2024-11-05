@@ -23,9 +23,7 @@ describe('ic-token.validation', () => {
 	};
 
 	const validIcCanisters: IcCanisters = {
-		ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-		// TODO: to be removed when indexCanisterId becomes optional
-		indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
+		ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 	};
 
 	const validIcToken: IcToken = {
@@ -33,6 +31,11 @@ describe('ic-token.validation', () => {
 		...validIcCanisters,
 		fee: 123n,
 		position: 1
+	};
+
+	const validIcTokenWithIndex: IcToken = {
+		...validIcToken,
+		indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
 	};
 
 	describe('isIcToken', () => {
@@ -57,13 +60,12 @@ describe('ic-token.validation', () => {
 
 	describe('isIcTokenCanistersStrict', () => {
 		it('should return true for a valid IcToken with IcCanistersStrict', () => {
-			expect(isIcTokenCanistersStrict(validIcToken)).toBe(true);
+			expect(isIcTokenCanistersStrict(validIcTokenWithIndex)).toBe(true);
 		});
 
-		// TODO: test missing indexCanisterId when it becomes optional
-		// it('should return false for a valid IcToken without strict canisters fields', () => {
-		// 	expect(isIcTokenCanistersStrict(validIcToken)).toBe(false);
-		// });
+		it('should return false for a valid IcToken without strict canisters fields', () => {
+			expect(isIcTokenCanistersStrict(validIcToken)).toBe(false);
+		});
 
 		it('should return false for a token type casted to IcToken', () => {
 			expect(isIcTokenCanistersStrict(validToken as IcToken)).toBe(false);
@@ -72,13 +74,12 @@ describe('ic-token.validation', () => {
 
 	describe('isNotIcTokenCanistersStrict', () => {
 		it('should return false for a valid IcToken with IcCanistersStrict', () => {
-			expect(isNotIcTokenCanistersStrict(validIcToken)).toBe(false);
+			expect(isNotIcTokenCanistersStrict(validIcTokenWithIndex)).toBe(false);
 		});
 
-		// TODO: test missing indexCanisterId when it becomes optional
-		// it('should return true for a valid IcToken without strict canisters fields', () => {
-		// 	expect(isNotIcTokenCanistersStrict(validIcToken)).toBe(true);
-		// });
+		it('should return true for a valid IcToken without strict canisters fields', () => {
+			expect(isNotIcTokenCanistersStrict(validIcToken)).toBe(true);
+		});
 
 		it('should return true for a token type casted to IcToken', () => {
 			expect(isNotIcTokenCanistersStrict(validToken as IcToken)).toBe(true);
