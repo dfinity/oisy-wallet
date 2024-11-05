@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import AboutItem from '$lib/components/hero/about/AboutItem.svelte';
+	import AboutItem from '$lib/components/about/AboutItem.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import { ABOUT_WHY_OISY_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
