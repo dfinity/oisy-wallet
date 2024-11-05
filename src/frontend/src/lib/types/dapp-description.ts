@@ -1,6 +1,6 @@
 import dAppDescriptionsJson from '$env/dapp-descriptions.json';
 import { UrlSchema } from '$lib/validation/url.validation';
-import { number, z } from 'zod';
+import { z } from 'zod';
 
 // see https://github.com/dfinity/portal/tree/95c67a5cfe201e4e5cb79f3cf5d18fe16498cd8c?tab=readme-ov-file#object-schema
 const DAppDescriptionSchema = z.object({
@@ -27,10 +27,7 @@ const DAppDescriptionSchema = z.object({
 	video: z.string().optional(),
 	videoContentType: z.enum(['video/webm', 'video/mp4']).optional(),
 
-	submittableId: z.string().optional(),
-
-	nameHeight: number().optional(),
-	tagSectionHeight: number().optional()
+	submittableId: z.string().optional()
 });
 
 const CarouselDappDescriptionSchema = z.object({
@@ -47,11 +44,17 @@ const OisyDappDescriptionSchema = DAppDescriptionSchema.extend({
 	carousel: CarouselDappDescriptionSchema.optional()
 });
 
+const DAppDescriptionDimensionSchema = z.object({
+	nameHeight: z.number(),
+	tagSectionHeight: z.number()
+});
+
 export type OisyDappDescription = z.infer<typeof OisyDappDescriptionSchema>;
 export type FeaturedOisyDappDescription = Omit<OisyDappDescription, 'screenshots'> &
 	Required<Pick<OisyDappDescription, 'screenshots'>>;
 export type CarouselSlideOisyDappDescription = Omit<OisyDappDescription, 'carousel'> &
 	Required<Pick<OisyDappDescription, 'carousel'>>;
+export type OisyDappDescriptionDimension = z.infer<typeof DAppDescriptionDimensionSchema>;
 
 // TODO: to be move to $env
 const parseResult = z.array(OisyDappDescriptionSchema).safeParse(dAppDescriptionsJson);

@@ -2,13 +2,16 @@
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OisyDappDescription } from '$lib/types/dapp-description';
+	import type {
+		OisyDappDescription,
+		OisyDappDescriptionDimension
+	} from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: OisyDappDescription;
 	$: ({ name: dAppName, logo, oneLiner, tags } = dAppDescription);
 
-	let calculateClampValue = (dAppDescription: OisyDappDescription) =>
+	let calculateClampValue = (dAppDescription: OisyDappDescriptionDimension) =>
 		dAppDescription.nameHeight > 30
 			? dAppDescription.tagSectionHeight > 30
 				? 2
@@ -17,9 +20,9 @@
 				? 4
 				: 6;
 
-	export let nameHeight;
-	export let tagSectionHeight;
-	export let clamp;
+	let nameHeight: number;
+	let tagSectionHeight: number;
+	let clamp: number;
 
 	$: clamp = calculateClampValue({ nameHeight, tagSectionHeight });
 </script>
