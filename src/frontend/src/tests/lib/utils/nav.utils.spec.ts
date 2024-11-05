@@ -3,7 +3,9 @@ import {
 	isRouteDappExplorer,
 	isRouteSettings,
 	isRouteTokens,
-	isRouteTransactions, resetRouteParams, type RouteParams
+	isRouteTransactions,
+	resetRouteParams,
+	type RouteParams
 } from '$lib/utils/nav.utils';
 import type { Page } from '@sveltejs/kit';
 import { describe, expect } from 'vitest';
@@ -14,6 +16,9 @@ describe('resetRouteParams', () => {
 
 		Object.keys(result).forEach((key) => {
 			expect(result[key as keyof RouteParams]).toBeNull();
+		});
+	});
+});
 
 describe('Route Check Functions', () => {
 	const mockPage = (id: string): Page => ({
