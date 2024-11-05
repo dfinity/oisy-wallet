@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import type { Token } from '$lib/types/token';

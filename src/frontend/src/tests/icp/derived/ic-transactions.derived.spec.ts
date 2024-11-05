@@ -7,7 +7,7 @@ import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens.env';
 import { icTransactions } from '$icp/derived/ic-transactions.derived';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';

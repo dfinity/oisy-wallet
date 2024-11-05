@@ -9,7 +9,7 @@ import {
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks.icrc.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
 import {
 	MINT_MEMO_REIMBURSE_TRANSACTION,

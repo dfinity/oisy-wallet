@@ -1,6 +1,6 @@
 import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { metadata } from '$icp/api/icrc-ledger.api';
-import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic';
+import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';

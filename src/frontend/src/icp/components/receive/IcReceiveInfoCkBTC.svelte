@@ -11,7 +11,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';

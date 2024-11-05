@@ -1,6 +1,6 @@
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
 import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { i18n } from '$lib/stores/i18n.store';

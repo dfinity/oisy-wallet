@@ -1,4 +1,4 @@
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';

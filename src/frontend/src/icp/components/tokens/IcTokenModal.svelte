@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import Token from '$lib/components/tokens/Token.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';

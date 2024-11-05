@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { Token } from '$lib/types/token';
 

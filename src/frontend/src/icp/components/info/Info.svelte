@@ -5,7 +5,7 @@
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { HideInfoKey } from '$icp/utils/ck.utils';
 	import { isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';

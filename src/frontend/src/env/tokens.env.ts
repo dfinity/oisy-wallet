@@ -5,7 +5,7 @@ import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks.icp
 import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
 import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 

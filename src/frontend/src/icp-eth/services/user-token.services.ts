@@ -4,7 +4,7 @@ import { loadUserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { setUserToken as setUserTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';

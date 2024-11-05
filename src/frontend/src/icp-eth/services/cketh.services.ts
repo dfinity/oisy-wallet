@@ -1,7 +1,7 @@
 import { minterInfo } from '$icp-eth/api/cketh-minter.api';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
-import type { IcCkMetadata } from '$icp/types/ic';
+import type { IcCkMetadata } from '$icp/types/ic-token';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
