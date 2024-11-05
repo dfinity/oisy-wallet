@@ -2,8 +2,8 @@
 	import { fade } from 'svelte/transition';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
-	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
+	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
