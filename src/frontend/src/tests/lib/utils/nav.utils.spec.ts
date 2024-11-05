@@ -1,0 +1,80 @@
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
+import {
+	isRouteDappExplorer,
+	isRouteSettings,
+	isRouteTokens,
+	isRouteTransactions
+} from '$lib/utils/nav.utils';
+import type { Page } from '@sveltejs/kit';
+import { describe, expect } from 'vitest';
+
+describe('Route Check Functions', () => {
+	const mockPage = (id: string): Page => ({
+		params: {},
+		route: { id },
+		status: 200,
+		error: null,
+		data: {},
+		url: URL.prototype,
+		state: {},
+		form: null
+	});
+
+	describe('isRouteTransactions', () => {
+		it('should return true when route id matches Transactions path', () => {
+			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(
+				true
+			);
+		});
+
+		it('should return false when route id does not match Transactions path', () => {
+			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+		});
+	});
+
+	describe('isRouteSettings', () => {
+		it('should return true when route id matches Settings path', () => {
+			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(true);
+		});
+
+		it('should return false when route id does not match Settings path', () => {
+			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
+
+			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+		});
+	});
+
+	describe('isRouteDappExplorer', () => {
+		it('should return true when route id matches Explore path', () => {
+			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Explore}`))).toBe(true);
+		});
+
+		it('should return false when route id does not match Explore path', () => {
+			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+		});
+	});
+
+	describe('isRouteTokens', () => {
+		it('should return true when route id matches ROUTE_ID_GROUP_APP exactly', () => {
+			expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBe(true);
+		});
+
+		it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {
+			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
+		});
+	});
+});
