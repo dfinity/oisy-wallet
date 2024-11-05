@@ -1,4 +1,8 @@
-import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import {
+	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
+	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
+} from '$env/networks.icrc.env';
+import { ERC20_SUGGESTED_TOKENS } from '$env/tokens.erc20.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -11,6 +15,7 @@ import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import type { ContractAddressText } from '$eth/types/address';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -64,16 +69,37 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 }: {
 	defaultToken: T;
 	userToken: TokenToggleable<T> | undefined;
-}): TokenToggleable<T> => ({
-	...defaultToken,
-	enabled:
+}): TokenToggleable<T> => {
+
+	const isEnabledByDefault =
+		'ledgerCanisterId' in defaultToken &&
+		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(
+			(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId
+		);
+
+	const isSuggestedToken =
 		('ledgerCanisterId' in defaultToken &&
-			ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(
+			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(
 				(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId
 			)) ||
-		userToken?.enabled === true,
-	version: userToken?.version
-});
+		('address' in defaultToken &&
+			ERC20_SUGGESTED_TOKENS.map((token) => token.address).includes(
+				(
+					defaultToken as {
+						address: ContractAddressText;
+					}
+				).address
+			));
+
+	return {
+		...defaultToken,
+		enabled:
+			isEnabledByDefault ||
+			(userToken?.enabled === undefined && isSuggestedToken) ||
+			userToken?.enabled === true,
+		version: userToken?.version
+	};
+};
 
 /**
  * Calculates USD balance for the provided token.
