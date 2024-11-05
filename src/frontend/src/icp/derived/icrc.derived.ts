@@ -5,8 +5,8 @@ import {
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
