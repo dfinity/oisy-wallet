@@ -10,6 +10,18 @@ export const checkAnyNonZeroBalance = ($balancesStore: CertifiedStoreData<Balanc
 		(tokenId) => !($balancesStore[tokenId as TokenId]?.data?.isZero() ?? true)
 	);
 
+/**
+ * Check if all balances are zero.
+ *
+ * It requires a minimum length of the balance data to be considered valid.
+ * This is to avoid false positives when, for example, the list of tokens is still loading,
+ * and the number of tokens in the balance store is not the same as the number of tokens in the UI.
+ *
+ * @param $balancesStore - Certified store of balances.
+ * @param minLength - Minimum length of the store to be considered valid.
+ * @returns `true` if all balances are zero and the conditions are met, `false` otherwise.
+ */
+
 export const checkAllBalancesZero = ({
 	$balancesStore,
 	minLength
