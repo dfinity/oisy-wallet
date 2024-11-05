@@ -14,7 +14,8 @@ import {
 	type MapCkEthereumPendingTransactionParams
 } from '$icp-eth/utils/cketh-transactions.utils';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-import type { IcCkLinkedAssets, IcToken, IcTransactionUi } from '$icp/types/ic';
+import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
