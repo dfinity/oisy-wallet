@@ -231,7 +231,7 @@ describe('Schema Validation Tests', () => {
 		it('should fail with invalid canister', () => {
 			const invalidData = {
 				...validData,
-				feeLedgerCanisterId: 123
+				ledgerCanisterId: 123
 			};
 			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
