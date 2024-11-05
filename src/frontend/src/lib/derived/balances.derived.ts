@@ -32,3 +32,8 @@ export const allBalancesZero: Readable<boolean> = derived(
 			minLength: $enabledNetworkTokens.length
 		})
 );
+
+export const noPositiveBalanceAndNotAllBalancesZero: Readable<boolean> = derived(
+	[anyBalanceNonZero, allBalancesZero],
+	([$anyBalanceNonZero, $allBalancesZero]) => !$anyBalanceNonZero && !$allBalancesZero
+);
