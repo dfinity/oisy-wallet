@@ -4,7 +4,7 @@
 	import { page } from '$app/stores';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
-	import AboutWhyOisy from '$lib/components/hero/about/AboutWhyOisy.svelte';
+	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
