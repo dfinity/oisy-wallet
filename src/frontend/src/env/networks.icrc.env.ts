@@ -473,5 +473,8 @@ export const ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS = [
 export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 	...(nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDT)
 		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
+		: []),
+	...(nonNullish(CKERC20_STAGING_DATA?.ckSepoliaUSDC)
+		? [CKERC20_STAGING_DATA.ckSepoliaUSDC.ledgerCanisterId]
 		: [])
 ];
