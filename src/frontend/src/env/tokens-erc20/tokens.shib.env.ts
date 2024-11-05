@@ -2,7 +2,6 @@ import { ETHEREUM_NETWORK } from '$env/networks.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import shib from '$icp-eth/assets/shib.svg';
 import type { TokenId } from '$lib/types/token';
-
 import { parseTokenId } from '$lib/validation/token.validation';
 
 export const SHIB_DECIMALS = 18;
