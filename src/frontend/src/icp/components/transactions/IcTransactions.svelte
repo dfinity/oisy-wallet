@@ -22,12 +22,7 @@
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
-	import {
-		isIcToken,
-		isIcTokenCanistersStrict,
-		isNotIcToken,
-		isNotIcTokenCanistersStrict
-	} from '$icp/utils/ic-token.utils';
+	import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/utils/ic-token.utils';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
