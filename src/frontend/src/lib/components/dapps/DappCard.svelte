@@ -7,6 +7,21 @@
 
 	export let dAppDescription: OisyDappDescription;
 	$: ({ name: dAppName, logo, oneLiner, tags } = dAppDescription);
+
+	let calculateClampValue = (dAppDescription: OisyDappDescription) =>
+		dAppDescription.nameHeight > 30
+			? dAppDescription.tagSectionHeight > 30
+				? 2
+				: 4
+			: dAppDescription.tagSectionHeight > 30
+				? 4
+				: 6;
+
+	export let nameHeight;
+	export let tagSectionHeight;
+	export let clamp;
+
+	$: clamp = calculateClampValue({ nameHeight, tagSectionHeight });
 </script>
 
 <button
@@ -25,15 +40,23 @@
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">
 		<section>
-			<p class="m-0 text-start text-lg font-semibold">{dAppName}</p>
+			<p
+				class="m-0 line-clamp-2 overflow-hidden text-start text-lg font-semibold"
+				bind:offsetHeight={nameHeight}
+			>
+				{dAppName}
+			</p>
 			<p
 				title={oneLiner}
-				class="m-0 mt-2 line-clamp-2 text-ellipsis text-start text-xs text-misty-rose md:line-clamp-4"
+				class:md:line-clamp-2={clamp === 2}
+				class:md:line-clamp-4={clamp === 4}
+				class:md:line-clamp-6={clamp === 6}
+				class="m-0 mt-2 overflow-hidden text-ellipsis text-start text-xs text-misty-rose"
 			>
 				{oneLiner}
 			</p>
 		</section>
-		<section>
+		<section class="max-h-14 min-h-6 overflow-y-hidden" bind:offsetHeight={tagSectionHeight}>
 			<DappTags {dAppName} {tags} />
 		</section>
 	</article>
