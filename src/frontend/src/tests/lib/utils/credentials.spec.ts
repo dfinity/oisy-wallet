@@ -12,7 +12,7 @@ describe('credentials utils', () => {
 			const profile: UserProfile = {
 				credentials: [
 					{
-						issuer: "test",
+						issuer: 'test',
 						credential_type: { ProofOfUniqueness: null },
 						verified_date_timestamp: [123456n]
 					}
@@ -28,7 +28,7 @@ describe('credentials utils', () => {
 			const profile: UserProfile = {
 				credentials: [
 					{
-						issuer: "test",
+						issuer: 'test',
 						credential_type: { ProofOfUniqueness: null },
 						verified_date_timestamp: []
 					}
