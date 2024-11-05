@@ -32,7 +32,12 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { last } from '$lib/utils/array.utils';
-	import { isIcToken, isIcTokenCanistersStrict } from '$icp/utils/ic-token.utils';
+	import {
+		isIcToken,
+		isIcTokenCanistersStrict,
+		isNotIcToken,
+		isNotIcTokenCanistersStrict
+	} from '$icp/utils/ic-token.utils';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -70,7 +75,7 @@
 			return;
 		}
 
-		if (!isIcToken($tokenAsIcToken) || !isIcTokenCanistersStrict($tokenAsIcToken)) {
+		if (isNotIcToken($tokenAsIcToken) || isNotIcTokenCanistersStrict($tokenAsIcToken)) {
 			// On one hand, we assume that the parent component does not mount this component if no transactions can be fetched; on the other hand, we want to avoid displaying an error toast that could potentially appear multiple times.
 			// Therefore, we do not particularly display a visual error. In any case, we cannot load transactions without an Index canister.
 			return;
