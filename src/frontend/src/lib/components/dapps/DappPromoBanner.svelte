@@ -12,7 +12,7 @@
 <article class="relative flex items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
 		<ImgBanner
-			styleClass="bg-brand-subtle-alt h-64 max-h-64"
+			styleClass="bg-brand-subtle-alt max-h-64"
 			src={dAppDescription.screenshots[0]}
 			alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
 		/>
