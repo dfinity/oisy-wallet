@@ -3,6 +3,11 @@ import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
 import { readCanisterIds } from './env.utils';
 
+// We disable the exchange in the E2E tests to load the buttons in the Hero
+dotenv.config({
+	path: join(process.cwd(), '.env.e2e')
+});
+
 dotenv.populate(
 	process.env as DotenvPopulateInput,
 	readCanisterIds({
@@ -10,9 +15,6 @@ dotenv.populate(
 		prefix: 'E2E_'
 	})
 );
-
-// We disable the exchange in the E2E tests to load the buttons in the Hero
-process.env.VITE_EXCHANGE_DISABLED = 'true';
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
