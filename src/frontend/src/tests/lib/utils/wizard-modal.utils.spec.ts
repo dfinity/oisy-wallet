@@ -1,7 +1,6 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 import { WizardModal, type WizardSteps } from '@dfinity/gix-components';
-import { describe, expect, it, vi } from 'vitest';
 
 const mockModal = {
 	set: vi.fn()

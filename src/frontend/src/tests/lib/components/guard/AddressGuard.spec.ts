@@ -11,7 +11,7 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { render } from '@testing-library/svelte';
-import { expect, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('AddressGuard', () => {
 	let apiMock: MockInstance;

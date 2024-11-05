@@ -19,7 +19,7 @@ import {
 import { $balances, bn1, bn2, bn3, certified } from '$tests/mocks/balances.mock';
 import { $exchanges, usd } from '$tests/mocks/exchanges.mock';
 import { $tokens } from '$tests/mocks/tokens.mock';
-import { describe, expect, it, type MockedFunction } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()

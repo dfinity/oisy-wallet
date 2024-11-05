@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "0.9.2",
+	"version": "0.9.3",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -26,7 +26,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"test": "vitest",
+		"test": "tsc --project tsconfig.spec.json --noEmit && vitest",
 		"cargo:test": "./scripts/test.backend.sh",
 		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
@@ -37,7 +37,7 @@
 		"deploy": "scripts/deploy.sh",
 		"tags": "node_modules/.bin/semver $(git tag)",
 		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts",
-		"playwright:install": "playwright install && playwright install-deps",
+		"playwright:install": "playwright install --with-deps",
 		"e2e": "npm run playwright:install && playwright test",
 		"e2e:dev": "npm run playwright:install && NODE_ENV=development playwright test",
 		"e2e:ci": "npm run playwright:install && playwright test --reporter=html",
