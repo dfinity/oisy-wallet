@@ -1,5 +1,9 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
-import type { IcpTransaction, IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
+import type {
+	IcTransactionAddOnsInfo,
+	IcTransactionUi,
+	IcpTransaction
+} from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';

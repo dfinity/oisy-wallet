@@ -1,6 +1,6 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index-ng.api';
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
-import type { IcTransactionUi } from '$icp/types/ic';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
 import {

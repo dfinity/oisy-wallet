@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { type ComponentType } from 'svelte';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';

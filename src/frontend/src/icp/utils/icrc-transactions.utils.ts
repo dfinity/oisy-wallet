@@ -1,4 +1,8 @@
-import type { IcrcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+import type {
+	IcTransactionType,
+	IcTransactionUi,
+	IcrcTransaction
+} from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
