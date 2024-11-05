@@ -7,7 +7,8 @@ import {
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
-import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic';
+import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
