@@ -25,7 +25,6 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 
-
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
 		? mapTokenUi({
