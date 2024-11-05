@@ -14,7 +14,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -94,7 +94,7 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 		...defaultToken,
 		enabled:
 			isEnabledByDefault ||
-			(userToken?.enabled === undefined && isSuggestedToken) ||
+			(isNullish(userToken?.enabled) && isSuggestedToken) ||
 			userToken?.enabled === true,
 		version: userToken?.version
 	};
