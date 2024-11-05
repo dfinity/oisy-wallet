@@ -5,7 +5,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { get } from 'svelte/store';
-import { expect, type MockedFunction } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/qr-code.utils', () => ({
 	decodeQrCodeUrn: vi.fn()
