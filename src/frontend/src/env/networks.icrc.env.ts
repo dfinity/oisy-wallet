@@ -474,4 +474,4 @@ export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 	...(nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDT)
 		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
 		: [])
-]
+];
