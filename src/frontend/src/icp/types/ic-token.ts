@@ -10,7 +10,7 @@ import {
 	IcInterfaceSchema,
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
-} from '$icp/validation/ic-token.validation';
+} from '$icp/schema/ic-token.schema';
 import type { Option } from '$lib/types/utils';
 import { z } from 'zod';
 
