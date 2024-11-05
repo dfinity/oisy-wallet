@@ -26,7 +26,7 @@
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"test": "vitest",
+		"test": "tsc --project tsconfig.spec.json --noEmit && vitest",
 		"cargo:test": "./scripts/test.backend.sh",
 		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
