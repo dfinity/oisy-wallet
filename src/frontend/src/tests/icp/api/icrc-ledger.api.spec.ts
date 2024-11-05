@@ -17,26 +17,46 @@ describe('icrc-ledger.api', () => {
 	});
 
 	describe('balance', () => {
-		it('successfully calls balance endpoint', async () => {
-			const balanceE8s = 314_000_000n;
-			ledgerCanisterMock.balance.mockResolvedValue(balanceE8s);
+		const params = {
+			certified: true,
+			owner: mockPrincipal,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
 
-			const tokens = await balance({
+		const balanceE8s = 314_000_000n;
+
+		const account: IcrcAccount = {
+			owner: mockPrincipal
+		};
+
+		beforeEach(() => {
+			ledgerCanisterMock.balance.mockResolvedValue(balanceE8s);
+		});
+
+		it('successfully calls balance endpoint', async () => {
+			const tokens = await balance(params);
+
+			expect(tokens).toEqual(balanceE8s);
+			expect(ledgerCanisterMock.balance).toBeCalledTimes(1);
+
+			expect(ledgerCanisterMock.balance).toBeCalledWith({
 				certified: true,
-				owner: mockPrincipal,
-				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-				identity: mockIdentity
+				...account
+			});
+		});
+
+		it('successfully calls balance endpoint as query', async () => {
+			const tokens = await balance({
+				...params,
+				certified: false
 			});
 
 			expect(tokens).toEqual(balanceE8s);
 			expect(ledgerCanisterMock.balance).toBeCalledTimes(1);
 
-			const account: IcrcAccount = {
-				owner: mockPrincipal
-			};
-
 			expect(ledgerCanisterMock.balance).toBeCalledWith({
-				certified: true,
+				certified: false,
 				...account
 			});
 		});
