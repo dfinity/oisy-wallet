@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { routeNetwork } from '$lib/derived/nav.derived';
 	import { networks } from '$lib/derived/networks.derived';
-	import TransactionsList from '$lib/components/transactions/TransactionsList.svelte';
+	import Transactions from '$lib/components/transactions/Transactions.svelte';
 
 	onMount(async () => {
 		// We need to know the network on which the transactions should be loaded.
@@ -24,4 +24,4 @@
 	});
 </script>
 
-<TransactionsList />
+<Transactions />
