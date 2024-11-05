@@ -4,9 +4,8 @@
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { EthAddress } from '$lib/types/address';
+import type { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { z } from 'zod';
-
-export const CoingeckoCoinsIdSchema = z.enum(['ethereum', 'bitcoin', 'internet-computer']);
 
 export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
 
