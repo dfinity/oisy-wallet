@@ -18,8 +18,8 @@
 		type EthereumFeeContext as EthereumFeeContextType,
 		initEthereumFeeStore
 	} from '$icp/stores/ethereum-fee.store';
-	import type { IcToken } from '$icp/types/ic';
 	import type { IcTransferParams } from '$icp/types/ic-send';
+	import type { IcToken } from '$icp/types/ic-token';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth

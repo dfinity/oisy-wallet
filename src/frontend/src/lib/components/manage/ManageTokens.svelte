@@ -15,7 +15,7 @@
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
