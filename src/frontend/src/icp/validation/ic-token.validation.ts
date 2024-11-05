@@ -16,6 +16,11 @@ export const IcAppMetadataSchema = z.object({
 
 export const IcCanistersSchema = z.object({
 	ledgerCanisterId: CanisterIdTextSchema,
+	// TODO: Make canister .optional()
+	indexCanisterId: CanisterIdTextSchema
+});
+
+export const IcCanistersStrictSchema = IcCanistersSchema.extend({
 	indexCanisterId: CanisterIdTextSchema
 });
 
