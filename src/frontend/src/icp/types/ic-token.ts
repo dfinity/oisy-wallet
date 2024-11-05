@@ -1,6 +1,6 @@
 import {
 	IcAppMetadataSchema,
-	IcCanistersSchema,
+	IcCanistersSchema, IcCanistersStrictSchema,
 	IcCkInterfaceSchema,
 	IcCkLinkedAssetsSchema,
 	IcCkMetadataSchema,
@@ -18,6 +18,8 @@ export type IcFee = z.infer<typeof IcFeeSchema>;
 export type IcAppMetadata = z.infer<typeof IcAppMetadataSchema>;
 
 export type IcCanisters = z.infer<typeof IcCanistersSchema>;
+
+export type IcCanistersStrict = z.infer<typeof IcCanistersStrictSchema>;
 
 export type IcCkLinkedAssets = z.infer<typeof IcCkLinkedAssetsSchema>;
 

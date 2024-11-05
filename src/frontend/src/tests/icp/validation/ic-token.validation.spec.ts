@@ -131,11 +131,27 @@ describe('Schema Validation Tests', () => {
 	});
 
 	describe('IcCanistersStrictSchema', () => {
+		const validToken = {
+			...mockToken,
+			...mockFee,
+			...mockCanisters,
+			...mockApp
+		};
+
+		it('should validate with correct data', () => {
+			expect(IcCanistersSchema.parse(validToken)).toEqual(validToken);
+		});
+
 		it('should fail with missing index canister field', () => {
 			const invalidData = {
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 			};
 			expect(() => IcCanistersStrictSchema.parse(invalidData)).toThrow();
+		});
+
+		it('should fail for token with missing index canister field', () => {
+			const { indexCanisterId: _, ...tokenWithoutIndexCanisterId } = validToken;
+			expect(() => IcCanistersStrictSchema.parse(tokenWithoutIndexCanisterId)).toThrow();
 		});
 	});
 
