@@ -1,5 +1,3 @@
-import type { OptionBalance } from '$lib/types/balance';
-import type { Option, RequiredExcept } from '$lib/types/utils';
 import {
 	TokenAppearanceSchema,
 	TokenBuySchema,
@@ -9,7 +7,9 @@ import {
 	TokenSchema,
 	TokenStandardSchema,
 	type TokenIdSchema
-} from '$lib/validation/token.validation';
+} from '$lib/schema/token.schema';
+import type { OptionBalance } from '$lib/types/balance';
+import type { Option, RequiredExcept } from '$lib/types/utils';
 import { z } from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;

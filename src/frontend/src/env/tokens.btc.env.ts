@@ -2,6 +2,7 @@ import { BTC_MAINNET_NETWORK, BTC_REGTEST_NETWORK, BTC_TESTNET_NETWORK } from '$
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';
+
 import { parseTokenId } from '$lib/validation/token.validation';
 
 export const BTC_DECIMALS = 8;

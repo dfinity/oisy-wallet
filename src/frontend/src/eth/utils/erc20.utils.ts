@@ -13,6 +13,7 @@ import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-to
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 import type { UserTokenState } from '$lib/types/token-toggleable';
+
 import { parseTokenId } from '$lib/validation/token.validation';
 
 type MapErc20TokenParams = Erc20Contract &
