@@ -17,6 +17,7 @@ import {
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
 } from '$icp/validation/ic-token.validation';
+
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('Schema Validation Tests', () => {
