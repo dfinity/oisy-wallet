@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
-	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 
 	let worker: ExchangeWorker | undefined;
-
 
 	onMount(async () => {
 		if (EXCHANGE_DISABLED) {
