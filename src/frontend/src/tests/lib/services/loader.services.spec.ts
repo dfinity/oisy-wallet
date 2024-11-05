@@ -4,7 +4,7 @@ import * as authServices from '$lib/services/auth.services';
 import { initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
-import { expect, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('loader.services', () => {
 	describe('initSignerAllowance', () => {
