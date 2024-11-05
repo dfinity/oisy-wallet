@@ -4,6 +4,12 @@ import type { TokenId } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
 
+export const checkAnyNonZeroBalance = ($balancesStore: CertifiedStoreData<BalancesData>): boolean =>
+	nonNullish($balancesStore) &&
+	Object.getOwnPropertySymbols($balancesStore).some(
+		(tokenId) => !($balancesStore[tokenId as TokenId]?.data?.isZero() ?? true)
+	);
+
 export const checkAllBalancesZero = ({
 	$balancesStore,
 	minLength
