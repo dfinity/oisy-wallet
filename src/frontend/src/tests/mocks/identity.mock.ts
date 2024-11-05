@@ -5,8 +5,17 @@ export const mockPrincipalText = 'xlmdg-vkosz-ceopx-7wtgu-g3xmd-koiyc-awqaq-7mod
 
 export const mockPrincipal = Principal.fromText(mockPrincipalText);
 
+const transformRequest = () => {
+	console.error(
+		'It looks like the agent is trying to make a request that should have been mocked at',
+		new Error().stack
+	);
+	throw new Error('Not implemented');
+};
+
 export const mockIdentity = {
-	getPrincipal: () => mockPrincipal
+	getPrincipal: () => mockPrincipal,
+	transformRequest
 } as unknown as Identity;
 
 // This is not linked/related to the mock above.
