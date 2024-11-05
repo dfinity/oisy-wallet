@@ -1,7 +1,7 @@
 import type {
 	EthAddressResponse,
+	EthSignTransactionRequest,
 	RejectionCode_1,
-	SignRequest,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -59,7 +59,7 @@ describe('signer.canister', () => {
 			max_fee_per_gas: 5n,
 			chain_id: 10n,
 			nonce: 10n
-		} as SignRequest
+		} as EthSignTransactionRequest
 	};
 	const personalSignParams = {
 		message: 'message'

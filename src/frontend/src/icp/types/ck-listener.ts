@@ -1,4 +1,4 @@
-import type { IcCkLinkedAssets } from '$icp/types/ic';
+import type { IcCkLinkedAssets } from '$icp/types/ic-token';
 import type { PostMessageDataRequestIcCk } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 

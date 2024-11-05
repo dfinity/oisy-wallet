@@ -1,5 +1,5 @@
 import { icrcTokens } from '$icp/derived/icrc.derived';
-import type { IcCkToken, IcToken } from '$icp/types/ic';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token } from '$lib/stores/token.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
