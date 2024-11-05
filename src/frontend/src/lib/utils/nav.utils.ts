@@ -99,6 +99,12 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	};
 };
 
+export const resetRouteParams = (): RouteParams => ({
+	[TOKEN_PARAM]: null,
+	[NETWORK_PARAM]: null,
+	[URI_PARAM]: null
+});
+
 export const switchNetwork = async (networkId: Option<NetworkId>) => {
 	const url = new URL(window.location.href);
 
