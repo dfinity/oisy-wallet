@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Page } from '@sveltejs/kit';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -12,14 +11,18 @@
 	import {
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens,
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
 
-	// If we pass $page directly in the HTML, we get a type error
-	let pageData: Page;
-	$: pageData = $page;
+	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
+	$: route = isRouteSettings($page)
+		? 'settings'
+		: isRouteDappExplorer($page)
+			? 'explore'
+			: isRouteTransactions($page)
+				? 'transactions'
+				: 'tokens';
 </script>
 
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
@@ -27,7 +30,7 @@
 		<NavigationItem
 			href="/"
 			ariaLabel={$i18n.navigation.alt.tokens}
-			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
+			selected={route === 'tokens' || route === 'transactions'}
 		>
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
@@ -36,7 +39,7 @@
 		<NavigationItem
 			href={AppPath.Explore}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
-			selected={isRouteDappExplorer(pageData)}
+			selected={route === 'explore'}
 		>
 			<IconlyUfo />
 			{$i18n.navigation.text.dapp_explorer}
@@ -45,7 +48,7 @@
 		<NavigationItem
 			href={`${AppPath.Settings}?${networkParam($networkId)}`}
 			ariaLabel={$i18n.navigation.alt.settings}
-			selected={isRouteSettings(pageData)}
+			selected={route === 'settings'}
 		>
 			<IconlySettings />
 			{$i18n.navigation.text.settings}
