@@ -399,7 +399,8 @@
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
-			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
+			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
+			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
 			"show_token": "Show token",
@@ -642,8 +643,8 @@
 	"transactions": {
 		"text": {
 			"title": "Transactions",
-			"no_transactions": "You have no transactions.",
-			"sign_in": "Sign in to view your transactions.",
+			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
+			"transaction_history": "Your transaction history will appear here",
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},

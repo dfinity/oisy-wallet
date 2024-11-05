@@ -1,6 +1,5 @@
+import { BLOCKCHAIN_API_URL } from '$env/rest/blockchain.env';
 import type { BitcoinAddressData, BlockchainBtcAddressDataParams } from '$lib/types/blockchain';
-
-const API_URL = import.meta.env.VITE_BLOCKCHAIN_API_URL;
 
 /**
  * Get BTC address data (including transactions).
@@ -17,7 +16,7 @@ export const btcAddressData = ({
 	});
 
 const fetchBlockchainApi = async <T>({ endpointPath }: { endpointPath: string }): Promise<T> => {
-	const response = await fetch(`${API_URL}/${endpointPath}`);
+	const response = await fetch(`${BLOCKCHAIN_API_URL}/${endpointPath}`);
 
 	if (!response.ok) {
 		throw new Error('Blockchain API response not ok.');

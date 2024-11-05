@@ -3,10 +3,10 @@
 
 	const variantClassNames = {
 		default: 'border border-light-grey bg-dust/30',
-		info: 'bg-background-brand-subtle text-foreground-brand-primary',
-		error: 'bg-rusty-red/20 text-rusty-red',
-		warning: 'bg-background-warning-subtle text-foreground-warning',
-		success: 'bg-green-crayola/20 text-green-crayola',
+		info: 'bg-brand-subtle text-brand-primary',
+		error: 'bg-error-subtle text-error',
+		warning: 'bg-warning-subtle text-warning',
+		success: 'bg-success-subtle text-success',
 		outline: 'border border-light-grey bg-off-white'
 	};
 

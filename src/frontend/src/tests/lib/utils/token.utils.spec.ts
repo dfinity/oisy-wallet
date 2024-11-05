@@ -11,7 +11,7 @@ import {
 import { $balances, bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
 import { $exchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
-import { describe, expect, it, type MockedFunction } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
