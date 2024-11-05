@@ -19,6 +19,10 @@ export const IcCanistersSchema = z.object({
 	indexCanisterId: CanisterIdTextSchema.optional()
 });
 
+export const IcCanistersStrictSchema = IcCanistersSchema.extend({
+	indexCanisterId: CanisterIdTextSchema
+});
+
 export const IcCkLinkedAssetsSchema = z.object({
 	twinToken: TokenSchema,
 	feeLedgerCanisterId: CanisterIdTextSchema.optional()
