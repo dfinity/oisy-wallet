@@ -1,4 +1,4 @@
-import type { IcCkToken } from '$icp/types/ic-tokens';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';

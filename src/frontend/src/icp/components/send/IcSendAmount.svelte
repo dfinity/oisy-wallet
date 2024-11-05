@@ -9,7 +9,7 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import type { OptionIcToken } from '$icp/types/ic-tokens';
+	import type { OptionIcToken } from '$icp/types/ic-token';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import {
