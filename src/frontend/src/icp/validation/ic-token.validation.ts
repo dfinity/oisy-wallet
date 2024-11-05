@@ -1,5 +1,5 @@
+import { IcCanistersStrictSchema, IcTokenSchema } from '$icp/schema/ic-token.schema';
 import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
-import { IcCanistersStrictSchema, IcTokenSchema } from '$icp/validation/ic-token.validation';
 import type { Token } from '$lib/types/token';
 
 export const isIcToken = (token: Token): token is IcToken => {

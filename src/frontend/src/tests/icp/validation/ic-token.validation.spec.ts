@@ -6,12 +6,12 @@ import {
 	isIcTokenCanistersStrict,
 	isNotIcToken,
 	isNotIcTokenCanistersStrict
-} from '$icp/utils/ic-token.utils';
+} from '$icp/validation/ic-token.validation';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { describe, expect, it } from 'vitest';
 
-describe('ic-token.utils', () => {
+describe('ic-token.validation', () => {
 	const validToken: Token = {
 		id: parseTokenId('TokenId'),
 		network: ICP_NETWORK,
