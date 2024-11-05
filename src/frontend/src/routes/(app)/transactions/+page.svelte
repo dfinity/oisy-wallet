@@ -2,9 +2,9 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import Transactions from '$lib/components/transactions/Transactions.svelte';
 	import { routeNetwork } from '$lib/derived/nav.derived';
 	import { networks } from '$lib/derived/networks.derived';
-	import Transactions from '$lib/components/transactions/Transactions.svelte';
 
 	onMount(async () => {
 		// We need to know the network on which the transactions should be loaded.
