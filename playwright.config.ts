@@ -3,6 +3,10 @@ import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
 import { readCanisterIds } from './env.utils';
 
+dotenv.config({
+	path: join(process.cwd(), '.env.e2e')
+});
+
 dotenv.populate(
 	process.env as DotenvPopulateInput,
 	readCanisterIds({
