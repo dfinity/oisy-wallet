@@ -5,7 +5,6 @@ import { BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { token } from '$lib/stores/token.store';
 import { get } from 'svelte/store';
-import { describe, expect, it } from 'vitest';
 
 describe('btc-transactions.derived', () => {
 	describe('sortedBtcTransactions', () => {
@@ -70,6 +69,14 @@ describe('btc-transactions.derived', () => {
 
 		it('should return empty array when no transactions exist', () => {
 			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+
+			const result = get(sortedBtcTransactions);
+
+			expect(result).toEqual([]);
+		});
+
+		it('should return empty when transactions is set to nullish', () => {
+			btcTransactionsStore.nullify(BTC_MAINNET_TOKEN_ID);
 
 			const result = get(sortedBtcTransactions);
 

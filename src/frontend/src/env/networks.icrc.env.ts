@@ -21,7 +21,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { EnvTokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkInterface, IcInterface } from '$icp/types/ic';
+import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';

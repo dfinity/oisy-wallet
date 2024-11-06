@@ -3,7 +3,6 @@ import { initSignerContext } from '$lib/stores/signer.store';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
 import { get } from 'svelte/store';
-import { describe, expect, it, vi } from 'vitest';
 
 describe('SignerContext', () => {
 	const identity = Ed25519KeyIdentity.generate();
