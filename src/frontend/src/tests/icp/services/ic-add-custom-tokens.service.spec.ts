@@ -26,6 +26,10 @@ describe('ic-add-custom-tokens.service', () => {
 
 		let spyToastsError: MockInstance;
 
+		let spyLedgerId: MockInstance;
+		let spyGetTransactions: MockInstance;
+		let spyMetadata: MockInstance;
+
 		const validParams = {
 			identity: mockIdentity,
 			icrcTokens: [],
@@ -121,13 +125,31 @@ describe('ic-add-custom-tokens.service', () => {
 
 				expect(result).toEqual({ result: 'error' });
 			});
+
+			it('should return error if metadata are undefined', async () => {
+				spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
+					Principal.fromText(mockLedgerCanisterId)
+				);
+
+				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
+					balance: 100n,
+					transactions: [],
+					oldest_tx_id: [0n]
+				});
+
+				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([]);
+
+				const result = await loadAndAssertAddCustomToken(validParams);
+
+				expect(result).toEqual({ result: 'error' });
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).tokens.import.error.no_metadata }
+				});
+			});
 		});
 
 		describe('success', () => {
-			let spyLedgerId: MockInstance;
-			let spyGetTransactions: MockInstance;
-			let spyMetadata: MockInstance;
-
 			beforeEach(() => {
 				spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
 					Principal.fromText(mockLedgerCanisterId)
