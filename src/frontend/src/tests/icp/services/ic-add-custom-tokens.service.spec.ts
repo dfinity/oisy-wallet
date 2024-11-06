@@ -2,11 +2,14 @@ import { ICP_NETWORK } from '$env/networks.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import * as agent from '$lib/actors/agents.ic';
+import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { HttpAgent } from '@dfinity/agent';
 import { IcrcIndexNgCanister, IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
@@ -21,6 +24,8 @@ describe('ic-add-custom-tokens.service', () => {
 		let spyLedgerCreate: MockInstance;
 		let spyIndexCreate: MockInstance;
 
+		let spyToastsError: MockInstance;
+
 		const validParams = {
 			identity: mockIdentity,
 			icrcTokens: [],
@@ -30,6 +35,8 @@ describe('ic-add-custom-tokens.service', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			spyLedgerCreate = vi
 				.spyOn(IcrcLedgerCanister, 'create')
@@ -60,6 +67,10 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 
 				expect(result).toEqual({ result: 'error' });
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
+				});
 			});
 
 			it('should return error if indexCanisterId is missing', async () => {
@@ -70,6 +81,10 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 
 				expect(result).toEqual({ result: 'error' });
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).tokens.import.error.missing_index_id }
+				});
 			});
 
 			it('should return error if token is already available', async () => {
