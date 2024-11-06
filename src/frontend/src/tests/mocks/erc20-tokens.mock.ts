@@ -7,7 +7,8 @@ import { mockValidToken } from '$tests/mocks/tokens.mock';
 export const mockValidErc20Token: Erc20Token = {
 	...mockValidToken,
 	id: parseTokenId('Erc20TokenId'),
-	address: mockEthAddress,
 	network: ETHEREUM_NETWORK,
+	standard: 'erc20',
+	address: mockEthAddress,
 	exchange: 'erc20'
 };
