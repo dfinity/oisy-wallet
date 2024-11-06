@@ -150,5 +150,19 @@
 		"description": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market while earning interest, and borrowers can access liquidity by providing collateral that exceeds the borrowed amount.\nIt is completely permissionless, meaning anyone can access and interact with Aave through a user-friendly interface or directly with its smart contracts on supported blockchain networks.",
 		"logo": "/images/dapps/aave-logo.svg",
 		"screenshots": ["/images/dapps/aave.webp"]
+	},
+	{
+		"id": "zkpoker",
+		"name": "zkPoker",
+		"oneLiner": "Cutting-edge cryptography and blockchain intertwine to a secure and transparent playing environment for all.",
+		"callToAction": "You are invited",
+		"website": "https://zkpoker.app/",
+		"twitter": "https://x.com/zkpokerapp",
+		"tags": ["WalletConnect", "Game"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Cutting-edge cryptography and blockchain intertwine to provide a secure and transparent playing environment for all.<br/><br/>Play with your choice of digital assets—ICP now, with BTC, ETH, SOL, and USDC coming soon. Fully on-chain, no central points of failure. Our blockchain-based RNG ensures provably fair gaming, using open-source technology from Dfinity’s R&D team.",
+		"logo": "/images/dapps/zkpoker-logo.svg",
+		"screenshots": ["/images/dapps/zkpoker.webp"]
 	}
 ]
