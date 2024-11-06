@@ -11,6 +11,7 @@
 	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -21,7 +22,6 @@
 	import { token } from '$lib/stores/token.store';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 
 	export let transaction: EthTransactionUi;
 
@@ -39,30 +39,30 @@
 	$: ckTokenSymbol = isSupportedEthToken($token)
 		? $token.twinTokenSymbol
 		: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-		(($token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
+			(($token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
 
 	let label: string;
 	$: label =
 		type === 'withdraw'
 			? replacePlaceholders(
-				pending
-					? $i18n.transaction.label.converting_ck_token
-					: $i18n.transaction.label.ck_token_converted,
-				{
-					$twinToken: $tokenSymbol ?? '',
-					$ckToken: ckTokenSymbol
-				}
-			)
-			: type === 'deposit'
-				? replacePlaceholders(
 					pending
-						? $i18n.transaction.label.converting_twin_token
-						: $i18n.transaction.label.ck_token_sent,
+						? $i18n.transaction.label.converting_ck_token
+						: $i18n.transaction.label.ck_token_converted,
 					{
 						$twinToken: $tokenSymbol ?? '',
 						$ckToken: ckTokenSymbol
 					}
 				)
+			: type === 'deposit'
+				? replacePlaceholders(
+						pending
+							? $i18n.transaction.label.converting_twin_token
+							: $i18n.transaction.label.ck_token_sent,
+						{
+							$twinToken: $tokenSymbol ?? '',
+							$ckToken: ckTokenSymbol
+						}
+					)
 				: type === 'send'
 					? $i18n.send.text.send
 					: $i18n.receive.text.receive;
