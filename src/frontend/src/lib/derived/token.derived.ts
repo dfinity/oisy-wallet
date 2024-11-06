@@ -1,8 +1,7 @@
 import { isBitcoinToken } from '$btc/utils/token.utils';
-import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
-import type { EthereumUserToken } from '$eth/types/erc20-user-token';
+import { isEthereumUserTokenDisabled } from '$eth/types/erc20-user-token';
 import { icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { isIcrcCustomTokenDisabled } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { token } from '$lib/stores/token.store';
@@ -40,9 +39,9 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 		let toggleable = false;
 
 		if (icTokenIcrcCustomToken($token)) {
-			toggleable = !isIcTokenIcrcCustomTokenDisabled($token);
+			toggleable = !isIcrcCustomTokenDisabled($token);
 		} else if (icTokenEthereumUserToken($token)) {
-			toggleable = !isIcTokenEthereumUserTokenDisabled($token);
+			toggleable = !isEthereumUserTokenDisabled($token);
 		} else if (isBitcoinToken($token)) {
 			toggleable = false;
 		}
@@ -52,21 +51,7 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 		console.log('enabled' in $token);
 
 		return toggleable;
-	} else {
-		return false;
 	}
+
+	return false;
 });
-
-function isIcTokenIcrcCustomTokenDisabled(token: IcrcCustomToken): boolean {
-	let outdated: boolean;
-	outdated = token.indexCanisterVersion === 'outdated';
-	return (
-		(token.category === 'default' && token.standard === 'icp') ||
-		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(token.ledgerCanisterId) ||
-		outdated
-	);
-}
-
-function isIcTokenEthereumUserTokenDisabled(token: EthereumUserToken): boolean {
-	return token.category === 'default' && token.standard === 'ethereum';
-}

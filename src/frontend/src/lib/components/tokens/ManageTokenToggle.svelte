@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
-	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
+	import { type EthereumUserToken, isEthereumUserTokenDisabled } from '$eth/types/erc20-user-token';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let token: EthereumUserToken;
 
 	let disabled = false;
-	$: disabled = token.category === 'default' && token.standard === 'ethereum';
+	$: disabled = isEthereumUserTokenDisabled(token);
 
 	let checked: boolean;
 	$: checked = token.enabled ?? false;
