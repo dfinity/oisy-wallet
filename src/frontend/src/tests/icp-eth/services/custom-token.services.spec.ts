@@ -11,8 +11,8 @@ import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
+import { expect } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import {expect} from "vitest";
 
 describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
@@ -151,12 +151,11 @@ describe('custom-token.services', () => {
 						category: 'custom',
 						position: 4,
 						enabled: true,
-						standard: "icrc",
+						standard: 'icrc',
 						version: 1n
 					})
 				}
 			]);
-
 		});
 	});
 });
