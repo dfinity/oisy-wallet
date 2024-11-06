@@ -30,6 +30,12 @@ describe('custom-token.services', () => {
 	});
 
 	describe('autoLoadCustomToken', () => {
+		const mockValidSendToken = {
+			...mockValidIcToken,
+			twinTokenSymbol: mockIcrcCustomTokens[0].symbol,
+			standard: 'erc20' as const
+		};
+
 		it('should return "skipped" when the token standard does not match', async () => {
 			const result = await autoLoadCustomToken({
 				icrcCustomTokens: mockIcrcCustomTokens,
@@ -40,123 +46,134 @@ describe('custom-token.services', () => {
 			expect(result.result).toBe('skipped');
 		});
 
-		const assertSetCustomToken = async ({
-			customTokens,
-			expectedVersion
-		}: {
-			customTokens: IcrcCustomToken[];
-			expectedVersion: [] | [bigint];
-		}) => {
-			const spySetCustomToken = backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
-			const spyListCustomTokens = backendCanisterMock.listCustomTokens.mockResolvedValue([]);
+		describe("success", () => {
+			const assertSetCustomToken = async ({
+													customTokens,
+													expectedVersion
+												}: {
+				customTokens: IcrcCustomToken[];
+				expectedVersion: [] | [bigint];
+			}) => {
+				const spySetCustomToken = backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
+				const spyListCustomTokens = backendCanisterMock.listCustomTokens.mockResolvedValue([]);
 
-			const mockSendToken = {
-				...mockValidIcToken,
-				twinTokenSymbol: customTokens[0].symbol,
-				standard: 'erc20' as const
-			};
+				const mockSendToken = {
+					...mockValidIcToken,
+					twinTokenSymbol: customTokens[0].symbol,
+					standard: 'erc20' as const
+				};
 
-			const { result } = await autoLoadCustomToken({
-				icrcCustomTokens: customTokens,
-				sendToken: mockSendToken,
-				identity: mockIdentity
-			});
+				const { result } = await autoLoadCustomToken({
+					icrcCustomTokens: customTokens,
+					sendToken: mockSendToken,
+					identity: mockIdentity
+				});
 
-			expect(result).toBe('loaded');
+				expect(result).toBe('loaded');
 
-			expect(spySetCustomToken).toHaveBeenNthCalledWith(1, {
-				token: {
-					enabled: true,
-					version: expectedVersion,
+				expect(spySetCustomToken).toHaveBeenNthCalledWith(1, {
 					token: {
-						Icrc: {
-							index_id: [Principal.fromText(mockSendToken.indexCanisterId)],
-							ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
+						enabled: true,
+						version: expectedVersion,
+						token: {
+							Icrc: {
+								index_id: [Principal.fromText(mockSendToken.indexCanisterId)],
+								ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
+							}
 						}
 					}
-				}
-			});
+				});
 
-			expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
-		};
-
-		it('should call setCustomToken with a new custom token', async () => {
-			await assertSetCustomToken({ customTokens: mockIcrcCustomTokens, expectedVersion: [] });
-		});
-
-		it('should call setCustomToken to update a custom token', async () => {
-			const customTokens: IcrcCustomToken[] = [
-				{
-					...mockIcrcCustomTokens[0],
-					version: 1n
-				},
-				mockIcrcCustomTokens[1]
-			];
-
-			await assertSetCustomToken({
-				customTokens,
-				expectedVersion: [customTokens[0].version ?? 0n]
-			});
-		});
-
-		it('should load tokens after set custom token', async () => {
-			const mockSendToken = {
-				...mockValidIcToken,
-				twinTokenSymbol: mockIcrcCustomTokens[0].symbol,
-				standard: 'erc20' as const
+				expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
 			};
 
-			backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
-			const spyListCustomTokens = backendCanisterMock.listCustomTokens.mockResolvedValue([
-				{
-					token: {
-						Icrc: {
-							index_id: [Principal.fromText(mockSendToken.indexCanisterId)],
-							ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
-						}
-					},
-					version: [1n],
-					enabled: true
-				}
-			]);
-
-			const spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
-				['icrc1:name', { Text: mockSendToken.name }],
-				['icrc1:symbol', { Text: mockSendToken.symbol }],
-				['icrc1:decimals', { Nat: BigInt(mockSendToken.decimals) }],
-				['icrc1:fee', { Nat: mockSendToken.fee }]
-			]);
-
-			const { result } = await autoLoadCustomToken({
-				icrcCustomTokens: mockIcrcCustomTokens,
-				sendToken: mockSendToken,
-				identity: mockIdentity
+			it('should call setCustomToken with a new custom token', async () => {
+				await assertSetCustomToken({ customTokens: mockIcrcCustomTokens, expectedVersion: [] });
 			});
 
-			expect(result).toBe('loaded');
-
-			expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
-
-			expect(spyMetadata).toHaveBeenCalledWith({ certified: true });
-
-			const store = get(icrcCustomTokensStore);
-
-			expect(store).toHaveLength(1);
-			expect(store).toEqual([
-				{
-					certified: true,
-					data: expect.objectContaining({
-						...mockValidIcToken,
-						id: expect.any(Symbol),
-						category: 'custom',
-						position: 4,
-						enabled: true,
-						standard: "icrc",
+			it('should call setCustomToken to update a custom token', async () => {
+				const customTokens: IcrcCustomToken[] = [
+					{
+						...mockIcrcCustomTokens[0],
 						version: 1n
-					})
-				}
-			]);
+					},
+					mockIcrcCustomTokens[1]
+				];
 
+				await assertSetCustomToken({
+					customTokens,
+					expectedVersion: [customTokens[0].version ?? 0n]
+				});
+			});
+
+			it('should load tokens after set custom token', async () => {
+				backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
+				const spyListCustomTokens = backendCanisterMock.listCustomTokens.mockResolvedValue([
+					{
+						token: {
+							Icrc: {
+								index_id: [Principal.fromText(mockValidSendToken.indexCanisterId)],
+								ledger_id: Principal.fromText(mockValidSendToken.ledgerCanisterId)
+							}
+						},
+						version: [1n],
+						enabled: true
+					}
+				]);
+
+				const spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
+					['icrc1:name', { Text: mockValidSendToken.name }],
+					['icrc1:symbol', { Text: mockValidSendToken.symbol }],
+					['icrc1:decimals', { Nat: BigInt(mockValidSendToken.decimals) }],
+					['icrc1:fee', { Nat: mockValidSendToken.fee }]
+				]);
+
+				const { result } = await autoLoadCustomToken({
+					icrcCustomTokens: mockIcrcCustomTokens,
+					sendToken: mockValidSendToken,
+					identity: mockIdentity
+				});
+
+				expect(result).toBe('loaded');
+
+				expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+
+				expect(spyMetadata).toHaveBeenCalledWith({ certified: true });
+
+				const store = get(icrcCustomTokensStore);
+
+				expect(store).toHaveLength(1);
+				expect(store).toEqual([
+					{
+						certified: true,
+						data: expect.objectContaining({
+							...mockValidIcToken,
+							id: expect.any(Symbol),
+							category: 'custom',
+							position: 4,
+							enabled: true,
+							standard: "icrc",
+							version: 1n
+						})
+					}
+				]);
+
+			});
 		});
+
+		describe("error", () => {
+			it.only('should call setCustomToken with a new custom token', async () => {
+				const err = new Error('test');
+				backendCanisterMock.setCustomToken.mockRejectedValue(err);
+
+				const { result  } = await autoLoadCustomToken({
+					icrcCustomTokens: mockIcrcCustomTokens,
+					sendToken: mockValidSendToken,
+					identity: mockIdentity
+				});
+
+				expect(result).toBe('error');
+			});
+		})
 	});
 });
