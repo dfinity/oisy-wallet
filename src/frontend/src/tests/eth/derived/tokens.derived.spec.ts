@@ -22,13 +22,26 @@ describe('tokens.derived', () => {
 			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN]);
 		});
 
-		it('should return ETH and Sepolia when testnets are enabled', () => {
+		it('should return an empty array when mainnet is disabled', () => {
+			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementationOnce(() => false);
+
+			expect(get(enabledEthereumTokens)).toEqual([]);
+		});
+
+		it('should return only Sepolia ETH when testnets are enabled and mainnet disabled', () => {
+			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementationOnce(() => false);
+			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+
+			expect(get(enabledEthereumTokens)).toEqual([SEPOLIA_TOKEN]);
+		});
+
+		it('should return ETH and Sepolia ETH when testnets are enabled', () => {
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
 			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
 		});
 
-		it('should return ETH and Sepolia when in local env', () => {
+		it('should return ETH and Sepolia ETH when in local env', () => {
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => true);
 
 			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
