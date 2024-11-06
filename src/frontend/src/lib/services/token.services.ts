@@ -21,7 +21,7 @@ export const loadTokenAndRun = async ({
 	await callback();
 };
 
-interface AutoLoadTokenParams<
+export interface AutoLoadTokenParams<
 	T extends SaveUserToken | SaveCustomToken,
 	K extends Erc20Token | IcCkToken
 > {
