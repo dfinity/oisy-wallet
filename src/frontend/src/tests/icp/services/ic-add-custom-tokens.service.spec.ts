@@ -97,20 +97,6 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 			});
 
-			it('should return error if indexCanisterId is missing', async () => {
-				const result = await loadAndAssertAddCustomToken({
-					identity: mockIdentity,
-					icrcTokens: [],
-					ledgerCanisterId: mockLedgerCanisterId
-				});
-
-				expect(result).toEqual({ result: 'error' });
-
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).tokens.import.error.missing_index_id }
-				});
-			});
-
 			it('should return error if token is already available', async () => {
 				const result = await loadAndAssertAddCustomToken({
 					identity: mockIdentity,
@@ -221,6 +207,16 @@ describe('ic-add-custom-tokens.service', () => {
 					['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
 					['icrc1:fee', { Nat: tokenFee }]
 				]);
+			});
+
+			it('should accept loading without indexCanisterId', async () => {
+				const { result } = await loadAndAssertAddCustomToken({
+					identity: mockIdentity,
+					icrcTokens: [],
+					ledgerCanisterId: mockLedgerCanisterId
+				});
+
+				expect(result).toBe('success');
 			});
 
 			it('should init ledger with expected canister id', async () => {
