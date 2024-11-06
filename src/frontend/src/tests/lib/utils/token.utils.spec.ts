@@ -8,8 +8,8 @@ import {
 	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
-import { $balances, bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
-import { $exchanges } from '$tests/mocks/exchanges.mock';
+import { bn1, bn2, bn3, mockBalances } from '$tests/mocks/balances.mock';
+import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
 import type { MockedFunction } from 'vitest';
 
@@ -103,17 +103,29 @@ describe('calculateTokenUsdBalance', () => {
 	});
 
 	it('should correctly calculate USD balance for the token', () => {
-		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances, $exchanges });
+		const result = calculateTokenUsdBalance({
+			token: ETHEREUM_TOKEN,
+			$balances: mockBalances,
+			$exchanges: mockExchanges
+		});
 		expect(result).toEqual(bn3.toNumber());
 	});
 
 	it('should return undefined if exchange rate is not available', () => {
-		const result = calculateTokenUsdBalance({ token: ICP_TOKEN, $balances, $exchanges: {} });
+		const result = calculateTokenUsdBalance({
+			token: ICP_TOKEN,
+			$balances: mockBalances,
+			$exchanges: {}
+		});
 		expect(result).toEqual(undefined);
 	});
 
 	it('should return 0 if balances store is not available', () => {
-		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
+		const result = calculateTokenUsdBalance({
+			token: ETHEREUM_TOKEN,
+			$balances: {},
+			$exchanges: mockExchanges
+		});
 		expect(result).toEqual(0);
 	});
 
@@ -121,7 +133,7 @@ describe('calculateTokenUsdBalance', () => {
 		const result = calculateTokenUsdBalance({
 			token: ETHEREUM_TOKEN,
 			$balances: undefined,
-			$exchanges
+			$exchanges: mockExchanges
 		});
 		expect(result).toEqual(0);
 	});
@@ -139,7 +151,11 @@ describe('mapTokenUi', () => {
 	});
 
 	it('should return an object TokenUi with the correct values', () => {
-		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances, $exchanges });
+		const result = mapTokenUi({
+			token: ETHEREUM_TOKEN,
+			$balances: mockBalances,
+			$exchanges: mockExchanges
+		});
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
 			balance: bn3,
@@ -148,7 +164,7 @@ describe('mapTokenUi', () => {
 	});
 
 	it('should return an object TokenUi with undefined usdBalance if exchange rate is not available', () => {
-		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances, $exchanges: {} });
+		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: mockBalances, $exchanges: {} });
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
 			balance: bn3,
@@ -157,7 +173,11 @@ describe('mapTokenUi', () => {
 	});
 
 	it('should return an object TokenUi with undefined balance if balances store is not initiated', () => {
-		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: undefined, $exchanges });
+		const result = mapTokenUi({
+			token: ETHEREUM_TOKEN,
+			$balances: undefined,
+			$exchanges: mockExchanges
+		});
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
 			balance: undefined,
@@ -166,7 +186,7 @@ describe('mapTokenUi', () => {
 	});
 
 	it('should return an object TokenUi with undefined balance if balances store is not available', () => {
-		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
+		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges: mockExchanges });
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
 			balance: undefined,
@@ -178,7 +198,7 @@ describe('mapTokenUi', () => {
 		const result = mapTokenUi({
 			token: ETHEREUM_TOKEN,
 			$balances: { [ETHEREUM_TOKEN.id]: null },
-			$exchanges
+			$exchanges: mockExchanges
 		});
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
