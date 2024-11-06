@@ -1,5 +1,6 @@
-import { TokenIdSchema, TokenSchema, type Token, type TokenId } from '$lib/types/token';
-import { z, type SafeParseReturnType } from 'zod';
+import { TokenIdSchema, TokenSchema } from '$lib/schema/token.schema';
+import type { Token, TokenId } from '$lib/types/token';
+import { z } from 'zod';
 
 const TokenIdStringSchema = z.string();
 
@@ -12,9 +13,3 @@ export const isToken = (token: unknown): token is Token => {
 	const { success } = TokenSchema.safeParse(token);
 	return success;
 };
-
-export const parseTokenId = (tokenIdString: string): TokenId =>
-	TokenIdSchema.parse(Symbol(tokenIdString));
-
-export const safeParseToken = (token: object): SafeParseReturnType<object, Token> =>
-	TokenSchema.safeParse(token);

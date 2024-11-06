@@ -6,11 +6,9 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard, TokenUi } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
-import type { Option } from '$lib/types/utils';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { safeParseToken } from '$lib/validation/token.validation';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
@@ -185,6 +183,3 @@ export const sumUsdBalances = ([usdBalance1, usdBalance2]: [
  */
 export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>
 	'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
-
-export const isToken = (token: Option<unknown>): token is Token =>
-	nonNullish(token) && safeParseToken(token).success;

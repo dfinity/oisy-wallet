@@ -5,11 +5,11 @@ import type { TokenId, TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import {
 	isRequiredTokenWithLinkedData,
-	isToken,
 	sumBalances,
 	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
+import { isToken } from '$lib/validation/token.validation';
 import { nonNullish } from '@dfinity/utils';
 
 /**
