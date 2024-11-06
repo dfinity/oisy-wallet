@@ -31,6 +31,7 @@ package/
 .env.*
 !.env.example
 !.env.test
+!.env.e2e
 
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
