@@ -10,10 +10,9 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockedAgent } from '$tests/mocks/agents.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -32,7 +31,7 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	return {
 		...actual,
 		// eslint-disable-next-line require-await
-		getAgent: async () => mockedAgent
+		getAgent: async () => mock<HttpAgent>()
 	};
 });
 
