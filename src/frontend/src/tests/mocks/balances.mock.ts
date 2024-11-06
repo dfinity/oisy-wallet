@@ -10,7 +10,7 @@ export const bn1 = BigNumber.from(1n);
 export const bn2 = BigNumber.from(2n);
 export const bn3 = BigNumber.from(3n);
 
-export const $balances: CertifiedStoreData<BalancesData> = {
+export const mockBalances: CertifiedStoreData<BalancesData> = {
 	[ICP_TOKEN.id]: { data: bn1, certified },
 	[BTC_MAINNET_TOKEN.id]: { data: bn2, certified },
 	[ETHEREUM_TOKEN.id]: { data: bn3, certified }
