@@ -46,10 +46,6 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 			toggleable = false;
 		}
 
-		console.log($token);
-		console.log(toggleable);
-		console.log('enabled' in $token);
-
 		return toggleable;
 	}
 
