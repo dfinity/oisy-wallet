@@ -11,8 +11,8 @@ import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
+import { expect } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import {expect} from "vitest";
 
 describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
@@ -46,11 +46,11 @@ describe('custom-token.services', () => {
 			expect(result.result).toBe('skipped');
 		});
 
-		describe("success", () => {
+		describe('success', () => {
 			const assertSetCustomToken = async ({
-													customTokens,
-													expectedVersion
-												}: {
+				customTokens,
+				expectedVersion
+			}: {
 				customTokens: IcrcCustomToken[];
 				expectedVersion: [] | [bigint];
 			}) => {
@@ -152,21 +152,20 @@ describe('custom-token.services', () => {
 							category: 'custom',
 							position: 4,
 							enabled: true,
-							standard: "icrc",
+							standard: 'icrc',
 							version: 1n
 						})
 					}
 				]);
-
 			});
 		});
 
-		describe("error", () => {
+		describe('error', () => {
 			it.only('should call setCustomToken with a new custom token', async () => {
 				const err = new Error('test');
 				backendCanisterMock.setCustomToken.mockRejectedValue(err);
 
-				const { result  } = await autoLoadCustomToken({
+				const { result } = await autoLoadCustomToken({
 					icrcCustomTokens: mockIcrcCustomTokens,
 					sendToken: mockValidSendToken,
 					identity: mockIdentity
@@ -174,6 +173,6 @@ describe('custom-token.services', () => {
 
 				expect(result).toBe('error');
 			});
-		})
+		});
 	});
 });
