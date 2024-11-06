@@ -28,17 +28,17 @@
 	>
 		<div class="pointer-events-auto flex flex-row items-center gap-4">
 			<ExternalLinkIcon
-				href={OISY_REPO_URL}
-				ariaLabel={$i18n.navigation.text.source_code_on_github}
-			>
-				<IconGitHub />
-			</ExternalLinkIcon>
-
-			<ExternalLinkIcon
 				href={OISY_TWITTER_URL}
 				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 			>
 				<IconTwitter />
+			</ExternalLinkIcon>
+
+			<ExternalLinkIcon
+				href={OISY_REPO_URL}
+				ariaLabel={$i18n.navigation.text.source_code_on_github}
+			>
+				<IconGitHub />
 			</ExternalLinkIcon>
 
 			<a
