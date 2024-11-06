@@ -21,6 +21,13 @@ describe('ic-add-custom-tokens.service', () => {
 		let spyLedgerCreate: MockInstance;
 		let spyIndexCreate: MockInstance;
 
+		const validParams = {
+			identity: mockIdentity,
+			icrcTokens: [],
+			ledgerCanisterId: mockLedgerCanisterId,
+			indexCanisterId: mockIndexCanisterId
+		};
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -34,6 +41,17 @@ describe('ic-add-custom-tokens.service', () => {
 		});
 
 		describe('error', () => {
+			it('should return error if identity is missing', async () => {
+				await expect(() =>
+					loadAndAssertAddCustomToken({
+						identity: undefined,
+						icrcTokens: [],
+						ledgerCanisterId: mockLedgerCanisterId,
+						indexCanisterId: mockIndexCanisterId
+					})
+				).rejects.toThrow();
+			});
+
 			it('should return error if ledgerCanisterId is missing', async () => {
 				const result = await loadAndAssertAddCustomToken({
 					identity: mockIdentity,
@@ -78,19 +96,22 @@ describe('ic-add-custom-tokens.service', () => {
 
 				expect(result).toEqual({ result: 'error' });
 			});
+
+			it('should return error if ledger is not related to index', async () => {
+				indexCanisterMock.ledgerId.mockResolvedValue(
+					Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai')
+				);
+
+				const result = await loadAndAssertAddCustomToken(validParams);
+
+				expect(result).toEqual({ result: 'error' });
+			});
 		});
 
 		describe('success', () => {
 			let spyLedgerId: MockInstance;
 			let spyGetTransactions: MockInstance;
 			let spyMetadata: MockInstance;
-
-			const validParams = {
-				identity: mockIdentity,
-				icrcTokens: [],
-				ledgerCanisterId: mockLedgerCanisterId,
-				indexCanisterId: mockIndexCanisterId
-			};
 
 			beforeEach(() => {
 				spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
