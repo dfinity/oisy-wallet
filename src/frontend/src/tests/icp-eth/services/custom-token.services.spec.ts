@@ -3,6 +3,8 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as agent from '$lib/actors/agents.ic';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -11,12 +13,17 @@ import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
+import { expect, type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
 	const ledgerCanisterMock = mock<IcrcLedgerCanister>();
+
+	let spyToastsError: MockInstance;
+
+	// we mock console.error just to avoid unnecessary logs while running the tests
+	vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -27,6 +34,8 @@ describe('custom-token.services', () => {
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 
 		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
+
+		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 	});
 
 	describe('autoLoadCustomToken', () => {
@@ -161,9 +170,11 @@ describe('custom-token.services', () => {
 		});
 
 		describe('error', () => {
-			it.only('should call setCustomToken with a new custom token', async () => {
+			it('should result in error if setCustomToken fails', async () => {
 				const err = new Error('test');
 				backendCanisterMock.setCustomToken.mockRejectedValue(err);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([]);
 
 				const { result } = await autoLoadCustomToken({
 					icrcCustomTokens: mockIcrcCustomTokens,
@@ -172,6 +183,64 @@ describe('custom-token.services', () => {
 				});
 
 				expect(result).toBe('error');
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).init.error.icrc_custom_token },
+					err
+				});
+			});
+
+			it('should result with loaded but toastError if listCustomTokens fails', async () => {
+				backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
+
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				const { result } = await autoLoadCustomToken({
+					icrcCustomTokens: mockIcrcCustomTokens,
+					sendToken: mockValidSendToken,
+					identity: mockIdentity
+				});
+
+				expect(result).toBe('loaded');
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).init.error.icrc_canisters },
+					err
+				});
+			});
+
+			it('should result with loaded but toastError if metadata fails', async () => {
+				backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([
+					{
+						token: {
+							Icrc: {
+								index_id: [Principal.fromText(mockValidSendToken.indexCanisterId)],
+								ledger_id: Principal.fromText(mockValidSendToken.ledgerCanisterId)
+							}
+						},
+						version: [1n],
+						enabled: true
+					}
+				]);
+
+				const err = new Error('test');
+				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				const { result } = await autoLoadCustomToken({
+					icrcCustomTokens: mockIcrcCustomTokens,
+					sendToken: mockValidSendToken,
+					identity: mockIdentity
+				});
+
+				expect(result).toBe('loaded');
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).init.error.icrc_canisters },
+					err
+				});
 			});
 		});
 	});
