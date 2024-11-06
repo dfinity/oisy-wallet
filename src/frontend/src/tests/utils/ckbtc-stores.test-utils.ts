@@ -5,7 +5,7 @@ import {
 } from '$env/networks.icrc.env';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
