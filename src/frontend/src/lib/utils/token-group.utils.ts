@@ -9,7 +9,6 @@ import {
 	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
-import { isToken } from '$lib/validation/token.validation';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -190,8 +189,8 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 	}>(
 		(acc, token) => ({
 			...acc,
-			...('twinToken' in token &&
-			isToken(token.twinToken) &&
+			...(isIcCkToken(token) &&
+			nonNullish(token.twinToken) &&
 			token.decimals === token.twinToken.decimals
 				? // If the token has a twinToken, and both have the same decimals, group them together.
 					{
