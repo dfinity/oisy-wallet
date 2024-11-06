@@ -160,7 +160,7 @@
 		"twitter": "https://twitter.com/CurveFinance",
 		"github": "https://github.com/curvefi",
 		"telegram": "https://t.me/curvefi",
-		"tags": ["WalletConnect","Liquidity", "DEX"],
+		"tags": ["WalletConnect", "Liquidity", "DEX"],
 		"stats": "",
 		"usesInternetIdentity": true,
 		"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans.",
