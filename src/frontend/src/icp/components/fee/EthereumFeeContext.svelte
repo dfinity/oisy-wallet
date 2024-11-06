@@ -9,7 +9,7 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import type { IcToken } from '$icp/types/ic';
+	import type { IcToken } from '$icp/types/ic-token';
 	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 	import {

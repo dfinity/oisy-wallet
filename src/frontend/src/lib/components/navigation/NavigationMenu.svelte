@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Page } from '@sveltejs/kit';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -11,18 +12,16 @@
 	import {
 		isRouteDappExplorer,
 		isRouteSettings,
+		isRouteTokens,
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
 
-	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
-	$: route = isRouteSettings($page)
-		? 'settings'
-		: isRouteDappExplorer($page)
-			? 'explore'
-			: isRouteTransactions($page)
-				? 'transactions'
-				: 'tokens';
+	// If we pass $page directly, we get a type error: for some reason (I cannot find any
+	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
+	// cast it to `Page`.
+	let pageData: Page;
+	$: pageData = $page;
 </script>
 
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
@@ -30,7 +29,7 @@
 		<NavigationItem
 			href="/"
 			ariaLabel={$i18n.navigation.alt.tokens}
-			selected={route === 'tokens' || route === 'transactions'}
+			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
 		>
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
@@ -39,7 +38,7 @@
 		<NavigationItem
 			href={AppPath.Explore}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
-			selected={route === 'explore'}
+			selected={isRouteDappExplorer(pageData)}
 		>
 			<IconlyUfo />
 			{$i18n.navigation.text.dapp_explorer}
@@ -48,7 +47,7 @@
 		<NavigationItem
 			href={`${AppPath.Settings}?${networkParam($networkId)}`}
 			ariaLabel={$i18n.navigation.alt.settings}
-			selected={route === 'settings'}
+			selected={isRouteSettings(pageData)}
 		>
 			<IconlySettings />
 			{$i18n.navigation.text.settings}
