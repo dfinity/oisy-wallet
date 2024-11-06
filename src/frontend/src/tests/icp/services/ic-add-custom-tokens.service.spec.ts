@@ -1,5 +1,6 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
+import type { IcToken } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import * as agent from '$lib/actors/agents.ic';
 import { i18n } from '$lib/stores/i18n.store';
@@ -35,6 +36,25 @@ describe('ic-add-custom-tokens.service', () => {
 			icrcTokens: [],
 			ledgerCanisterId: mockLedgerCanisterId,
 			indexCanisterId: mockIndexCanisterId
+		};
+
+		const tokenName = 'Test Token';
+		const tokenSymbol = 'TEST';
+		const tokenDecimals = 8;
+		const tokenFee = 1000n;
+
+		const existingToken: IcToken = {
+			id: parseTokenId('test'),
+			ledgerCanisterId: '2ouva-viaaa-aaaaq-aaamq-cai',
+			indexCanisterId: '2awyi-oyaaa-aaaaq-aaanq-cai',
+			standard: 'icp',
+			category: 'custom',
+			position: Number.MAX_VALUE,
+			name: tokenName,
+			symbol: tokenSymbol,
+			decimals: tokenDecimals,
+			fee: tokenFee,
+			network: ICP_NETWORK
 		};
 
 		beforeEach(() => {
@@ -114,6 +134,10 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 
 				expect(result).toEqual({ result: 'error' });
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).tokens.error.already_available }
+				});
 			});
 
 			it('should return error if ledger is not related to index', async () => {
@@ -147,6 +171,36 @@ describe('ic-add-custom-tokens.service', () => {
 					msg: { text: get(i18n).tokens.import.error.no_metadata }
 				});
 			});
+
+			it('should return error if token already exits', async () => {
+				spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
+					Principal.fromText(mockLedgerCanisterId)
+				);
+
+				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
+					balance: 100n,
+					transactions: [],
+					oldest_tx_id: [0n]
+				});
+
+				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
+					['icrc1:name', { Text: tokenName }],
+					['icrc1:symbol', { Text: tokenSymbol }],
+					['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
+					['icrc1:fee', { Nat: tokenFee }]
+				]);
+
+				const result = await loadAndAssertAddCustomToken({
+					...validParams,
+					icrcTokens: [existingToken]
+				});
+
+				expect(result).toEqual({ result: 'error' });
+
+				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+					msg: { text: get(i18n).tokens.error.duplicate_metadata }
+				});
+			});
 		});
 
 		describe('success', () => {
@@ -162,10 +216,10 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 
 				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
-					['icrc1:name', { Text: 'Test Token' }],
-					['icrc1:symbol', { Text: 'TEST' }],
-					['icrc1:decimals', { Nat: 8n }],
-					['icrc1:fee', { Nat: 1000n }]
+					['icrc1:name', { Text: tokenName }],
+					['icrc1:symbol', { Text: tokenSymbol }],
+					['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
+					['icrc1:fee', { Nat: tokenFee }]
 				]);
 			});
 
@@ -214,7 +268,7 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 			});
 
-			it('should successfully add a new token', async () => {
+			it('should successfully load a new token', async () => {
 				const result = await loadAndAssertAddCustomToken(validParams);
 
 				expect(result.result).toBe('success');
@@ -225,6 +279,21 @@ describe('ic-add-custom-tokens.service', () => {
 					symbol: 'TEST',
 					decimals: 8
 				});
+			});
+
+			it('should successfully load a new token if name or symbol is different', async () => {
+				const { result } = await loadAndAssertAddCustomToken({
+					...validParams,
+					icrcTokens: [
+						{
+							...existingToken,
+							name: 'Another name',
+							symbol: 'Another symbol'
+						}
+					]
+				});
+
+				expect(result).toBe('success');
 			});
 		});
 	});
