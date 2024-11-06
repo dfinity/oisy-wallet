@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { anyBalanceNonZero } from '$lib/derived/balances.derived';
+	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -14,9 +14,7 @@
 </script>
 
 <span class="flex flex-col gap-2">
-	<output
-		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} mt-8 inline-block`}
-	>
+	<output class={`mt-8 inline-block break-all text-5xl font-bold`}>
 		{#if $loaded}
 			{formatUSD({ value: totalUsd })}
 		{:else}
@@ -24,6 +22,6 @@
 		{/if}
 	</output>
 	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
-		{$anyBalanceNonZero ? $i18n.hero.text.available_balance : $i18n.hero.text.top_up}
+		{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
 	</span>
 </span>

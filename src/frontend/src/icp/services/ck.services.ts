@@ -1,8 +1,8 @@
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
-import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
+import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
