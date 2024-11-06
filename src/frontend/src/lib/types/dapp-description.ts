@@ -44,17 +44,11 @@ const OisyDappDescriptionSchema = DAppDescriptionSchema.extend({
 	carousel: CarouselDappDescriptionSchema.optional()
 });
 
-const DAppDescriptionDimensionSchema = z.object({
-	nameHeight: z.number(),
-	tagSectionHeight: z.number()
-});
-
 export type OisyDappDescription = z.infer<typeof OisyDappDescriptionSchema>;
 export type FeaturedOisyDappDescription = Omit<OisyDappDescription, 'screenshots'> &
 	Required<Pick<OisyDappDescription, 'screenshots'>>;
 export type CarouselSlideOisyDappDescription = Omit<OisyDappDescription, 'carousel'> &
 	Required<Pick<OisyDappDescription, 'carousel'>>;
-export type OisyDappDescriptionDimension = z.infer<typeof DAppDescriptionDimensionSchema>;
 
 // TODO: to be move to $env
 const parseResult = z.array(OisyDappDescriptionSchema).safeParse(dAppDescriptionsJson);

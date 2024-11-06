@@ -2,29 +2,11 @@
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type {
-		OisyDappDescription,
-		OisyDappDescriptionDimension
-	} from '$lib/types/dapp-description';
+	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: OisyDappDescription;
 	$: ({ name: dAppName, logo, oneLiner, tags } = dAppDescription);
-
-	let calculateClampValue = (dAppDescription: OisyDappDescriptionDimension) =>
-		dAppDescription.nameHeight > 30
-			? dAppDescription.tagSectionHeight > 30
-				? 2
-				: 4
-			: dAppDescription.tagSectionHeight > 30
-				? 4
-				: 6;
-
-	let nameHeight: number;
-	let tagSectionHeight: number;
-	let clamp: number;
-
-	$: clamp = calculateClampValue({ nameHeight, tagSectionHeight });
 </script>
 
 <button
@@ -43,23 +25,12 @@
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">
 		<section>
-			<p
-				class="m-0 line-clamp-2 overflow-hidden text-start text-lg font-semibold"
-				bind:offsetHeight={nameHeight}
-			>
-				{dAppName}
-			</p>
-			<p
-				title={oneLiner}
-				class:md:line-clamp-2={clamp === 2}
-				class:md:line-clamp-4={clamp === 4}
-				class:md:line-clamp-6={clamp === 6}
-				class="m-0 mt-2 line-clamp-2 overflow-hidden text-ellipsis text-start text-xs text-misty-rose"
-			>
+			<p class="m-0 text-start text-lg font-semibold">{dAppName}</p>
+			<p title={oneLiner} class="m-0 mt-2 text-start text-xs text-misty-rose">
 				{oneLiner}
 			</p>
 		</section>
-		<section class="max-h-14 min-h-6 overflow-y-hidden" bind:offsetHeight={tagSectionHeight}>
+		<section class="absolute bottom-4 left-4 right-4 max-h-6 min-h-6 overflow-hidden md:max-h-14">
 			<DappTags {dAppName} {tags} />
 		</section>
 	</article>
