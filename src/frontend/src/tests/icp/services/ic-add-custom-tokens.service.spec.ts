@@ -281,7 +281,7 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 			});
 
-			it('should successfully load a new token if name or symbol is different', async () => {
+			it('should successfully load a new token if name and symbol is different', async () => {
 				const { result } = await loadAndAssertAddCustomToken({
 					...validParams,
 					icrcTokens: [
