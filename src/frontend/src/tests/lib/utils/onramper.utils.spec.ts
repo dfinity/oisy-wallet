@@ -6,7 +6,7 @@ import {
 	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK
 } from '$env/networks.env';
-import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/onramper.env';
+import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type {
 	OnramperCryptoWallet,
@@ -24,7 +24,6 @@ import {
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockAccountIdentifierText, mockPrincipalText } from '$tests/mocks/identity.mock';
-import { describe, expect, it } from 'vitest';
 
 describe('buildOnramperLink', () => {
 	it('should build the correct URL with all parameters', () => {

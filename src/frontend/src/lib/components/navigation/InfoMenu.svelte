@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AboutWhyOisy from '$lib/components/hero/about/AboutWhyOisy.svelte';
+	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 </script>
 

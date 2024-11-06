@@ -10,23 +10,23 @@
 
 <article class="relative flex h-64 items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="absolute inset-0 bg-onahau">
+		<div class="absolute inset-0 bg-brand-subtle-alt">
 			<Img
 				fitHeight={true}
 				height="100%"
 				width="100%"
 				styleClass="object-cover"
 				src={dAppDescription.screenshots[0]}
-				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppname: dAppDescription.name })}
+				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
 			/>
 		</div>
 	{/if}
-	<div class="z-10 flex-1 bg-black/30 px-4 py-4 backdrop-blur-sm">
+	<div class="flex-1 bg-black/30 px-4 py-4 backdrop-blur-sm">
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img
 					src={dAppDescription.logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppname: dAppDescription.name })}
+					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppDescription.name })}
 				/>
 			</div>
 			<div class="flex-1">

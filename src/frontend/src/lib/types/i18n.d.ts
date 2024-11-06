@@ -24,7 +24,7 @@ interface I18nCore {
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
-	warning: { may_take_a_few_seconds: string; do_not_close: string };
+	warning: { do_not_close: string };
 }
 
 interface I18nNavigation {
@@ -160,7 +160,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; learn_more_about_erc20_icp: string };
+	text: { available_balance: string; top_up: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -201,6 +201,7 @@ interface I18nReceive {
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
+			your_private_eth_address: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
 			principal: string;
@@ -329,6 +330,7 @@ interface I18nConvert {
 	text: {
 		converting: string;
 		convert_to_btc: string;
+		convert_to_ckbtc: string;
 		convert_to_token: string;
 		convert_to_cketh: string;
 		convert_to_ckerc20: string;
@@ -359,6 +361,7 @@ interface I18nTokens {
 		hide_zero_balances: string;
 		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
+		buy_or_receive: string;
 		initializing: string;
 		updating_ui: string;
 		show_token: string;
@@ -574,8 +577,8 @@ interface I18nTransaction {
 interface I18nTransactions {
 	text: {
 		title: string;
-		no_transactions: string;
-		sign_in: string;
+		buy_or_receive: string;
+		transaction_history: string;
 		open_transactions: string;
 		mainnet_btc_transactions_info: string;
 	};

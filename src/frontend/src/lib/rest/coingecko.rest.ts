@@ -1,3 +1,4 @@
+import { COINGECKO_API_KEY, COINGECKO_API_URL } from '$env/rest/coingecko.env';
 import type {
 	CoingeckoResponse,
 	CoingeckoSimpleParams,
@@ -9,9 +10,6 @@ import type {
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import { nonNullish } from '@dfinity/utils';
-
-const API_URL = import.meta.env.VITE_COINGECKO_API_URL;
-const API_KEY = import.meta.env.VITE_COINGECKO_API_KEY;
 
 /**
  * Get the current price of any cryptocurrencies in any other supported currencies that you need.
@@ -61,9 +59,9 @@ const fetchCoingecko = async <T extends CoingeckoSimplePrice | CoingeckoSimpleTo
 	endpointPath: string;
 	queryParams: string;
 }): Promise<CoingeckoResponse<T> | null> => {
-	const response = await fetch(`${API_URL}/${endpointPath}?${queryParams}`, {
+	const response = await fetch(`${COINGECKO_API_URL}/${endpointPath}?${queryParams}`, {
 		headers: {
-			...(nonNullish(API_KEY) && { ['x-cg-pro-api-key']: API_KEY })
+			...(nonNullish(COINGECKO_API_KEY) && { ['x-cg-pro-api-key']: COINGECKO_API_KEY })
 		}
 	});
 

@@ -60,12 +60,12 @@
 
 	--alert-width: calc(100% - var(--padding-8x));
 	--alert-max-width: calc(100vw - var(--padding-4x));
-	--alert-max-height: calc(100vh - var(--padding-4x));
+	--alert-max-height: calc(100dvh - var(--padding-4x));
 	--alert-border-radius: var(--border-radius-xs);
 	--alert-padding-y: 0;
 	--alert-padding-x: 0;
 
-	--dialog-width: 464px;
+	--dialog-width: 560px;
 	--dialog-max-width: var(--alert-max-width);
 	--dialog-max-height: var(--alert-max-height);
 	--dialog-min-height: var(--alert-max-height);
@@ -139,6 +139,10 @@ div.modal {
 		margin-inline: calc(3 / 2 * var(--padding));
 
 		--color-grey: rgba(0, 0, 0, 0.05);
+
+		h2 {
+			font-size: var(--font-size-h3);
+		}
 	}
 
 	div.wrapper.dialog div.container-wrapper {
@@ -148,7 +152,7 @@ div.modal {
 			border-radius: 0;
 
 			div.content {
-				padding-inline: var(--padding-2_5x);
+				padding-inline: var(--padding-1_5x);
 
 				@include media.min-width(medium) {
 					padding-inline: var(--padding-2_5x);
@@ -175,6 +179,8 @@ div.modal {
 		flex-direction: column;
 		min-height: 100%;
 
+		--stretch-padding-bottom: 0;
+
 		&.min-h-auto {
 			min-height: auto;
 		}
@@ -184,7 +190,7 @@ div.modal {
 
 			@include modal.content;
 
-			padding: var(--padding-3x) var(--padding-2_5x) 0;
+			padding: var(--padding-3x) var(--padding-2_5x) var(--stretch-padding-bottom);
 
 			margin: 0 0 var(--padding-0_5x);
 

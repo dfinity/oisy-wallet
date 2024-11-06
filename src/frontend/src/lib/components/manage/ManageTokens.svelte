@@ -15,7 +15,7 @@
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
@@ -231,7 +231,7 @@
 	>
 		<span class="text-7xl">🤔</span>
 
-		<span class="py-4 text-center font-bold text-blue-ribbon no-underline"
+		<span class="py-4 text-center font-bold text-brand-primary no-underline"
 			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
@@ -263,7 +263,7 @@
 	</div>
 
 	<button
-		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-blue-ribbon no-underline"
+		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 

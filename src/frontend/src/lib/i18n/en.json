@@ -28,8 +28,7 @@
 			"back": "Go back to the previous page"
 		},
 		"warning": {
-			"may_take_a_few_seconds": "This may take a few seconds.",
-			"do_not_close": "Please do not close your browser tab."
+			"do_not_close": "Don't close this tab until the transaction is done"
 		}
 	},
 	"navigation": {
@@ -62,7 +61,7 @@
 			"authenticate": "Open or Create",
 			"asset_types": "Bitcoin, Ethereum, ICP and more",
 			"instant_and_private": "Instant and private access anywhere",
-			"advanced_cryptography": "Peace of mind through advanced cryptography"
+			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
@@ -89,23 +88,23 @@
 			"all_dapps": "All dapps",
 			"featured": "Featured",
 			"sign_in": "Sign-in to explore the ecosystem.",
-			"title": "Explore Web3 Ecosystem",
-			"open_dapp": "Open $dAppname",
+			"title": "Explore Apps",
+			"open_dapp": "Open $dAppName",
 			"submit_your_dapp": "Submit your dapp"
 		},
 		"alt": {
-			"learn_more": "Learn more about $dAppname",
-			"logo": "Logo of $dAppname",
+			"learn_more": "Learn more about $dAppName",
+			"logo": "Logo of $dAppName",
 			"show_all": "Show all decentralised applications",
 			"show_tag": "Show decentralised applications with the tag $tag",
-			"open_dapp": "Open the app $dAppname",
-			"open_telegram": "Open $dAppname on Telegram",
-			"open_open_chat": "Open $dAppname on OpenChat",
-			"open_twitter": "Open the $dAppname X/Twitter feed",
-			"source_code_on_github": "View source code of $dAppname on github",
+			"open_dapp": "Open the app $dAppName",
+			"open_telegram": "Open $dAppName on Telegram",
+			"open_open_chat": "Open $dAppName on OpenChat",
+			"open_twitter": "Open the $dAppName X/Twitter feed",
+			"source_code_on_github": "View source code of $dAppName on github",
 			"submit_your_dapp": "Submit your dapp to be shown in the dapp-explorer",
-			"tags": "Tags related to $dAppname",
-			"website": "Image of $dAppname"
+			"tags": "Tags related to $dAppName",
+			"website": "Image of $dAppName"
 		}
 	},
 	"footer": {
@@ -182,6 +181,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
+			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
@@ -230,6 +230,7 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
+				"your_private_eth_address": "Your private address for all ERC20 tokens.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
 				"principal": "ICP Principal",
@@ -363,12 +364,13 @@
 		"text": {
 			"converting": "Converting...",
 			"convert_to_btc": "Convert to BTC",
+			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
 			"convert_to_cketh": "Convert to ckETH",
 			"convert_to_ckerc20": "Convert to $ckErc20",
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
-			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes.",
-			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes.",
+			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
+			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
 			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
@@ -397,7 +399,8 @@
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
-			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
+			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
+			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
 			"show_token": "Show token",
@@ -640,8 +643,8 @@
 	"transactions": {
 		"text": {
 			"title": "Transactions",
-			"no_transactions": "You have no transactions.",
-			"sign_in": "Sign in to view your transactions.",
+			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
+			"transaction_history": "Your transaction history will appear here",
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},

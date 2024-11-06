@@ -8,9 +8,9 @@
 	export let indexCanisterId = '';
 </script>
 
-<p class="mb-2 mt-1 text-dark-blue">{replaceOisyPlaceholders($i18n.tokens.import.text.info)}</p>
+<p class="mb-2 mt-1">{replaceOisyPlaceholders($i18n.tokens.import.text.info)}</p>
 
-<p class="mb-4 font-bold text-blue-ribbon">
+<p class="mb-4 font-bold text-brand-primary">
 	<ExternalLink
 		href="https://github.com/dfinity/oisy-wallet/blob/main/HOW-TO.md#custom-icrc-token-integration"
 		ariaLabel={$i18n.tokens.import.text.open_github_howto}

@@ -7,8 +7,8 @@
 	import { TOKEN_GROUP } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
-	import type { TokenUiGroup } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
+	import type { TokenUiGroup } from '$lib/types/token-group';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 
 	export let tokenGroup: TokenUiGroup;
@@ -31,7 +31,7 @@
 				? 'bg-white rounded-b-none'
 				: ''}"
 		>
-			<TokenCardContent data={headerData} testIdPrefix={TOKEN_GROUP} />
+			<TokenCardContent data={headerData} hideNetworkLogo testIdPrefix={TOKEN_GROUP} />
 		</TokenCardWithOnClick>
 	</MultipleListeners>
 

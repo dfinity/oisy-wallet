@@ -91,28 +91,27 @@ a.as-button {
 	}
 
 	&.primary:not([disabled]):not(.disabled):not(.loading) {
-		background: var(--color-blue-ribbon);
+		@apply bg-brand-primary;
 		color: var(--color-white);
 
 		&:hover {
-			background: var(--color-cobalt);
+			@apply bg-brand-secondary;
 		}
 
 		&:active {
-			background: var(--color-resolution-blue);
+			@apply bg-brand-tertiary;
 		}
 	}
 
 	&.secondary:not([disabled]):not(.disabled):not(.loading) {
-		background: var(--color-zumthor);
-		color: var(--color-primary);
+		@apply text-brand-primary bg-brand-subtle;
 
 		&:hover {
-			background: var(--color-onahau);
+			@apply bg-brand-subtle-alt;
 		}
 
 		&:active {
-			background: var(--color-anakiwa);
+			@apply bg-brand-subtle2-alt;
 		}
 	}
 
@@ -120,23 +119,23 @@ a.as-button {
 		background: var(--color-white);
 
 		&:hover {
-			color: var(--color-primary);
+			@apply text-brand-primary;
 		}
 
 		&:active {
-			background: var(--color-onahau);
+			@apply bg-brand-subtle-alt;
 			color: currentColor;
 		}
 
 		&.link {
-			color: var(--color-primary);
+			@apply text-brand-primary;
 
 			&:hover {
-				color: var(--color-cobalt);
+				@apply text-brand-secondary;
 			}
 
 			&:active {
-				color: var(--color-cobalt);
+				@apply text-brand-secondary;
 			}
 		}
 	}
@@ -170,7 +169,7 @@ a.as-button {
 	&.text {
 		&:hover,
 		&:active {
-			color: var(--color-blue-ribbon);
+			@apply text-brand-primary;
 		}
 	}
 

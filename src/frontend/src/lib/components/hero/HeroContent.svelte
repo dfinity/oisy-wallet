@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import Back from '$lib/components/core/Back.svelte';
@@ -12,11 +14,19 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { exchanges } from '$lib/derived/exchange.derived';
+	import {
+		balance,
+		balanceZero,
+		noPositiveBalanceAndNotAllBalancesZero
+	} from '$lib/derived/balances.derived';
+	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { type HeroContext, initHeroContext } from '$lib/stores/hero.store';
+	import { HERO_CONTEXT_KEY } from '$lib/stores/hero.store.js';
 	import type { OptionTokenUi } from '$lib/types/token';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	export let usdTotal = false;
@@ -30,10 +40,28 @@
 				$exchanges: $exchanges
 			})
 		: undefined;
+
+	const { loading, outflowActionsDisabled, ...rest } = initHeroContext();
+	setContext<HeroContext>(HERO_CONTEXT_KEY, {
+		loading,
+		outflowActionsDisabled,
+		...rest
+	});
+
+	$: loading.set(
+		isRouteTransactions($page)
+			? isNullish(pageTokenUi?.balance)
+			: !$exchangeInitialized || $noPositiveBalanceAndNotAllBalancesZero
+	);
+
+	let isTransactionsPage = false;
+	$: isTransactionsPage = isRouteTransactions($page);
+
+	$: outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-blue-ribbon bg-gradient-to-b from-blue-ribbon via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum}
 	class:via-interdimensional-blue={$networkICP}
 	class:to-chinese-purple={$networkICP}
@@ -43,7 +71,7 @@
 	class:to-bright-lilac={$networkEthereum}
 >
 	{#if summary}
-		<div transition:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
+		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
 
@@ -71,12 +99,12 @@
 	{/if}
 
 	{#if usdTotal}
-		<div transition:slide={SLIDE_PARAMS}>
+		<div in:slide={SLIDE_PARAMS}>
 			<ExchangeBalance />
 		</div>
 	{/if}
 
-	<div transition:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
+	<div in:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
 		<Actions />
 	</div>
 
