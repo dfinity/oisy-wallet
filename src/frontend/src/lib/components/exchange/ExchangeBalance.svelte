@@ -15,7 +15,7 @@
 
 <span class="flex flex-col gap-2">
 	<output
-		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} mt-8 inline-block`}
+		class={`break-all text-5xl font-bold mt-8 inline-block`}
 	>
 		{#if $loaded}
 			{formatUSD({ value: totalUsd })}
