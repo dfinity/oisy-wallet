@@ -15,18 +15,16 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isRouteDappExplorer, isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
 
-	// TODO: We should consider adding a description for the pages, as this block of code is now appearing in two places.
-	// Other areas, like the Menu, are also somewhat disorganized, with navigation logic spread across multiple locations.
-	let route: 'transactions' | 'tokens' | 'settings' | 'explore' = 'tokens';
-	$: route = isRouteSettings($page)
-		? 'settings'
-		: isRouteDappExplorer($page)
-			? 'explore'
-			: isRouteTransactions($page)
-				? 'transactions'
-				: 'tokens';
+	let tokensRoute: boolean;
+	$: tokensRoute = isRouteTokens($page);
+
+	let transactionsRoute: boolean;
+	$: transactionsRoute = isRouteTransactions($page);
+
+	let showHero: boolean;
+	$: showHero = tokensRoute || transactionsRoute;
 
 	$: token.set($pageToken);
 
@@ -60,15 +58,15 @@
 	<AuthGuard>
 		<SplitPane>
 			<NavigationMenu slot="menu">
-				{#if route === 'tokens'}
+				{#if tokensRoute}
 					<div transition:fade class="hidden xl:block">
 						<DappsCarousel />
 					</div>
 				{/if}
 			</NavigationMenu>
 
-			{#if route !== 'settings' && route !== 'explore'}
-				<Hero usdTotal={route === 'tokens'} summary={route === 'transactions'} />
+			{#if showHero}
+				<Hero />
 			{/if}
 
 			<LoadersGuard>
