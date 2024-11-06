@@ -1,6 +1,6 @@
 import { isToken, parseTokenId } from '$lib/validation/token.validation';
-import { validIcToken } from '$tests/mocks/ic-tokens.mock';
-import { validToken } from '$tests/mocks/tokens.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { describe, expect, it } from 'vitest';
 
 describe('token.validation', () => {
@@ -18,25 +18,25 @@ describe('token.validation', () => {
 
 	describe('isToken', () => {
 		it('should return true for a valid Token', () => {
-			expect(isToken(validToken)).toBe(true);
+			expect(isToken(mockValidToken)).toBe(true);
 		});
 
 		it('should return true for a valid Token with expansion', () => {
-			expect(isToken(validIcToken)).toBe(true);
+			expect(isToken(mockValidIcToken)).toBe(true);
 		});
 
 		it('should return false for an invalid Token', () => {
-			const { id: _, ...invalidToken } = validToken;
+			const { id: _, ...invalidToken } = mockValidToken;
 
 			expect(isToken(invalidToken)).toBe(false);
 
-			expect(isToken({ ...validToken, id: 'invalid-id' })).toBe(false);
+			expect(isToken({ ...mockValidToken, id: 'invalid-id' })).toBe(false);
 
-			expect(isToken({ ...validToken, network: 'invalid-network' })).toBe(false);
+			expect(isToken({ ...mockValidToken, network: 'invalid-network' })).toBe(false);
 
-			expect(isToken({ ...validToken, standard: 'invalid-standard' })).toBe(false);
+			expect(isToken({ ...mockValidToken, standard: 'invalid-standard' })).toBe(false);
 
-			expect(isToken({ ...validToken, category: 'invalid-category' })).toBe(false);
+			expect(isToken({ ...mockValidToken, category: 'invalid-category' })).toBe(false);
 		});
 	});
 });

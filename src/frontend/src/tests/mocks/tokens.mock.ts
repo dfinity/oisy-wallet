@@ -4,9 +4,9 @@ import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
-export const $tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
+export const mockTokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
-export const validToken: Token = {
+export const mockValidToken: Token = {
 	id: parseTokenId('TokenId'),
 	network: ICP_NETWORK,
 	standard: 'icp',
