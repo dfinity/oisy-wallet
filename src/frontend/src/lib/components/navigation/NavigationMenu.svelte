@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Page } from '@sveltejs/kit';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
@@ -17,7 +18,9 @@
 		networkParam
 	} from '$lib/utils/nav.utils.js';
 
-	// If we pass $page directly in the HTML, we get a type error
+	// If we pass $page directly, we get a type error: for some reason (I cannot find any
+	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
+	// cast it to `Page`.
 	let pageData: Page;
 	$: pageData = $page;
 </script>
