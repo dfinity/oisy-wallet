@@ -138,7 +138,7 @@
 	},
 	{
 		"id": "aave",
-		"name": "aave",
+		"name": "Aave",
 		"oneLiner": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers.",
 		"callToAction": "Access the full power of DeFi",
 		"website": "https://aave.com/",
@@ -150,5 +150,21 @@
 		"description": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market while earning interest, and borrowers can access liquidity by providing collateral that exceeds the borrowed amount.\nIt is completely permissionless, meaning anyone can access and interact with Aave through a user-friendly interface or directly with its smart contracts on supported blockchain networks.",
 		"logo": "/images/dapps/aave-logo.svg",
 		"screenshots": ["/images/dapps/aave.webp"]
+	},
+	{
+		"id": "curve-finance",
+		"name": "Curve Finance",
+		"oneLiner": "Leading DEX, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains.",
+		"callToAction": "Get warped",
+		"website": "https://curve.fi/",
+		"twitter": "https://twitter.com/CurveFinance",
+		"github": "https://github.com/curvefi",
+		"telegram": "https://t.me/curvefi",
+		"tags": ["WalletConnect", "Liquidity", "DEX"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans.",
+		"logo": "/images/dapps/curve-finance-logo.svg",
+		"screenshots": ["/images/dapps/curve-finance.webp"]
 	}
 ]
