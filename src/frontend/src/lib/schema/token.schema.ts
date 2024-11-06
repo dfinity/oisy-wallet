@@ -1,4 +1,4 @@
-import { NetworkSchema } from '$lib/types/network';
+import { NetworkSchema } from '$lib/schema/network.schema';
 import type { OnramperId } from '$lib/types/onramper';
 import type { TokenBuy } from '$lib/types/token';
 import type { AtLeastOne } from '$lib/types/utils';
