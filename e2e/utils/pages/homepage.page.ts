@@ -22,7 +22,7 @@ interface HomepageParams {
 	viewportSize?: ViewportSize;
 }
 
-type HomepageLoggedInParams = {
+export type HomepageLoggedInParams = {
 	iiPage: InternetIdentityPage;
 } & HomepageParams;
 
@@ -277,6 +277,10 @@ export class HomepageLoggedIn extends Homepage {
 		await expect(qrCodeOutputLocator).toHaveText(qrCode ?? '');
 	}
 
+	async extendWaitForReady(): Promise<void> {
+		// Extend the waitForReady method in a subclass
+	}
+
 	/**
 	 * @override
 	 */
@@ -288,5 +292,7 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
 		await this.waitForTokensInitialization();
+
+		await this.extendWaitForReady();
 	}
 }
