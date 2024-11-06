@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
 
 	export let token: OptionTokenUi;
@@ -22,7 +23,7 @@
 		<TokenExchangeBalance
 			balance={token?.balance}
 			usdBalance={token?.usdBalance}
-			nullishBalanceMessage="$ value is not available"
+			nullishBalanceMessage={$i18n.hero.text.unavailable_balance}
 		/>
 	</span>
 </span>

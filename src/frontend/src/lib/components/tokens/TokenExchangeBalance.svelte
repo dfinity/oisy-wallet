@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenFinancialData } from '$lib/types/token';
 	import { formatUSD } from '$lib/utils/format.utils';
 
@@ -14,6 +15,7 @@
 	{:else if isNullish(balance)}
 		<span class:animate-pulse={isNullish(balance)}>{nullishBalanceMessage}</span>
 	{:else}
-		<span class:animate-pulse={isNullish(balance)}>n/a</span>
+		<span class:animate-pulse={isNullish(balance)}>{$i18n.tokens.balance.error.not_applicable}</span
+		>
 	{/if}
 </output>
