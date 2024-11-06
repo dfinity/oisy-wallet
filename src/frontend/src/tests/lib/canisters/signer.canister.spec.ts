@@ -1,7 +1,7 @@
 import type {
 	EthAddressResponse,
+	EthSignTransactionRequest,
 	RejectionCode_1,
-	SignRequest,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -10,12 +10,10 @@ import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockedAgent } from '$tests/mocks/agents.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -31,7 +29,7 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	return {
 		...actual,
 		// eslint-disable-next-line require-await
-		getAgent: async () => mockedAgent
+		getAgent: async () => mock<HttpAgent>()
 	};
 });
 
@@ -60,7 +58,7 @@ describe('signer.canister', () => {
 			max_fee_per_gas: 5n,
 			chain_id: 10n,
 			nonce: 10n
-		} as SignRequest
+		} as EthSignTransactionRequest
 	};
 	const personalSignParams = {
 		message: 'message'

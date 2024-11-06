@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
