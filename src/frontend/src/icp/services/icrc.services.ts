@@ -105,6 +105,9 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
+/**
+ * @todo Add missing document and test for this function.
+ */
 const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
