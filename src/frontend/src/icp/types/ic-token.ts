@@ -1,6 +1,7 @@
 import {
 	IcAppMetadataSchema,
 	IcCanistersSchema,
+	IcCanistersStrictSchema,
 	IcCkInterfaceSchema,
 	IcCkLinkedAssetsSchema,
 	IcCkMetadataSchema,
@@ -9,7 +10,7 @@ import {
 	IcInterfaceSchema,
 	IcTokenSchema,
 	IcTokenWithoutIdSchema
-} from '$icp/validation/ic-token.validation';
+} from '$icp/schema/ic-token.schema';
 import type { Option } from '$lib/types/utils';
 import { z } from 'zod';
 
@@ -18,6 +19,8 @@ export type IcFee = z.infer<typeof IcFeeSchema>;
 export type IcAppMetadata = z.infer<typeof IcAppMetadataSchema>;
 
 export type IcCanisters = z.infer<typeof IcCanistersSchema>;
+
+export type IcCanistersStrict = z.infer<typeof IcCanistersStrictSchema>;
 
 export type IcCkLinkedAssets = z.infer<typeof IcCkLinkedAssetsSchema>;
 
