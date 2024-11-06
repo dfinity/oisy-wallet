@@ -14,7 +14,11 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { balance, balanceZero } from '$lib/derived/balances.derived';
+	import {
+		balance,
+		balanceZero,
+		noPositiveBalanceAndNotAllBalancesZero
+	} from '$lib/derived/balances.derived';
 	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -45,7 +49,9 @@
 	});
 
 	$: loading.set(
-		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
+		isRouteTransactions($page)
+			? isNullish(pageTokenUi?.balance)
+			: !$exchangeInitialized || $noPositiveBalanceAndNotAllBalancesZero
 	);
 
 	let isTransactionsPage = false;

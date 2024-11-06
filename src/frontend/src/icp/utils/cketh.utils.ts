@@ -1,7 +1,7 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
-import type { IcToken } from '$icp/types/ic';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
+import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option } from '$lib/types/utils';
