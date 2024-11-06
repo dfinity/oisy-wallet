@@ -2,7 +2,6 @@ import { ICP_TOKEN } from '$env/tokens.env';
 import { token } from '$lib/stores/token.store';
 import { mockPageStore } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.utils';
-import { describe, it } from 'vitest';
 
 mockPageStore();
 

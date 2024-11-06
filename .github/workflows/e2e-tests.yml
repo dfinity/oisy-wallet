@@ -44,7 +44,7 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-  may-merge:
+  may-merge-e2e:
     needs: ['e2e']
     runs-on: ubuntu-24.04
     steps:
