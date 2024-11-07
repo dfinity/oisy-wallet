@@ -5,7 +5,6 @@
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import {
-		NANO_SECONDS_IN_MILLISECOND,
 		NANO_SECONDS_IN_SECOND
 	} from '$lib/constants/app.constants';
 	import { modalStore } from '$lib/stores/modal.store';
