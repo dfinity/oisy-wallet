@@ -7,7 +7,7 @@
 	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
-	import { sortedTransactions } from '$eth/derived/transactions.derived';
+	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapTransactionUi } from '$eth/utils/transactions.utils';
@@ -33,7 +33,7 @@
 	});
 
 	let sortedTransactionsUi: EthTransactionUi[];
-	$: sortedTransactionsUi = $sortedTransactions.map((transaction) =>
+	$: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>
 		mapTransactionUi({
 			transaction,
 			ckMinterInfoAddresses,
@@ -92,7 +92,7 @@
 		</div>
 	{/each}
 
-	{#if $sortedTransactions.length === 0}
+	{#if $sortedEthTransactions.length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </EthTransactionsSkeletons>
