@@ -1,5 +1,10 @@
-import {IC_CKBTC_INDEX_CANISTER_ID, IC_CKBTC_LEDGER_CANISTER_ID} from '$env/networks.icrc.env';
-import {autoLoadCustomToken, setCustomToken, toCustomToken} from '$icp-eth/services/custom-token.services';
+import { IC_CKBTC_INDEX_CANISTER_ID, IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
+import {
+	autoLoadCustomToken,
+	setCustomToken,
+	toCustomToken
+} from '$icp-eth/services/custom-token.services';
+import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as agent from '$lib/actors/agents.ic';
@@ -7,17 +12,16 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import {mockIcrcCustomToken, mockIcrcCustomTokens} from '$tests/mocks/icrc-custom-tokens.mock';
+import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import {isNullish, toNullable} from '@dfinity/utils';
+import { isNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { expect, type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import type {SaveCustomToken} from "$icp/services/ic-custom-tokens.services";
 
 describe('custom-token.services', () => {
 	const backendCanisterMock = mock<BackendCanister>();
