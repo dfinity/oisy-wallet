@@ -36,24 +36,24 @@ export default defineConfig({
 		/* Test against desktop browsers. */
 		{
 			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'] },
+			use: { ...devices['Desktop Chrome'] }
 		},
 		{
 			name: 'Edge',
-			use: { ...devices['Desktop Edge'] },
+			use: { ...devices['Desktop Edge'] }
 		},
 		{
 			name: 'Firefox',
-			use: { ...devices['Desktop Firefox'] },
+			use: { ...devices['Desktop Firefox'] }
 		},
-		/*Test against mobile viewports. */
+		/* Test against mobile viewports. */
 		{
 			name: 'Pixel 7',
-			use: { ...devices['Pixel 7'] },
+			use: { ...devices['Pixel 7'] }
 		},
 		{
 			name: 'Galaxy S9+',
-			use: { ...devices['Galaxy S9+'] },
+			use: { ...devices['Galaxy S9+'] }
 		},
 		/*Test against branded browsers. */
 		{
