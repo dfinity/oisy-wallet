@@ -7,14 +7,14 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TransactionType } from '$lib/types/transaction';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
+	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 
 	export let transaction: BtcTransactionUi;
 
 	let from: string;
 	let to: string | undefined;
-	let type: TransactionType;
+	let type: BtcTransactionType;
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let id: string;

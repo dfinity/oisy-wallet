@@ -19,7 +19,7 @@ export type IcrcTransaction = {
 
 export type IcTransaction = IcpTransaction | IcrcTransaction;
 
-export type IcTransactionType = TransactionType | 'approve' | 'burn' | 'mint';
+export type IcTransactionType = Exclude<TransactionType, 'withdraw' | 'deposit'>;
 
 export type IcTransactionIdText = string;
 

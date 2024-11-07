@@ -1,6 +1,6 @@
 import type { Transaction, TransactionType } from '$lib/types/transaction';
 
-export type EthTransactionType = TransactionType | 'withdraw' | 'deposit';
+export type EthTransactionType = Exclude<TransactionType, 'approve' | 'burn' | 'mint'>;
 
 export interface EthTransactionUi extends Transaction {
 	uiType: EthTransactionType;
