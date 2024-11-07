@@ -1,3 +1,4 @@
+import * as NetworksModule from '$env/networks.icrc.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID, IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
 import { LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
@@ -357,9 +358,13 @@ describe('mapDefaultTokenToToggleable', () => {
 		describe('ckUSDC', () => {
 			const ckUSDCLedgerCanisterId = ckErc20Production.ckUSDC?.ledgerCanisterId;
 
-			vi.mock('$env/networks.icrc.env', () => ({
-				ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS: [ckUSDCLedgerCanisterId ?? '']
-			}));
+			beforeEach(() => {
+				vi.spyOn(
+					NetworksModule,
+					'ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS',
+					'get'
+				).mockReturnValue([ckUSDCLedgerCanisterId ?? '']);
+			});
 
 			const dummyCkUSDC = { ledgerCanisterId: ckUSDCLedgerCanisterId } as IcCkToken;
 
@@ -396,9 +401,13 @@ describe('mapDefaultTokenToToggleable', () => {
 		describe('ckUSDT', () => {
 			const ckUSDTLedgerCanisterId = ckErc20Production.ckUSDT?.ledgerCanisterId;
 
-			vi.mock('$env/networks.icrc.env', () => ({
-				ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS: [ckUSDTLedgerCanisterId ?? '']
-			}));
+			beforeEach(() => {
+				vi.spyOn(
+					NetworksModule,
+					'ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS',
+					'get'
+				).mockReturnValue([ckUSDTLedgerCanisterId ?? '']);
+			});
 
 			const dummyCkUSDT = { ledgerCanisterId: ckUSDTLedgerCanisterId } as IcCkToken;
 
