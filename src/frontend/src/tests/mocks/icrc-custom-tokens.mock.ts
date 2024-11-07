@@ -2,7 +2,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
-const icrcCustomToken: IcrcCustomToken = {
+export const mockIcrcCustomToken: IcrcCustomToken = {
 	enabled: false,
 	...mockValidIcToken,
 	alternativeName: 'test',
@@ -10,9 +10,9 @@ const icrcCustomToken: IcrcCustomToken = {
 };
 
 export const mockIcrcCustomTokens: IcrcCustomToken[] = [
-	icrcCustomToken,
+	mockIcrcCustomToken,
 	{
-		...icrcCustomToken,
+		...mockIcrcCustomToken,
 		id: parseTokenId('Another ID')
 	}
 ];
