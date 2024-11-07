@@ -10,7 +10,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 describe('ic-token.validation', () => {
-	const validIcTokenWithIndex: IcToken = {
+	const mockValidIcTokenWithIndex: IcToken = {
 		...mockValidIcToken,
 		indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
 	};
@@ -37,7 +37,7 @@ describe('ic-token.validation', () => {
 
 	describe('isIcTokenCanistersStrict', () => {
 		it('should return true for a valid IcToken with IcCanistersStrict', () => {
-			expect(isIcTokenCanistersStrict(validIcTokenWithIndex)).toBe(true);
+			expect(isIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBe(true);
 		});
 
 		it('should return false for a valid IcToken without strict canisters fields', () => {
@@ -51,7 +51,7 @@ describe('ic-token.validation', () => {
 
 	describe('isNotIcTokenCanistersStrict', () => {
 		it('should return false for a valid IcToken with IcCanistersStrict', () => {
-			expect(isNotIcTokenCanistersStrict(validIcTokenWithIndex)).toBe(false);
+			expect(isNotIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBe(false);
 		});
 
 		it('should return true for a valid IcToken without strict canisters fields', () => {
