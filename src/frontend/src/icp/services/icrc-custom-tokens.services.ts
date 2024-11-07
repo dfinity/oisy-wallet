@@ -23,6 +23,9 @@ export const buildIndexedIcrcCustomTokens = (): Record<
 		{}
 	);
 
+/**
+ * @todo Add missing document and test for this function.
+ */
 export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 	try {
 		const tokens = envIcrcTokens
