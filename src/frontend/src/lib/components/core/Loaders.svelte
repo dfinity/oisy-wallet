@@ -5,7 +5,6 @@
 	import LoaderWallets from '$lib/components/core/LoaderWallets.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
-
 </script>
 
 <AddressGuard>
