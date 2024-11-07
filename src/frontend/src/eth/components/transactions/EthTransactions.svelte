@@ -5,9 +5,9 @@
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
+	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
-	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapTransactionUi } from '$eth/utils/transactions.utils';
