@@ -469,7 +469,7 @@ export const ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS = [
 		: [])
 ];
 
-// Suggested canisters to be enabled by default if the user set no preference
+// Additional suggested canisters to be enabled by default if the user set no preference
 export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 	...(nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDT)
 		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
