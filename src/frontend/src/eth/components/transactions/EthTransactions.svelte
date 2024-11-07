@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
@@ -44,17 +45,19 @@
 
 <Header>{$i18n.transactions.text.title}</Header>
 
-<EthTransactionsSkeletons>
-	{#each sortedTransactionsUi as transaction (transaction.hash)}
-		<div transition:slide={SLIDE_DURATION}>
-			<EthTransaction {transaction} />
-		</div>
-	{/each}
+<LoaderEthTransactions>
+	<EthTransactionsSkeletons>
+		{#each sortedTransactionsUi as transaction (transaction.hash)}
+			<div transition:slide={SLIDE_DURATION}>
+				<EthTransaction {transaction} />
+			</div>
+		{/each}
 
-	{#if $sortedTransactions.length === 0}
-		<TransactionsPlaceholder />
-	{/if}
-</EthTransactionsSkeletons>
+		{#if $sortedTransactions.length === 0}
+			<TransactionsPlaceholder />
+		{/if}
+	</EthTransactionsSkeletons>
+</LoaderEthTransactions>
 
 {#if $modalTransaction && nonNullish(selectedTransaction)}
 	<EthTransactionModal transaction={selectedTransaction} />
