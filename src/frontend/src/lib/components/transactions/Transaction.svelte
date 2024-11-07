@@ -8,7 +8,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import type { TransactionType, TransactionStatus } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
-	import { mapIcon } from '$lib/utils/transaction.utils';
+	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
 	export let amount: BigNumber | undefined;
 	export let type: TransactionType;
@@ -16,7 +16,7 @@
 	export let timestamp: number | undefined;
 
 	let icon: ComponentType;
-	$: icon = mapIcon({ type, status });
+	$: icon = mapTransactionIcon({ type, status });
 
 	let iconWithOpacity: boolean;
 	$: iconWithOpacity = status === 'pending' || status === 'unconfirmed';

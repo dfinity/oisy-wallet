@@ -4,7 +4,7 @@ import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
-import { mapIcon } from '$lib/utils/transaction.utils';
+import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
 describe('transaction.utils', () => {
 	describe('mapIcon', () => {
@@ -18,46 +18,46 @@ describe('transaction.utils', () => {
 
 		allNonPendingStatus.forEach((status) => {
 			it(`should return IconConvertFrom for withdraw and status ${status}`, () => {
-				expect(mapIcon({ type: 'withdraw', status })).toBe(IconConvertFrom);
+				expect(mapTransactionIcon({ type: 'withdraw', status })).toBe(IconConvertFrom);
 			});
 
 			it(`should return IconConvertFrom for mint and status ${status}`, () => {
-				expect(mapIcon({ type: 'mint', status })).toBe(IconConvertFrom);
+				expect(mapTransactionIcon({ type: 'mint', status })).toBe(IconConvertFrom);
 			});
 
 			it(`should return IconConvertTo for deposit and status ${status}`, () => {
-				expect(mapIcon({ type: 'deposit', status })).toBe(IconConvertTo);
+				expect(mapTransactionIcon({ type: 'deposit', status })).toBe(IconConvertTo);
 			});
 
 			it(`should return IconConvertTo for burn and status ${status}`, () => {
-				expect(mapIcon({ type: 'burn', status })).toBe(IconConvertTo);
+				expect(mapTransactionIcon({ type: 'burn', status })).toBe(IconConvertTo);
 			});
 
 			it(`should return IconConvertTo for approve and status ${status}`, () => {
-				expect(mapIcon({ type: 'approve', status })).toBe(IconConvertTo);
+				expect(mapTransactionIcon({ type: 'approve', status })).toBe(IconConvertTo);
 			});
 
 			it(`should return IconSend for send and status ${status}`, () => {
-				expect(mapIcon({ type: 'send', status })).toBe(IconSend);
+				expect(mapTransactionIcon({ type: 'send', status })).toBe(IconSend);
 			});
 
 			it(`should return IconReceive for receive and status ${status}`, () => {
-				expect(mapIcon({ type: 'receive', status })).toBe(IconReceive);
+				expect(mapTransactionIcon({ type: 'receive', status })).toBe(IconReceive);
 			});
 		});
 
 		allConvertTypes.forEach((type) => {
 			it(`should return IconConvert for ${type} and status pending`, () => {
-				expect(mapIcon({ type, status: 'pending' })).toBe(IconConvert);
+				expect(mapTransactionIcon({ type, status: 'pending' })).toBe(IconConvert);
 			});
 		});
 
 		it(`should return IconSend for send and status pending`, () => {
-			expect(mapIcon({ type: 'send', status: 'pending' })).toBe(IconSend);
+			expect(mapTransactionIcon({ type: 'send', status: 'pending' })).toBe(IconSend);
 		});
 
 		it(`should return IconReceive for receive and status pending`, () => {
-			expect(mapIcon({ type: 'receive', status: 'pending' })).toBe(IconReceive);
+			expect(mapTransactionIcon({ type: 'receive', status: 'pending' })).toBe(IconReceive);
 		});
 	});
 });

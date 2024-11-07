@@ -6,7 +6,7 @@ import IconSend from '$lib/components/icons/IconSend.svelte';
 import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 import type { ComponentType } from 'svelte';
 
-export const mapIcon = ({
+export const mapTransactionIcon = ({
 	type,
 	status
 }: {
