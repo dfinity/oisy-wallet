@@ -180,5 +180,19 @@
 		"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans.",
 		"logo": "/images/dapps/curve-finance-logo.svg",
 		"screenshots": ["/images/dapps/curve-finance.webp"]
+	},
+	{
+		"id": "zkpoker",
+		"name": "zkPoker",
+		"oneLiner": "Cutting-edge cryptography and blockchain intertwine to a secure and transparent playing environment for all.",
+		"callToAction": "You are invited",
+		"website": "https://zkpoker.app/",
+		"twitter": "https://x.com/zkpokerapp",
+		"tags": ["WalletConnect", "Game"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Cutting-edge cryptography and blockchain intertwine to provide a secure and transparent playing environment for all.<br/><br/>Play with your choice of digital assets—ICP now, with BTC, ETH, SOL, and USDC coming soon. Fully on-chain, no central points of failure. Our blockchain-based RNG ensures provably fair gaming, using open-source technology from Dfinity’s R&D team.",
+		"logo": "/images/dapps/zkpoker-logo.svg",
+		"screenshots": ["/images/dapps/zkpoker.webp"]
 	}
 ]
