@@ -19,19 +19,13 @@
 
 	export let transaction: IcTransactionUi;
 
-	let transactionType: IcTransactionType;
+	let type: IcTransactionType;
 	let transactionTypeLabel: string | undefined;
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let incoming: boolean | undefined;
 
-	$: ({
-		type: transactionType,
-		typeLabel: transactionTypeLabel,
-		value,
-		timestamp,
-		incoming
-	} = transaction);
+	$: ({ type, typeLabel: transactionTypeLabel, value, timestamp, incoming } = transaction);
 
 	let pending = false;
 	$: pending = transaction?.status === 'pending';
@@ -41,13 +35,13 @@
 
 	let icon: ComponentType;
 	$: icon =
-		['burn', 'approve', 'mint'].includes(transactionType) && pending
+		['burn', 'approve', 'mint'].includes(type) && pending
 			? IconConvert
-			: ['burn', 'approve'].includes(transactionType)
+			: ['burn', 'approve'].includes(type)
 				? IconConvertTo
-				: transactionType === 'mint'
+				: type === 'mint'
 					? IconConvertFrom
-					: incoming === false
+					: type === 'send'
 						? IconSend
 						: IconReceive;
 
@@ -58,7 +52,7 @@
 <button on:click={() => modalStore.openIcTransaction(transaction)} class="block w-full border-0">
 	<Card>
 		<span class="inline-block first-letter:capitalize"
-			><IcTransactionLabel label={transactionTypeLabel} fallback={transactionType} /></span
+			><IcTransactionLabel label={transactionTypeLabel} fallback={type} /></span
 		>
 
 		<RoundedIcon slot="icon" {icon} />
