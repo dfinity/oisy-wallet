@@ -152,6 +152,20 @@
 		"screenshots": ["/images/dapps/aave.webp"]
 	},
 	{
+		"id": "eigenlayer",
+		"name": "EigenLayer",
+		"oneLiner": "Ethereum based protocol that introduces restaking, allowing to stake any ERC20 token.",
+		"callToAction": "Restake now",
+		"website": "https://www.eigenlayer.xyz/",
+		"twitter": "https://twitter.com/eigenlayer",
+		"tags": ["WalletConnect", "Staking"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "EigenLayer is a protocol built on Ethereum that introduces restaking, a new primitive in cryptoeconomic security. It allows users to stake assets such as Native ETH, Liquid Staking Tokens (LSTs), EIGEN token or any ERC20 token into EigenLayer smart contracts, thereby extending Ethereum's cryptoeconomic security to additional applications on the network.",
+		"logo": "/images/dapps/eigenlayer-logo.svg",
+		"screenshots": ["/images/dapps/eigenlayer.webp"]
+	},
+	{
 		"id": "curve-finance",
 		"name": "Curve Finance",
 		"oneLiner": "Leading DEX, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains.",
