@@ -68,9 +68,9 @@ export interface RouteParams {
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	if (!browser) {
 		return {
-			token: undefined,
-			network: undefined,
-			uri: undefined
+			[TOKEN_PARAM]: undefined,
+			[NETWORK_PARAM]: undefined,
+			[URI_PARAM]: undefined
 		};
 	}
 
@@ -93,9 +93,9 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	const uri = searchParams?.get(URI_PARAM);
 
 	return {
-		token: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
-		network: searchParams?.get(NETWORK_PARAM),
-		uri: nonNullish(uri) ? decodeURIComponent(uri) : null
+		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
+		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
+		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null
 	};
 };
 

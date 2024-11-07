@@ -3,7 +3,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { setCustomToken as setCustomTokenasApi } from '$lib/api/backend.api';
+import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -86,7 +86,7 @@ export const setCustomToken = async ({
 	token: IcrcCustomToken;
 	enabled: boolean;
 }) =>
-	await setCustomTokenasApi({
+	await setCustomTokenApi({
 		identity,
 		token: toCustomToken({ ...token, enabled })
 	});

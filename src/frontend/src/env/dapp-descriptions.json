@@ -138,7 +138,7 @@
 	},
 	{
 		"id": "aave",
-		"name": "aave",
+		"name": "Aave",
 		"oneLiner": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers.",
 		"callToAction": "Access the full power of DeFi",
 		"website": "https://aave.com/",
@@ -164,5 +164,21 @@
 		"description": "EigenLayer is a protocol built on Ethereum that introduces restaking, a new primitive in cryptoeconomic security. It allows users to stake assets such as Native ETH, Liquid Staking Tokens (LSTs), EIGEN token or any ERC20 token into EigenLayer smart contracts, thereby extending Ethereum's cryptoeconomic security to additional applications on the network.",
 		"logo": "/images/dapps/eigenlayer-logo.svg",
 		"screenshots": ["/images/dapps/eigenlayer.webp"]
+	},
+	{
+		"id": "curve-finance",
+		"name": "Curve Finance",
+		"oneLiner": "Leading DEX, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains.",
+		"callToAction": "Get warped",
+		"website": "https://curve.fi/",
+		"twitter": "https://twitter.com/CurveFinance",
+		"github": "https://github.com/curvefi",
+		"telegram": "https://t.me/curvefi",
+		"tags": ["WalletConnect", "Liquidity", "DEX"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans.",
+		"logo": "/images/dapps/curve-finance-logo.svg",
+		"screenshots": ["/images/dapps/curve-finance.webp"]
 	}
 ]
