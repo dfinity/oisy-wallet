@@ -10,5 +10,5 @@ export const TransactionTypeSchema = z.enum([
 	// ICP
 	'approve',
 	'burn',
-	'mint',
+	'mint'
 ]);
