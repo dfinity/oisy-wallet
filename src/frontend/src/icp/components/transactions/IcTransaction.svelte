@@ -25,13 +25,7 @@
 	let timestamp: bigint | undefined;
 	let incoming: boolean | undefined;
 
-	$: ({
-		type,
-		typeLabel: transactionTypeLabel,
-		value,
-		timestamp,
-		incoming
-	} = transaction);
+	$: ({ type, typeLabel: transactionTypeLabel, value, timestamp, incoming } = transaction);
 
 	let pending = false;
 	$: pending = transaction?.status === 'pending';
