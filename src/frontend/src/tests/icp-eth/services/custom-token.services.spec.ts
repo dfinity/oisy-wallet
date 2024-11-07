@@ -1,4 +1,10 @@
-import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
+import { IC_CKBTC_INDEX_CANISTER_ID, IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
+import {
+	autoLoadCustomToken,
+	setCustomToken,
+	toCustomToken
+} from '$icp-eth/services/custom-token.services';
+import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as agent from '$lib/actors/agents.ic';
@@ -6,12 +12,13 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
+import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { expect, type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -241,6 +248,57 @@ describe('custom-token.services', () => {
 					msg: { text: get(i18n).init.error.icrc_canisters },
 					err
 				});
+			});
+		});
+	});
+
+	describe('toCustomToken', () => {
+		it.each([undefined, 2n])('should convert to CustomToken with version %s', (version) => {
+			const input: SaveCustomToken = {
+				enabled: true,
+				version,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
+			};
+
+			const result = toCustomToken(input);
+
+			expect(result).toEqual({
+				enabled: input.enabled,
+				version: toNullable(version),
+				token: {
+					Icrc: {
+						ledger_id: Principal.fromText(input.ledgerCanisterId),
+						index_id: [Principal.fromText(input.indexCanisterId)]
+					}
+				}
+			});
+		});
+	});
+
+	describe('setCustomToken', () => {
+		it('should call backend setCustomToken with expected parameters', async () => {
+			const spySetCustomToken = backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
+
+			const enabled = true;
+
+			await setCustomToken({
+				token: mockIcrcCustomToken,
+				identity: mockIdentity,
+				enabled
+			});
+
+			expect(spySetCustomToken).toHaveBeenCalledWith({
+				token: {
+					enabled,
+					version: toNullable(mockIcrcCustomToken.version),
+					token: {
+						Icrc: {
+							ledger_id: Principal.fromText(mockIcrcCustomToken.ledgerCanisterId),
+							index_id: [Principal.fromText(mockIcrcCustomToken.indexCanisterId)]
+						}
+					}
+				}
 			});
 		});
 	});
