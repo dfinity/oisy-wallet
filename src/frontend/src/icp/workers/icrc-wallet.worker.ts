@@ -25,7 +25,7 @@ const getTransactions = ({
 }: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<IcrcIndexNgGetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
-	// TODO: This is not clean. If the index canister ID is not provided we should not even land here.
+	// TODO(OISY-296): This is not clean. If the index canister ID is not provided we should not even land here.
 	const { indexCanisterId } = data;
 	assertNonNullish(indexCanisterId);
 
