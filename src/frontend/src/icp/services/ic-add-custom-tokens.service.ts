@@ -6,7 +6,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface ValidateTokenData {
@@ -46,13 +46,13 @@ export const loadAndAssertAddCustomToken = async ({
 		return { result: 'error' };
 	}
 
-	const { valid } = isNullish(indexCanisterId)
-		? { valid: true }
-		: await assertIndexLedgerId({
+	const { valid } = nonNullish(indexCanisterId)
+		? await assertIndexLedgerId({
 				identity,
 				...canisterIds,
 				indexCanisterId
-			});
+			})
+		: { valid: true };
 
 	if (!valid) {
 		return { result: 'error' };
