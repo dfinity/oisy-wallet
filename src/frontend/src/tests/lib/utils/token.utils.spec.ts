@@ -5,7 +5,7 @@ import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { ckErc20Production } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import type { TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
