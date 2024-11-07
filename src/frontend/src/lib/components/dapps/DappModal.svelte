@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Html, IconGitHub, Modal } from '@dfinity/gix-components';
+	import { Html, Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
+	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconOpenChat from '$lib/components/icons/IconOpenChat.svelte';
 	import IconTelegram from '$lib/components/icons/IconTelegram.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
@@ -106,7 +107,7 @@
 								$dAppName: dAppName
 							})}
 						>
-							<IconTwitter />
+							<IconTwitter size="22" />
 						</ExternalLinkIcon>
 					{/if}
 					{#if nonNullish(github)}

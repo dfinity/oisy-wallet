@@ -4,7 +4,7 @@ import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
-import type { IcInterface } from '$icp/types/ic';
+import type { IcInterface } from '$icp/types/ic-token';
 import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
@@ -105,6 +105,9 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
+/**
+ * @todo Add missing document and test for this function.
+ */
 const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
