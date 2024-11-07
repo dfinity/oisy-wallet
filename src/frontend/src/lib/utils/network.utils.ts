@@ -4,7 +4,9 @@ import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID,
+	ETHEREUM_NETWORK_ID,
 	ICP_NETWORK_ID,
+	SEPOLIA_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
 } from '$env/networks.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
@@ -20,6 +22,12 @@ export const isNetworkIdICP = (id: NetworkId | undefined): id is typeof ICP_NETW
 
 export const isNetworkIdEthereum = (id: NetworkId | undefined): boolean =>
 	nonNullish(id) && SUPPORTED_ETHEREUM_NETWORKS_IDS.includes(id);
+
+export const isNetworkIdEthereumMainnet = (networkId: NetworkId | undefined): boolean =>
+	ETHEREUM_NETWORK_ID === networkId;
+
+export const isNetworkIdSepolia = (networkId: NetworkId | undefined): boolean =>
+	SEPOLIA_NETWORK_ID === networkId;
 
 export const isNetworkIdBitcoin = (id: NetworkId | undefined): boolean =>
 	nonNullish(id) && BITCOIN_NETWORKS_IDS.includes(id);
