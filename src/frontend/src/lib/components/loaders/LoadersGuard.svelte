@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
-	import Loaders from '$lib/components/core/Loaders.svelte';
+	import Loaders from '$lib/components/loaders/Loaders.svelte';
 	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 
