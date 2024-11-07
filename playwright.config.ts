@@ -17,6 +17,8 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
+const isMac = process.platform === 'darwin';
+
 export default defineConfig({
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
@@ -37,10 +39,6 @@ export default defineConfig({
 			use: { ...devices['Desktop Chrome'] },
 		},
 		{
-			name: 'Safari',
-			use: { ...devices['Desktop Safari'] },
-		},
-		{
 			name: 'Edge',
 			use: { ...devices['Desktop Edge'] },
 		},
@@ -48,23 +46,7 @@ export default defineConfig({
 			name: 'Firefox',
 			use: { ...devices['Desktop Firefox'] },
 		},
-		/* Test against mobile viewports. */
-		{
-			name: 'iPad Mini',
-			use: { ...devices['iPad Mini'] },
-		},
-		{
-			name: 'iPad Pro',
-			use: { ...devices['iPad Pro 11'] },
-		},
-		{
-			name: 'iPhone 15 Pro Max',
-			use: { ...devices['iPhone 15 Pro Max'] },
-		},
-		{
-			name: 'iPhone SE',
-			use: { ...devices['iPhone SE'] },
-		},
+		/*Test against mobile viewports. */
 		{
 			name: 'Pixel 7',
 			use: { ...devices['Pixel 7'] },
@@ -82,5 +64,34 @@ export default defineConfig({
       name: 'Microsoft Edge',
       use: { ...devices['Desktop Edge'], channel: 'msedge' },
     },
-	]
+		/*Test against Apple devices. */
+		...(isMac
+      ? [
+					{
+						name: 'Safari',
+						use: devices['Desktop Safari'],
+					},
+          {
+            name: 'iPhone 15 Pro',
+            use: devices['iPhone 15 Pro'],
+          },
+          {
+            name: 'iPhone SE',
+            use: devices['iPhone SE'],
+          },
+          {
+            name: 'iPad Pro 11',
+            use: devices['iPad Pro 11'],
+          },
+          {
+            name: 'iPhone 15 Pro Max',
+            use: devices['iPhone 15 Pro Max'],
+          },
+					{
+						name: 'iPad Mini',
+						use: devices['iPad Mini'],
+					},
+        ]
+      : []), // If not on macOS, don't include Apple devices
+  ],
 });
