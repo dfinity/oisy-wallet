@@ -29,9 +29,6 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 
-	export let usdTotal = false;
-	export let summary = false;
-
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
 		? mapTokenUi({
@@ -70,7 +67,7 @@
 	class:via-united-nations-blue={$networkEthereum}
 	class:to-bright-lilac={$networkEthereum}
 >
-	{#if summary}
+	{#if isTransactionsPage}
 		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
@@ -96,9 +93,7 @@
 
 			<Balance token={pageTokenUi} />
 		</div>
-	{/if}
-
-	{#if usdTotal}
+	{:else}
 		<div in:slide={SLIDE_PARAMS}>
 			<ExchangeBalance />
 		</div>
