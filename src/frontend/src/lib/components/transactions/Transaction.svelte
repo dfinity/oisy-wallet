@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { ComponentType } from 'svelte';
+	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
@@ -12,9 +13,8 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import type {  TransactionStatus } from '$lib/types/transaction';
+	import type { TransactionStatus } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
-	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 
 	export let amount: BigNumber | undefined;
 	export let type: BtcTransactionType | EthTransactionType;
