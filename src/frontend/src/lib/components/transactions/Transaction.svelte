@@ -12,10 +12,10 @@
 	import type { TransactionType, TransactionStatus } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
 
-	export let value: BigNumber | undefined;
+	export let amount: BigNumber | undefined;
 	export let type: TransactionType;
 	export let status: TransactionStatus;
-	export let timestamp: bigint | undefined;
+	export let timestamp: number | undefined;
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
@@ -34,14 +34,14 @@
 		<RoundedIcon slot="icon" {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
 
 		<svelte:fragment slot="amount">
-			{#if nonNullish(value)}
-				<Amount amount={BigNumber.from(value)} />
+			{#if nonNullish(amount)}
+				<Amount {amount} />
 			{/if}
 		</svelte:fragment>
 
 		<svelte:fragment slot="description">
 			{#if nonNullish(timestamp)}
-				{formatSecondsToDate(Number(timestamp))}
+				{formatSecondsToDate(timestamp)}
 			{/if}
 
 			<TransactionStatusComponent {status} />

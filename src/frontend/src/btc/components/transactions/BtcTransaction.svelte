@@ -18,8 +18,8 @@
 
 <Transaction
 	on:click={() => modalStore.openBtcTransaction(transaction)}
-	value={nonNullish(value) ? BigNumber.from(value) : undefined}
+	amount={nonNullish(value) ? BigNumber.from(value) : undefined}
 	{type}
-	{timestamp}
+	timestamp={Number(timestamp)}
 	{status}
 />
