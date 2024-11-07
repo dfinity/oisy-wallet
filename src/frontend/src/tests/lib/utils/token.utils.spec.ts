@@ -5,7 +5,7 @@ import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { ckErc20Production } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-import type { IcToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic';
 import type { TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -296,7 +296,7 @@ describe('mapDefaultTokenToToggleable', () => {
 
 	describe('Default ICRC tokens are always enabled', () => {
 		describe('ckBTC', () => {
-			const dummyCkBTC = { ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID } as IcToken;
+			const dummyCkBTC = { ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID } as IcCkToken;
 			it('should enable ckBTC if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: dummyCkBTC,
@@ -326,7 +326,7 @@ describe('mapDefaultTokenToToggleable', () => {
 		});
 
 		describe('ckETH', () => {
-			const dummyCkETH = { ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID } as IcToken;
+			const dummyCkETH = { ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID } as IcCkToken;
 			it('should enable ckETH if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: dummyCkETH,
@@ -366,7 +366,7 @@ describe('mapDefaultTokenToToggleable', () => {
 				).mockReturnValue([ckUSDCLedgerCanisterId ?? '']);
 			});
 
-			const dummyCkUSDC = { ledgerCanisterId: ckUSDCLedgerCanisterId } as IcToken;
+			const dummyCkUSDC = { ledgerCanisterId: ckUSDCLedgerCanisterId } as IcCkToken;
 
 			it('should enable ckUSDC if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({
@@ -409,7 +409,7 @@ describe('mapDefaultTokenToToggleable', () => {
 				).mockReturnValue([ckUSDTLedgerCanisterId ?? '']);
 			});
 
-			const dummyCkUSDT = { ledgerCanisterId: ckUSDTLedgerCanisterId } as IcToken;
+			const dummyCkUSDT = { ledgerCanisterId: ckUSDTLedgerCanisterId } as IcCkToken;
 
 			it('should enable ckUSDT if no userToken', () => {
 				const result = mapDefaultTokenToToggleable({
