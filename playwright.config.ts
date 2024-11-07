@@ -34,53 +34,53 @@ export default defineConfig({
 		/* Test against desktop browsers. */
 		{
 			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'] },
+			use: { ...devices['Desktop Chrome'] }
 		},
 		{
 			name: 'Safari',
-			use: { ...devices['Desktop Safari'] },
+			use: { ...devices['Desktop Safari'] }
 		},
 		{
 			name: 'Edge',
-			use: { ...devices['Desktop Edge'] },
+			use: { ...devices['Desktop Edge'] }
 		},
 		{
 			name: 'Firefox',
-			use: { ...devices['Desktop Firefox'] },
+			use: { ...devices['Desktop Firefox'] }
 		},
 		/* Test against mobile viewports. */
 		{
 			name: 'iPad Mini',
-			use: { ...devices['iPad Mini'] },
+			use: { ...devices['iPad Mini'] }
 		},
 		{
 			name: 'iPad Pro',
-			use: { ...devices['iPad Pro 11'] },
+			use: { ...devices['iPad Pro 11'] }
 		},
 		{
 			name: 'iPhone 15 Pro Max',
-			use: { ...devices['iPhone 15 Pro Max'] },
+			use: { ...devices['iPhone 15 Pro Max'] }
 		},
 		{
 			name: 'iPhone SE',
-			use: { ...devices['iPhone SE'] },
+			use: { ...devices['iPhone SE'] }
 		},
 		{
 			name: 'Pixel 7',
-			use: { ...devices['Pixel 7'] },
+			use: { ...devices['Pixel 7'] }
 		},
 		{
 			name: 'Galaxy S9+',
-			use: { ...devices['Galaxy S9+'] },
+			use: { ...devices['Galaxy S9+'] }
 		},
 		/*Test against branded browsers. */
 		{
-      name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    },
-    {
-      name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    },
+			name: 'Google Chrome',
+			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+		},
+		{
+			name: 'Microsoft Edge',
+			use: { ...devices['Desktop Edge'], channel: 'msedge' }
+		}
 	]
 });
