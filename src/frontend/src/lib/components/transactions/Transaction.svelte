@@ -3,6 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { ComponentType } from 'svelte';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
+	import type { IcTransactionType } from '$icp/types/ic-transaction';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
@@ -16,27 +17,36 @@
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
 
 	export let amount: BigNumber | undefined;
-	export let type: TransactionType | EthTransactionType;
+	export let type: TransactionType | EthTransactionType | IcTransactionType;
 	export let status: TransactionStatus;
 	export let timestamp: number | undefined;
+	export let styleClass: string | undefined = undefined;
+
+	let isConversionFrom: boolean;
+	$: isConversionFrom = type === 'withdraw' || type === 'mint';
+
+	let isConversionTo: boolean;
+	$: isConversionTo = type === 'deposit' || type === 'burn' || type === 'approve';
+
+	let isPendingConversion: boolean;
+	$: isPendingConversion = (isConversionFrom || isConversionTo) && status === 'pending';
 
 	let icon: ComponentType;
-	$: icon =
-		(type === 'withdraw' || type === 'deposit') && status === 'pending'
-			? IconConvert
-			: type === 'withdraw'
-				? IconConvertFrom
-				: type === 'deposit'
-					? IconConvertTo
-					: type === 'send'
-						? IconSend
-						: IconReceive;
+	$: icon = isPendingConversion
+		? IconConvert
+		: isConversionFrom
+			? IconConvertFrom
+			: isConversionTo
+				? IconConvertTo
+				: type === 'send'
+					? IconSend
+					: IconReceive;
 
 	let iconWithOpacity: boolean;
 	$: iconWithOpacity = status === 'pending' || status === 'unconfirmed';
 </script>
 
-<button class="contents" on:click>
+<button class={`contents ${styleClass ?? ''}`} on:click>
 	<Card>
 		<span class="inline-block first-letter:capitalize"><slot /></span>
 
