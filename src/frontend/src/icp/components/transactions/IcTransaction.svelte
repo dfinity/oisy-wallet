@@ -9,11 +9,12 @@
 	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
+	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { TransactionStatus } from '$lib/types/transaction';
 	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
@@ -34,6 +35,9 @@
 
 	let pending = false;
 	$: pending = transaction?.status === 'pending';
+
+	let status: TransactionStatus;
+	$: status = pending ? 'pending' : 'confirmed';
 
 	let icon: ComponentType;
 	$: icon =
@@ -70,7 +74,7 @@
 				{formatNanosecondsToDate(timestamp)}
 			{/if}
 
-			<TransactionPending {pending} />
+			<TransactionStatusComponent {status} />
 		</svelte:fragment>
 	</Card>
 </button>
