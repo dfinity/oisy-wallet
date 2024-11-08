@@ -1,4 +1,7 @@
-import type { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
+import type {
+	TransactionStatusSchema,
+	TransactionTypeSchema
+} from '$lib/schema/transaction.schema';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { FeeData } from '@ethersproject/providers';

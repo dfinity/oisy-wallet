@@ -6,7 +6,7 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import type { TransactionStatus } from '$lib/types/transaction';
+	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
