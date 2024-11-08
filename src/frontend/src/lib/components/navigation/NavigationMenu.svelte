@@ -7,6 +7,11 @@
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		NAVIGATION_ITEM_EXPLORER,
+		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_TOKENS
+	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -16,11 +21,6 @@
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
-	import {
-		NAVIGATION_ITEM_EXPLORER,
-		NAVIGATION_ITEM_SETTINGS,
-		NAVIGATION_ITEM_TOKENS
-	} from '$lib/constants/test-ids.constants';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually

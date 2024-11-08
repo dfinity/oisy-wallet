@@ -2,7 +2,7 @@
 	export let href: string;
 	export let selected = false;
 	export let ariaLabel: string;
-	export let testId: string|undefined = undefined;
+	export let testId: string | undefined = undefined;
 </script>
 
 <a
