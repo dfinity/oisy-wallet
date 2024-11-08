@@ -23,4 +23,4 @@ const initPageStoreMock = () => {
 	};
 };
 
-export const page = initPageStoreMock();
+export const mockPage = initPageStoreMock();
