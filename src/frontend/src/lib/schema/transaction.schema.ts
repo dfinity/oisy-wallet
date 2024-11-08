@@ -8,10 +8,10 @@ const icpSpecificTypes = ['approve', 'burn', 'mint'] as const;
 
 const allTypes = [...commonTypes, ...ethSpecificTypes, ...icpSpecificTypes] as const;
 
-export const btcTransactionTypes = commonTypes;
+export const btcTransactionTypes = z.enum(commonTypes);
 
-export const ethTransactionTypes = [...commonTypes, ...ethSpecificTypes];
+export const ethTransactionTypes = z.enum([...commonTypes, ...ethSpecificTypes]);
 
-export const icpTransactionTypes = [...commonTypes, ...icpSpecificTypes];
+export const icpTransactionTypes = z.enum([...commonTypes, ...icpSpecificTypes]);
 
 export const TransactionTypeSchema = z.enum(allTypes);

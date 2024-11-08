@@ -20,7 +20,10 @@ export type IcrcTransaction = {
 
 export type IcTransaction = IcpTransaction | IcrcTransaction;
 
-export type IcTransactionType = Extract<TransactionType, (typeof icpTransactionTypes)[number]>;
+export type IcTransactionType = Extract<
+	TransactionType,
+	(typeof icpTransactionTypes.options)[number]
+>;
 
 export type IcTransactionIdText = string;
 
