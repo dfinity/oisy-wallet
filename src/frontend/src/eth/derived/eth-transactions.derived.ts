@@ -1,11 +1,11 @@
-import { transactionsStore } from '$eth/stores/transactions.store';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const sortedTransactions: Readable<Transaction[]> = derived(
-	[transactionsStore, tokenWithFallback],
+export const sortedEthTransactions: Readable<Transaction[]> = derived(
+	[ethTransactionsStore, tokenWithFallback],
 	([$transactionsStore, { id: $tokenId }]) =>
 		($transactionsStore?.[$tokenId] ?? []).sort(
 			(
@@ -33,12 +33,12 @@ export const sortedTransactions: Readable<Transaction[]> = derived(
 		)
 );
 
-export const transactionsInitialized: Readable<boolean> = derived(
-	[transactionsStore, tokenWithFallback],
-	([$transactionsStore, { id: $tokenId }]) => nonNullish($transactionsStore?.[$tokenId])
+export const ethTransactionsInitialized: Readable<boolean> = derived(
+	[ethTransactionsStore, tokenWithFallback],
+	([$ethTransactionsStore, { id: $tokenId }]) => nonNullish($ethTransactionsStore?.[$tokenId])
 );
 
-export const transactionsNotInitialized: Readable<boolean> = derived(
-	[transactionsInitialized],
-	([$transactionsInitialized]) => !$transactionsInitialized
+export const ethTransactionsNotInitialized: Readable<boolean> = derived(
+	[ethTransactionsInitialized],
+	([$ethTransactionsInitialized]) => !$ethTransactionsInitialized
 );
