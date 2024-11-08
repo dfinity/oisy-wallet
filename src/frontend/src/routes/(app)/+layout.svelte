@@ -5,7 +5,7 @@
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
-	import Loaders from '$lib/components/core/Loaders.svelte';
+	import Loaders from '$lib/components/loaders/Loaders.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
