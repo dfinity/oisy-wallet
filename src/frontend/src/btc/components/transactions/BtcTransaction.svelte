@@ -2,17 +2,17 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
+	import type { BtcTransactionType } from '$btc/types/btc-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { TransactionType } from '$lib/types/transaction';
 
 	export let transaction: BtcTransactionUi;
 
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let status: BtcTransactionStatus;
-	let type: TransactionType;
+	let type: BtcTransactionType;
 
 	$: ({ type, status, value, timestamp } = transaction);
 
