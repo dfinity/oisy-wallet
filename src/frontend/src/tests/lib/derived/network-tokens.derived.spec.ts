@@ -47,7 +47,7 @@ describe('network-tokens.derived', () => {
 		});
 
 		describe('when testnets are enabled', () => {
-			const mockEr20UserToken: Erc20UserToken = {
+			const mockErc20UserToken: Erc20UserToken = {
 				...PEPE_TOKEN,
 				...toggleProps
 			};
@@ -63,7 +63,7 @@ describe('network-tokens.derived', () => {
 				},
 				{
 					network: ETHEREUM_NETWORK,
-					tokens: [ETHEREUM_TOKEN, mockEr20UserToken]
+					tokens: [ETHEREUM_TOKEN, mockErc20UserToken]
 				},
 				{
 					network: SEPOLIA_NETWORK,
@@ -74,7 +74,7 @@ describe('network-tokens.derived', () => {
 			beforeEach(() => {
 				testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
-				erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+				erc20UserTokensStore.setAll([{ data: mockErc20UserToken, certified: false }]);
 			});
 
 			it('should not return testnet tokens when no network is selected', () => {
@@ -82,7 +82,7 @@ describe('network-tokens.derived', () => {
 					ICP_TOKEN,
 					BTC_MAINNET_TOKEN,
 					ETHEREUM_TOKEN,
-					mockEr20UserToken
+					mockErc20UserToken
 				]);
 			});
 
