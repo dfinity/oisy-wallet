@@ -1,12 +1,12 @@
-import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
+import Activity from '$lib/components/transactions/Activity.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
-describe('AllTransactions', () => {
+describe('Activity', () => {
 	it('renders the title', () => {
-		const { container } = render(AllTransactions);
+		const { container } = render(Activity);
 
 		const title: HTMLHeadingElement | null = container.querySelector('h1');
 
