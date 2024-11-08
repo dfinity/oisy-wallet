@@ -78,7 +78,12 @@ describe('network-tokens.derived', () => {
 			});
 
 			it('should not return testnet tokens when no network is selected', () => {
-				expect(get(enabledNetworkTokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
+				expect(get(enabledNetworkTokens)).toEqual([
+					ICP_TOKEN,
+					BTC_MAINNET_TOKEN,
+					ETHEREUM_TOKEN,
+					mockEr20UserToken
+				]);
 			});
 
 			it.each(networkMap)('should return all tokens for %s', ({ network, tokens }) => {
