@@ -16,6 +16,11 @@
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
+	import {
+		NAVIGATION_ITEM_EXPLORER,
+		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_TOKENS
+	} from '$lib/constants/test-ids.constants';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -30,6 +35,7 @@
 			href="/"
 			ariaLabel={$i18n.navigation.alt.tokens}
 			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
+			testId={NAVIGATION_ITEM_TOKENS}
 		>
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
@@ -39,6 +45,7 @@
 			href={AppPath.Explore}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
 			selected={isRouteDappExplorer(pageData)}
+			testId={NAVIGATION_ITEM_EXPLORER}
 		>
 			<IconlyUfo />
 			{$i18n.navigation.text.dapp_explorer}
@@ -48,6 +55,7 @@
 			href={`${AppPath.Settings}?${networkParam($networkId)}`}
 			ariaLabel={$i18n.navigation.alt.settings}
 			selected={isRouteSettings(pageData)}
+			testId={NAVIGATION_ITEM_SETTINGS}
 		>
 			<IconlySettings />
 			{$i18n.navigation.text.settings}
