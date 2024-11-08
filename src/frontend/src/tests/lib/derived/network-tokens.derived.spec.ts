@@ -18,7 +18,6 @@ import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('network-tokens.derived', () => {
 	describe('enabledNetworkTokens', () => {
@@ -43,25 +42,15 @@ describe('network-tokens.derived', () => {
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		});
 
-		it('should return all non-testnet tokens when no network is selected', () => {
+		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
 			expect(get(enabledNetworkTokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
 		});
 
-		it('should not return testnet tokens when testnets are enabled and no network is selected', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
-
-			expect(get(enabledNetworkTokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
-		});
-
-		it('should return the tokens for a selected network (even testnet)', () => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
-
+		describe('when testnets are enabled', () => {
 			const mockEr20UserToken: Erc20UserToken = {
 				...PEPE_TOKEN,
 				...toggleProps
 			};
-
-			erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
 
 			const networkMap = [
 				{
@@ -82,7 +71,17 @@ describe('network-tokens.derived', () => {
 				}
 			];
 
-			networkMap.forEach(({ network, tokens }) => {
+			beforeEach(() => {
+				testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+
+				erc20UserTokensStore.setAll([{ data: mockEr20UserToken, certified: false }]);
+			});
+
+			it('should not return testnet tokens when no network is selected', () => {
+				expect(get(enabledNetworkTokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
+			});
+
+			it.each(networkMap)('should return all tokens for %s', ({ network, tokens }) => {
 				mockPage.mock({ network: network.id.description });
 
 				expect(get(enabledNetworkTokens)).toEqual(tokens);
