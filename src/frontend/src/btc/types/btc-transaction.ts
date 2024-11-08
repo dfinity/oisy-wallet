@@ -1,6 +1,3 @@
 import type { TransactionType } from '$lib/types/transaction';
 
-export type BtcTransactionType = Exclude<
-	TransactionType,
-	'withdraw' | 'deposit' | 'approve' | 'burn' | 'mint'
->;
+export type BtcTransactionType = Extract<TransactionType, 'send' | 'receive'>;
