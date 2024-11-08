@@ -6,4 +6,4 @@
 <PageTitle>{$i18n.activity.text.title}</PageTitle>
 
 <!--TODO: Add unified transaction component here.-->
-Working on it..
+Working on it...
