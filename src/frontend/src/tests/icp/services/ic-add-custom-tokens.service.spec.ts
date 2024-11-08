@@ -1,12 +1,13 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcCanisters, IcToken } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import * as agent from '$lib/actors/agents.ic';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { HttpAgent } from '@dfinity/agent';
 import { IcrcIndexNgCanister, IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
@@ -30,12 +31,12 @@ describe('ic-add-custom-tokens.service', () => {
 		let spyLedgerId: MockInstance;
 		let spyGetTransactions: MockInstance;
 		let spyMetadata: MockInstance;
+		let spyBalance: MockInstance;
 
 		const validParams = {
 			identity: mockIdentity,
 			icrcTokens: [],
-			ledgerCanisterId: mockLedgerCanisterId,
-			indexCanisterId: mockIndexCanisterId
+			ledgerCanisterId: mockLedgerCanisterId
 		};
 
 		const tokenName = 'Test Token';
@@ -97,20 +98,6 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 			});
 
-			it('should return error if indexCanisterId is missing', async () => {
-				const result = await loadAndAssertAddCustomToken({
-					identity: mockIdentity,
-					icrcTokens: [],
-					ledgerCanisterId: mockLedgerCanisterId
-				});
-
-				expect(result).toEqual({ result: 'error' });
-
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).tokens.import.error.missing_index_id }
-				});
-			});
-
 			it('should return error if token is already available', async () => {
 				const result = await loadAndAssertAddCustomToken({
 					identity: mockIdentity,
@@ -140,81 +127,118 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 			});
 
-			it('should return error if ledger is not related to index', async () => {
-				indexCanisterMock.ledgerId.mockResolvedValue(
-					Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai')
-				);
+			describe('without index canister', () => {
+				it('should return error if metadata are undefined', async () => {
+					spyBalance = ledgerCanisterMock.balance.mockResolvedValue(123n);
 
-				const result = await loadAndAssertAddCustomToken(validParams);
+					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([]);
 
-				expect(result).toEqual({ result: 'error' });
+					const result = await loadAndAssertAddCustomToken(validParams);
+
+					expect(result).toEqual({ result: 'error' });
+
+					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+						msg: { text: get(i18n).tokens.import.error.no_metadata }
+					});
+				});
+
+				it('should return error if token already exits', async () => {
+					spyBalance = ledgerCanisterMock.balance.mockResolvedValue(123n);
+
+					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
+						['icrc1:name', { Text: tokenName }],
+						['icrc1:symbol', { Text: tokenSymbol }],
+						['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
+						['icrc1:fee', { Nat: tokenFee }]
+					]);
+
+					const result = await loadAndAssertAddCustomToken({
+						...validParams,
+						icrcTokens: [existingToken]
+					});
+
+					expect(result).toEqual({ result: 'error' });
+
+					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+						msg: { text: get(i18n).tokens.error.duplicate_metadata }
+					});
+				});
 			});
 
-			it('should return error if metadata are undefined', async () => {
-				spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
-					Principal.fromText(mockLedgerCanisterId)
-				);
+			describe('with index canister', () => {
+				it('should return error if ledger is not related to index', async () => {
+					indexCanisterMock.ledgerId.mockResolvedValue(
+						Principal.fromText('2ouva-viaaa-aaaaq-aaamq-cai')
+					);
 
-				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-					balance: 100n,
-					transactions: [],
-					oldest_tx_id: [0n]
+					const result = await loadAndAssertAddCustomToken({
+						...validParams,
+						indexCanisterId: mockIndexCanisterId
+					});
+
+					expect(result).toEqual({ result: 'error' });
 				});
 
-				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([]);
+				it('should return error if metadata are undefined', async () => {
+					spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
+						Principal.fromText(mockLedgerCanisterId)
+					);
 
-				const result = await loadAndAssertAddCustomToken(validParams);
+					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
+						balance: 100n,
+						transactions: [],
+						oldest_tx_id: [0n]
+					});
 
-				expect(result).toEqual({ result: 'error' });
+					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([]);
 
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).tokens.import.error.no_metadata }
-				});
-			});
+					const result = await loadAndAssertAddCustomToken({
+						...validParams,
+						indexCanisterId: mockIndexCanisterId
+					});
 
-			it('should return error if token already exits', async () => {
-				spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
-					Principal.fromText(mockLedgerCanisterId)
-				);
+					expect(result).toEqual({ result: 'error' });
 
-				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-					balance: 100n,
-					transactions: [],
-					oldest_tx_id: [0n]
-				});
-
-				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
-					['icrc1:name', { Text: tokenName }],
-					['icrc1:symbol', { Text: tokenSymbol }],
-					['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
-					['icrc1:fee', { Nat: tokenFee }]
-				]);
-
-				const result = await loadAndAssertAddCustomToken({
-					...validParams,
-					icrcTokens: [existingToken]
+					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+						msg: { text: get(i18n).tokens.import.error.no_metadata }
+					});
 				});
 
-				expect(result).toEqual({ result: 'error' });
+				it('should return error if token already exits', async () => {
+					spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
+						Principal.fromText(mockLedgerCanisterId)
+					);
 
-				expect(spyToastsError).toHaveBeenNthCalledWith(1, {
-					msg: { text: get(i18n).tokens.error.duplicate_metadata }
+					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
+						balance: 100n,
+						transactions: [],
+						oldest_tx_id: [0n]
+					});
+
+					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
+						['icrc1:name', { Text: tokenName }],
+						['icrc1:symbol', { Text: tokenSymbol }],
+						['icrc1:decimals', { Nat: BigInt(tokenDecimals) }],
+						['icrc1:fee', { Nat: tokenFee }]
+					]);
+
+					const result = await loadAndAssertAddCustomToken({
+						...validParams,
+						indexCanisterId: mockIndexCanisterId,
+						icrcTokens: [existingToken]
+					});
+
+					expect(result).toEqual({ result: 'error' });
+
+					expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+						msg: { text: get(i18n).tokens.error.duplicate_metadata }
+					});
 				});
 			});
 		});
 
 		describe('success', () => {
 			beforeEach(() => {
-				spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
-					Principal.fromText(mockLedgerCanisterId)
-				);
-
-				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-					balance: 100n,
-					transactions: [],
-					oldest_tx_id: [0n]
-				});
-
 				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
 					['icrc1:name', { Text: tokenName }],
 					['icrc1:symbol', { Text: tokenSymbol }],
@@ -223,67 +247,37 @@ describe('ic-add-custom-tokens.service', () => {
 				]);
 			});
 
-			it('should init ledger with expected canister id', async () => {
-				await loadAndAssertAddCustomToken(validParams);
+			const expectedBalance = 100n;
 
-				expect(spyLedgerCreate).toHaveBeenNthCalledWith(
-					1,
-					expect.objectContaining({ canisterId: Principal.fromText(mockLedgerCanisterId) })
-				);
-			});
+			type LoadAndAssertAddCustomTokenParams = Partial<IcCanisters> & {
+				identity: OptionIdentity;
+				icrcTokens: IcToken[];
+			};
 
-			it('should init index with expected canister id', async () => {
-				await loadAndAssertAddCustomToken(validParams);
-
-				expect(spyIndexCreate).toHaveBeenNthCalledWith(
-					1,
-					expect.objectContaining({ canisterId: Principal.fromText(mockIndexCanisterId) })
-				);
-			});
-
-			it('should call with an update ledgerId to ensure Index and Ledger are related', async () => {
-				await loadAndAssertAddCustomToken(validParams);
-
-				expect(spyLedgerId).toHaveBeenNthCalledWith(1, {
-					certified: true
-				});
-			});
-
-			it('should call with an update getTransactions to retrieve the current balance of the token', async () => {
-				await loadAndAssertAddCustomToken(validParams);
-
-				expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
-					account: getIcrcAccount(mockIdentity.getPrincipal()),
-					certified: true,
-					max_results: 0n,
-					start: undefined
-				});
-			});
-
-			it('should call with an update metadata to retrieve the details of the token', async () => {
-				await loadAndAssertAddCustomToken(validParams);
+			const assertUpdateCallMetadata = async (params: LoadAndAssertAddCustomTokenParams) => {
+				await loadAndAssertAddCustomToken(params);
 
 				expect(spyMetadata).toHaveBeenNthCalledWith(1, {
 					certified: true
 				});
-			});
+			};
 
-			it('should successfully load a new token', async () => {
-				const result = await loadAndAssertAddCustomToken(validParams);
+			const assertLoadToken = async (params: LoadAndAssertAddCustomTokenParams) => {
+				const result = await loadAndAssertAddCustomToken(params);
 
 				expect(result.result).toBe('success');
 				expect(result.data).toBeDefined();
-				expect(result.data?.balance).toBe(100n);
+				expect(result.data?.balance).toBe(expectedBalance);
 				expect(result.data?.token).toMatchObject({
-					name: 'Test Token',
-					symbol: 'TEST',
-					decimals: 8
+					name: tokenName,
+					symbol: tokenSymbol,
+					decimals: tokenDecimals
 				});
-			});
+			};
 
-			it('should successfully load a new token if name and symbol is different', async () => {
+			const assertLoadTokenDifferent = async (params: LoadAndAssertAddCustomTokenParams) => {
 				const { result } = await loadAndAssertAddCustomToken({
-					...validParams,
+					...params,
 					icrcTokens: [
 						{
 							...existingToken,
@@ -294,6 +288,111 @@ describe('ic-add-custom-tokens.service', () => {
 				});
 
 				expect(result).toBe('success');
+			};
+
+			it('should init ledger with expected canister id', async () => {
+				await loadAndAssertAddCustomToken(validParams);
+
+				expect(spyLedgerCreate).toHaveBeenNthCalledWith(
+					1,
+					expect.objectContaining({ canisterId: Principal.fromText(mockLedgerCanisterId) })
+				);
+			});
+
+			describe('without index canister', () => {
+				beforeEach(() => {
+					spyBalance = ledgerCanisterMock.balance.mockResolvedValue(expectedBalance);
+				});
+
+				it('should accept loading without indexCanisterId', async () => {
+					const { result } = await loadAndAssertAddCustomToken({
+						identity: mockIdentity,
+						icrcTokens: [],
+						ledgerCanisterId: mockLedgerCanisterId
+					});
+
+					expect(result).toBe('success');
+				});
+
+				it('should call with an update balance to retrieve the current balance of the token', async () => {
+					await loadAndAssertAddCustomToken(validParams);
+
+					expect(spyBalance).toHaveBeenNthCalledWith(1, {
+						certified: true,
+						owner: mockPrincipal
+					});
+				});
+
+				it('should call with an update metadata to retrieve the details of the token', async () => {
+					await assertUpdateCallMetadata(validParams);
+				});
+
+				it('should successfully load a new token', async () => {
+					await assertLoadToken(validParams);
+				});
+
+				it('should successfully load a new token if name and symbol is different', async () => {
+					await assertLoadTokenDifferent(validParams);
+				});
+			});
+
+			describe('with index canister', () => {
+				const validParamsWithIndex = {
+					...validParams,
+					indexCanisterId: mockIndexCanisterId
+				};
+
+				beforeEach(() => {
+					spyLedgerId = indexCanisterMock.ledgerId.mockResolvedValue(
+						Principal.fromText(mockLedgerCanisterId)
+					);
+
+					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
+						balance: expectedBalance,
+						transactions: [],
+						oldest_tx_id: [0n]
+					});
+				});
+
+				it('should init index with expected canister id', async () => {
+					await loadAndAssertAddCustomToken(validParamsWithIndex);
+
+					expect(spyIndexCreate).toHaveBeenNthCalledWith(
+						1,
+						expect.objectContaining({ canisterId: Principal.fromText(mockIndexCanisterId) })
+					);
+				});
+
+				it('should call with an update ledgerId to ensure Index and Ledger are related', async () => {
+					await loadAndAssertAddCustomToken(validParamsWithIndex);
+
+					expect(spyLedgerId).toHaveBeenNthCalledWith(1, {
+						certified: true
+					});
+				});
+
+				it('should call with an update getTransactions to retrieve the current balance of the token', async () => {
+					await loadAndAssertAddCustomToken(validParamsWithIndex);
+
+					expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+						account: getIcrcAccount(mockIdentity.getPrincipal()),
+						certified: true,
+						max_results: 0n,
+						start: undefined
+					});
+				});
+
+				it('should call with an update metadata to retrieve the details of the token', async () => {
+					await assertUpdateCallMetadata(validParamsWithIndex);
+				});
+
+				it('should successfully load a new token', async () => {
+					await assertLoadToken(validParamsWithIndex);
+				});
+
+				it('should successfully load a new token if name and symbol is different', async () => {
+					await assertLoadTokenDifferent(validParamsWithIndex);
+				});
 			});
 		});
 	});

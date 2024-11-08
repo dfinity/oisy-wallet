@@ -5,11 +5,11 @@
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
-	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
+	import Loaders from '$lib/components/loaders/Loaders.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
@@ -69,9 +69,9 @@
 				<Hero />
 			{/if}
 
-			<LoadersGuard>
+			<Loaders>
 				<slot />
-			</LoadersGuard>
+			</Loaders>
 		</SplitPane>
 
 		<Modals />
