@@ -5,7 +5,7 @@
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
-	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
+	import Loaders from '$lib/components/core/Loaders.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
@@ -69,9 +69,9 @@
 				<Hero />
 			{/if}
 
-			<LoadersGuard>
+			<Loaders>
 				<slot />
-			</LoadersGuard>
+			</Loaders>
 		</SplitPane>
 
 		<Modals />
