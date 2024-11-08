@@ -1,4 +1,3 @@
-import { page } from '$app/stores';
 import * as btcEnv from '$env/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
@@ -17,8 +16,8 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { testnetsStore } from '$lib/stores/settings.store';
-import { mockPageData } from '$tests/mocks/page.store.mock';
-import { get, readable } from 'svelte/store';
+import { mockPage } from '$tests/mocks/page.store.mock';
+import { get } from 'svelte/store';
 import { expect } from 'vitest';
 
 describe('network-tokens.derived', () => {
@@ -30,6 +29,8 @@ describe('network-tokens.derived', () => {
 
 		beforeEach(() => {
 			vi.resetAllMocks();
+
+			mockPage.reset();
 
 			erc20DefaultTokensStore.reset();
 			erc20UserTokensStore.resetAll();
@@ -43,16 +44,10 @@ describe('network-tokens.derived', () => {
 		});
 
 		it('should return all non-testnet tokens when no network is selected', () => {
-			const mockStore = readable(mockPageData({}));
-			vi.spyOn(page, 'subscribe').mockImplementationOnce(mockStore.subscribe);
-
 			expect(get(enabledNetworkTokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
 		});
 
 		it('should not return testnet tokens when testnets are enabled and no network is selected', () => {
-			const mockStore = readable(mockPageData({}));
-			vi.spyOn(page, 'subscribe').mockImplementationOnce(mockStore.subscribe);
-
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
 			expect(get(enabledNetworkTokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
@@ -88,8 +83,7 @@ describe('network-tokens.derived', () => {
 			];
 
 			networkMap.forEach(({ network, tokens }) => {
-				const mockStore = readable(mockPageData({ network: network.id.description }));
-				vi.spyOn(page, 'subscribe').mockImplementation(mockStore.subscribe);
+				mockPage.mock({ network: network.id.description });
 
 				expect(get(enabledNetworkTokens)).toEqual(tokens);
 			});
