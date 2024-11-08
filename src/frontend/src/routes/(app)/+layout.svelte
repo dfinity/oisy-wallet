@@ -9,7 +9,7 @@
 	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
-	import Loaders from '$lib/components/loaders/Loaders.svelte';
+	import Loaders from '$lib/components/core/Loaders.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
