@@ -396,6 +396,7 @@ interface I18nTokens {
 		error: {
 			loading_metadata: string;
 			no_metadata: string;
+			unexpected_ledger: string;
 			unexpected_index: string;
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;

@@ -1,12 +1,12 @@
 import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
-import { metadata } from '$icp/api/icrc-ledger.api';
+import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface ValidateTokenData {
@@ -35,13 +35,6 @@ export const loadAndAssertAddCustomToken = async ({
 		return { result: 'error' };
 	}
 
-	if (isNullish(indexCanisterId)) {
-		toastsError({
-			msg: { text: get(i18n).tokens.import.error.missing_index_id }
-		});
-		return { result: 'error' };
-	}
-
 	const canisterIds = { ledgerCanisterId, indexCanisterId };
 
 	const { alreadyAvailable } = assertAlreadyAvailable({
@@ -53,22 +46,26 @@ export const loadAndAssertAddCustomToken = async ({
 		return { result: 'error' };
 	}
 
-	const { valid } = await assertLedgerId({
-		identity,
-		...canisterIds
-	});
+	const { valid } = nonNullish(indexCanisterId)
+		? await assertIndexLedgerId({
+				identity,
+				...canisterIds,
+				indexCanisterId
+			})
+		: { valid: true };
 
 	if (!valid) {
 		return { result: 'error' };
 	}
 
 	try {
+		const params = { identity, ...canisterIds };
+
 		const [token, balance] = await Promise.all([
-			loadMetadata({
-				identity,
-				...canisterIds
-			}),
-			loadBalance({ identity, ...canisterIds })
+			loadMetadata(params),
+			...(isNullish(indexCanisterId)
+				? [loadLedgerBalance(params)]
+				: [loadIndexBalance({ ...params, indexCanisterId })])
 		]);
 
 		if (isNullish(token)) {
@@ -157,10 +154,31 @@ const loadMetadata = async ({
 	}
 };
 
-const loadBalance = async ({
+const loadLedgerBalance = async ({
+	identity,
+	ledgerCanisterId
+}: IcCanisters & { identity: Identity }): Promise<bigint> => {
+	try {
+		return await balance({
+			ledgerCanisterId,
+			identity,
+			owner: identity.getPrincipal(),
+			certified: true
+		});
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: get(i18n).tokens.import.error.unexpected_ledger },
+			err
+		});
+
+		throw err;
+	}
+};
+
+const loadIndexBalance = async ({
 	identity,
 	indexCanisterId
-}: Pick<IcCanisters, 'indexCanisterId'> & { identity: Identity }): Promise<bigint> => {
+}: Required<Pick<IcCanisters, 'indexCanisterId'>> & { identity: Identity }): Promise<bigint> => {
 	try {
 		const { balance } = await getTransactionsIcrc({
 			indexCanisterId,
@@ -181,11 +199,11 @@ const loadBalance = async ({
 	}
 };
 
-const assertLedgerId = async ({
+const assertIndexLedgerId = async ({
 	identity,
 	indexCanisterId,
 	ledgerCanisterId
-}: IcCanisters & { identity: Identity }): Promise<{ valid: boolean }> => {
+}: Required<IcCanisters> & { identity: Identity }): Promise<{ valid: boolean }> => {
 	try {
 		const ledgerId = await getLedgerId({
 			indexCanisterId,

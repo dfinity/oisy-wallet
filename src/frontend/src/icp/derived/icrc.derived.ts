@@ -71,7 +71,7 @@ const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 					userLedgerCanisterId === ledgerCanisterId && userIndexCanisterId === indexCanisterId
 			);
 
-			return mapDefaultTokenToToggleable({
+			return mapDefaultTokenToToggleable<IcToken>({
 				defaultToken: {
 					ledgerCanisterId,
 					indexCanisterId,

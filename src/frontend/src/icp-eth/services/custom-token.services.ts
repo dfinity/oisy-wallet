@@ -10,7 +10,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { isNullish, toNullable } from '@dfinity/utils';
+import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const assertErc20SendTokenData = (sendToken: Erc20Token): AutoLoadTokenResult | undefined => {
@@ -72,7 +72,9 @@ export const toCustomToken = ({
 	token: {
 		Icrc: {
 			ledger_id: Principal.fromText(ledgerCanisterId),
-			index_id: toNullable(Principal.fromText(indexCanisterId))
+			index_id: toNullable(
+				nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
+			)
 		}
 	}
 });

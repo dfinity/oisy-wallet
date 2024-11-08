@@ -99,13 +99,12 @@ describe('ic-token.schema', () => {
 			expect(IcCanistersSchema.parse(validData)).toEqual(validData);
 		});
 
-		// TODO: uncomment when Index canister becomes optional
-		// it('should validate with ledger canister only', () => {
-		// 	const validData = {
-		// 		ledgerCanisterId: mockCanisters.ledgerCanisterId
-		// 	};
-		// 	expect(IcCanistersSchema.parse(validData)).toEqual(validData);
-		// });
+		it('should validate with ledger canister only', () => {
+			const validData = {
+				ledgerCanisterId: mockCanisters.ledgerCanisterId
+			};
+			expect(IcCanistersSchema.parse(validData)).toEqual(validData);
+		});
 
 		it('should fail with invalid ledger canister id', () => {
 			const invalidData = {
@@ -219,11 +218,10 @@ describe('ic-token.schema', () => {
 			expect(IcInterfaceSchema.parse(validData)).toEqual(validData);
 		});
 
-		// TODO: uncomment when Index canister becomes optional
-		// it('should validate without Index canister', () => {
-		// 	const { indexCanisterId: _, ...restValidData } = validData;
-		// 	expect(IcInterfaceSchema.parse(restValidData)).toEqual(restValidData);
-		// });
+		it('should validate without Index canister', () => {
+			const { indexCanisterId: _, ...restValidData } = validData;
+			expect(IcInterfaceSchema.parse(restValidData)).toEqual(restValidData);
+		});
 
 		it('should fail with incorrect IcCanisters data', () => {
 			const invalidData = {

@@ -25,13 +25,18 @@ const getTransactions = ({
 }: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<IcrcIndexNgGetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
+	// TODO(OISY-296): This is not clean. If the index canister ID is not provided we should not even land here.
+	const { indexCanisterId } = data;
+	assertNonNullish(indexCanisterId);
+
 	return getTransactionsApi({
 		identity,
 		certified,
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
 		start: undefined,
-		...data
+		...data,
+		indexCanisterId
 	});
 };
 
