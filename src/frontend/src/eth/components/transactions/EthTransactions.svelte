@@ -2,12 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
-	import Transaction from '$eth/components/transactions/Transaction.svelte';
-	import TransactionModal from '$eth/components/transactions/TransactionModal.svelte';
-	import TransactionsSkeletons from '$eth/components/transactions/TransactionsSkeletons.svelte';
+	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
+	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
+	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
-	import { sortedTransactions } from '$eth/derived/transactions.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapTransactionUi } from '$eth/utils/transactions.utils';
@@ -33,7 +33,7 @@
 	});
 
 	let sortedTransactionsUi: EthTransactionUi[];
-	$: sortedTransactionsUi = $sortedTransactions.map((transaction) =>
+	$: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>
 		mapTransactionUi({
 			transaction,
 			ckMinterInfoAddresses,
@@ -85,20 +85,20 @@
 
 <Header>{$i18n.transactions.text.title}</Header>
 
-<TransactionsSkeletons>
+<EthTransactionsSkeletons>
 	{#each sortedTransactionsUi as transaction (transaction.hash)}
 		<div transition:slide={SLIDE_DURATION}>
-			<Transaction {transaction} />
+			<EthTransaction {transaction} />
 		</div>
 	{/each}
 
-	{#if $sortedTransactions.length === 0}
+	{#if $sortedEthTransactions.length === 0}
 		<TransactionsPlaceholder />
 	{/if}
-</TransactionsSkeletons>
+</EthTransactionsSkeletons>
 
 {#if $modalTransaction && nonNullish(selectedTransaction)}
-	<TransactionModal transaction={selectedTransaction} />
+	<EthTransactionModal transaction={selectedTransaction} />
 {:else if $modalToken}
 	<TokenModal />
 {/if}

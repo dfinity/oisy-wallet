@@ -3,14 +3,14 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { setCustomToken as setCustomTokenasApi } from '$lib/api/backend.api';
+import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { isNullish, toNullable } from '@dfinity/utils';
+import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const assertErc20SendTokenData = (sendToken: Erc20Token): AutoLoadTokenResult | undefined => {
@@ -72,7 +72,9 @@ export const toCustomToken = ({
 	token: {
 		Icrc: {
 			ledger_id: Principal.fromText(ledgerCanisterId),
-			index_id: toNullable(Principal.fromText(indexCanisterId))
+			index_id: toNullable(
+				nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
+			)
 		}
 	}
 });
@@ -86,7 +88,7 @@ export const setCustomToken = async ({
 	token: IcrcCustomToken;
 	enabled: boolean;
 }) =>
-	await setCustomTokenasApi({
+	await setCustomTokenApi({
 		identity,
 		token: toCustomToken({ ...token, enabled })
 	});

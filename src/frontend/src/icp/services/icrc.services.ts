@@ -105,6 +105,9 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
+/**
+ * @todo Add missing document and test for this function.
+ */
 const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
@@ -149,6 +152,7 @@ const loadCustomIcrcTokensData = async ({
 
 		const indexCanisterId = fromNullable(index_id);
 
+		// TODO(OISY-296): remove isNullish(indexCanisterId) when support for reading balance and no index is fully implemented
 		// Index canister ID currently mandatory in Oisy's frontend
 		if (isNullish(indexCanisterId)) {
 			return undefined;
