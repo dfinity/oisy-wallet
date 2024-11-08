@@ -1,7 +1,7 @@
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
-import { transactionsStore } from '$eth/stores/transactions.store';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { i18n } from '$lib/stores/i18n.store';
@@ -53,9 +53,9 @@ const loadEthTransactions = async ({
 	try {
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
-		transactionsStore.set({ tokenId, transactions });
+		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
-		transactionsStore.reset();
+		ethTransactionsStore.reset();
 
 		const {
 			transactions: {
@@ -116,9 +116,9 @@ export const loadErc20Transactions = async ({
 	try {
 		const { transactions: transactionsRest } = etherscanRests(networkId);
 		const transactions = await transactionsRest({ contract: token, address });
-		transactionsStore.set({ tokenId, transactions });
+		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
-		transactionsStore.reset();
+		ethTransactionsStore.reset();
 
 		const {
 			transactions: {

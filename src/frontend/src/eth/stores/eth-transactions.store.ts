@@ -41,4 +41,4 @@ const initTransactionsStore = (): TransactionsStore => {
 	};
 };
 
-export const transactionsStore = initTransactionsStore();
+export const ethTransactionsStore = initTransactionsStore();

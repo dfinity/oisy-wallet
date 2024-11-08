@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { ethTransactionsNotInitialized } from '$eth/derived/eth-transactions.derived';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
-	import { transactionsNotInitialized } from '$eth/derived/transactions.derived';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 </script>
 
-{#if ($erc20UserTokensNotInitialized && $tokenNotInitialized) || $transactionsNotInitialized}
+{#if ($erc20UserTokensNotInitialized && $tokenNotInitialized) || $ethTransactionsNotInitialized}
 	<SkeletonCards rows={5} />
 {:else}
 	<div in:fade>
