@@ -14,9 +14,9 @@ const initPageStoreMock = () => {
 
 	return {
 		subscribe,
-		mock: (params: Partial<RouteParams>) =>
+		mock: (data: Partial<RouteParams>) =>
 			set({
-				data: params
+				data
 			}),
 
 		reset: () => set(initialStoreValue)
