@@ -16,15 +16,6 @@
 	export let timestamp: number | undefined;
 	export let styleClass: string | undefined = undefined;
 
-	let isConversionFrom: boolean;
-	$: isConversionFrom = type === 'withdraw' || type === 'mint';
-
-	let isConversionTo: boolean;
-	$: isConversionTo = type === 'deposit' || type === 'burn' || type === 'approve';
-
-	let isPendingConversion: boolean;
-	$: isPendingConversion = (isConversionFrom || isConversionTo) && status === 'pending';
-
 	let icon: ComponentType;
 	$: icon = mapTransactionIcon({ type, status });
 
