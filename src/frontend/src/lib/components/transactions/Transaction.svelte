@@ -2,22 +2,16 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { ComponentType } from 'svelte';
-	import type { EthTransactionType } from '$eth/types/eth-transaction';
-	import type { IcTransactionType } from '$icp/types/ic-transaction';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
-	import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
-	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
-	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import type { TransactionType, TransactionStatus } from '$lib/types/transaction';
+	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
+	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
 	export let amount: BigNumber | undefined;
-	export let type: TransactionType | EthTransactionType | IcTransactionType;
+	export let type: TransactionType;
 	export let status: TransactionStatus;
 	export let timestamp: number | undefined;
 	export let styleClass: string | undefined = undefined;
@@ -32,15 +26,7 @@
 	$: isPendingConversion = (isConversionFrom || isConversionTo) && status === 'pending';
 
 	let icon: ComponentType;
-	$: icon = isPendingConversion
-		? IconConvert
-		: isConversionFrom
-			? IconConvertFrom
-			: isConversionTo
-				? IconConvertTo
-				: type === 'send'
-					? IconSend
-					: IconReceive;
+	$: icon = mapTransactionIcon({ type, status });
 
 	let iconWithOpacity: boolean;
 	$: iconWithOpacity = status === 'pending' || status === 'unconfirmed';
