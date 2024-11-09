@@ -669,6 +669,10 @@ interface I18nLicense_agreement {
 	alt: { license_agreement: string };
 }
 
+interface I18nActivity {
+	text: { title: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -695,4 +699,5 @@ interface I18n {
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
+	activity: I18nActivity;
 }
