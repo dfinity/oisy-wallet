@@ -767,5 +767,10 @@
 		"alt": {
 			"license_agreement": "The $oisy_name License Agreement"
 		}
+	},
+	"activity": {
+		"text": {
+			"title": "Recent Activity"
+		}
 	}
 }
