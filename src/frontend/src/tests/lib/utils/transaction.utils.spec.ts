@@ -46,10 +46,8 @@ describe('transaction.utils', () => {
 			});
 		});
 
-		allConvertTypes.forEach((type) => {
-			it(`should return IconConvert for ${type} and status pending`, () => {
-				expect(mapTransactionIcon({ type, status: 'pending' })).toBe(IconConvert);
-			});
+		it.each(allConvertTypes)('should return IconConvert for %s and status pending', (type) => {
+			expect(mapTransactionIcon({ type, status: 'pending' })).toBe(IconConvert);
 		});
 
 		it(`should return IconSend for send and status pending`, () => {
