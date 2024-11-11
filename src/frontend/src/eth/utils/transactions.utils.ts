@@ -22,7 +22,7 @@ export const decodeErc20AbiDataValue = (data: string): BigNumber => {
 };
 
 /**
- * It maps a transaction to a transaction UI object
+ * It maps a transaction to an Ethereum transaction UI object
  */
 export const mapEthTransactionUi = ({
 	transaction,
