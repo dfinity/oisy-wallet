@@ -8,7 +8,6 @@ import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { expect, type MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/transactions.services', () => ({
 	loadTransactions: vi.fn()
@@ -21,12 +20,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	const mockErc20UserTokens = [...mockMainnetErc20UserTokens, ...mockSepoliaErc20UserTokens];
 
-	const mockLoadTransactions = loadTransactions as MockedFunction<typeof loadTransactions>;
-
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		mockLoadTransactions.mockResolvedValue({ success: true });
 
 		erc20UserTokensStore.setAll(mockErc20UserTokens);
 
@@ -61,7 +56,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	it('should not load transactions for native Ethereum token when Ethereum mainnet is disabled', async () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
-		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementationOnce(() => false);
+		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 
 		render(LoaderMultipleEthTransactions);
 
