@@ -42,7 +42,7 @@ export const PostMessageRequestSchema = z.enum([
 ]);
 
 export const PostMessageDataRequestSchema = z.never();
-export const PostMessageDataResponseSchema = z.object({});
+export const PostMessageDataResponseSchema = z.object({}).strict();
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	erc20Addresses: z.array(z.custom<Erc20ContractAddress>()),
@@ -145,9 +145,9 @@ export const PostMessageSyncStateSchema = PostMessageDataResponseSchema.extend({
 
 export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSchema.extend({
 	address: z.custom<BtcAddressData>()
-});
+}).strict();
 
-export const PostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 	z.object({
 		msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
 		data: dataSchema.optional()

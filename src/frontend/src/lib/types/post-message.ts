@@ -17,7 +17,7 @@ import {
 	PostMessageRequestSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
-	PostMessageSchema,
+	inferPostMessageSchema,
 	PostMessageSyncStateSchema
 } from '$lib/schema/post-message.schema';
 
@@ -71,5 +71,5 @@ export type PostMessageDataResponseBTCAddress = z.infer<
 >;
 
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> = z.infer<
-	ReturnType<typeof PostMessageSchema<ZodType<T>>>
+	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
 >;
