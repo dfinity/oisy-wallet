@@ -13,7 +13,7 @@
 
 <span class="flex flex-col gap-2">
 	<output
-		class={`break-words inline-flex w-full flex-row justify-center gap-3 text-4xl font-bold lg:text-5xl`}
+		class={`inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl`}
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !token.balance.isZero()}
 			<span><Amount amount={token.balance} /> {token.symbol}</span>
