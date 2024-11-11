@@ -1,5 +1,4 @@
 import {
-	JsonTransactionsTextSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -13,6 +12,7 @@ import {
 	PostMessageDataResponseExchangeSchema,
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
+	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageRequestSchema,
 	PostMessageResponseSchema,
@@ -20,7 +20,6 @@ import {
 	PostMessageSchema,
 	PostMessageSyncStateSchema
 } from '$lib/schema/post-message.schema';
-import type { CertifiedData } from '$lib/types/store';
 
 import { z, type ZodType } from 'zod';
 
@@ -55,17 +54,7 @@ export type PostMessageDataResponseExchangeError = z.infer<
 	typeof PostMessageDataResponseExchangeErrorSchema
 >;
 
-export type JsonTransactionsText = z.infer<typeof JsonTransactionsTextSchema>;
-
-// TODO: can maybe be simplified?
-type PostMessageWalletData<T> = Omit<T, 'transactions' | 'balance'> & {
-	balance: CertifiedData<bigint>;
-	newTransactions: JsonTransactionsText;
-};
-
-export interface PostMessageDataResponseWallet<T = unknown> extends PostMessageDataResponse {
-	wallet: PostMessageWalletData<T>;
-}
+export type PostMessageDataResponseWallet = z.infer<typeof PostMessageDataResponseWalletSchema>;
 
 export type PostMessageDataResponseError = z.infer<typeof PostMessageDataResponseErrorSchema>;
 

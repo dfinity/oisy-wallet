@@ -116,7 +116,16 @@ export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataRespons
 });
 
 // Transactions & {certified: boolean}
-export const JsonTransactionsTextSchema = z.string();
+const JsonTransactionsTextSchema = z.string();
+
+const PostMessageWalletDataSchema = z.object({
+	balance: z.custom<CertifiedData<bigint>>(),
+	newTransactions: JsonTransactionsTextSchema
+});
+
+export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema.extend({
+	wallet: PostMessageWalletDataSchema
+});
 
 export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.extend({
 	error: z.unknown()
