@@ -45,6 +45,7 @@ export const PostMessageDataRequestSchema = z.never();
 export const PostMessageDataResponseSchema = z.object({}).strict();
 
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
+	// TODO: generate zod schema for Erc20ContractAddress
 	erc20Addresses: z.array(z.custom<Erc20ContractAddress>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema)
 });
@@ -60,12 +61,15 @@ export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({
 export const PostMessageDataRequestIcCkBTCUpdateBalanceSchema =
 	PostMessageDataRequestIcCkSchema.extend({
 		btcAddress: z.string().optional(),
+		// TODO: generate zod schema for BitcoinNetwork
 		bitcoinNetwork: z.custom<BitcoinNetwork>()
 	});
 
 export const PostMessageDataRequestBtcSchema = z.object({
+	// TODO: generate zod schema for CertifiedData
 	btcAddress: z.custom<CertifiedData<BtcAddress>>(),
 	shouldFetchTransactions: z.boolean(),
+	// TODO: can we implement a generic way to convert Candid types to Zod?
 	bitcoinNetwork: z.custom<SignerBitcoinNetwork>()
 });
 
@@ -103,6 +107,7 @@ export const PostMessageDataResponseAuthSchema = PostMessageDataResponseSchema.e
 	authRemainingTime: z.number()
 });
 
+// TODO: generate zod schema for Coingecko
 export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSchema.extend({
 	currentEthPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>(),
@@ -144,6 +149,7 @@ export const PostMessageSyncStateSchema = PostMessageDataResponseSchema.extend({
 });
 
 export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSchema.extend({
+	// TODO: generate zod schema for BtcAddressData
 	address: z.custom<BtcAddressData>()
 }).strict();
 
