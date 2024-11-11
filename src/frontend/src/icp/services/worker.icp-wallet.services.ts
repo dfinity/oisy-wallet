@@ -11,7 +11,6 @@ import type {
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
-import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
 
 export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	const WalletWorker = await import('$icp/workers/icp-wallet.worker?worker');
@@ -21,9 +20,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 		data
 	}: MessageEvent<
 		PostMessage<
-			| PostMessageDataResponseWallet<
-					Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>
-			  >
+			| PostMessageDataResponseWallet
 			| PostMessageDataResponseError
 			| PostMessageDataResponseWalletCleanUp
 		>
@@ -34,9 +31,7 @@ export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 			case 'syncIcpWallet':
 				syncWallet({
 					tokenId: ICP_TOKEN_ID,
-					data: data.data as PostMessageDataResponseWallet<
-						Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>
-					>
+					data: data.data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcpWalletError':
