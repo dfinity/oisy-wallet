@@ -33,6 +33,18 @@ runs:
       shell: bash
       run: dfx start --background --quiet
 
+    - name: Install LLVM on macOS
+      if: runner.os == 'macOS'
+      run: brew install llvm
+
+    - name: Set environment variables for wasm32 target on macOS
+      if: runner.os == 'macOS'
+      run: |
+        echo "CC_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/clang" >> $GITHUB_ENV
+        echo "AR_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/llvm-ar" >> $GITHUB_ENV
+        echo "CFLAGS_wasm32_unknown_unknown=--target=wasm32-unknown-unknown" >> $GITHUB_ENV
+        echo "CRATE_CC_NO_DEFAULTS=true" >> $GITHUB_ENV
+
     - name: Deploy backend
       shell: bash
       run: npm run deploy
