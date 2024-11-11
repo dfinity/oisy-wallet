@@ -20,7 +20,6 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 const isMac = process.platform === 'darwin';
 
 export default defineConfig({
-
 	timeout: 60 * 1000,
 
 	workers: 2,
@@ -29,7 +28,7 @@ export default defineConfig({
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
 		port: DEV ? 5173 : 4173,
-		timeout: 120 * 1000,
+		timeout: 120 * 1000
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
