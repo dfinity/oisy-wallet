@@ -254,7 +254,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
-	top_up_cycles_ledger: ActorMethod<[], Config>;
+	top_up_cycles_ledger: ActorMethod<[bigint], Config>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

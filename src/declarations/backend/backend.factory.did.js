@@ -282,7 +282,7 @@ export const idlFactory = ({ IDL }) => {
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([], [Config], ['query'])
+		top_up_cycles_ledger: IDL.Func([IDL.Nat], [Config], ['query'])
 	});
 };
 // @ts-ignore

@@ -178,8 +178,8 @@ fn config() -> Config {
 /// Show the canister configuration.
 #[query(guard = "caller_is_allowed")]
 #[must_use]
-fn top_up_cycles_ledger() -> Config {
-    unimplemented!();
+fn top_up_cycles_ledger(cycles: u128) -> Config {
+    unimplemented!("Need {cycles}");
 }
 
 /// Processes external HTTP requests.
