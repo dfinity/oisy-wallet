@@ -281,7 +281,8 @@ export const idlFactory = ({ IDL }) => {
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
-		step_migration: IDL.Func([], [], [])
+		step_migration: IDL.Func([], [], []),
+		top_up_cycles_ledger: IDL.Func([], [Config], ['query'])
 	});
 };
 // @ts-ignore

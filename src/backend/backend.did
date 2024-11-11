@@ -236,4 +236,5 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
+  top_up_cycles_ledger : () -> (Config) query;
 }
