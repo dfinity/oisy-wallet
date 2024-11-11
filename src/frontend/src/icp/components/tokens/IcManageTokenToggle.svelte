@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
-	import { type IcrcCustomToken, isIcrcCustomTokenDisabled } from '$icp/types/icrc-custom-token';
+	import { type IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isIcrcCustomTokenDisabled } from '$lib/utils/token-toggle.utils';
 
 	export let token: IcrcCustomToken;
 

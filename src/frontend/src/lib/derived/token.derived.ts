@@ -1,11 +1,12 @@
-import { isBitcoinToken } from '$btc/utils/token.utils';
-import { isEthereumUserTokenDisabled } from '$eth/types/erc20-user-token';
 import { icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-import { isIcrcCustomTokenDisabled } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { token } from '$lib/stores/token.store';
 import type { OptionTokenId, OptionTokenStandard, Token } from '$lib/types/token';
+import {
+	isEthereumUserTokenEnabled,
+	isIcrcCustomTokenEnabled
+} from '$lib/utils/token-toggle.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -36,17 +37,13 @@ export const tokenDecimals: Readable<number | undefined> = derived(
 
 export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) => {
 	if (nonNullish($token)) {
-		let toggleable = false;
-
 		if (icTokenIcrcCustomToken($token)) {
-			toggleable = !isIcrcCustomTokenDisabled($token);
+			return isIcrcCustomTokenEnabled($token);
 		} else if (icTokenEthereumUserToken($token)) {
-			toggleable = !isEthereumUserTokenDisabled($token);
-		} else if (isBitcoinToken($token)) {
-			toggleable = false;
+			return isEthereumUserTokenEnabled($token);
+		} else {
+			return false;
 		}
-
-		return toggleable;
 	}
 
 	return false;
