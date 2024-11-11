@@ -4,16 +4,16 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { nonNullish } from '@dfinity/utils';
 
 // TODO: Check why this functionality is used instead of eth.utils.ts -> isSupportedEthToken.
-export function isEthereumUserTokenDisabled(token: EthereumUserToken): boolean {
+export function isEthereumTokenToggleDisabled(token: EthereumUserToken): boolean {
 	return nonNullish(token) && token.category === 'default' && token.standard === 'ethereum';
 }
 
-export function isEthereumUserTokenEnabled(token: EthereumUserToken): boolean {
-	return !isEthereumUserTokenDisabled(token);
+export function isEthereumTokenToggleEnabled(token: EthereumUserToken): boolean {
+	return !isEthereumTokenToggleDisabled(token);
 }
 
 // TODO: Like above - check why this functionality is used.
-export function isIcrcCustomTokenDisabled(token: IcrcCustomToken): boolean {
+export function isIcrcTokenToggleDisabled(token: IcrcCustomToken): boolean {
 	return nonNullish(token)
 		? token.indexCanisterVersion === 'outdated' ||
 				(token.category === 'default' && token.standard === 'icp') ||
@@ -21,6 +21,6 @@ export function isIcrcCustomTokenDisabled(token: IcrcCustomToken): boolean {
 		: false;
 }
 
-export function isIcrcCustomTokenEnabled(token: IcrcCustomToken): boolean {
-	return !isIcrcCustomTokenDisabled(token);
+export function isIcrcTokenToggleEnabled(token: IcrcCustomToken): boolean {
+	return !isIcrcTokenToggleDisabled(token);
 }
