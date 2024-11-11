@@ -49,6 +49,7 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bind;
 mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
@@ -181,8 +182,8 @@ fn config() -> Config {
 /// Show the canister configuration.
 #[query(guard = "caller_is_allowed")]
 #[must_use]
-fn top_up_cycles_ledger(request: Option<TopUpCyclesLedgerRequest>) -> TopUpCyclesLedgerResult {
-    signer::top_up_cycles_ledger(request.unwrap_or_default())
+async fn top_up_cycles_ledger(request: Option<TopUpCyclesLedgerRequest>) -> TopUpCyclesLedgerResult {
+    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.

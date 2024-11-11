@@ -1,7 +1,6 @@
 //! Code for inetracting with the chain fusion signer.
 use crate::{
-    read_config,
-    state::{CYCLES_LEDGER, SIGNER},
+    bind::cycles_ledger::Service, read_config, state::{CYCLES_LEDGER, SIGNER}
 };
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{CandidType, Deserialize, Nat, Principal};
@@ -166,6 +165,7 @@ pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
 /// Possible error conditions when topping up the cycles ledger.
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum TopUpCyclesLedgerError {
+    CouldNotGetBalanceFromCyclesLedger,
     InsufficientCycles { available: u64, required: u64 },
 }
 /// Possible successful responses when topping up the cycles ledger.
@@ -184,6 +184,12 @@ pub struct TopUpCyclesLedgerResponse {
 pub type TopUpCyclesLedgerResult = Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>;
 
 /// Tops up the cycles ledger.
-pub fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
+pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
+    let cycles_ledger = CyclesLedgerService(*CYCLES_LEDGER);
+    let account = Account {
+        owner: ic_cdk::id(),
+        subaccount: None,
+    };
+    let (balance, ): (Nat,) = cycles_ledger.icrc_1_balance_of(&account).await.map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)?;
     unimplemented!("Do something with {request:?}")
 }
