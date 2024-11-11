@@ -139,3 +139,51 @@ pub async fn btc_principal_to_p2wpkh_address(
         Err("Error getting P2WPKH from public key".to_string())
     }
 }
+
+/// A request to top up the cycles ledger.
+#[derive(CandidType, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Default)]
+pub struct TopUpCyclesLedgerRequest {
+    /// If the cycles ledger account balance is below this threshold, top it up.
+    pub threshold: Option<u64>,
+    /// The percentage of the backend canister's own cycles to send to the cycles ledger.
+    pub percentage: Option<u8>,
+}
+impl TopUpCyclesLedgerRequest {
+    pub fn threshold(&self) -> u64 {
+        self.threshold
+            .unwrap_or(DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD)
+    }
+    pub fn percentage(&self) -> u8 {
+        self.percentage
+            .unwrap_or(DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE)
+    }
+}
+/// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
+pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u64 = 10_000_000_000_000; // 10T
+/// The proportion of the backend canitster's own cycles to send to the cycles ledger.
+pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
+
+/// Possible error conditions when topping up the cycles ledger.
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub enum TopUpCyclesLedgerError {
+    InsufficientCycles { available: u64, required: u64 },
+}
+/// Possible successful responses when topping up the cycles ledger.
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct TopUpCyclesLedgerResponse {
+    /// The ledger balance after topping up.
+    ledger_balance: u64,
+    /// The backend canister cycles after topping up.
+    backend_cycles: u64,
+    /// The amount topped up.
+    /// - Zero if the ledger balance was already sufficient.
+    /// - The requested amount otherwise.
+    topped_up: u64,
+}
+
+pub type TopUpCyclesLedgerResult = Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>;
+
+/// Tops up the cycles ledger.
+pub fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
+    unimplemented!("Do something with {request:?}")
+}

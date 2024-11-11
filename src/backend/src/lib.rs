@@ -35,7 +35,10 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
+use signer::{
+    btc_principal_to_p2wpkh_address, AllowSigningError, TopUpCyclesLedgerRequest,
+    TopUpCyclesLedgerResult,
+};
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -178,8 +181,8 @@ fn config() -> Config {
 /// Show the canister configuration.
 #[query(guard = "caller_is_allowed")]
 #[must_use]
-fn top_up_cycles_ledger(cycles: u128) -> Config {
-    unimplemented!("Need {cycles}");
+fn top_up_cycles_ledger(request: Option<TopUpCyclesLedgerRequest>) -> TopUpCyclesLedgerResult {
+    signer::top_up_cycles_ledger(request.unwrap_or_default())
 }
 
 /// Processes external HTTP requests.
