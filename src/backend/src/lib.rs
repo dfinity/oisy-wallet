@@ -422,7 +422,9 @@ pub async fn btc_get_pending_transactions(
 
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-pub fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
+pub fn add_user_credential(
+    request: AddUserCredentialRequest,
+) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
