@@ -45,21 +45,21 @@ use types::{
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
-pub mod assertions;
-pub mod bitcoin_api;
-pub mod bitcoin_utils;
-pub mod config;
-pub mod guards;
-pub mod heap_state;
-pub mod impls;
-pub mod migrate;
-pub mod oisy_user;
-pub mod signer;
-pub mod state;
-pub mod token;
-pub mod types;
-pub mod user_profile;
-pub mod user_profile_model;
+mod assertions;
+mod bitcoin_api;
+mod bitcoin_utils;
+mod config;
+mod guards;
+mod heap_state;
+mod impls;
+mod migrate;
+mod oisy_user;
+mod signer;
+mod state;
+mod token;
+mod types;
+mod user_profile;
+mod user_profile_model;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
