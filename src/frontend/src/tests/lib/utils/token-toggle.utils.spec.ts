@@ -1,14 +1,14 @@
-import type { EthereumUserToken } from '$eth/types/erc20-user-token';
-import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, ICP_TOKEN, ICP_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens.env';
 import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
-import { isEthereumUserTokenDisabled, isIcrcCustomTokenDisabled } from '$lib/utils/token-toggle.utils';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { describe, expect } from 'vitest';
-import {
-	IC_CKBTC_INDEX_CANISTER_ID,
-	IC_CKBTC_LEDGER_CANISTER_ID,
-} from '$env/networks.icrc.env';
+import { IC_CKBTC_INDEX_CANISTER_ID, IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens.env';
+import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import {
+	isEthereumUserTokenDisabled,
+	isIcrcCustomTokenDisabled
+} from '$lib/utils/token-toggle.utils';
+import { describe, expect } from 'vitest';
 
 describe('isEthereumUserTokenDisabled', () => {
 	it('should check if default ethereum user token is disabled for token toggle', () => {
@@ -57,8 +57,8 @@ describe('isIcrcCustomTokenDisabled', () => {
 			category: 'default',
 			position: 0,
 			enabled: false,
-			fee: ICP_TRANSACTION_FEE_E8S,
-		}
+			fee: ICP_TRANSACTION_FEE_E8S
+		};
 
 		expect(isIcrcCustomTokenDisabled(token)).toBe(true);
 	});
@@ -77,8 +77,8 @@ describe('isIcrcCustomTokenDisabled', () => {
 			category: 'custom',
 			position: 0,
 			enabled: false,
-			fee: ICP_TRANSACTION_FEE_E8S,
-		}
+			fee: ICP_TRANSACTION_FEE_E8S
+		};
 
 		expect(isIcrcCustomTokenDisabled(token)).toBe(false);
 	});
@@ -97,8 +97,8 @@ describe('isIcrcCustomTokenDisabled', () => {
 			category: 'custom',
 			position: 0,
 			enabled: false,
-			fee: ICP_TRANSACTION_FEE_E8S,
-		}
+			fee: ICP_TRANSACTION_FEE_E8S
+		};
 
 		expect(isIcrcCustomTokenDisabled(token)).toBe(true);
 	});
