@@ -213,7 +213,7 @@ export class IcWalletScheduler<
 	}) {
 		const certifiedTransactions = newTransactions.map((data) => ({ data, certified }));
 
-		this.timer.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
+		this.timer.postMsg<PostMessageDataResponseWallet>({
 			msg: this.msg,
 			data: {
 				wallet: {
