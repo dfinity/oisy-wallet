@@ -45,21 +45,21 @@ use types::{
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
-mod assertions;
-mod bitcoin_api;
-mod bitcoin_utils;
-mod config;
-mod guards;
-mod heap_state;
-mod impls;
-mod migrate;
-mod oisy_user;
-mod signer;
-mod state;
-mod token;
-mod types;
-mod user_profile;
-mod user_profile_model;
+pub mod assertions;
+pub mod bitcoin_api;
+pub mod bitcoin_utils;
+pub mod config;
+pub mod guards;
+pub mod heap_state;
+pub mod impls;
+pub mod migrate;
+pub mod oisy_user;
+pub mod signer;
+pub mod state;
+pub mod token;
+pub mod types;
+pub mod user_profile;
+pub mod user_profile_model;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -87,11 +87,11 @@ thread_local! {
     );
 }
 
-pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(&cell.borrow()))
 }
 
-pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
+fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
     STATE.with(|cell| f(&mut cell.borrow_mut()))
 }
 
@@ -99,7 +99,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 ///
 /// # Panics
 /// - If the `STATE.config` is not initialized.
-pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
+fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
             .config
