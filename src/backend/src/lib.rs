@@ -154,6 +154,10 @@ pub fn init(arg: Arg) {
     }
 }
 
+/// Post-upgrade handler.
+///
+/// # Panics
+/// - If the config is not initialized, which should not happen during an upgrade.  Maybe this is a new installation?
 #[post_upgrade]
 pub fn post_upgrade(arg: Option<Arg>) {
     match arg {
@@ -168,7 +172,7 @@ pub fn post_upgrade(arg: Option<Arg>) {
     }
 }
 
-/// Show the canister configuration.
+/// Gets the canister configuration.
 #[query(guard = "caller_is_allowed")]
 #[must_use]
 pub fn config() -> Config {
@@ -254,6 +258,7 @@ pub fn remove_user_token(token_id: UserTokenId) {
 }
 
 #[query(guard = "may_read_user_data")]
+#[must_use]
 pub fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
@@ -288,6 +293,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 }
 
 #[query(guard = "may_read_user_data")]
+#[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
@@ -295,6 +301,10 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
+/// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+///
+/// # Errors
+/// Errors are enumerated by: `SelectedUtxosFeeError`.
 #[update(guard = "may_read_user_data")]
 pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
@@ -358,6 +368,10 @@ pub async fn btc_select_user_utxos_fee(
     })
 }
 
+/// Adds a pending Bitcoin transaction for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcAddPendingTransactionError`.
 #[update(guard = "may_write_user_data")]
 pub async fn btc_add_pending_transaction(
     params: BtcAddPendingTransactionRequest,
@@ -385,6 +399,10 @@ pub async fn btc_add_pending_transaction(
     })
 }
 
+/// Returns the pending Bitcoin transactions for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 #[update(guard = "may_read_user_data")]
 pub async fn btc_get_pending_transactions(
     params: BtcGetPendingTransactionsRequest,
@@ -420,6 +438,10 @@ pub async fn btc_get_pending_transactions(
     })
 }
 
+/// Adds a verifiable credential to the user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn add_user_credential(
@@ -459,6 +481,7 @@ pub fn add_user_credential(
 /// It create a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
 #[update(guard = "may_write_user_data")]
+#[must_use]
 pub fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -470,6 +493,13 @@ pub fn create_user_profile() -> UserProfile {
     })
 }
 
+/// Returns the caller's user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `GetUserProfileError`.
+///
+/// # Panics
+/// - If the caller is anonymous.  See: `may_read_user_data`.
 #[query(guard = "may_read_user_data")]
 pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -491,6 +521,9 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 /// - The chain fusion signer performs threshold key operations including providing
 ///   public keys, creating signatures and assisting with performing signed Bitcoin
 ///   and Ethereum transactions.
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "may_read_user_data")]
 pub async fn allow_signing() -> Result<(), AllowSigningError> {
     signer::allow_signing().await
@@ -498,6 +531,7 @@ pub async fn allow_signing() -> Result<(), AllowSigningError> {
 
 #[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
+#[must_use]
 pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
     // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
@@ -518,6 +552,7 @@ pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV
 
 /// Gets the state of any migration currently in progress.
 #[query(guard = "caller_is_allowed")]
+#[must_use]
 pub fn migration() -> Option<MigrationReport> {
     read_state(|s| s.migration.as_ref().map(MigrationReport::from))
 }
@@ -532,6 +567,7 @@ pub fn set_guards(guards: Guards) {
 ///
 /// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
 #[query(guard = "caller_is_allowed")]
+#[must_use]
 pub fn stats() -> Stats {
     read_state(|s| Stats::from(s))
 }
@@ -574,6 +610,9 @@ pub fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 }
 
 /// Switch off the migration timer; migrate with manual API calls instead.
+///
+/// # Errors
+/// - There is no migration in progress.
 #[update(guard = "caller_is_allowed")]
 pub fn migration_stop_timer() -> Result<(), String> {
     mutate_state(|s| {
