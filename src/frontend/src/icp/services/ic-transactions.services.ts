@@ -1,7 +1,7 @@
 import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
 import type { IcTransaction } from '$icp/types/ic-transaction';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
@@ -23,7 +23,7 @@ const getTransactions = async ({
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
-	token: IcToken;
+	token: IcToken & IcCanistersStrict;
 }): Promise<IcTransaction[]> => {
 	if (standard === 'icrc') {
 		const { transactions } = await getTransactionsIcrc({
@@ -49,7 +49,7 @@ export const loadNextTransactions = ({
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
-	token: IcToken;
+	token: IcToken & IcCanistersStrict;
 	signalEnd: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcTransaction[]>({

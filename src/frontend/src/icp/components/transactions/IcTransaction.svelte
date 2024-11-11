@@ -9,41 +9,39 @@
 	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
+	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { TransactionStatus } from '$lib/types/transaction';
 	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
 
-	let transactionType: IcTransactionType;
+	let type: IcTransactionType;
 	let transactionTypeLabel: string | undefined;
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let incoming: boolean | undefined;
 
-	$: ({
-		type: transactionType,
-		typeLabel: transactionTypeLabel,
-		value,
-		timestamp,
-		incoming
-	} = transaction);
+	$: ({ type, typeLabel: transactionTypeLabel, value, timestamp, incoming } = transaction);
 
 	let pending = false;
 	$: pending = transaction?.status === 'pending';
 
+	let status: TransactionStatus;
+	$: status = pending ? 'pending' : 'confirmed';
+
 	let icon: ComponentType;
 	$: icon =
-		['burn', 'approve', 'mint'].includes(transactionType) && pending
+		['burn', 'approve', 'mint'].includes(type) && pending
 			? IconConvert
-			: ['burn', 'approve'].includes(transactionType)
+			: ['burn', 'approve'].includes(type)
 				? IconConvertTo
-				: transactionType === 'mint'
+				: type === 'mint'
 					? IconConvertFrom
-					: incoming === false
+					: type === 'send'
 						? IconSend
 						: IconReceive;
 
@@ -54,7 +52,7 @@
 <button on:click={() => modalStore.openIcTransaction(transaction)} class="block w-full border-0">
 	<Card>
 		<span class="inline-block first-letter:capitalize"
-			><IcTransactionLabel label={transactionTypeLabel} fallback={transactionType} /></span
+			><IcTransactionLabel label={transactionTypeLabel} fallback={type} /></span
 		>
 
 		<RoundedIcon slot="icon" {icon} />
@@ -70,7 +68,7 @@
 				{formatNanosecondsToDate(timestamp)}
 			{/if}
 
-			<TransactionPending {pending} />
+			<TransactionStatusComponent {status} />
 		</svelte:fragment>
 	</Card>
 </button>

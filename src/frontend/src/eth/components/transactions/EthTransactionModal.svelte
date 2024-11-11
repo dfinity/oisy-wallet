@@ -2,7 +2,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import TransactionStatus from '$eth/components/transactions/TransactionStatus.svelte';
+	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -75,7 +75,7 @@
 				<output>{blockNumber}</output>
 			</Value>
 
-			<TransactionStatus {blockNumber} />
+			<EthTransactionStatus {blockNumber} />
 		{/if}
 
 		{#if nonNullish(timestamp)}
