@@ -1,14 +1,21 @@
 //! Code for inetracting with the chain fusion signer.
 use crate::{
-    bind::cycles_ledger::Service, read_config, state::{CYCLES_LEDGER, SIGNER}
+    bind::cycles_ledger::Service,
+    read_config,
+    state::{CYCLES_LEDGER, SIGNER},
 };
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{CandidType, Deserialize, Nat, Principal};
-use ic_cdk::api::management_canister::{
-    bitcoin::BitcoinNetwork,
-    ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
+use ic_cdk::api::{
+    call::call_with_payment128,
+    management_canister::{
+        bitcoin::BitcoinNetwork,
+        ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
+    },
 };
-use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, Service as CyclesLedgerService};
+use ic_cycles_ledger_client::{
+    Account, ApproveArgs, ApproveError, DepositArgs, DepositResult, Service as CyclesLedgerService,
+};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
 
@@ -143,12 +150,12 @@ pub async fn btc_principal_to_p2wpkh_address(
 #[derive(CandidType, Deserialize, Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub struct TopUpCyclesLedgerRequest {
     /// If the cycles ledger account balance is below this threshold, top it up.
-    pub threshold: Option<u64>,
+    pub threshold: Option<u128>,
     /// The percentage of the backend canister's own cycles to send to the cycles ledger.
     pub percentage: Option<u8>,
 }
 impl TopUpCyclesLedgerRequest {
-    pub fn threshold(&self) -> u64 {
+    pub fn threshold(&self) -> u128 {
         self.threshold
             .unwrap_or(DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD)
     }
@@ -158,7 +165,7 @@ impl TopUpCyclesLedgerRequest {
     }
 }
 /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
-pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u64 = 10_000_000_000_000; // 10T
+pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
 /// The proportion of the backend canitster's own cycles to send to the cycles ledger.
 pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
 
@@ -166,19 +173,22 @@ pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum TopUpCyclesLedgerError {
     CouldNotGetBalanceFromCyclesLedger,
-    InsufficientCycles { available: u64, required: u64 },
+    CouldNotTopUpCyclesLedger {
+        available: u128,
+        tried_to_send: u128,
+    },
 }
 /// Possible successful responses when topping up the cycles ledger.
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct TopUpCyclesLedgerResponse {
     /// The ledger balance after topping up.
-    ledger_balance: u64,
+    ledger_balance: u128,
     /// The backend canister cycles after topping up.
-    backend_cycles: u64,
+    backend_cycles: u128,
     /// The amount topped up.
     /// - Zero if the ledger balance was already sufficient.
     /// - The requested amount otherwise.
-    topped_up: u64,
+    topped_up: u128,
 }
 
 pub type TopUpCyclesLedgerResult = Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>;
@@ -190,6 +200,48 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
         owner: ic_cdk::id(),
         subaccount: None,
     };
-    let (balance, ): (Nat,) = cycles_ledger.icrc_1_balance_of(&account).await.map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)?;
-    unimplemented!("Do something with {request:?}")
+    let (ledger_balance,): (Nat,) = cycles_ledger
+        .icrc_1_balance_of(&account)
+        .await
+        .map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)?;
+    let ledger_balance: u128 = ledger_balance.0.clone().try_into().unwrap_or_else(|err| {
+        unreachable!(
+            "Failed to convert new ledger balance of {} to u128: {}",
+            ledger_balance, err
+        )
+    });
+    if ledger_balance < request.threshold() {
+        // Decide how many cycles to keep and how many to send to teh cycles ledger.
+        let own_canister_cycle_balance = ic_cdk::api::canister_balance128();
+        let to_send = own_canister_cycle_balance / 100 * u128::from(request.percentage());
+        let to_retain = own_canister_cycle_balance - to_send;
+
+        // Top up the cycles ledger.
+        let arg = DepositArgs {
+            to: account,
+            memo: None,
+        };
+        let (result,): (DepositResult,) =
+            call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send)
+                .await
+                .expect("Unable to call deposit");
+        let ledger_balance: u128 = result.balance.0.clone().try_into().unwrap_or_else(|err| {
+            unreachable!(
+                "Failed to convert new ledger balance of {} to u128: {}",
+                result.balance, err
+            )
+        });
+
+        Ok(TopUpCyclesLedgerResponse {
+            ledger_balance,
+            backend_cycles: to_retain,
+            topped_up: to_send,
+        })
+    } else {
+        Ok(TopUpCyclesLedgerResponse {
+            ledger_balance: 0,
+            backend_cycles: ledger_balance,
+            topped_up: 0,
+        })
+    }
 }
