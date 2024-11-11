@@ -39,7 +39,8 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 	if (nonNullish($token)) {
 		if (icTokenIcrcCustomToken($token)) {
 			return isIcrcCustomTokenEnabled($token);
-		} else if (icTokenEthereumUserToken($token)) {
+		}
+		if (icTokenEthereumUserToken($token)) {
 			return isEthereumUserTokenEnabled($token);
 		}
 	}
