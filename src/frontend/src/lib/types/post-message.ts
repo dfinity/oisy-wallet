@@ -4,6 +4,7 @@ import {
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	PostMessageDataRequestIcCkSchema,
 	PostMessageDataRequestIcrcSchema,
+	PostMessageDataRequestIcrcStrictSchema,
 	PostMessageDataRequestSchema,
 	PostMessageDataResponseAuthSchema,
 	PostMessageDataResponseBTCAddressSchema,
@@ -33,6 +34,10 @@ export type PostMessageDataRequestExchangeTimer = z.infer<
 >;
 
 export type PostMessageDataRequestIcrc = z.infer<typeof PostMessageDataRequestIcrcSchema>;
+
+export type PostMessageDataRequestIcrcStrict = z.infer<
+	typeof PostMessageDataRequestIcrcStrictSchema
+>;
 
 export type PostMessageDataRequestIcCk = z.infer<typeof PostMessageDataRequestIcCkSchema>;
 
