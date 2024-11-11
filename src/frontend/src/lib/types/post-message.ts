@@ -17,8 +17,8 @@ import {
 	PostMessageRequestSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
-	inferPostMessageSchema,
-	PostMessageSyncStateSchema
+	PostMessageSyncStateSchema,
+	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 
 import { z, type ZodType } from 'zod';
