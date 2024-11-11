@@ -7,6 +7,7 @@
 	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
+	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import {
 		BITCOIN_FEE_CONTEXT_KEY,
@@ -190,7 +191,7 @@
 </script>
 
 <EthereumFeeContext {networkId}>
-	<BitcoinFeeContext {amount} {networkId}>
+	<BitcoinFeeContext {amount} {networkId} token={$tokenWithFallbackAsIcToken}>
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
 			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} {source} />
 		{:else if currentStep?.name === WizardStepsSend.SENDING}

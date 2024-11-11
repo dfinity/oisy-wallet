@@ -1,21 +1,21 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { tokenDecimals } from '$lib/derived/token.derived';
 	import type { NetworkId } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
+	export let token: Token;
 	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger($tokenWithFallbackAsIcToken);
+	$: ckBTC = isTokenCkBtcLedger(token);
 
 	const { store } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 
@@ -38,9 +38,9 @@
 			identity: $authIdentity,
 			amount: parseToken({
 				value: `${amount}`,
-				unitName: $tokenDecimals
+				unitName: token.decimals
 			}).toBigInt(),
-			...$tokenWithFallbackAsIcToken
+			...token
 		});
 
 		if (isNullish(fee) || result === 'error') {
@@ -55,7 +55,7 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: amount, networkId, (() => debounceEstimateFee())();
+	$: amount, networkId, token, (() => debounceEstimateFee())();
 </script>
 
 <slot />
