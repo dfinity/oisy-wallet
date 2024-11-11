@@ -1,15 +1,6 @@
+import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import { queryAndUpdate } from '$lib/actors/query.ic';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import {
-	SchedulerTimer,
-	type Scheduler,
-	type SchedulerJobData,
-	type SchedulerJobParams
-} from '$lib/schedulers/scheduler';
-import type {
-	PostMessageDataResponseError,
-	PostMessageDataResponseWallet
-} from '$lib/types/post-message';
+import { type SchedulerJobData, type SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { CertifiedData } from '$lib/types/store';
 import { isNullish } from '@dfinity/utils';
 
@@ -18,11 +9,9 @@ interface IcrcBalanceStore {
 	balance: CertifiedData<bigint> | undefined;
 }
 
-export class IcWalletBalanceScheduler<PostMessageDataRequest>
-	implements Scheduler<PostMessageDataRequest>
-{
-	private timer = new SchedulerTimer('syncIcWalletStatus');
-
+export class IcWalletBalanceScheduler<
+	PostMessageDataRequest
+> extends IcWalletScheduler<PostMessageDataRequest> {
 	private store: IcrcBalanceStore = {
 		balance: undefined
 	};
@@ -30,36 +19,22 @@ export class IcWalletBalanceScheduler<PostMessageDataRequest>
 	constructor(
 		private getBalance: (data: SchedulerJobParams<PostMessageDataRequest>) => Promise<bigint>,
 		private msg: 'syncIcpWallet' | 'syncIcrcWallet'
-	) {}
-
-	stop() {
-		this.timer.stop();
+	) {
+		super();
 	}
 
-	async start(data: PostMessageDataRequest | undefined) {
-		await this.timer.start<PostMessageDataRequest>({
-			interval: WALLET_TIMER_INTERVAL_MILLIS,
-			job: this.syncWallet,
-			data
-		});
-	}
-
-	async trigger(data: PostMessageDataRequest | undefined) {
-		await this.timer.trigger<PostMessageDataRequest>({
-			job: this.syncWallet,
-			data
-		});
-	}
-
-	private syncWallet = async ({ identity, ...data }: SchedulerJobData<PostMessageDataRequest>) => {
+	/**
+	 * @override
+	 */
+	protected async syncWallet({ identity, ...data }: SchedulerJobData<PostMessageDataRequest>) {
 		await queryAndUpdate<bigint>({
 			request: ({ identity: _, certified }) => this.getBalance({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncBalance({ certified, ...rest }),
-			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
+			onCertifiedError: ({ error }) => this.postMessageWalletError({ msg: this.msg, error }),
 			identity,
 			resolution: 'all_settled'
 		});
-	};
+	}
 
 	private syncBalance = ({
 		response: balance,
@@ -82,14 +57,20 @@ export class IcWalletBalanceScheduler<PostMessageDataRequest>
 			balance: { data: balance, certified }
 		};
 
-		this.postMessageWallet({
+		this.postMessageWalletBalance({
 			balance,
 			certified
 		});
 	};
 
-	private postMessageWallet({ balance: data, certified }: { balance: bigint; certified: boolean }) {
-		this.timer.postMsg<PostMessageDataResponseWallet>({
+	private postMessageWalletBalance({
+		balance: data,
+		certified
+	}: {
+		balance: bigint;
+		certified: boolean;
+	}) {
+		this.postMessageWallet({
 			msg: this.msg,
 			data: {
 				wallet: {
@@ -98,15 +79,6 @@ export class IcWalletBalanceScheduler<PostMessageDataRequest>
 						certified
 					}
 				}
-			}
-		});
-	}
-
-	private postMessageWalletError(error: unknown) {
-		this.timer.postMsg<PostMessageDataResponseError>({
-			msg: `${this.msg}Error`,
-			data: {
-				error
 			}
 		});
 	}
