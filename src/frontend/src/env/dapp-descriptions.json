@@ -209,5 +209,20 @@
 		"description": "ICDex is a dApp within the ICLighthouse DAO. It's a fully on-chain order book DEX project built on the IC blockchain, with core code contributed by ICLighthouse and its development driven by the community. Governance is conducted through the ICLighthouse DAO SNS. The Exchange Mode of ICDex includes Tunnel Mode and Pool Mode, offering advanced functions like Strategic Orders.",
 		"logo": "/images/dapps/icdex-logo.svg",
 		"screenshots": ["/images/dapps/icdex.webp"]
+	},
+	{
+		"id": "sonic",
+		"name": "Sonic",
+		"oneLiner": "Unlock the full potential of DeFi and streamlined trading. Swap tokens, earn as a liquidity provider and harness Bitfinity EVM's leading AMM.",
+		"callToAction": "Open Sonic",
+		"website": "https://sonic.ooo/",
+		"twitter": "https://twitter.com/sonic_ooo",
+		"github": "https://github.com/sonicdex/",
+		"tags": ["DeFi"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Sonic, a multichain decentralized exchange built on the Internet Computer Protocol (ICP), offers a wide range of DeFi services. Users can easily trade tokens and perpetuals, provide liquidity, and participate in the LBP token sale. Users can engage in DAO governance, stake for rewards, and vote on platform decisions.<br/><br/>Fully on-chain & open-source! Swap tokens like a pro, stack those fees as a liquidity provider, join the AMM vibe, and be an integral part of the Sonic DAO.",
+		"logo": "/images/dapps/sonic-logo.svg",
+		"screenshots": ["/images/dapps/sonic.webp"]
 	}
 ]
