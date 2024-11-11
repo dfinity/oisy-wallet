@@ -7,5 +7,6 @@ export type EthTransactionType = Extract<
 >;
 
 export interface EthTransactionUi extends Transaction {
+	id: string | undefined;
 	uiType: EthTransactionType;
 }

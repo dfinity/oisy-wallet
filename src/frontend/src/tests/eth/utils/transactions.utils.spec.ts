@@ -82,4 +82,20 @@ describe('mapEthTransactionUi', () => {
 		expect(result.uiType).not.toBe('withdraw');
 		expect(result.uiType).not.toBe('deposit');
 	});
+
+	it('should map an ID to the transaction hash if it exists', () => {
+		const result = mapEthTransactionUi({
+			transaction: { ...transaction, hash: '0x1234' },
+			ckMinterInfoAddresses,
+			$ethAddress
+		});
+
+		expect(result.id).toBe('0x1234');
+	});
+
+	it('should map an ID to undefined if the transaction hash does not exist', () => {
+		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+
+		expect(result.id).toBeUndefined;
+	});
 });
