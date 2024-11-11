@@ -1,0 +1,55 @@
+<script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
+	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import type { UnifiedTransactionUi } from '$lib/types/transaction';
+	import {
+		isNetworkIdBTCMainnet,
+		isNetworkIdEthereum,
+		isNetworkIdICP
+	} from '$lib/utils/network.utils';
+
+	let transactions: UnifiedTransactionUi[];
+	$: transactions = $enabledTokens.reduce<UnifiedTransactionUi[]>(
+		(acc, { id: tokenId, network: { id: networkId } }) => {
+			if (isNetworkIdBTCMainnet(networkId) && nonNullish($btcTransactionsStore)) {
+				return [
+					...acc,
+					...($btcTransactionsStore[tokenId] ?? []).map(({ data: transaction }) => ({
+						...transaction,
+						transactionComponent: BtcTransaction
+					}))
+				];
+			}
+
+			if (isNetworkIdICP(networkId)) {
+				// TODO: Implement ICP transactions
+				return acc;
+			}
+
+			if (isNetworkIdEthereum(networkId)) {
+				// TODO: Implement Ethereum transactions
+				return acc;
+			}
+
+			return acc;
+		},
+		[]
+	);
+</script>
+
+{#if transactions.length > 0}
+	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
+		<li in:slide={SLIDE_DURATION}>
+			<svelte:component this={transaction.transactionComponent} {transaction} />
+		</li>
+	{/each}
+{/if}
+
+{#if transactions.length === 0}
+	<TransactionsPlaceholder />
+{/if}
