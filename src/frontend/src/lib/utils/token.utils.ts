@@ -70,17 +70,17 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken: T;
 	userToken: TokenToggleable<T> | undefined;
 }): TokenToggleable<T> => {
-	const isEnabledByDefault =
+
+	const ledgerCanisterId =
 		'ledgerCanisterId' in defaultToken &&
-		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(
-			(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId
-		);
+		(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId;
+
+	const isEnabledByDefault =
+		ledgerCanisterId && ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
 	const isSuggestedToken =
-		('ledgerCanisterId' in defaultToken &&
-			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(
-				(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId
-			)) ||
+		(ledgerCanisterId &&
+			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
 		('address' in defaultToken &&
 			ERC20_SUGGESTED_TOKENS.map((token) => token.address).includes(
 				(
