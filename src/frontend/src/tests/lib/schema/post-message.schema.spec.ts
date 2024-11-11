@@ -10,6 +10,7 @@ import {
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	PostMessageDataRequestIcCkSchema,
 	PostMessageDataRequestIcrcSchema,
+	PostMessageDataRequestIcrcStrictSchema,
 	PostMessageDataRequestSchema,
 	PostMessageDataResponseAuthSchema,
 	PostMessageDataResponseBTCAddressSchema,
@@ -147,11 +148,9 @@ describe('post-message.schema', () => {
 			).toThrow();
 		});
 	});
-
 	describe('PostMessageDataRequestIcrcSchema', () => {
 		const mockCanisters = {
-			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-			indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 		};
 
 		const mockEnv = { env: 'mainnet' };
@@ -174,6 +173,40 @@ describe('post-message.schema', () => {
 		it('should throw an error if env field is invalid', () => {
 			const invalidData = { ...mockCanisters, env: 'invalid_env' };
 			expect(() => PostMessageDataRequestIcrcSchema.parse(invalidData)).toThrow();
+		});
+	});
+
+	describe('PostMessageDataRequestIcrcStrictSchema', () => {
+		const mockCanisters = {
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
+		};
+
+		const mockEnv = { env: 'mainnet' };
+
+		it('should validate with correct structure for IcCanistersSchema and env field from NetworkSchema', () => {
+			const validData = { ...mockCanisters, ...mockEnv };
+			expect(PostMessageDataRequestIcrcStrictSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should throw an error if env field is missing', () => {
+			const invalidData = { ...mockCanisters };
+			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
+		});
+
+		it('should throw an error if IcCanistersSchema fields are missing', () => {
+			const invalidData = { ...mockEnv };
+			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
+		});
+
+		it('should throw an error if env field is invalid', () => {
+			const invalidData = { ...mockCanisters, env: 'invalid_env' };
+			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
+		});
+
+		it('should throw an error if IcCanistersSchema fields is missing the index', () => {
+			const invalidData = { ledgerCanisterId: mockCanisters.ledgerCanisterId, ...mockEnv };
+			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
 		});
 	});
 
@@ -418,13 +451,13 @@ describe('post-message.schema', () => {
 			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
-		it('should throw an error if newTransactions is missing', () => {
-			const invalidData = {
+		it('should validate if newTransactions is missing', () => {
+			const validData = {
 				wallet: {
 					balance: mockValidBalance
 				}
 			};
-			expect(() => PostMessageDataResponseWalletSchema.parse(invalidData)).toThrow();
+			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should validate if balance is not a bigint because of zod custom', () => {
