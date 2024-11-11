@@ -26,7 +26,10 @@ export class IcWalletBalanceScheduler<
 	/**
 	 * @override
 	 */
-	protected async syncWallet({ identity, ...data }: SchedulerJobData<PostMessageDataRequest>) {
+	protected syncWallet = async ({
+		identity,
+		...data
+	}: SchedulerJobData<PostMessageDataRequest>) => {
 		await queryAndUpdate<bigint>({
 			request: ({ identity: _, certified }) => this.getBalance({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncBalance({ certified, ...rest }),
@@ -34,7 +37,7 @@ export class IcWalletBalanceScheduler<
 			identity,
 			resolution: 'all_settled'
 		});
-	}
+	};
 
 	private syncBalance = ({
 		response: balance,

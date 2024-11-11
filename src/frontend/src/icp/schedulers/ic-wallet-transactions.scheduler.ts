@@ -50,7 +50,10 @@ export class IcWalletTransactionsScheduler<
 	/**
 	 * @override
 	 */
-	protected async syncWallet({ identity, ...data }: SchedulerJobData<PostMessageDataRequest>) {
+	protected syncWallet = async ({
+		identity,
+		...data
+	}: SchedulerJobData<PostMessageDataRequest>) => {
 		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
 			request: ({ identity: _, certified }) =>
 				this.getTransactions({ ...data, identity, certified }),
@@ -62,7 +65,7 @@ export class IcWalletTransactionsScheduler<
 			identity,
 			resolution: 'all_settled'
 		});
-	}
+	};
 
 	private syncTransactions = ({
 		response: { transactions: fetchedTransactions, balance, ...rest },
