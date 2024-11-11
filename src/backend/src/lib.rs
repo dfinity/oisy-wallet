@@ -181,7 +181,6 @@ fn config() -> Config {
 
 /// Show the canister configuration.
 #[query(guard = "caller_is_allowed")]
-#[must_use]
 async fn top_up_cycles_ledger(
     request: Option<TopUpCyclesLedgerRequest>,
 ) -> TopUpCyclesLedgerResult {
