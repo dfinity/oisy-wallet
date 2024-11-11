@@ -21,6 +21,8 @@ export default {
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
 			'light-grey': '#ced4da',
+			// TODO: add the new gray colors as theme-variables
+			'bright-gray': '#e9ecef',
 			aurometalsaurus: '#6c757d',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'blue-ribbon': '#0066ff',
