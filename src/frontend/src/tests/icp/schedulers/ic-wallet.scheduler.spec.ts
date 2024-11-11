@@ -1,5 +1,6 @@
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import * as agent from '$lib/actors/agents.ic';
+import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { PostMessageDataRequestIcrc } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import * as authUtils from '$lib/utils/auth.utils';
@@ -8,8 +9,6 @@ import { HttpAgent } from '@dfinity/agent';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import type { GetTransactions } from '@dfinity/ledger-icrc/dist/candid/icrc_index-ng';
 import { mock } from 'vitest-mock-extended';
-
-process.env.VITEST_ENV = 'node';
 
 describe('IcWalletScheduler', () => {
 	let scheduler: IcWalletScheduler<
@@ -32,9 +31,19 @@ describe('IcWalletScheduler', () => {
 	const mockMapToSelfTransaction = vi.fn();
 	const mockMapTransaction = vi.fn();
 
-	const postMessageMock = vi.fn();
+	let originalPostmessage: unknown;
 
-	let originalPostMessage: unknown;
+	beforeAll(() => {
+		originalPostmessage = window.postMessage;
+		window.postMessage = (_message: unknown) => {
+			// Do nothing
+		};
+	});
+
+	afterAll(() => {
+		// @ts-expect-error redo original
+		window.postMessage = originalPostmessage;
+	});
 
 	beforeEach(() => {
 		vi.useFakeTimers();
@@ -47,9 +56,6 @@ describe('IcWalletScheduler', () => {
 			'syncIcpWallet'
 		);
 
-		originalPostMessage = postMessage;
-		globalThis.postMessage = postMessageMock;
-
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
 		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
@@ -57,9 +63,6 @@ describe('IcWalletScheduler', () => {
 
 	afterEach(() => {
 		scheduler.stop();
-
-		// @ts-expect-error mocked for test
-		globalThis.postMessage = originalPostMessage;
 
 		vi.useRealTimers();
 	});
@@ -83,8 +86,8 @@ describe('IcWalletScheduler', () => {
 		await scheduler.start(undefined);
 
 		// Fast-forward time to trigger the scheduled job multiple times
-		// vi.advanceTimersByTime(WALLET_TIMER_INTERVAL_MILLIS * 3);
+		vi.advanceTimersByTime(WALLET_TIMER_INTERVAL_MILLIS * 3);
 
-		expect(mockGetTransactions).toHaveBeenCalledTimes(3);
+		expect(mockGetTransactions).toHaveBeenCalledTimes(4);
 	});
 });
