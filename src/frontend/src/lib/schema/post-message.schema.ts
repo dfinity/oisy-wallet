@@ -1,6 +1,10 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
-import { IcCanistersSchema, IcCkMetadataSchema } from '$icp/schema/ic-token.schema';
+import {
+	IcCanistersSchema,
+	IcCanistersStrictSchema,
+	IcCkMetadataSchema
+} from '$icp/schema/ic-token.schema';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import { NetworkSchema } from '$lib/schema/network.schema';
@@ -51,6 +55,10 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 });
 
 export const PostMessageDataRequestIcrcSchema = IcCanistersSchema.merge(
+	NetworkSchema.pick({ env: true })
+);
+
+export const PostMessageDataRequestIcrcStrictSchema = IcCanistersStrictSchema.merge(
 	NetworkSchema.pick({ env: true })
 );
 
