@@ -1,6 +1,5 @@
 //! Code for inetracting with the chain fusion signer.
 use crate::{
-    bind::cycles_ledger::Service,
     read_config,
     state::{CYCLES_LEDGER, SIGNER},
 };
