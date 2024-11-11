@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isIcrcCustomTokenDisabled } from '$lib/utils/token-toggle.utils';
+	import { isIcrcTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
 
 	export let token: IcrcCustomToken;
 
@@ -13,7 +13,7 @@
 	$: outdated = token.indexCanisterVersion === 'outdated';
 
 	let disabled = false;
-	$: disabled = isIcrcCustomTokenDisabled(token);
+	$: disabled = isIcrcTokenToggleDisabled(token);
 
 	let checked: boolean;
 	$: checked = token.enabled;

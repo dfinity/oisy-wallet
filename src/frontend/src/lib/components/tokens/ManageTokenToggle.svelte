@@ -3,12 +3,12 @@
 	import { createEventDispatcher } from 'svelte';
 	import { type EthereumUserToken } from '$eth/types/erc20-user-token';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isEthereumUserTokenDisabled } from '$lib/utils/token-toggle.utils';
+	import { isEthereumTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
 
 	export let token: EthereumUserToken;
 
 	let disabled = false;
-	$: disabled = isEthereumUserTokenDisabled(token);
+	$: disabled = isEthereumTokenToggleDisabled(token);
 
 	let checked: boolean;
 	$: checked = token.enabled ?? false;

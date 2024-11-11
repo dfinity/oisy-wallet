@@ -4,8 +4,8 @@ import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { token } from '$lib/stores/token.store';
 import type { OptionTokenId, OptionTokenStandard, Token } from '$lib/types/token';
 import {
-	isEthereumUserTokenEnabled,
-	isIcrcCustomTokenEnabled
+	isEthereumTokenToggleEnabled,
+	isIcrcTokenToggleEnabled
 } from '$lib/utils/token-toggle.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -37,12 +37,11 @@ export const tokenDecimals: Readable<number | undefined> = derived(
 
 export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) => {
 	if (nonNullish($token)) {
-		if (icTokenIcrcCustomToken($token)) {
-			return isIcrcCustomTokenEnabled($token);
-		}
-		if (icTokenEthereumUserToken($token)) {
-			return isEthereumUserTokenEnabled($token);
-		}
+		return icTokenIcrcCustomToken($token)
+			? isIcrcTokenToggleEnabled($token)
+			: icTokenEthereumUserToken($token)
+				? isEthereumTokenToggleEnabled($token)
+				: false;
 	}
 
 	return false;
