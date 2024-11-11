@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
-	import { loadTransactions } from '$eth/services/transactions.services';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { mapTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -17,37 +16,13 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
 	import type { TransactionUi } from '$lib/types/transaction';
 	import {
 		isNetworkIdBTCMainnet,
-		isNetworkIdEthereum,
 		isNetworkIdEthereumMainnet,
 		isNetworkIdICP,
 		isNetworkIdSepolia
 	} from '$lib/utils/network.utils';
-
-	const load = async (token: Token) => {
-		const {
-			network: { id: networkId },
-			id: tokenId
-		} = token;
-
-		if (!isNetworkIdEthereum(networkId)) {
-			return;
-		}
-
-		await loadTransactions({ tokenId, networkId });
-	};
-
-	const multiLoad = async () => {
-		await Promise.all($enabledTokens.map(async (token) => await load(token)));
-	};
-
-	// We debounce because we have a limit of calls per second to the API and the Ethereum tokens list is not u
-	const debounceMultiLoad = debounce(multiLoad, 500);
-
-	$: $enabledTokens, debounceMultiLoad();
 
 	let transactions: TransactionUi[];
 	$: transactions = $enabledTokens.reduce<TransactionUi[]>(
@@ -80,7 +55,7 @@
 				return [
 					...acc,
 					...($ethTransactionsStore[tokenId] ?? []).map((transaction) => ({
-						...mapTransactionUi({
+						...mapEthTransactionUi({
 							transaction,
 							ckMinterInfoAddresses: toCkMinterInfoAddresses({
 								minterInfo: $ckEthMinterInfoStore?.[SEPOLIA_TOKEN_ID],
