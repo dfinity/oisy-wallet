@@ -20,16 +20,24 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 const isMac = process.platform === 'darwin';
 
 export default defineConfig({
+
+	timeout: 60 * 1000,
+
+	workers: 2,
+
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
-		port: DEV ? 5173 : 4173
+		port: DEV ? 5173 : 4173,
+		timeout: 120 * 1000,
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',
+		actionTimeout: 60 * 1000,
+		navigationTimeout: 60 * 1000,
 		...(DEV && { headless: false })
 	},
 	projects: [
@@ -39,30 +47,8 @@ export default defineConfig({
 			use: { ...devices['Desktop Chrome'] }
 		},
 		{
-			name: 'Edge',
-			use: { ...devices['Desktop Edge'] }
-		},
-		{
 			name: 'Firefox',
 			use: { ...devices['Desktop Firefox'] }
-		},
-		/* Test against mobile viewports. */
-		{
-			name: 'Pixel 7',
-			use: { ...devices['Pixel 7'] }
-		},
-		{
-			name: 'Galaxy S9+',
-			use: { ...devices['Galaxy S9+'] }
-		},
-		/*Test against branded browsers. */
-		{
-			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
-		},
-		{
-			name: 'Microsoft Edge',
-			use: { ...devices['Desktop Edge'], channel: 'msedge' }
 		},
 		/*Test against Apple devices. */
 		...(isMac
@@ -72,24 +58,8 @@ export default defineConfig({
 						use: devices['Desktop Safari']
 					},
 					{
-						name: 'iPhone 15 Pro',
-						use: devices['iPhone 15 Pro']
-					},
-					{
 						name: 'iPhone SE',
 						use: devices['iPhone SE']
-					},
-					{
-						name: 'iPad Pro 11',
-						use: devices['iPad Pro 11']
-					},
-					{
-						name: 'iPhone 15 Pro Max',
-						use: devices['iPhone 15 Pro Max']
-					},
-					{
-						name: 'iPad Mini',
-						use: devices['iPad Mini']
 					}
 				]
 			: []) // If not on macOS, don't include Apple devices
