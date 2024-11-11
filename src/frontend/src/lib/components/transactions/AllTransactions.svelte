@@ -1,8 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
-	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
@@ -15,15 +12,9 @@
 
 	let transactions: UnifiedTransactionUi[];
 	$: transactions = $enabledTokens.reduce<UnifiedTransactionUi[]>(
-		(acc, { id: tokenId, network: { id: networkId } }) => {
-			if (isNetworkIdBTCMainnet(networkId) && nonNullish($btcTransactionsStore)) {
-				return [
-					...acc,
-					...($btcTransactionsStore[tokenId] ?? []).map(({ data: transaction }) => ({
-						...transaction,
-						transactionComponent: BtcTransaction
-					}))
-				];
+		(acc, { network: { id: networkId } }) => {
+			if (isNetworkIdBTCMainnet(networkId)) {
+				// TODO: Implement BTC transactions
 			}
 
 			if (isNetworkIdICP(networkId)) {
