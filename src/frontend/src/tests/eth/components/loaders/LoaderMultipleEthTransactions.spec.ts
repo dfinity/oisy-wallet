@@ -1,4 +1,6 @@
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import * as ethEnv from '$env/networks.eth.env';
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 import { loadTransactions } from '$eth/services/transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
@@ -6,7 +8,7 @@ import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import type { MockedFunction } from 'vitest';
+import { expect, type MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/transactions.services', () => ({
 	loadTransactions: vi.fn()
@@ -26,26 +28,17 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		mockLoadTransactions.mockResolvedValue({ success: true });
 
+		erc20UserTokensStore.setAll(mockErc20UserTokens);
+
 		testnetsStore.reset({ key: 'testnets' });
 
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
-
-		erc20UserTokensStore.setAll(mockErc20UserTokens);
-	});
-
-	it('should load transactions for all mainnet Ethereum tokens (native and ERC20)', async () => {
-		render(LoaderMultipleEthTransactions);
-
-		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledTimes(mockMainnetErc20UserTokens.length + 1);
-		});
 	});
 
 	it('should load transactions for all Ethereum and Sepolia tokens (native and ERC20) when testnets flag is enabled', async () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
-		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 		render(LoaderMultipleEthTransactions);
 
@@ -54,28 +47,30 @@ describe('LoaderMultipleEthTransactions', () => {
 		});
 	});
 
-	it('should load transactions for all Sepolia tokens (native and ERC20) when Ethereum mainnet is disabled', async () => {
+	it('should not load transactions for native Sepolia token when testnets flag is disabled', async () => {
+		render(LoaderMultipleEthTransactions);
+
+		await waitFor(() => {
+			expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+			expect(loadTransactions).not.toHaveBeenCalledWith({
+				networkId: SEPOLIA_NETWORK_ID,
+				tokenId: SEPOLIA_TOKEN_ID
+			});
+		});
+	});
+
+	it('should not load transactions for native Ethereum token when Ethereum mainnet is disabled', async () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementationOnce(() => false);
 
 		render(LoaderMultipleEthTransactions);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledTimes(mockSepoliaErc20UserTokens.length + 1);
-		});
-	});
-
-	it('should not load transactions multiple times for the same token', async () => {
-		render(LoaderMultipleEthTransactions);
-
-		erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll(mockErc20UserTokens);
-
-		// erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll(mockErc20UserTokens);
-
-		await waitFor(() => {
 			expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+			expect(loadTransactions).not.toHaveBeenCalledWith({
+				networkId: ETHEREUM_NETWORK_ID,
+				tokenId: ETHEREUM_TOKEN_ID
+			});
 		});
 	});
 
@@ -88,12 +83,24 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		render(LoaderMultipleEthTransactions);
 
+		await waitFor(() => {
+			expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+		});
+
 		erc20UserTokensStore.resetAll();
-		erc20UserTokensStore.setAll([...mockMainnetErc20UserTokens, ...mockAdditionalTokens]);
+		erc20UserTokensStore.setAll([...mockErc20UserTokens, ...mockAdditionalTokens]);
 
 		await waitFor(() => {
 			expect(loadTransactions).toHaveBeenCalledTimes(
-				mockMainnetErc20UserTokens.length + 1 + mockAdditionalTokens.length
+				2 * (mockErc20UserTokens.length + 1) + mockAdditionalTokens.length
+			);
+		});
+
+		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+
+		await waitFor(() => {
+			expect(loadTransactions).toHaveBeenCalledTimes(
+				3 * (mockErc20UserTokens.length + 1) + 2 * mockAdditionalTokens.length + 1
 			);
 		});
 	});
