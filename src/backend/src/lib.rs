@@ -175,6 +175,13 @@ fn config() -> Config {
     read_config(std::clone::Clone::clone)
 }
 
+/// Show the canister configuration.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+fn top_up_cycles_ledger() -> Config {
+    unimplemented!();
+}
+
 /// Processes external HTTP requests.
 #[query]
 #[allow(clippy::needless_pass_by_value)]
