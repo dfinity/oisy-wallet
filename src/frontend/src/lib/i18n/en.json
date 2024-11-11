@@ -435,6 +435,7 @@
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",
 				"no_metadata": "No metadata for the token is provided. This is unexpected.",
+				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
@@ -765,6 +766,11 @@
 		},
 		"alt": {
 			"license_agreement": "The $oisy_name License Agreement"
+		}
+	},
+	"activity": {
+		"text": {
+			"title": "Recent Activity"
 		}
 	}
 }
