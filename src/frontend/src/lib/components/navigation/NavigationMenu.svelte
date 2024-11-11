@@ -7,6 +7,11 @@
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		NAVIGATION_ITEM_EXPLORER,
+		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_ITEM_TOKENS
+	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -30,6 +35,7 @@
 			href="/"
 			ariaLabel={$i18n.navigation.alt.tokens}
 			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
+			testId={NAVIGATION_ITEM_TOKENS}
 		>
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
@@ -39,6 +45,7 @@
 			href={AppPath.Explore}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
 			selected={isRouteDappExplorer(pageData)}
+			testId={NAVIGATION_ITEM_EXPLORER}
 		>
 			<IconlyUfo />
 			{$i18n.navigation.text.dapp_explorer}
@@ -48,6 +55,7 @@
 			href={`${AppPath.Settings}?${networkParam($networkId)}`}
 			ariaLabel={$i18n.navigation.alt.settings}
 			selected={isRouteSettings(pageData)}
+			testId={NAVIGATION_ITEM_SETTINGS}
 		>
 			<IconlySettings />
 			{$i18n.navigation.text.settings}
