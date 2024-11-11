@@ -5,6 +5,5 @@
 </script>
 
 <MultipleListeners tokens={$enabledNetworkTokens}>
-	<AllTransactions />
 	<Activity />
 </MultipleListeners>

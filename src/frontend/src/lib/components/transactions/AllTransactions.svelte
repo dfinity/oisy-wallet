@@ -5,8 +5,9 @@
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
+	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import { loadTransactions } from '$eth/services/transactions.services';
-	import { transactionsStore } from '$eth/stores/transactions.store';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { mapTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
@@ -15,7 +16,9 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
+	import type { TransactionUi } from '$lib/types/transaction';
 	import {
 		isNetworkIdBTCMainnet,
 		isNetworkIdEthereum,
@@ -23,9 +26,6 @@
 		isNetworkIdICP,
 		isNetworkIdSepolia
 	} from '$lib/utils/network.utils';
-	import type { TransactionUi } from '$lib/types/transaction';
-	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	const load = async (token: Token) => {
 		const {
@@ -36,8 +36,6 @@
 		if (!isNetworkIdEthereum(networkId)) {
 			return;
 		}
-
-		console.log('Loading transactions for token:', token);
 
 		await loadTransactions({ tokenId, networkId });
 	};
@@ -62,7 +60,7 @@
 			if (isNetworkIdEthereumMainnet(networkId)) {
 				return [
 					...acc,
-					...($transactionsStore[tokenId] ?? []).map((transaction) => ({
+					...($ethTransactionsStore[tokenId] ?? []).map((transaction) => ({
 						...mapTransactionUi({
 							transaction,
 							ckMinterInfoAddresses: toCkMinterInfoAddresses({
@@ -81,7 +79,7 @@
 			if (isNetworkIdSepolia(networkId)) {
 				return [
 					...acc,
-					...($transactionsStore[tokenId] ?? []).map((transaction) => ({
+					...($ethTransactionsStore[tokenId] ?? []).map((transaction) => ({
 						...mapTransactionUi({
 							transaction,
 							ckMinterInfoAddresses: toCkMinterInfoAddresses({
