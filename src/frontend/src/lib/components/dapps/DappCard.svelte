@@ -30,7 +30,9 @@
 				{oneLiner}
 			</p>
 		</section>
-		<section class="absolute bottom-4 left-4 right-4 max-h-6 min-h-6 overflow-hidden md:max-h-[calc(3.5rem+1px)]">
+		<section
+			class="absolute bottom-4 left-4 right-4 max-h-6 min-h-6 overflow-hidden md:max-h-[calc(3.5rem+1px)]"
+		>
 			<DappTags {dAppName} {tags} />
 		</section>
 	</article>
