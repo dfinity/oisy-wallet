@@ -5,7 +5,6 @@ import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { ckErc20Production } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-import type { IcCkToken } from '$icp/types/ic-token';
 import type { TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -18,6 +17,7 @@ import {
 } from '$lib/utils/token.utils';
 import { bn1, bn2, bn3, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, type MockedFunction } from 'vitest';
 
@@ -285,238 +285,144 @@ describe('sumUsdBalances', () => {
 });
 
 describe('mapDefaultTokenToToggleable', () => {
-	describe('Every other random token is only enabled if the user enables it', () => {
-		it('should enable LINK if user enables it', () => {
-			const result = mapDefaultTokenToToggleable({
-				defaultToken: LINK_TOKEN,
-				userToken: { ...LINK_TOKEN, enabled: true }
+	beforeEach(() => vi.clearAllMocks());
+
+	const setupDefaultTokenMock = (canisterId?: string) => {
+		vi.spyOn(
+			NetworksModule,
+			'ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS',
+			'get'
+		).mockReturnValue([canisterId ?? '']);
+	};
+
+	const setupSuggestedTokenMock = (canisterId?: string) => {
+		vi.spyOn(
+			NetworksModule,
+			'ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS',
+			'get'
+		).mockReturnValue([canisterId ?? '']);
+	};
+
+	const dummyCkBTC = { ...mockValidIcToken, ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID };
+	const dummyCkETH = { ...mockValidIcToken, ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID };
+	const ckUSDCLedgerCanisterId = ckErc20Production.ckUSDC?.ledgerCanisterId;
+	const dummyCkUSDC = { ...mockValidIcToken, ledgerCanisterId: ckUSDCLedgerCanisterId };
+
+	describe.each([
+		{ description: 'LINK token', token: LINK_TOKEN },
+		{
+			description: 'Dummy ck token',
+			token: { ...mockValidIcToken, ledgerCanisterId: 'etik7-oiaaa-aaaar-qagia-cai' }
+		}
+	])(
+		'Every other random token is only enabled if the user enables it - $description',
+		({ token }) => {
+			it('should enable the token if user enables it', () => {
+				const result = mapDefaultTokenToToggleable({
+					defaultToken: token,
+					userToken: { ...token, enabled: true }
+				});
+
+				expect(result.enabled).toEqual(true);
 			});
 
+			it('should not enable the token if user has not enabled it', () => {
+				const result = mapDefaultTokenToToggleable({
+					defaultToken: token,
+					userToken: { ...token, enabled: false }
+				});
+
+				expect(result.enabled).toEqual(false);
+			});
+
+			it('should not enable the token if userToken is undefined', () => {
+				const result = mapDefaultTokenToToggleable({
+					defaultToken: token,
+					userToken: undefined
+				});
+
+				expect(result.enabled).toEqual(false);
+			});
+		}
+	);
+
+	describe.each([
+		{
+			description: 'Default ICRC token ckBTC',
+			token: dummyCkBTC,
+			setupMock: setupDefaultTokenMock
+		},
+		{
+			description: 'Default ICRC token ckETH',
+			token: dummyCkETH,
+			setupMock: setupDefaultTokenMock
+		},
+		{
+			description: 'Suggested ICRC token ckUSDC',
+			token: dummyCkUSDC,
+			setupMock: setupDefaultTokenMock
+		}
+	])('$description - Default/Suggested Tokens', ({ token, setupMock }) => {
+		beforeEach(() => setupMock(token.ledgerCanisterId));
+
+		it('should enable the token if no userToken', () => {
+			const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
 			expect(result.enabled).toEqual(true);
 		});
 
-		it('should not enable LINK if user has not enabled it', () => {
+		it('should enable the token if userToken has enabled false', () => {
 			const result = mapDefaultTokenToToggleable({
-				defaultToken: LINK_TOKEN,
-				userToken: { ...LINK_TOKEN, enabled: false }
+				defaultToken: token,
+				userToken: { ...token, enabled: false }
 			});
+			expect(result.enabled).toEqual(true);
+		});
 
+		it('should enable the token if userToken has enabled true', () => {
+			const result = mapDefaultTokenToToggleable({
+				defaultToken: token,
+				userToken: { ...token, enabled: true }
+			});
+			expect(result.enabled).toEqual(true);
+		});
+	});
+
+	const dummyCkUSDT = {
+		...mockValidIcToken,
+		ledgerCanisterId: ckErc20Production.ckUSDT?.ledgerCanisterId
+	};
+	describe.each([
+		{
+			description: 'Suggested ICRC token ckUSDT',
+			token: dummyCkUSDT,
+			setupMock: setupSuggestedTokenMock
+		},
+		{ description: 'Suggested ERC20 token USDC', token: USDC_TOKEN },
+		{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN }
+	])('$description - Suggested Tokens', ({ token, setupMock }) => {
+		if (setupMock) {
+			beforeEach(() => setupMock(token.ledgerCanisterId));
+		}
+
+		it('should enable the token if no userToken', () => {
+			const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
+			expect(result.enabled).toEqual(true);
+		});
+
+		it('should not enable the token if userToken has enabled false', () => {
+			const result = mapDefaultTokenToToggleable({
+				defaultToken: token,
+				userToken: { ...token, enabled: false }
+			});
 			expect(result.enabled).toEqual(false);
 		});
 
-		it('should not enable LINK if userToken is undefined', () => {
+		it('should enable the token if userToken has enabled true', () => {
 			const result = mapDefaultTokenToToggleable({
-				defaultToken: LINK_TOKEN,
-				userToken: undefined
+				defaultToken: token,
+				userToken: { ...token, enabled: true }
 			});
-
-			expect(result.enabled).toEqual(false);
-		});
-	});
-
-	describe('Default ICRC tokens are always enabled', () => {
-		describe('ckBTC', () => {
-			const dummyCkBTC = { ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID } as IcCkToken;
-			it('should enable ckBTC if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkBTC,
-					userToken: undefined
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should enable ckBTC if userToken has enabled false', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkBTC,
-					userToken: { ...dummyCkBTC, enabled: false }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should enable ckBTC if userToken has enabled true', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkBTC,
-					userToken: { ...dummyCkBTC, enabled: true }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-		});
-
-		describe('ckETH', () => {
-			const dummyCkETH = { ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID } as IcCkToken;
-			it('should enable ckETH if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkETH,
-					userToken: undefined
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should enable ckETH if userToken has enabled false', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkETH,
-					userToken: { ...dummyCkETH, enabled: false }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should enable ckETH if userToken has enabled true', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkETH,
-					userToken: { ...dummyCkETH, enabled: true }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-		});
-
-		describe('ckUSDC', () => {
-			const ckUSDCLedgerCanisterId = ckErc20Production.ckUSDC?.ledgerCanisterId;
-
-			beforeEach(() => {
-				vi.spyOn(
-					NetworksModule,
-					'ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS',
-					'get'
-				).mockReturnValue([ckUSDCLedgerCanisterId ?? '']);
-			});
-
-			const dummyCkUSDC = { ledgerCanisterId: ckUSDCLedgerCanisterId } as IcCkToken;
-
-			it('should enable ckUSDC if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkUSDC,
-					userToken: undefined
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should enable ckUSDC if userToken has enabled false', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkUSDC,
-					userToken: { ...dummyCkUSDC, enabled: false }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should enable ckUSDC if userToken has enabled true', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkUSDC,
-					userToken: { ...dummyCkUSDC, enabled: true }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-		});
-	});
-
-	describe('Suggested ICRC tokens are enabled if user has no settings', () => {
-		describe('ckUSDT', () => {
-			const ckUSDTLedgerCanisterId = ckErc20Production.ckUSDT?.ledgerCanisterId;
-
-			beforeEach(() => {
-				vi.spyOn(
-					NetworksModule,
-					'ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS',
-					'get'
-				).mockReturnValue([ckUSDTLedgerCanisterId ?? '']);
-			});
-
-			const dummyCkUSDT = { ledgerCanisterId: ckUSDTLedgerCanisterId } as IcCkToken;
-
-			it('should enable ckUSDT if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkUSDT,
-					userToken: undefined
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should not enable ckUSDT if userToken has enabled false', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkUSDT,
-					userToken: { ...dummyCkUSDT, enabled: false }
-				});
-
-				expect(result.enabled).toEqual(false);
-			});
-
-			it('should enable ckUSDT if userToken has enabled true', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: dummyCkUSDT,
-					userToken: { ...dummyCkUSDT, enabled: true }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-		});
-	});
-
-	describe('Suggested ERC20 tokens are enabled if user has no settings', () => {
-		describe('USDC', () => {
-			it('should enable USDC if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: USDC_TOKEN,
-					userToken: undefined
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should not enable USDC if userToken has enabled false', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: USDC_TOKEN,
-					userToken: { ...USDC_TOKEN, enabled: false }
-				});
-
-				expect(result.enabled).toEqual(false);
-			});
-
-			it('should enable USDC if userToken has enabled true', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: USDC_TOKEN,
-					userToken: { ...USDC_TOKEN, enabled: true }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-		});
-
-		describe('USDT', () => {
-			it('should enable USDT if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: USDT_TOKEN,
-					userToken: undefined
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
-
-			it('should not enable USDT if userToken has enabled false', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: USDT_TOKEN,
-					userToken: { ...USDT_TOKEN, enabled: false }
-				});
-
-				expect(result.enabled).toEqual(false);
-			});
-
-			it('should enable USDT if userToken has enabled true', () => {
-				const result = mapDefaultTokenToToggleable({
-					defaultToken: USDT_TOKEN,
-					userToken: { ...USDT_TOKEN, enabled: true }
-				});
-
-				expect(result.enabled).toEqual(true);
-			});
+			expect(result.enabled).toEqual(true);
 		});
 	});
 });
