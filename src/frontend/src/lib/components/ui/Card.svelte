@@ -4,7 +4,7 @@
 	import CardAmountDescription from '$lib/components/ui/CardAmountDescription.svelte';
 
 	export let noMargin = false;
-	export let testId: string  = 'card';
+	export let testId = 'card';
 
 	let description = false;
 	$: description = nonNullish($$slots.description);

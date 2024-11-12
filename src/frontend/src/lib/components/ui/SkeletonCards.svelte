@@ -2,7 +2,7 @@
 	import SkeletonCard from '$lib/components/ui/SkeletonCard.svelte';
 
 	export let rows: number;
-	export let testIdPrefix: string = 'skeleton-card';
+	export let testIdPrefix = 'skeleton-card';
 
 	let cards: number[];
 	$: cards = Array.from({ length: rows }, (_, i) => i);
