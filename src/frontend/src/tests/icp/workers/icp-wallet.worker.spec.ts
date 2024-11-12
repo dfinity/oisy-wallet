@@ -109,6 +109,24 @@ describe('icp-wallet.worker', () => {
 		expect(spyGetTransactions).toHaveBeenCalledTimes(6);
 	});
 
+	it('should postMessage with status of the worker', async () => {
+		await scheduler.start(undefined);
+
+		expect(postMessageMock).toHaveBeenCalledWith({
+			msg: 'syncIcWalletStatus',
+			data: {
+				state: 'in_progress'
+			}
+		});
+
+		expect(postMessageMock).toHaveBeenCalledWith({
+			msg: 'syncIcWalletStatus',
+			data: {
+				state: 'idle'
+			}
+		});
+	});
+
 	it('should postMessage with balance and transactions', async () => {
 		await scheduler.start(undefined);
 
