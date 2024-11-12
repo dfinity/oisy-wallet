@@ -39,7 +39,7 @@
 	const debounceValidate = debounce(validate, 300);
 
 	let errorState: boolean;
-	$: errorState = nonNullish(errorType) && errorType === 'insufficient-balance';
+	$: errorState = nonNullish(errorType) && errorType === 'insufficient-funds';
 
 	$: amount, token.decimals, debounceValidate();
 </script>

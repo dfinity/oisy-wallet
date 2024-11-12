@@ -1,4 +1,4 @@
 export type ConvertAmountErrorType =
-	| 'insufficient-balance'
-	| 'insufficient-balance-for-fee'
+	| 'insufficient-funds'
+	| 'insufficient-funds-for-fee'
 	| undefined;
