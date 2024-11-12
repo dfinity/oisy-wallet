@@ -37,7 +37,7 @@ use shared::types::{
 };
 use signer::{
     btc_principal_to_p2wpkh_address, AllowSigningError, TopUpCyclesLedgerRequest,
-    TopUpCyclesLedgerResult,
+    TopUpCyclesLedgerResult, CYCLES_LEDGER_TOP_UP_INTERVAL_SECONDS,
 };
 use std::cell::RefCell;
 use std::time::Duration;
@@ -150,12 +150,23 @@ fn set_config(arg: InitArg) {
     });
 }
 
+fn start_periodic_housekeeping_timers() {
+    let _ = set_timer_interval(
+        Duration::from_secs(CYCLES_LEDGER_TOP_UP_INTERVAL_SECONDS),
+        || ic_cdk::spawn(top_up_cycles_ledger_timer_action()),
+    );
+}
+async fn top_up_cycles_ledger_timer_action() {
+    let _ = top_up_cycles_ledger(None).await;
+}
+
 #[init]
 fn init(arg: Arg) {
     match arg {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+    start_periodic_housekeeping_timers();
 }
 
 #[post_upgrade]
@@ -170,6 +181,7 @@ fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    start_periodic_housekeeping_timers();
 }
 
 /// Show the canister configuration.

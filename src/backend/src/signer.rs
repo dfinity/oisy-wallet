@@ -168,6 +168,8 @@ impl TopUpCyclesLedgerRequest {
 pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
 /// The proportion of the backend canitster's own cycles to send to the cycles ledger.
 pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
+/// The seconds between each cycle ledger top up.
+pub const CYCLES_LEDGER_TOP_UP_INTERVAL_SECONDS: u64 = 60 * 60; // 1 hour
 
 /// Possible error conditions when topping up the cycles ledger.
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
