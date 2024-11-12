@@ -289,12 +289,12 @@ describe('sumUsdBalances', () => {
 });
 
 describe('findTwinToken', () => {
-	it('should return correct twin token', () => {
-		const ckBtcToken = {
-			...mockValidIcCkToken,
-			symbol: BTC_MAINNET_TOKEN.twinTokenSymbol
-		} as IcCkToken;
+	const ckBtcToken = {
+		...mockValidIcCkToken,
+		symbol: BTC_MAINNET_TOKEN.twinTokenSymbol
+	} as IcCkToken;
 
+	it('should return correct twin token', () => {
 		const result = findTwinToken({
 			tokens: [...mockTokens, ckBtcToken],
 			tokenToPair: BTC_MAINNET_TOKEN
@@ -305,7 +305,7 @@ describe('findTwinToken', () => {
 
 	it('should return undefined if no twin token found', () => {
 		const result = findTwinToken({
-			tokens: mockTokens,
+			tokens: [...mockTokens, ckBtcToken],
 			tokenToPair: ETHEREUM_TOKEN
 		});
 
@@ -316,7 +316,7 @@ describe('findTwinToken', () => {
 		const { twinTokenSymbol: _, ...tokenWithoutTwinTokenSymbol } = BTC_MAINNET_TOKEN;
 
 		const result = findTwinToken({
-			tokens: mockTokens,
+			tokens: [...mockTokens, ckBtcToken],
 			tokenToPair: tokenWithoutTwinTokenSymbol
 		});
 
