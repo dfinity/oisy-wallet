@@ -32,8 +32,15 @@ const mapTransaction = ({
 	jobData: SchedulerJobData<PostMessageDataRequest>;
 }): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
-const scheduler: IcWalletScheduler<Transaction, TransactionWithId, PostMessageDataRequest> =
+// Exposed for test purposes
+export const initIcpWalletScheduler = (): IcWalletScheduler<
+	Transaction,
+	TransactionWithId,
+	PostMessageDataRequest
+> =>
 	new IcWalletScheduler(getTransactions, mapTransactionIcpToSelf, mapTransaction, 'syncIcpWallet');
+
+const scheduler = initIcpWalletScheduler();
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;
