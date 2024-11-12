@@ -1,7 +1,7 @@
 import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 import { render } from '@testing-library/svelte';
 
-describe('SkeletonCard', () => {
+describe('SkeletonCards', () => {
 	it('renders a number of SkeletonCard components', () => {
 		const { getByTestId } = render(SkeletonCards, { props: { rows: 5 } });
 
