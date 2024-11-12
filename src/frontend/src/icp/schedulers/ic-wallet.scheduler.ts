@@ -156,6 +156,9 @@ export class IcWalletScheduler<
 			certified,
 			...rest
 		});
+
+		// If we have sent at least one postMessage we can consider the worker has being initialized.
+		this.initialized = true;
 	};
 
 	/**
@@ -213,7 +216,7 @@ export class IcWalletScheduler<
 	}) {
 		const certifiedTransactions = newTransactions.map((data) => ({ data, certified }));
 
-		this.timer.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
+		this.timer.postMsg<PostMessageDataResponseWallet>({
 			msg: this.msg,
 			data: {
 				wallet: {

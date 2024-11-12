@@ -1,3 +1,4 @@
+import { icpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionType } from '$lib/types/transaction';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type {
@@ -19,7 +20,10 @@ export type IcrcTransaction = {
 
 export type IcTransaction = IcpTransaction | IcrcTransaction;
 
-export type IcTransactionType = TransactionType | 'approve' | 'burn' | 'mint';
+export type IcTransactionType = Extract<
+	TransactionType,
+	(typeof icpTransactionTypes.options)[number]
+>;
 
 export type IcTransactionIdText = string;
 

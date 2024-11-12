@@ -377,7 +377,8 @@
 			"set_amount": "Set amount for conversion",
 			"check_balance_for_fees": "Check $token balance for conversion fees",
 			"fees_explanation": "You need enough $token to cover the smart contract execution fees.",
-			"current_balance": "👉 Current balance:"
+			"current_balance": "👉 Current balance:",
+			"input_reset_button": "Reset input value"
 		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
@@ -435,6 +436,7 @@
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",
 				"no_metadata": "No metadata for the token is provided. This is unexpected.",
+				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
@@ -765,6 +767,11 @@
 		},
 		"alt": {
 			"license_agreement": "The $oisy_name License Agreement"
+		}
+	},
+	"activity": {
+		"text": {
+			"title": "Recent Activity"
 		}
 	}
 }

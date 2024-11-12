@@ -344,6 +344,7 @@ interface I18nConvert {
 		check_balance_for_fees: string;
 		fees_explanation: string;
 		current_balance: string;
+		input_reset_button: string;
 	};
 	error: { loading_cketh_helper: string };
 }
@@ -396,6 +397,7 @@ interface I18nTokens {
 		error: {
 			loading_metadata: string;
 			no_metadata: string;
+			unexpected_ledger: string;
 			unexpected_index: string;
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
@@ -668,6 +670,10 @@ interface I18nLicense_agreement {
 	alt: { license_agreement: string };
 }
 
+interface I18nActivity {
+	text: { title: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -694,4 +700,5 @@ interface I18n {
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
+	activity: I18nActivity;
 }

@@ -25,13 +25,18 @@ const getTransactions = ({
 }: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<IcrcIndexNgGetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
+	// TODO(OISY-296): This is not clean. If the index canister ID is not provided we should not even land here.
+	const { indexCanisterId } = data;
+	assertNonNullish(indexCanisterId);
+
 	return getTransactionsApi({
 		identity,
 		certified,
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
 		start: undefined,
-		...data
+		...data,
+		indexCanisterId
 	});
 };
 
@@ -56,16 +61,20 @@ const mapTransaction = ({
 	return mapIcrcTransaction({ transaction, identity });
 };
 
-const scheduler: IcWalletScheduler<
+// Exposed for test purposes
+export const initIcrcWalletScheduler = (): IcWalletScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrc
-> = new IcWalletScheduler(
-	getTransactions,
-	mapTransactionIcrcToSelf,
-	mapTransaction,
-	'syncIcrcWallet'
-);
+> =>
+	new IcWalletScheduler(
+		getTransactions,
+		mapTransactionIcrcToSelf,
+		mapTransaction,
+		'syncIcrcWallet'
+	);
+
+const scheduler = initIcrcWalletScheduler();
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
