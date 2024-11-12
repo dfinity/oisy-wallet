@@ -46,14 +46,14 @@ describe('icp-wallet.worker', () => {
 		data: {
 			state: 'in_progress'
 		}
-	}
+	};
 
 	const mockPostMessageStatusIdle = {
 		msg: 'syncIcWalletStatus',
 		data: {
 			state: 'idle'
 		}
-	}
+	};
 
 	const mockMappedTransaction = mapIcpTransaction({
 		transaction: mockTransaction,
@@ -82,12 +82,12 @@ describe('icp-wallet.worker', () => {
 	const mockPostMessageNotCertified = {
 		msg: 'syncIcpWallet',
 		data: mockPostMessageData(false)
-	}
+	};
 
 	const mockPostMessageCertified = {
 		msg: 'syncIcpWallet',
 		data: mockPostMessageData(true)
-	}
+	};
 
 	const postMessageMock = vi.fn();
 
