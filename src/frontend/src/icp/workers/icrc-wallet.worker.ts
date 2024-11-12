@@ -1,5 +1,5 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index-ng.api';
-import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
@@ -62,12 +62,12 @@ const mapTransaction = ({
 };
 
 // Exposed for test purposes
-export const initIcrcWalletScheduler = (): IcWalletScheduler<
+export const initIcrcWalletScheduler = (): IcWalletTransactionsScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrc
 > =>
-	new IcWalletScheduler(
+	new IcWalletTransactionsScheduler(
 		getTransactions,
 		mapTransactionIcrcToSelf,
 		mapTransaction,
