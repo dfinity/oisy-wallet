@@ -4,7 +4,6 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 
 	export let testId: string = 'skeleton-card';
-
 </script>
 
 <Card {testId}>
