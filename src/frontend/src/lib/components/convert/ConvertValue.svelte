@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+
 	export let ref: undefined | string = undefined;
 
 	let secondaryValue: boolean;
-	$: secondaryValue = $$slots['secondary-value'];
+	$: secondaryValue = nonNullish($$slots['secondary-value']);
 </script>
 
 <div class="mb-2 flex w-full justify-between last:mb-0 md:items-center">
