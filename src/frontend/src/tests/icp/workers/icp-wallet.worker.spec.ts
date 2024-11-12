@@ -237,4 +237,40 @@ describe('icp-wallet.worker', () => {
 			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 		});
 	});
+
+	describe('with cleanup', () => {
+		const mockRogueId = 666n;
+
+		it('should trigger postMessage cleanup', async () => {
+			indexCanisterMock.getTransactions.mockImplementation(({ certified }) =>
+				Promise.resolve({
+					balance: mockBalance,
+					transactions: !certified
+						? [
+								mockTransaction,
+								{
+									...mockTransaction,
+									id: mockRogueId
+								}
+							]
+						: [mockTransaction],
+					oldest_tx_id: [mockOldestTxId]
+				})
+			);
+
+			await scheduler.start(undefined);
+
+			// query + update = 2
+			// idle and in_progress
+			// cleanup
+			expect(postMessageMock).toHaveBeenCalledTimes(5);
+
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'syncIcpWalletCleanUp',
+				data: {
+					transactionIds: [`${mockRogueId}`]
+				}
+			});
+		});
+	});
 });
