@@ -17,6 +17,9 @@ export const initAnalytics = async () => {
 	await initOrbiter({
 		satelliteId: SATELLITE_ID,
 		orbiterId: ORBITER_ID,
+		options: {
+			performance: false
+		},
 		worker: {
 			path: '/workers/analytics.worker.js'
 		}
