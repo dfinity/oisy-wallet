@@ -70,7 +70,6 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken: T;
 	userToken: TokenToggleable<T> | undefined;
 }): TokenToggleable<T> => {
-
 	const ledgerCanisterId =
 		'ledgerCanisterId' in defaultToken &&
 		(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId;
