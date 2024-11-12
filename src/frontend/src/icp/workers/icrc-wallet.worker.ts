@@ -1,5 +1,5 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index-ng.api';
-import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
@@ -61,16 +61,20 @@ const mapTransaction = ({
 	return mapIcrcTransaction({ transaction, identity });
 };
 
-const scheduler: IcWalletScheduler<
+// Exposed for test purposes
+export const initIcrcWalletScheduler = (): IcWalletTransactionsScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrc
-> = new IcWalletScheduler(
-	getTransactions,
-	mapTransactionIcrcToSelf,
-	mapTransaction,
-	'syncIcrcWallet'
-);
+> =>
+	new IcWalletTransactionsScheduler(
+		getTransactions,
+		mapTransactionIcrcToSelf,
+		mapTransaction,
+		'syncIcrcWallet'
+	);
+
+const scheduler = initIcrcWalletScheduler();
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
