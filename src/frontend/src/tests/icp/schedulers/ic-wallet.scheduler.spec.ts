@@ -72,9 +72,9 @@ describe('IcWalletScheduler', () => {
 		expect(scheduler['timer']['timer']).toBeDefined();
 	});
 
-	it.skip('should trigger the scheduler manually', async () => {
+	it('should trigger the scheduler manually', async () => {
 		await scheduler.trigger(undefined);
-		expect(scheduler['timer']['timer']).toBeDefined();
+		expect(mockGetTransactions).toHaveBeenCalledTimes(2);
 	});
 
 	it('should stop the scheduler', () => {
@@ -85,8 +85,7 @@ describe('IcWalletScheduler', () => {
 	it('should trigger syncWallet periodically', async () => {
 		await scheduler.start(undefined);
 
-		// Fast-forward time to trigger the scheduled job multiple times
-		vi.advanceTimersByTime(WALLET_TIMER_INTERVAL_MILLIS * 3);
+		vi.advanceTimersByTime(WALLET_TIMER_INTERVAL_MILLIS);
 
 		expect(mockGetTransactions).toHaveBeenCalledTimes(4);
 	});
