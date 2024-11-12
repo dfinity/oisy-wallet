@@ -13,9 +13,10 @@ set -euo pipefail
 }
 
 # If no canisters are specified, generate bindings for all.
-if (( $# == 0 ))
-then mapfile -t canisters < <(jq -r '.canisters|keys|.[]' dfx.json)
-else canisters=("${@}")
+if (($# == 0)); then
+  mapfile -t canisters < <(jq -r '.canisters|keys|.[]' dfx.json)
+else
+  canisters=("${@}")
 fi
 
 for canister in "${canisters[@]}"; do

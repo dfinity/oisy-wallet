@@ -18,3 +18,5 @@
 scripts/did.sh # TODO: Use local Wasm as input.
 # Generate rust bindings
 scripts/bind/rust.sh
+# Format
+scripts/format.sh
