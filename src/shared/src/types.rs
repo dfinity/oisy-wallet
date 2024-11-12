@@ -224,6 +224,65 @@ pub mod bitcoin {
     }
 }
 
+/// Types related to the signer & topping up the cycles ledger account for use with the signer.
+pub mod signer {
+    use super::{CandidType, Debug, Deserialize};
+    /// Types related to topping up the cycles ledger account for use with the signer.
+    pub mod topup {
+        use super::{CandidType, Debug, Deserialize};
+        use candid::Nat;
+        /// A request to top up the cycles ledger.
+        #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
+        pub struct TopUpCyclesLedgerRequest {
+            /// If the cycles ledger account balance is below this threshold, top it up.
+            pub threshold: Option<Nat>,
+            /// The percentage of the backend canister's own cycles to send to the cycles ledger.
+            pub percentage: Option<u8>,
+        }
+        impl TopUpCyclesLedgerRequest {
+            /// The requested threshold for topping up the cycles ledger, if provided, else the default.
+            #[must_use]
+            pub fn threshold(&self) -> Nat {
+                self.threshold
+                    .clone()
+                    .unwrap_or(Nat::from(DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD))
+            }
+            /// The requested percentage of the backend's own canisters to send to the cycles ledger, if provided, else the default.
+            #[must_use]
+            pub fn percentage(&self) -> u8 {
+                self.percentage
+                    .unwrap_or(DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE)
+            }
+        }
+        /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
+        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
+        /// The proportion of the backend canitster's own cycles to send to the cycles ledger.
+        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
+
+        /// Possible error conditions when topping up the cycles ledger.
+        #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+        pub enum TopUpCyclesLedgerError {
+            CouldNotGetBalanceFromCyclesLedger,
+            CouldNotTopUpCyclesLedger { available: Nat, tried_to_send: Nat },
+        }
+        /// Possible successful responses when topping up the cycles ledger.
+        #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+        pub struct TopUpCyclesLedgerResponse {
+            /// The ledger balance after topping up.
+            ledger_balance: Nat,
+            /// The backend canister cycles after topping up.
+            backend_cycles: Nat,
+            /// The amount topped up.
+            /// - Zero if the ledger balance was already sufficient.
+            /// - The requested amount otherwise.
+            topped_up: Nat,
+        }
+
+        pub type TopUpCyclesLedgerResult =
+            Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>;
+    }
+}
+
 /// Types specifics to the user profile.
 pub mod user_profile {
     use super::{CredentialType, Timestamp};

@@ -27,6 +27,7 @@ use shared::types::bitcoin::{
     SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
 };
 use shared::types::custom_token::{CustomToken, CustomTokenId};
+use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
@@ -35,10 +36,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use signer::{
-    btc_principal_to_p2wpkh_address, AllowSigningError, TopUpCyclesLedgerRequest,
-    TopUpCyclesLedgerResult,
-};
+use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -57,7 +55,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
-mod signer;
+pub mod signer;
 mod state;
 mod token;
 mod types;
