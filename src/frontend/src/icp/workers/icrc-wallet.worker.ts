@@ -61,16 +61,20 @@ const mapTransaction = ({
 	return mapIcrcTransaction({ transaction, identity });
 };
 
-const scheduler: IcWalletTransactionsScheduler<
+// Exposed for test purposes
+export const initIcrcWalletScheduler = (): IcWalletTransactionsScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrc
-> = new IcWalletTransactionsScheduler(
-	getTransactions,
-	mapTransactionIcrcToSelf,
-	mapTransaction,
-	'syncIcrcWallet'
-);
+> =>
+	new IcWalletTransactionsScheduler(
+		getTransactions,
+		mapTransactionIcrcToSelf,
+		mapTransaction,
+		'syncIcrcWallet'
+	);
+
+const scheduler = initIcrcWalletScheduler();
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
