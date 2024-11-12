@@ -1,35 +1,20 @@
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import * as agent from '$lib/actors/agents.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import type { PostMessageDataRequestIcrc } from '$lib/types/post-message';
-import type { CertifiedData } from '$lib/types/store';
+import type { PostMessageDataRequest } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { HttpAgent } from '@dfinity/agent';
-import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import type { GetTransactions } from '@dfinity/ledger-icrc/dist/candid/icrc_index-ng';
+import { IndexCanister, type Transaction, type TransactionWithId } from '@dfinity/ledger-icp';
+import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
-describe('IcWalletScheduler', () => {
-	let scheduler: IcWalletScheduler<
-		IcrcTransaction,
-		IcrcTransactionWithId,
-		PostMessageDataRequestIcrc
-	>;
+describe('icp-wallet.worker', () => {
+	let scheduler: IcWalletScheduler<Transaction, TransactionWithId, PostMessageDataRequest>;
+	const indexCanisterMock = mock<IndexCanister>();
 
-	const mockTransactions = [{ id: 'tx1', transaction: { data: 'mockData', certified: true } }];
-	const mockBalance: CertifiedData<bigint> = { data: BigInt(1000), certified: true };
-
-	const mockGetTransactions = vi.fn().mockImplementation(() =>
-		Promise.resolve({
-			balance: 100n,
-			transactions: [],
-			oldest_tx_id: [0n]
-		} as GetTransactions)
-	);
-
-	const mockMapToSelfTransaction = vi.fn();
-	const mockMapTransaction = vi.fn();
+	let spyGetTransactions: MockInstance;
 
 	let originalPostmessage: unknown;
 
@@ -49,16 +34,18 @@ describe('IcWalletScheduler', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		scheduler = new IcWalletScheduler(
-			mockGetTransactions,
-			mockMapToSelfTransaction,
-			mockMapTransaction,
-			'syncIcpWallet'
-		);
+		scheduler = initIcpWalletScheduler();
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
+		vi.spyOn(IndexCanister, 'create').mockImplementation(() => indexCanisterMock);
 		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
+
+		spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
+			balance: 100n,
+			transactions: [],
+			oldest_tx_id: [0n]
+		});
 	});
 
 	afterEach(() => {
@@ -76,7 +63,7 @@ describe('IcWalletScheduler', () => {
 		await scheduler.trigger(undefined);
 
 		// query + update = 2
-		expect(mockGetTransactions).toHaveBeenCalledTimes(2);
+		expect(spyGetTransactions).toHaveBeenCalledTimes(2);
 	});
 
 	it('should stop the scheduler', () => {
@@ -88,14 +75,14 @@ describe('IcWalletScheduler', () => {
 		await scheduler.start(undefined);
 
 		// query + update = 2
-		expect(mockGetTransactions).toHaveBeenCalledTimes(2);
+		expect(spyGetTransactions).toHaveBeenCalledTimes(2);
 
 		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-		expect(mockGetTransactions).toHaveBeenCalledTimes(4);
+		expect(spyGetTransactions).toHaveBeenCalledTimes(4);
 
 		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-		expect(mockGetTransactions).toHaveBeenCalledTimes(6);
+		expect(spyGetTransactions).toHaveBeenCalledTimes(6);
 	});
 });
