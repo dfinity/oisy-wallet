@@ -238,10 +238,14 @@ describe('icp-wallet.worker', () => {
 		});
 	});
 
-	describe('with cleanup', () => {
-		const mockRogueId = 666n;
+	describe('other scenarios', () => {
+		beforeEach(() => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+		});
 
 		it('should trigger postMessage cleanup', async () => {
+			const mockRogueId = 666n;
+
 			indexCanisterMock.getTransactions.mockImplementation(({ certified }) =>
 				Promise.resolve({
 					balance: mockBalance,
@@ -269,6 +273,24 @@ describe('icp-wallet.worker', () => {
 				msg: 'syncIcpWalletCleanUp',
 				data: {
 					transactionIds: [`${mockRogueId}`]
+				}
+			});
+		});
+
+		it('should trigger postMessage with error', async () => {
+			const err = new Error('test');
+			indexCanisterMock.getTransactions.mockRejectedValue(err);
+
+			await scheduler.start(undefined);
+
+			// idle and in_progress
+			// error
+			expect(postMessageMock).toHaveBeenCalledTimes(3);
+
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'syncIcpWalletError',
+				data: {
+					error: err
 				}
 			});
 		});
