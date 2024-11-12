@@ -18,9 +18,9 @@
 
 {#if transactions.length > 0}
 	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
-		<li in:slide={SLIDE_DURATION}>
+		<div in:slide={SLIDE_DURATION}>
 			<svelte:component this={transaction.component} {transaction} />
-		</li>
+		</div>
 	{/each}
 {/if}
 
