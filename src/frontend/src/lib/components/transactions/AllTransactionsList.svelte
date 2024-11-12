@@ -11,6 +11,7 @@
 	} from '$lib/utils/network.utils';
 
 	let transactions: AllTransactionsUi;
+	// TODO: extract the function to a separate util
 	$: transactions = $enabledTokens.reduce<AllTransactionsUi>(
 		(acc, { network: { id: networkId } }) => {
 			if (isNetworkIdBTCMainnet(networkId)) {
@@ -32,6 +33,9 @@
 		[]
 	);
 </script>
+
+<!--TODO: include skeleton for loading transactions-->
+
 
 {#if transactions.length > 0}
 	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
