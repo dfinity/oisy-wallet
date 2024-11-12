@@ -9,7 +9,7 @@
 	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
-	import { mapTransactionUi } from '$eth/utils/transactions.utils';
+	import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -30,7 +30,7 @@
 
 	let sortedTransactionsUi: EthTransactionUi[];
 	$: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>
-		mapTransactionUi({
+		mapEthTransactionUi({
 			transaction,
 			ckMinterInfoAddresses,
 			$ethAddress: $ethAddress
