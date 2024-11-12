@@ -1,0 +1,9 @@
+{
+	"production": {
+		"BOB": {
+			"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
+			"indexCanisterId": "6lnhz-oaaaa-aaaas-aabkq-cai"
+		}
+	},
+	"staging": {}
+}

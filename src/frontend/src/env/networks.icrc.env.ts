@@ -1,4 +1,5 @@
 import {
+	CANISTER_EXPLORER_URL,
 	CKBTC_EXPLORER_URL,
 	CKBTC_TESTNET_EXPLORER_URL,
 	CKETH_EXPLORER_URL,
@@ -18,8 +19,10 @@ import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import type { EnvTokens } from '$env/types/env-token-ckerc20';
+import { additionalIcrcProduction } from '$env/tokens.icrc.env';
+import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
+import type { EnvIcrcTokens } from '$env/types/env-token-icrc-additional';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
@@ -228,7 +231,7 @@ const mapCkErc20Data = ({
 	ledgerCanisterId,
 	env
 }: {
-	ckErc20Tokens: EnvTokens;
+	ckErc20Tokens: EnvCkErc20Tokens;
 	minterCanisterId: OptionCanisterIdText;
 	ledgerCanisterId: OptionCanisterIdText;
 	env: NetworkEnvironment;
@@ -418,6 +421,37 @@ export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
 ];
 
 /**
+ * Additional ICRC tokens from JSON file
+ */
+
+const mapIcrcData = (
+	icrcTokens: EnvIcrcTokens
+): Record<EnvTokenSymbol, Omit<IcInterface, 'position'>> =>
+	Object.entries(icrcTokens).reduce(
+		(acc, [key, value]) => ({
+			...acc,
+			...((STAGING || BETA || PROD) &&
+				nonNullish(value) && {
+					[key]: {
+						...value,
+						exchangeCoinId: 'internet-computer',
+						explorerUrl: `${CANISTER_EXPLORER_URL}/${value.ledgerCanisterId}`
+					}
+				})
+		}),
+		{}
+	);
+
+const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcProduction);
+
+const BOB_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BOB)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA?.BOB,
+			position: 12
+		}
+	: undefined;
+
+/**
  * All ICRC tokens data
  */
 
@@ -428,8 +462,7 @@ export const PUBLIC_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
 ];
 
-export const ICRC_TOKENS: IcInterface[] = [
-	...PUBLIC_ICRC_TOKENS,
+const CK_ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
 	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
@@ -448,6 +481,14 @@ export const ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : []),
 	...(nonNullish(CKEURC_IC_DATA) ? [CKEURC_IC_DATA] : []),
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
+];
+
+const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [...(nonNullish(BOB_IC_DATA) ? [BOB_IC_DATA] : [])];
+
+export const ICRC_TOKENS: IcInterface[] = [
+	...PUBLIC_ICRC_TOKENS,
+	...CK_ICRC_TOKENS,
+	...ADDITIONAL_ICRC_TOKENS
 ];
 
 export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(

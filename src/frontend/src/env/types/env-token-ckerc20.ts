@@ -11,7 +11,7 @@ const envTokenData = envIcToken.extend({
 
 const envTokens = z.record(envTokenSymbol, z.union([z.undefined(), envTokenData]));
 
-export type EnvTokens = z.infer<typeof envTokens>;
+export type EnvCkErc20Tokens = z.infer<typeof envTokens>;
 
 export const envTokensCkErc20 = z.object({
 	production: envTokens,

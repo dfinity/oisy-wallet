@@ -7,6 +7,7 @@ const EXPLORER_URLS = {
 	CKBTC: 'https://dashboard.internetcomputer.org/bitcoin',
 	CKBTC_TESTNET: 'https://dashboard.internetcomputer.org/testbtc',
 	SNS: 'https://dashboard.internetcomputer.org/sns',
+	CANISTER: 'https://dashboard.internetcomputer.org/canister',
 	BTC_MAINNET: 'https://blockstream.info',
 	BTC_TESTNET: 'https://blockstream.info/testnet'
 };
@@ -20,6 +21,7 @@ export const {
 	CKBTC: CKBTC_EXPLORER_URL,
 	CKBTC_TESTNET: CKBTC_TESTNET_EXPLORER_URL,
 	SNS: SNS_EXPLORER_URL,
+	CANISTER: CANISTER_EXPLORER_URL,
 	BTC_MAINNET: BTC_MAINNET_EXPLORER_URL,
 	BTC_TESTNET: BTC_TESTNET_EXPLORER_URL
 } = EXPLORER_URLS;
