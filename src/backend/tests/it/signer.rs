@@ -6,7 +6,7 @@ use candid::Principal;
 use shared::types::signer::topup::TopUpCyclesLedgerResponse;
 
 #[test]
-fn test_list_users_cannot_be_called_if_not_allowed() {
+fn test_topup_cannot_be_called_if_not_allowed() {
     let pic_setup = setup();
     // A random unauthorized user.
     let caller = Principal::from_text(VC_HOLDER).unwrap();
