@@ -13,6 +13,7 @@
 				"id": {
 					"ic": "grghe-syaaa-aaaar-qabyq-cai",
 					"beta": "grghe-syaaa-aaaar-qabyq-cai",
+					"test_be_1": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_1": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_2": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_3": "tdxud-2yaaa-aaaad-aadiq-cai",
@@ -301,6 +302,10 @@
 			"type": "persistent"
 		},
 		"test_fe_4": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_be_1": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},
