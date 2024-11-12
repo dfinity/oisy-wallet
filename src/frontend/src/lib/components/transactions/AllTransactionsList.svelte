@@ -1,27 +1,27 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
+	import type { BtcTransactionUi } from '$btc/types/btc';
+	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import {
+		modalBtcTransaction,
+		modalIcTransaction,
+		modalEthTransaction
+	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { AllTransactionsUi } from '$lib/types/transaction';
 	import {
 		isNetworkIdBTCMainnet,
 		isNetworkIdEthereum,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
-	import { nonNullish } from '@dfinity/utils';
-	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
-	import type { BtcTransactionUi } from '$btc/types/btc';
-	import type { EthTransactionUi } from '$eth/types/eth-transaction';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
-	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
-	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
-	import {
-		modalBtcTransaction,
-		modalIcTransaction,
-		modalEthTransaction
-	} from '$lib/derived/modal.derived';
-	import { modalStore } from '$lib/stores/modal.store';
 
 	let transactions: AllTransactionsUi;
 	// TODO: extract the function to a separate util
