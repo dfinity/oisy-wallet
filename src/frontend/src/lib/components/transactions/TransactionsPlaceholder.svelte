@@ -30,7 +30,7 @@
 	</div>
 </div>
 
-<style lang="postcss">
+<style lang="scss">
 	.transaction-action-icon {
 		@apply flex items-center justify-center rounded-full bg-brand-subtle-alt p-3.5 ring-2 ring-brand-subtle;
 	}
