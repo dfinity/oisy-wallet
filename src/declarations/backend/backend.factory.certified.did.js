@@ -32,6 +32,7 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: IDL.Text
 	});
 	const AddUserCredentialRequest = IDL.Record({
+		derivation_origin: IDL.Text,
 		credential_jwt: IDL.Text,
 		issuer_canister_id: IDL.Principal,
 		current_user_version: IDL.Opt(IDL.Nat64),

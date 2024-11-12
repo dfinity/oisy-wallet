@@ -96,7 +96,8 @@ export class BackendCanister extends Canister<BackendService> {
 		credentialJwt,
 		issuerCanisterId,
 		currentUserVersion,
-		credentialSpec
+		credentialSpec,
+		derivationOrigin
 	}: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
 		const { add_user_credential } = this.caller({ certified: true });
 
@@ -104,7 +105,8 @@ export class BackendCanister extends Canister<BackendService> {
 			credential_jwt: credentialJwt,
 			issuer_canister_id: issuerCanisterId,
 			current_user_version: toNullable(currentUserVersion),
-			credential_spec: credentialSpec
+			credential_spec: credentialSpec,
+			derivation_origin: derivationOrigin
 		});
 	};
 

@@ -27,11 +27,13 @@ import { get } from 'svelte/store';
 const addPouhCredential = async ({
 	identity,
 	credentialJwt,
-	issuerCanisterId
+	issuerCanisterId,
+	derivationOrigin
 }: {
 	identity: Identity;
 	credentialJwt: string;
 	issuerCanisterId: Principal;
+	derivationOrigin: string;
 }): Promise<ResultSuccess> => {
 	const { auth: authI18n } = get(i18n);
 	try {
@@ -43,6 +45,7 @@ const addPouhCredential = async ({
 				credential_type: POUH_CREDENTIAL_TYPE,
 				arguments: []
 			},
+			derivationOrigin,
 			issuerCanisterId,
 			currentUserVersion: fromNullable(userProfile?.profile.version ?? []),
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -81,18 +84,21 @@ const addPouhCredential = async ({
 const handleSuccess = async ({
 	response,
 	identity,
-	issuerCanisterId
+	issuerCanisterId,
+	derivationOrigin
 }: {
 	response: VerifiablePresentationResponse;
 	identity: Identity;
 	issuerCanisterId: Principal;
+	derivationOrigin: string;
 }): Promise<ResultSuccess> => {
 	const { auth: authI18n } = get(i18n);
 	if ('Ok' in response) {
 		const { success } = await addPouhCredential({
 			credentialJwt: response.Ok,
 			identity,
-			issuerCanisterId
+			issuerCanisterId,
+			derivationOrigin
 		});
 		if (success) {
 			await loadCertifiedUserProfile({ identity });
@@ -112,6 +118,8 @@ export const requestPouhCredential = ({
 }): Promise<ResultSuccess> => {
 	const credentialSubject = identity.getPrincipal();
 	const { auth: authI18n } = get(i18n);
+	const derivationOriginParams = getOptionalDerivationOrigin();
+	const derivationOrigin = derivationOriginParams?.derivationOrigin ?? window.location.origin;
 	return new Promise((resolve, reject) => {
 		const issuerCanisterId = nonNullish(POUH_ISSUER_CANISTER_ID)
 			? Principal.fromText(POUH_ISSUER_CANISTER_ID)
@@ -143,10 +151,10 @@ export const requestPouhCredential = ({
 				reject();
 			},
 			onSuccess: async (response: VerifiablePresentationResponse) => {
-				resolve(await handleSuccess({ response, identity, issuerCanisterId }));
+				resolve(await handleSuccess({ response, identity, issuerCanisterId, derivationOrigin }));
 			},
 			windowOpenerFeatures: popupCenter({ width: VC_POPUP_WIDTH, height: VC_POPUP_HEIGHT }),
-			...getOptionalDerivationOrigin()
+			...derivationOriginParams
 		});
 	});
 };

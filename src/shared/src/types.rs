@@ -262,6 +262,7 @@ pub mod user_profile {
         pub credential_spec: CredentialSpec,
         pub issuer_canister_id: Principal,
         pub current_user_version: Option<Version>,
+        pub derivation_origin: String,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

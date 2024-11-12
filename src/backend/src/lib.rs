@@ -434,6 +434,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
         user_principal,
+        request.derivation_origin,
         &vc_flow_signers,
         &request.credential_spec,
         &root_pk_raw,

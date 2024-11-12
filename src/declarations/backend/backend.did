@@ -5,6 +5,7 @@ type AddUserCredentialError = variant {
   UserNotFound;
 };
 type AddUserCredentialRequest = record {
+  derivation_origin : text;
   credential_jwt : text;
   issuer_canister_id : principal;
   current_user_version : opt nat64;

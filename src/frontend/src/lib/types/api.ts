@@ -19,6 +19,7 @@ export interface AddUserCredentialParams {
 	issuerCanisterId: Principal;
 	currentUserVersion?: bigint;
 	credentialSpec: CredentialSpec;
+	derivationOrigin: string;
 }
 export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
 

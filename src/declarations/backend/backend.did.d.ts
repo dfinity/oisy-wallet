@@ -8,6 +8,7 @@ export type AddUserCredentialError =
 	| { ConfigurationError: null }
 	| { UserNotFound: null };
 export interface AddUserCredentialRequest {
+	derivation_origin: string;
 	credential_jwt: string;
 	issuer_canister_id: Principal;
 	current_user_version: [] | [bigint];
