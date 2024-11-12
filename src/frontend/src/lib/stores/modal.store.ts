@@ -20,7 +20,7 @@ export interface Modal<T> {
 		| 'wallet-connect-auth'
 		| 'wallet-connect-sign'
 		| 'wallet-connect-send'
-		| 'transaction'
+		| 'eth-transaction'
 		| 'ic-transaction'
 		| 'manage-tokens'
 		| 'hide-token'
@@ -54,7 +54,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
 	openWalletConnectSend: <D extends T>(data: D) => void;
-	openTransaction: <D extends T>(data: D) => void;
+	openEthTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
 	openBtcTransaction: <D extends T>(data: D) => void;
 	openManageTokens: () => void;
@@ -89,7 +89,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
 		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
-		openTransaction: <D extends T>(data: D) => set({ type: 'transaction', data }),
+		openEthTransaction: <D extends T>(data: D) => set({ type: 'eth-transaction', data }),
 		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
 		openBtcTransaction: <D extends T>(data: D) => set({ type: 'btc-transaction', data }),
 		openManageTokens: () => set({ type: 'manage-tokens' }),
