@@ -27,6 +27,7 @@ use shared::types::bitcoin::{
     SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
 };
 use shared::types::custom_token::{CustomToken, CustomTokenId};
+use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
@@ -54,7 +55,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
-mod signer;
+pub mod signer;
 mod state;
 mod token;
 mod types;
@@ -177,6 +178,17 @@ pub fn post_upgrade(arg: Option<Arg>) {
 #[must_use]
 pub fn config() -> Config {
     read_config(std::clone::Clone::clone)
+}
+
+/// Adds cycles to the cycles ledger, if it is below a certain threshold.
+///
+/// # Errors
+/// Error conditions are enumerated by: `TopUpCyclesLedgerError`
+#[update(guard = "caller_is_allowed")]
+pub async fn top_up_cycles_ledger(
+    request: Option<TopUpCyclesLedgerRequest>,
+) -> TopUpCyclesLedgerResult {
+    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.

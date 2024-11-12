@@ -256,6 +256,26 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
+	const TopUpCyclesLedgerRequest = IDL.Record({
+		threshold: IDL.Opt(IDL.Nat),
+		percentage: IDL.Opt(IDL.Nat8)
+	});
+	const TopUpCyclesLedgerResponse = IDL.Record({
+		backend_cycles: IDL.Nat,
+		ledger_balance: IDL.Nat,
+		topped_up: IDL.Nat
+	});
+	const TopUpCyclesLedgerError = IDL.Variant({
+		CouldNotGetBalanceFromCyclesLedger: IDL.Null,
+		CouldNotTopUpCyclesLedger: IDL.Record({
+			tried_to_send: IDL.Nat,
+			available: IDL.Nat
+		})
+	});
+	const Result_8 = IDL.Variant({
+		Ok: TopUpCyclesLedgerResponse,
+		Err: TopUpCyclesLedgerError
+	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		allow_signing: IDL.Func([], [Result_1], []),
@@ -281,7 +301,8 @@ export const idlFactory = ({ IDL }) => {
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),
-		step_migration: IDL.Func([], [], [])
+		step_migration: IDL.Func([], [], []),
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_8], [])
 	});
 };
 // @ts-ignore
