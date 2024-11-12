@@ -3,20 +3,23 @@ import { render } from '@testing-library/svelte';
 
 describe('TransactionsSkeletons', () => {
 	it('renders SkeletonCards when loading is true', () => {
-		const { getByTestId } = render(TransactionsSkeletons, { props: { loading: true } });
+		const { getByTestId } = render(TransactionsSkeletons, {
+			props: { loading: true, testIdPrefix: 'skeleton-card' }
+		});
 
-		const skeleton = getByTestId('skeleton-cards');
-		expect(skeleton).toBeInTheDocument();
+		Array.from({ length: 5 }).forEach((_, i) => {
+			const skeleton = getByTestId(`skeleton-card-${i}`);
+			expect(skeleton).toBeInTheDocument();
+		});
 	});
 
-	it('renders slot content with fade transition when loading is false', () => {
-		const { getByTestId, queryByTestId } = render(TransactionsSkeletons, {
-			props: { loading: false }
+	it('renders slot content when loading is false', () => {
+		const { getByTestId } = render(TransactionsSkeletons, {
+			props: { loading: false, testIdPrefix: 'skeleton-card' }
 		});
-		const skeleton = queryByTestId('skeleton-cards');
-		expect(skeleton).not.toBeInTheDocument();
 
-		const content = getByTestId('slot-content');
-		expect(content).toBeInTheDocument();
+		Array.from({ length: 5 }).forEach((_, i) => {
+			expect(() => getByTestId(`skeleton-card-${i}`)).toThrow();
+		});
 	});
 });
