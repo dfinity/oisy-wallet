@@ -126,6 +126,7 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 	switch (msg) {
 		case 'stopIcrcWalletTimer':
 			walletTransactionsScheduler.stop();
+			walletBalanceScheduler.stop();
 			return;
 		case 'startIcrcWalletTimer':
 			await startIcrcWalletTimer();
