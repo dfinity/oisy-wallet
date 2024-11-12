@@ -156,6 +156,9 @@ export class IcWalletScheduler<
 			certified,
 			...rest
 		});
+
+		// If we have sent at least one postMessage we can consider the worker has being initialized.
+		this.initialized = true;
 	};
 
 	/**
