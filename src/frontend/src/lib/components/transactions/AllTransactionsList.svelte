@@ -27,3 +27,5 @@
 {#if transactions.length === 0}
 	<TransactionsPlaceholder />
 {/if}
+
+<!--TODO: add modals for transaction details-->
