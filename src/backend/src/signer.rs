@@ -49,7 +49,7 @@ const fn per_user_cycles_allowance() -> u64 {
 /// Enables the user to sign transactions.
 ///
 /// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
-/// 
+///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
 pub async fn allow_signing() -> Result<(), AllowSigningError> {
@@ -132,7 +132,7 @@ fn transform_network(network: BitcoinNetwork) -> Network {
 }
 
 /// Converts a public key to a P2PKH address.
-/// 
+///
 /// # Errors
 /// - It was not possible to get the P2WPKH from the public key.
 pub async fn btc_principal_to_p2wpkh_address(
@@ -148,7 +148,7 @@ pub async fn btc_principal_to_p2wpkh_address(
 }
 
 /// Tops up the cycles ledger.
-/// 
+///
 /// # Errors
 /// Errors are enumerated by: `TopUpCyclesLedgerError`
 #[allow(clippy::unused_async)] // TODO: Remove once the code is implemented
