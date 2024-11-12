@@ -42,6 +42,10 @@ describe('LoaderMultipleEthTransactions', () => {
 		});
 	});
 
+	it('should not load transactions if ERC20 user tokens are not initialized', async () => {});
+
+	it('should not load transactions more than once if the stores do not change', async () => {});
+
 	it('should not load transactions for native Sepolia token when testnets flag is disabled', async () => {
 		render(LoaderMultipleEthTransactions);
 
