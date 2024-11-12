@@ -17,23 +17,50 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
+const isMac = process.platform === 'darwin';
+
 export default defineConfig({
+	timeout: 60 * 1000,
+
+	workers: 2,
+
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
-		port: DEV ? 5173 : 4173
+		port: DEV ? 5173 : 4173,
+		timeout: 120 * 1000
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',
+		actionTimeout: 60 * 1000,
+		navigationTimeout: 60 * 1000,
 		...(DEV && { headless: false })
 	},
 	projects: [
+		/* Test against desktop browsers. */
 		{
 			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
-		}
+			use: { ...devices['Desktop Chrome'] }
+		},
+		{
+			name: 'Firefox',
+			use: { ...devices['Desktop Firefox'] }
+		},
+		/*Test against Apple devices. */
+		...(isMac
+			? [
+					{
+						name: 'Safari',
+						use: devices['Desktop Safari']
+					},
+					{
+						name: 'iPhone SE',
+						use: devices['iPhone SE']
+					}
+				]
+			: []) // If not on macOS, don't include Apple devices
 	]
 });
