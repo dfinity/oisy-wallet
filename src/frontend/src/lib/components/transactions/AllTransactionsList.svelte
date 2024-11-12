@@ -36,7 +36,6 @@
 
 <!--TODO: include skeleton for loading transactions-->
 
-
 {#if transactions.length > 0}
 	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
 		<li in:slide={SLIDE_DURATION}>
