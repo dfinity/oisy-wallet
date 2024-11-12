@@ -344,6 +344,7 @@ interface I18nConvert {
 		check_balance_for_fees: string;
 		fees_explanation: string;
 		current_balance: string;
+		input_reset_button: string;
 	};
 	error: { loading_cketh_helper: string };
 }
