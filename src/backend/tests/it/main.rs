@@ -11,3 +11,4 @@ mod user_credentials;
 mod user_profile;
 mod user_token;
 mod utils;
+mod signer;
