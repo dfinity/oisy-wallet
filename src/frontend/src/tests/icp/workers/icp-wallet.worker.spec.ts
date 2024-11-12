@@ -1,4 +1,5 @@
 import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import * as agent from '$lib/actors/agents.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -7,6 +8,7 @@ import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { HttpAgent } from '@dfinity/agent';
 import { IndexCanister, type Transaction, type TransactionWithId } from '@dfinity/ledger-icp';
+import { jsonReplacer } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
@@ -18,11 +20,32 @@ describe('icp-wallet.worker', () => {
 
 	let originalPostmessage: unknown;
 
+	const mockBalance = 100n;
+	const mockOldestTxId = 4n;
+	const mockTransaction: TransactionWithId = {
+		id: 123n,
+		transaction: {
+			memo: 0n,
+			icrc1_memo: [],
+			operation: {
+				Transfer: {
+					to: 'abc',
+					fee: { e8s: 456n },
+					from: 'cde',
+					amount: { e8s: 789n },
+					spender: []
+				}
+			},
+			timestamp: [],
+			created_at_time: []
+		}
+	};
+
+	const postMessageMock = vi.fn();
+
 	beforeAll(() => {
 		originalPostmessage = window.postMessage;
-		window.postMessage = (_message: unknown) => {
-			// Do nothing
-		};
+		window.postMessage = postMessageMock;
 	});
 
 	afterAll(() => {
@@ -42,9 +65,9 @@ describe('icp-wallet.worker', () => {
 		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 
 		spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-			balance: 100n,
-			transactions: [],
-			oldest_tx_id: [0n]
+			balance: mockBalance,
+			transactions: [mockTransaction],
+			oldest_tx_id: [mockOldestTxId]
 		});
 	});
 
@@ -84,5 +107,43 @@ describe('icp-wallet.worker', () => {
 		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 		expect(spyGetTransactions).toHaveBeenCalledTimes(6);
+	});
+
+	it('should postMessage with balance and transactions', async () => {
+		await scheduler.start(undefined);
+
+		const mappedTransaction = mapIcpTransaction({
+			transaction: mockTransaction,
+			identity: mockIdentity
+		});
+
+		const expectedData = (certified: boolean) => ({
+			wallet: {
+				balance: {
+					certified,
+					data: mockBalance
+				},
+				oldest_tx_id: [mockOldestTxId],
+				newTransactions: JSON.stringify(
+					[
+						{
+							data: mappedTransaction,
+							certified
+						}
+					],
+					jsonReplacer
+				)
+			}
+		});
+
+		expect(postMessageMock).toHaveBeenCalledWith({
+			msg: 'syncIcpWallet',
+			data: expectedData(false)
+		});
+
+		expect(postMessageMock).toHaveBeenCalledWith({
+			msg: 'syncIcpWallet',
+			data: expectedData(true)
+		});
 	});
 });
