@@ -46,8 +46,8 @@ describe('IcWalletScheduler', () => {
 	});
 
 	beforeEach(() => {
-		vi.useFakeTimers();
 		vi.clearAllMocks();
+		vi.useFakeTimers();
 
 		scheduler = new IcWalletScheduler(
 			mockGetTransactions,
@@ -74,6 +74,8 @@ describe('IcWalletScheduler', () => {
 
 	it('should trigger the scheduler manually', async () => {
 		await scheduler.trigger(undefined);
+
+		// query + update = 2
 		expect(mockGetTransactions).toHaveBeenCalledTimes(2);
 	});
 
@@ -85,8 +87,15 @@ describe('IcWalletScheduler', () => {
 	it('should trigger syncWallet periodically', async () => {
 		await scheduler.start(undefined);
 
-		vi.advanceTimersByTime(WALLET_TIMER_INTERVAL_MILLIS);
+		// query + update = 2
+		expect(mockGetTransactions).toHaveBeenCalledTimes(2);
+
+		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 		expect(mockGetTransactions).toHaveBeenCalledTimes(4);
+
+		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+		expect(mockGetTransactions).toHaveBeenCalledTimes(6);
 	});
 });
