@@ -174,6 +174,7 @@ export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFe
 export type Result_5 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_6 = { Ok: MigrationReport } | { Err: string };
 export type Result_7 = { Ok: null } | { Err: string };
+export type Result_8 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -200,6 +201,25 @@ export interface SupportedCredential {
 	credential_type: CredentialType;
 }
 export type Token = { Icrc: IcrcToken };
+export type TopUpCyclesLedgerError =
+	| {
+			CouldNotGetBalanceFromCyclesLedger: null;
+	  }
+	| {
+			CouldNotTopUpCyclesLedger: {
+				tried_to_send: bigint;
+				available: bigint;
+			};
+	  };
+export interface TopUpCyclesLedgerRequest {
+	threshold: [] | [bigint];
+	percentage: [] | [number];
+}
+export interface TopUpCyclesLedgerResponse {
+	backend_cycles: bigint;
+	ledger_balance: bigint;
+	topped_up: bigint;
+}
 export interface UserCredential {
 	issuer: string;
 	verified_date_timestamp: [] | [bigint];
@@ -254,6 +274,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_8>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
