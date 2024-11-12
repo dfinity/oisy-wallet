@@ -64,25 +64,25 @@ const mapTransaction = ({
 };
 
 const getBalance = ({
-                        identity,
-                        certified,
-                        data
-                    }: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<bigint> => {
-    assertNonNullish(data, 'No data - ledgerIndexCanister - provided to fetch balance.');
+	identity,
+	certified,
+	data
+}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<bigint> => {
+	assertNonNullish(data, 'No data - ledgerIndexCanister - provided to fetch balance.');
 
-    return balance({
-        identity,
-        certified,
-        owner: identity.getPrincipal(),
-        ...data
-    });
+	return balance({
+		identity,
+		certified,
+		owner: identity.getPrincipal(),
+		...data
+	});
 };
 
 // Exposed for test purposes
 export const initIcrcWalletScheduler = (): IcWalletTransactionsScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
-    PostMessageDataRequestIcrcStrict
+	PostMessageDataRequestIcrcStrict
 > =>
 	new IcWalletTransactionsScheduler(
 		getTransactions,
@@ -94,7 +94,7 @@ export const initIcrcWalletScheduler = (): IcWalletTransactionsScheduler<
 const walletTransactionsScheduler = initIcrcWalletScheduler();
 
 const walletBalanceScheduler: IcWalletBalanceScheduler<PostMessageDataRequestIcrc> =
-    new IcWalletBalanceScheduler(getBalance, 'syncIcrcWallet');
+	new IcWalletBalanceScheduler(getBalance, 'syncIcrcWallet');
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
