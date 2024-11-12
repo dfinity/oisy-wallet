@@ -7,7 +7,7 @@
 </script>
 
 {#if loading}
-	<SkeletonCards rows={5} {testIdPrefix}/>
+	<SkeletonCards rows={5} {testIdPrefix} />
 {:else}
 	<div in:fade>
 		<slot />
