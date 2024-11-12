@@ -9,8 +9,6 @@
 		isNetworkIdEthereum,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
-	import { nonNullish } from '@dfinity/utils';
-	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 
 	let transactions: AllTransactionsUi;
 	// TODO: extract the function to a separate util
