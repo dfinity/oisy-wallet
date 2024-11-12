@@ -160,6 +160,10 @@ type Result_4 = variant {
 type Result_5 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_6 = variant { Ok : MigrationReport; Err : text };
 type Result_7 = variant { Ok; Err : text };
+type Result_8 = variant {
+  Ok : TopUpCyclesLedgerResponse;
+  Err : TopUpCyclesLedgerError;
+};
 type SelectedUtxosFeeError = variant {
   PendingTransactions;
   InternalError : record { msg : text };
@@ -187,6 +191,19 @@ type SupportedCredential = record {
   credential_type : CredentialType;
 };
 type Token = variant { Icrc : IcrcToken };
+type TopUpCyclesLedgerError = variant {
+  CouldNotGetBalanceFromCyclesLedger;
+  CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat };
+};
+type TopUpCyclesLedgerRequest = record {
+  threshold : opt nat;
+  percentage : opt nat8;
+};
+type TopUpCyclesLedgerResponse = record {
+  backend_cycles : nat;
+  ledger_balance : nat;
+  topped_up : nat;
+};
 type UserCredential = record {
   issuer : text;
   verified_date_timestamp : opt nat64;
@@ -236,4 +253,5 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_8);
 }

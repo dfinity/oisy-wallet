@@ -35,7 +35,10 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
+use signer::{
+    btc_principal_to_p2wpkh_address, AllowSigningError, TopUpCyclesLedgerRequest,
+    TopUpCyclesLedgerResult,
+};
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -177,6 +180,17 @@ pub fn post_upgrade(arg: Option<Arg>) {
 #[must_use]
 pub fn config() -> Config {
     read_config(std::clone::Clone::clone)
+}
+
+/// Adds cycles to the cycles ledger, if it is below a certain threshold.
+///
+/// # Errors
+/// Error conditions are enumerated by: `TopUpCyclesLedgerError`
+#[update(guard = "caller_is_allowed")]
+pub async fn top_up_cycles_ledger(
+    request: Option<TopUpCyclesLedgerRequest>,
+) -> TopUpCyclesLedgerResult {
+    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.
