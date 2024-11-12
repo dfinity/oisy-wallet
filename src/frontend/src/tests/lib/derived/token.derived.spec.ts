@@ -1,3 +1,5 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { tokenToggleable } from '$lib/derived/token.derived';
@@ -58,6 +60,16 @@ describe('token.derived', () => {
 		it('should return if icrc custom token is toggleable', () => {
 			token.set({ ...mockIcrcCustomToken, category: 'custom' });
 			expect(get(tokenToggleable)).toBe(true);
+		});
+
+		it('should return if btc token is toggleable', () => {
+			token.set(BTC_MAINNET_TOKEN);
+			expect(get(tokenToggleable)).toBe(false);
+		});
+
+		it('should return if sepolia token is toggleable', () => {
+			token.set(SEPOLIA_TOKEN);
+			expect(get(tokenToggleable)).toBe(false);
 		});
 	});
 });
