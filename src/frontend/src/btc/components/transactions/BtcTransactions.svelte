@@ -10,10 +10,10 @@
 	} from '$btc/derived/btc-transactions.derived';
 	import type { BtcTransactionUi } from '$btc/types/btc';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
+	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalBtcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 
 	let selectedTransaction: BtcTransactionUi | undefined;
 	$: selectedTransaction = $modalBtcTransaction
