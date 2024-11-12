@@ -41,6 +41,54 @@ describe('icp-wallet.worker', () => {
 		}
 	};
 
+	const mockPostMessageStatusInProgress = {
+		msg: 'syncIcWalletStatus',
+		data: {
+			state: 'in_progress'
+		}
+	}
+
+	const mockPostMessageStatusIdle = {
+		msg: 'syncIcWalletStatus',
+		data: {
+			state: 'idle'
+		}
+	}
+
+	const mockMappedTransaction = mapIcpTransaction({
+		transaction: mockTransaction,
+		identity: mockIdentity
+	});
+
+	const mockPostMessageData = (certified: boolean) => ({
+		wallet: {
+			balance: {
+				certified,
+				data: mockBalance
+			},
+			oldest_tx_id: [mockOldestTxId],
+			newTransactions: JSON.stringify(
+				[
+					{
+						data: mockMappedTransaction,
+						certified
+					}
+				],
+				jsonReplacer
+			)
+		}
+	});
+
+	const mockPostMessageNotCertified = {
+		msg: 'syncIcpWallet',
+		data: mockPostMessageData(false)
+	}
+
+	const mockPostMessageCertified = {
+		msg: 'syncIcpWallet',
+		data: mockPostMessageData(true)
+	}
+
 	const postMessageMock = vi.fn();
 
 	beforeAll(() => {
@@ -109,59 +157,45 @@ describe('icp-wallet.worker', () => {
 		expect(spyGetTransactions).toHaveBeenCalledTimes(6);
 	});
 
+	it('should no trigger postMessage if no changes', async () => {
+		await scheduler.start(undefined);
+
+		// query + update = 2
+		expect(postMessageMock).toHaveBeenCalledTimes(4);
+
+		expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+		expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageNotCertified);
+		expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
+		expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+
+		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+		expect(postMessageMock).toHaveBeenCalledTimes(6);
+
+		expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+		expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+		expect(postMessageMock).toHaveBeenCalledTimes(8);
+
+		expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+		expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
+	});
+
 	it('should postMessage with status of the worker', async () => {
 		await scheduler.start(undefined);
 
-		expect(postMessageMock).toHaveBeenCalledWith({
-			msg: 'syncIcWalletStatus',
-			data: {
-				state: 'in_progress'
-			}
-		});
+		expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 
-		expect(postMessageMock).toHaveBeenCalledWith({
-			msg: 'syncIcWalletStatus',
-			data: {
-				state: 'idle'
-			}
-		});
+		expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 	});
 
 	it('should postMessage with balance and transactions', async () => {
 		await scheduler.start(undefined);
 
-		const mappedTransaction = mapIcpTransaction({
-			transaction: mockTransaction,
-			identity: mockIdentity
-		});
+		expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
 
-		const expectedData = (certified: boolean) => ({
-			wallet: {
-				balance: {
-					certified,
-					data: mockBalance
-				},
-				oldest_tx_id: [mockOldestTxId],
-				newTransactions: JSON.stringify(
-					[
-						{
-							data: mappedTransaction,
-							certified
-						}
-					],
-					jsonReplacer
-				)
-			}
-		});
-
-		expect(postMessageMock).toHaveBeenCalledWith({
-			msg: 'syncIcpWallet',
-			data: expectedData(false)
-		});
-
-		expect(postMessageMock).toHaveBeenCalledWith({
-			msg: 'syncIcpWallet',
-			data: expectedData(true)
-		});
+		expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
 	});
 });
