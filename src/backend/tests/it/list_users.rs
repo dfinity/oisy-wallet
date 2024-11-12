@@ -2,7 +2,7 @@ use std::time::{Duration, UNIX_EPOCH};
 
 use crate::utils::{
     assertion::assert_user_profiles_eq,
-    mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
+    mock::{CALLER, ISSUER_CANISTER_ID, VC_DERIVATION_ORIGIN, VC_HOLDER, VP_JWT},
     pocketic::{setup, PicCanisterTrait},
 };
 use candid::Principal;
@@ -85,6 +85,7 @@ fn test_list_users_returns_filtered_users_by_updated() {
             credential_type: "ProofOfUniqueness".to_string(),
             arguments: None,
         },
+        derivation_origin: VC_DERIVATION_ORIGIN.to_string(),
         issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
             .expect("VC Holder principal is invalid"),
     };
@@ -205,6 +206,7 @@ fn test_list_users_returns_pouh_credential() {
             credential_type: "ProofOfUniqueness".to_string(),
             arguments: None,
         },
+        derivation_origin: VC_DERIVATION_ORIGIN.to_string(),
         issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
             .expect("VC Holder principal is invalid"),
     };

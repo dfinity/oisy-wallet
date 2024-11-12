@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::utils::{
-    mock::{ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
+    mock::{ISSUER_CANISTER_ID, VC_DERIVATION_ORIGIN, VC_HOLDER, VP_JWT},
     pocketic::{setup, PicCanisterTrait},
 };
 use candid::Principal;
@@ -28,6 +28,7 @@ fn test_add_user_credential_adds_credential() {
             credential_type: "ProofOfUniqueness".to_string(),
             arguments: None,
         },
+        derivation_origin: VC_DERIVATION_ORIGIN.to_string(),
         current_user_version: profile.version,
         issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
             .expect("VC Holder principal is invalid"),
@@ -75,6 +76,7 @@ fn test_add_user_credential_cannot_updated_wrong_version() {
             credential_type: "ProofOfUniqueness".to_string(),
             arguments: None,
         },
+        derivation_origin: VC_DERIVATION_ORIGIN.to_string(),
         // Set an incremented version to make the endpoint fail.
         current_user_version: Some(profile.version.map_or(1, |v| v + 1)),
         issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
@@ -115,6 +117,7 @@ fn test_add_user_credential_replaces_credential_same_type() {
             credential_type: "ProofOfUniqueness".to_string(),
             arguments: None,
         },
+        derivation_origin: VC_DERIVATION_ORIGIN.to_string(),
         issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
             .expect("VC Holder principal is invalid"),
     };
