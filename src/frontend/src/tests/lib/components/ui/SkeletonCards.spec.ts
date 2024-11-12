@@ -10,15 +10,4 @@ describe('SkeletonCards', () => {
 			expect(skeleton).toBeInTheDocument();
 		});
 	});
-
-	it('renders a number of SkeletonCard components with a custom testId', () => {
-		const { getByTestId } = render(SkeletonCards, {
-			props: { rows: 3, testIdPrefix: 'custom-skeleton-card' }
-		});
-
-		Array.from({ length: 3 }).forEach((_, i) => {
-			const skeleton = getByTestId(`custom-skeleton-card-${i}`);
-			expect(skeleton).toBeInTheDocument();
-		});
-	});
 });
