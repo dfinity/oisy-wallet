@@ -1,5 +1,4 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { configure } from '@testing-library/svelte';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
 import { type UserConfig } from 'vite';
@@ -10,10 +9,6 @@ process.env = {
 	...process.env,
 	...readCanisterIds({ prefix: 'VITE_' })
 };
-
-configure({
-	testIdAttribute: 'data-tid'
-});
 
 export default defineConfig(
 	(): UserConfig => ({
