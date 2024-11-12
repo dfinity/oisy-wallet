@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { IconClose } from '@dfinity/gix-components';
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { fade } from 'svelte/transition';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let token: Token;
 	export let amount: number | undefined = undefined;
+	export let name = 'convert-amount';
 	export let disabled: boolean | undefined = undefined;
 	export let customValidate: (userAmount: BigNumber | undefined) => void = () => {};
 	export let error: Error | undefined = undefined;
@@ -36,7 +39,8 @@
 
 <div class="convert-input-amount text-3xl font-bold" class:error={nonNullish(error)}>
 	<InputCurrency
-		name="convert-amount"
+		{name}
+		testId="convert-amount"
 		bind:value={amount}
 		decimals={token.decimals}
 		{placeholder}
@@ -45,9 +49,11 @@
 		<svelte:fragment slot="inner-end">
 			{#if nonNullish(amount) && !disabled}
 				<button
+					transition:fade={{ duration: 200 }}
+					data-tid="convert-amount-reset"
+					aria-label={$i18n.convert.text.input_reset_button}
 					on:click|preventDefault={onReset}
 					class={nonNullish(error) ? 'text-error' : 'text-aurometalsaurus'}
-					class:hidden={isNullish(amount) || disabled}
 				>
 					<IconClose />
 				</button>
