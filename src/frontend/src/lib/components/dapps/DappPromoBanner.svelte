@@ -11,11 +11,12 @@
 
 <article class="relative flex items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<ImgBanner
-			styleClass="bg-brand-subtle-alt max-h-64"
-			src={dAppDescription.screenshots[0]}
-			alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
-		/>
+		<div class="max-h-64 bg-brand-subtle-alt">
+			<ImgBanner
+				src={dAppDescription.screenshots[0]}
+				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
+			/>
+		</div>
 	{/if}
 	<div class="absolute start-0 w-full flex-1 bg-black/30 px-4 py-4 backdrop-blur-sm">
 		<div class="flex items-center gap-x-2">
