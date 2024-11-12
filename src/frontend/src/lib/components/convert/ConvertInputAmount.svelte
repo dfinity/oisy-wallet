@@ -69,7 +69,7 @@
 	</InputCurrency>
 </div>
 
-<style lang="scss">
+<style lang="postcss">
 	:global(.convert-input-amount div.input-block) {
 		--padding: 0;
 	}
