@@ -253,5 +253,5 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_8) query;
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_8);
 }
