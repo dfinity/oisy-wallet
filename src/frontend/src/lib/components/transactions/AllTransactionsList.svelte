@@ -3,15 +3,15 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
-	import type { UnifiedTransactionUi } from '$lib/types/transaction';
+	import type { AllTransactionsUi } from '$lib/types/transaction';
 	import {
 		isNetworkIdBTCMainnet,
 		isNetworkIdEthereum,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
 
-	let transactions: UnifiedTransactionUi[];
-	$: transactions = $enabledTokens.reduce<UnifiedTransactionUi[]>(
+	let transactions: AllTransactionsUi;
+	$: transactions = $enabledTokens.reduce<AllTransactionsUi>(
 		(acc, { network: { id: networkId } }) => {
 			if (isNetworkIdBTCMainnet(networkId)) {
 				// TODO: Implement BTC transactions

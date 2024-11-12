@@ -33,6 +33,6 @@ export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to
 	fromExplorerUrl?: string;
 };
 
-export type UnifiedTransactionUi = (BtcTransactionUi | EthTransactionUi | IcTransactionUi) & {
+export type AllTransactionsUi = ((BtcTransactionUi | EthTransactionUi | IcTransactionUi) & {
 	transactionComponent: ComponentType;
-};
+})[];
