@@ -3,7 +3,7 @@
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 
-	export let testId :string|undefined = undefined;
+	export let testId: string | undefined = undefined;
 </script>
 
 <Card {testId}>
