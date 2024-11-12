@@ -43,6 +43,8 @@ jobs:
 
       - name: Prepare macOS
         uses: ./.github/actions/prepare-macos
+        with:
+          os: ${{ matrix.os }}
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
