@@ -10,7 +10,7 @@ vi.mock('$lib/utils/transactions.utils', () => ({
 	mapAllTransactionsUi: vi.fn()
 }));
 
-describe('Activity', () => {
+describe('AllTransactionsList', () => {
 	const mockedMapAllTransactionsUi = mapAllTransactionsUi as MockedFunction<
 		typeof mapAllTransactionsUi
 	>;
@@ -62,9 +62,11 @@ describe('Activity', () => {
 		it('should render the transactions list', () => {
 			const { container } = render(AllTransactionsList);
 
-			const listItems = container.querySelectorAll('li');
+			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
+				(el) => el.parentElement === container
+			);
 
-			expect(listItems).toHaveLength(btcTransactionsNumber);
+			expect(transactionComponents).toHaveLength(btcTransactionsNumber);
 		});
 	});
 });
