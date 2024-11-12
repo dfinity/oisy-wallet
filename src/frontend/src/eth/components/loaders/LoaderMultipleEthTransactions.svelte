@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 
 	const load = async () => {
+		if ($erc20UserTokensNotInitialized) {
+			return;
+		}
+
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
 				async ({ network: { id: networkId }, id: tokenId }) => {
@@ -14,9 +18,7 @@
 		);
 	};
 
-	const debounceLoad = debounce(load, 500);
-
-	$: $enabledEthereumTokens, $enabledErc20Tokens, debounceLoad();
+	$: $enabledEthereumTokens, $enabledErc20Tokens, $erc20UserTokensNotInitialized, load();
 </script>
 
 <slot />
