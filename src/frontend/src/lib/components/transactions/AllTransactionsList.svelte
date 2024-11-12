@@ -9,6 +9,19 @@
 		isNetworkIdEthereum,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
+	import { nonNullish } from '@dfinity/utils';
+	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+	import type { BtcTransactionUi } from '$btc/types/btc';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
+	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+	import {
+		modalBtcTransaction,
+		modalIcTransaction,
+		modalEthTransaction
+	} from '$lib/derived/modal.derived';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	let transactions: AllTransactionsUi;
 	// TODO: extract the function to a separate util
@@ -32,6 +45,21 @@
 		},
 		[]
 	);
+
+	let selectedBtcTransaction: BtcTransactionUi | undefined;
+	$: selectedBtcTransaction = $modalBtcTransaction
+		? ($modalStore?.data as BtcTransactionUi | undefined)
+		: undefined;
+
+	let selectedEthTransaction: EthTransactionUi | undefined;
+	$: selectedEthTransaction = $modalEthTransaction
+		? ($modalStore?.data as EthTransactionUi | undefined)
+		: undefined;
+
+	let selectedIcTransaction: IcTransactionUi | undefined;
+	$: selectedIcTransaction = $modalIcTransaction
+		? ($modalStore?.data as IcTransactionUi | undefined)
+		: undefined;
 </script>
 
 <!--TODO: include skeleton for loading transactions-->
@@ -46,4 +74,12 @@
 
 {#if transactions.length === 0}
 	<TransactionsPlaceholder />
+{/if}
+
+{#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
+	<BtcTransactionModal transaction={selectedBtcTransaction} />
+{:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
+	<EthTransactionModal transaction={selectedEthTransaction} />
+{:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
+	<IcTransactionModal transaction={selectedIcTransaction} />
 {/if}
