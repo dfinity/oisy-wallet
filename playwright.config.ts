@@ -19,7 +19,6 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 export default defineConfig({
 	timeout: 60 * 1000,
-
 	workers: 2,
 
 	webServer: {
