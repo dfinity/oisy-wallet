@@ -9,14 +9,14 @@
 	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
-	import { mapTransactionUi } from '$eth/utils/transactions.utils';
+	import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
+	import { modalToken, modalEthTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionEthAddress } from '$lib/types/address';
@@ -30,7 +30,7 @@
 
 	let sortedTransactionsUi: EthTransactionUi[];
 	$: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>
-		mapTransactionUi({
+		mapEthTransactionUi({
 			transaction,
 			ckMinterInfoAddresses,
 			$ethAddress: $ethAddress
@@ -38,7 +38,7 @@
 	);
 
 	let selectedTransaction: TransactionType | undefined;
-	$: selectedTransaction = $modalTransaction
+	$: selectedTransaction = $modalEthTransaction
 		? ($modalStore?.data as TransactionType | undefined)
 		: undefined;
 </script>
@@ -59,7 +59,7 @@
 	</EthTransactionsSkeletons>
 </LoaderEthTransactions>
 
-{#if $modalTransaction && nonNullish(selectedTransaction)}
+{#if $modalEthTransaction && nonNullish(selectedTransaction)}
 	<EthTransactionModal transaction={selectedTransaction} />
 {:else if $modalToken}
 	<TokenModal />
