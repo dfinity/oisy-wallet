@@ -9,7 +9,7 @@ use ic_cdk::api::management_canister::{
     bitcoin::BitcoinNetwork,
     ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
 };
-use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, Service as CyclesLedgerService};
+use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, CyclesLedgerService};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
 use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
