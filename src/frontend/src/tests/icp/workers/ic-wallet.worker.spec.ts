@@ -385,7 +385,10 @@ describe('ic-wallet.worker', () => {
 				});
 			});
 
-			initWithoutTransactions({ msg: 'syncIcpWallet', initScheduler: initIcpWalletTransactionsScheduler });
+			initWithoutTransactions({
+				msg: 'syncIcpWallet',
+				initScheduler: initIcpWalletTransactionsScheduler
+			});
 		});
 
 		describe('other scenarios', () => {
