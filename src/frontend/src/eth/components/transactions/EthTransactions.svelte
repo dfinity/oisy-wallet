@@ -16,7 +16,7 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
+	import { modalToken, modalEthTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionEthAddress } from '$lib/types/address';
@@ -38,7 +38,7 @@
 	);
 
 	let selectedTransaction: TransactionType | undefined;
-	$: selectedTransaction = $modalTransaction
+	$: selectedTransaction = $modalEthTransaction
 		? ($modalStore?.data as TransactionType | undefined)
 		: undefined;
 </script>
@@ -59,7 +59,7 @@
 	</EthTransactionsSkeletons>
 </LoaderEthTransactions>
 
-{#if $modalTransaction && nonNullish(selectedTransaction)}
+{#if $modalEthTransaction && nonNullish(selectedTransaction)}
 	<EthTransactionModal transaction={selectedTransaction} />
 {:else if $modalToken}
 	<TokenModal />

@@ -67,7 +67,7 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openTransaction(transaction)}
+	on:click={() => modalStore.openEthTransaction(transaction)}
 	{amount}
 	{type}
 	timestamp={transactionDate}
