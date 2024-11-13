@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { envTokenSymbol } from '$env/types/env-token-common';
 
 export const envIcrcTokenMetadata = z.object({
 	decimals: z.number(),
@@ -29,3 +30,12 @@ export type EnvIcrcTokenMetadata = z.infer<typeof envIcrcTokenMetadata>;
 export type EnvIcrcToken = z.infer<typeof envIcrcToken>;
 
 export type EnvIcrcTokens = z.infer<typeof envIcrcTokens>;
+
+const envAdditionalIcrcTokens = z.record(envTokenSymbol, z.union([z.undefined(), envIcToken]));
+
+export type EnvAdditionalIcrcTokens = z.infer<typeof envAdditionalIcrcTokens>;
+
+export const envTokensAdditionalIcrc = z.object({
+	production: envAdditionalIcrcTokens,
+	staging: envAdditionalIcrcTokens
+});
