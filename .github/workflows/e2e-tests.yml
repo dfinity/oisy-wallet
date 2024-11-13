@@ -26,9 +26,9 @@ jobs:
         id: e2e-or-config-files
         run: |
           if git diff --name-only "origin/${{ github.base_ref }}" HEAD | grep -E "(playwright.config.ts|e2e/)"; then
-            echo "e2e-or-config-changed=true" >> GITHUB_OUTPUT
+            echo "e2e-or-config-changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "e2e-or-config-changed=false" >> GITHUB_OUTPUT
+            echo "e2e-or-config-changed=false" >> "$GITHUB_OUTPUT"
           fi
         shell: bash
         continue-on-error: false
