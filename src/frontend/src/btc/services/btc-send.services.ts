@@ -3,7 +3,6 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import { addPendingBtcTransaction, selectUserUtxosFee } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
-import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import type { BtcAddress } from '$lib/types/address';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -17,13 +16,14 @@ interface BtcSendServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;
 	amount: number;
-	progress: (step: ProgressStepsSendBtc) => void;
 }
 
 export type SendBtcParams = BtcSendServiceParams & {
 	destination: BtcAddress;
 	source: BtcAddress;
 	utxosFee: UtxosFee;
+	onSendStarted?: () => void;
+	onSendCompleted?: () => void;
 };
 
 export const selectUtxosFee = async ({
@@ -48,16 +48,17 @@ export const selectUtxosFee = async ({
 };
 
 export const sendBtc = async ({
-	progress,
 	utxosFee,
 	network,
 	source,
 	identity,
+	onSendStarted,
+	onSendCompleted,
 	...rest
 }: SendBtcParams): Promise<void> => {
-	const { txid } = await send({ progress, utxosFee, network, identity, ...rest });
+	const { txid } = await send({ onSendStarted, utxosFee, network, identity, ...rest });
 
-	progress(ProgressStepsSendBtc.RELOAD);
+	onSendCompleted?.();
 
 	await addPendingBtcTransaction({
 		identity,
@@ -76,12 +77,12 @@ const send = async ({
 	network,
 	amount,
 	utxosFee,
-	progress
+	onSendStarted
 }: Omit<SendBtcParams, 'source'>): Promise<SendBtcResponse> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 
-	progress(ProgressStepsSendBtc.SEND);
+	onSendStarted?.();
 
 	return await sendBtcApi({
 		identity,

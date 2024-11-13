@@ -110,10 +110,11 @@
 				destination,
 				amount,
 				utxosFee,
-				progress,
 				network,
 				source,
-				identity: $authIdentity
+				identity: $authIdentity,
+				onSendStarted: () => progress(ProgressStepsSendBtc.SEND),
+				onSendCompleted: () => progress(ProgressStepsSendBtc.DONE)
 			});
 
 			sendProgressStep = ProgressStepsSendBtc.DONE;
