@@ -75,6 +75,7 @@ jobs:
           if [ "${{ needs.check-e2e-changes.outputs.e2e_or_config_changed }}" == "false" ]; then
             echo "No E2E or config changes detected. PR is cleared for merging."
           elif [ "${{ needs.e2e.result }}" == "success" ]; then
+            echo "This PR is cleared for merging"
           else
             echo "This PR is not cleared for merging"
             exit 1
