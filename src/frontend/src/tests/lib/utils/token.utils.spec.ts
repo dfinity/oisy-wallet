@@ -3,12 +3,15 @@ import { IC_CKBTC_LEDGER_CANISTER_ID, IC_CKETH_LEDGER_CANISTER_ID } from '$env/n
 import { LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import type { IcCkToken } from '$icp/types/ic-token';
 import type { TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdBalance,
+	findTwinToken,
 	getMaxTransactionAmount,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
@@ -17,7 +20,8 @@ import {
 } from '$lib/utils/token.utils';
 import { bn1, bn2, bn3, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockTokens } from '$tests/mocks/tokens.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, type MockedFunction } from 'vitest';
 
@@ -281,6 +285,42 @@ describe('sumUsdBalances', () => {
 
 	it('should return undefined when both balances are nullish', () => {
 		expect(sumUsdBalances([undefined, undefined])).toBeUndefined();
+	});
+});
+
+describe('findTwinToken', () => {
+	const ckBtcToken = {
+		...mockValidIcCkToken,
+		symbol: BTC_MAINNET_TOKEN.twinTokenSymbol
+	} as IcCkToken;
+
+	it('should return correct twin token', () => {
+		const result = findTwinToken({
+			tokens: [...mockTokens, ckBtcToken],
+			tokenToPair: BTC_MAINNET_TOKEN
+		});
+
+		expect(result).toBe(ckBtcToken);
+	});
+
+	it('should return undefined if no twin token found', () => {
+		const result = findTwinToken({
+			tokens: [...mockTokens, ckBtcToken],
+			tokenToPair: ETHEREUM_TOKEN
+		});
+
+		expect(result).toBe(undefined);
+	});
+
+	it('should return undefined if tokenToPair does not contain twinTokenSymbol', () => {
+		const { twinTokenSymbol: _, ...tokenWithoutTwinTokenSymbol } = BTC_MAINNET_TOKEN;
+
+		const result = findTwinToken({
+			tokens: [...mockTokens, ckBtcToken],
+			tokenToPair: tokenWithoutTwinTokenSymbol
+		});
+
+		expect(result).toBe(undefined);
 	});
 });
 
