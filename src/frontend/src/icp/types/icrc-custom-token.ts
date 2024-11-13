@@ -1,4 +1,5 @@
-import type { EnvIcrcTokenMetadata, EnvSnsToken } from '$env/types/env-icrc-token';
+import type { EnvIcrcTokenMetadata } from '$env/types/env-icrc-token';
+import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { Option } from '$lib/types/utils';
