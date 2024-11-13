@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const oisyMetadata = z.object({
+export const OisyMetadataSchema = z.object({
 	OISY_SHORT: z.string(),
 	OISY_NAME: z.string(),
 	OISY_ONELINER: z.string(),
