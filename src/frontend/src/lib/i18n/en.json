@@ -428,9 +428,8 @@
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
 				"add_the_token": "Add the token",
-				"info": "To display custom token information correctly, $oisy_name requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
-				"github_howto": "Read how ICRC token Integration works",
-				"open_github_howto": "Open information about ICRC token integration on GitHub",
+				"info": "Ledger and Index canister IDs are usually available on the project’s website. ",
+				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
@@ -648,7 +647,9 @@
 			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
 			"transaction_history": "Your transaction history will appear here",
 			"open_transactions": "Open the list of $token transactions",
-			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified."
+			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
+			"transaction_history_unavailable": "Transaction history unavailable",
+			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",

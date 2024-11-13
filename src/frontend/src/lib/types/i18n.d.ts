@@ -390,8 +390,7 @@ interface I18nTokens {
 			verifying: string;
 			add_the_token: string;
 			info: string;
-			github_howto: string;
-			open_github_howto: string;
+			info_index: string;
 			custom_tokens_not_supported: string;
 		};
 		error: {
@@ -583,6 +582,8 @@ interface I18nTransactions {
 		transaction_history: string;
 		open_transactions: string;
 		mainnet_btc_transactions_info: string;
+		transaction_history_unavailable: string;
+		missing_index_canister_explanation: string;
 	};
 	error: {
 		loading_transactions: string;
