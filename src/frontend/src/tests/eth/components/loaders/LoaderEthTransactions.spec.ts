@@ -7,15 +7,19 @@ import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { vi } from 'vitest';
+import { vi, type MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/transactions.services', () => ({
-	loadTransactions: vi.fn().mockResolvedValue({ success: true })
+	loadTransactions: vi.fn()
 }));
 
 describe('LoaderEthTransactions', () => {
+	const mockLoadTransactions = loadTransactions as MockedFunction<typeof loadTransactions>;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		mockLoadTransactions.mockResolvedValue({ success: true });
 
 		mockPage.reset();
 		token.reset();
@@ -142,6 +146,25 @@ describe('LoaderEthTransactions', () => {
 		await waitFor(() => {
 			expect(loadTransactions).not.toHaveBeenCalledTimes(n);
 			expect(loadTransactions).toHaveBeenCalledOnce();
+		});
+	});
+
+	it('should re-call the load function if it fails the first time but the token is the same', async () => {
+		mockLoadTransactions.mockResolvedValue({ success: false });
+
+		mockPage.mock({ token: SEPOLIA_PEPE_TOKEN.name });
+		token.set(SEPOLIA_PEPE_TOKEN);
+
+		render(LoaderEthTransactions);
+
+		mockPage.mock({ token: ICP_TOKEN.name });
+		token.set(ICP_TOKEN);
+
+		mockPage.mock({ token: SEPOLIA_PEPE_TOKEN.name });
+		token.set(SEPOLIA_PEPE_TOKEN);
+
+		await waitFor(() => {
+			expect(loadTransactions).toHaveBeenCalledTimes(2);
 		});
 	});
 
