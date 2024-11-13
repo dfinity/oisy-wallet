@@ -50,15 +50,7 @@ jobs:
         run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
       - name: Generate bindings
         if: steps.changes.outputs.src == 'true'
-        run: npm run generate
-      - name: Check bindings
-        if: steps.changes.outputs.src == 'true'
-        run: |
-          test -z "$(git status --porcelain | tee /dev/stderr)" || {
-                  echo "FIX: Please execute npm run generate"
-                  git diff
-                  exit 1
-          }
+        run: ./scripts/bind.sh --check
   binding-checks-pass:
     needs: [ 'generate' ]
     runs-on: ubuntu-24.04
