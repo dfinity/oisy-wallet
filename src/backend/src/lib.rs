@@ -151,7 +151,7 @@ fn set_config(arg: InitArg) {
 /// - `hourly_housekeeping_tasks`
 fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
-    let immediate = Duration::from_secs(0);
+    let immediate = Duration::ZERO;
     set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
 
     // Then periodically:
@@ -162,8 +162,14 @@ fn start_periodic_housekeeping_timers() {
 /// Runs hourly housekeeping tasks:
 /// - Top up the cycles ledger.
 async fn hourly_housekeeping_tasks() {
-    let _ = top_up_cycles_ledger(None).await;
-    // TODO: Add monitoring for how many cycles have been topped up and whether topping up is failing.
+    // Tops up the account on the cycles ledger
+    {
+        let result = top_up_cycles_ledger(None).await;
+        if let Err(err) = result {
+            eprintln!("Failed to top up cycles ledger: {err:?}");
+        }
+        // TODO: Add monitoring for how many cycles have been topped up and whether topping up is failing.
+    }
 }
 
 #[init]
