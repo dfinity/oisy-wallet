@@ -14,6 +14,7 @@
 	export let type: TransactionType;
 	export let status: TransactionStatus;
 	export let timestamp: number | undefined;
+	export let styleClass: string | undefined = undefined;
 
 	let icon: ComponentType;
 	$: icon = mapTransactionIcon({ type, status });
@@ -22,7 +23,7 @@
 	$: iconWithOpacity = status === 'pending' || status === 'unconfirmed';
 </script>
 
-<button class="contents" on:click>
+<button class={`contents ${styleClass ?? ''}`} on:click>
 	<Card>
 		<span class="inline-block first-letter:capitalize"><slot /></span>
 
