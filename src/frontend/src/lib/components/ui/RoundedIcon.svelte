@@ -5,7 +5,8 @@
 	export let iconStyleClass = '';
 </script>
 
-<div class="relative">
-	<div class="aspect-square w-12 rounded-full bg-brand-subtle-alt" />
-	<svelte:component this={icon} styleClass={`inset-center ${iconStyleClass}`} />
+<div
+	class="relative flex items-center justify-center rounded-full bg-primary p-3 ring-2 ring-brand-subtle"
+>
+	<svelte:component this={icon} styleClass={iconStyleClass} />
 </div>
