@@ -157,6 +157,7 @@ fn start_periodic_housekeeping_timers() {
 /// - Top up the cycles ledger.
 async fn hourly_housekeeping_tasks() {
     let _ = top_up_cycles_ledger(None).await;
+    // TODO: Add monitoring for how many cycles have been topped up and whether topping up is failing.
 }
 
 #[init]
