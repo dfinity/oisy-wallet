@@ -2,6 +2,7 @@ import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index-ng.ap
 import { balance } from '$icp/api/icrc-ledger.api';
 import { IcWalletBalanceScheduler } from '$icp/schedulers/ic-wallet-balance.scheduler';
 import { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
+import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
@@ -23,7 +24,7 @@ import {
 	type IcrcTransaction,
 	type IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
 const getTransactions = ({
 	identity,
@@ -78,8 +79,10 @@ const getBalance = ({
 	});
 };
 
+const MSG_SYNC_ICRC_WALLET = 'syncIcrcWallet';
+
 // Exposed for test purposes
-export const initIcrcWalletScheduler = (): IcWalletTransactionsScheduler<
+export const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrcStrict
@@ -88,51 +91,46 @@ export const initIcrcWalletScheduler = (): IcWalletTransactionsScheduler<
 		getTransactions,
 		mapTransactionIcrcToSelf,
 		mapTransaction,
-		'syncIcrcWallet'
+		MSG_SYNC_ICRC_WALLET
 	);
 
-const walletTransactionsScheduler = initIcrcWalletScheduler();
+// Exposed for test purposes
+export const initIcrcWalletBalanceScheduler =
+	(): IcWalletBalanceScheduler<PostMessageDataRequestIcrc> =>
+		new IcWalletBalanceScheduler(getBalance, MSG_SYNC_ICRC_WALLET);
 
-const walletBalanceScheduler: IcWalletBalanceScheduler<PostMessageDataRequestIcrc> =
-	new IcWalletBalanceScheduler(getBalance, 'syncIcrcWallet');
+const initScheduler = (
+	data: PostMessageDataRequestIcrc | undefined
+): IcWalletScheduler<PostMessageDataRequestIcrc> => {
+	const { success: withIndexCanister } = PostMessageDataRequestIcrcStrictSchema.safeParse(data);
+
+	return withIndexCanister
+		? initIcrcWalletTransactionsScheduler()
+		: initIcrcWalletBalanceScheduler();
+};
+
+let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc> | undefined;
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
 
-	const startIcrcWalletTimer = async () => {
-		const { success: withIndexCanister, data: withIndexData } =
-			PostMessageDataRequestIcrcStrictSchema.safeParse(data);
-
-		if (withIndexCanister) {
-			await walletTransactionsScheduler.start(withIndexData);
-			return;
-		}
-
-		await walletBalanceScheduler.start(data);
-	};
-
-	const triggerIcrcWalletTimer = async () => {
-		const { success: withIndexCanister, data: withIndexData } =
-			PostMessageDataRequestIcrcStrictSchema.safeParse(data);
-
-		if (withIndexCanister) {
-			await walletTransactionsScheduler.trigger(withIndexData);
-			return;
-		}
-
-		await walletBalanceScheduler.trigger(data);
-	};
+	switch (msg) {
+		case 'startIcrcWalletTimer':
+		case 'stopIcrcWalletTimer':
+			scheduler?.stop();
+	}
 
 	switch (msg) {
-		case 'stopIcrcWalletTimer':
-			walletTransactionsScheduler.stop();
-			walletBalanceScheduler.stop();
-			return;
-		case 'startIcrcWalletTimer':
-			await startIcrcWalletTimer();
-			return;
-		case 'triggerIcrcWalletTimer':
-			await triggerIcrcWalletTimer();
-			return;
+		case 'startIcrcWalletTimer': {
+			scheduler = initScheduler(data);
+			await scheduler.start(data);
+			break;
+		}
+		case 'triggerIcrcWalletTimer': {
+			if (isNullish(scheduler)) {
+				scheduler = initScheduler(data);
+			}
+			await scheduler.trigger(data);
+		}
 	}
 };
