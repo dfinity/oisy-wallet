@@ -26,6 +26,7 @@ export default defineConfig({
 		port: DEV ? 5173 : 4173,
 		timeout: 120 * 1000
 	},
+
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
