@@ -1,9 +1,14 @@
+import type { BtcTransactionUi } from '$btc/types/btc';
+import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import IconConvert from '$lib/components/icons/IconConvert.svelte';
 import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
+import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
+import { isNullish } from '@dfinity/utils';
 import type { ComponentType } from 'svelte';
 
 export const mapTransactionIcon = ({
@@ -28,4 +33,35 @@ export const mapTransactionIcon = ({
 				: type === 'send'
 					? IconSend
 					: IconReceive;
+};
+
+/**
+ * Group a list of transactions by date.
+ *
+ * It assumes that the transactions are already sorted by timestamp in descending order.
+ * It does not sort the transactions, nor the groups.
+ * If a transaction has no timestamp, it will be grouped under the key 'undefined'.
+ *
+ * @param transactions - List of transactions to group.
+ * @returns Object where the keys are the date and the values are the transactions for that date.
+ */
+export const groupTransactionsByDate = <
+	T extends BtcTransactionUi | EthTransactionUi | IcTransactionUi
+>(
+	transactions: T[]
+) => {
+	const currentDate = new Date();
+
+	return transactions.reduce<Record<string, T[]>>((acc, transaction) => {
+		if (isNullish(transaction.timestamp)) {
+			return { ...acc, undefined: [...(acc['undefined'] ?? []), transaction] };
+		}
+
+		const date = formatSecondsToNormalizedDate({
+			seconds: Number(transaction.timestamp),
+			currentDate
+		});
+
+		return { ...acc, [date]: [...(acc[date] ?? []), transaction] };
+	}, {});
 };
