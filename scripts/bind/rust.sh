@@ -39,7 +39,12 @@ for canister in "${canisters[@]}"; do
       exit 1
     } >&2
     mkdir -p "src/backend/src/bind"
-    didc bind -t rs "$candid_file" --config "$canister_binding_config" >"$generated_client"
+    didc bind -t rs "$candid_file" --config "$canister_binding_config" >"$generated_client" || {
+      echo "ERROR: Failed to generate client for $canister."
+      echo "       Candid:        $candid_file"
+      echo "       Configuration: $canister_binding_config"
+      exit 1
+    } >&2
   else
     echo "INFO: No rust binding script for $canister at $canister_binding_config"
   fi
