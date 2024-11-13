@@ -25,7 +25,7 @@ jobs:
       - name: Check for E2E or Playwright Config File Changes
         id: e2e-or-config-files
         run: |
-          if git diff --name-only "origin/${{ github.base_ref }}" HEAD | grep -E "(playwright.config.ts|e2e/)"; then
+          if git diff --name-only "origin/${{ github.base_ref }}" HEAD | grep -E "(playwright.config.ts|.env.e2e|canister_e2e_ids.json|e2e/)"; then
             echo "e2e-or-config-changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "e2e-or-config-changed=false" >> "$GITHUB_OUTPUT"
