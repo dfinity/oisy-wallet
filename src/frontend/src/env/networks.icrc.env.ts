@@ -408,6 +408,7 @@ const mapIcrcData = (
 		}),
 		{}
 	);
+
 const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokensProduction);
 
 const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BURN)
