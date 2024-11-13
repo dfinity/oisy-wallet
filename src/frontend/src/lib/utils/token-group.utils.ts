@@ -1,5 +1,5 @@
 import type { IcCkToken } from '$icp/types/ic-token';
-import { isIcCkToken } from '$icp/utils/icrc.utils';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
