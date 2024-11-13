@@ -36,6 +36,7 @@ jobs:
   oisy-backend-wasm:
     if: ${{ needs.check-e2e-changes.outputs.e2e_or_config_changed == 'true' }}
     runs-on: ubuntu-24.04
+    needs: check-e2e-changes
     steps:
       - name: Checkout
         uses: actions/checkout@v4
