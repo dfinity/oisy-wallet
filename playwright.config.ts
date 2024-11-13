@@ -18,16 +18,21 @@ dotenv.populate(
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 export default defineConfig({
+	timeout: 60 * 1000,
+	workers: 2,
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
-		port: DEV ? 5173 : 4173
+		port: DEV ? 5173 : 4173,
+		timeout: 120 * 1000
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',
+		actionTimeout: 60 * 1000,
+		navigationTimeout: 60 * 1000,
 		...(DEV && { headless: false })
 	},
 	projects: [
