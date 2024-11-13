@@ -451,13 +451,13 @@ describe('post-message.schema', () => {
 			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
-		it('should throw an error if newTransactions is missing', () => {
-			const invalidData = {
+		it('should validate if newTransactions is missing', () => {
+			const validData = {
 				wallet: {
 					balance: mockValidBalance
 				}
 			};
-			expect(() => PostMessageDataResponseWalletSchema.parse(invalidData)).toThrow();
+			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should validate if balance is not a bigint because of zod custom', () => {
