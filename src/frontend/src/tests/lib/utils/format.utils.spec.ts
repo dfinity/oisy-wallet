@@ -182,7 +182,7 @@ describe('formatSecondsToNormalizedDate', () => {
 		});
 	});
 
-	describe('when the current date is provided', () => {
+	describe('when the reference date is provided', () => {
 		const currentDate = new Date(1990, 1, 19);
 
 		it('should return "Today" for the current date', () => {
