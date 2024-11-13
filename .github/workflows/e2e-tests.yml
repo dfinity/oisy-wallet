@@ -2,9 +2,6 @@ name: E2E Tests
 
 on:
   pull_request:
-    paths:
-      - 'e2e/**'
-      - playwright.config.ts
   workflow_dispatch:
 
 concurrency:
