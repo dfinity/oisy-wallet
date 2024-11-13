@@ -1,11 +1,11 @@
-import { envIcrcTokenMetadata, envIcToken } from '$env/types/env-icrc-token';
+import { EnvIcrcTokenMetadataSchema, EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
 import { z } from 'zod';
 
 const IndexCanisterVersionSchema = z.union([z.literal('up-to-date'), z.literal('outdated')]);
 
-export const EnvSnsTokenSchema = envIcToken.extend({
+export const EnvSnsTokenSchema = EnvIcTokenSchema.extend({
 	rootCanisterId: z.string(),
-	metadata: envIcrcTokenMetadata,
+	metadata: EnvIcrcTokenMetadataSchema,
 	indexCanisterVersion: IndexCanisterVersionSchema
 });
 
