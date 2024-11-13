@@ -7,7 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div class="py-12">
+<div class="py-12" data-tid="no-transactions-placeholder">
 	<div class="mb-5 flex justify-center p-2">
 		<span class="-mr-3.5">
 			<RoundedIcon icon={IconReceive} />

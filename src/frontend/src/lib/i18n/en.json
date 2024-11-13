@@ -647,7 +647,9 @@
 			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
 			"transaction_history": "Your transaction history will appear here",
 			"open_transactions": "Open the list of $token transactions",
-			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified."
+			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
+			"transaction_history_unavailable": "Transaction history unavailable",
+			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
