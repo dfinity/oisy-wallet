@@ -4,13 +4,14 @@ import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import * as agent from '$lib/actors/agents.ic';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import type { CanisterIdText } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
+import { expect, type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('icrc.services', () => {
@@ -26,6 +27,8 @@ describe('icrc.services', () => {
 		const mockName = 'Test';
 		const mockSymbol = 'TST';
 
+		let spyMetadata: MockInstance;
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -39,7 +42,7 @@ describe('icrc.services', () => {
 
 		describe('success', () => {
 			beforeEach(() => {
-				ledgerCanisterMock.metadata.mockResolvedValue([
+				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
 					['icrc1:name', { Text: mockName }],
 					['icrc1:symbol', { Text: mockSymbol }],
 					['icrc1:decimals', { Nat: mockDecimals }],
@@ -47,13 +50,19 @@ describe('icrc.services', () => {
 				]);
 			});
 
-			const testLoadCustomTokens = async (mockCustomToken: CustomToken) => {
+			const testLoadCustomTokens = async ({
+				mockCustomToken,
+				ledgerCanisterId
+			}: {
+				mockCustomToken: CustomToken;
+				ledgerCanisterId: CanisterIdText;
+			}) => {
 				await loadCustomTokens({ identity: mockIdentity });
 
 				const tokens = get(icrcCustomTokensStore);
 
 				const token = (tokens ?? []).find(
-					({ data: { ledgerCanisterId: tokenLedgerId } }) => tokenLedgerId === mockLedgerCanisterId
+					({ data: { ledgerCanisterId: tokenLedgerId } }) => tokenLedgerId === ledgerCanisterId
 				);
 
 				expect(token).not.toBeNull();
@@ -93,7 +102,7 @@ describe('icrc.services', () => {
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
-				await testLoadCustomTokens(mockCustomToken);
+				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 			});
 
 			it('should load custom tokens without index canister', async () => {
@@ -110,7 +119,48 @@ describe('icrc.services', () => {
 
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
-				await testLoadCustomTokens(mockCustomToken);
+				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
+			});
+
+			it('should load custom tokens without calling ledger metadata', async () => {
+				const dragginzLedgerCanisterId = 'zfcdd-tqaaa-aaaaq-aaaga-cai';
+				const dragginzIndexCanisterId = 'zlaol-iaaaa-aaaaq-aaaha-cai';
+
+				const mockCustomToken: CustomToken = {
+					token: {
+						Icrc: {
+							index_id: [Principal.fromText(dragginzIndexCanisterId)],
+							ledger_id: Principal.fromText(dragginzLedgerCanisterId)
+						}
+					},
+					version: [1n],
+					enabled: true
+				};
+
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				const tokens = get(icrcCustomTokensStore);
+
+				const token = (tokens ?? []).find(
+					({ data: { ledgerCanisterId: tokenLedgerId } }) =>
+						tokenLedgerId === dragginzLedgerCanisterId
+				);
+
+				expect(token).toEqual({
+					certified: true,
+					data: expect.objectContaining({
+						alternativeName: 'Dragginz',
+						explorerUrl: 'https://dashboard.internetcomputer.org/sns/zxeu2-7aaaa-aaaaq-aaafa-cai',
+						fee: 100000n,
+						icon: '/icons/sns/zfcdd-tqaaa-aaaaq-aaaga-cai.png',
+						indexCanisterId: dragginzIndexCanisterId,
+						indexCanisterVersion: 'up-to-date',
+						ledgerCanisterId: dragginzLedgerCanisterId,
+						name: 'Draggin Karma Points'
+					})
+				});
 			});
 		});
 	});
