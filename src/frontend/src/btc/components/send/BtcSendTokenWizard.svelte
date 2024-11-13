@@ -135,7 +135,6 @@
 		on:icBack
 		on:icSend={send}
 		bind:utxosFee
-		{progress}
 		{destination}
 		{amount}
 		{networkId}
