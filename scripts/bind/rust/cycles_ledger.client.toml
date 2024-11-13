@@ -4,7 +4,6 @@ template = "scripts/bind/rust/client.hbs"
 # any tags mentioned from hbs
 candid_crate = "candid"
 canister_name = "cycles_ledger"
-submodule = "impls"
 
 [rust]
 visibility = "pub"
