@@ -1,7 +1,6 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -10,37 +9,19 @@ export interface ConvertData {
 	destinationToken: Token;
 }
 
-export interface ConvertStore extends Readable<ConvertData> {
-	set: (data: ConvertData) => void;
-}
-
-export const initConvertStore = (data: ConvertData): ConvertStore => {
-	const { subscribe, set: setStore } = writable<ConvertData>(data);
-
-	return {
-		subscribe,
-
-		set(data: ConvertData) {
-			setStore(data);
-		}
-	};
-};
-
 export const initConvertContext = (convertData: ConvertData): ConvertContext => {
-	const convertStore = initConvertStore(convertData);
+	const data = writable<ConvertData>(convertData);
 
-	const sourceToken = derived([convertStore], ([{ sourceToken }]) => sourceToken);
-	const destinationToken = derived([convertStore], ([{ destinationToken }]) => destinationToken);
+	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
+	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken);
 
 	const sourceTokenBalance = derived(
 		[balancesStore, sourceToken],
-		([$balancesStore, $sourceToken]) =>
-			nonNullish($sourceToken) ? $balancesStore?.[$sourceToken.id]?.data : undefined
+		([$balancesStore, $sourceToken]) => $balancesStore?.[$sourceToken.id]?.data
 	);
 	const destinationTokenBalance = derived(
 		[balancesStore, destinationToken],
-		([$balancesStore, $destinationToken]) =>
-			nonNullish($destinationToken) ? $balancesStore?.[$destinationToken.id]?.data : undefined
+		([$balancesStore, $destinationToken]) => $balancesStore?.[$destinationToken.id]?.data
 	);
 
 	const sourceTokenExchangeRate = derived(
@@ -49,8 +30,7 @@ export const initConvertContext = (convertData: ConvertData): ConvertContext => 
 	);
 	const destinationTokenExchangeRate = derived(
 		[exchanges, destinationToken],
-		([$exchanges, $destinationToken]) =>
-			nonNullish($destinationToken) ? $exchanges?.[$destinationToken.id]?.usd : undefined
+		([$exchanges, $destinationToken]) => $exchanges?.[$destinationToken.id]?.usd
 	);
 
 	return {
