@@ -68,10 +68,16 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
-export const formatSecondsToNormalizedDate = (seconds: number): string => {
+export const formatSecondsToNormalizedDate = ({
+	seconds,
+	currentDate
+}: {
+	seconds: number;
+	currentDate?: Date;
+}): string => {
 	const date = new Date(seconds * 1000);
 
-	const today = new Date();
+	const today = currentDate ?? new Date();
 	const yesterday = new Date(today);
 	yesterday.setDate(today.getDate() - 1);
 

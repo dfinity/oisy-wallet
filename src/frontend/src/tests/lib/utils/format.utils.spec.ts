@@ -100,83 +100,138 @@ describe('formatToken', () => {
 });
 
 describe('formatSecondsToNormalizedDate', () => {
-	it('should return "Today" for the current date', () => {
-		const currentDate = new Date();
-		const currentDateTimestamp = Math.floor(currentDate.getTime() / 1000);
+	describe('when the current date is not provided', () => {
+		it('should return "Today" for the current date', () => {
+			const currentDate = new Date();
+			const currentDateTimestamp = Math.floor(currentDate.getTime() / 1000);
 
-		expect(formatSecondsToNormalizedDate(currentDateTimestamp)).toBe('Today');
-	});
-
-	it('should return "Yesterday" for the previous date', () => {
-		const currentDate = new Date();
-		const yesterday = new Date(currentDate);
-		yesterday.setDate(currentDate.getDate() - 1);
-		const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
-
-		expect(formatSecondsToNormalizedDate(yesterdayTimestamp)).toBe('Yesterday');
-	});
-
-	it('should return day and month if within the same year', () => {
-		const currentDate = new Date(2024, 1, 25);
-		const earlierThisYear = new Date(currentDate);
-		earlierThisYear.setMonth(currentDate.getMonth() - 1);
-		const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
-
-		const expected = earlierThisYear.toLocaleDateString('en', {
-			day: 'numeric',
-			month: 'long'
+			expect(formatSecondsToNormalizedDate({ seconds: currentDateTimestamp })).toBe('Today');
 		});
 
-		expect(formatSecondsToNormalizedDate(timestampThisYear)).toBe(expected);
-	});
+		it('should return "Yesterday" for the previous date', () => {
+			const currentDate = new Date();
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() - 1);
+			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
 
-	it('should return day, month, and year if from a different year', () => {
-		const currentDate = new Date(2024, 1, 25);
-		const lastYear = new Date(currentDate);
-		lastYear.setFullYear(currentDate.getFullYear() - 1);
-		const timestampLastYear = Math.floor(lastYear.getTime() / 1000);
-
-		const expected = lastYear.toLocaleDateString('en', {
-			day: 'numeric',
-			month: 'long',
-			year: 'numeric'
+			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('Yesterday');
 		});
 
-		expect(formatSecondsToNormalizedDate(timestampLastYear)).toBe(expected);
+		it('should return day and month if within the same year', () => {
+			const currentDate = new Date(2024, 1, 25);
+			const earlierThisYear = new Date(currentDate);
+			earlierThisYear.setMonth(currentDate.getMonth() - 1);
+			const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
+
+			const expected = earlierThisYear.toLocaleDateString('en', {
+				day: 'numeric',
+				month: 'long'
+			});
+
+			expect(formatSecondsToNormalizedDate({ seconds: timestampThisYear })).toBe(expected);
+		});
+
+		it('should return day, month, and year if from a different year', () => {
+			const currentDate = new Date(2024, 1, 25);
+			const lastYear = new Date(currentDate);
+			lastYear.setFullYear(currentDate.getFullYear() - 1);
+			const timestampLastYear = Math.floor(lastYear.getTime() / 1000);
+
+			const expected = lastYear.toLocaleDateString('en', {
+				day: 'numeric',
+				month: 'long',
+				year: 'numeric'
+			});
+
+			expect(formatSecondsToNormalizedDate({ seconds: timestampLastYear })).toBe(expected);
+		});
+
+		it('should not give an error if the date is in the future', () => {
+			const currentDate = new Date(2024, 1, 25);
+			const futureDate = new Date(currentDate);
+			futureDate.setDate(currentDate.getDate() + 1);
+			const futureTimestamp = Math.floor(futureDate.getTime() / 1000);
+
+			expect(() => formatSecondsToNormalizedDate({ seconds: futureTimestamp })).not.toThrow();
+		});
+
+		it('should return "Yesterday" even if the date was in the past year', () => {
+			vi.useFakeTimers().setSystemTime(new Date(2024, 0, 1));
+
+			const currentDate = new Date(2024, 0, 1);
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() - 1);
+			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
+
+			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('Yesterday');
+
+			vi.useRealTimers();
+		});
+
+		it('should return "Yesterday" even if the date was in the past month', () => {
+			vi.useFakeTimers().setSystemTime(new Date(2024, 1, 1));
+
+			const currentDate = new Date(2024, 1, 1);
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() - 1);
+			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
+
+			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('Yesterday');
+
+			vi.useRealTimers();
+		});
 	});
 
-	it('should not give an error if the date is in the future', () => {
-		const currentDate = new Date(2024, 1, 25);
-		const futureDate = new Date(currentDate);
-		futureDate.setDate(currentDate.getDate() + 1);
-		const futureTimestamp = Math.floor(futureDate.getTime() / 1000);
+	describe('when the current date is provided', () => {
+		const currentDate = new Date(1990, 1, 19);
 
-		expect(() => formatSecondsToNormalizedDate(futureTimestamp)).not.toThrow();
-	});
+		it('should return "Today" for the current date', () => {
+			const currentDateTimestamp = Math.floor(currentDate.getTime() / 1000);
 
-	it('should return "Yesterday" even if the date was in the past year', () => {
-		vi.useFakeTimers().setSystemTime(new Date(2024, 0, 1));
+			expect(formatSecondsToNormalizedDate({ seconds: currentDateTimestamp, currentDate })).toBe(
+				'Today'
+			);
+		});
 
-		const currentDate = new Date(2024, 0, 1);
-		const yesterday = new Date(currentDate);
-		yesterday.setDate(currentDate.getDate() - 1);
-		const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
+		it('should return "Yesterday" for the previous date', () => {
+			const yesterday = new Date(currentDate);
+			yesterday.setDate(currentDate.getDate() - 1);
+			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
 
-		expect(formatSecondsToNormalizedDate(yesterdayTimestamp)).toBe('Yesterday');
+			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp, currentDate })).toBe(
+				'Yesterday'
+			);
+		});
 
-		vi.useRealTimers();
-	});
+		it('should return day and month if within the same year', () => {
+			const earlierThisYear = new Date(currentDate);
+			earlierThisYear.setMonth(currentDate.getMonth() - 1);
+			const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
 
-	it('should return "Yesterday" even if the date was in the past month', () => {
-		vi.useFakeTimers().setSystemTime(new Date(2024, 1, 1));
+			const expected = earlierThisYear.toLocaleDateString('en', {
+				day: 'numeric',
+				month: 'long'
+			});
 
-		const currentDate = new Date(2024, 1, 1);
-		const yesterday = new Date(currentDate);
-		yesterday.setDate(currentDate.getDate() - 1);
-		const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
+			expect(formatSecondsToNormalizedDate({ seconds: timestampThisYear, currentDate })).toBe(
+				expected
+			);
+		});
 
-		expect(formatSecondsToNormalizedDate(yesterdayTimestamp)).toBe('Yesterday');
+		it('should return day, month, and year if from a different year', () => {
+			const lastYear = new Date(currentDate);
+			lastYear.setFullYear(currentDate.getFullYear() - 1);
+			const timestampLastYear = Math.floor(lastYear.getTime() / 1000);
 
-		vi.useRealTimers();
+			const expected = lastYear.toLocaleDateString('en', {
+				day: 'numeric',
+				month: 'long',
+				year: 'numeric'
+			});
+
+			expect(formatSecondsToNormalizedDate({ seconds: timestampLastYear, currentDate })).toBe(
+				expected
+			);
+		});
 	});
 });
