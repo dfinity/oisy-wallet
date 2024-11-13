@@ -148,3 +148,6 @@ export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
 ];
 
 export const ERC20_TWIN_TOKENS_IDS: TokenId[] = ERC20_TWIN_TOKENS.map(({ id }) => id);
+
+// Suggested tokens to be enabled by default if the user set no preference
+export const ERC20_SUGGESTED_TOKENS = [USDT_TOKEN, USDC_TOKEN];
