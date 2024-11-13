@@ -408,12 +408,11 @@ const mapIcrcData = (
 		}),
 		{}
 	);
+const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokensProduction);
 
-const ADDITIONAL_ICRC_DATA = mapIcrcData(additionalIcrcTokensProduction);
-
-const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_DATA?.BURN)
+const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BURN)
 	? {
-			...ADDITIONAL_ICRC_DATA.BURN,
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.BURN,
 			position: 12
 		}
 	: undefined;
