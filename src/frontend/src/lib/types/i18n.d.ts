@@ -582,6 +582,8 @@ interface I18nTransactions {
 		transaction_history: string;
 		open_transactions: string;
 		mainnet_btc_transactions_info: string;
+		transaction_history_unavailable: string;
+		missing_index_canister_explanation: string;
 	};
 	error: {
 		loading_transactions: string;
