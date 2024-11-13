@@ -27,7 +27,7 @@ export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
 export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to'> & {
-	id: bigint | string;
+	id: bigint | string | undefined;
 	timestamp?: bigint;
 	txExplorerUrl?: string;
 	toExplorerUrl?: string;
