@@ -165,7 +165,7 @@ const loadCustomIcrcTokensData = async ({
 				? meta
 				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
 			ledgerCanisterId: ledgerCanisterIdText,
-			indexCanisterId: indexCanisterId?.toText(),
+			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
 			position: ICRC_TOKENS.length + 1 + index,
 			category: 'custom',
 			icrcCustomTokens: indexedIcrcCustomTokens
