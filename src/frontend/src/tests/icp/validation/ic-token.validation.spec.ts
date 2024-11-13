@@ -1,62 +1,95 @@
+import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
 import {
+	isIcCkToken,
 	isIcToken,
 	isIcTokenCanistersStrict,
+	isNotIcCkToken,
 	isNotIcToken,
 	isNotIcTokenCanistersStrict
 } from '$icp/validation/ic-token.validation';
-import { validIcToken } from '$tests/mocks/ic-tokens.mock';
-import { validToken } from '$tests/mocks/tokens.mock';
-import { describe, expect, it } from 'vitest';
+import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 describe('ic-token.validation', () => {
+	const mockValidIcTokenWithIndex: IcToken = {
+		...mockValidIcToken,
+		indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
+	};
+
 	describe('isIcToken', () => {
 		it('should return true for a valid IcToken', () => {
-			expect(isIcToken(validIcToken)).toBe(true);
+			expect(isIcToken(mockValidIcToken)).toBe(true);
 		});
 
 		it('should return false for an invalid IcToken', () => {
-			expect(isIcToken(validToken)).toBe(false);
+			expect(isIcToken(mockValidToken)).toBe(false);
 		});
 	});
 
 	describe('isNotIcToken', () => {
 		it('should return false for a valid IcToken', () => {
-			expect(isNotIcToken(validIcToken)).toBe(false);
+			expect(isNotIcToken(mockValidIcToken)).toBe(false);
 		});
 
 		it('should return true for an invalid IcToken', () => {
-			expect(isNotIcToken(validToken)).toBe(true);
+			expect(isNotIcToken(mockValidToken)).toBe(true);
 		});
 	});
 
 	describe('isIcTokenCanistersStrict', () => {
 		it('should return true for a valid IcToken with IcCanistersStrict', () => {
-			expect(isIcTokenCanistersStrict(validIcToken)).toBe(true);
+			expect(isIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBe(true);
 		});
 
-		// TODO: test missing indexCanisterId when it becomes optional
-		// it('should return false for a valid IcToken without strict canisters fields', () => {
-		// 	expect(isIcTokenCanistersStrict(validIcToken)).toBe(false);
-		// });
+		it('should return false for a valid IcToken without strict canisters fields', () => {
+			expect(isIcTokenCanistersStrict(mockValidIcToken)).toBe(false);
+		});
 
 		it('should return false for a token type casted to IcToken', () => {
-			expect(isIcTokenCanistersStrict(validToken as IcToken)).toBe(false);
+			expect(isIcTokenCanistersStrict(mockValidToken as IcToken)).toBe(false);
 		});
 	});
 
 	describe('isNotIcTokenCanistersStrict', () => {
 		it('should return false for a valid IcToken with IcCanistersStrict', () => {
-			expect(isNotIcTokenCanistersStrict(validIcToken)).toBe(false);
+			expect(isNotIcTokenCanistersStrict(mockValidIcTokenWithIndex)).toBe(false);
 		});
 
-		// TODO: test missing indexCanisterId when it becomes optional
-		// it('should return true for a valid IcToken without strict canisters fields', () => {
-		// 	expect(isNotIcTokenCanistersStrict(validIcToken)).toBe(true);
-		// });
+		it('should return true for a valid IcToken without strict canisters fields', () => {
+			expect(isNotIcTokenCanistersStrict(mockValidIcToken)).toBe(true);
+		});
 
 		it('should return true for a token type casted to IcToken', () => {
-			expect(isNotIcTokenCanistersStrict(validToken as IcToken)).toBe(true);
+			expect(isNotIcTokenCanistersStrict(mockValidToken as IcToken)).toBe(true);
+		});
+	});
+
+	describe('isIcCkToken', () => {
+		it('should return true for a valid IcCkToken', () => {
+			expect(isIcCkToken(mockValidIcCkToken)).toBe(true);
+		});
+
+		it('should return true for a valid IcCkToken that does not have optional props', () => {
+			expect(isIcCkToken(mockValidIcCkToken)).toBe(true);
+		});
+
+		it('should return false for an invalid IcToken', () => {
+			expect(isIcCkToken(mockValidToken)).toBe(false);
+		});
+	});
+
+	describe('isNotIcCkToken', () => {
+		it('should return false for a valid IcCkToken', () => {
+			expect(isNotIcCkToken(mockValidIcCkToken)).toBe(false);
+		});
+
+		it('should return false for a valid IcCkToken that does not have optional props', () => {
+			expect(isNotIcCkToken(mockValidIcCkToken)).toBe(false);
+		});
+
+		it('should return true for an invalid IcToken', () => {
+			expect(isNotIcCkToken(mockValidToken)).toBe(true);
 		});
 	});
 });

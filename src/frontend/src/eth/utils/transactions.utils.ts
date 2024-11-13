@@ -21,10 +21,10 @@ export const decodeErc20AbiDataValue = (data: string): BigNumber => {
 	return value;
 };
 
-/** It maps a transaction to a transaction UI object
- *
+/**
+ * It maps a transaction to an Ethereum transaction UI object
  */
-export const mapTransactionUi = ({
+export const mapEthTransactionUi = ({
 	transaction,
 	ckMinterInfoAddresses,
 	$ethAddress
@@ -37,6 +37,7 @@ export const mapTransactionUi = ({
 
 	return {
 		...transaction,
+		id: transaction.hash,
 		uiType: ckMinterInfoAddresses.includes(from.toLowerCase())
 			? 'withdraw'
 			: ckMinterInfoAddresses.includes(to?.toLowerCase())

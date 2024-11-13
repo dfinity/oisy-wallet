@@ -1,12 +1,14 @@
-<!-- source: DFINITY foundation -->
-<svg
-	width="16"
-	height="20"
-	viewBox="0 0 16 20"
-	fill="currentColor"
-	xmlns="http://www.w3.org/2000/svg"
->
-	<path
-		d="M12.6009 2.94141H15.0544L9.69434 8.9215L16 17.0591H11.0627L7.19566 12.1237L2.77087 17.0591H0.31595L6.04904 10.6627L0 2.94141H5.06262L8.55811 7.45254L12.6009 2.94141ZM11.7399 15.6256H13.0993L4.32392 4.2996H2.86506L11.7399 15.6256Z"
-	/>
+<script lang="ts">
+	export let size = '20';
+</script>
+
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<g clip-path="url(#clip0_2345_9171)">
+		<path
+			fill-rule="evenodd"
+			clip-rule="evenodd"
+			d="M15.9455 23L10.396 15.0901L3.44886 23H0.509766L9.09209 13.2311L0.509766 1H8.05571L13.286 8.45502L19.8393 1H22.7784L14.5943 10.3165L23.4914 23H15.9455ZM19.2185 20.77H17.2398L4.71811 3.23H6.6971L11.7121 10.2532L12.5793 11.4719L19.2185 20.77Z"
+			fill="currentColor"
+		/>
+	</g>
 </svg>

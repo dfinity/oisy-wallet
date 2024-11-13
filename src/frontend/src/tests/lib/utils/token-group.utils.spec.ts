@@ -11,6 +11,7 @@ import {
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
 import { bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { BigNumber } from 'alchemy-sdk';
 
 const tokens = [
@@ -20,6 +21,7 @@ const tokens = [
 		usdBalance: 50000
 	},
 	{
+		...mockValidIcCkToken,
 		symbol: 'ckBTC',
 		network: ICP_NETWORK,
 		balance: BigNumber.from(2),
@@ -36,6 +38,7 @@ const tokens = [
 		usdBalance: 20000
 	},
 	{
+		...mockValidIcCkToken,
 		symbol: 'ckETH',
 		network: ICP_NETWORK,
 		balance: BigNumber.from(5),
@@ -56,6 +59,7 @@ const tokens = [
 const tokensWithMismatchedDecimals = [
 	...tokens,
 	{
+		...mockValidIcCkToken,
 		symbol: 'FOO',
 		network: {
 			id: Symbol('FOO'),
@@ -73,6 +77,7 @@ const tokensWithMismatchedDecimals = [
 		name: 'Foo Token'
 	},
 	{
+		...mockValidIcCkToken,
 		symbol: 'ckFOO',
 		network: ICP_NETWORK,
 		balance: BigNumber.from(200),
