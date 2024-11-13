@@ -18,6 +18,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Fetch base branch
+        run: |
+          git fetch origin "${{ github.base_ref }}:${{ github.base_ref }}"
+
       - name: Check for E2E or Playwright Config File Changes
         id: e2e_or_config_files
         run: |
