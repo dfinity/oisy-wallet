@@ -99,6 +99,7 @@ export const initIcrcWalletBalanceScheduler =
 	(): IcWalletBalanceScheduler<PostMessageDataRequestIcrc> =>
 		new IcWalletBalanceScheduler(getBalance, MSG_SYNC_ICRC_WALLET);
 
+// TODO(OISY-296): expose this function instead of above initializer for test purpose
 const initScheduler = (
 	data: PostMessageDataRequestIcrc | undefined
 ): IcWalletScheduler<PostMessageDataRequestIcrc> => {
