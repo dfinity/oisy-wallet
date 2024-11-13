@@ -54,16 +54,14 @@ const randomMemecoin = {
 const ledgerCanisterId = await deployLedger(randomMemecoin);
 
 const args = process.argv.slice(2);
-const withIndex = args?.find((arg) => ['--with-index'].includes(arg)) !== undefined;
+const withIndex = (args ?? []).includes('--with-index');
 
-let indexCanisterId;
-
-if (withIndex) {
-	indexCanisterId = await deployIndex({
-		...randomMemecoin,
-		ledgerCanisterId
-	});
-}
+const indexCanisterId = withIndex
+	? await deployIndex({
+			...randomMemecoin,
+			ledgerCanisterId
+		})
+	: undefined;
 
 console.log(
 	`✅ Memecoin ${randomMemecoin.metadata.name} (${randomMemecoin.metadata.symbol}) deployed.`
