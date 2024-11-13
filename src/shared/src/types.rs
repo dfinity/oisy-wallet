@@ -269,13 +269,13 @@ pub mod signer {
         #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
         pub struct TopUpCyclesLedgerResponse {
             /// The ledger balance after topping up.
-            ledger_balance: Nat,
+            pub ledger_balance: Nat,
             /// The backend canister cycles after topping up.
-            backend_cycles: Nat,
+            pub backend_cycles: Nat,
             /// The amount topped up.
             /// - Zero if the ledger balance was already sufficient.
             /// - The requested amount otherwise.
-            topped_up: Nat,
+            pub topped_up: Nat,
         }
 
         pub type TopUpCyclesLedgerResult =
