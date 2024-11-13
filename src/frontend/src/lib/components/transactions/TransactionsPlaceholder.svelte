@@ -3,22 +3,23 @@
 	import IconlyArrowRightLeft from '$lib/components/icons/iconly/IconlyArrowRightLeft.svelte';
 	import IconlyArrowUpRight from '$lib/components/icons/iconly/IconlyArrowUpRight.svelte';
 	import IconlyCreditCard from '$lib/components/icons/iconly/IconlyCreditCard.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class="py-12">
 	<div class="mb-5 flex justify-center p-2">
-		<span class="transaction-action-icon -mr-3.5">
-			<IconReceive />
+		<span class="-mr-3.5">
+			<RoundedIcon icon={IconReceive} />
 		</span>
-		<span class="transaction-action-icon -mr-3.5">
-			<IconlyArrowUpRight />
+		<span class="-mr-3.5">
+			<RoundedIcon icon={IconlyArrowUpRight} />
 		</span>
-		<span class="transaction-action-icon -mr-3.5">
-			<IconlyArrowRightLeft />
+		<span class="-mr-3.5">
+			<RoundedIcon icon={IconlyArrowRightLeft} />
 		</span>
 		<span class="transaction-action-icon">
-			<IconlyCreditCard />
+			<RoundedIcon icon={IconlyCreditCard} />
 		</span>
 	</div>
 
@@ -29,9 +30,3 @@
 		</p>
 	</div>
 </div>
-
-<style lang="postcss">
-	.transaction-action-icon {
-		@apply flex items-center justify-center rounded-full bg-brand-subtle-alt p-3.5 ring-2 ring-brand-subtle;
-	}
-</style>
