@@ -1,7 +1,8 @@
 import { SNS_EXPLORER_URL } from '$env/explorers.env';
 import { ICP_NETWORK } from '$env/networks.env';
+import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
 import snsTokens from '$env/tokens.sns.json';
-import { EnvSnsTokenSchema, EnvSnsTokensSchema, type EnvSnsToken } from '$env/types/env-sns-token';
+import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import { i18n } from '$lib/stores/i18n.store';
