@@ -1,7 +1,7 @@
 import icrcTokens from '$env/tokens.icrc.json';
-import { envTokensAdditionalIcrc } from '$env/types/env-icrc-token';
+import { EnvTokensAdditionalIcrcSchema } from '$env/schema/env-additional-icrc-token.schema';
 
-const additionalIcrcTokens = envTokensAdditionalIcrc.safeParse(icrcTokens);
+const additionalIcrcTokens = EnvTokensAdditionalIcrcSchema.safeParse(icrcTokens);
 
 export const { production: additionalIcrcTokensProduction, staging: additionalIcrcTokensStaging } =
 	additionalIcrcTokens.success ? additionalIcrcTokens.data : { production: {}, staging: {} };
