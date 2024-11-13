@@ -1,5 +1,5 @@
-import icrcTokens from '$env/tokens.icrc.json';
 import { EnvTokensAdditionalIcrcSchema } from '$env/schema/env-additional-icrc-token.schema';
+import icrcTokens from '$env/tokens.icrc.json';
 
 const additionalIcrcTokens = EnvTokensAdditionalIcrcSchema.safeParse(icrcTokens);
 
