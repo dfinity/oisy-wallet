@@ -2,7 +2,7 @@ import type { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-tr
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
-import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
+import { initIcpWalletTransactionsScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import * as agent from '$lib/actors/agents.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -370,7 +370,7 @@ describe('ic-wallet-transactions.worker', () => {
 
 			initWithTransactions({
 				msg: 'syncIcpWallet',
-				initScheduler: initIcpWalletScheduler,
+				initScheduler: initIcpWalletTransactionsScheduler,
 				transaction: mockMappedTransaction
 			});
 		});
@@ -384,7 +384,10 @@ describe('ic-wallet-transactions.worker', () => {
 				});
 			});
 
-			initWithoutTransactions({ msg: 'syncIcpWallet', initScheduler: initIcpWalletScheduler });
+			initWithoutTransactions({
+				msg: 'syncIcpWallet',
+				initScheduler: initIcpWalletTransactionsScheduler
+			});
 		});
 
 		describe('other scenarios', () => {
@@ -410,7 +413,7 @@ describe('ic-wallet-transactions.worker', () => {
 				indexCanisterMock.getTransactions.mockRejectedValue(err);
 
 			initOtherScenarios({
-				initScheduler: initIcpWalletScheduler,
+				initScheduler: initIcpWalletTransactionsScheduler,
 				initCleanupMock,
 				initErrorMock,
 				msg: 'syncIcpWallet'
