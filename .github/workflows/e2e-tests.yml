@@ -69,7 +69,7 @@ jobs:
           retention-days: 30
 
   may-merge-e2e:
-    needs: ['e2e']
+    needs: ['check-e2e-changes', 'e2e']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
