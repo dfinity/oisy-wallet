@@ -161,6 +161,8 @@ describe('icrc.services', () => {
 						name: 'Draggin Karma Points'
 					})
 				});
+
+				expect(spyMetadata).not.toHaveBeenCalled();
 			});
 		});
 	});
