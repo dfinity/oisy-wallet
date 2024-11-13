@@ -5,7 +5,7 @@ import {
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
-import { isIcCkToken } from '$icp/utils/icrc.utils';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
