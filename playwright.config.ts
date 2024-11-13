@@ -28,6 +28,7 @@ export default defineConfig({
 	},
 
 	testDir: 'e2e',
+
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
