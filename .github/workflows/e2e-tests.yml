@@ -34,13 +34,10 @@ jobs:
         continue-on-error: false
 
   oisy-backend-wasm:
-#    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
+    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
     runs-on: ubuntu-24.04
     needs: check-e2e-changes
     steps:
-      - name: Test
-        run: echo "${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}"
-
       - name: Checkout
         uses: actions/checkout@v4
 
