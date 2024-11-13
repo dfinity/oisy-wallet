@@ -27,10 +27,10 @@ export const syncWallet = ({
 		}
 	});
 
-	// TODO: set nullish if newTransactions is null
+	// TODO(OISY-296): set nullish if newTransactions is null
 	// TODO: also verify why we have a particular implementation here?
 	btcTransactionsStore.prepend({
 		tokenId,
-		transactions: JSON.parse(newTransactions ?? '', jsonReviver)
+		transactions: JSON.parse(newTransactions ?? '[]', jsonReviver)
 	});
 };
