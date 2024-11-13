@@ -1,5 +1,5 @@
 import metadata from '$env/oisy.metadata.json';
-import { oisyMetadata } from '$env/types/env-oisy-metadata';
+import { OisyMetadataSchema } from '$env/schema/env-oisy-metadata.schema';
 import { safeParse } from '$lib/validation/utils.validation';
 
 export const {
@@ -11,7 +11,7 @@ export const {
 	OISY_STATUS_URL,
 	OISY_TWITTER_URL
 } = safeParse({
-	schema: oisyMetadata,
+	schema: OisyMetadataSchema,
 	value: metadata,
 	fallback: {
 		OISY_SHORT: '',
