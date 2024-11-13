@@ -76,27 +76,11 @@ export const formatSecondsToNormalizedDate = ({
 	currentDate?: Date;
 }): string => {
 	const date = new Date(seconds * 1000);
-
 	const today = currentDate ?? new Date();
-	const yesterday = new Date(today);
-	yesterday.setDate(today.getDate() - 1);
+	const daysDifference = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-	const isToday =
-		date.getDate() === today.getDate() &&
-		date.getMonth() === today.getMonth() &&
-		date.getFullYear() === today.getFullYear();
-
-	const isYesterday =
-		date.getDate() === yesterday.getDate() &&
-		date.getMonth() === yesterday.getMonth() &&
-		date.getFullYear() === yesterday.getFullYear();
-
-	if (isToday) {
-		return 'Today';
-	}
-
-	if (isYesterday) {
-		return 'Yesterday';
+	if (Math.abs(daysDifference) < 2) {
+		return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(daysDifference, 'day');
 	}
 
 	// Same year, return day and month name

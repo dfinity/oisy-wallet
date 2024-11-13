@@ -101,20 +101,20 @@ describe('formatToken', () => {
 
 describe('formatSecondsToNormalizedDate', () => {
 	describe('when the current date is not provided', () => {
-		it('should return "Today" for the current date', () => {
+		it('should return "today" for the current date', () => {
 			const currentDate = new Date();
 			const currentDateTimestamp = Math.floor(currentDate.getTime() / 1000);
 
-			expect(formatSecondsToNormalizedDate({ seconds: currentDateTimestamp })).toBe('Today');
+			expect(formatSecondsToNormalizedDate({ seconds: currentDateTimestamp })).toBe('today');
 		});
 
-		it('should return "Yesterday" for the previous date', () => {
+		it('should return "yesterday" for the previous date', () => {
 			const currentDate = new Date();
 			const yesterday = new Date(currentDate);
 			yesterday.setDate(currentDate.getDate() - 1);
 			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
 
-			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('Yesterday');
+			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('yesterday');
 		});
 
 		it('should return day and month if within the same year', () => {
@@ -155,7 +155,7 @@ describe('formatSecondsToNormalizedDate', () => {
 			expect(() => formatSecondsToNormalizedDate({ seconds: futureTimestamp })).not.toThrow();
 		});
 
-		it('should return "Yesterday" even if the date was in the past year', () => {
+		it('should return "yesterday" even if the date was in the past year', () => {
 			vi.useFakeTimers().setSystemTime(new Date(2024, 0, 1));
 
 			const currentDate = new Date(2024, 0, 1);
@@ -163,12 +163,12 @@ describe('formatSecondsToNormalizedDate', () => {
 			yesterday.setDate(currentDate.getDate() - 1);
 			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
 
-			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('Yesterday');
+			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('yesterday');
 
 			vi.useRealTimers();
 		});
 
-		it('should return "Yesterday" even if the date was in the past month', () => {
+		it('should return "yesterday" even if the date was in the past month', () => {
 			vi.useFakeTimers().setSystemTime(new Date(2024, 1, 1));
 
 			const currentDate = new Date(2024, 1, 1);
@@ -176,7 +176,7 @@ describe('formatSecondsToNormalizedDate', () => {
 			yesterday.setDate(currentDate.getDate() - 1);
 			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
 
-			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('Yesterday');
+			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp })).toBe('yesterday');
 
 			vi.useRealTimers();
 		});
@@ -185,21 +185,21 @@ describe('formatSecondsToNormalizedDate', () => {
 	describe('when the reference date is provided', () => {
 		const currentDate = new Date(1990, 1, 19);
 
-		it('should return "Today" for the current date', () => {
+		it('should return "today" for the current date', () => {
 			const currentDateTimestamp = Math.floor(currentDate.getTime() / 1000);
 
 			expect(formatSecondsToNormalizedDate({ seconds: currentDateTimestamp, currentDate })).toBe(
-				'Today'
+				'today'
 			);
 		});
 
-		it('should return "Yesterday" for the previous date', () => {
+		it('should return "yesterday" for the previous date', () => {
 			const yesterday = new Date(currentDate);
 			yesterday.setDate(currentDate.getDate() - 1);
 			const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
 
 			expect(formatSecondsToNormalizedDate({ seconds: yesterdayTimestamp, currentDate })).toBe(
-				'Yesterday'
+				'yesterday'
 			);
 		});
 
