@@ -41,6 +41,17 @@ describe('icrc.services', () => {
 		});
 
 		describe('success', () => {
+			const mockCustomToken: CustomToken = {
+				token: {
+					Icrc: {
+						index_id: [Principal.fromText(mockIndexCanisterId)],
+						ledger_id: Principal.fromText(mockLedgerCanisterId)
+					}
+				},
+				version: [1n],
+				enabled: true
+			};
+
 			beforeEach(() => {
 				spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
 					['icrc1:name', { Text: mockName }],
@@ -89,17 +100,6 @@ describe('icrc.services', () => {
 			};
 
 			it('should load custom tokens with index canister', async () => {
-				const mockCustomToken: CustomToken = {
-					token: {
-						Icrc: {
-							index_id: [Principal.fromText(mockIndexCanisterId)],
-							ledger_id: Principal.fromText(mockLedgerCanisterId)
-						}
-					},
-					version: [1n],
-					enabled: true
-				};
-
 				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
@@ -163,6 +163,36 @@ describe('icrc.services', () => {
 				});
 
 				expect(spyMetadata).not.toHaveBeenCalled();
+			});
+
+			it('should call metadata with query and certified', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([mockCustomToken]);
+
+				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
+
+				expect(spyMetadata).toHaveBeenCalledWith({
+					certified: false
+				});
+
+				expect(spyMetadata).toHaveBeenCalledWith({
+					certified: true
+				});
+			});
+
+			it('should call list custom tokens with query and certified', async () => {
+				const spyListCustomTokens = backendCanisterMock.listCustomTokens.mockResolvedValue([
+					mockCustomToken
+				]);
+
+				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
+
+				expect(spyListCustomTokens).toHaveBeenCalledWith({
+					certified: false
+				});
+
+				expect(spyListCustomTokens).toHaveBeenCalledWith({
+					certified: true
+				});
 			});
 		});
 	});
