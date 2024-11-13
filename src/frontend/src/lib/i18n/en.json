@@ -428,9 +428,8 @@
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
 				"add_the_token": "Add the token",
-				"info": "To display custom token information correctly, $oisy_name requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
-				"github_howto": "Read how ICRC token Integration works",
-				"open_github_howto": "Open information about ICRC token integration on GitHub",
+				"info": "Ledger and Index canister IDs are usually available on the project’s website. ",
+				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {

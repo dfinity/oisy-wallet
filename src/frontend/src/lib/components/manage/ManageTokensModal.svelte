@@ -80,13 +80,6 @@
 			return;
 		}
 
-		if (isNullish(indexCanisterId)) {
-			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_index_id }
-			});
-			return;
-		}
-
 		await saveIcrc([
 			{
 				enabled: true,
