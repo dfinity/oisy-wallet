@@ -31,6 +31,7 @@ export type EnvIcrcToken = z.infer<typeof envIcrcToken>;
 
 export type EnvIcrcTokens = z.infer<typeof envIcrcTokens>;
 
+// TODO, extract the union into it's own schema
 const envAdditionalIcrcTokens = z.record(envTokenSymbol, z.union([z.undefined(), envIcToken]));
 
 export type EnvAdditionalIcrcTokens = z.infer<typeof envAdditionalIcrcTokens>;
