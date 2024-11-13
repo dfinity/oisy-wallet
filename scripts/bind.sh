@@ -11,6 +11,10 @@
 	  - Wasm for each canister is at: '.dfx/local/canisters/$CANISTER/$CANISTER.wasm.gz'
 	    Note: You may need to set '"gzip": true' for canisters in 'dfx.json'.
 	  - Candid for each canister is at: '.dfx/local/canisters/$CANISTER/$CANISTER.did'
+
+	Usage:
+	$(basename "$0") [--check]
+	  Generates bindings.  Optionally checks whether the bindings have changed.
 	EOF
 
   exit 0
@@ -28,3 +32,10 @@ scripts/bind/rust.sh
 scripts/bind/web.sh
 # Format
 scripts/format.sh
+# Check whether any files have changed.
+[[ "${1:-}" != "--check" ]] || {
+  if git status --porcelain --untracked-files=no | grep -q .; then
+    echo "ERROR: Bindings are not up to date.  Please run: '$0'"
+    exit 1
+  fi
+}
