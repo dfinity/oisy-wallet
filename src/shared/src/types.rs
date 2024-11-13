@@ -240,6 +240,19 @@ pub mod signer {
             pub percentage: Option<u8>,
         }
         impl TopUpCyclesLedgerRequest {
+            /// Checks that the request is valid.
+            pub fn check(&self) -> Result<(), TopUpCyclesLedgerError> {
+                if let Some(percentage) = self.percentage {
+                    if percentage < MIN_PERCENTAGE || percentage > MAX_PERCENTAGE {
+                        return Err(TopUpCyclesLedgerError::InvalidArgPercentageOutOfRange {
+                            percentage,
+                            min: MIN_PERCENTAGE,
+                            max: MAX_PERCENTAGE,
+                        });
+                    }
+                }
+                Ok(())
+            }
             /// The requested threshold for topping up the cycles ledger, if provided, else the default.
             #[must_use]
             pub fn threshold(&self) -> Nat {
@@ -258,11 +271,18 @@ pub mod signer {
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
         /// The proportion of the backend canitster's own cycles to send to the cycles ledger.
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
+        /// The minimum sensible percentage to send to the cycles ledger.
+        /// - Note: With 0% the backend canister would never top up the cycles ledger.
+        pub const MIN_PERCENTAGE: u8 = 1;
+        /// The maximum sensible percentage to send to the cycles ledger.
+        /// - Note: With 100% the backend canister would be left with no cycles.
+        pub const MAX_PERCENTAGE: u8 = 99;
 
         /// Possible error conditions when topping up the cycles ledger.
         #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
         pub enum TopUpCyclesLedgerError {
             CouldNotGetBalanceFromCyclesLedger,
+            InvalidArgPercentageOutOfRange { percentage: u8, min: u8, max: u8 },
             CouldNotTopUpCyclesLedger { available: Nat, tried_to_send: Nat },
         }
         /// Possible successful responses when topping up the cycles ledger.

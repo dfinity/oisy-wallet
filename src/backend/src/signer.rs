@@ -160,6 +160,7 @@ pub async fn btc_principal_to_p2wpkh_address(
 /// # Errors
 /// Errors are enumerated by: `TopUpCyclesLedgerError`
 pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
+    request.check()?;
     let cycles_ledger = CyclesLedgerService(*CYCLES_LEDGER);
     let account = Account {
         owner: ic_cdk::id(),
