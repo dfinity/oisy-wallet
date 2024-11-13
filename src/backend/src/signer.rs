@@ -1,4 +1,4 @@
-//! Code for inetracting with the chain fusion signer.
+//! Code for interacting with the chain fusion signer.
 use crate::{
     read_config,
     state::{CYCLES_LEDGER, SIGNER},
@@ -171,7 +171,7 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
         .map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)?;
 
     if ledger_balance < request.threshold() {
-        // Decide how many cycles to keep and how many to send to teh cycles ledger.
+        // Decide how many cycles to keep and how many to send to the cycles ledger.
         let own_canister_cycle_balance = Nat::from(ic_cdk::api::canister_balance128());
         let to_send = own_canister_cycle_balance.clone() / Nat::from(100u32)
             * Nat::from(request.percentage());
