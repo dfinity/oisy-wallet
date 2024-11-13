@@ -241,9 +241,12 @@ pub mod signer {
         }
         impl TopUpCyclesLedgerRequest {
             /// Checks that the request is valid.
+            ///
+            /// # Errors
+            /// - If the percentage is out of bounds.
             pub fn check(&self) -> Result<(), TopUpCyclesLedgerError> {
                 if let Some(percentage) = self.percentage {
-                    if percentage < MIN_PERCENTAGE || percentage > MAX_PERCENTAGE {
+                    if !(MIN_PERCENTAGE..=MAX_PERCENTAGE).contains(&percentage) {
                         return Err(TopUpCyclesLedgerError::InvalidArgPercentageOutOfRange {
                             percentage,
                             min: MIN_PERCENTAGE,
