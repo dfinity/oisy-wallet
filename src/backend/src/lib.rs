@@ -10,7 +10,7 @@ use heap_state::state::with_btc_pending_transactions;
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::{clear_timer, set_timer_interval};
+use ic_cdk_timers::{clear_timer, set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -147,12 +147,38 @@ fn set_config(arg: InitArg) {
     });
 }
 
+/// Runs housekeeping tasks immediately, then periodically:
+/// - `hourly_housekeeping_tasks`
+fn start_periodic_housekeeping_timers() {
+    // Run housekeeping tasks once, immediately but asynchronously.
+    let immediate = Duration::ZERO;
+    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+
+    // Then periodically:
+    let hour = Duration::from_secs(60 * 60);
+    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+}
+
+/// Runs hourly housekeeping tasks:
+/// - Top up the cycles ledger.
+async fn hourly_housekeeping_tasks() {
+    // Tops up the account on the cycles ledger
+    {
+        let result = top_up_cycles_ledger(None).await;
+        if let Err(err) = result {
+            eprintln!("Failed to top up cycles ledger: {err:?}");
+        }
+        // TODO: Add monitoring for how many cycles have been topped up and whether topping up is failing.
+    }
+}
+
 #[init]
 pub fn init(arg: Arg) {
     match arg {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+    start_periodic_housekeeping_timers();
 }
 
 /// Post-upgrade handler.
@@ -171,6 +197,7 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    start_periodic_housekeeping_timers();
 }
 
 /// Gets the canister configuration.
