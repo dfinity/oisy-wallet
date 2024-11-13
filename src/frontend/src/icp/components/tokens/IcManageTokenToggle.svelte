@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
-	import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import { type IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isIcrcTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
 
 	export let token: IcrcCustomToken;
 
@@ -13,10 +13,7 @@
 	$: outdated = token.indexCanisterVersion === 'outdated';
 
 	let disabled = false;
-	$: disabled =
-		(token.category === 'default' && token.standard === 'icp') ||
-		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(token.ledgerCanisterId) ||
-		outdated;
+	$: disabled = isIcrcTokenToggleDisabled(token);
 
 	let checked: boolean;
 	$: checked = token.enabled;
