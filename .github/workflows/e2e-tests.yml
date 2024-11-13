@@ -12,6 +12,8 @@ jobs:
 
   check-e2e-changes:
     runs-on: ubuntu-24.04
+    outputs:
+      e2e_or_config_changed: ${{ steps.e2e_or_config_files.outputs.changed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,15 +26,15 @@ jobs:
         id: e2e_or_config_files
         run: |
           if git diff --name-only "origin/${{ github.base_ref }}" HEAD | grep -E "(playwright.config.ts|e2e/)"; then
-            echo "E2E_OR_CONFIG_CHANGED=true" >> $GITHUB_ENV
+            echo "e2e_or_config_changed=true" >> $GITHUB_ENV
           else
-            echo "E2E_OR_CONFIG_CHANGED=false" >> $GITHUB_ENV
+            echo "e2e_or_config_changed=false" >> $GITHUB_ENV
           fi
         shell: bash
         continue-on-error: false
 
   oisy-backend-wasm:
-    if: env.E2E_OR_CONFIG_CHANGED == 'true'
+    if: ${{ needs.check-e2e-changes.outputs.e2e_or_config_changed == 'true' }}
     runs-on: ubuntu-24.04
     needs: check-e2e-changes
     steps:
@@ -43,7 +45,7 @@ jobs:
         uses: ./.github/actions/oisy-backend
 
   e2e:
-    if: env.E2E_OR_CONFIG_CHANGED == 'true'
+    if: ${{ needs.check-e2e-changes.outputs.e2e_or_config_changed == 'true' }}
     runs-on: ubuntu-24.04
     needs: oisy-backend-wasm
     steps:
@@ -72,7 +74,7 @@ jobs:
     steps:
       - name: Cleared for merging
         run: |
-          if [ "$E2E_OR_CONFIG_CHANGED" == "false" ]; then
+          if [ "${{ needs.check-e2e-changes.outputs.e2e_or_config_changed }}" == "false" ]; then
             echo "No E2E or config changes detected. PR is cleared for merging."
           elif [ "${{ needs.e2e.result }}" == "success" ]; then
             echo "This PR is cleared for merging"
