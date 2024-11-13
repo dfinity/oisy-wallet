@@ -50,9 +50,7 @@
 		{#if nonNullish(screenshots) && screenshots.length > 0}
 			<div class="overflow-hidden rounded-3xl">
 				<ImgBanner
-					fitHeight={true}
-					height="100%"
-					width="100%"
+					styleClass="max-h-64"
 					src={screenshots[0]}
 					alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppName })}
 				/>
