@@ -11,7 +11,6 @@ import type {
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
-import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
 
 export const initIcrcWalletWorker = async ({
 	indexCanisterId,
@@ -26,7 +25,7 @@ export const initIcrcWalletWorker = async ({
 		data
 	}: MessageEvent<
 		PostMessage<
-			| PostMessageDataResponseWallet<Omit<IcrcGetTransactions, 'transactions'>>
+			| PostMessageDataResponseWallet
 			| PostMessageDataResponseError
 			| PostMessageDataResponseWalletCleanUp
 		>
@@ -37,9 +36,7 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseWallet<
-						Omit<IcrcGetTransactions, 'transactions'>
-					>
+					data: data.data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcrcWalletError':
