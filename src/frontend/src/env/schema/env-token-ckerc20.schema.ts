@@ -1,5 +1,5 @@
 import { EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
-import { envTokenSymbol } from '$env/types/env-token-common';
+import { EnvTokenSymbolSchema } from '$env/schema/env-token-common.schema';
 import { isEthAddress } from '$lib/utils/account.utils';
 import { z } from 'zod';
 
@@ -13,7 +13,7 @@ const EnvCkErc20TokenDataSchema = EnvIcTokenSchema.extend({
 });
 
 export const EnvCkErc20TokensSchema = z.record(
-	envTokenSymbol,
+	EnvTokenSymbolSchema,
 	z.union([z.undefined(), EnvCkErc20TokenDataSchema])
 );
 
