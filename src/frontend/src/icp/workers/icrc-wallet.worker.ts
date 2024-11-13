@@ -81,8 +81,7 @@ const getBalance = ({
 
 const MSG_SYNC_ICRC_WALLET = 'syncIcrcWallet';
 
-// Exposed for test purposes
-export const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
+const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrcStrict
@@ -94,13 +93,11 @@ export const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsSched
 		MSG_SYNC_ICRC_WALLET
 	);
 
-// Exposed for test purposes
-export const initIcrcWalletBalanceScheduler =
-	(): IcWalletBalanceScheduler<PostMessageDataRequestIcrc> =>
-		new IcWalletBalanceScheduler(getBalance, MSG_SYNC_ICRC_WALLET);
+const initIcrcWalletBalanceScheduler = (): IcWalletBalanceScheduler<PostMessageDataRequestIcrc> =>
+	new IcWalletBalanceScheduler(getBalance, MSG_SYNC_ICRC_WALLET);
 
-// TODO(OISY-296): expose this function instead of above initializer for test purpose
-const initScheduler = (
+// Exposed for test purposes
+export const initIcrcWalletScheduler = (
 	data: PostMessageDataRequestIcrc | undefined
 ): IcWalletScheduler<PostMessageDataRequestIcrc> => {
 	const { success: withIndexCanister } = PostMessageDataRequestIcrcStrictSchema.safeParse(data);
@@ -123,13 +120,13 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 
 	switch (msg) {
 		case 'startIcrcWalletTimer': {
-			scheduler = initScheduler(data);
+			scheduler = initIcrcWalletScheduler(data);
 			await scheduler.start(data);
 			break;
 		}
 		case 'triggerIcrcWalletTimer': {
 			if (isNullish(scheduler)) {
-				scheduler = initScheduler(data);
+				scheduler = initIcrcWalletScheduler(data);
 			}
 			await scheduler.trigger(data);
 		}
