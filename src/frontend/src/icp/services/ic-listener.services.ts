@@ -27,8 +27,9 @@ export const syncWallet = ({
 		}
 	});
 
+	// TODO(OISY-296): set nullish if newTransactions is null
 	icTransactionsStore.prepend({
 		tokenId,
-		transactions: JSON.parse(newTransactions, jsonReviver)
+		transactions: JSON.parse(newTransactions ?? '[]', jsonReviver)
 	});
 };
