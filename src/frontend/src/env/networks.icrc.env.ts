@@ -19,6 +19,8 @@ import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import { additionalIcrcTokensProduction } from '$env/tokens.icrc.env';
+import type { EnvAdditionalIcrcTokens } from '$env/types/env-icrc-additional-token';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -27,8 +29,6 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
-import type { EnvAdditionalIcrcTokens } from '$env/types/env-icrc-additional-token';
-import { additionalIcrcTokensProduction } from '$env/tokens.icrc.env';
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
