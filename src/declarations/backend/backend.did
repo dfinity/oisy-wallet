@@ -192,6 +192,11 @@ type SupportedCredential = record {
 };
 type Token = variant { Icrc : IcrcToken };
 type TopUpCyclesLedgerError = variant {
+  InvalidArgPercentageOutOfRange : record {
+    max : nat8;
+    min : nat8;
+    percentage : nat8;
+  };
   CouldNotGetBalanceFromCyclesLedger;
   CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat };
 };
