@@ -150,10 +150,9 @@ fn set_config(arg: InitArg) {
 /// Runs housekeeping tasks immediately, then periodically:
 /// - `hourly_housekeeping_tasks`
 fn start_periodic_housekeeping_timers() {
-    // Run housekeeping tasks once:
-    set_timer(Duration::from_secs(0), || {
-        ic_cdk::spawn(hourly_housekeeping_tasks())
-    });
+    // Run housekeeping tasks once, immediately but asynchronously.
+    let immediate = Duration::from_secs(0);
+    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);

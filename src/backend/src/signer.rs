@@ -175,7 +175,7 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
         let own_canister_cycle_balance = Nat::from(ic_cdk::api::canister_balance128());
         let to_send = own_canister_cycle_balance.clone() / Nat::from(100u32)
             * Nat::from(request.percentage());
-        let to_retain = own_canister_cycle_balance - to_send.clone();
+        let to_retain = own_canister_cycle_balance.clone() - to_send.clone();
 
         // Top up the cycles ledger.
         let arg = DepositArgs {
@@ -189,7 +189,10 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
         let (result,): (DepositResult,) =
             call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
                 .await
-                .expect("Unable to call deposit");
+                .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
+                    available: own_canister_cycle_balance,
+                    tried_to_send: to_send.clone(),
+                })?;
         let ledger_balance = result.balance;
 
         Ok(TopUpCyclesLedgerResponse {
