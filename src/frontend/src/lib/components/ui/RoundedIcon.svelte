@@ -6,6 +6,6 @@
 </script>
 
 <div class="relative">
-	<div class="aspect-square w-12 rounded-full bg-primary border border-brand-subtle-alt" />
+	<div class="aspect-square w-12 rounded-full border border-brand-subtle-alt bg-primary" />
 	<svelte:component this={icon} styleClass={`inset-center ${iconStyleClass}`} />
 </div>
