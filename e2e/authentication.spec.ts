@@ -21,5 +21,6 @@ testWithII('should sign-out', async ({ page, iiPage }) => {
 	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
 
 	await homepageLoggedIn.waitForAuthentication();
+
 	await homepageLoggedIn.waitForLogout();
 });
