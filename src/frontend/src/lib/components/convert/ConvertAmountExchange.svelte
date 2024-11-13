@@ -17,11 +17,11 @@
 </script>
 
 {#if nonNullish(usdValue)}
-	<div in:fade>
+	<div in:fade data-tid="convert-amount-exchange">
 		{`${nonNullish(amount) && amount === 0 ? '' : '~'}`}{usdValue}
 	</div>
 {:else}
-	<div class="w-10 sm:w-8">
+	<div class="w-10 sm:w-8" data-tid="convert-amount-exchange-skeleton">
 		<SkeletonText />
 	</div>
 {/if}
