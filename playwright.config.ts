@@ -20,7 +20,6 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 export default defineConfig({
 	timeout: 60 * 1000,
 	workers: 2,
-
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
