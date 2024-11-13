@@ -2,8 +2,6 @@ name: E2E Tests
 
 on:
   pull_request:
-    paths:
-      - 'e2e/**'
   workflow_dispatch:
 
 concurrency:
@@ -12,8 +10,33 @@ concurrency:
 
 jobs:
 
-  oisy-backend-wasm:
+  check-e2e-changes:
     runs-on: ubuntu-24.04
+    outputs:
+      e2e-or-config-changed: ${{ steps.e2e-or-config-files.outputs.e2e-or-config-changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin "${{ github.base_ref }}:${{ github.base_ref }}"
+
+      - name: Check for E2E or Playwright Config File Changes
+        id: e2e-or-config-files
+        run: |
+          if git diff --name-only "origin/${{ github.base_ref }}" HEAD | grep -E "(playwright.config.ts|.env.e2e|canister_e2e_ids.json|e2e/)"; then
+            echo "e2e-or-config-changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "e2e-or-config-changed=false" >> "$GITHUB_OUTPUT"
+          fi
+        shell: bash
+        continue-on-error: false
+
+  oisy-backend-wasm:
+    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
+    runs-on: ubuntu-24.04
+    needs: check-e2e-changes
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +45,7 @@ jobs:
         uses: ./.github/actions/oisy-backend
 
   e2e:
+    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
     runs-on: ubuntu-24.04
     needs: oisy-backend-wasm
     steps:
@@ -45,8 +69,17 @@ jobs:
           retention-days: 30
 
   may-merge-e2e:
-    needs: ['e2e']
+    if: always()
+    needs: ['check-e2e-changes', 'e2e']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
-        run: echo OK
+        run: |
+          if [ "${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}" == "false" ]; then
+            echo "No E2E or config changes detected. PR is cleared for merging."
+          elif [ "${{ needs.e2e.result }}" == "success" ]; then
+            echo "This PR is cleared for merging"
+          else
+            echo "This PR is not cleared for merging"
+            exit 1
+          fi
