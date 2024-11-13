@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { nonNullish } from '@dfinity/utils';
 import { deployIndex, deployLedger } from './deploy.utils.mjs';
 
 const WORDS = [
@@ -52,11 +53,23 @@ const randomMemecoin = {
 
 const ledgerCanisterId = await deployLedger(randomMemecoin);
 
-await deployIndex({
-	...randomMemecoin,
-	ledgerCanisterId
-});
+const args = process.argv.slice(2);
+const withIndex = args?.find((arg) => ['--with-index'].includes(arg)) !== undefined;
+
+let indexCanisterId;
+
+if (withIndex) {
+	indexCanisterId = await deployIndex({
+		...randomMemecoin,
+		ledgerCanisterId
+	});
+}
 
 console.log(
 	`✅ Memecoin ${randomMemecoin.metadata.name} (${randomMemecoin.metadata.symbol}) deployed.`
 );
+console.log(`🏦 Ledger ${ledgerCanisterId.toText()}`);
+
+if (nonNullish(indexCanisterId)) {
+	console.log(`🔎 Index ${indexCanisterId.toText()}`);
+}
