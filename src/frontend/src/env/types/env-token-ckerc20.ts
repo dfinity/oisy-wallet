@@ -5,15 +5,15 @@ import { z } from 'zod';
 
 const envErc20ContractAddress = z.custom<string>(isEthAddress, 'Invalid ERC20 Contract Address');
 
-const envTokenData = envIcToken.extend({
+const envCkErc20TokenData = envIcToken.extend({
 	erc20ContractAddress: envErc20ContractAddress
 });
 
-const envTokens = z.record(envTokenSymbol, z.union([z.undefined(), envTokenData]));
+const envCkErc20Tokens = z.record(envTokenSymbol, z.union([z.undefined(), envCkErc20TokenData]));
 
-export type EnvTokens = z.infer<typeof envTokens>;
+export type EnvCkErc20Tokens = z.infer<typeof envCkErc20Tokens>;
 
 export const envTokensCkErc20 = z.object({
-	production: envTokens,
-	staging: envTokens
+	production: envCkErc20Tokens,
+	staging: envCkErc20Tokens
 });

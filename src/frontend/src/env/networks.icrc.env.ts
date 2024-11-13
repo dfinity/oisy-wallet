@@ -18,7 +18,7 @@ import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import type { EnvTokens } from '$env/types/env-token-ckerc20';
+import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
@@ -228,7 +228,7 @@ const mapCkErc20Data = ({
 	ledgerCanisterId,
 	env
 }: {
-	ckErc20Tokens: EnvTokens;
+	ckErc20Tokens: EnvCkErc20Tokens;
 	minterCanisterId: OptionCanisterIdText;
 	ledgerCanisterId: OptionCanisterIdText;
 	env: NetworkEnvironment;
