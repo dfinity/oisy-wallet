@@ -36,9 +36,14 @@ export default defineConfig({
 		...(DEV && { headless: false })
 	},
 	projects: [
+		/* Test against desktop browsers. */
 		{
 			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+			use: { ...devices['Desktop Chrome'] }
+		},
+		{
+			name: 'Firefox',
+			use: { ...devices['Desktop Firefox'] }
 		}
 	]
 });
