@@ -42,9 +42,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare macOS
+        if: runner.os == 'macOS'
         uses: ./.github/actions/prepare-macos
-        with:
-          os: ${{ matrix.os }}
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
