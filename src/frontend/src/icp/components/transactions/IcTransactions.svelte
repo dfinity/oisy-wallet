@@ -5,7 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import Info from '$icp/components/info/Info.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
-	import IcNoTransactionsPlaceholder from '$icp/components/transactions/IcNoTransactionsPlaceholder.svelte';
+	import IcNoIndexPlaceholder from '$icp/components/transactions/IcNoIndexPlaceholder.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
@@ -124,7 +124,7 @@
 		{/if}
 
 		{#if noTransactions}
-			<IcNoTransactionsPlaceholder />
+			<IcNoIndexPlaceholder />
 		{:else if $icTransactions.length === 0}
 			<TransactionsPlaceholder />
 		{/if}

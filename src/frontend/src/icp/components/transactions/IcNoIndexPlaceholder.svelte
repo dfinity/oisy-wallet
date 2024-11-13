@@ -5,7 +5,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<div class="py-12">
+<div class="py-12" data-tid="ic-no-index-placeholder">
 	<div class="mb-5 flex justify-center">
 		<RoundedIcon icon={IconSearchClose} />
 	</div>
