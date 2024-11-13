@@ -9,7 +9,7 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdICP
 } from '$lib/utils/network.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 
 /**
  * Maps the transactions stores to a unified list of transactions with their respective components.
@@ -25,7 +25,11 @@ export const mapAllTransactionsUi = ({
 	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
 }): AllTransactionsUi =>
 	tokens.reduce<AllTransactionsUi>((acc, { id: tokenId, network: { id: networkId } }) => {
-		if (isNetworkIdBTCMainnet(networkId) && nonNullish($btcTransactions)) {
+		if (isNetworkIdBTCMainnet(networkId)) {
+			if (isNullish($btcTransactions)) {
+				return acc;
+			}
+
 			return [
 				...acc,
 				...($btcTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
