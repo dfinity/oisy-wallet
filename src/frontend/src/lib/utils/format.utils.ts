@@ -68,6 +68,40 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
+export const formatSecondsToNormalizedDate = (seconds: number): string => {
+	const date = new Date(seconds * 1000);
+
+	const today = new Date();
+	const yesterday = new Date(today);
+	yesterday.setDate(today.getDate() - 1);
+
+	const isToday =
+		date.getDate() === today.getDate() &&
+		date.getMonth() === today.getMonth() &&
+		date.getFullYear() === today.getFullYear();
+
+	const isYesterday =
+		date.getDate() === yesterday.getDate() &&
+		date.getMonth() === yesterday.getMonth() &&
+		date.getFullYear() === yesterday.getFullYear();
+
+	if (isToday) {
+		return 'Today';
+	}
+
+	if (isYesterday) {
+		return 'Yesterday';
+	}
+
+	// Same year, return day and month name
+	if (date.getFullYear() === today.getFullYear()) {
+		return date.toLocaleDateString('en', { day: 'numeric', month: 'long' });
+	}
+
+	// Different year, return day, month, and year
+	return date.toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' });
+};
+
 export const formatUSD = ({
 	value,
 	options
