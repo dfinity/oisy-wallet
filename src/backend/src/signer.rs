@@ -5,14 +5,22 @@ use crate::{
 };
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{CandidType, Deserialize, Nat, Principal};
-use ic_cdk::api::management_canister::{
-    bitcoin::BitcoinNetwork,
-    ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
+use ic_cdk::api::{
+    call::call_with_payment128,
+    management_canister::{
+        bitcoin::BitcoinNetwork,
+        ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
+    },
 };
-use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, Service as CyclesLedgerService};
+use ic_cycles_ledger_client::{
+    Account, ApproveArgs, ApproveError, DepositArgs, DepositResult, Service as CyclesLedgerService,
+};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
-use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
+use shared::types::signer::topup::{
+    TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
+    TopUpCyclesLedgerResult,
+};
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum AllowSigningError {
@@ -151,7 +159,53 @@ pub async fn btc_principal_to_p2wpkh_address(
 ///
 /// # Errors
 /// Errors are enumerated by: `TopUpCyclesLedgerError`
-#[allow(clippy::unused_async)] // TODO: Remove once the code is implemented
 pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
-    todo!("Add code that tops up the cycles ledger per this request: {request:?}")
+    request.check()?;
+    let cycles_ledger = CyclesLedgerService(*CYCLES_LEDGER);
+    let account = Account {
+        owner: ic_cdk::id(),
+        subaccount: None,
+    };
+    let (ledger_balance,): (Nat,) = cycles_ledger
+        .icrc_1_balance_of(&account)
+        .await
+        .map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)?;
+
+    if ledger_balance < request.threshold() {
+        // Decide how many cycles to keep and how many to send to the cycles ledger.
+        let own_canister_cycle_balance = Nat::from(ic_cdk::api::canister_balance128());
+        let to_send = own_canister_cycle_balance.clone() / Nat::from(100u32)
+            * Nat::from(request.percentage());
+        let to_retain = own_canister_cycle_balance.clone() - to_send.clone();
+
+        // Top up the cycles ledger.
+        let arg = DepositArgs {
+            to: account,
+            memo: None,
+        };
+        let to_send_128: u128 =
+            to_send.clone().0.try_into().unwrap_or_else(|err| {
+                unreachable!("Failed to convert cycle amount to u128: {}", err)
+            });
+        let (result,): (DepositResult,) =
+            call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
+                .await
+                .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
+                    available: own_canister_cycle_balance,
+                    tried_to_send: to_send.clone(),
+                })?;
+        let ledger_balance = result.balance;
+
+        Ok(TopUpCyclesLedgerResponse {
+            ledger_balance,
+            backend_cycles: to_retain,
+            topped_up: to_send,
+        })
+    } else {
+        Ok(TopUpCyclesLedgerResponse {
+            ledger_balance: Nat::from(0u32),
+            backend_cycles: ledger_balance,
+            topped_up: Nat::from(0u32),
+        })
+    }
 }
