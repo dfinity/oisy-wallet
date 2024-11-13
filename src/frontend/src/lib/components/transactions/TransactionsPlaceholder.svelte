@@ -24,7 +24,7 @@
 
 	<div class="space-y-4">
 		<p class="m-0 text-center text-lg font-bold">{$i18n.transactions.text.transaction_history}</p>
-		<p class="m-0 text-center text-secondary opacity-50">
+		<p class="text-secondary m-0 text-center opacity-50">
 			{$i18n.transactions.text.buy_or_receive}
 		</p>
 	</div>
