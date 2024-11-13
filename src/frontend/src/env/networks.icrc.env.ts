@@ -1,5 +1,4 @@
 import {
-	CANISTER_EXPLORER_URL,
 	CKBTC_EXPLORER_URL,
 	CKBTC_TESTNET_EXPLORER_URL,
 	CKETH_EXPLORER_URL,
@@ -401,8 +400,7 @@ const mapIcrcData = (
 				nonNullish(value) && {
 					[key]: {
 						...value,
-						exchangeCoinId: 'internet-computer',
-						explorerUrl: `${CANISTER_EXPLORER_URL}/${value.ledgerCanisterId}`
+						exchangeCoinId: 'internet-computer'
 					}
 				})
 		}),
