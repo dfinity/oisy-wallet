@@ -70,11 +70,12 @@ jobs:
     needs: ['e2e']
     runs-on: ubuntu-24.04
     steps:
-      run: |
-        if [ "${{ needs.check-e2e-changes.outputs.e2e_or_config_changed }}" == "false" ]; then
-          echo "No E2E or config changes detected. PR is cleared for merging."
-        elif [ "${{ needs.e2e.result }}" == "success" ]; then
-        else
-          echo "This PR is not cleared for merging"
-          exit 1
-        fi
+      - name: Cleared for merging
+        run: |
+          if [ "${{ needs.check-e2e-changes.outputs.e2e_or_config_changed }}" == "false" ]; then
+            echo "No E2E or config changes detected. PR is cleared for merging."
+          elif [ "${{ needs.e2e.result }}" == "success" ]; then
+          else
+            echo "This PR is not cleared for merging"
+            exit 1
+          fi
