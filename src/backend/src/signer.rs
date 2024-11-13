@@ -12,6 +12,7 @@ use ic_cdk::api::management_canister::{
 use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, Service as CyclesLedgerService};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
+use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum AllowSigningError {
@@ -48,6 +49,9 @@ const fn per_user_cycles_allowance() -> u64 {
 /// Enables the user to sign transactions.
 ///
 /// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`
 pub async fn allow_signing() -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
@@ -128,6 +132,9 @@ fn transform_network(network: BitcoinNetwork) -> Network {
 }
 
 /// Converts a public key to a P2PKH address.
+///
+/// # Errors
+/// - It was not possible to get the P2WPKH from the public key.
 pub async fn btc_principal_to_p2wpkh_address(
     network: BitcoinNetwork,
     principal: &Principal,
@@ -138,4 +145,13 @@ pub async fn btc_principal_to_p2wpkh_address(
     } else {
         Err("Error getting P2WPKH from public key".to_string())
     }
+}
+
+/// Tops up the cycles ledger.
+///
+/// # Errors
+/// Errors are enumerated by: `TopUpCyclesLedgerError`
+#[allow(clippy::unused_async)] // TODO: Remove once the code is implemented
+pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
+    todo!("Add code that tops up the cycles ledger per this request: {request:?}")
 }

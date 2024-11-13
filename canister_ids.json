@@ -6,7 +6,8 @@
 	"backend": {
 		"beta": "yrinv-sqaaa-aaaan-qzmxq-cai",
 		"ic": "doked-biaaa-aaaar-qag2a-cai",
-		"staging": "d3nvo-aaaaa-aaaar-qagzq-cai"
+		"staging": "d3nvo-aaaaa-aaaar-qagzq-cai",
+		"test_be_1": "jloto-byaaa-aaaap-anryq-cai"
 	},
 	"frontend": {
 		"beta": "v7iq7-yiaaa-aaaan-qmrtq-cai",
