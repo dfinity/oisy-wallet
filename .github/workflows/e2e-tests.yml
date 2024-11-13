@@ -69,6 +69,7 @@ jobs:
           retention-days: 30
 
   may-merge-e2e:
+    if: always()
     needs: ['check-e2e-changes', 'e2e']
     runs-on: ubuntu-24.04
     steps:
