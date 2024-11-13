@@ -1,4 +1,5 @@
 import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinNetwork } from '$declarations/signer/signer.did';
 import { getBtcBalance } from '$lib/api/signer.api';
@@ -9,10 +10,7 @@ import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/sche
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionIdentity } from '$lib/types/identity';
-import type {
-	PostMessageDataRequestBtc,
-	PostMessageDataResponseWallet
-} from '$lib/types/post-message';
+import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
@@ -146,8 +144,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	};
 
-	private postMessageWallet(data: PostMessageDataResponseWallet) {
-		this.timer.postMsg<PostMessageDataResponseWallet>({
+	private postMessageWallet(data: BtcPostMessageDataResponseWallet) {
+		this.timer.postMsg<BtcPostMessageDataResponseWallet>({
 			msg: 'syncBtcWallet',
 			data
 		});
