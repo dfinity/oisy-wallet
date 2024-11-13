@@ -35,3 +35,6 @@ for canister in "${canisters[@]}"; do
     echo "INFO: No rust binding script for $canister at $canister_binding_config"
   fi
 done
+
+# Format
+scripts/format.rust.sh

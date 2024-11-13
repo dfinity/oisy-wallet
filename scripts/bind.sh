@@ -23,7 +23,8 @@ if git status --porcelain --untracked-files=no | grep -q .; then
 fi
 # Generate candid for the backend
 scripts/did.sh # TODO: Use local Wasm as input.
-# Generate rust bindings
+# Generate bindings
 scripts/bind/rust.sh
+scripts/bind/web.sh
 # Format
 scripts/format.sh
