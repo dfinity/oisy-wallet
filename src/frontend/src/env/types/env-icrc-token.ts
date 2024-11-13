@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { envTokenSymbol } from '$env/types/env-token-common';
+import { z } from 'zod';
 
 export const envIcrcTokenMetadata = z.object({
 	decimals: z.number(),
