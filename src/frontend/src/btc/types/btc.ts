@@ -3,8 +3,7 @@ import type { TransactionStatus, TransactionUiCommon } from '$lib/types/transact
 
 export type BtcTransactionStatus = TransactionStatus;
 
-export interface BtcTransactionUi extends TransactionUiCommon {
-	id: string;
+export type BtcTransactionUi = TransactionUiCommon & {
 	type: BtcTransactionType;
 	status: BtcTransactionStatus;
 	value?: bigint;
@@ -14,4 +13,4 @@ export interface BtcTransactionUi extends TransactionUiCommon {
 	 1. Use https://blockchain.info/latestblock to get info about the latest block height.
 	 2. Calculate confirmations: confirmations = currentBlockHeight - transactionBlockHeight + 1
 	 */
-}
+};

@@ -1,5 +1,5 @@
 import { icpTransactionTypes } from '$lib/schema/transaction.schema';
-import type { TransactionType } from '$lib/types/transaction';
+import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type {
 	IcrcTransaction as IcrcTransactionCandid,
@@ -29,22 +29,15 @@ export type IcTransactionIdText = string;
 
 export type IcTransactionStatus = 'executed' | 'pending' | 'reimbursed' | 'failed';
 
-export interface IcTransactionUi {
-	id: bigint | string;
+export type IcTransactionUi = TransactionUiCommon & {
 	type: IcTransactionType;
 	// e.g. BTC Received
 	typeLabel?: string;
-	from?: string;
 	// e.g. From: BTC Network
 	fromLabel?: string;
-	fromExplorerUrl?: string;
-	to?: string;
 	// e.g. To: BTC Network
 	toLabel?: string;
-	toExplorerUrl?: string;
 	incoming?: boolean;
 	value?: bigint;
-	timestamp?: bigint;
 	status: IcTransactionStatus;
-	txExplorerUrl?: string;
-}
+};
