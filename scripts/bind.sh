@@ -17,9 +17,9 @@
 }
 
 # Ensure that git is clean
-if git status --porcelain --untracked-files=no | grep -q .
-then echo "ERROR: Git is not clean.  Please commit all changes before automated code generation."
-	exit 1
+if git status --porcelain --untracked-files=no | grep -q .; then
+  echo "ERROR: Git is not clean.  Please commit all changes before automated code generation."
+  exit 1
 fi
 # Generate candid for the backend
 scripts/did.sh # TODO: Use local Wasm as input.
