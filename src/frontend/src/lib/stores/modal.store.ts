@@ -72,7 +72,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
-	const onPopState = async () => {
+	const onPopState = () => {
 		modalStore.close();
 	};
 
