@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconSearchClose from '$lib/components/icons/IconSearchClose.svelte';
+	import IconSearchClose from '$lib/components/icons/lucide/IconSearchClose.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
