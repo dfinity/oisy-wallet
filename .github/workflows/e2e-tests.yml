@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'e2e/**'
+      - playwright.config.ts
   workflow_dispatch:
 
 concurrency:
@@ -12,7 +13,27 @@ concurrency:
 
 jobs:
 
+  check-e2e-changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      e2e_or_config_changed: ${{ steps.e2e_or_config_files.outputs.changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for E2E or Playwright Config File Changes
+        id: e2e_or_config_files
+        run: |
+          if git diff --name-only origin/main | grep -Eq '^(e2e/|playwright\.config\.ts)'; then
+            echo "e2e_or_config_changed=true" >> $GITHUB_ENV
+          else
+            echo "e2e_or_config_changed=false" >> $GITHUB_ENV
+          fi
+        shell: bash
+        continue-on-error: false
+
   oisy-backend-wasm:
+    if: ${{ needs.check-e2e-changes.outputs.e2e_or_config_changed == 'true' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -22,6 +43,7 @@ jobs:
         uses: ./.github/actions/oisy-backend
 
   e2e:
+    if: ${{ needs.check-e2e-changes.outputs.e2e_or_config_changed == 'true' }}
     runs-on: ubuntu-24.04
     needs: oisy-backend-wasm
     steps:
@@ -48,5 +70,11 @@ jobs:
     needs: ['e2e']
     runs-on: ubuntu-24.04
     steps:
-      - name: Cleared for merging
-        run: echo OK
+      run: |
+        if [ "${{ needs.check-e2e-changes.outputs.e2e_or_config_changed }}" == "false" ]; then
+          echo "No E2E or config changes detected. PR is cleared for merging."
+        elif [ "${{ needs.e2e.result }}" == "success" ]; then
+        else
+          echo "This PR is not cleared for merging"
+          exit 1
+        fi
