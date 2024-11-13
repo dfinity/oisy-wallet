@@ -27,6 +27,7 @@ use shared::types::bitcoin::{
     SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
 };
 use shared::types::custom_token::{CustomToken, CustomTokenId};
+use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
@@ -35,10 +36,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use signer::{
-    btc_principal_to_p2wpkh_address, AllowSigningError, TopUpCyclesLedgerRequest,
-    TopUpCyclesLedgerResult, CYCLES_LEDGER_TOP_UP_INTERVAL_SECONDS,
-};
+use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -58,7 +56,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
-mod signer;
+pub mod signer;
 mod state;
 mod token;
 mod types;
@@ -151,12 +149,13 @@ fn set_config(arg: InitArg) {
 }
 
 fn start_periodic_housekeeping_timers() {
-    let _ = set_timer_interval(
-        Duration::from_secs(CYCLES_LEDGER_TOP_UP_INTERVAL_SECONDS),
-        || ic_cdk::spawn(top_up_cycles_ledger_timer_action()),
-    );
+    let hour = Duration::from_secs(60 * 60);
+    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
 }
-async fn top_up_cycles_ledger_timer_action() {
+
+/// Runs hourly housekeeping tasks:
+/// - Top up the cycles ledger.
+async fn hourly_housekeeping_tasks() {
     let _ = top_up_cycles_ledger(None).await;
 }
 
@@ -195,7 +194,10 @@ pub fn config() -> Config {
     read_config(std::clone::Clone::clone)
 }
 
-/// Show the canister configuration.
+/// Adds cycles to the cycles ledger, if it is below a certain threshold.
+///
+/// # Errors
+/// Error conditions are enumerated by: `TopUpCyclesLedgerError`
 #[update(guard = "caller_is_allowed")]
 pub async fn top_up_cycles_ledger(
     request: Option<TopUpCyclesLedgerRequest>,

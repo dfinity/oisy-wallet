@@ -17,6 +17,10 @@ use ic_cycles_ledger_client::{
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
+use shared::types::signer::topup::{
+    TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
+    TopUpCyclesLedgerResult,
+};
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum AllowSigningError {
@@ -53,6 +57,9 @@ const fn per_user_cycles_allowance() -> u64 {
 /// Enables the user to sign transactions.
 ///
 /// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`
 pub async fn allow_signing() -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
@@ -133,6 +140,9 @@ fn transform_network(network: BitcoinNetwork) -> Network {
 }
 
 /// Converts a public key to a P2PKH address.
+///
+/// # Errors
+/// - It was not possible to get the P2WPKH from the public key.
 pub async fn btc_principal_to_p2wpkh_address(
     network: BitcoinNetwork,
     principal: &Principal,
@@ -144,53 +154,6 @@ pub async fn btc_principal_to_p2wpkh_address(
         Err("Error getting P2WPKH from public key".to_string())
     }
 }
-
-/// A request to top up the cycles ledger.
-#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
-pub struct TopUpCyclesLedgerRequest {
-    /// If the cycles ledger account balance is below this threshold, top it up.
-    pub threshold: Option<Nat>,
-    /// The percentage of the backend canister's own cycles to send to the cycles ledger.
-    pub percentage: Option<u8>,
-}
-impl TopUpCyclesLedgerRequest {
-    pub fn threshold(&self) -> Nat {
-        self.threshold
-            .clone()
-            .unwrap_or(Nat::from(DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD))
-    }
-    pub fn percentage(&self) -> u8 {
-        self.percentage
-            .unwrap_or(DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE)
-    }
-}
-/// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
-pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
-/// The proportion of the backend canitster's own cycles to send to the cycles ledger.
-pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
-/// The seconds between each cycle ledger top up.
-pub const CYCLES_LEDGER_TOP_UP_INTERVAL_SECONDS: u64 = 60 * 60; // 1 hour
-
-/// Possible error conditions when topping up the cycles ledger.
-#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
-pub enum TopUpCyclesLedgerError {
-    CouldNotGetBalanceFromCyclesLedger,
-    CouldNotTopUpCyclesLedger { available: Nat, tried_to_send: Nat },
-}
-/// Possible successful responses when topping up the cycles ledger.
-#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
-pub struct TopUpCyclesLedgerResponse {
-    /// The ledger balance after topping up.
-    ledger_balance: Nat,
-    /// The backend canister cycles after topping up.
-    backend_cycles: Nat,
-    /// The amount topped up.
-    /// - Zero if the ledger balance was already sufficient.
-    /// - The requested amount otherwise.
-    topped_up: Nat,
-}
-
-pub type TopUpCyclesLedgerResult = Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>;
 
 /// Tops up the cycles ledger.
 pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
