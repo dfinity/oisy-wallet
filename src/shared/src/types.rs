@@ -28,7 +28,7 @@ pub struct InitArg {
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
-    /// Chain Fussion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
 }
 
@@ -72,7 +72,7 @@ pub struct Config {
     pub ic_root_key_raw: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
-    /// Chain Fussion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
 }
 
@@ -256,7 +256,7 @@ pub mod signer {
         }
         /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
-        /// The proportion of the backend canitster's own cycles to send to the cycles ledger.
+        /// The proportion of the backend canister's own cycles to send to the cycles ledger.
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
 
         /// Possible error conditions when topping up the cycles ledger.
