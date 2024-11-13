@@ -1,4 +1,4 @@
-//! Code for interacting with the chain fusion signer.
+//! Code for inetracting with the chain fusion signer.
 use crate::{
     read_config,
     state::{CYCLES_LEDGER, SIGNER},
