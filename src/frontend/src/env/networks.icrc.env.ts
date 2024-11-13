@@ -1,4 +1,5 @@
 import {
+	CANISTER_EXPLORER_URL,
 	CKBTC_EXPLORER_URL,
 	CKBTC_TESTNET_EXPLORER_URL,
 	CKETH_EXPLORER_URL,
@@ -26,6 +27,8 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
+import type { EnvAdditionalIcrcTokens } from '$env/types/env-icrc-additional-token';
+import { additionalIcrcTokensProduction } from '$env/tokens.icrc.env';
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
@@ -385,6 +388,36 @@ const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 		}
 	: undefined;
 
+/**
+ * Additional ICRC tokens from JSON file
+ */
+const mapIcrcData = (
+	icrcTokens: EnvAdditionalIcrcTokens
+): Record<EnvTokenSymbol, Omit<IcInterface, 'position'>> =>
+	Object.entries(icrcTokens).reduce(
+		(acc, [key, value]) => ({
+			...acc,
+			...((STAGING || BETA || PROD) &&
+				nonNullish(value) && {
+					[key]: {
+						...value,
+						exchangeCoinId: 'internet-computer',
+						explorerUrl: `${CANISTER_EXPLORER_URL}/${value.ledgerCanisterId}`
+					}
+				})
+		}),
+		{}
+	);
+
+const ADDITIONAL_ICRC_DATA = mapIcrcData(additionalIcrcTokensProduction);
+
+const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_DATA?.BURN)
+	? {
+			...ADDITIONAL_ICRC_DATA.BURN,
+			position: 12
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -428,8 +461,11 @@ export const PUBLIC_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
 ];
 
+const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : [])];
+
 export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,
+	...ADDITIONAL_ICRC_TOKENS,
 	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
 	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
