@@ -8,7 +8,6 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -19,7 +18,6 @@
 	export let utxosFee: UtxosFee | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
-	export let progress: (step: ProgressStepsSendBtc) => void;
 
 	const { sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -38,7 +36,6 @@
 				? await selectUtxosFeeApi({
 						amount,
 						network,
-						progress,
 						identity: $authIdentity
 					})
 				: undefined;
