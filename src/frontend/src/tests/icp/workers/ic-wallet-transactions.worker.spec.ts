@@ -24,7 +24,7 @@ import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
-describe('ic-wallet.worker', () => {
+describe('ic-wallet-transactions.worker', () => {
 	let spyGetTransactions: MockInstance;
 
 	let originalPostmessage: unknown;
@@ -313,15 +313,14 @@ describe('ic-wallet.worker', () => {
 			const err = new Error('test');
 			initErrorMock(err);
 
-			const scheduler = initIcpWalletScheduler();
-			await scheduler.start(undefined);
+			await scheduler.start(startData);
 
 			// idle and in_progress
 			// error
 			expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 			expect(postMessageMock).toHaveBeenCalledWith({
-				msg: 'syncIcpWalletError',
+				msg: `${msg}Error`,
 				data: {
 					error: err
 				}
