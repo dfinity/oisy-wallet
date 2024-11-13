@@ -1,5 +1,13 @@
 export const themeVariables = {
 	background: {
+		page: 'var(--colors-neutrals-white)',
+		primary: 'var(--colors-neutrals-white)',
+		'primary-inverted': 'var(--colors-neutrals-black)',
+		secondary: 'var(--colors-neutrals-100)',
+		'secondary-inverted': 'var(--colors-neutrals-900)',
+		tertiary: 'var(--colors-neutrals-200)',
+		'tertiary-inverted': 'var(--colors-neutrals-600)',
+		disabled: 'var(--colors-neutrals-300)',
 		brand: {
 			subtle: 'var(--color-brand-100)',
 			'subtle-alt': 'var(--color-brand-200)',
@@ -32,6 +40,14 @@ export const themeVariables = {
 		}
 	},
 	border: {
+		basic: 'var(--colors-neutrals-white)',
+		primary: 'var(--colors-neutrals-200)',
+		'primary-inverted': 'var(--colors-neutrals-900)',
+		secondary: 'var(--colors-neutrals-300)',
+		'secondary-inverted': 'var(--colors-neutrals-800)',
+		tertiary: 'var(--colors-neutrals-400)',
+		'tertiary-inverted': 'var(--colors-neutrals-500)',
+		disabled: 'var(--colors-neutrals-200)',
 		brand: {
 			subtle: 'var(--color-brand-100)',
 			'subtle-alt': 'var(--color-brand-200)',
@@ -61,6 +77,9 @@ export const themeVariables = {
 		}
 	},
 	foreground: {
+		tertiary: 'var(--colors-neutral-600)',
+		'tertiary-inverted': 'var(--colors-neutral-500)',
+		disabled: 'var(--colors-neutral-400)',
 		brand: {
 			primary: 'var(--color-brand-base)',
 			'primary-alt': 'var(--color-brand-100)',
