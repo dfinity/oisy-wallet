@@ -1,11 +1,11 @@
-import { envIcToken } from '$env/types/env-icrc-token';
+import { EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
 import { envTokenSymbol } from '$env/types/env-token-common';
 import { isEthAddress } from '$lib/utils/account.utils';
 import { z } from 'zod';
 
 const envErc20ContractAddress = z.custom<string>(isEthAddress, 'Invalid ERC20 Contract Address');
 
-const envCkErc20TokenData = envIcToken.extend({
+const envCkErc20TokenData = EnvIcTokenSchema.extend({
 	erc20ContractAddress: envErc20ContractAddress
 });
 
