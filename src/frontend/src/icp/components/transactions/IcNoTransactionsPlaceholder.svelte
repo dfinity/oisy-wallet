@@ -12,10 +12,10 @@
 
 	<div class="space-y-4">
 		<p class="m-0 text-center text-lg font-bold">
-			{replaceOisyPlaceholders($i18n.transactions.text.transaction_history_unavailable)}
+			{$i18n.transactions.text.transaction_history_unavailable}
 		</p>
 		<p class="text-secondary m-0 text-center opacity-50">
-			{$i18n.transactions.text.missing_index_canister_explanation}
+			{replaceOisyPlaceholders($i18n.transactions.text.missing_index_canister_explanation)}
 		</p>
 	</div>
 </div>
