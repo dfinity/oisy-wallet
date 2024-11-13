@@ -1,0 +1,11 @@
+[didc.rust]
+target = "custom"
+template = "scripts/bind/pic/client.hbs"
+# any tags mentioned from hbs
+candid_crate = "candid"
+canister_name = "cycles_ledger"
+submodule = "impls"
+
+[rust]
+visibility = "pub"
+attributes = "#[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]"

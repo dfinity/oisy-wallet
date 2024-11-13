@@ -1,3 +1,0 @@
-[rust]
-visibility = "pub"
-attributes = "#[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]"
