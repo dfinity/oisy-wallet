@@ -26,9 +26,15 @@ else
 fi
 
 for canister in "${canisters[@]}"; do
-  canister_binding_config="./scripts/bind/rust/${canister}.toml"
+  canister_binding_config="./scripts/bind/rust/${canister}.client.toml"
+  candid_file="".dfx/local/canisters/$canister/${canister}.did""
   if test -f "$canister_binding_config"; then
     echo "INFO: Creating rust bindings for $canister..."
+    test -f "$candid_file" || {
+      echo "ERROR: Candid file missing from: '$candid_file'"
+      echo "       You may need to run: dfx deploy $canister"
+      exit 1
+    } >&2
     mkdir -p "src/backend/src/bind"
     didc bind -t rs ".dfx/local/canisters/$canister/$canister.did" --config "$canister_binding_config" >"src/$canister/client/src/lib.rs"
   else
