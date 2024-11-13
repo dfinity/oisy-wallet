@@ -30,7 +30,7 @@ export const selectUtxosFee = async ({
 	identity,
 	network,
 	amount
-}: BtcSendServiceParams): Promise<UtxosFee> => {
+}: Omit<BtcSendServiceParams, 'progress'>): Promise<UtxosFee> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 
