@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ComponentType } from 'svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
@@ -10,6 +11,7 @@
 	export let badge:
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
+		| { type: 'transaction'; icon: ComponentType }
 		| undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 	export let ring = false;
@@ -43,6 +45,11 @@
 				alt={replacePlaceholders($i18n.core.alt.logo, { $name: networkName })}
 				{color}
 			/>
+		</div>
+	{:else if badge?.type === 'transaction'}
+		<!-- TODO: use new mapping color when merged-->
+		<div class="absolute -bottom-1 -right-1 rounded-full bg-brand-tertiary p-1 text-white">
+			<svelte:component this={badge.icon} size="16" />
 		</div>
 	{/if}
 </div>
