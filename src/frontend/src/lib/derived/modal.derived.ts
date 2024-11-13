@@ -69,9 +69,9 @@ export const modalWalletConnectSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'wallet-connect-send'
 );
-export const modalTransaction: Readable<boolean> = derived(
+export const modalEthTransaction: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'transaction'
+	($modalStore) => $modalStore?.type === 'eth-transaction'
 );
 export const modalIcTransaction: Readable<boolean> = derived(
 	modalStore,
