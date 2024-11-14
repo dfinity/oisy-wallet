@@ -7,18 +7,19 @@ import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionsUi } from '$lib/types/transaction';
+import type { AllTransactionsUi, AnyTransactionUi } from '$lib/types/transaction';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
 	isNetworkIdSepolia
 } from '$lib/utils/network.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Maps the transactions stores to a unified list of transactions with their respective components.
@@ -93,4 +94,21 @@ export const mapAllTransactionsUi = ({
 
 		return acc;
 	}, []);
+};
+
+export const sortTransactions = ({
+	transactionA: { timestamp: timestampA },
+	transactionB: { timestamp: timestampB }
+}: {
+	transactionA: AnyTransactionUi;
+	transactionB: AnyTransactionUi;
+}): number => {
+	if (nonNullish(timestampA) && nonNullish(timestampB)) {
+		return (
+			Number(normalizeTimestampToSeconds(timestampB)) -
+			Number(normalizeTimestampToSeconds(timestampA))
+		);
+	}
+
+	return nonNullish(timestampA) ? 1 : -1;
 };
