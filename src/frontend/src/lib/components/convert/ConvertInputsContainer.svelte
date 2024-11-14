@@ -1,5 +1,4 @@
 <div class="flex flex-col items-start justify-between md:flex-row">
-	<!-- TODO: Update colors with values from theme-variables when they are available there -->
 	<div
 		class="mb-3 flex h-14 w-full items-center rounded-lg border border-primary bg-secondary px-3 md:mb-0 md:w-[35%]"
 	>
