@@ -12,7 +12,6 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 
 	let transactions: AllTransactionsUi;
-	// TODO: add ethTransactions, ckEthMinterInfo and ethAddress to mapAllTransactionsUi
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore,
