@@ -7,9 +7,9 @@
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { Token } from '$lib/types/token';
 
 	export let transaction: EthTransactionUi;
 	export let token: Token | undefined = undefined;
