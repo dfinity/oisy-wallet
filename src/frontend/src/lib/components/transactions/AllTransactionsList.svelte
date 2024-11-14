@@ -2,22 +2,20 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import type { AllTransactionsUi } from '$lib/types/transaction';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionsUi;
+	// TODO: add ethTransactions to mapAllTransactionsUi
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore,
-		$ethTransactions: $ethTransactionsStore,
-		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress
+		$ethTransactions: {},
+		$ckEthMinterInfo: {},
+		$ethAddress: undefined
 	});
 </script>
 
