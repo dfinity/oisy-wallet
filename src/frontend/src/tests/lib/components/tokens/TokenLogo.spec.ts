@@ -101,13 +101,13 @@ describe('TokenLogo', () => {
 		});
 	});
 
-	describe('when badge type is "transaction"', () => {
-		it('should display transaction badge', () => {
+	describe('when badge type is "icon"', () => {
+		it('should display icon badge', () => {
 			const { getByTestId } = render(TokenLogo, {
 				props: {
 					data: mockToken,
 					badge: {
-						type: 'transaction',
+						type: 'icon',
 						icon: IconSend,
 						ariaLabel: 'send'
 					},
@@ -115,7 +115,7 @@ describe('TokenLogo', () => {
 				}
 			});
 
-			expect(getByTestId('transaction-badge')).toBeInTheDocument();
+			expect(getByTestId('icon-badge')).toBeInTheDocument();
 		});
 	});
 });
