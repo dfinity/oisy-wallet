@@ -46,6 +46,7 @@ describe('request-pouh-credential.services', () => {
 			vi.clearAllMocks();
 			vi.resetAllMocks();
 			vi.stubEnv('VITE_LOCAL_POUH_ISSUER_CANISTER_ID', 'qbw6f-caaaa-aaaah-qdcwa-cai');
+			vi.stubEnv('VITE_DFX_NETWORK', 'local');
 			toastsStore.reset();
 			userProfileStore.reset();
 			userProfileStore.set({ certified: true, profile: initialUserProfile });
