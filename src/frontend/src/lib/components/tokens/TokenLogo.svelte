@@ -13,6 +13,8 @@
 		| undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 	export let ring = false;
+	export let testId: string | undefined = undefined;
+	export let badgeTestId: string | undefined = undefined;
 
 	const {
 		icon,
@@ -28,11 +30,13 @@
 		size={logoSize}
 		{color}
 		{ring}
+		{testId}
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
 			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold text-[var(--color-secondary)]"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: data.name })}
+			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}
 		</span>
@@ -42,6 +46,7 @@
 				src={badge.blackAndWhite ? networkIconBW : networkIcon}
 				alt={replacePlaceholders($i18n.core.alt.logo, { $name: networkName })}
 				{color}
+				testId={`network-${badgeTestId}`}
 			/>
 		</div>
 	{/if}
