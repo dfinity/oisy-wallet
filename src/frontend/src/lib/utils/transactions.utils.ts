@@ -42,8 +42,15 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 }): AllTransactionsUi => {
-	let ckEthMinterInfoAddressesMainnet: OptionEthAddress[];
-	let ckEthMinterInfoAddressesSepolia: OptionEthAddress[];
+	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
+		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
+		networkId: ETHEREUM_NETWORK_ID
+	});
+
+	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
+		minterInfo: $ckEthMinterInfo?.[SEPOLIA_TOKEN_ID],
+		networkId: SEPOLIA_NETWORK_ID
+	});
 
 	return tokens.reduce<AllTransactionsUi>((acc, { id: tokenId, network: { id: networkId } }) => {
 		if (isNetworkIdBTCMainnet(networkId)) {
@@ -63,20 +70,6 @@ export const mapAllTransactionsUi = ({
 		if (isNetworkIdEthereum(networkId)) {
 			// TODO: remove Sepolia transactions when the feature is complete; for now we use it for testing
 			const isSepoliaNetwork = isNetworkIdSepolia(networkId);
-
-			if (!isSepoliaNetwork && isNullish(ckEthMinterInfoAddressesMainnet)) {
-				ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
-					minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
-					networkId: ETHEREUM_NETWORK_ID
-				});
-			}
-
-			if (isSepoliaNetwork && isNullish(ckEthMinterInfoAddressesSepolia)) {
-				ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
-					minterInfo: $ckEthMinterInfo?.[SEPOLIA_TOKEN_ID],
-					networkId: SEPOLIA_NETWORK_ID
-				});
-			}
 
 			return [
 				...acc,
