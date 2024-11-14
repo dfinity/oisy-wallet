@@ -40,6 +40,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	describe('when ERC20 user tokens are initialized', () => {
 		beforeEach(() => {
+			erc20UserTokensStore.resetAll();
 			erc20UserTokensStore.setAll(mockErc20UserTokens);
 		});
 
@@ -95,6 +96,34 @@ describe('LoaderMultipleEthTransactions', () => {
 			});
 		});
 
+		it('should not load transactions twice for the same tokens even if the stores change', async () => {
+			const mockAdditionalTokens = createMockErc20UserTokens({
+				n: 1,
+				networkEnv: 'mainnet',
+				start: 2
+			});
+
+			render(LoaderMultipleEthTransactions);
+
+			await waitFor(() => {
+				// mockErc20UserTokens.length + Ethereum native token
+				expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+			});
+
+			erc20UserTokensStore.resetAll();
+			erc20UserTokensStore.setAll([...mockErc20UserTokens, ...mockAdditionalTokens]);
+
+			await waitFor(() => {
+				// the number of calls as before + mockAdditionalTokens.length
+				expect(loadTransactions).toHaveBeenCalledTimes(
+					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length
+				);
+				expect(loadTransactions).not.toHaveBeenCalledTimes(
+					2 * (mockErc20UserTokens.length + 1) + mockAdditionalTokens.length
+				);
+			});
+		});
+
 		it('should load transactions for new tokens when they are added', async () => {
 			const mockAdditionalTokens = createMockErc20UserTokens({
 				n: 5,
@@ -113,18 +142,18 @@ describe('LoaderMultipleEthTransactions', () => {
 			erc20UserTokensStore.setAll([...mockErc20UserTokens, ...mockAdditionalTokens]);
 
 			await waitFor(() => {
-				// twice the number of calls as before + mockAdditionalTokens.length
+				// the number of calls as before + mockAdditionalTokens.length
 				expect(loadTransactions).toHaveBeenCalledTimes(
-					2 * (mockErc20UserTokens.length + 1) + mockAdditionalTokens.length
+					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length
 				);
 			});
 
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
 			await waitFor(() => {
-				// three times the number of calls of the first render + twice the number of additional tokens + Sepolia native token
+				// the number of calls of the first render + the number of additional tokens + Sepolia native token
 				expect(loadTransactions).toHaveBeenCalledTimes(
-					3 * (mockErc20UserTokens.length + 1) + 2 * mockAdditionalTokens.length + 1
+					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length + 1
 				);
 			});
 		});
