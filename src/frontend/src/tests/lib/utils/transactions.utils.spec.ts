@@ -8,7 +8,8 @@ import {
 } from '$env/tokens.btc.env';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
-import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+import type { AnyTransactionUi } from '$lib/types/transaction';
+import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc.mock';
 
 describe('transactions.utils', () => {
@@ -54,6 +55,27 @@ describe('transactions.utils', () => {
 
 				expect(result).toEqual([]);
 			});
+		});
+	});
+
+	describe('sortTransactions', () => {
+		const transaction1 = { timestamp: 1 } as AnyTransactionUi;
+		const transaction2 = { timestamp: 2 } as AnyTransactionUi;
+		const transaction3 = { timestamp: 3 } as AnyTransactionUi;
+		const transactionWithNullTimestamp = { timestamp: undefined } as AnyTransactionUi;
+
+		it('should sort transactions in descending order by timestamp', () => {
+			const result = [transaction2, transaction1, transaction3].sort((a, b) =>
+				sortTransactions({ transactionA: a, transactionB: b })
+			);
+			expect(result).toEqual([transaction3, transaction2, transaction1]);
+		});
+
+		it('should sort transactions with nullish timestamps first', () => {
+			const result = [transaction1, transactionWithNullTimestamp, transaction2].sort((a, b) =>
+				sortTransactions({ transactionA: a, transactionB: b })
+			);
+			expect(result).toEqual([transactionWithNullTimestamp, transaction2, transaction1]);
 		});
 	});
 });
