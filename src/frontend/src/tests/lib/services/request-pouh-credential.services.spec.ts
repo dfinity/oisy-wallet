@@ -45,6 +45,7 @@ describe('request-pouh-credential.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.resetAllMocks();
+			vi.stubEnv('VITE_LOCAL_POUH_ISSUER_CANISTER_ID', 'qbw6f-caaaa-aaaah-qdcwa-cai');
 			toastsStore.reset();
 			userProfileStore.reset();
 			userProfileStore.set({ certified: true, profile: initialUserProfile });
@@ -70,7 +71,7 @@ describe('request-pouh-credential.services', () => {
 
 			const result = await requestPouhCredential({ identity });
 
-			expect(result.success).toBeTruthy();
+			expect(result.success).toBe(true);
 			expect(addUserCredentialMock).toBeCalledTimes(1);
 			expect(addUserCredentialMock).toBeCalledWith({
 				identity,
@@ -95,7 +96,7 @@ describe('request-pouh-credential.services', () => {
 
 			const result = await requestPouhCredential({ identity });
 
-			expect(result.success).toBeTruthy();
+			expect(result.success).toBe(true);
 			expect(addUserCredentialMock).toBeCalledTimes(1);
 			expect(addUserCredentialMock).toBeCalledWith({
 				identity,
