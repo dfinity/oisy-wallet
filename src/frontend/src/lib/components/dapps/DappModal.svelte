@@ -58,7 +58,7 @@
 		{/if}
 
 		<article class="py-5">
-			<div class="flex flex-wrap items-center justify-start gap-4 border-b border-light-grey pb-5">
+			<div class="flex flex-wrap items-center justify-start gap-4 border-b border-tertiary pb-5">
 				<Logo
 					size="md"
 					src={logo}

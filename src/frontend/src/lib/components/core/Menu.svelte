@@ -107,7 +107,7 @@
 
 		<Hr />
 
-		<span class="text-center text-sm text-aurometalsaurus">
+		<span class="text-center text-sm text-tertiary">
 			<LicenseLink noUnderline />
 		</span>
 	</div>
