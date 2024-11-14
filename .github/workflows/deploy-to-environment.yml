@@ -25,11 +25,6 @@ on:
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
         default: false
-      backend-yes:
-        required: false
-        type: boolean
-        description: 'Allow breaking changes and other blockers to backend deployment'
-        default: false
 
 run-name: >-
   ${{ 
@@ -160,7 +155,7 @@ jobs:
       - name: Deploy Backend to Environment
         run: |
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
-          [[ "${{ github.event.inputs.backend-yes }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes') # Corresponds to: dfx deploy --yes
+          [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
           if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
