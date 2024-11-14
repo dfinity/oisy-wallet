@@ -378,7 +378,26 @@
 			"check_balance_for_fees": "Check $token balance for conversion fees",
 			"fees_explanation": "You need enough $token to cover the smart contract execution fees.",
 			"current_balance": "👉 Current balance:",
-			"input_reset_button": "Reset input value"
+			"review_button": "Review",
+			"convert_button": "Swap",
+			"input_reset_button": "Reset input value",
+			"swap_to_token": "Swap $sourceToken → $destinationToken",
+			"review": "Review transaction",
+			"available_balance": "Available",
+			"max_balance": "Max",
+			"review_tokens_info_title": "You're swapping",
+			"amount_to_convert": "Amount to swap",
+			"amount_to_receive": "Amount to receive",
+			"source_network": "Source network",
+			"destination_network": "Destination network",
+			"conversion_may_take": "Conversion may take up to 1 hour",
+			"executing_transaction": "Executing transaction...",
+			"initializing": "Initializing transaction...",
+			"refreshing_ui": "Refreshing UI"
+		},
+		"assertion": {
+			"insufficient_funds": "Insufficient balance",
+			"insufficient_funds_for_fee": "Insufficient balance to cover the fees"
 		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
@@ -508,7 +527,12 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
-			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:"
+			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:",
+			"convert_fee": "Swap fee",
+			"convert_inter_network_fee": "Inter-network fee",
+			"convert_btc_network_fee": "Bitcoin network fee",
+			"zero_fee": "Free",
+			"total_fee": "Total fee"
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
