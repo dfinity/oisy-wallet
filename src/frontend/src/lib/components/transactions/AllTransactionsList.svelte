@@ -19,7 +19,9 @@
 	});
 
 	let sortedTransactions: AllTransactionsUi;
-	$: sortedTransactions = transactions.sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }));
+	$: sortedTransactions = transactions.sort((a, b) =>
+		sortTransactions({ transactionA: a, transactionB: b })
+	);
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
