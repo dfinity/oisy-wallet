@@ -20,6 +20,7 @@ test('should display about-why-oisy modal', async ({ page, isMobile }) => {
 	});
 
 	await homepageLoggedOut.waitForReady();
+	await page.waitForLoadState('networkidle');
 
 	await homepageLoggedOut.testModalSnapshot({
 		modalOpenButtonTestId: ABOUT_WHY_OISY_BUTTON,

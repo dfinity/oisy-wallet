@@ -29,6 +29,8 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 	});
 
 	await homepageLoggedIn.waitForReady();
+
+	await page.waitForLoadState('networkidle');
 });
 
 testWithII('should display receive-tokens modal', async () => {
