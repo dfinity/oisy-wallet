@@ -1,40 +1,25 @@
-import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import * as btcEnv from '$env/networks.btc.env';
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
-import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+import * as transactionsUtils from '$lib/utils/transactions.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-import type { MockedFunction } from 'vitest';
-
-vi.mock('$lib/utils/transactions.utils', () => ({
-	mapAllTransactionsUi: vi.fn()
-}));
 
 describe('AllTransactionsList', () => {
-	const mockedMapAllTransactionsUi = mapAllTransactionsUi as MockedFunction<
-		typeof mapAllTransactionsUi
-	>;
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
 	it('should call the function to map the transactions list', () => {
-		mockedMapAllTransactionsUi.mockReturnValue([]);
+		const spyMapAllTransactionsUi = vi.spyOn(transactionsUtils, 'mapAllTransactionsUi');
 
 		render(AllTransactionsList);
 
-		expect(mapAllTransactionsUi).toHaveBeenCalled();
+		expect(spyMapAllTransactionsUi).toHaveBeenCalled();
+
+		spyMapAllTransactionsUi.mockRestore();
 	});
 
 	describe('when the transactions list is empty', () => {
-		beforeEach(() => {
-			mockedMapAllTransactionsUi.mockReturnValue([]);
-		});
-
 		it('should render the placeholder', () => {
-			mockedMapAllTransactionsUi.mockReturnValue([]);
-
 			const { getByText } = render(AllTransactionsList);
 
 			expect(getByText(en.transactions.text.transaction_history)).toBeInTheDocument();
@@ -45,12 +30,17 @@ describe('AllTransactionsList', () => {
 		const btcTransactionsNumber = 5;
 
 		beforeEach(() => {
-			mockedMapAllTransactionsUi.mockReturnValue(
-				createMockBtcTransactionsUi(btcTransactionsNumber).map((transaction) => ({
-					...transaction,
-					component: BtcTransaction
-				}))
-			);
+			vi.resetAllMocks();
+
+			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+		});
+
+		btcTransactionsStore.append({
+			tokenId: BTC_MAINNET_TOKEN_ID,
+			transactions: createMockBtcTransactionsUi(btcTransactionsNumber).map((transaction) => ({
+				data: transaction,
+				certified: false
+			}))
 		});
 
 		it('should not render the placeholder', () => {

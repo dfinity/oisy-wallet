@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -14,9 +15,8 @@
 	});
 </script>
 
-<!--TODO: include skeleton for loading transactions-->
-
-{#if transactions.length > 0}
+<!--TODO: include skeleton for loading transactions and remove nullish checks-->
+{#if nonNullish(transactions) && transactions.length > 0}
 	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
 		<div in:slide={SLIDE_DURATION}>
 			<svelte:component this={transaction.component} {transaction} />
@@ -24,7 +24,7 @@
 	{/each}
 {/if}
 
-{#if transactions.length === 0}
+{#if isNullish(transactions) || transactions.length === 0}
 	<TransactionsPlaceholder />
 {/if}
 
