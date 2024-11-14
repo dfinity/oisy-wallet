@@ -1,5 +1,5 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens.env';
-import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
@@ -66,6 +66,31 @@ export const formatSecondsToDate = (seconds: number): string => {
 export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+};
+
+export const formatSecondsToNormalizedDate = ({
+	seconds,
+	currentDate
+}: {
+	seconds: number;
+	currentDate?: Date;
+}): string => {
+	const date = new Date(seconds * 1000);
+	const today = currentDate ?? new Date();
+	const daysDifference = Math.ceil((date.getTime() - today.getTime()) / MILLISECONDS_IN_DAY);
+
+	if (Math.abs(daysDifference) < 2) {
+		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
+		return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(daysDifference, 'day');
+	}
+
+	// Same year, return day and month name
+	if (date.getFullYear() === today.getFullYear()) {
+		return date.toLocaleDateString('en', { day: 'numeric', month: 'long' });
+	}
+
+	// Different year, return day, month, and year
+	return date.toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
 export const formatUSD = ({
