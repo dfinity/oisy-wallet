@@ -7,7 +7,10 @@ import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
+import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
@@ -35,13 +38,17 @@ export const mapAllTransactionsUi = ({
 	$btcTransactions,
 	$ethTransactions,
 	$ckEthMinterInfo,
-	$ethAddress
+	$ethAddress,
+	$icTransactions,
+	$btcStatuses
 }: {
 	tokens: Token[];
 	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
 	$ethTransactions: EthTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
+	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 }): AllTransactionsUi => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
 		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
@@ -88,8 +95,18 @@ export const mapAllTransactionsUi = ({
 		}
 
 		if (isNetworkIdICP(networkId)) {
-			// TODO: Implement ICP transactions
-			return acc;
+			// TODO: Implement ckBTC and ckETH transactions
+			return [
+				...acc,
+				...($icTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					...extendIcTransaction({
+						transaction,
+						token,
+						btcStatuses: $btcStatusesStore?.[$token.id] ?? undefined
+					}),
+					component: BtcTransaction
+				}))
+			];
 		}
 
 		return acc;
@@ -112,3 +129,21 @@ export const sortTransactions = ({
 
 	return nonNullish(timestampA) ? 1 : -1;
 };
+
+$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+$btcStatuses: CertifiedStoreData<BtcStatusesData>;
+
+if (isNetworkIdICP(networkId)) {
+	// TODO: Implement ckBTC and ckETH transactions
+	return [
+		...acc,
+		...($icTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+			...extendIcTransaction({
+				transaction,
+				token,
+				btcStatuses: $btcStatusesStore?.[$token.id] ?? undefined
+			}),
+			component: BtcTransaction
+		}))
+	];
+}
