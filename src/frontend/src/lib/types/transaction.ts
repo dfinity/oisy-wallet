@@ -36,5 +36,5 @@ export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to
 export type AnyTransactionUi = BtcTransactionUi | EthTransactionUi | IcTransactionUi;
 
 export type AllTransactionsUi = (AnyTransactionUi & {
-	transactionComponent: ComponentType;
+	component: ComponentType;
 })[];
