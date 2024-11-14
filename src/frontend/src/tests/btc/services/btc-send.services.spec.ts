@@ -4,7 +4,6 @@ import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
 import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
@@ -31,7 +30,6 @@ describe('btc-send.services', () => {
 				.mockResolvedValue(true);
 			const sendBtcApiSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
 			const progressSpy = vi.spyOn(defaultParams, 'progress');
-			const waitAndTriggerWalletSpy = vi.spyOn(walletUtils, 'waitAndTriggerWallet');
 
 			await sendBtc(defaultParams);
 
@@ -61,8 +59,6 @@ describe('btc-send.services', () => {
 				txId: hexStringToUint8Array(txid),
 				utxos: defaultParams.utxosFee.utxos
 			});
-
-			expect(waitAndTriggerWalletSpy).toHaveBeenCalledOnce();
 		});
 
 		it('should throw if signer sendBtc throws', async () => {
