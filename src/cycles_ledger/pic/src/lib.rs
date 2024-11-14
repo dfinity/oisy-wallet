@@ -6,8 +6,8 @@
 #![allow(dead_code, unused_imports, clippy::all, clippy::missing_errors_doc)]
 use std::sync::Arc;
 
-use candid::{self, encode_args, CandidType, Deserialize, Principal};
-use pocket_ic::{PocketIc, UserError};
+use candid::{self, decode_args, encode_args, CandidType, Deserialize, Principal};
+use pocket_ic::{PocketIc, UserError, WasmResult};
 
 pub use ic_cycles_ledger_types::*;
 
@@ -21,7 +21,7 @@ impl CyclesLedgerPic {
         &self,
         caller: Principal,
         arg0: &CreateCanisterArgs,
-    ) -> Result<Result<CreateCanisterSuccess, CreateCanisterError>, String> {
+    ) -> Result<(Result<CreateCanisterSuccess, CreateCanisterError>,), String> {
         let args = encode_args((arg0,)).expect("Failed to encode update call arguments");
         self.pic
             .update_call(self.canister_id, caller, "create_canister", args)
@@ -33,7 +33,7 @@ impl CyclesLedgerPic {
             })
             .and_then(|reply| match reply {
                 WasmResult::Reply(reply) => {
-                    decode_one(&reply).map_err(|e| format!("Decoding failed: {e}"))
+                    decode_args(&reply).map_err(|e| format!("Decoding failed: {e}"))
                 }
                 WasmResult::Reject(error) => Err(error),
             })
