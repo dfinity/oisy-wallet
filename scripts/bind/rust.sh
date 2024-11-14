@@ -6,13 +6,13 @@ set -euo pipefail
 	Generates rust canister bindings.
 
 	Prerequisites:
-	- A Rust crate at src/\$canister/client/
+	- Rust crates at src/\$canister/{tyes,client,pic}/
 
 	Usage:
 	  $(basename $0) [canister_name..]
 
 	Properties:
-	- Creates a Rust bindings file at src/\$canister/client/src/lib.rs
+	- Creates Rust bindings files at src/\$canister/{types,client,pic}/src/lib.rs
 	EOF
 
   exit 0
@@ -26,21 +26,22 @@ else
 fi
 
 for canister in "${canisters[@]}"; do
+for binding in types client ; do
   # Paths:
-  canister_binding_config="./scripts/bind/rust/${canister}.client.toml"
+  canister_binding_config="./scripts/bind/rust/${canister}.${binding}.toml"
   candid_file=".dfx/local/canisters/$canister/${canister}.did"
-  generated_client="src/$canister/client/src/lib.rs"
+  generated_file="src/$canister/$binding/src/lib.rs"
   # Generate:
   if test -f "$canister_binding_config"; then
-    echo "INFO: Creating rust bindings for $canister..."
+    echo "INFO: Creating rust $binding for $canister..."
     test -f "$candid_file" || {
       echo "ERROR: Candid file missing from: '$candid_file'"
       echo "       You may need to run: dfx deploy $canister"
       exit 1
     } >&2
     mkdir -p "src/backend/src/bind"
-    didc bind -t rs "$candid_file" --config "$canister_binding_config" >"$generated_client" || {
-      echo "ERROR: Failed to generate client for $canister."
+    didc bind -t rs "$candid_file" --config "$canister_binding_config" >"$generated_file" || {
+      echo "ERROR: Failed to generate $binding for $canister."
       echo "       Candid:        $candid_file"
       echo "       Configuration: $canister_binding_config"
       exit 1
@@ -48,6 +49,7 @@ for canister in "${canisters[@]}"; do
   else
     echo "INFO: No rust binding script for $canister at $canister_binding_config"
   fi
+done
 done
 
 # Format
