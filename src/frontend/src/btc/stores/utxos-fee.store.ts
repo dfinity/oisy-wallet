@@ -18,7 +18,7 @@ export const initUtxosFeeStore = (): UtxosFeeStore => {
 		subscribe,
 
 		reset() {
-			set(undefined);
+			set(null);
 		},
 
 		setUtxosFee(data: UtxosFeeStoreData) {

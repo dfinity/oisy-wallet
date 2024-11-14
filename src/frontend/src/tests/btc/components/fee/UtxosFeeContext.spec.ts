@@ -22,8 +22,9 @@ describe('UtxosFeeContext', () => {
 	const mockContext = (store: UtxosFeeStore) => new Map([[UTXOS_FEE_CONTEXT_KEY, { store }]]);
 	const mockBtcSendApi = () =>
 		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
-	const mockAuthStore = (value: Identity | null) =>
+	const mockAuthStore = (value: Identity | null = mockIdentity) =>
 		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
+	let store: UtxosFeeStore;
 
 	const props = {
 		amount,
@@ -32,14 +33,15 @@ describe('UtxosFeeContext', () => {
 
 	beforeEach(() => {
 		mockPage.reset();
+		store = initUtxosFeeStore();
+		store.reset();
 	});
 
 	it('should call selectUtxosFee with proper params', async () => {
-		const store = initUtxosFeeStore();
 		const setUtxosFeeSpy = vi.spyOn(store, 'setUtxosFee');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
-		mockAuthStore(mockIdentity);
+		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props,
@@ -59,7 +61,6 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if no authIdentity available', async () => {
-		const store = initUtxosFeeStore();
 		const selectUtxosFeeSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
 
 		mockAuthStore(null);
@@ -75,12 +76,11 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if no networkId provided', async () => {
-		const store = initUtxosFeeStore();
 		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 		const { networkId: _, ...newProps } = props;
 
-		mockAuthStore(mockIdentity);
+		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props: newProps,
@@ -94,12 +94,11 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if no amount provided', async () => {
-		const store = initUtxosFeeStore();
 		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 		const { amount: _, ...newProps } = props;
 
-		mockAuthStore(mockIdentity);
+		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props: newProps,
@@ -113,11 +112,10 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if provided amount is 0', async () => {
-		const store = initUtxosFeeStore();
 		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
-		mockAuthStore(mockIdentity);
+		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props: { ...props, amount: 0 },
@@ -131,11 +129,10 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if provided networkId is not BTC', async () => {
-		const store = initUtxosFeeStore();
 		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
-		mockAuthStore(mockIdentity);
+		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props: { ...props, networkId: ICP_NETWORK_ID },
