@@ -20,8 +20,8 @@ import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
-import type { AllTransactionsUi, Transaction } from '$lib/types/transaction';
-import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+import type { AllTransactionsUi, AnyTransactionUi, Transaction } from '$lib/types/transaction';
+import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 
@@ -227,6 +227,27 @@ describe('transactions.utils', () => {
 
 				expect(result).toEqual(expectedTransactions);
 			});
+		});
+	});
+
+	describe('sortTransactions', () => {
+		const transaction1 = { timestamp: 1 } as AnyTransactionUi;
+		const transaction2 = { timestamp: 2 } as AnyTransactionUi;
+		const transaction3 = { timestamp: 3 } as AnyTransactionUi;
+		const transactionWithNullTimestamp = { timestamp: undefined } as AnyTransactionUi;
+
+		it('should sort transactions in descending order by timestamp', () => {
+			const result = [transaction2, transaction1, transaction3].sort((a, b) =>
+				sortTransactions({ transactionA: a, transactionB: b })
+			);
+			expect(result).toEqual([transaction3, transaction2, transaction1]);
+		});
+
+		it('should sort transactions with nullish timestamps first', () => {
+			const result = [transaction1, transactionWithNullTimestamp, transaction2].sort((a, b) =>
+				sortTransactions({ transactionA: a, transactionB: b })
+			);
+			expect(result).toEqual([transactionWithNullTimestamp, transaction2, transaction1]);
 		});
 	});
 });
