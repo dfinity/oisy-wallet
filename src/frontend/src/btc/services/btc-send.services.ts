@@ -20,7 +20,7 @@ interface BtcSendServiceParams {
 	progress: (step: ProgressStepsSendBtc) => void;
 }
 
-type SendBtcParams = BtcSendServiceParams & {
+export type SendBtcParams = BtcSendServiceParams & {
 	destination: BtcAddress;
 	source: BtcAddress;
 	utxosFee: UtxosFee;
@@ -55,7 +55,6 @@ export const sendBtc = async ({
 	identity,
 	...rest
 }: SendBtcParams): Promise<void> => {
-	// TODO: use txid returned by this method to register it as a pending transaction in BE
 	const { txid } = await send({ progress, utxosFee, network, identity, ...rest });
 
 	progress(ProgressStepsSendBtc.RELOAD);
