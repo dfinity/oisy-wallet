@@ -68,6 +68,17 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
+/** Formats a number of seconds to a normalized date string.
+ *
+ * If the date is within the same year, it returns the day and month name.
+ * If the date is in a different year, it returns the day, month, and year.
+ * If the date is within 2 days, it returns a relative time format (today or yesterday).
+ * It accepts an optional currentDate parameter to compare the date with. Otherwise, it uses the current date.
+ *
+ * @param {Object} params - The options object.
+ * @param {number} params.seconds - The number of seconds to format.
+ * @param {Date} [params.currentDate] - The date to compare with. Defaults to the current date.
+ */
 export const formatSecondsToNormalizedDate = ({
 	seconds,
 	currentDate
