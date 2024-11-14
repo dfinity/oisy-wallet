@@ -12,7 +12,7 @@
 	<ButtonAuthenticate on:click={async () => await signIn({})} {fullWidth} />
 
 	<span
-		class={`mt-4 flex flex-col text-sm text-aurometalsaurus ${licenseAlignment === 'center' ? 'text-center' : ''}`}
+		class={`mt-4 flex flex-col text-sm text-tertiary ${licenseAlignment === 'center' ? 'text-center' : ''}`}
 	>
 		{$i18n.license_agreement.text.accept_terms}
 

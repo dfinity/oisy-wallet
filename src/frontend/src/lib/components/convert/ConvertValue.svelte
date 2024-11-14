@@ -16,6 +16,6 @@
 		>
 
 		<!-- TODO: Update colors with values from theme-variables when they are available there -->
-		<span class="text-sm text-aurometalsaurus"><slot name="secondary-value" /></span>
+		<span class="text-sm text-tertiary"><slot name="secondary-value" /></span>
 	</div>
 </div>
