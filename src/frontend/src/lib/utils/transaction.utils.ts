@@ -3,6 +3,7 @@ import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
+import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import type { AnyTransactionUi, TransactionStatus, TransactionType } from '$lib/types/transaction';
 import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
 import { isNullish } from '@dfinity/utils';
@@ -50,8 +51,15 @@ export const groupTransactionsByDate = <T extends AnyTransactionUi>(transactions
 			return { ...acc, undefined: [...(acc['undefined'] ?? []), transaction] };
 		}
 
+		const timestamp = Number(transaction.timestamp);
+
 		const date = formatSecondsToNormalizedDate({
-			seconds: Number(transaction.timestamp),
+			seconds:
+				timestamp > 1e15
+					? timestamp / Number(NANO_SECONDS_IN_SECOND)
+					: timestamp > 1e12
+						? timestamp / Number(MILLISECONDS_IN_SECOND)
+						: timestamp,
 			currentDate
 		});
 

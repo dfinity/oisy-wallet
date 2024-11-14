@@ -3,6 +3,7 @@ import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
+import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
 import type { AnyTransactionUi } from '$lib/types/transaction';
 import { groupTransactionsByDate, mapTransactionIcon } from '$lib/utils/transaction.utils';
@@ -69,6 +70,10 @@ describe('transaction.utils', () => {
 			timestamp: index + 1
 		})) as AnyTransactionUi[];
 
+		const nowInMilliseconds = Date.now();
+		const nowInSeconds = nowInMilliseconds / MILLISECONDS_IN_SECOND;
+		const nowInNanoSeconds = nowInMilliseconds * Number(NANO_SECONDS_IN_MILLISECOND);
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -115,6 +120,30 @@ describe('transaction.utils', () => {
 
 		it('should return an empty object for empty transactions array', () => {
 			expect(groupTransactionsByDate([])).toEqual({});
+		});
+
+		it('should handle timestamps provided in nanoseconds', () => {
+			const transactions = [
+				mockTransactions[0],
+				{ ...mockTransactions[1], timestamp: nowInNanoSeconds }
+			] as AnyTransactionUi[];
+
+			expect(groupTransactionsByDate(transactions)).toEqual({
+				[1]: [transactions[0]],
+				[nowInSeconds.toString()]: [transactions[1]]
+			});
+		});
+
+		it('should handle timestamps provided in milliseconds', () => {
+			const transactions = [
+				mockTransactions[0],
+				{ ...mockTransactions[1], timestamp: nowInMilliseconds }
+			] as AnyTransactionUi[];
+
+			expect(groupTransactionsByDate(transactions)).toEqual({
+				'1': [transactions[0]],
+				[nowInSeconds.toString()]: [transactions[1]]
+			});
 		});
 	});
 });
