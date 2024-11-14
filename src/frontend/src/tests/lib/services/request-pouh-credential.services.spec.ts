@@ -47,7 +47,10 @@ describe('request-pouh-credential.services', () => {
 			vi.resetAllMocks();
 			vi.resetModules();
 			vi.unstubAllEnvs();
-			vi.stubEnv('import.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID', 'qbw6f-caaaa-aaaah-qdcwa-cai');
+			vi.stubEnv(
+				'import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID',
+				'qbw6f-caaaa-aaaah-qdcwa-cai'
+			);
 			toastsStore.reset();
 			userProfileStore.reset();
 			userProfileStore.set({ certified: true, profile: initialUserProfile });
