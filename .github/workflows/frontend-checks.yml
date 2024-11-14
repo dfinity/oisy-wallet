@@ -36,7 +36,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Test
-        run: npm run test src/frontend/src/tests/lib/services/request-pouh-credential.services.spec.ts --allowOnly
+        run: npm run test src/frontend/src/tests/lib/services/request-pouh-credential.services.spec.ts
 
   may-merge:
     if: always()
