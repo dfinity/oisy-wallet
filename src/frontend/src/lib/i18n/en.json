@@ -796,6 +796,9 @@
 	"activity": {
 		"text": {
 			"title": "Recent Activity"
+		},
+		"info": {
+			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		}
 	}
 }
