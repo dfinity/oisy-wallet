@@ -2134,6 +2134,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-cycles-ledger-pic"
+version = "0.1.0"
+dependencies = [
+ "candid",
+ "ic-cdk 0.16.0",
+ "ic-cycles-ledger-types",
+ "pocket-ic",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
 name = "ic-cycles-ledger-types"
 version = "0.1.0"
 dependencies = [
