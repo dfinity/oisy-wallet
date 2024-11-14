@@ -129,21 +129,3 @@ export const sortTransactions = ({
 
 	return nonNullish(timestampA) ? 1 : -1;
 };
-
-$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
-$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-
-if (isNetworkIdICP(networkId)) {
-	// TODO: Implement ckBTC and ckETH transactions
-	return [
-		...acc,
-		...($icTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
-			...extendIcTransaction({
-				transaction,
-				token,
-				btcStatuses: $btcStatusesStore?.[$token.id] ?? undefined
-			}),
-			component: BtcTransaction
-		}))
-	];
-}
