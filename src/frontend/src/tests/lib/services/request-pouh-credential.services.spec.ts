@@ -46,7 +46,7 @@ describe('request-pouh-credential.services', () => {
 			vi.clearAllMocks();
 			vi.resetAllMocks();
 			vi.resetModules();
-			vi.unstubAllEnvs();
+			// vi.unstubAllEnvs();
 			vi.stubEnv('VITE_LOCAL_POUH_ISSUER_CANISTER_ID', 'qbw6f-caaaa-aaaah-qdcwa-cai');
 			toastsStore.reset();
 			userProfileStore.reset();
@@ -55,7 +55,11 @@ describe('request-pouh-credential.services', () => {
 			getUserProfileMock = vi.spyOn(api, 'getUserProfile');
 		});
 
-		it.only('should request credential validate it and store it', async () => {
+		afterEach(() => {
+			vi.unstubAllEnvs();
+		});
+
+		it('should request credential validate it and store it', async () => {
 			addUserCredentialMock.mockResolvedValueOnce({ Ok: null });
 			const userProfileWithCredential: UserProfile = {
 				version: [],
