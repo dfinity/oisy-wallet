@@ -7,15 +7,18 @@
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import type { AllTransactionsUi } from '$lib/types/transaction';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { ethAddress } from '$lib/derived/address.derived';
 
 	let transactions: AllTransactionsUi;
 	// TODO: add ethTransactions, ckEthMinterInfo and ethAddress to mapAllTransactionsUi
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore,
-		$ethTransactions: {},
-		$ckEthMinterInfo: {},
-		$ethAddress: undefined
+		$ethTransactions: $ethTransactionsStore,
+		$ckEthMinterInfo: $ckEthMinterInfoStore,
+		$ethAddress: $ethAddress
 	});
 </script>
 
