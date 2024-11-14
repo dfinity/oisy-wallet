@@ -8,10 +8,10 @@
 	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
 
-	let loading=false;
+	let loading = false;
 
 	const load = async () => {
-		if(loading){
+		if (loading) {
 			return;
 		}
 
@@ -19,9 +19,7 @@
 			return;
 		}
 
-
-
-loading=true;
+		loading = true;
 
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
@@ -37,7 +35,7 @@ loading=true;
 			)
 		);
 
-loading=false;
+		loading = false;
 	};
 
 	$: $enabledEthereumTokens, $enabledErc20Tokens, $erc20UserTokensNotInitialized, load();
