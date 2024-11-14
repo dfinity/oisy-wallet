@@ -433,7 +433,6 @@ interface I18nTokens {
 	error: {
 		invalid_contract_address: string;
 		invalid_ledger: string;
-		invalid_index: string;
 		no_metadata: string;
 		unexpected: string;
 		unexpected_hiding: string;
