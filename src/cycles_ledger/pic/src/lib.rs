@@ -6,7 +6,11 @@
 #![allow(dead_code, unused_imports, clippy::all, clippy::missing_errors_doc)]
 use std::sync::Arc;
 
-use candid::{self, decode_args, encode_args, utils::{ArgumentDecoder, ArgumentEncoder}, CandidType, Deserialize, Principal};
+use candid::{
+    self, decode_args, encode_args,
+    utils::{ArgumentDecoder, ArgumentEncoder},
+    CandidType, Deserialize, Principal,
+};
 use pocket_ic::{PocketIc, UserError, WasmResult};
 
 pub use ic_cycles_ledger_types::*;
