@@ -7,12 +7,12 @@
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let transaction: EthTransactionUi;
-	export let token: Token | undefined = undefined;
+	export let token: OptionToken = undefined;
 
 	let value: BigNumber;
 	let timestamp: number | undefined;
