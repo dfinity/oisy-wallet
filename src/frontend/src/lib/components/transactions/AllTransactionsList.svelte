@@ -9,9 +9,13 @@
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionsUi;
+	// TODO: add ethTransactions, ckEthMinterInfo and ethAddress to mapAllTransactionsUi
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
-		$btcTransactions: $btcTransactionsStore
+		$btcTransactions: $btcTransactionsStore,
+		$ethTransactions: {},
+		$ckEthMinterInfo: {},
+		$ethAddress: undefined
 	});
 </script>
 
