@@ -5,6 +5,7 @@
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import type { TokenId } from '$lib/types/token';
 
+	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
 
 	const load = async () => {
