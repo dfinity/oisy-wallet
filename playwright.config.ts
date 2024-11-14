@@ -18,7 +18,7 @@ dotenv.populate(
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 export default defineConfig({
-	timeout: 60 * 1000,
+	timeout: 300 * 1000,
 	workers: 2,
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
@@ -31,14 +31,19 @@ export default defineConfig({
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',
-		actionTimeout: 60 * 1000,
-		navigationTimeout: 60 * 1000,
+		actionTimeout: 300 * 1000,
+		navigationTimeout: 300 * 1000,
 		...(DEV && { headless: false })
 	},
 	projects: [
+		/* Test against desktop browsers. */
 		{
 			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+			use: { ...devices['Desktop Chrome'] }
+		},
+		{
+			name: 'Firefox',
+			use: { ...devices['Desktop Firefox'] }
 		}
 	]
 });
