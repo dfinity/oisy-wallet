@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ComponentType } from 'svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
@@ -10,9 +11,12 @@
 	export let badge:
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
+		| { type: 'icon'; icon: ComponentType; ariaLabel: string }
 		| undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 	export let ring = false;
+	export let testId: string | undefined = undefined;
+	export let badgeTestId: string | undefined = undefined;
 
 	const {
 		icon,
@@ -28,11 +32,13 @@
 		size={logoSize}
 		{color}
 		{ring}
+		{testId}
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
-			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold text-[var(--color-secondary)]"
+			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-white text-sm font-semibold text-[var(--color-secondary)]"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: data.name })}
+			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}
 		</span>
@@ -42,7 +48,17 @@
 				src={badge.blackAndWhite ? networkIconBW : networkIcon}
 				alt={replacePlaceholders($i18n.core.alt.logo, { $name: networkName })}
 				{color}
+				testId={`network-${badgeTestId}`}
 			/>
+		</div>
+	{:else if badge?.type === 'icon'}
+		<!-- TODO: use new mapping color when merged-->
+		<div
+			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-white"
+			aria-label={badge.ariaLabel}
+			data-tid={`icon-${badgeTestId}`}
+		>
+			<svelte:component this={badge.icon} size="16" />
 		</div>
 	{/if}
 </div>
