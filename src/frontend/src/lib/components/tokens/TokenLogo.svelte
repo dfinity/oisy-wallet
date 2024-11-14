@@ -11,7 +11,7 @@
 	export let badge:
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
-		| { type: 'transaction'; icon: ComponentType }
+		| { type: 'transaction'; icon: ComponentType, ariaLabel: string }
 		| undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 	export let ring = false;
@@ -53,7 +53,11 @@
 		</div>
 	{:else if badge?.type === 'transaction'}
 		<!-- TODO: use new mapping color when merged-->
-		<div class="absolute -bottom-1 -right-1 rounded-full bg-brand-tertiary p-1 text-white">
+		<div
+			class="absolute -bottom-1 -right-1 rounded-full bg-brand-tertiary p-1 text-white"
+			aria-label={badge.ariaLabel}
+			data-tid={`transaction-${badgeTestId}`}
+		>
 			<svelte:component this={badge.icon} size="16" />
 		</div>
 	{/if}

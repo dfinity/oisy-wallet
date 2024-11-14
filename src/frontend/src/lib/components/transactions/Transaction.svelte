@@ -32,7 +32,7 @@
 
 		<div slot="icon">
 			{#if nonNullish(token)}
-				<TokenLogo data={token} badge={{ type: 'transaction', icon }} />
+				<TokenLogo data={token} badge={{ type: 'transaction', icon ,ariaLabel:type}} />
 			{:else}
 				<RoundedIcon {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
 			{/if}

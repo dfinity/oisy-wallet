@@ -1,3 +1,4 @@
+import IconSend from '$lib/components/icons/IconSend.svelte';
 import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -97,6 +98,24 @@ describe('TokenLogo', () => {
 			const networkBadge = getByAltText(expected);
 			expect(networkBadge).toBeInTheDocument();
 			expect(networkBadge).toHaveAttribute('src', 'network-icon-bw-url');
+		});
+	});
+
+	describe('when badge type is "transaction"', () => {
+		it('should display transaction badge', () => {
+			const { getByTestId } = render(TokenLogo, {
+				props: {
+					data: mockToken,
+					badge: {
+						type: 'transaction',
+						icon: IconSend,
+						ariaLabel: 'send'
+					},
+					badgeTestId: 'badge'
+				}
+			});
+
+			expect(getByTestId('transaction-badge')).toBeInTheDocument();
 		});
 	});
 });
