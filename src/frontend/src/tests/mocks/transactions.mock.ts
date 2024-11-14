@@ -1,10 +1,6 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { EthTransactionUi } from '$eth/types/eth-transaction';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import type { AnyTransactionUi } from '$lib/types/transaction';
 
-export const createTransactionsUi = (
-	n: number
-): (BtcTransactionUi | EthTransactionUi | IcTransactionUi)[] =>
+export const createTransactionsUi = (n: number): AnyTransactionUi[] =>
 	Array.from({ length: n }, (_, i) => ({
 		id: `id-${i}`,
 		type: 'send',

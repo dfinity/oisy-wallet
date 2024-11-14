@@ -1,12 +1,10 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { EthTransactionUi } from '$eth/types/eth-transaction';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import IconConvert from '$lib/components/icons/IconConvert.svelte';
 import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
+import type { AnyTransactionUi } from '$lib/types/transaction';
 import { groupTransactionsByDate, mapTransactionIcon } from '$lib/utils/transaction.utils';
 import { createTransactionsUi } from '$tests/mocks/transactions.mock';
 
@@ -64,13 +62,12 @@ describe('transaction.utils', () => {
 	});
 
 	describe('groupTransactionsByDate', () => {
-		const baseTransactions: (BtcTransactionUi | EthTransactionUi | IcTransactionUi)[] =
-			createTransactionsUi(5);
+		const baseTransactions: AnyTransactionUi[] = createTransactionsUi(5);
 
 		const mockTransactions = baseTransactions.map((transaction, index) => ({
 			...transaction,
 			timestamp: index + 1
-		})) as (BtcTransactionUi | EthTransactionUi | IcTransactionUi)[];
+		})) as AnyTransactionUi[];
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -99,7 +96,7 @@ describe('transaction.utils', () => {
 				{ ...mockTransactions[2], timestamp: 1 },
 				{ ...mockTransactions[3], timestamp: 2 },
 				{ ...mockTransactions[4], timestamp: 2 }
-			] as (BtcTransactionUi | EthTransactionUi | IcTransactionUi)[];
+			] as AnyTransactionUi[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': transactions.slice(0, 3),
