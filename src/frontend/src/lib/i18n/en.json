@@ -491,7 +491,6 @@
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
-			"invalid_index": "The selected token is not linked with an Icrc Index canister.",
 			"no_metadata": "No metadata were fetched for the contract address.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
