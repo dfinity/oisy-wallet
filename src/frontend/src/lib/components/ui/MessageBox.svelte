@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 
-	export let level: 'plain'|'info' | 'light-warning' | 'error' = 'info';
+	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
 </script>
 
 <div
