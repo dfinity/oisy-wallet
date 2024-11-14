@@ -6,7 +6,7 @@
 #![allow(dead_code, unused_imports, clippy::all, clippy::missing_errors_doc)]
 use std::sync::Arc;
 
-use candid::{self, decode_args, encode_args, CandidType, Deserialize, Principal};
+use candid::{self, decode_args, encode_args, utils::{ArgumentDecoder, ArgumentEncoder}, CandidType, Deserialize, Principal};
 use pocket_ic::{PocketIc, UserError, WasmResult};
 
 pub use ic_cycles_ledger_types::*;
@@ -15,6 +15,30 @@ pub struct CyclesLedgerPic {
     pub pic: Arc<PocketIc>,
     pub canister_id: Principal,
 }
+
+/*
+impl CyclesLedgerPic {
+    fn update<'a,R,T>(&self, caller: Principal, args: T) -> Result<R, String>
+    where T: ArgumentEncoder,
+    R: ArgumentDecoder<'a> {
+        let args = encode_args(args).expect("Failed to encode update call arguments");
+        self.pic
+            .update_call(self.canister_id, caller, "create_canister", args)
+            .map_err(|e| {
+                format!(
+                    "Update call error. RejectionCode: {:?}, Error: {}",
+                    e.code, e.description
+                )
+            })
+            .and_then(|reply| match reply {
+                WasmResult::Reply(reply) => {
+                    decode_args(&reply).map_err(|e| format!("Decoding failed: {e}"))
+                }
+                WasmResult::Reject(error) => Err(error),
+            })
+    }
+}
+*/
 
 impl CyclesLedgerPic {
     pub fn create_canister(
