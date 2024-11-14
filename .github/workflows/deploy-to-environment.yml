@@ -57,7 +57,6 @@ jobs:
           fi
 
       - name: Check release policy
-        if: ${{ (github.event.inputs.network == 'staging') && (github.ref != 'refs/heads/main') }}
         run: |
           if [[ "$NETWORK" ==  "staging" ]] && [[ "${{ github.ref }}" != "refs/heads/main" ]] ; then
             echo "Only the main branch may be deployed to staging."
