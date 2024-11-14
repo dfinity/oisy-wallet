@@ -114,6 +114,7 @@ export const requestPouhCredential = ({
 	const credentialSubject = identity.getPrincipal();
 	const { auth: authI18n } = get(i18n);
 	return new Promise((resolve, reject) => {
+		console.log(VITE_DFX_NETWORK);
 		console.log(POUH_ISSUER_CANISTER_ID);
 		console.log(POUH_ISSUER_ORIGIN);
 		console.log(INTERNET_IDENTITY_ORIGIN);
