@@ -1,22 +1,8 @@
 import { initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
-import type { UtxosFee } from '$btc/types/btc-send';
+import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.utils';
 import { get } from 'svelte/store';
-
-const mockUtxosFee: UtxosFee = {
-	feeSatoshis: 1000n,
-	utxos: [
-		{
-			height: 1000,
-			value: 1n,
-			outpoint: {
-				txid: [1, 2, 3],
-				vout: 1
-			}
-		}
-	]
-};
 
 describe('utxosFeeStore', () => {
 	beforeEach(() => {
@@ -41,5 +27,16 @@ describe('utxosFeeStore', () => {
 		});
 
 		expect(get(store)?.utxosFee).toStrictEqual(mockUtxosFee);
+	});
+
+	it('should reset the value', () => {
+		const store = initUtxosFeeStore();
+
+		store.setUtxosFee({
+			utxosFee: mockUtxosFee
+		});
+		store.reset();
+
+		expect(get(store)?.utxosFee).toBe(undefined);
 	});
 });

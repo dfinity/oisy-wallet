@@ -6,7 +6,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdBitcoin, mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
+	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
@@ -19,13 +19,8 @@
 			return;
 		}
 
-		if (
-			isNullish(networkId) ||
-			!isNetworkIdBitcoin(networkId) ||
-			isNullish(amount) ||
-			amount === 0
-		) {
-			store.setUtxosFee(null);
+		if (isNullish(networkId) || isNullish(amount) || amount === 0) {
+			store.reset();
 			return;
 		}
 
@@ -40,7 +35,7 @@
 			: undefined;
 
 		if (isNullish(utxosFee)) {
-			store.setUtxosFee(null);
+			store.reset();
 			return;
 		}
 
@@ -51,7 +46,7 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: amount, networkId, (() => debounceEstimateFee())();
+	$: amount, networkId, debounceEstimateFee();
 </script>
 
 <slot />

@@ -8,6 +8,7 @@ export type UtxosFeeStoreData = Option<{
 
 export interface UtxosFeeStore extends Readable<UtxosFeeStoreData> {
 	setUtxosFee: (data: UtxosFeeStoreData) => void;
+	reset: () => void;
 }
 
 export const initUtxosFeeStore = (): UtxosFeeStore => {
@@ -15,6 +16,10 @@ export const initUtxosFeeStore = (): UtxosFeeStore => {
 
 	return {
 		subscribe,
+
+		reset() {
+			set(undefined);
+		},
 
 		setUtxosFee(data: UtxosFeeStoreData) {
 			set(data);
