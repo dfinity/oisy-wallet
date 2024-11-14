@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { BtcTransactionUi } from '$btc/types/btc';
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
@@ -18,14 +19,13 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AllTransactionsUi } from '$lib/types/transaction';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
-	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 
 	let transactions: AllTransactionsUi;
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore
 	});
-  
+
 	let selectedBtcTransaction: BtcTransactionUi | undefined;
 	$: selectedBtcTransaction = $modalBtcTransaction
 		? ($modalStore?.data as BtcTransactionUi | undefined)
@@ -62,4 +62,3 @@
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
 	<IcTransactionModal transaction={selectedIcTransaction} />
 {/if}
-
