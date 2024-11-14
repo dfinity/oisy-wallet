@@ -6,10 +6,8 @@
 #![allow(dead_code, unused_imports, clippy::all, clippy::missing_errors_doc)]
 use std::sync::Arc;
 
-use candid::{self, CandidType, Deserialize, Principal};
-use pocket_ic::PocketIc;
-
-use crate::utils::pic_canister::{PicCanister, PicCanisterTrait};
+use candid::{self, CandidType, Deserialize, Principal, decode_args, encode_args};
+use pocket_ic::{PocketIc, WasmResult};
 
 pub use ic_{{snake_case canister_name}}_types::*;
 
@@ -25,8 +23,22 @@ pub struct {{PascalCase canister_name}}Pic {
 
 impl {{PascalCase canister_name}}Pic {
   {{#each methods}}
-  pub fn {{this.name}}(&self, caller: Principal{{#each this.args}}, {{this.0}}: &{{this.1}}{{/each}}) -> Result<{{vec_to_arity this.rets}}, String> {
-    let wasm_result =  self.pic.update_call(self.canister_id, caller, "{{escape_debug this.original_name}}", ({{#each this.args}}{{this.0}}, {{/each}}));
+  pub fn {{this.name}}(&self, caller: Principal{{#each this.args}}, {{this.0}}: &{{this.1}}{{/each}}) -> Result<({{#each this.rets}}{{this}}, {{/each}}), String> {
+        let args = encode_args(({{#each this.args}}{{this.0}}, {{/each}})).expect("Failed to encode update call arguments");
+        self.pic
+            .update_call(self.canister_id, caller, "create_canister", args)
+            .map_err(|e| {
+                format!(
+                    "Update call error. RejectionCode: {:?}, Error: {}",
+                    e.code, e.description
+                )
+            })
+            .and_then(|reply| match reply {
+                WasmResult::Reply(reply) => {
+                    decode_args(&reply).map_err(|e| format!("Decoding failed: {e}"))
+                }
+                WasmResult::Reject(error) => Err(error),
+            })
   }
   {{/each}}
 }
