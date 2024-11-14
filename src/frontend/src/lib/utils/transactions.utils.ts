@@ -41,8 +41,11 @@ export const mapAllTransactionsUi = ({
 	$ethTransactions: EthTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-}): AllTransactionsUi =>
-	tokens.reduce<AllTransactionsUi>((acc, { id: tokenId, network: { id: networkId } }) => {
+}): AllTransactionsUi => {
+	let ckEthMinterInfoAddressesMainnet: OptionEthAddress[];
+	let ckEthMinterInfoAddressesSepolia: OptionEthAddress[];
+
+	return tokens.reduce<AllTransactionsUi>((acc, { id: tokenId, network: { id: networkId } }) => {
 		if (isNetworkIdBTCMainnet(networkId)) {
 			if (isNullish($btcTransactions)) {
 				return acc;
@@ -61,16 +64,28 @@ export const mapAllTransactionsUi = ({
 			// TODO: remove Sepolia transactions when the feature is complete; for now we use it for testing
 			const isSepoliaNetwork = isNetworkIdSepolia(networkId);
 
+			if (!isSepoliaNetwork && isNullish(ckEthMinterInfoAddressesMainnet)) {
+				ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
+					minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
+					networkId: ETHEREUM_NETWORK_ID
+				});
+			}
+
+			if (isSepoliaNetwork && isNullish(ckEthMinterInfoAddressesSepolia)) {
+				ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
+					minterInfo: $ckEthMinterInfo?.[SEPOLIA_TOKEN_ID],
+					networkId: SEPOLIA_NETWORK_ID
+				});
+			}
+
 			return [
 				...acc,
 				...($ethTransactions[tokenId] ?? []).map((transaction) => ({
 					...mapEthTransactionUi({
 						transaction,
-						ckMinterInfoAddresses: toCkMinterInfoAddresses({
-							minterInfo:
-								$ckEthMinterInfo?.[isSepoliaNetwork ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID],
-							networkId: isSepoliaNetwork ? SEPOLIA_NETWORK_ID : ETHEREUM_NETWORK_ID
-						}),
+						ckMinterInfoAddresses: isSepoliaNetwork
+							? ckEthMinterInfoAddressesSepolia
+							: ckEthMinterInfoAddressesMainnet,
 						$ethAddress: $ethAddress
 					}),
 					component: EthTransaction
@@ -85,3 +100,4 @@ export const mapAllTransactionsUi = ({
 
 		return acc;
 	}, []);
+};
