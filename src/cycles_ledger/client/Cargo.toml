@@ -8,3 +8,4 @@ candid = { workspace = true }
 ic-cdk = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
+ic-cycles-ledger-types = { workspace = true }
