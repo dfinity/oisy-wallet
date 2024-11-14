@@ -55,7 +55,7 @@ describe('request-pouh-credential.services', () => {
 			getUserProfileMock = vi.spyOn(api, 'getUserProfile');
 		});
 
-		it('should request credential validate it and store it', async () => {
+		it.only('should request credential validate it and store it', async () => {
 			addUserCredentialMock.mockResolvedValueOnce({ Ok: null });
 			const userProfileWithCredential: UserProfile = {
 				version: [],
