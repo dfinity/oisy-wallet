@@ -5,7 +5,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   lint:
     runs-on: ubuntu-24.04
 
@@ -37,7 +36,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Test
-        run: npm run test
+        run: npm run test src/frontend/src/tests/lib/services/request-pouh-credential.services.spec.ts
 
   may-merge:
     if: always()

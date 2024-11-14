@@ -110,9 +110,13 @@ export const requestPouhCredential = ({
 }: {
 	identity: Identity;
 }): Promise<ResultSuccess> => {
+	console.log('in da requestPouhCredential');
 	const credentialSubject = identity.getPrincipal();
 	const { auth: authI18n } = get(i18n);
 	return new Promise((resolve, reject) => {
+		console.log(POUH_ISSUER_CANISTER_ID);
+		console.log(POUH_ISSUER_ORIGIN);
+		console.log(INTERNET_IDENTITY_ORIGIN);
 		const issuerCanisterId = nonNullish(POUH_ISSUER_CANISTER_ID)
 			? Principal.fromText(POUH_ISSUER_CANISTER_ID)
 			: undefined;
