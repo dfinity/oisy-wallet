@@ -11,7 +11,7 @@
 	export let badge:
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
-		| { type: 'transaction'; icon: ComponentType, ariaLabel: string }
+		| { type: 'transaction'; icon: ComponentType; ariaLabel: string }
 		| undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 	export let ring = false;
