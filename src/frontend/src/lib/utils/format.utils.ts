@@ -1,5 +1,5 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens.env';
-import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
@@ -77,7 +77,7 @@ export const formatSecondsToNormalizedDate = ({
 }): string => {
 	const date = new Date(seconds * 1000);
 	const today = currentDate ?? new Date();
-	const daysDifference = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+	const daysDifference = Math.ceil((date.getTime() - today.getTime()) / MILLISECONDS_IN_DAY);
 
 	if (Math.abs(daysDifference) < 2) {
 		return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(daysDifference, 'day');
