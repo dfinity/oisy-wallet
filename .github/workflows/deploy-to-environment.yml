@@ -154,14 +154,17 @@ jobs:
 
       - name: Deploy Backend to Environment
         run: |
+          DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
+          [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
+
           if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
-                ENV=$NETWORK ./scripts/deploy.backend.sh
+                ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
               fi
             else            
-              ENV=$NETWORK ./scripts/deploy.backend.sh
+              ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
             fi
           fi

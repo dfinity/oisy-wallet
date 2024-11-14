@@ -60,7 +60,7 @@ if [ -n "${ENV+1}" ]; then
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })" --network "$ENV"
+  })" --network "$ENV" "${@}"
 else
   DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
   dfx deploy backend --argument "(variant {
@@ -79,5 +79,5 @@ else
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })" --specified-id "$DEFAULT_CANISTER_ID"
+  })" --specified-id "$DEFAULT_CANISTER_ID" "${@}"
 fi
