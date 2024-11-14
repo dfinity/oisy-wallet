@@ -5,7 +5,7 @@
 	import { token } from '$lib/stores/token.store';
 
 	let loading: boolean;
-	$: loading = isNullish($token) || isNullish($icTransactionsStore?.[$token.id]);
+	$: loading = isNullish($token) || $icTransactionsStore?.[$token.id] === undefined;
 </script>
 
 <TransactionsSkeletons {loading}>

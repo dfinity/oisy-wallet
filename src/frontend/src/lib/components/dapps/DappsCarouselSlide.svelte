@@ -30,7 +30,7 @@
 				modalStore.openDappDetails(dappsCarouselSlide);
 			}}
 			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
-			class="text-primary text-sm font-semibold"
+			class="text-sm font-semibold text-brand-primary"
 		>
 			{callToAction} →
 		</button>

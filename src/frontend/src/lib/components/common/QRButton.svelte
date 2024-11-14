@@ -8,7 +8,7 @@
 	data-tid="qr-code-scanner-button"
 	on:click|preventDefault
 	aria-label={$i18n.send.text.open_qr_modal}
-	class="text-primary hover:text-inherit active:text-inherit"
+	class="text-brand-primary hover:text-inherit active:text-inherit"
 >
 	<IconQRCodeScanner />
 </button>

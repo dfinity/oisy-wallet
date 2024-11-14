@@ -5,6 +5,7 @@ import {
 	IC_CKBTC_MINTER_CANISTER_ID
 } from '$env/networks.icrc.env';
 import {
+	JsonTransactionsTextSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -25,6 +26,7 @@ import {
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
+	PostMessageWalletDataSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type { BtcAddress } from '$lib/types/address';
@@ -434,6 +436,57 @@ describe('post-message.schema', () => {
 		});
 	});
 
+	describe('JsonTransactionsTextSchema', () => {
+		it('should validate a string successfully', () => {
+			const validData = JSON.stringify([{ id: 'tx1', amount: 500 }]);
+			expect(JsonTransactionsTextSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should fail validation for non-string values', () => {
+			const invalidData = 123n;
+			expect(() => JsonTransactionsTextSchema.parse(invalidData)).toThrow();
+		});
+	});
+
+	describe('PostMessageWalletDataSchema', () => {
+		const mockValidBalance: CertifiedData<bigint> = {
+			data: 1000n,
+			certified: true
+		};
+		const mockValidTransactions = JSON.stringify([{ id: 'tx1', amount: 500 }]);
+
+		it('should validate with a valid balance and newTransactions', () => {
+			const validData = {
+				balance: mockValidBalance,
+				newTransactions: mockValidTransactions
+			};
+			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should validate if newTransactions is missing', () => {
+			const validData = {
+				balance: mockValidBalance
+			};
+			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should validate if balance is not a bigint because of zod custom', () => {
+			const validData = {
+				balance: 'not_a_bigint',
+				newTransactions: mockValidTransactions
+			};
+			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
+		});
+
+		it('should validate if newTransactions is not valid JSON because it accepts a string', () => {
+			const validData = {
+				balance: mockValidBalance,
+				newTransactions: 'invalid_json'
+			};
+			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
+		});
+	});
+
 	describe('PostMessageDataResponseWalletSchema', () => {
 		const mockValidBalance: CertifiedData<bigint> = {
 			data: 1000n,
@@ -451,13 +504,13 @@ describe('post-message.schema', () => {
 			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
-		it('should throw an error if newTransactions is missing', () => {
-			const invalidData = {
+		it('should validate if newTransactions is missing', () => {
+			const validData = {
 				wallet: {
 					balance: mockValidBalance
 				}
 			};
-			expect(() => PostMessageDataResponseWalletSchema.parse(invalidData)).toThrow();
+			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should validate if balance is not a bigint because of zod custom', () => {
