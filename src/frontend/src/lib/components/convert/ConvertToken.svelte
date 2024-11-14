@@ -10,7 +10,6 @@
 <div class="flex items-center">
 	<TokenLogo data={token} logoSize={size} />
 
-
 	<span class={`${size === 'md' ? 'text-3xl font-bold' : 'text-tertiary'} ml-2 `}
 		>{token.symbol}</span
 	>
