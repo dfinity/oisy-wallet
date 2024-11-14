@@ -1,0 +1,31 @@
+name: 'Setup LLVM and Bash on macOS'
+
+description: 'Installs LLVM and Bash 5 on macOS and sets up environment variables for wasm32 target'
+
+runs:
+  using: composite
+  steps:
+
+    - name: Install LLVM and Bash on macOS
+      shell: bash
+      run: |
+        brew install llvm
+        brew install bash
+
+    - name: Add Bash 5 to PATH on macOS
+      shell: bash
+      run: |
+        echo "$(brew --prefix bash)/bin" >> $GITHUB_PATH
+
+    - name: Verify Bash Version
+      shell: bash
+      run: |
+        bash --version
+
+    - name: Set environment variables for wasm32 target on macOS
+      shell: bash
+      run: |
+        echo "CC_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/clang" >> $GITHUB_ENV
+        echo "AR_wasm32_unknown_unknown=$(brew --prefix llvm)/bin/llvm-ar" >> $GITHUB_ENV
+        echo "CFLAGS_wasm32_unknown_unknown=--target=wasm32-unknown-unknown" >> $GITHUB_ENV
+        echo "CRATE_CC_NO_DEFAULTS_wasm32_unknown_unknown=true" >> $GITHUB_ENV

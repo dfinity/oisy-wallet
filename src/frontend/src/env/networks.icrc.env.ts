@@ -18,7 +18,7 @@ import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import type { EnvTokens } from '$env/types/env-token-ckerc20';
+import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
@@ -228,7 +228,7 @@ const mapCkErc20Data = ({
 	ledgerCanisterId,
 	env
 }: {
-	ckErc20Tokens: EnvTokens;
+	ckErc20Tokens: EnvCkErc20Tokens;
 	minterCanisterId: OptionCanisterIdText;
 	ledgerCanisterId: OptionCanisterIdText;
 	env: NetworkEnvironment;
@@ -466,5 +466,12 @@ export const ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS = [
 	IC_CKETH_LEDGER_CANISTER_ID,
 	...(nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDC)
 		? [CKERC20_PRODUCTION_DATA.ckUSDC.ledgerCanisterId]
+		: [])
+];
+
+// Additional suggested canisters to be enabled by default if the user set no preference
+export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
+	...(nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDT)
+		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
 		: [])
 ];
