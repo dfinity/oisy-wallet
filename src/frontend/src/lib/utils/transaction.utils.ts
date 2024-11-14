@@ -52,7 +52,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUi>(transactions
 		}
 
 		const date = formatSecondsToNormalizedDate({
-			seconds: normalizeTimestampToSeconds(Number(transaction.timestamp)),
+			seconds: normalizeTimestampToSeconds(transaction.timestamp),
 			currentDate
 		});
 
