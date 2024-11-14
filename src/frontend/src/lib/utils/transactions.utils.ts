@@ -1,5 +1,6 @@
 import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
@@ -60,7 +61,10 @@ export const sortTransactions = ({
 	transactionB: AnyTransactionUi;
 }): number => {
 	if (nonNullish(timestampA) && nonNullish(timestampB)) {
-		return Number(timestampB) - Number(timestampA);
+		return (
+			Number(normalizeTimestampToSeconds(timestampB)) -
+			Number(normalizeTimestampToSeconds(timestampA))
+		);
 	}
 
 	return nonNullish(timestampA) ? 1 : -1;
