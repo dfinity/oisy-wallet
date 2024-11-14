@@ -40,6 +40,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	describe('when ERC20 user tokens are initialized', () => {
 		beforeEach(() => {
+			erc20UserTokensStore.resetAll();
 			erc20UserTokensStore.setAll(mockErc20UserTokens);
 		});
 
