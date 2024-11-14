@@ -3,6 +3,9 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+	import type { TokenId } from '$lib/types/token';
+
+	let tokensLoaded: TokenId[] = [];
 
 	const load = async () => {
 		if ($erc20UserTokensNotInitialized) {
@@ -12,7 +15,13 @@
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
 				async ({ network: { id: networkId }, id: tokenId }) => {
+					if (tokensLoaded.includes(tokenId)) {
+						return;
+					}
+
 					await loadTransactions({ tokenId, networkId });
+
+					tokensLoaded.push(tokenId);
 				}
 			)
 		);
