@@ -161,6 +161,7 @@ jobs:
           dfx identity import --disable-encryption --force default "$key_pem"
           rm "$key_pem"
           dfx identity use default
+          dfx identity get-principal
 
       - name: Pre-build
         run: npm run build
