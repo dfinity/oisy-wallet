@@ -7,5 +7,10 @@ testWithII('should display activity page', async ({ page, iiPage }) => {
 
 	await activityPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await page.waitForLoadState('networkidle');
+
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		animations: 'disabled'
+	});
 });

@@ -7,7 +7,12 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 
 	await transactionsPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await page.waitForLoadState('networkidle');
+
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		animations: 'disabled'
+	});
 });
 
 testWithII('should display ETH transactions page', async ({ page, iiPage }) => {
@@ -15,7 +20,12 @@ testWithII('should display ETH transactions page', async ({ page, iiPage }) => {
 
 	await transactionsPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await page.waitForLoadState('networkidle');
+
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		animations: 'disabled'
+	});
 });
 
 testWithII('should display ICP transactions page', async ({ page, iiPage }) => {
@@ -23,5 +33,10 @@ testWithII('should display ICP transactions page', async ({ page, iiPage }) => {
 
 	await transactionsPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await page.waitForLoadState('networkidle');
+
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		animations: 'disabled'
+	});
 });
