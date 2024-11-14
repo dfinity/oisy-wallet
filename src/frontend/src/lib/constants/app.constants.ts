@@ -32,8 +32,7 @@ export const POUH_ISSUER_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_POUH_ISSUER_CANISTER_ID
 			: PROD
 				? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
-				: // Default to prod for development. This is necessary because this is the environment used in testing.
-					import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID;
+				: undefined;
 
 export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 	? LOCAL
