@@ -21,6 +21,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
+	import { token } from '$lib/stores/token.store';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
 	$: ckMinterInfoAddresses = toCkMinterInfoAddresses({
@@ -49,7 +50,7 @@
 	<EthTransactionsSkeletons>
 		{#each sortedTransactionsUi as transaction (transaction.hash)}
 			<div transition:slide={SLIDE_DURATION}>
-				<EthTransaction {transaction} />
+				<EthTransaction {transaction} token={$token} />
 			</div>
 		{/each}
 

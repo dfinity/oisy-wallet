@@ -5,6 +5,7 @@ import type {
 	TransactionStatusSchema,
 	TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
+import type { Token } from '$lib/types/token';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { FeeData } from '@ethersproject/providers';
@@ -36,5 +37,6 @@ export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to
 export type AnyTransactionUi = BtcTransactionUi | EthTransactionUi | IcTransactionUi;
 
 export type AllTransactionsUi = (AnyTransactionUi & {
+	token: Token;
 	component: ComponentType;
 })[];
