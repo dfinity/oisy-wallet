@@ -15,6 +15,15 @@ export const mockBtcTransactionUi: BtcTransactionUi = {
 	confirmations: 1
 };
 
+export const createMockBtcTransactionsUi = (n: number): BtcTransactionUi[] =>
+	Array.from({ length: n }, () => ({
+		...mockBtcTransactionUi,
+		blockNumber: Math.floor(Math.random() * 100000),
+		id: Math.random().toString(36).substring(7),
+		timestamp: BigInt(Math.floor(Math.random() * 100000)),
+		value: BigInt(Math.floor(Math.random() * 100000))
+	}));
+
 export const mockBtcTransaction: BitcoinTransaction = {
 	hash: 'e793cab7e155a0e8f825c4609548faf759c57715fecac587580a1d716bb2b89e',
 	ver: 1,
