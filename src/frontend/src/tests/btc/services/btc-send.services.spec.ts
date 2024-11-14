@@ -1,5 +1,4 @@
-import * as btcSendService from '$btc/services/btc-send.services';
-import { type SendBtcParams } from '$btc/services/btc-send.services';
+import { sendBtc, type SendBtcParams } from '$btc/services/btc-send.services';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
@@ -8,7 +7,6 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockPage } from '$tests/mocks/page.store.mock';
 import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
 
 describe('btc-send.services', () => {
@@ -22,10 +20,9 @@ describe('btc-send.services', () => {
 		amount: 10
 	} as SendBtcParams;
 	const txid = 'txid;';
+	const error = new Error('test error');
 
-	beforeEach(() => {
-		mockPage.reset();
-	});
+	beforeEach(() => {});
 
 	describe('sendBtc', () => {
 		it('should call all required functions', async () => {
@@ -36,7 +33,7 @@ describe('btc-send.services', () => {
 			const progressSpy = vi.spyOn(defaultParams, 'progress');
 			const waitAndTriggerWalletSpy = vi.spyOn(walletUtils, 'waitAndTriggerWallet');
 
-			await btcSendService.sendBtc(defaultParams);
+			await sendBtc(defaultParams);
 
 			expect(progressSpy).toHaveBeenCalledWith(ProgressStepsSendBtc.SEND);
 
@@ -66,6 +63,28 @@ describe('btc-send.services', () => {
 			});
 
 			expect(waitAndTriggerWalletSpy).toHaveBeenCalledOnce();
+		});
+
+		it('should throw if signer sendBtc throws', async () => {
+			vi.spyOn(signerAPI, 'sendBtc').mockImplementation(async () => {
+				await Promise.resolve();
+				throw error;
+			});
+
+			const res = sendBtc(defaultParams);
+
+			await expect(res).rejects.toThrow(error);
+		});
+
+		it('should throw if backend addPendingBtcTransaction throws', async () => {
+			vi.spyOn(backendAPI, 'addPendingBtcTransaction').mockImplementation(async () => {
+				await Promise.resolve();
+				throw error;
+			});
+
+			const res = sendBtc(defaultParams);
+
+			await expect(res).rejects.toThrow(error);
 		});
 	});
 });
