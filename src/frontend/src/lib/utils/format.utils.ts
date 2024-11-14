@@ -80,6 +80,7 @@ export const formatSecondsToNormalizedDate = ({
 	const daysDifference = Math.ceil((date.getTime() - today.getTime()) / MILLISECONDS_IN_DAY);
 
 	if (Math.abs(daysDifference) < 2) {
+		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
 		return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(daysDifference, 'day');
 	}
 
