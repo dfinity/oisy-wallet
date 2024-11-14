@@ -58,6 +58,7 @@ export const mapAllTransactionsUi = ({
 		}
 
 		if (isNetworkIdEthereum(networkId)) {
+			// TODO: remove Sepolia transactions when the feature is complete; for now we use it for testing
 			const isSepoliaNetwork = isNetworkIdSepolia(networkId);
 
 			return [
