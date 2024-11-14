@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import type { BtcTransactionUi } from '$btc/types/btc';
@@ -18,6 +18,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AllTransactionsUi } from '$lib/types/transaction';
 	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 
 	let transactions: AllTransactionsUi;
 	$: transactions = mapAllTransactionsUi({
