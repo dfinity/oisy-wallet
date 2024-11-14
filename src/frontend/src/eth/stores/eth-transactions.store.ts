@@ -12,7 +12,7 @@ export interface EthTransactionsStore extends Readable<EthTransactionsData> {
 	reset: () => void;
 }
 
-const initTransactionsStore = (): EthTransactionsStore => {
+const initEthTransactionsStore = (): EthTransactionsStore => {
 	const INITIAL: EthTransactionsData = {} as Record<TokenId, Transaction[]>;
 
 	const { subscribe, update, set } = writable<EthTransactionsData>(INITIAL);
@@ -41,4 +41,4 @@ const initTransactionsStore = (): EthTransactionsStore => {
 	};
 };
 
-export const ethTransactionsStore = initTransactionsStore();
+export const ethTransactionsStore = initEthTransactionsStore();
