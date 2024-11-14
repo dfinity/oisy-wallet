@@ -70,7 +70,8 @@ describe('transaction.utils', () => {
 			timestamp: index + 1
 		})) as AnyTransactionUi[];
 
-		const nowInMilliseconds = Date.now();
+		const nowInMilliseconds =
+			Math.floor(Date.now() / MILLISECONDS_IN_SECOND) * MILLISECONDS_IN_SECOND;
 		const nowInSeconds = nowInMilliseconds / MILLISECONDS_IN_SECOND;
 		const nowInNanoSeconds = nowInMilliseconds * Number(NANO_SECONDS_IN_MILLISECOND);
 
