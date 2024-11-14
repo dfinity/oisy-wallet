@@ -54,7 +54,7 @@ FROM deps AS build_backend
 
 COPY . .
 
-RUN touch src/*/src/lib.rs
+RUN touch src/*/src/lib.rs src/*/*/src/lib.rs
 
 RUN ./docker/build --backend
 
