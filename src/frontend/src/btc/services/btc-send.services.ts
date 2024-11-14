@@ -22,8 +22,7 @@ export type SendBtcParams = BtcSendServiceParams & {
 	destination: BtcAddress;
 	source: BtcAddress;
 	utxosFee: UtxosFee;
-	onSendStarted?: () => void;
-	onSendCompleted?: () => void;
+	onProgress?: () => void;
 };
 
 export const selectUtxosFee = async ({
@@ -52,13 +51,13 @@ export const sendBtc = async ({
 	network,
 	source,
 	identity,
-	onSendStarted,
-	onSendCompleted,
+	onProgress,
 	...rest
 }: SendBtcParams): Promise<void> => {
-	const { txid } = await send({ onSendStarted, utxosFee, network, identity, ...rest });
+	// TODO: use txid returned by this method to register it as a pending transaction in BE
+	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
-	onSendCompleted?.();
+	onProgress?.();
 
 	await addPendingBtcTransaction({
 		identity,
@@ -77,12 +76,12 @@ const send = async ({
 	network,
 	amount,
 	utxosFee,
-	onSendStarted
+	onProgress
 }: Omit<SendBtcParams, 'source'>): Promise<SendBtcResponse> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 
-	onSendStarted?.();
+	onProgress?.();
 
 	return await sendBtcApi({
 		identity,

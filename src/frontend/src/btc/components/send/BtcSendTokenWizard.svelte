@@ -113,8 +113,13 @@
 				network,
 				source,
 				identity: $authIdentity,
-				onSendStarted: () => progress(ProgressStepsSendBtc.SEND),
-				onSendCompleted: () => progress(ProgressStepsSendBtc.DONE)
+				onProgress: () => {
+					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
+						progress(ProgressStepsSendBtc.SEND);
+					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
+						progress(ProgressStepsSendBtc.DONE);
+					}
+				}
 			});
 
 			sendProgressStep = ProgressStepsSendBtc.DONE;
