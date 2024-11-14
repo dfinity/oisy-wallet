@@ -36,7 +36,7 @@
 		<span
 			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-light-grey bg-white text-sm font-semibold text-[var(--color-secondary)]"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: data.name })}
-			data-tid={badgeTestId}
+			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}
 		</span>
@@ -46,7 +46,7 @@
 				src={badge.blackAndWhite ? networkIconBW : networkIcon}
 				alt={replacePlaceholders($i18n.core.alt.logo, { $name: networkName })}
 				{color}
-				testId={badgeTestId}
+				testId={`network-${badgeTestId}`}
 			/>
 		</div>
 	{/if}

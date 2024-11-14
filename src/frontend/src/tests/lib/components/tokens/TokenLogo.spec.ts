@@ -29,7 +29,7 @@ describe('TokenLogo', () => {
 
 	it('should not render the badge when it is not provided', () => {
 		const { queryByTestId } = render(TokenLogo, {
-			props: { data: { ...mockToken, icon: undefined }, badgeTestId: 'token-logo-badge' }
+			props: { data: { ...mockToken, icon: undefined }, badgeTestId: 'badge' }
 		});
 
 		expect(queryByTestId('token-logo-badge')).toBeNull();
@@ -41,7 +41,7 @@ describe('TokenLogo', () => {
 				props: {
 					data: mockToken,
 					badge: { type: 'tokenCount', count: 123 },
-					badgeTestId: 'token-count-badge'
+					badgeTestId: 'badge'
 				}
 			});
 
@@ -54,7 +54,7 @@ describe('TokenLogo', () => {
 				props: {
 					data: mockToken,
 					badge: { type: 'tokenCount', count: 0 },
-					badgeTestId: 'token-count-badge'
+					badgeTestId: 'badge'
 				}
 			});
 
@@ -65,7 +65,7 @@ describe('TokenLogo', () => {
 	describe('when badge type is "network"', () => {
 		it('should display network icon badge', () => {
 			const { getByTestId, getByAltText } = render(TokenLogo, {
-				props: { data: mockToken, badge: { type: 'network' }, badgeTestId: 'network-badge' }
+				props: { data: mockToken, badge: { type: 'network' }, badgeTestId: 'badge' }
 			});
 
 			expect(getByTestId('network-badge')).toBeInTheDocument();
@@ -84,7 +84,7 @@ describe('TokenLogo', () => {
 				props: {
 					data: mockToken,
 					badge: { type: 'network', blackAndWhite: true },
-					badgeTestId: 'network-badge'
+					badgeTestId: 'badge'
 				}
 			});
 
