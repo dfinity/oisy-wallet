@@ -6,13 +6,12 @@
 #![allow(dead_code, unused_imports, clippy::all, clippy::missing_errors_doc)]
 use {{candid_crate}}::{self, CandidType, Deserialize, Principal};
 use ic_cdk::api::call::CallResult;
+pub use ic_{{snake_case canister_name}}_types::*;
 
 {{#if submodule}}
 /// Manually maintained methods
 pub mod {{submodule}};
 {{/if}}
-
-{{type_defs}}
 
 {{#if methods}}
 pub struct {{PascalCase canister_name}}Service(pub Principal);
