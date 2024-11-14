@@ -1,4 +1,11 @@
-import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import {
+	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
+	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
+} from '$env/networks.icrc.env';
+import { ERC20_SUGGESTED_TOKENS } from '$env/tokens.erc20.env';
+import type { ContractAddressText } from '$eth/types/address';
+import type { IcCkToken } from '$icp/types/ic-token';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -9,7 +16,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -64,16 +71,35 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 }: {
 	defaultToken: T;
 	userToken: TokenToggleable<T> | undefined;
-}): TokenToggleable<T> => ({
-	...defaultToken,
-	enabled:
-		('ledgerCanisterId' in defaultToken &&
-			ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(
-				(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId
-			)) ||
-		userToken?.enabled === true,
-	version: userToken?.version
-});
+}): TokenToggleable<T> => {
+	const ledgerCanisterId =
+		'ledgerCanisterId' in defaultToken &&
+		(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId;
+
+	const isEnabledByDefault =
+		ledgerCanisterId && ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
+
+	const isSuggestedToken =
+		(ledgerCanisterId &&
+			ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)) ||
+		('address' in defaultToken &&
+			ERC20_SUGGESTED_TOKENS.map((token) => token.address).includes(
+				(
+					defaultToken as {
+						address: ContractAddressText;
+					}
+				).address
+			));
+
+	return {
+		...defaultToken,
+		enabled:
+			isEnabledByDefault ||
+			(isNullish(userToken?.enabled) && isSuggestedToken) ||
+			userToken?.enabled === true,
+		version: userToken?.version
+	};
+};
 
 /**
  * Calculates USD balance for the provided token.
@@ -183,3 +209,22 @@ export const sumUsdBalances = ([usdBalance1, usdBalance2]: [
  */
 export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>
 	'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
+
+/** Find in the provided tokens list a twin IC token by symbol.
+ *
+ * @param tokenToPair - token to find a twin for.
+ * @param tokens - The list of tokens.
+ * @returns IcCkToken or undefined if no twin token found.
+ * */
+export const findTwinToken = ({
+	tokenToPair,
+	tokens
+}: {
+	tokenToPair: Token;
+	tokens: Token[];
+}): IcCkToken | undefined =>
+	isRequiredTokenWithLinkedData(tokenToPair)
+		? (tokens.find(
+				(token) => token.symbol === tokenToPair.twinTokenSymbol && isIcCkToken(token)
+			) as IcCkToken | undefined)
+		: undefined;

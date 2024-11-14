@@ -128,7 +128,7 @@
 		<div in:fade={{ delay: 0, duration: 250 }}>
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
-					<ImgBanner width="100%" src={banner} size="small" />
+					<ImgBanner src={banner} />
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
 

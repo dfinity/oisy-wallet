@@ -344,8 +344,24 @@ interface I18nConvert {
 		check_balance_for_fees: string;
 		fees_explanation: string;
 		current_balance: string;
+		review_button: string;
+		convert_button: string;
 		input_reset_button: string;
+		swap_to_token: string;
+		review: string;
+		available_balance: string;
+		max_balance: string;
+		review_tokens_info_title: string;
+		amount_to_convert: string;
+		amount_to_receive: string;
+		source_network: string;
+		destination_network: string;
+		conversion_may_take: string;
+		executing_transaction: string;
+		initializing: string;
+		refreshing_ui: string;
 	};
+	assertion: { insufficient_funds: string; insufficient_funds_for_fee: string };
 	error: { loading_cketh_helper: string };
 }
 
@@ -390,8 +406,7 @@ interface I18nTokens {
 			verifying: string;
 			add_the_token: string;
 			info: string;
-			github_howto: string;
-			open_github_howto: string;
+			info_index: string;
 			custom_tokens_not_supported: string;
 		};
 		error: {
@@ -434,7 +449,6 @@ interface I18nTokens {
 	error: {
 		invalid_contract_address: string;
 		invalid_ledger: string;
-		invalid_index: string;
 		no_metadata: string;
 		unexpected: string;
 		unexpected_hiding: string;
@@ -454,6 +468,11 @@ interface I18nFee {
 		estimated_inter_network: string;
 		estimated_eth: string;
 		max_fee_eth: string;
+		convert_fee: string;
+		convert_inter_network_fee: string;
+		convert_btc_network_fee: string;
+		zero_fee: string;
+		total_fee: string;
 	};
 	error: { cannot_fetch_gas_fee: string };
 }
@@ -583,6 +602,8 @@ interface I18nTransactions {
 		transaction_history: string;
 		open_transactions: string;
 		mainnet_btc_transactions_info: string;
+		transaction_history_unavailable: string;
+		missing_index_canister_explanation: string;
 	};
 	error: {
 		loading_transactions: string;

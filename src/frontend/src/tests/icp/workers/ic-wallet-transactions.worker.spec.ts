@@ -1,4 +1,4 @@
-import type { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
+import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
@@ -9,22 +9,13 @@ import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { HttpAgent } from '@dfinity/agent';
-import {
-	IndexCanister,
-	type Transaction,
-	type TransactionWithId as TransactionWithIdIcp
-} from '@dfinity/ledger-icp';
-import {
-	IcrcIndexNgCanister,
-	type IcrcIndexNgTransactionWithId,
-	type IcrcTransaction,
-	type IcrcTransactionWithId
-} from '@dfinity/ledger-icrc';
+import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
+import { IcrcIndexNgCanister, type IcrcIndexNgTransactionWithId } from '@dfinity/ledger-icrc';
 import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
-describe('ic-wallet.worker', () => {
+describe('ic-wallet-transactions.worker', () => {
 	let spyGetTransactions: MockInstance;
 
 	let originalPostmessage: unknown;
@@ -108,28 +99,26 @@ describe('ic-wallet.worker', () => {
 		vi.useRealTimers();
 	});
 
-	const initWithTransactions = <
-		T extends IcrcTransaction | Transaction,
-		TWithId extends IcrcTransactionWithId | TransactionWithIdIcp,
-		PostMessageDataRequest
-	>({
+	const initWithTransactions = <PostMessageDataRequest>({
 		initScheduler,
 		transaction,
 		msg,
 		startData = undefined
 	}: {
-		initScheduler: () => IcWalletTransactionsScheduler<T, TWithId, PostMessageDataRequest>;
+		initScheduler: (
+			data: PostMessageDataRequest | undefined
+		) => IcWalletScheduler<PostMessageDataRequest>;
 		transaction: IcTransactionUi;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet';
 		startData?: PostMessageDataRequest | undefined;
 	}) => {
-		let scheduler: IcWalletTransactionsScheduler<T, TWithId, PostMessageDataRequest>;
+		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
 		const mockPostMessageNotCertified = mockPostMessage({ msg, transaction, certified: false });
 		const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
 
 		beforeEach(() => {
-			scheduler = initScheduler();
+			scheduler = initScheduler(startData);
 		});
 
 		afterEach(() => {
@@ -211,23 +200,21 @@ describe('ic-wallet.worker', () => {
 		});
 	};
 
-	const initWithoutTransactions = <
-		T extends IcrcTransaction | Transaction,
-		TWithId extends IcrcTransactionWithId | TransactionWithIdIcp,
-		PostMessageDataRequest
-	>({
+	const initWithoutTransactions = <PostMessageDataRequest>({
 		msg,
 		initScheduler,
 		startData = undefined
 	}: {
 		msg: 'syncIcpWallet' | 'syncIcrcWallet';
-		initScheduler: () => IcWalletTransactionsScheduler<T, TWithId, PostMessageDataRequest>;
+		initScheduler: (
+			data: PostMessageDataRequest | undefined
+		) => IcWalletScheduler<PostMessageDataRequest>;
 		startData?: PostMessageDataRequest | undefined;
 	}) => {
-		let scheduler: IcWalletTransactionsScheduler<T, TWithId, PostMessageDataRequest>;
+		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
 		beforeEach(() => {
-			scheduler = initScheduler();
+			scheduler = initScheduler(startData);
 		});
 
 		afterEach(() => {
@@ -260,27 +247,25 @@ describe('ic-wallet.worker', () => {
 		});
 	};
 
-	const initOtherScenarios = <
-		T extends IcrcTransaction | Transaction,
-		TWithId extends IcrcTransactionWithId | TransactionWithIdIcp,
-		PostMessageDataRequest
-	>({
+	const initOtherScenarios = <PostMessageDataRequest>({
 		initScheduler,
 		startData = undefined,
 		initCleanupMock,
 		initErrorMock,
 		msg
 	}: {
-		initScheduler: () => IcWalletTransactionsScheduler<T, TWithId, PostMessageDataRequest>;
+		initScheduler: (
+			data: PostMessageDataRequest | undefined
+		) => IcWalletScheduler<PostMessageDataRequest>;
 		startData?: PostMessageDataRequest | undefined;
 		initCleanupMock: (mockRogueId: bigint) => void;
 		initErrorMock: (err: Error) => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet';
 	}) => {
-		let scheduler: IcWalletTransactionsScheduler<T, TWithId, PostMessageDataRequest>;
+		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
 		beforeEach(() => {
-			scheduler = initScheduler();
+			scheduler = initScheduler(startData);
 
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
@@ -313,15 +298,14 @@ describe('ic-wallet.worker', () => {
 			const err = new Error('test');
 			initErrorMock(err);
 
-			const scheduler = initIcpWalletScheduler();
-			await scheduler.start(undefined);
+			await scheduler.start(startData);
 
 			// idle and in_progress
 			// error
 			expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 			expect(postMessageMock).toHaveBeenCalledWith({
-				msg: 'syncIcpWalletError',
+				msg: `${msg}Error`,
 				data: {
 					error: err
 				}
@@ -385,7 +369,10 @@ describe('ic-wallet.worker', () => {
 				});
 			});
 
-			initWithoutTransactions({ msg: 'syncIcpWallet', initScheduler: initIcpWalletScheduler });
+			initWithoutTransactions({
+				msg: 'syncIcpWallet',
+				initScheduler: initIcpWalletScheduler
+			});
 		});
 
 		describe('other scenarios', () => {

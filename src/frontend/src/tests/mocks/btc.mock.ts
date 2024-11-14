@@ -1,4 +1,5 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
+import type { UtxosFee } from '$btc/types/btc-send';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 
 export const mockBtcAddress = 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7';
@@ -14,6 +15,29 @@ export const mockBtcTransactionUi: BtcTransactionUi = {
 	value: 126527n,
 	confirmations: 1
 };
+
+export const mockUtxosFee: UtxosFee = {
+	feeSatoshis: 1000n,
+	utxos: [
+		{
+			height: 1000,
+			value: 1n,
+			outpoint: {
+				txid: [1, 2, 3],
+				vout: 1
+			}
+		}
+	]
+};
+
+export const createMockBtcTransactionsUi = (n: number): BtcTransactionUi[] =>
+	Array.from({ length: n }, () => ({
+		...mockBtcTransactionUi,
+		blockNumber: Math.floor(Math.random() * 100000),
+		id: Math.random().toString(36).substring(7),
+		timestamp: BigInt(Math.floor(Math.random() * 100000)),
+		value: BigInt(Math.floor(Math.random() * 100000))
+	}));
 
 export const mockBtcTransaction: BitcoinTransaction = {
 	hash: 'e793cab7e155a0e8f825c4609548faf759c57715fecac587580a1d716bb2b89e',
