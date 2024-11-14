@@ -1,4 +1,5 @@
 <script lang="ts">
+	import pLimit from 'p-limit';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
@@ -8,6 +9,8 @@
 	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
 
+	const limit = pLimit(1);
+
 	const load = async () => {
 		if ($erc20UserTokensNotInitialized) {
 			return;
@@ -15,15 +18,13 @@
 
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
-				async ({ network: { id: networkId }, id: tokenId }) => {
-					if (tokensLoaded.includes(tokenId)) {
-						return;
-					}
-
-					await loadTransactions({ tokenId, networkId });
-
-					tokensLoaded.push(tokenId);
-				}
+				({ network: { id: networkId }, id: tokenId }) =>
+					limit(async () => {
+						if (!tokensLoaded.includes(tokenId)) {
+							await loadTransactions({ tokenId, networkId });
+							tokensLoaded.push(tokenId);
+						}
+					})
 			)
 		);
 	};
