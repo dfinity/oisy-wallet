@@ -1,7 +1,7 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import * as api from '$lib/api/backend.api';
-import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
+// import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -82,7 +82,7 @@ describe('request-pouh-credential.services', () => {
 					credential_type: POUH_CREDENTIAL_TYPE,
 					arguments: []
 				},
-				issuerCanisterId: Principal.fromText(POUH_ISSUER_CANISTER_ID),
+				issuerCanisterId: Principal.fromText('aaaaa-aa'),
 				currentUserVersion: undefined,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
@@ -107,7 +107,7 @@ describe('request-pouh-credential.services', () => {
 					credential_type: POUH_CREDENTIAL_TYPE,
 					arguments: []
 				},
-				issuerCanisterId: Principal.fromText(POUH_ISSUER_CANISTER_ID),
+				issuerCanisterId: Principal.fromText('aaaaa-aa'),
 				currentUserVersion: undefined,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
