@@ -7,7 +7,7 @@ import type {
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
-import { fromNullable, nonNullish } from '@dfinity/utils';
+import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 export const mapTransactionIcpToSelf = (
 	tx: TransactionWithId
@@ -137,5 +137,5 @@ export const mapIcpTransaction = ({
 		};
 	}
 
-	throw new Error(`Unknown transaction type ${JSON.stringify(transaction)}`);
+	throw new Error(`Unknown transaction type ${JSON.stringify(transaction, jsonReplacer)}`);
 };
