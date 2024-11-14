@@ -2133,6 +2133,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-cycles-ledger-types"
+version = "0.1.0"
+dependencies = [
+ "candid",
+ "ic-cdk 0.16.0",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
 name = "ic-error-types"
 version = "0.9.0"
 source = "git+https://github.com/dfinity/ic?rev=e69bcc7b319cbb3ebc22ec55af35287741244db6#e69bcc7b319cbb3ebc22ec55af35287741244db6"
