@@ -138,8 +138,7 @@ describe('custom-token.services', () => {
 				}
 			);
 
-			// TODO(OISY-296): introduce test for undefined Index canister ID
-			it.each([IC_CKBTC_INDEX_CANISTER_ID])(
+			it.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
 				'should load tokens after set custom token with index ID %s',
 				async (indexCanisterId) => {
 					backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
@@ -237,8 +236,7 @@ describe('custom-token.services', () => {
 				});
 			});
 
-			// TODO(OISY-296): introduce test for undefined Index canister ID
-			it.each([IC_CKBTC_INDEX_CANISTER_ID])(
+			it.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
 				'should result with loaded but toastError if metadata fails with index ID %s',
 				async (indexCanisterId) => {
 					backendCanisterMock.setCustomToken.mockResolvedValue(undefined);
