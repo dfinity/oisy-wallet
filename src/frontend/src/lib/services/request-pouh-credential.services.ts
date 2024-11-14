@@ -1,6 +1,7 @@
 import { addUserCredential } from '$lib/api/backend.api';
 import {
 	INTERNET_IDENTITY_ORIGIN,
+	LOCAL,
 	POUH_ISSUER_CANISTER_ID,
 	POUH_ISSUER_ORIGIN,
 	VC_POPUP_HEIGHT,
@@ -115,6 +116,8 @@ export const requestPouhCredential = ({
 	const { auth: authI18n } = get(i18n);
 	return new Promise((resolve, reject) => {
 		console.log(VITE_DFX_NETWORK);
+		console.log(LOCAL);
+		console.log(import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID);
 		console.log(POUH_ISSUER_CANISTER_ID);
 		console.log(POUH_ISSUER_ORIGIN);
 		console.log(INTERNET_IDENTITY_ORIGIN);
