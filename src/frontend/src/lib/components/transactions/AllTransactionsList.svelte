@@ -12,12 +12,15 @@
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionsUi;
+	// TODO: add icTransactions and btcStatuses
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress
+		$ethAddress: $ethAddress,
+		$icTransactions: {},
+		$btcStatuses: {}
 	});
 
 	let sortedTransactions: AllTransactionsUi;
