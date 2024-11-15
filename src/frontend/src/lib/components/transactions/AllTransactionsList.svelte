@@ -18,13 +18,13 @@
 		modalEthTransaction
 	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type {
 		AllTransactionsUi,
 		AllTransactionUi,
 		TransactionsUiDateGroup
 	} from '$lib/types/transaction';
 	import { groupTransactionsByDate } from '$lib/utils/transaction.utils';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionsUi;
