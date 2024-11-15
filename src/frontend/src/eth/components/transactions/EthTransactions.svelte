@@ -50,7 +50,7 @@
 	<EthTransactionsSkeletons>
 		{#each sortedTransactionsUi as transaction (transaction.hash)}
 			<div transition:slide={SLIDE_DURATION}>
-				<EthTransaction {transaction} token={$token} />
+				<EthTransaction {transaction} token={$token} hideTokenLogo />
 			</div>
 		{/each}
 
