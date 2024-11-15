@@ -13,7 +13,7 @@
 
 	export let transaction: EthTransactionUi;
 	export let token: Token;
-  export let hideTokenLogo = false;
+	export let hideTokenLogo = false;
 
 	let value: BigNumber;
 	let timestamp: number | undefined;
