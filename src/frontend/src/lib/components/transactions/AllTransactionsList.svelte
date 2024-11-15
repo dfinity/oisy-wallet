@@ -67,7 +67,7 @@
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
 {#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-	{#each Object.entries(groupedTransactions) as [date, transactions], index (`${date}-${index}`)}
+	{#each Object.entries(groupedTransactions) as [date, transactions] (date)}
 		<TransactionsDateGroup {date} {transactions} />
 	{/each}
 {/if}
