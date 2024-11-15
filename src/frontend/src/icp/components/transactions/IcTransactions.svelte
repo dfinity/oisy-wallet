@@ -118,10 +118,7 @@
 			<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction
-							transaction={transaction.data}
-							token={$token ?? ICP_TOKEN}
-						/>
+						<IcTransaction transaction={transaction.data} token={$token ?? ICP_TOKEN} />
 					</li>
 				{/each}
 			</InfiniteScroll>
