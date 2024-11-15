@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
@@ -17,5 +18,6 @@
 			src={data.network.iconBW}
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: data.network.name })}
 		/>
+		<NetworkLogo network={data.network} blackAndWhite />
 	{/if}
 </div>
