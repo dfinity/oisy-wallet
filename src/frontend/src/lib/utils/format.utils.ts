@@ -1,20 +1,24 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
-import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
+import { BigNumber, type BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
-export const formatToken = ({
-	value,
-	unitName = ETHEREUM_DEFAULT_DECIMALS,
-	displayDecimals = 4,
-	trailingZeros = false
-}: {
+const DEFAULT_DISPLAY_DECIMALS = 4;
+
+interface FormatTokenParams {
 	value: BigNumber;
 	unitName?: string | BigNumberish;
 	displayDecimals?: number;
 	trailingZeros?: boolean;
-}): string => {
+}
+
+export const formatToken = ({
+	value,
+	unitName = ETHEREUM_DEFAULT_DECIMALS,
+	displayDecimals = DEFAULT_DISPLAY_DECIMALS,
+	trailingZeros = false
+}: FormatTokenParams): string => {
 	const res = Utils.formatUnits(value, unitName);
 	const formatted = (+res).toLocaleString('en-US', {
 		useGrouping: false,
@@ -28,6 +32,19 @@ export const formatToken = ({
 
 	return formatted.replace(/\.0+$/, '');
 };
+
+export const formatTokenBigintToNumber = ({
+	value,
+	...restParams
+}: Omit<FormatTokenParams, 'value'> & {
+	value: bigint;
+}): number =>
+	Number(
+		formatToken({
+			value: BigNumber.from(value),
+			...restParams
+		})
+	);
 
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	export let feeAmount: bigint | undefined = undefined;
 	export let symbol: string;
@@ -12,14 +11,11 @@
 
 	let formattedFeeAmount: number | undefined;
 	$: formattedFeeAmount = nonNullish(feeAmount)
-		? // TODO: create a util for formating and converting a bigint to number
-			Number(
-				formatToken({
-					value: BigNumber.from(feeAmount),
-					unitName: decimals,
-					displayDecimals: decimals
-				})
-			)
+		? formatTokenBigintToNumber({
+				value: feeAmount,
+				unitName: decimals,
+				displayDecimals: decimals
+			})
 		: undefined;
 </script>
 
