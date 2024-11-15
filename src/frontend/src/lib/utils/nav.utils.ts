@@ -26,6 +26,9 @@ export const isRouteSettings = ({ route: { id } }: Page): boolean =>
 export const isRouteDappExplorer = ({ route: { id } }: Page): boolean =>
 	id === `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
 
+export const isRouteActivity = ({ route: { id } }: Page): boolean =>
+	id === `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
+
 export const isRouteTokens = ({ route: { id } }: Page): boolean => id === ROUTE_ID_GROUP_APP;
 
 const tokenUrl = ({
