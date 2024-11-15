@@ -9,16 +9,18 @@
 	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
 
-
 	const load = async () => {
 		if ($erc20UserTokensNotInitialized) {
 			return;
 		}
 
-		const tokens:Token[]=[...$enabledEthereumTokens, ...$enabledErc20Tokens];
+		const tokens: Token[] = [...$enabledEthereumTokens, ...$enabledErc20Tokens];
 
 		for (let i = 0; i < tokens.length; i++) {
-			const { network: { id: networkId }, id: tokenId } = tokens[i];
+			const {
+				network: { id: networkId },
+				id: tokenId
+			} = tokens[i];
 			if (!tokensLoaded.includes(tokenId)) {
 				await loadTransactions({ tokenId, networkId });
 				tokensLoaded.push(tokenId);
