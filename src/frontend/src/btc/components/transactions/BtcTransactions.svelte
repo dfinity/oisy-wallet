@@ -11,12 +11,11 @@
 	import type { BtcTransactionUi } from '$btc/types/btc';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
+	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalBtcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
-	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
-
 
 	let selectedTransaction: BtcTransactionUi | undefined;
 	$: selectedTransaction = $modalBtcTransaction
