@@ -12,7 +12,8 @@
 
 	let formattedAmount: number | undefined;
 	$: formattedAmount = nonNullish(feeAmount)
-		? Number(
+		? // TODO: create a util for formating and converting a bigint to number
+			Number(
 				formatToken({
 					value: BigNumber.from(feeAmount),
 					unitName: decimals,
