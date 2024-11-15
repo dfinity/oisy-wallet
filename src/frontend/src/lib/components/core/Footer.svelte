@@ -65,23 +65,26 @@
 			class:md:translate-x-full={$authSignedIn}
 			class:1.5md:translate-x-0={$authSignedIn}
 		>
-			<ExternalLink
-				href="https://dfinity.org"
-				ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
-				iconVisible={false}
-			>
-				<div class="flex flex-row items-center gap-2">
-					<IconDfinity />
-					<span
-						class:md:hidden={$authSignedIn}
-						class:xl:flex={$authSignedIn}
-						class:md:h-md:hidden={$authNotSignedIn}
-						class:1.5md:h-md:flex={$authNotSignedIn}
+			<div class="flex flex-row items-center gap-2">
+				<IconDfinity />
+				<span
+					class:md:hidden={$authSignedIn}
+					class:xl:flex={$authSignedIn}
+					class:md:h-md:hidden={$authNotSignedIn}
+					class:1.5md:h-md:flex={$authNotSignedIn}
+				>
+					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
+					<ExternalLink
+						href="https://dfinity.org"
+						ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
+						iconVisible={false}
+						color="blue"
 					>
-						{replaceOisyPlaceholders($i18n.footer.text.developed_with)}
-					</span>
-				</div>
-			</ExternalLink>
+						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
+					</ExternalLink>
+					{replaceOisyPlaceholders($i18n.footer.text.copyright)}
+				</span>
+			</div>
 		</div>
 	</div>
 </footer>
