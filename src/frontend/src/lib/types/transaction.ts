@@ -36,7 +36,11 @@ export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to
 
 export type AnyTransactionUi = BtcTransactionUi | EthTransactionUi | IcTransactionUi;
 
-export type AllTransactionsUi = (AnyTransactionUi & {
+export type AllTransactionUi = AnyTransactionUi & {
 	token: Token;
 	component: ComponentType;
-})[];
+};
+
+export type AllTransactionsUi = AllTransactionUi[];
+
+export type TransactionsUiDateGroup<T extends AnyTransactionUi> = Record<string, T[]>;
