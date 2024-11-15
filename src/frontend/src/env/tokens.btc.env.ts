@@ -53,6 +53,8 @@ export const BTC_REGTEST_TOKEN: Token = {
 	icon: bitcoinTestnet
 };
 
+// The following tokens are used as fallback for any Bitcoin token defined in the token store.
+// That means that the order of the tokens in the array is important, to have a correct fallback chain.
 export const SUPPORTED_BITCOIN_TOKENS: [...Token[], Token] = [
 	...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_TOKEN] : []),
 	BTC_TESTNET_TOKEN,
