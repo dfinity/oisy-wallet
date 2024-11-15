@@ -10,7 +10,7 @@
 
 	export let transaction: BtcTransactionUi;
 	export let token: Token;
-	export let hideTokenLogo = false;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
@@ -30,7 +30,7 @@
 	timestamp={Number(timestamp)}
 	{status}
 	{token}
-	{hideTokenLogo}
+	{iconType}
 >
 	{label}
 </Transaction>

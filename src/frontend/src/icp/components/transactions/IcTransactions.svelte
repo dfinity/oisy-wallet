@@ -121,7 +121,6 @@
 						<IcTransaction
 							transaction={transaction.data}
 							token={$token ?? ICP_TOKEN}
-							hideTokenLogo
 						/>
 					</li>
 				{/each}

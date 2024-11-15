@@ -13,7 +13,7 @@
 
 	export let transaction: EthTransactionUi;
 	export let token: Token;
-	export let hideTokenLogo = false;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let value: BigNumber;
 	let timestamp: number | undefined;
@@ -74,7 +74,7 @@
 	timestamp={transactionDate}
 	{status}
 	{token}
-	{hideTokenLogo}
+	{iconType}
 >
 	{label}
 </Transaction>
