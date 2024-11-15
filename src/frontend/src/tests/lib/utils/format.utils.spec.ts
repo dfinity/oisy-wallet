@@ -1,6 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { formatSecondsToNormalizedDate, formatToken } from '$lib/utils/format.utils';
+import {
+	formatSecondsToNormalizedDate,
+	formatToken,
+	formatTokenBigintToNumber
+} from '$lib/utils/format.utils';
 import { BigNumber } from 'ethers';
+import { describe } from 'vitest';
 
 describe('formatToken', () => {
 	const value = BigNumber.from('1000000000000000000');
@@ -233,5 +238,37 @@ describe('formatSecondsToNormalizedDate', () => {
 				expected
 			);
 		});
+	});
+});
+
+describe('formatTokenBigintToNumber', () => {
+	it('should format correctly', () => {
+		expect(
+			formatTokenBigintToNumber({
+				value: 2000000n,
+				displayDecimals: 4,
+				unitName: 4
+			})
+		).toBe(200);
+
+		expect(
+			formatTokenBigintToNumber({
+				value: 50000n,
+				displayDecimals: 8,
+				unitName: 4
+			})
+		).toBe(5);
+
+		expect(
+			formatTokenBigintToNumber({
+				value: 1000000000000000n
+			})
+		).toBe(0.001);
+
+		expect(
+			formatTokenBigintToNumber({
+				value: 0n
+			})
+		).toBe(0);
 	});
 });
