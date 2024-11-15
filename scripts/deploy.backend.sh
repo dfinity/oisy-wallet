@@ -53,7 +53,7 @@ if [ -n "${ENV+1}" ]; then
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
          cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
-         derivation_origin = \"$DERIVATION_ORIGIN\";
+         derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };
@@ -73,7 +73,7 @@ else
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
          cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
-         derivation_origin = \"$DERIVATION_ORIGIN\";
+         derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };

@@ -32,7 +32,7 @@ pub struct InitArg {
     pub cfs_canister_id: Option<Principal>,
     /// Derivation origins when logging in the dapp with Internet Identity.
     /// Used to validate the id alias credential which includes the derivation origin of the id alias.
-    pub derivation_origin: String,
+    pub derivation_origin: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
@@ -79,7 +79,7 @@ pub struct Config {
     pub cfs_canister_id: Option<Principal>,
     /// Derivation origins when logging in the dapp with Internet Identity.
     /// Used to validate the id alias credential which includes the derivation origin of the id alias.
-    pub derivation_origin: String,
+    pub derivation_origin: Option<String>,
 }
 
 pub mod transaction {
