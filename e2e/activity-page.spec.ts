@@ -7,5 +7,9 @@ testWithII('should display activity page', async ({ page, iiPage }) => {
 
 	await activityPage.waitForReady();
 
+	await page.waitForLoadState('networkidle');
+
+	await activityPage.promotionCarousel.goToSlide(1);
+
 	await expect(page).toHaveScreenshot({ fullPage: true });
 });
