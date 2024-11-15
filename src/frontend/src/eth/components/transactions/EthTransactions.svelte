@@ -17,9 +17,9 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalToken, modalEthTransaction } from '$lib/derived/modal.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 
@@ -50,7 +50,7 @@
 	<EthTransactionsSkeletons>
 		{#each sortedTransactionsUi as transaction (transaction.hash)}
 			<div transition:slide={SLIDE_DURATION}>
-				<EthTransaction {transaction} token={$token} />
+				<EthTransaction {transaction} token={$tokenWithFallback} />
 			</div>
 		{/each}
 

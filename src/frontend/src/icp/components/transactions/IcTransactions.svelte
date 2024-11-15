@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { ComponentType } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import { ICP_TOKEN } from '$env/tokens.env';
 	import Info from '$icp/components/info/Info.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
 	import IcNoIndexPlaceholder from '$icp/components/transactions/IcNoIndexPlaceholder.svelte';
@@ -117,7 +118,7 @@
 			<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction transaction={transaction.data} />
+						<IcTransaction transaction={transaction.data} token={$token ?? ICP_TOKEN} />
 					</li>
 				{/each}
 			</InfiniteScroll>

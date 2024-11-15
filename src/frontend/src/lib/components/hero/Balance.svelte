@@ -16,7 +16,7 @@
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !token.balance.isZero()}
-			<span><Amount amount={token.balance} /> {token.symbol}</span>
+			<span><Amount amount={token.balance} decimals={token.decimals} /> {token.symbol}</span>
 		{:else}
 			<span class:animate-pulse={$loading}>0.00</span>
 		{/if}
