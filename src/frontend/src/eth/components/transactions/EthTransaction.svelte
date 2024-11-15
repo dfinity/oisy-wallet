@@ -5,14 +5,14 @@
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import { tokenSymbol } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
+	import type { OptionToken } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let transaction: EthTransactionUi;
+	export let token: OptionToken = undefined;
 
 	let value: BigNumber;
 	let timestamp: number | undefined;
@@ -28,10 +28,10 @@
 	$: ({ value, timestamp, displayTimestamp, uiType: type } = transaction);
 
 	let ckTokenSymbol: string;
-	$: ckTokenSymbol = isSupportedEthToken($token)
-		? $token.twinTokenSymbol
+	$: ckTokenSymbol = isSupportedEthToken(token)
+		? token.twinTokenSymbol
 		: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-			(($token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
+			((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
 
 	let label: string;
 	$: label =
@@ -41,7 +41,7 @@
 						? $i18n.transaction.label.converting_ck_token
 						: $i18n.transaction.label.ck_token_converted,
 					{
-						$twinToken: $tokenSymbol ?? '',
+						$twinToken: token?.symbol ?? '',
 						$ckToken: ckTokenSymbol
 					}
 				)
@@ -51,7 +51,7 @@
 							? $i18n.transaction.label.converting_twin_token
 							: $i18n.transaction.label.ck_token_sent,
 						{
-							$twinToken: $tokenSymbol ?? '',
+							$twinToken: token?.symbol ?? '',
 							$ckToken: ckTokenSymbol
 						}
 					)
@@ -72,6 +72,7 @@
 	{type}
 	timestamp={transactionDate}
 	{status}
+	{token}
 >
 	{label}
 </Transaction>
