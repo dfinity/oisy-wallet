@@ -30,7 +30,7 @@
 {#if nonNullish(sortedTransactions) && sortedTransactions.length > 0}
 	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
 		<div in:slide={SLIDE_DURATION}>
-			<svelte:component this={transaction.component} {transaction} />
+			<svelte:component this={transaction.component} {transaction} token={transaction.token} />
 		</div>
 	{/each}
 {/if}
