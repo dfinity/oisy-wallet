@@ -32,6 +32,7 @@ interface I18nNavigation {
 		tokens: string;
 		settings: string;
 		dapp_explorer: string;
+		activity: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -42,6 +43,7 @@ interface I18nNavigation {
 		tokens: string;
 		settings: string;
 		dapp_explorer: string;
+		activity: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;

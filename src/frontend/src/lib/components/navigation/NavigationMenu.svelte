@@ -2,12 +2,14 @@
 	import type { Page } from '@sveltejs/kit';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
+		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
@@ -15,6 +17,7 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
+		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
@@ -39,6 +42,16 @@
 		>
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
+		</NavigationItem>
+
+		<NavigationItem
+			href="/activity"
+			ariaLabel={$i18n.navigation.alt.activity}
+			selected={isRouteActivity(pageData)}
+			testId={NAVIGATION_ITEM_ACTIVITY}
+		>
+			<IconActivity />
+			{$i18n.navigation.text.activity}
 		</NavigationItem>
 
 		<NavigationItem

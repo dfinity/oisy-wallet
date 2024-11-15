@@ -1,5 +1,6 @@
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
+	isRouteActivity,
 	isRouteDappExplorer,
 	isRouteSettings,
 	isRouteTokens,
@@ -79,6 +80,22 @@ describe('Route Check Functions', () => {
 			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
 
 			expect(isRouteDappExplorer(mockPage(`/anotherGroup/${AppPath.Explore}`))).toBe(false);
+		});
+	});
+
+	describe('isRouteActivity', () => {
+		it('should return true when route id matches Activity path', () => {
+			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Activity}`))).toBe(true);
+		});
+
+		it('should return false when route id does not match Activity path', () => {
+			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+			expect(isRouteActivity(mockPage(`/anotherGroup/${AppPath.Activity}`))).toBe(false);
 		});
 	});
 
