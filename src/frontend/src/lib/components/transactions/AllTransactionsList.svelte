@@ -1,11 +1,22 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+	import type { BtcTransactionUi } from '$btc/types/btc';
+	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import {
+		modalBtcTransaction,
+		modalIcTransaction,
+		modalEthTransaction
+	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import type {
 		AllTransactionsUi,
@@ -13,15 +24,19 @@
 		TransactionsUiDateGroup
 	} from '$lib/types/transaction';
 	import { groupTransactionsByDate } from '$lib/utils/transaction.utils';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionsUi;
+	// TODO: add icTransactions and btcStatuses
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress: $ethAddress
+		$ethAddress: $ethAddress,
+		$icTransactions: {},
+		$btcStatuses: {}
 	});
 
 	let sortedTransactions: AllTransactionsUi;
@@ -31,6 +46,21 @@
 
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUi>;
 	$: groupedTransactions = groupTransactionsByDate(sortedTransactions);
+
+	let selectedBtcTransaction: BtcTransactionUi | undefined;
+	$: selectedBtcTransaction = $modalBtcTransaction
+		? ($modalStore?.data as BtcTransactionUi | undefined)
+		: undefined;
+
+	let selectedEthTransaction: EthTransactionUi | undefined;
+	$: selectedEthTransaction = $modalEthTransaction
+		? ($modalStore?.data as EthTransactionUi | undefined)
+		: undefined;
+
+	let selectedIcTransaction: IcTransactionUi | undefined;
+	$: selectedIcTransaction = $modalIcTransaction
+		? ($modalStore?.data as IcTransactionUi | undefined)
+		: undefined;
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
@@ -44,4 +74,10 @@
 	<TransactionsPlaceholder />
 {/if}
 
-<!--TODO: add modals for transaction details-->
+{#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
+	<BtcTransactionModal transaction={selectedBtcTransaction} />
+{:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
+	<EthTransactionModal transaction={selectedEthTransaction} />
+{:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
+	<IcTransactionModal transaction={selectedIcTransaction} />
+{/if}
