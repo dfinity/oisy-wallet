@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconAccountBalance, IconUser, Popover } from '@dfinity/gix-components';
+	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
