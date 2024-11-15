@@ -36,6 +36,25 @@ describe('AllTransactionsList', () => {
 		const btcTransactionsNumber = 5;
 		const ethTransactionsNumber = 3;
 
+		const todayTimestamp = new Date().getTime();
+		const yesterdayTimestamp = todayTimestamp - 24 * 60 * 60 * 1000;
+
+		btcTransactionsStore.append({
+			tokenId: BTC_MAINNET_TOKEN_ID,
+			transactions: createMockBtcTransactionsUi(btcTransactionsNumber).map((transaction) => ({
+				data: { ...transaction, timestamp: BigInt(todayTimestamp) },
+				certified: false
+			}))
+		});
+
+		ethTransactionsStore.add({
+			tokenId: ETHEREUM_TOKEN_ID,
+			transactions: createMockEthTransactions(ethTransactionsNumber).map((transaction) => ({
+				...transaction,
+				timestamp: yesterdayTimestamp
+			}))
+		});
+
 		beforeEach(() => {
 			vi.resetAllMocks();
 
@@ -48,30 +67,30 @@ describe('AllTransactionsList', () => {
 			]);
 		});
 
-		btcTransactionsStore.append({
-			tokenId: BTC_MAINNET_TOKEN_ID,
-			transactions: createMockBtcTransactionsUi(btcTransactionsNumber).map((transaction) => ({
-				data: transaction,
-				certified: false
-			}))
-		});
-
-		ethTransactionsStore.add({
-			tokenId: ETHEREUM_TOKEN_ID,
-			transactions: createMockEthTransactions(ethTransactionsNumber)
-		});
-
 		it('should not render the placeholder', () => {
 			const { queryByText } = render(AllTransactionsList);
 
 			expect(queryByText(en.transactions.text.transaction_history)).not.toBeInTheDocument();
 		});
 
-		it('should render the transactions list', () => {
-			const { container } = render(AllTransactionsList);
+		it('should render the transactions list with group of dates', () => {
+			const { container, getByText } = render(AllTransactionsList);
 
 			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
 				(el) => el.parentElement === container
+			);
+
+			// today and yesterday
+			expect(transactionComponents).toHaveLength(2);
+			expect(getByText('today')).toBeInTheDocument();
+			expect(getByText('yesterday')).toBeInTheDocument();
+		});
+
+		it('should render the transactions list with all the transactions', () => {
+			const { container } = render(AllTransactionsList);
+
+			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
+				(el) => el.parentElement?.parentElement === container
 			);
 
 			expect(transactionComponents).toHaveLength(btcTransactionsNumber + ethTransactionsNumber);

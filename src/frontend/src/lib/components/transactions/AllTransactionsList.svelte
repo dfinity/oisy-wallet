@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
-	import type { AllTransactionsUi } from '$lib/types/transaction';
+	import type {
+		AllTransactionsUi,
+		AllTransactionUi,
+		TransactionsUiDateGroup
+	} from '$lib/types/transaction';
+	import { groupTransactionsByDate } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionsUi;
@@ -24,14 +28,15 @@
 	$: sortedTransactions = transactions.sort((a, b) =>
 		sortTransactions({ transactionA: a, transactionB: b })
 	);
+
+	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUi>;
+	$: groupedTransactions = groupTransactionsByDate(sortedTransactions);
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
 {#if nonNullish(sortedTransactions) && sortedTransactions.length > 0}
-	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
-		<div in:slide={SLIDE_DURATION}>
-			<svelte:component this={transaction.component} {transaction} token={transaction.token} />
-		</div>
+	{#each Object.entries(groupedTransactions) as [date, transactions], index (`${date}-${index}`)}
+		<TransactionsDateGroup {date} {transactions} />
 	{/each}
 {/if}
 
