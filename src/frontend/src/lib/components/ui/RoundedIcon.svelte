@@ -8,7 +8,5 @@
 <div
 	class="relative flex items-center justify-center rounded-full bg-primary p-3 ring-2 ring-brand-subtle"
 >
-	<div class:opacity-10={withOpacity}>
-		<svelte:component this={icon}  />
-	</div>
+		<svelte:component this={icon}  styleClass={withOpacity ? 'opacity-10' : ''} />
 </div>
