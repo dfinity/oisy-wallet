@@ -66,56 +66,41 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAboutWhyOisy: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
 	close: () => void;
-	set: (value: ModalData<T>) => void;
 }
 
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
-	const onPopState = () => {
-		modalStore.close();
-	};
-
 	return {
-		openEthReceive: <D extends T>(data: D) => modalStore.set({ type: 'eth-receive', data }),
-		openIcpReceive: <D extends T>(data: D) => modalStore.set({ type: 'icp-receive', data }),
-		openIcrcReceive: <D extends T>(data: D) => modalStore.set({ type: 'icrc-receive', data }),
-		openCkBTCReceive: <D extends T>(data: D) => modalStore.set({ type: 'ckbtc-receive', data }),
-		openCkETHReceive: <D extends T>(data: D) => modalStore.set({ type: 'cketh-receive', data }),
-		openBtcReceive: <D extends T>(data: D) => modalStore.set({ type: 'btc-receive', data }),
-		openReceive: <D extends T>(data: D) => modalStore.set({ type: 'receive', data }),
-		openSend: <D extends T>(data: D) => modalStore.set({ type: 'send', data }),
-		openBuy: <D extends T>(data: D) => modalStore.set({ type: 'buy', data }),
-		openConvertCkBTCToBTC: () => modalStore.set({ type: 'convert-ckbtc-btc' }),
-		openConvertBTCToCkBTC: () => modalStore.set({ type: 'convert-btc-ckbtc' }),
-		openConvertToTwinTokenCkEth: () => modalStore.set({ type: 'convert-to-twin-token-cketh' }),
-		openConvertToTwinTokenEth: () => modalStore.set({ type: 'convert-to-twin-token-eth' }),
-		openHowToConvertToTwinTokenEth: () =>
-			modalStore.set({ type: 'how-to-convert-to-twin-token-eth' }),
-		openWalletConnectAuth: () => modalStore.set({ type: 'wallet-connect-auth' }),
-		openWalletConnectSign: <D extends T>(data: D) =>
-			modalStore.set({ type: 'wallet-connect-sign', data }),
-		openWalletConnectSend: <D extends T>(data: D) =>
-			modalStore.set({ type: 'wallet-connect-send', data }),
-		openEthTransaction: <D extends T>(data: D) => modalStore.set({ type: 'eth-transaction', data }),
-		openIcTransaction: <D extends T>(data: D) => modalStore.set({ type: 'ic-transaction', data }),
-		openBtcTransaction: <D extends T>(data: D) => modalStore.set({ type: 'btc-transaction', data }),
-		openManageTokens: () => modalStore.set({ type: 'manage-tokens' }),
-		openHideToken: () => modalStore.set({ type: 'hide-token' }),
-		openIcHideToken: () => modalStore.set({ type: 'ic-hide-token' }),
-		openToken: () => modalStore.set({ type: 'token' }),
-		openIcToken: () => modalStore.set({ type: 'ic-token' }),
-		openReceiveBitcoin: () => modalStore.set({ type: 'receive-bitcoin' }),
-		openAboutWhyOisy: () => modalStore.set({ type: 'about-why-oisy' }),
-		openDappDetails: <D extends T>(data: D) => modalStore.set({ type: 'dapp-details', data }),
-		close: () => {
-			set(null);
-			window.removeEventListener('popstate', onPopState);
-		},
-		set: (value: ModalData<T>) => {
-			set(value);
-			window.addEventListener('popstate', onPopState);
-		},
+		openEthReceive: <D extends T>(data: D) => set({ type: 'eth-receive', data }),
+		openIcpReceive: <D extends T>(data: D) => set({ type: 'icp-receive', data }),
+		openIcrcReceive: <D extends T>(data: D) => set({ type: 'icrc-receive', data }),
+		openCkBTCReceive: <D extends T>(data: D) => set({ type: 'ckbtc-receive', data }),
+		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
+		openBtcReceive: <D extends T>(data: D) => set({ type: 'btc-receive', data }),
+		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
+		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
+		openBuy: <D extends T>(data: D) => set({ type: 'buy', data }),
+		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
+		openConvertBTCToCkBTC: () => set({ type: 'convert-btc-ckbtc' }),
+		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
+		openConvertToTwinTokenEth: () => set({ type: 'convert-to-twin-token-eth' }),
+		openHowToConvertToTwinTokenEth: () => set({ type: 'how-to-convert-to-twin-token-eth' }),
+		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
+		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
+		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
+		openEthTransaction: <D extends T>(data: D) => set({ type: 'eth-transaction', data }),
+		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
+		openBtcTransaction: <D extends T>(data: D) => set({ type: 'btc-transaction', data }),
+		openManageTokens: () => set({ type: 'manage-tokens' }),
+		openHideToken: () => set({ type: 'hide-token' }),
+		openIcHideToken: () => set({ type: 'ic-hide-token' }),
+		openToken: () => set({ type: 'token' }),
+		openIcToken: () => set({ type: 'ic-token' }),
+		openReceiveBitcoin: () => set({ type: 'receive-bitcoin' }),
+		openAboutWhyOisy: () => set({ type: 'about-why-oisy' }),
+		openDappDetails: <D extends T>(data: D) => set({ type: 'dapp-details', data }),
+		close: () => set(null),
 		subscribe
 	};
 };

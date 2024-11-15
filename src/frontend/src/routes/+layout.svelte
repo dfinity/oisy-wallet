@@ -18,6 +18,7 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	/**
 	 * Init dApp
@@ -82,6 +83,15 @@
 		const spinner = document.querySelector('body > #app-spinner');
 		spinner?.remove();
 	})();
+
+	/**
+	 * Event handler
+	 */
+
+	window.onpopstate = function () {
+		modalStore.close();
+	};
+
 </script>
 
 <svelte:window on:storage={syncAuthStore} />
