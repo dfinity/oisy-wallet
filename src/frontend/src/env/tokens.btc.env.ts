@@ -1,4 +1,3 @@
-import { BTC_MAINNET_ENABLED } from '$env/networks.btc.env';
 import { BTC_MAINNET_NETWORK, BTC_REGTEST_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks.env';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
@@ -52,11 +51,3 @@ export const BTC_REGTEST_TOKEN: Token = {
 	decimals: BTC_DECIMALS,
 	icon: bitcoinTestnet
 };
-
-// The following tokens are used as fallback for any Bitcoin token defined in the token store.
-// That means that the order of the tokens in the array is important, to have a correct fallback chain.
-export const SUPPORTED_BITCOIN_TOKENS: [...Token[], Token] = [
-	...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_TOKEN] : []),
-	BTC_TESTNET_TOKEN,
-	BTC_REGTEST_TOKEN
-];
