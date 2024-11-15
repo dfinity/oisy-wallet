@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconUser, Popover } from '@dfinity/gix-components';
+	import { IconAccountBalance, IconUser, Popover } from '@dfinity/gix-components';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
@@ -19,7 +19,8 @@
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteDappExplorer, isRouteSettings, networkParam } from '$lib/utils/nav.utils';
+	import { isRouteActivity, isRouteDappExplorer, isRouteSettings, networkParam } from '$lib/utils/nav.utils';
+	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -30,9 +31,15 @@
 		hidePopover();
 		await goto(`${AppPath.Settings}?${networkParam($networkId)}`);
 	};
+
 	const goToDappExplorer = async () => {
 		hidePopover();
 		await goto(AppPath.Explore);
+	};
+
+	const goToActivity = async () => {
+		hidePopover();
+		await goto(AppPath.Activity);
 	};
 
 	let settingsRoute = false;
@@ -40,6 +47,9 @@
 
 	let dAppExplorerRoute = false;
 	$: dAppExplorerRoute = isRouteDappExplorer($page);
+
+	let activityRoute = false;
+	$: activityRoute = isRouteActivity($page);
 
 	let addressesOption = true;
 	$: addressesOption = !settingsRoute && !dAppExplorerRoute;
@@ -59,6 +69,13 @@
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
+		{/if}
+
+		{#if !activityRoute && !settingsRoute}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.activity} on:click={goToActivity}>
+				<IconActivity size="20" />
+				{$i18n.navigation.text.activity}
+			</ButtonMenu>
 		{/if}
 
 		{#if !dAppExplorerRoute && !settingsRoute}

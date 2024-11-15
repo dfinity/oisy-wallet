@@ -8,6 +8,7 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
+		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
@@ -15,12 +16,14 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
+		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
+	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -39,6 +42,16 @@
 		>
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
+		</NavigationItem>
+
+		<NavigationItem
+			href="/activity"
+			ariaLabel={$i18n.navigation.alt.activity}
+			selected={isRouteActivity(pageData)}
+			testId={NAVIGATION_ITEM_ACTIVITY}
+		>
+			<IconActivity />
+			{$i18n.navigation.text.activity}
 		</NavigationItem>
 
 		<NavigationItem
