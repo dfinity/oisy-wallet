@@ -4,7 +4,6 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
@@ -24,6 +23,7 @@ import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
+import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
