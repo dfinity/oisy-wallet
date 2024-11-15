@@ -19,8 +19,8 @@
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress: $ethAddress,
-		$icTransactions:{},
-		$btcStatuses:{}
+		$icTransactions: {},
+		$btcStatuses: {}
 	});
 
 	let sortedTransactions: AllTransactionsUi;
