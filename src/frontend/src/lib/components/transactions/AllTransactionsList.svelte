@@ -44,8 +44,8 @@
 		sortTransactions({ transactionA: a, transactionB: b })
 	);
 
-	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUi>;
-	$: groupedTransactions = groupTransactionsByDate(sortedTransactions);
+	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUi> | undefined;
+	$: groupedTransactions = nonNullish(sortedTransactions) ?  groupTransactionsByDate(sortedTransactions) :undefined
 
 	let selectedBtcTransaction: BtcTransactionUi | undefined;
 	$: selectedBtcTransaction = $modalBtcTransaction
@@ -64,13 +64,13 @@
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
-{#if nonNullish(sortedTransactions) && sortedTransactions.length > 0}
+{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
 	{#each Object.entries(groupedTransactions) as [date, transactions], index (`${date}-${index}`)}
 		<TransactionsDateGroup {date} {transactions} />
 	{/each}
 {/if}
 
-{#if isNullish(sortedTransactions) || sortedTransactions.length === 0}
+{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
 	<TransactionsPlaceholder />
 {/if}
 
