@@ -53,7 +53,7 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto flex flex-row items-center justify-end gap-2 text-sm lg:max-w-48 xl:max-w-none"
+			class="item pointer-events-auto flex flex-row items-center justify-end gap-2 text-sm pr-6 pl-6 md:pr-0 md:pl-0 lg:max-w-48 xl:max-w-none"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
 			class:md:h-md:pr-4={$authNotSignedIn}
