@@ -73,7 +73,8 @@
 	{type}
 	timestamp={transactionDate}
 	{status}
-	token={hideTokenLogo ? undefined : token}
+	{token}
+	{hideTokenLogo}
 >
 	{label}
 </Transaction>

@@ -28,7 +28,7 @@
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
 	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
 		<div transition:slide={SLIDE_DURATION}>
-			<BtcTransaction transaction={transaction.data} token={$token ?? DEFAULT_BITCOIN_TOKEN} />
+			<BtcTransaction transaction={transaction.data} token={$token ?? DEFAULT_BITCOIN_TOKEN} hideTokenLogo />
 		</div>
 	{/each}
 

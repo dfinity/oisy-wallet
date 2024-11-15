@@ -11,6 +11,7 @@
 
 	export let transaction: IcTransactionUi;
 	export let token: Token;
+	export let hideTokenLogo = false;
 
 	let type: IcTransactionType;
 	let transactionTypeLabel: string | undefined;
@@ -49,6 +50,7 @@
 	{timestamp}
 	{status}
 	{token}
+	{hideTokenLogo}
 >
 	<IcTransactionLabel label={transactionTypeLabel} fallback={type} />
 </Transaction>

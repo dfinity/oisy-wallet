@@ -18,6 +18,7 @@
 	export let timestamp: number | undefined;
 	export let styleClass: string | undefined = undefined;
 	export let token: Token;
+	export let hideTokenLogo = false;
 
 	let icon: ComponentType;
 	$: icon = mapTransactionIcon({ type, status });
@@ -31,7 +32,7 @@
 		<span class="inline-block first-letter:capitalize"><slot /></span>
 
 		<div slot="icon">
-			{#if nonNullish(token)}
+			{#if nonNullish(token) && !hideTokenLogo}
 				<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
 			{:else}
 				<RoundedIcon {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
