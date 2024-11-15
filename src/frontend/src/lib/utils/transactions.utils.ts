@@ -53,7 +53,12 @@ export const mapAllTransactionsUi = ({
 		networkId: SEPOLIA_NETWORK_ID
 	});
 
-	return tokens.reduce<AllTransactionsUi>((acc, { id: tokenId, network: { id: networkId } }) => {
+	return tokens.reduce<AllTransactionsUi>((acc, token) => {
+		const {
+			id: tokenId,
+			network: { id: networkId }
+		} = token;
+
 		if (isNetworkIdBTCMainnet(networkId)) {
 			if (isNullish($btcTransactions)) {
 				return acc;
@@ -63,6 +68,7 @@ export const mapAllTransactionsUi = ({
 				...acc,
 				...($btcTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
 					...transaction,
+					token,
 					component: BtcTransaction
 				}))
 			];
@@ -82,6 +88,7 @@ export const mapAllTransactionsUi = ({
 							: ckEthMinterInfoAddressesMainnet,
 						$ethAddress: $ethAddress
 					}),
+					token,
 					component: EthTransaction
 				}))
 			];
