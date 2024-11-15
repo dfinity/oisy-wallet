@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
 import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import * as appConstants from '$lib/constants/app.constants';
+import { describe, expect, it, vi } from 'vitest';
 
 describe('mapIcrcData', () => {
 	const token = {
