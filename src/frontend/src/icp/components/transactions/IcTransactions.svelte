@@ -30,6 +30,7 @@
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -117,7 +118,7 @@
 			<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction transaction={transaction.data} />
+						<IcTransaction transaction={transaction.data} token={$tokenWithFallback} />
 					</li>
 				{/each}
 			</InfiniteScroll>

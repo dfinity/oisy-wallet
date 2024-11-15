@@ -13,6 +13,7 @@
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalBtcTransaction } from '$lib/derived/modal.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	let selectedTransaction: BtcTransactionUi | undefined;
@@ -26,7 +27,7 @@
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
 	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
 		<div transition:slide={SLIDE_DURATION}>
-			<BtcTransaction transaction={transaction.data} />
+			<BtcTransaction transaction={transaction.data} token={$tokenWithFallback} />
 		</div>
 	{/each}
 
