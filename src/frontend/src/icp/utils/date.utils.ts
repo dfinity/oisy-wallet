@@ -11,3 +11,5 @@ export const normalizeTimestampToSeconds = (timestamp: number | bigint): number 
 			? ts / Number(MILLISECONDS_IN_SECOND)
 			: ts;
 };
+
+export const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });

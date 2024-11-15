@@ -1,4 +1,5 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens.env';
+import { relativeTimeFormatter } from '$icp/utils/date.utils';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber, type BigNumberish } from '@ethersproject/bignumber';
@@ -109,7 +110,7 @@ export const formatSecondsToNormalizedDate = ({
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
-		return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(daysDifference, 'day');
+		return relativeTimeFormatter.format(daysDifference, 'day');
 	}
 
 	// Same year, return day and month name
