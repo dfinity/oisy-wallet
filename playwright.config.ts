@@ -24,7 +24,7 @@ export default defineConfig({
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
 		port: DEV ? 5173 : 4173,
-		timeout: 120 * 1000
+		timeout: 180 * 1000
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
