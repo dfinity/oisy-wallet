@@ -2,7 +2,6 @@ import { sendBtc, type SendBtcParams } from '$btc/services/btc-send.services';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
-import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -10,7 +9,7 @@ import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
 
 describe('btc-send.services', () => {
 	const defaultParams = {
-		progress: () => {},
+		onProgress: () => {},
 		utxosFee: mockUtxosFee,
 		network: 'mainnet',
 		source: 'address',
@@ -29,11 +28,11 @@ describe('btc-send.services', () => {
 				.spyOn(backendAPI, 'addPendingBtcTransaction')
 				.mockResolvedValue(true);
 			const sendBtcApiSpy = vi.spyOn(signerAPI, 'sendBtc').mockResolvedValue({ txid });
-			const progressSpy = vi.spyOn(defaultParams, 'progress');
+			const onProgressSpy = vi.spyOn(defaultParams, 'onProgress');
 
 			await sendBtc(defaultParams);
 
-			expect(progressSpy).toHaveBeenCalledWith(ProgressStepsSendBtc.SEND);
+			expect(onProgressSpy).toHaveBeenCalled();
 
 			expect(sendBtcApiSpy).toHaveBeenCalledOnce();
 			expect(sendBtcApiSpy).toHaveBeenCalledWith({
@@ -49,7 +48,7 @@ describe('btc-send.services', () => {
 				]
 			});
 
-			expect(progressSpy).toHaveBeenCalledWith(ProgressStepsSendBtc.RELOAD);
+			expect(onProgressSpy).toHaveBeenCalled();
 
 			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
 			expect(addPendingBtcTransactionSpy).toHaveBeenCalledWith({

@@ -57,6 +57,7 @@ describe('transactions.utils', () => {
 		const expectedBtcMainnetTransactions: AllTransactionsUi = [
 			...mockBtcMainnetTransactions.map((transaction) => ({
 				...transaction,
+				token: BTC_MAINNET_TOKEN,
 				component: BtcTransaction
 			}))
 		];
@@ -68,6 +69,7 @@ describe('transactions.utils', () => {
 				...transaction,
 				id: transaction.hash,
 				uiType,
+				token: ETHEREUM_TOKEN,
 				component: EthTransaction
 			}))
 		];
@@ -77,6 +79,7 @@ describe('transactions.utils', () => {
 				...transaction,
 				id: transaction.hash,
 				uiType,
+				token: SEPOLIA_TOKEN,
 				component: EthTransaction
 			}))
 		];
@@ -86,6 +89,7 @@ describe('transactions.utils', () => {
 				...transaction,
 				id: transaction.hash,
 				uiType,
+				token: PEPE_TOKEN,
 				component: EthTransaction
 			}))
 		];
