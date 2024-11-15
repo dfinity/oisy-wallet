@@ -81,7 +81,7 @@
 
 	<button
 		slot="balance"
-		class={`rounded px-2 py-0.5 ${isZeroBalance ? 'bg-error-subtle-alt text-error' : 'bg-zumthor text-blue-ribbon'}`}
+		class={`rounded px-2 py-0.5 ${isZeroBalance ? 'bg-error-subtle-alt text-error' : 'bg-brand-subtle text-brand-primary'}`}
 		on:click|preventDefault={setMax}
 		data-tid="convert-amount-source-balance"
 	>
