@@ -8,6 +8,8 @@
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -24,15 +26,14 @@
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionsUi;
-	// TODO: add icTransactions and btcStatuses
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress: $ethAddress,
-		$icTransactions: {},
-		$btcStatuses: {}
+		$icTransactions: $icTransactionsStore,
+		$btcStatuses: $btcStatusesStore
 	});
 
 	let sortedTransactions: AllTransactionsUi;

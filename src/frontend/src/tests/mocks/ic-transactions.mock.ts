@@ -4,5 +4,6 @@ export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({
 		id: crypto.randomUUID(),
 		type: 'send',
-		status: 'executed'
+		status: 'executed',
+		value: BigInt(1)
 	}));
