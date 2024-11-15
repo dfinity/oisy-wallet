@@ -6,10 +6,10 @@
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 
 	export let transaction: BtcTransactionUi;
-	export let token: OptionToken = undefined;
+	export let token: Token;
 
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;

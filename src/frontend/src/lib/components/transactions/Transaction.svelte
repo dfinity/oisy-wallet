@@ -7,7 +7,7 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import type { OptionToken } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
@@ -17,7 +17,7 @@
 	export let status: TransactionStatus;
 	export let timestamp: number | undefined;
 	export let styleClass: string | undefined = undefined;
-	export let token: OptionToken = undefined;
+	export let token: Token;
 
 	let icon: ComponentType;
 	$: icon = mapTransactionIcon({ type, status });
@@ -40,7 +40,7 @@
 
 		<svelte:fragment slot="amount">
 			{#if nonNullish(amount)}
-				<Amount {amount} />
+				<Amount {amount} decimals={token.decimals} />
 			{/if}
 		</svelte:fragment>
 
