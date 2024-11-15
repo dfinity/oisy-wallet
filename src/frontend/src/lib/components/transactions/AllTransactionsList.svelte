@@ -21,10 +21,7 @@
 	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type {
-		AllTransactionUi,
-		TransactionsUiDateGroup
-	} from '$lib/types/transaction';
+	import type { AllTransactionUi, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
