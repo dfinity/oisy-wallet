@@ -45,7 +45,9 @@
 	);
 
 	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUi> | undefined;
-	$: groupedTransactions = nonNullish(sortedTransactions) ?  groupTransactionsByDate(sortedTransactions) :undefined
+	$: groupedTransactions = nonNullish(sortedTransactions)
+		? groupTransactionsByDate(sortedTransactions)
+		: undefined;
 
 	let selectedBtcTransaction: BtcTransactionUi | undefined;
 	$: selectedBtcTransaction = $modalBtcTransaction
