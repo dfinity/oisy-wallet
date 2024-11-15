@@ -72,6 +72,7 @@
 					class:xl:flex={$authSignedIn}
 					class:md:h-md:hidden={$authNotSignedIn}
 					class:1.5md:h-md:flex={$authNotSignedIn}
+					class="text-center"
 				>
 					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
 					<ExternalLink
