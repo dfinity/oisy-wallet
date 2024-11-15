@@ -67,6 +67,7 @@
 		"@metamask/detect-provider": "^2.0.0",
 		"@walletconnect/web3wallet": "^1.14.0",
 		"alchemy-sdk": "^3.4.1",
+		"bottleneck": "^2.19.5",
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
 		"idb-keyval": "^6.2.1",

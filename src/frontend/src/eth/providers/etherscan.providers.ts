@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { ETHERSCAN_NETWORK_HOMESTEAD, ETHERSCAN_NETWORK_SEPOLIA } from '$env/networks.eth.env';
+import { ETHERSCAN_API_KEY, etherscanSharedLimiter } from '$eth/constants/etherscan.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -13,22 +14,22 @@ import {
 } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 
-const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
-
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
 
 	constructor(private readonly network: Networkish) {
-		this.provider = new EtherscanProviderLib(this.network, API_KEY);
+		this.provider = new EtherscanProviderLib(this.network, ETHERSCAN_API_KEY);
 	}
 
-	transactions = ({
-		address,
-		startBlock
-	}: {
-		address: EthAddress;
-		startBlock?: BlockTag;
-	}): Promise<TransactionResponse[]> => this.provider.getHistory(address, startBlock);
+	transactions = etherscanSharedLimiter.wrap(
+		({
+			address,
+			startBlock
+		}: {
+			address: EthAddress;
+			startBlock?: BlockTag;
+		}): Promise<TransactionResponse[]> => this.provider.getHistory(address, startBlock)
+	);
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {
