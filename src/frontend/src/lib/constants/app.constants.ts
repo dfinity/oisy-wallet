@@ -24,12 +24,6 @@ export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 	: 'https://identity.ic0.app';
 
-console.log(
-	'in da app.constants.ts',
-	LOCAL,
-	import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID,
-	process.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
-);
 export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
 	: STAGING
