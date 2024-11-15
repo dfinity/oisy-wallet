@@ -18,7 +18,7 @@ describe('mapIcrcData', () => {
 		{ env: 'PROD', expected },
 		{ env: 'BETA', expected },
 		{ env: 'STAGING', expected: {} },
-		{ env: 'LOCAL', expected: {} },
+		{ env: 'LOCAL', expected: {} }
 	])('when %s is true', ({ env, expected }) => {
 		beforeEach(() => {
 			vi.resetAllMocks();
