@@ -15,15 +15,17 @@ describe('mapIcrcData', () => {
 	};
 
 	describe.each([
-		['PROD', expected],
-		['BETA', expected],
-		['STAGING', {}],
-		['LOCAL', {}]
-	])('when %s is true', (env, expected) => {
+		{ env: 'PROD', expected },
+		{ env: 'BETA', expected },
+		{ env: 'STAGING', expected: {} },
+		{ env: 'LOCAL', expected: {} },
+	])('when %s is true', ({ env, expected }) => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			vi.spyOn(appConstants, (env as keyof typeof appConstants) , 'get').mockImplementation(() => true);
+			vi.spyOn(appConstants, env as keyof typeof appConstants, 'get').mockImplementation(
+				() => true
+			);
 		});
 
 		it('should map ICRC tokens correctly', () => {
