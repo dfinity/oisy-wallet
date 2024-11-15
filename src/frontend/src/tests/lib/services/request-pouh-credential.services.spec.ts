@@ -45,9 +45,6 @@ describe('request-pouh-credential.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 			vi.resetAllMocks();
-			// vi.resetModules();
-			// vi.unstubAllEnvs();
-			// vi.stubEnv('VITE_LOCAL_POUH_ISSUER_CANISTER_ID', 'qbw6f-caaaa-aaaah-qdcwa-cai');
 			toastsStore.reset();
 			userProfileStore.reset();
 			userProfileStore.set({ certified: true, profile: initialUserProfile });
@@ -56,9 +53,6 @@ describe('request-pouh-credential.services', () => {
 		});
 
 		it('should request credential validate it and store it', async () => {
-			// const { requestPouhCredential } = await import(
-			// 	'$lib/services/request-pouh-credential.services'
-			// );
 			addUserCredentialMock.mockResolvedValueOnce({ Ok: null });
 			const userProfileWithCredential: UserProfile = {
 				version: [],
@@ -97,10 +91,6 @@ describe('request-pouh-credential.services', () => {
 		});
 
 		it('should not store the credential if validating credential fails', async () => {
-			// const { requestPouhCredential } = await import(
-			// 	'$lib/services/request-pouh-credential.services'
-			// );
-
 			addUserCredentialMock.mockResolvedValueOnce({ Err: { InvalidCredential: null } });
 
 			const result = await requestPouhCredential({ identity });
