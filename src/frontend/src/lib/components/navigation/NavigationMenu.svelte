@@ -2,6 +2,7 @@
 	import type { Page } from '@sveltejs/kit';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
@@ -23,7 +24,6 @@
 		isRouteTransactions,
 		networkParam
 	} from '$lib/utils/nav.utils.js';
-	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually

@@ -6,6 +6,7 @@
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
@@ -19,8 +20,12 @@
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteActivity, isRouteDappExplorer, isRouteSettings, networkParam } from '$lib/utils/nav.utils';
-	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
+	import {
+		isRouteActivity,
+		isRouteDappExplorer,
+		isRouteSettings,
+		networkParam
+	} from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
