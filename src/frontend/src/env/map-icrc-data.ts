@@ -1,7 +1,7 @@
 import type { EnvAdditionalIcrcTokens } from '$env/types/env-icrc-additional-token';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { IcInterface } from '$icp/types/ic-token';
-import { BETA, PROD, STAGING } from '$lib/constants/app.constants';
+import { BETA, PROD } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -13,7 +13,7 @@ export const mapIcrcData = (
 	Object.entries(icrcTokens).reduce(
 		(acc, [key, value]) => ({
 			...acc,
-			...((STAGING || BETA || PROD) &&
+			...((BETA || PROD) &&
 				nonNullish(value) && {
 					[key]: {
 						...value,
