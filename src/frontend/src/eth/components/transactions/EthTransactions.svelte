@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
 	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
@@ -30,25 +29,13 @@
 	});
 
 	let sortedTransactionsUi: EthTransactionUi[];
-	// $: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>
-	// 	mapEthTransactionUi({
-	// 		transaction,
-	// 		ckMinterInfoAddresses,
-	// 		$ethAddress: $ethAddress
-	// 	})
-	// );
-
-	let test: EthTransactionUi = {
-		id: 'test',
-		uiType: 'send',
-		nonce: 'asdasdasdasdasd',
-		gasLimit: BigNumber.from(2),
-		data: 'asdasd',
-		value: BigNumber.from(3),
-		chainId: 10001
-	};
-
-	sortedTransactionsUi = [test];
+	$: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>
+		mapEthTransactionUi({
+			transaction,
+			ckMinterInfoAddresses,
+			$ethAddress: $ethAddress
+		})
+	);
 
 	let selectedTransaction: TransactionType | undefined;
 	$: selectedTransaction = $modalEthTransaction
