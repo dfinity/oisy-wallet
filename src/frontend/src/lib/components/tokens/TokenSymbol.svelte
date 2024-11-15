@@ -14,10 +14,6 @@
 	{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
 
 	{#if nonNullish(data.network.iconBW) && !hideNetworkLogo}
-		<Logo
-			src={data.network.iconBW}
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: data.network.name })}
-		/>
 		<NetworkLogo network={data.network} blackAndWhite />
 	{/if}
 </div>
