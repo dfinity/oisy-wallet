@@ -12,8 +12,7 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 	export let testId: string | undefined = undefined;
-	
-	</script>
+</script>
 
 <div data-tid={testId} class="flex h-full items-center">
 	<div class="mr-4 shrink-0">
