@@ -27,6 +27,10 @@ describe('token.derived', () => {
 		enabled: true
 	};
 
+	beforeEach(() => {
+		token.reset();
+	});
+
 	describe('tokenToggleable', () => {
 		it('should return false for nullish token', () => {
 			expect(get(tokenToggleable)).toBe(false);
