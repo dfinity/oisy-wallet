@@ -17,8 +17,8 @@
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	/**
 	 * Init dApp
@@ -91,7 +91,6 @@
 	window.onpopstate = function () {
 		modalStore.close();
 	};
-
 </script>
 
 <svelte:window on:storage={syncAuthStore} />
