@@ -85,6 +85,8 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
+const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
 /** Formats a number of seconds to a normalized date string.
  *
  * If the date is within the same year, it returns the day and month name.
@@ -109,7 +111,7 @@ export const formatSecondsToNormalizedDate = ({
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
-		return new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(daysDifference, 'day');
+		return relativeTimeFormatter.format(daysDifference, 'day');
 	}
 
 	// Same year, return day and month name
