@@ -22,7 +22,6 @@ import {
 } from '$lib/utils/nav.utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 import { describe, expect } from 'vitest';
-import type { Page } from '@sveltejs/kit';
 
 describe('nav.utils', () => {
 	const mockGoTo = vi.fn();
