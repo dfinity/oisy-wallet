@@ -24,7 +24,7 @@ import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
-import type { AllTransactionsUi, AnyTransactionUi, Transaction } from '$lib/types/transaction';
+import type { AllTransactionUi, AnyTransactionUi, Transaction } from '$lib/types/transaction';
 import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
@@ -66,7 +66,7 @@ describe('transactions.utils', () => {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified }))
 		};
 
-		const expectedBtcMainnetTransactions: AllTransactionsUi = [
+		const expectedBtcMainnetTransactions: AllTransactionUi[] = [
 			...mockBtcMainnetTransactions.map((transaction) => ({
 				...transaction,
 				token: BTC_MAINNET_TOKEN,
@@ -76,7 +76,7 @@ describe('transactions.utils', () => {
 
 		const uiType = 'receive' as EthTransactionType;
 
-		const expectedEthMainnetTransactions: AllTransactionsUi = [
+		const expectedEthMainnetTransactions: AllTransactionUi[] = [
 			...mockEthMainnetTransactions.map((transaction) => ({
 				...transaction,
 				id: transaction.hash,
@@ -86,7 +86,7 @@ describe('transactions.utils', () => {
 			}))
 		];
 
-		const expectedSepoliaTransactions: AllTransactionsUi = [
+		const expectedSepoliaTransactions: AllTransactionUi[] = [
 			...mockSepoliaTransactions.map((transaction) => ({
 				...transaction,
 				id: transaction.hash,
@@ -96,7 +96,7 @@ describe('transactions.utils', () => {
 			}))
 		];
 
-		const expectedErc20Transactions: AllTransactionsUi = [
+		const expectedErc20Transactions: AllTransactionUi[] = [
 			...mockErc20Transactions.map((transaction) => ({
 				...transaction,
 				id: transaction.hash,
@@ -106,13 +106,13 @@ describe('transactions.utils', () => {
 			}))
 		];
 
-		const expectedEthTransactions: AllTransactionsUi = [
+		const expectedEthTransactions: AllTransactionUi[] = [
 			...expectedEthMainnetTransactions,
 			...expectedSepoliaTransactions,
 			...expectedErc20Transactions
 		];
 
-		const expectedIcTransactions: AllTransactionsUi = [
+		const expectedIcTransactions: AllTransactionUi[] = [
 			...mockIcTransactionsUi.map((transaction) => ({
 				...transaction,
 				token: ICP_TOKEN,
@@ -120,7 +120,7 @@ describe('transactions.utils', () => {
 			}))
 		];
 
-		const expectedTransactions: AllTransactionsUi = [
+		const expectedTransactions: AllTransactionUi[] = [
 			...expectedBtcMainnetTransactions,
 			...expectedEthTransactions,
 			...expectedIcTransactions

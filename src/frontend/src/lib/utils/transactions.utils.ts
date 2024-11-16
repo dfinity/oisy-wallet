@@ -16,7 +16,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionsUi, AnyTransactionUi } from '$lib/types/transaction';
+import type { AllTransactionUi, AnyTransactionUi } from '$lib/types/transaction';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
@@ -53,7 +53,7 @@ export const mapAllTransactionsUi = ({
 	$ethAddress: OptionEthAddress;
 	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-}): AllTransactionsUi => {
+}): AllTransactionUi[] => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
 		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
 		networkId: ETHEREUM_NETWORK_ID
@@ -64,7 +64,7 @@ export const mapAllTransactionsUi = ({
 		networkId: SEPOLIA_NETWORK_ID
 	});
 
-	return tokens.reduce<AllTransactionsUi>((acc, token) => {
+	return tokens.reduce<AllTransactionUi[]>((acc, token) => {
 		const {
 			id: tokenId,
 			network: { id: networkId }

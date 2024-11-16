@@ -53,7 +53,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUi>(
 ): TransactionsUiDateGroup<T> => {
 	const currentDate = new Date();
 
-	return transactions.reduce<Record<string, T[]>>((acc, transaction) => {
+	return transactions.reduce<TransactionsUiDateGroup<T>>((acc, transaction) => {
 		if (isNullish(transaction.timestamp)) {
 			return { ...acc, undefined: [...(acc['undefined'] ?? []), transaction] };
 		}
