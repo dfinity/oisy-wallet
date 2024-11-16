@@ -18,6 +18,7 @@ import {
 	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
+	isNetworkIdSepolia,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 
@@ -124,6 +125,18 @@ describe('network utils', () => {
 
 		it('should return false for non-BTC regtest ID', () => {
 			expect(isNetworkIdBTCRegtest(BTC_MAINNET_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSepolia', () => {
+		it('should return true for Sepolia network ID', () => {
+			expect(isNetworkIdSepolia(SEPOLIA_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-Sepolia network ID', () => {
+			expect(isNetworkIdSepolia(ETHEREUM_NETWORK_ID)).toBe(false);
+
+			expect(isNetworkIdSepolia(ICP_NETWORK_ID)).toBe(false);
 		});
 	});
 
