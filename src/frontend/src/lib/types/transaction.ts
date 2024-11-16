@@ -41,6 +41,6 @@ export type AllTransactionUi = AnyTransactionUi & {
 	component: ComponentType;
 };
 
-export type AllTransactionsUi = [AllTransactionUi, ...AllTransactionUi[]];
+export type AllTransactionUiNonEmptyList = [AllTransactionUi, ...AllTransactionUi[]];
 
 export type TransactionsUiDateGroup<T extends AnyTransactionUi> = Record<string, [T, ...T[]]>;
