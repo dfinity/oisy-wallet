@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';

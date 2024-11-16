@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
