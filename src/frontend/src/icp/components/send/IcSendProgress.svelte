@@ -6,8 +6,8 @@
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import type { ProgressStepList } from '$lib/types/progress-steps';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
 	export let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 	export let networkId: NetworkId | undefined = undefined;

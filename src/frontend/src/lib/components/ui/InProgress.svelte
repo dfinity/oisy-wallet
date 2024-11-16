@@ -2,8 +2,8 @@
 	import { ProgressSteps, type ProgressStep } from '@dfinity/gix-components';
 	import type { ComponentType } from 'svelte';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
-	import type { StaticStep } from '$lib/types/steps';
 	import type { ProgressStepList } from '$lib/types/progress-steps';
+	import type { StaticStep } from '$lib/types/steps';
 
 	export let progressStep: string;
 	export let steps: [ProgressStep | StaticStep, ...(ProgressStep | StaticStep)[]];

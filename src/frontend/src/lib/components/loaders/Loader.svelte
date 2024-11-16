@@ -24,8 +24,8 @@
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
-	import { emit } from '$lib/utils/events.utils';
 	import type { ProgressStepList } from '$lib/types/progress-steps';
+	import { emit } from '$lib/utils/events.utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
