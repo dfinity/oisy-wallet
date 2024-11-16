@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 
-	export let value: number | undefined = undefined;
+	export let value: string | number | undefined = undefined;
 	export let disabled: boolean | undefined = undefined;
 	export let name: string;
 	export let placeholder: string;

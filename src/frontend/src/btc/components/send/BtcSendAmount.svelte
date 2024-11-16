@@ -9,7 +9,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
 
 	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);

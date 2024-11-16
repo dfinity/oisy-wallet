@@ -4,5 +4,5 @@ import { isNullish } from '@dfinity/utils';
 export const isNullishOrEmpty = (value: OptionString): value is undefined | null =>
 	isNullish(value) || value === '';
 
-export const invalidAmount = (amount: number | undefined): boolean =>
-	isNullish(amount) || amount < 0;
+export const invalidAmount = (amount: number | string | undefined): boolean =>
+	isNullish(amount) || Number(amount) < 0;

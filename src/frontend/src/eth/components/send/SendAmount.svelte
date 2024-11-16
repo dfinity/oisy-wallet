@@ -15,7 +15,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let insufficientFunds: boolean;
 	export let nativeEthereumToken: Token;
 

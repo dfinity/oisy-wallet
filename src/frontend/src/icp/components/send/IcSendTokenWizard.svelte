@@ -59,7 +59,7 @@
 	export let currentStep: WizardStep | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let sendProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
 

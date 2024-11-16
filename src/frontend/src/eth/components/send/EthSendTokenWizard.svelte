@@ -63,7 +63,7 @@
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let sendProgressStep: string;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.

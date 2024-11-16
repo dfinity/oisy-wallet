@@ -11,7 +11,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let source: string;
 	export let disabled: boolean | undefined = false;
 
