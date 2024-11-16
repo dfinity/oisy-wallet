@@ -5,7 +5,6 @@ import {
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
 import { BigNumber } from 'ethers';
-import { describe } from 'vitest';
 
 describe('formatToken', () => {
 	const value = BigNumber.from('1000000000000000000');
