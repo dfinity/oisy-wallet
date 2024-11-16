@@ -1,7 +1,6 @@
 import { isToken, parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import { describe, expect, it } from 'vitest';
 
 describe('token.validation', () => {
 	describe('parseTokenId', () => {

@@ -17,7 +17,6 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('tokens.derived', () => {
 	const mockErc20DefaultToken: Erc20Token = {

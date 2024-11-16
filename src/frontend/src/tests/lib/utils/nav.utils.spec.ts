@@ -9,7 +9,6 @@ import {
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import type { Page } from '@sveltejs/kit';
-import { describe, expect } from 'vitest';
 
 describe('resetRouteParams', () => {
 	it('should return an object with all values set to null', () => {

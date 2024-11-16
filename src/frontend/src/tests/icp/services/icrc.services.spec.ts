@@ -14,7 +14,7 @@ import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { expect, type MockInstance } from 'vitest';
+import { type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('icrc.services', () => {

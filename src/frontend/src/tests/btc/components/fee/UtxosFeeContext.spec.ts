@@ -14,7 +14,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('UtxosFeeContext', () => {
 	const amount = 10;

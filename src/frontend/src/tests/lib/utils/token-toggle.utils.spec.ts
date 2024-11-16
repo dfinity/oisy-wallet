@@ -7,7 +7,6 @@ import {
 	isEthereumTokenToggleDisabled,
 	isIcrcTokenToggleDisabled
 } from '$lib/utils/token-toggle.utils';
-import { describe, expect } from 'vitest';
 
 describe('isEthereumUserTokenDisabled', () => {
 	it('should check if default ethereum user token is disabled for token toggle', () => {

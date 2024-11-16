@@ -4,7 +4,6 @@ import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/to
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('tokens.derived', () => {
 	describe('enabledBitcoinTokens', () => {

@@ -7,7 +7,7 @@ import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { vi, type MockedFunction } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/transactions.services', () => ({
 	loadTransactions: vi.fn()
