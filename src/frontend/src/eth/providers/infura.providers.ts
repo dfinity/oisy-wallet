@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.eth.env';
+import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -14,13 +15,11 @@ import {
 } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 
-const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
-
 export class InfuraProvider {
 	private readonly provider: InfuraProviderLib;
 
 	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProviderLib(this.network, API_KEY);
+		this.provider = new InfuraProviderLib(this.network, INFURA_API_KEY);
 	}
 
 	balance = (address: EthAddress): Promise<BigNumber> => this.provider.getBalance(address);
