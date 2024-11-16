@@ -7,7 +7,7 @@
 	export let key: HideInfoKey | undefined;
 
 	let hideInfo = true;
-	$: hideInfo = nonNullish(key) ? shouldHideInfo(key) : true;
+	$: hideInfo = nonNullish(key) ? shouldHideInfo<HideInfoKey>(key) : true;
 
 	const close = () => {
 		hideInfo = true;
@@ -16,7 +16,7 @@
 			return;
 		}
 
-		saveHideInfo(key);
+		saveHideInfo<HideInfoKey>(key);
 	};
 </script>
 
