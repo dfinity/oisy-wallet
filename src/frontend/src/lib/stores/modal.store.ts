@@ -32,20 +32,21 @@ export interface Modal<T> {
 		| 'btc-transaction'
 		| 'dapp-details';
 	data?: T;
+	modalId?: symbol;
 }
 
 export type ModalData<T> = Option<Modal<T>>;
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
-	openEthReceive: <D extends T>(data: D) => void;
-	openIcpReceive: <D extends T>(data: D) => void;
-	openIcrcReceive: <D extends T>(data: D) => void;
-	openCkBTCReceive: <D extends T>(data: D) => void;
-	openCkETHReceive: <D extends T>(data: D) => void;
-	openBtcReceive: <D extends T>(data: D) => void;
-	openReceive: <D extends T>(data: D) => void;
-	openSend: <D extends T>(data: D) => void;
-	openBuy: <D extends T>(data: D) => void;
+	openEthReceive: (modalId: symbol) => void;
+	openIcpReceive: (modalId: symbol) => void;
+	openIcrcReceive: (modalId: symbol) => void;
+	openCkBTCReceive: (modalId: symbol) => void;
+	openCkETHReceive: (modalId: symbol) => void;
+	openBtcReceive: (modalId: symbol) => void;
+	openReceive: (modalId: symbol) => void;
+	openSend: (modalId: symbol) => void;
+	openBuy: (modalId: symbol) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertBTCToCkBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
@@ -72,15 +73,15 @@ const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
 	return {
-		openEthReceive: <D extends T>(data: D) => set({ type: 'eth-receive', data }),
-		openIcpReceive: <D extends T>(data: D) => set({ type: 'icp-receive', data }),
-		openIcrcReceive: <D extends T>(data: D) => set({ type: 'icrc-receive', data }),
-		openCkBTCReceive: <D extends T>(data: D) => set({ type: 'ckbtc-receive', data }),
-		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
-		openBtcReceive: <D extends T>(data: D) => set({ type: 'btc-receive', data }),
-		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
-		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
-		openBuy: <D extends T>(data: D) => set({ type: 'buy', data }),
+		openEthReceive: (modalId: symbol) => set({ type: 'eth-receive', modalId }),
+		openIcpReceive: (modalId: symbol) => set({ type: 'icp-receive', modalId }),
+		openIcrcReceive: (modalId: symbol) => set({ type: 'icrc-receive', modalId }),
+		openCkBTCReceive: (modalId: symbol) => set({ type: 'ckbtc-receive', modalId }),
+		openCkETHReceive: (modalId: symbol) => set({ type: 'cketh-receive', modalId }),
+		openBtcReceive: (modalId: symbol) => set({ type: 'btc-receive', modalId }),
+		openReceive: (modalId: symbol) => set({ type: 'receive', modalId }),
+		openSend: (modalId: symbol) => set({ type: 'send', modalId }),
+		openBuy: (modalId: symbol) => set({ type: 'buy', modalId }),
 		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
 		openConvertBTCToCkBTC: () => set({ type: 'convert-btc-ckbtc' }),
 		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
