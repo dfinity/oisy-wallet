@@ -1,4 +1,5 @@
-import { saveHideInfo, shouldHideInfo, type HideInfoKey } from '$lib/utils/info.utils';
+import type { HideInfoKey } from '$icp/utils/ck.utils';
+import { saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
 describe('info.utils', () => {
 	describe('saveHideInfo', () => {
