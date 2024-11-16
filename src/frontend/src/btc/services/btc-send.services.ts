@@ -15,7 +15,7 @@ const DEFAULT_MIN_CONFIRMATIONS = 6;
 interface BtcSendServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;
-	amount: number;
+	amount: number | string;
 }
 
 export type SendBtcParams = BtcSendServiceParams & {

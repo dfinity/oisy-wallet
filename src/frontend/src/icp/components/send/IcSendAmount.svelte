@@ -29,7 +29,7 @@
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
