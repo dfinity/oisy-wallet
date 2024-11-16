@@ -1,5 +1,4 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens.env';
-import { relativeTimeFormatter } from '$icp/utils/date.utils';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber, type BigNumberish } from '@ethersproject/bignumber';
@@ -85,6 +84,8 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
+
+const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
  *
