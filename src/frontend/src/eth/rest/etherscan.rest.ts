@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { ETHERSCAN_API_URL_HOMESTEAD, ETHERSCAN_API_URL_SEPOLIA } from '$env/networks.eth.env';
+import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
 import { i18n } from '$lib/stores/i18n.store';
@@ -10,8 +11,6 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
-
-const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
 
 export class EtherscanRest {
 	constructor(private readonly apiUrl: string) {}
@@ -31,7 +30,7 @@ export class EtherscanRest {
 		url.searchParams.set('startblock', '0');
 		url.searchParams.set('endblock', '99999999');
 		url.searchParams.set('sort', 'desc');
-		url.searchParams.set('apikey', API_KEY);
+		url.searchParams.set('apikey', ETHERSCAN_API_KEY);
 
 		// https://docs.etherscan.io/v/sepolia-etherscan
 		// https://docs.etherscan.io/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
