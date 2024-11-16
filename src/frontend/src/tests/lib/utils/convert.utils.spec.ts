@@ -19,16 +19,6 @@ describe('validateConvertAmount', () => {
 		).toBeUndefined();
 	});
 
-	it('should return undefined if totalFee is undefined', () => {
-		expect(
-			validateConvertAmount({
-				userAmount,
-				decimals,
-				balance
-			})
-		).toBeUndefined();
-	});
-
 	it('should return insufficient funds error', () => {
 		expect(
 			validateConvertAmount({
@@ -49,5 +39,15 @@ describe('validateConvertAmount', () => {
 				totalFee
 			})
 		).toBe('insufficient-funds-for-fee');
+	});
+
+	it('should not return insufficient funds for fee error if totalFee is undefined', () => {
+		expect(
+			validateConvertAmount({
+				userAmount: balance.sub(BigNumber.from(totalFee).div(2)),
+				decimals,
+				balance
+			})
+		).toBeUndefined();
 	});
 });
