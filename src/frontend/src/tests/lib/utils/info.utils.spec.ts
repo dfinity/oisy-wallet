@@ -1,8 +1,8 @@
-import { saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
+import { saveHideInfo, shouldHideInfo, type HideInfoKey } from '$lib/utils/info.utils';
 
 describe('info.utils', () => {
 	describe('saveHideInfo', () => {
-		const key = 'someKey';
+		const key = 'someKey' as HideInfoKey;
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -40,7 +40,7 @@ describe('info.utils', () => {
 	});
 
 	describe('shouldHideInfo', () => {
-		const key = 'someKey';
+		const key = 'someKey' as HideInfoKey;
 
 		beforeEach(() => {
 			vi.resetAllMocks();
