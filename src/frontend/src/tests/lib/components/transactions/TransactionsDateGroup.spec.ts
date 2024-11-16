@@ -4,7 +4,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens.env';
 import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 import type { AllTransactionsUi } from '$lib/types/transaction';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { render } from '@testing-library/svelte';
 
