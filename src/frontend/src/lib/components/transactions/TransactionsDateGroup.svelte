@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import type { AllTransactionsUi } from '$lib/types/transaction';
+	import type { AllTransactionUiNonEmptyList } from '$lib/types/transaction';
 
 	export let date: string;
-	export let transactions: AllTransactionsUi;
+	export let transactions: AllTransactionUiNonEmptyList;
 </script>
 
 {#if transactions.length > 0}
