@@ -191,6 +191,7 @@ export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
 			...acc,
 			...(isIcCkToken(token) &&
 			nonNullish(token.twinToken) &&
+			// TODO: separate the check for decimals from the rest, since it seems important to the logic.
 			token.decimals === token.twinToken.decimals
 				? // If the token has a twinToken, and both have the same decimals, group them together.
 					{
