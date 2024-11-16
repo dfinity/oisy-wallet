@@ -26,7 +26,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { AllTransactionsUi, AnyTransactionUi, Transaction } from '$lib/types/transaction';
 import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 
