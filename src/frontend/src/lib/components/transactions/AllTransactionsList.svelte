@@ -21,15 +21,11 @@
 	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type {
-		AllTransactionsUi,
-		AllTransactionUi,
-		TransactionsUiDateGroup
-	} from '$lib/types/transaction';
+	import type { AllTransactionUi, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
-	let transactions: AllTransactionsUi;
+	let transactions: AllTransactionUi[];
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledTokens,
 		$btcTransactions: $btcTransactionsStore,
@@ -40,7 +36,7 @@
 		$btcStatuses: $btcStatusesStore
 	});
 
-	let sortedTransactions: AllTransactionsUi;
+	let sortedTransactions: AllTransactionUi[];
 	$: sortedTransactions = transactions.sort((a, b) =>
 		sortTransactions({ transactionA: a, transactionB: b })
 	);

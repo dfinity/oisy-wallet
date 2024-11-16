@@ -15,7 +15,7 @@
 			{@const { component, token } = transaction}
 
 			<div in:slide={SLIDE_DURATION}>
-				<svelte:component this={component} {transaction} {token} />
+				<svelte:component this={component} {transaction} {token} iconType="token" />
 			</div>
 		{/each}
 	</div>

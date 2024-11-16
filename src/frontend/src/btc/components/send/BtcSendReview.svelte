@@ -15,7 +15,7 @@
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
 	export let utxosFee: UtxosFee | undefined = undefined;

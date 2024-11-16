@@ -9,7 +9,7 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 import * as transactionsUtils from '$lib/utils/transactions.utils';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
