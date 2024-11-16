@@ -2,46 +2,51 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { ComponentType } from 'svelte';
-	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import type { TransactionType, TransactionStatus } from '$lib/types/transaction';
+	import type { Token } from '$lib/types/token';
+	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
+	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
-	export let value: BigNumber | undefined;
+	export let amount: BigNumber | undefined;
 	export let type: TransactionType;
 	export let status: TransactionStatus;
-	export let timestamp: bigint | undefined;
-
-	let label: string;
-	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
+	export let timestamp: number | undefined;
+	export let styleClass: string | undefined = undefined;
+	export let token: Token;
 
 	let icon: ComponentType;
-	$: icon = type === 'send' ? IconSend : IconReceive;
+	$: icon = mapTransactionIcon({ type, status });
 
 	let iconWithOpacity: boolean;
 	$: iconWithOpacity = status === 'pending' || status === 'unconfirmed';
 </script>
 
-<button class="contents" on:click>
+<button class={`contents ${styleClass ?? ''}`} on:click>
 	<Card>
-		<span class="inline-block first-letter:capitalize">{label}</span>
+		<span class="inline-block first-letter:capitalize"><slot /></span>
 
-		<RoundedIcon slot="icon" {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
+		<div slot="icon">
+			{#if nonNullish(token)}
+				<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
+			{:else}
+				<RoundedIcon {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
+			{/if}
+		</div>
 
 		<svelte:fragment slot="amount">
-			{#if nonNullish(value)}
-				<Amount amount={BigNumber.from(value)} />
+			{#if nonNullish(amount)}
+				<Amount {amount} decimals={token.decimals} />
 			{/if}
 		</svelte:fragment>
 
 		<svelte:fragment slot="description">
 			{#if nonNullish(timestamp)}
-				{formatSecondsToDate(Number(timestamp))}
+				{formatSecondsToDate(timestamp)}
 			{/if}
 
 			<TransactionStatusComponent {status} />

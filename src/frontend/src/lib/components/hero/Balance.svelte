@@ -13,10 +13,10 @@
 
 <span class="flex flex-col gap-2">
 	<output
-		class={`break-words ${(token?.balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'} inline-flex w-full flex-row justify-center gap-3 text-4xl font-bold lg:text-5xl`}
+		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !token.balance.isZero()}
-			<span><Amount amount={token.balance} /> {token.symbol}</span>
+			<span><Amount amount={token.balance} decimals={token.decimals} /> {token.symbol}</span>
 		{:else}
 			<span class:animate-pulse={$loading}>0.00</span>
 		{/if}

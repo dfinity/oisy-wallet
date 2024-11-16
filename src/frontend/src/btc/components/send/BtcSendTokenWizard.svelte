@@ -110,10 +110,16 @@
 				destination,
 				amount,
 				utxosFee,
-				progress,
 				network,
 				source,
-				identity: $authIdentity
+				identity: $authIdentity,
+				onProgress: () => {
+					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
+						progress(ProgressStepsSendBtc.SEND);
+					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
+						progress(ProgressStepsSendBtc.DONE);
+					}
+				}
 			});
 
 			sendProgressStep = ProgressStepsSendBtc.DONE;
@@ -135,7 +141,6 @@
 		on:icBack
 		on:icSend={send}
 		bind:utxosFee
-		{progress}
 		{destination}
 		{amount}
 		{networkId}
