@@ -12,8 +12,7 @@ import {
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
 import { bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { BigNumber } from 'alchemy-sdk';
 
 const tokens = [
