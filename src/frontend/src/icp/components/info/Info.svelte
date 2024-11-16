@@ -6,6 +6,7 @@
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
+	import type { CkHideInfoKey } from '$icp/utils/ck.utils';
 	import { isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
@@ -13,7 +14,6 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
-	import type { CkHideInfoKey } from '$icp/utils/ck.utils';
 
 	let mainnet = true;
 	$: mainnet =
