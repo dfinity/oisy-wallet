@@ -8,7 +8,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
