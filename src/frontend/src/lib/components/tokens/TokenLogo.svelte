@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
@@ -18,11 +19,7 @@
 	export let testId: string | undefined = undefined;
 	export let badgeTestId: string | undefined = undefined;
 
-	const {
-		icon,
-		name,
-		network: { name: networkName, icon: networkIcon, iconBW: networkIconBW }
-	} = data;
+	const { icon, name, network } = data;
 </script>
 
 <div class="relative">
@@ -44,9 +41,9 @@
 		</span>
 	{:else if badge?.type === 'network'}
 		<div class="absolute -bottom-1 -right-1">
-			<Logo
-				src={badge.blackAndWhite ? networkIconBW : networkIcon}
-				alt={replacePlaceholders($i18n.core.alt.logo, { $name: networkName })}
+			<NetworkLogo
+				{network}
+				blackAndWhite={badge.blackAndWhite}
 				{color}
 				testId={`network-${badgeTestId}`}
 			/>
