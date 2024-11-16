@@ -5,7 +5,7 @@
 	import ConvertValue from '$lib/components/convert/ConvertValue.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let symbol: string;
 	export let exchangeRate: number | undefined = undefined;
 	export let zeroAmountLabel: string | undefined = undefined;
