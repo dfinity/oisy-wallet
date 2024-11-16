@@ -13,6 +13,11 @@ on:
         options:
           - staging
           - beta
+          - test_fe_1
+          - test_fe_2
+          - test_fe_3
+          - test_fe_4
+          - test_be_1
       canister:
         required: true
         type: choice
@@ -41,17 +46,6 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Fail if branch is not main
-        if: ${{ github.ref != 'refs/heads/main' }}
-        run: |
-          echo "This workflow can only be manually triggered with workflow_dispatch on the main branch"
-          exit 1
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
       - name: Determine Deployment Network
         run: |
           if [ "${{ github.event_name }}" == "push" ]; then
@@ -62,25 +56,51 @@ jobs:
             echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
           fi
 
+      - name: Check release policy
+        run: |
+          if [[ "$NETWORK" ==  "staging" ]] && [[ "${{ github.ref }}" != "refs/heads/main" ]] ; then
+            echo "Only the main branch may be deployed to staging."
+            exit 1
+          fi
+          if [[ "$NETWORK" = test_fe_* ]] && [[ "$CANISTER" != "frontend" ]] ; then
+            echo "Only a frontend may be deployed to test_fe_* networks"
+            exit 1
+          fi
+          if [[ "$NETWORK" = test_be_* ]] && [[ "$CANISTER" != "backend" ]] ; then
+            echo "Only a backend may be deployed to test_be_* networks"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
       - name: Set Environment Variables Based on Network
         run: |
-          if [ "$NETWORK" == "staging" ]; then
+          if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_fe_* ]]; then
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}" >> $GITHUB_ENV
             echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}" >> $GITHUB_ENV
             echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}" >> $GITHUB_ENV
             echo "VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED=${{ secrets.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
+            if [[ "$NETWORK" == "staging" ]]; then
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
+              echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" >> $GITHUB_ENV
+            else
+              SUBDOMAIN="fe${NETWORK#test_fe_}" # E.g. test_fe_1 -> fe1
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" | sed "s/staging/$SUBDOMAIN/g" >> $GITHUB_ENV
+              echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" | sed "s/staging/$SUBDOMAIN/g" >> $GITHUB_ENV
+            fi
             {
               echo 'DFX_DEPLOY_KEY<<EOF'
               echo "${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
@@ -142,6 +162,7 @@ jobs:
           dfx identity import --disable-encryption --force default "$key_pem"
           rm "$key_pem"
           dfx identity use default
+          dfx identity get-principal
 
       - name: Pre-build
         run: npm run build
