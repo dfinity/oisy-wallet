@@ -1,6 +1,11 @@
 import { browser } from '$app/environment';
 
-export const saveHideInfo = <T extends string>(key: T) => {
+export type HideInfoKey =
+	| 'oisy_ic_hide_bitcoin_info'
+	| 'oisy_ic_hide_ethereum_info'
+	| 'oisy_ic_hide_erc20_info';
+
+export const saveHideInfo = <T extends HideInfoKey>(key: T) => {
 	try {
 		localStorage.setItem(key, 'true');
 	} catch (err: unknown) {
@@ -9,7 +14,7 @@ export const saveHideInfo = <T extends string>(key: T) => {
 	}
 };
 
-export const shouldHideInfo = <T extends string>(key: T): boolean => {
+export const shouldHideInfo = <T extends HideInfoKey>(key: T): boolean => {
 	try {
 		const store: Storage = browser ? localStorage : ({ [key]: 'false' } as unknown as Storage);
 		return store[key] === 'true';
