@@ -16,7 +16,7 @@
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let utxosFee: UtxosFee | undefined = undefined;
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	const { sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);

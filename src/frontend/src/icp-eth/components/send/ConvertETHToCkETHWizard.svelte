@@ -16,7 +16,7 @@
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 

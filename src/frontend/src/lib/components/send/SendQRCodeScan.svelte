@@ -11,7 +11,7 @@
 
 	export let expectedToken: OptionToken;
 	export let destination: string | undefined;
-	export let amount: number | undefined;
+	export let amount: string | number | undefined;
 	export let decodeQrCode: ({
 		status,
 		code,
