@@ -34,7 +34,7 @@
 			{#if nonNullish(token)}
 				<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
 			{:else}
-				<RoundedIcon {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
+				<RoundedIcon {icon} opacity={iconWithOpacity} />
 			{/if}
 		</div>
 

@@ -4,7 +4,6 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('tokens.derived', () => {
 	describe('enabledEthereumTokens', () => {
