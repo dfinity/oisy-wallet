@@ -25,10 +25,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import { emit } from '$lib/utils/events.utils';
+	import type { ProgressStepList } from '$lib/types/progress-steps';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
-	let steps: [ProgressStep, ...ProgressStep[]];
+	let steps: ProgressStepList;
 	$: steps = [
 		{
 			step: ProgressStepsLoader.INITIALIZATION,

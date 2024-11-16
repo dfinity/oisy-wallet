@@ -17,6 +17,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import type { ProgressStepList } from '$lib/types/progress-steps';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
@@ -83,7 +84,7 @@
 		}
 	];
 
-	const HIDE_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
+	const HIDE_TOKEN_STEPS:ProgressStepList = [
 		{
 			step: ProgressStepsHideToken.INITIALIZATION,
 			text: $i18n.tokens.text.initializing,

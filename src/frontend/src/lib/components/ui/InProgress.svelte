@@ -3,6 +3,7 @@
 	import type { ComponentType } from 'svelte';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
 	import type { StaticStep } from '$lib/types/steps';
+	import type { ProgressStepList } from '$lib/types/progress-steps';
 
 	export let progressStep: string;
 	export let steps: [ProgressStep | StaticStep, ...(ProgressStep | StaticStep)[]];
@@ -26,7 +27,7 @@
 						...step,
 						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
 					}
-		) as [ProgressStep, ...ProgressStep[]];
+		) as ProgressStepList;
 	};
 
 	$: progressStep, updateSteps();

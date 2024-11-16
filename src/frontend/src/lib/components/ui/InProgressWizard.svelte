@@ -8,9 +8,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
+	import type { ProgressStepList } from '$lib/types/progress-steps';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
-	export let steps: [ProgressStep, ...ProgressStep[]];
+	export let steps: ProgressStepList;
 
 	onMount(() => confirmToCloseBrowser(true));
 	onDestroy(() => confirmToCloseBrowser(false));

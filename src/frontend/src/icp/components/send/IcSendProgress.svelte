@@ -7,11 +7,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+	import type { ProgressStepList } from '$lib/types/progress-steps';
 
 	export let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 	export let networkId: NetworkId | undefined = undefined;
 
-	let steps: [ProgressStep, ...ProgressStep[]];
+	let steps: ProgressStepList;
 	$: steps = [
 		{
 			step: ProgressStepsSendIc.INITIALIZATION,
