@@ -18,10 +18,8 @@
 	$: inputValue = nonNullish(value) ? `${value}` : undefined;
 
 	const onInput = () => {
-		// Convert inputValue to number before updating parent's value
 		value = nonNullish(inputValue) ? Number(inputValue) : undefined;
 
-		// Bubble nnsInput as consumers might require the event as well
 		dispatch('nnsInput');
 	};
 </script>
