@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$icp/utils/ck.utils';
+	import type { HideInfoKey } from '$icp/utils/ck.utils';
 	import InfoBox from '$lib/components/info/InfoBox.svelte';
+	import { saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
 	export let key: HideInfoKey | undefined;
 
 	let hideInfo = true;
-	$: hideInfo = nonNullish(key) ? shouldHideInfo(key) : true;
+	$: hideInfo = nonNullish(key) ? shouldHideInfo<HideInfoKey>(key) : true;
 
 	const close = () => {
 		hideInfo = true;
@@ -15,7 +16,7 @@
 			return;
 		}
 
-		saveHideInfo(key);
+		saveHideInfo<HideInfoKey>(key);
 	};
 </script>
 
