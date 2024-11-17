@@ -15,7 +15,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
 
