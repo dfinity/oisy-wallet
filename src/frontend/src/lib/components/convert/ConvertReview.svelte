@@ -18,7 +18,7 @@
 <ContentWithToolbar>
 	<ConvertReviewTokens />
 
-	<div slot="outer-content" class="my-4">
+	<div slot="outer-content" class="my-4 flex-1">
 		<ConvertReviewNetworks />
 
 		<ConvertReviewAmount {sendAmount} {receiveAmount} />
