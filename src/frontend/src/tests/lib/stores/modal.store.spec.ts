@@ -17,17 +17,17 @@ describe('modal.store', () => {
 	});
 
 	it('should open eth-receive modal with modalId', () => {
-		const modalId = Symbol('modalId');
-		modalStore.openEthReceive(modalId);
+		const id = Symbol('modalId');
+		modalStore.openEthReceive(id);
 
-		expect(get(modalStore)).toEqual({ type: 'eth-receive', modalId });
+		expect(get(modalStore)).toEqual({ type: 'eth-receive', id });
 	});
 
 	it('should open icp-receive modal with modalId', () => {
-		const modalId = Symbol('modalId');
-		modalStore.openIcpReceive(modalId);
+		const id = Symbol('modalId');
+		modalStore.openIcpReceive(id);
 
-		expect(get(modalStore)).toEqual({ type: 'icp-receive', modalId });
+		expect(get(modalStore)).toEqual({ type: 'icp-receive', id });
 	});
 
 	it('should open wallet-connect-sign modal with data', () => {

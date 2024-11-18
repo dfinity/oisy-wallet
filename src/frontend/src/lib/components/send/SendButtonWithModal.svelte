@@ -10,6 +10,6 @@
 
 <SendButton on:click={() => open(modalId)} />
 
-{#if isOpen && $modalStore?.modalId === modalId}
+{#if isOpen && $modalStore?.id === modalId}
 	<slot name="modal" />
 {/if}

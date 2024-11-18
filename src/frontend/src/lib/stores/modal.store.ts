@@ -32,21 +32,21 @@ export interface Modal<T> {
 		| 'btc-transaction'
 		| 'dapp-details';
 	data?: T;
-	modalId?: symbol;
+	id?: symbol;
 }
 
 export type ModalData<T> = Option<Modal<T>>;
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
-	openEthReceive: (modalId: symbol) => void;
-	openIcpReceive: (modalId: symbol) => void;
-	openIcrcReceive: (modalId: symbol) => void;
-	openCkBTCReceive: (modalId: symbol) => void;
-	openCkETHReceive: (modalId: symbol) => void;
-	openBtcReceive: (modalId: symbol) => void;
-	openReceive: (modalId: symbol) => void;
-	openSend: (modalId: symbol) => void;
-	openBuy: (modalId: symbol) => void;
+	openEthReceive: (id: symbol) => void;
+	openIcpReceive: (id: symbol) => void;
+	openIcrcReceive: (id: symbol) => void;
+	openCkBTCReceive: (id: symbol) => void;
+	openCkETHReceive: (id: symbol) => void;
+	openBtcReceive: (id: symbol) => void;
+	openReceive: (id: symbol) => void;
+	openSend: (id: symbol) => void;
+	openBuy: (id: symbol) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertBTCToCkBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
@@ -74,7 +74,7 @@ export const initModalStore = <T>(): ModalStore<T> => {
 
 	const setType = (type: Modal<T>['type']) => () => set({ type });
 
-	const setTypeWithId = (type: Modal<T>['type']) => (modalId: symbol) => set({ type, modalId });
+	const setTypeWithId = (type: Modal<T>['type']) => (id: symbol) => set({ type, id });
 
 	const setTypeWithData =
 		(type: Modal<T>['type']) =>

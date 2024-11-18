@@ -9,6 +9,6 @@
 
 <BuyButton on:click={() => modalStore.openBuy(modalId)} />
 
-{#if $modalBuy && $modalStore?.modalId === modalId}
+{#if $modalBuy && $modalStore?.id === modalId}
 	<BuyModal />
 {/if}
