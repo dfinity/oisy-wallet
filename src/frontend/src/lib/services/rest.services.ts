@@ -1,21 +1,21 @@
-export interface RestRequestParams<R, E = unknown, S = void> {
-	request: () => Promise<R>;
-	onSuccess: (response: R) => S | undefined;
-	onError?: (error: E) => S | undefined;
-	onRetry?: (options: { error: E; retryCount: number }) => Promise<void>;
+export interface RestRequestParams<Response, Error = unknown, Success = void> {
+	request: () => Promise<Response>;
+	onSuccess: (response: Response) => Success | undefined;
+	onError?: (error: Error) => Success | undefined;
+	onRetry?: (options: { error: Error; retryCount: number }) => Promise<void>;
 	maxRetries?: number;
 }
 
 /**
  *
  */
-export const restRequest = async <R, E, S>({
+export const restRequest = async <Response, Error, Success>({
 	request,
 	onSuccess,
 	onError,
 	onRetry,
 	maxRetries = 10
-}: RestRequestParams<R, E, S>): Promise<S | undefined> => {
+}: RestRequestParams<Response, Error, Success>): Promise<Success | undefined> => {
 	let retryCount = 0;
 
 	while (retryCount <= maxRetries) {
@@ -27,10 +27,10 @@ export const restRequest = async <R, E, S>({
 
 			if (retryCount > maxRetries) {
 				console.error(`Max retries reached. Error:`, error);
-				return onError?.(error as E);
+				return onError?.(error as Error);
 			}
 
-			await onRetry?.({ error: error as E, retryCount });
+			await onRetry?.({ error: error as Error, retryCount });
 			console.warn(`Request attempt ${retryCount} failed. Retrying...`);
 		}
 	}
