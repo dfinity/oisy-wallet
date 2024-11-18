@@ -20,7 +20,7 @@
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;

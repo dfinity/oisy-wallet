@@ -22,7 +22,7 @@
 	export let targetNetwork: Network | undefined = undefined;
 	export let sourceNetwork: EthereumNetwork;
 	export let destinationEditable = true;
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 
 	const { feeStore: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
