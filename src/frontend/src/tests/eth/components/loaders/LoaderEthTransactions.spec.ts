@@ -9,8 +9,8 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockedFunction } from 'vitest';
 
-vi.mock('$eth/services/transactions.services', () => ({
-	loadTransactions: vi.fn()
+vi.mock('$eth/services/eth-transactions.services', () => ({
+	loadEthereumTransactions: vi.fn()
 }));
 
 describe('LoaderEthTransactions', () => {
