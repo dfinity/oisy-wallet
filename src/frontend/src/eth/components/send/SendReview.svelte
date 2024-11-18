@@ -15,6 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
@@ -22,7 +23,7 @@
 	export let targetNetwork: Network | undefined = undefined;
 	export let sourceNetwork: EthereumNetwork;
 	export let destinationEditable = true;
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 
 	const { feeStore: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
