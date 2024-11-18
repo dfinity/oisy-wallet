@@ -4,6 +4,7 @@ import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
+import { restRequest } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
@@ -113,29 +114,43 @@ const loadErc20Transactions = async ({
 		return { success: false };
 	}
 
-	try {
-		const { transactions: transactionsRest } = etherscanRests(networkId);
-		const transactions = await transactionsRest({ contract: token, address });
-		ethTransactionsStore.set({ tokenId, transactions });
-	} catch (err: unknown) {
-		ethTransactionsStore.reset();
+	const result = await restRequest({
+		request: async () => {
+			const { transactions: transactionsRest } = etherscanRests(networkId);
+			return await transactionsRest({ contract: token, address });
+		},
+		onSuccess: (transactions) => {
+			ethTransactionsStore.set({ tokenId, transactions });
+			return { success: true };
+		},
+		onError: (err) => {
+			ethTransactionsStore.reset();
 
-		const {
-			transactions: {
-				error: { loading_transactions_symbol }
-			}
-		} = get(i18n);
+			const {
+				transactions: {
+					error: { loading_transactions_symbol }
+				}
+			} = get(i18n);
 
-		toastsError({
-			msg: {
-				text: replacePlaceholders(loading_transactions_symbol, {
-					$symbol: token.symbol
-				})
-			},
-			err
-		});
+			toastsError({
+				msg: {
+					text: replacePlaceholders(loading_transactions_symbol, {
+						$symbol: token.symbol
+					})
+				},
+				err
+			});
+
+			return { success: false };
+		},
+		onRetry: async () => {
+			await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * 1000 + 1000)));
+		}
+	});
+
+	if (isNullish(result)) {
 		return { success: false };
 	}
 
-	return { success: true };
+	return result;
 };
