@@ -9,7 +9,6 @@
 	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
 
-
 	const load = async () => {
 		if (isNullish($enabledEthereumTokens) || isNullish($enabledErc20Tokens)) {
 			return;
