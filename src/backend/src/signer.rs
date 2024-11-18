@@ -13,7 +13,7 @@ use ic_cdk::api::{
     },
 };
 use ic_cycles_ledger_client::{
-    Account, ApproveArgs, ApproveError, DepositArgs, DepositResult, Service as CyclesLedgerService,
+    Account, ApproveArgs, ApproveError, CyclesLedgerService, DepositArgs, DepositResult,
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;

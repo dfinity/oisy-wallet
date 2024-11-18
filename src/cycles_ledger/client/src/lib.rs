@@ -420,8 +420,8 @@ pub enum WithdrawFromError {
     },
 }
 
-pub struct Service(pub Principal);
-impl Service {
+pub struct CyclesLedgerService(pub Principal);
+impl CyclesLedgerService {
     pub async fn create_canister(
         &self,
         arg0: &CreateCanisterArgs,
