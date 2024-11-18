@@ -461,7 +461,7 @@
 			"alternativeName": "ICVC",
 			"url": "https://mnc6b-aaaaa-aaaap-qhnrq-cai.icp0.io/"
 		},
-		"indexCanisterVersion": "outdated"
+		"indexCanisterVersion": "up-to-date"
 	},
 	{
 		"ledgerCanisterId": "o7oak-iyaaa-aaaaq-aadzq-cai",
