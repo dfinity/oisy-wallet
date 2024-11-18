@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
-	import { loadTransactions } from '$eth/services/transactions.services';
+	import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import type { TokenId } from '$lib/types/token';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
@@ -32,7 +32,7 @@
 
 		tokenIdLoaded = tokenId;
 
-		const { success } = await loadTransactions({ tokenId, networkId });
+		const { success } = await loadEthereumTransactions({ tokenId, networkId });
 
 		if (!success) {
 			tokenIdLoaded = undefined;
