@@ -13,7 +13,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadTransactions = ({
+export const loadEthereumTransactions = ({
 	networkId,
 	tokenId
 }: {
@@ -73,7 +73,7 @@ const loadEthTransactions = async ({
 	return { success: true };
 };
 
-export const loadErc20Transactions = async ({
+const loadErc20Transactions = async ({
 	networkId,
 	tokenId
 }: {

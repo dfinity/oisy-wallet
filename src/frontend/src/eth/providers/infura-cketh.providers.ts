@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.eth.env';
+import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import type { ContractAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
@@ -18,13 +19,11 @@ import type { Log } from 'alchemy-sdk';
 import { ethers } from 'ethers';
 import { get } from 'svelte/store';
 
-const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
-
 export class InfuraCkETHProvider implements Erc20Provider {
 	private readonly provider: InfuraProvider;
 
 	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, API_KEY);
+		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
 	}
 
 	getFeeData = ({

@@ -5,7 +5,8 @@ import {
 import type { BtcTransactionStatus } from '$btc/types/btc';
 import { mapBtcTransaction, sortBtcTransactions } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
-import { mockBtcAddress, mockBtcTransaction, mockBtcTransactionUi } from '$tests/mocks/btc.mock';
+import { mockBtcTransaction, mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 
 describe('mapBtcTransaction', () => {
 	const sendTransaction = {
