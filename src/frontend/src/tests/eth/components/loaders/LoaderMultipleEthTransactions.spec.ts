@@ -40,10 +40,6 @@ describe('LoaderMultipleEthTransactions', () => {
 		erc20UserTokensStore.resetAll();
 		erc20UserTokensStore.setAll(mockErc20UserTokens);
 	});
-	//
-	// beforeEach(() => {
-	//
-	// });
 
 	it('should load transactions for all Ethereum and Sepolia tokens (native and ERC20) when testnets flag is enabled', async () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
