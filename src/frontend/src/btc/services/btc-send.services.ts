@@ -3,8 +3,8 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import { addPendingBtcTransaction, selectUserUtxosFee } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
-import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import type { BtcAddress } from '$lib/types/address';
+import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
@@ -16,14 +16,14 @@ const DEFAULT_MIN_CONFIRMATIONS = 6;
 interface BtcSendServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;
-	amount: number;
-	progress: (step: ProgressStepsSendBtc) => void;
+	amount: Amount;
 }
 
-type SendBtcParams = BtcSendServiceParams & {
+export type SendBtcParams = BtcSendServiceParams & {
 	destination: BtcAddress;
 	source: BtcAddress;
 	utxosFee: UtxosFee;
+	onProgress?: () => void;
 };
 
 export const selectUtxosFee = async ({
@@ -48,17 +48,17 @@ export const selectUtxosFee = async ({
 };
 
 export const sendBtc = async ({
-	progress,
 	utxosFee,
 	network,
 	source,
 	identity,
+	onProgress,
 	...rest
 }: SendBtcParams): Promise<void> => {
 	// TODO: use txid returned by this method to register it as a pending transaction in BE
-	const { txid } = await send({ progress, utxosFee, network, identity, ...rest });
+	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
-	progress(ProgressStepsSendBtc.RELOAD);
+	onProgress?.();
 
 	await addPendingBtcTransaction({
 		identity,
@@ -77,12 +77,12 @@ const send = async ({
 	network,
 	amount,
 	utxosFee,
-	progress
+	onProgress
 }: Omit<SendBtcParams, 'source'>): Promise<SendBtcResponse> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 
-	progress(ProgressStepsSendBtc.SEND);
+	onProgress?.();
 
 	return await sendBtcApi({
 		identity,

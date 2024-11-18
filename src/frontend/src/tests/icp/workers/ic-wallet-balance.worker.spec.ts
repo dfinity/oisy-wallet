@@ -1,5 +1,5 @@
-import type { IcWalletBalanceScheduler } from '$icp/schedulers/ic-wallet-balance.scheduler';
-import { initIcrcWalletBalanceScheduler } from '$icp/workers/icrc-wallet.worker';
+import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import * as agent from '$lib/actors/agents.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
@@ -80,17 +80,19 @@ describe('ic-wallet-balance.worker', () => {
 		msg,
 		startData = undefined
 	}: {
-		initScheduler: () => IcWalletBalanceScheduler<PostMessageDataRequest>;
+		initScheduler: (
+			data: PostMessageDataRequest | undefined
+		) => IcWalletScheduler<PostMessageDataRequest>;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet';
 		startData?: PostMessageDataRequest | undefined;
 	}) => {
-		let scheduler: IcWalletBalanceScheduler<PostMessageDataRequest>;
+		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
 		const mockPostMessageNotCertified = mockPostMessage({ msg, certified: false });
 		const mockPostMessageCertified = mockPostMessage({ msg, certified: true });
 
 		beforeEach(() => {
-			scheduler = initScheduler();
+			scheduler = initScheduler(startData);
 		});
 
 		afterEach(() => {
@@ -178,15 +180,17 @@ describe('ic-wallet-balance.worker', () => {
 		initErrorMock,
 		msg
 	}: {
-		initScheduler: () => IcWalletBalanceScheduler<PostMessageDataRequest>;
+		initScheduler: (
+			data: PostMessageDataRequest | undefined
+		) => IcWalletScheduler<PostMessageDataRequest>;
 		startData?: PostMessageDataRequest | undefined;
 		initErrorMock: (err: Error) => void;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet';
 	}) => {
-		let scheduler: IcWalletBalanceScheduler<PostMessageDataRequest>;
+		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
 		beforeEach(() => {
-			scheduler = initScheduler();
+			scheduler = initScheduler(startData);
 
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
@@ -219,7 +223,6 @@ describe('ic-wallet-balance.worker', () => {
 
 		const startData = {
 			ledgerCanisterId: 'zfcdd-tqaaa-aaaaq-aaaga-cai',
-			indexCanisterId: 'zlaol-iaaaa-aaaaq-aaaha-cai',
 			env: 'mainnet' as const
 		};
 
@@ -234,7 +237,7 @@ describe('ic-wallet-balance.worker', () => {
 
 			initWithBalance({
 				msg: 'syncIcrcWallet',
-				initScheduler: initIcrcWalletBalanceScheduler,
+				initScheduler: initIcrcWalletScheduler,
 				startData
 			});
 		});
@@ -243,7 +246,7 @@ describe('ic-wallet-balance.worker', () => {
 			const initErrorMock = (err: Error) => ledgerCanisterMock.balance.mockRejectedValue(err);
 
 			initOtherScenarios({
-				initScheduler: initIcrcWalletBalanceScheduler,
+				initScheduler: initIcrcWalletScheduler,
 				startData,
 				initErrorMock,
 				msg: 'syncIcrcWallet'

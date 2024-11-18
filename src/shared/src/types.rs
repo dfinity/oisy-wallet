@@ -271,7 +271,7 @@ pub mod signer {
             }
         }
         /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
-        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
+        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 50_000_000_000_000; // 50T
         /// The proportion of the backend canister's own cycles to send to the cycles ledger.
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
         /// The minimum sensible percentage to send to the cycles ledger.
