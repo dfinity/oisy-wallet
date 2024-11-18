@@ -9,7 +9,7 @@
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
 
-<div class="flex w-full flex-col items-center justify-center">
+<div class="flex w-full flex-1 flex-col items-center justify-center pb-6">
 	<p class="font-bold">
 		{$i18n.convert.text.review_tokens_info_title}
 	</p>
