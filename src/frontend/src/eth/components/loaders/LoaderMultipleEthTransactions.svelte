@@ -16,13 +16,10 @@
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
 				async ({ network: { id: networkId }, id: tokenId }) => {
-					if (tokensLoaded.includes(tokenId)) {
-						return;
+					if (!tokensLoaded.includes(tokenId)) {
+						await loadTransactions({ tokenId, networkId });
+						tokensLoaded.push(tokenId);
 					}
-
-					await loadTransactions({ tokenId, networkId });
-
-					tokensLoaded.push(tokenId);
 				}
 			)
 		);
