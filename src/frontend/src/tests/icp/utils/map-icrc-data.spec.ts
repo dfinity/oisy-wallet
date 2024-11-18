@@ -1,6 +1,5 @@
 import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import * as appConstants from '$lib/constants/app.constants';
-import { describe, expect, it, vi } from 'vitest';
 
 describe('mapIcrcData', () => {
 	const token = {
@@ -14,14 +13,22 @@ describe('mapIcrcData', () => {
 		TESTTOKEN: { ...token.TESTTOKEN, exchangeCoinId: 'internet-computer' }
 	};
 
-	describe.each([
+	const envs = [
 		{ env: 'PROD', expected },
 		{ env: 'BETA', expected },
-		{ env: 'STAGING', expected: {} },
+		{ env: 'STAGING', expected },
 		{ env: 'LOCAL', expected: {} }
-	])('when %s is true', ({ env, expected }) => {
+	];
+
+	describe.each(envs)('when %s is true', ({ env, expected }) => {
 		beforeEach(() => {
 			vi.resetAllMocks();
+
+			envs.forEach(({ env: e }) => {
+				vi.spyOn(appConstants, e as keyof typeof appConstants, 'get').mockImplementation(
+					() => false
+				);
+			});
 
 			vi.spyOn(appConstants, env as keyof typeof appConstants, 'get').mockImplementation(
 				() => true
