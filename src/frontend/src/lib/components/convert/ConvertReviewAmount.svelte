@@ -4,8 +4,9 @@
 	import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store.js';
+	import type { OptionAmount } from '$lib/types/send';
 
-	export let sendAmount: number | undefined = undefined;
+	export let sendAmount: OptionAmount = undefined;
 	export let receiveAmount: number | undefined = undefined;
 
 	const { sourceToken, sourceTokenExchangeRate, destinationToken, destinationTokenExchangeRate } =
