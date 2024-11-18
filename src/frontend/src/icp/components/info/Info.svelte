@@ -12,8 +12,8 @@
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
-	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import type { HideInfoKey } from '$lib/utils/info.utils';
+	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	let mainnet = true;
 	$: mainnet =
