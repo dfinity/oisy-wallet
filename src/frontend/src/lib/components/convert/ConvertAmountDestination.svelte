@@ -7,10 +7,11 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import { formatToken, formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let sendAmount: number | undefined = undefined;
+	export let sendAmount: OptionAmount = undefined;
 	export let receiveAmount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
 	export let totalFee: bigint | undefined = undefined;
