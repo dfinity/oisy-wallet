@@ -9,8 +9,8 @@ import { testnetsStore } from '$lib/stores/settings.store';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$eth/services/transactions.services', () => ({
-	loadTransactions: vi.fn()
+vi.mock('$eth/services/eth-transactions.services', () => ({
+	loadEthereumTransactions: vi.fn()
 }));
 
 describe('LoaderMultipleEthTransactions', () => {
