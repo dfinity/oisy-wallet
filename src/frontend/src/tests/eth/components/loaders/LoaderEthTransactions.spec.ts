@@ -2,19 +2,21 @@ import { SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { ICP_TOKEN, SEPOLIA_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
-import { loadTransactions } from '$eth/services/transactions.services';
+import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockedFunction } from 'vitest';
 
-vi.mock('$eth/services/transactions.services', () => ({
-	loadTransactions: vi.fn()
+vi.mock('$eth/services/eth-transactions.services', () => ({
+	loadEthereumTransactions: vi.fn()
 }));
 
 describe('LoaderEthTransactions', () => {
-	const mockLoadTransactions = loadTransactions as MockedFunction<typeof loadTransactions>;
+	const mockLoadTransactions = loadEthereumTransactions as MockedFunction<
+		typeof loadEthereumTransactions
+	>;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -33,7 +35,7 @@ describe('LoaderEthTransactions', () => {
 		render(LoaderEthTransactions);
 
 		await waitFor(() => {
-			expect(loadTransactions).not.toHaveBeenCalled();
+			expect(loadEthereumTransactions).not.toHaveBeenCalled();
 		});
 	});
 
@@ -43,7 +45,7 @@ describe('LoaderEthTransactions', () => {
 		mockPage.mock({ token: ICP_TOKEN.name });
 
 		await waitFor(() => {
-			expect(loadTransactions).not.toHaveBeenCalled();
+			expect(loadEthereumTransactions).not.toHaveBeenCalled();
 		});
 	});
 
@@ -54,7 +56,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(ICP_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).not.toHaveBeenCalled();
+			expect(loadEthereumTransactions).not.toHaveBeenCalled();
 		});
 	});
 
@@ -65,7 +67,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledWith({
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_TOKEN_ID,
 				networkId: SEPOLIA_NETWORK_ID
 			});
@@ -79,7 +81,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_PEPE_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledWith({
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_PEPE_TOKEN.id,
 				networkId: SEPOLIA_PEPE_TOKEN.network.id
 			});
@@ -96,8 +98,8 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledOnce();
-			expect(loadTransactions).toHaveBeenCalledWith({
+			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_TOKEN_ID,
 				networkId: SEPOLIA_NETWORK_ID
 			});
@@ -111,7 +113,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledWith({
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_TOKEN_ID,
 				networkId: SEPOLIA_NETWORK_ID
 			});
@@ -121,13 +123,13 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_PEPE_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledWith({
+			expect(loadEthereumTransactions).toHaveBeenCalledWith({
 				tokenId: SEPOLIA_PEPE_TOKEN.id,
 				networkId: SEPOLIA_PEPE_TOKEN.network.id
 			});
 		});
 
-		expect(loadTransactions).toHaveBeenCalledTimes(2);
+		expect(loadEthereumTransactions).toHaveBeenCalledTimes(2);
 	});
 
 	it('should not call the load function everytime the token changes but it was already loaded before', async () => {
@@ -144,8 +146,8 @@ describe('LoaderEthTransactions', () => {
 		});
 
 		await waitFor(() => {
-			expect(loadTransactions).not.toHaveBeenCalledTimes(n);
-			expect(loadTransactions).toHaveBeenCalledOnce();
+			expect(loadEthereumTransactions).not.toHaveBeenCalledTimes(n);
+			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -164,7 +166,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_PEPE_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledTimes(2);
+			expect(loadEthereumTransactions).toHaveBeenCalledTimes(2);
 		});
 	});
 
@@ -175,7 +177,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledOnce();
+			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
 		});
 
 		render(LoaderEthTransactions);
@@ -187,7 +189,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
-			expect(loadTransactions).toHaveBeenCalledTimes(2);
+			expect(loadEthereumTransactions).toHaveBeenCalledTimes(2);
 		});
 	});
 });
