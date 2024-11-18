@@ -12,14 +12,16 @@
 </script>
 
 <ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
-	<Collapsible slot="fee">
-		<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
-		<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
-			<BtcConvertFeeTotal />
-		</div>
+	<div class="btc-convert-review-fees" slot="fee">
+		<Collapsible>
+			<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
+			<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
+				<BtcConvertFeeTotal />
+			</div>
 
-		<BtcConvertFees {sendAmount} />
-	</Collapsible>
+			<BtcConvertFees {sendAmount} />
+		</Collapsible>
+	</div>
 
 	<div slot="info-message" class="mt-4">
 		<MessageBox>{$i18n.convert.text.conversion_may_take}</MessageBox>
@@ -29,7 +31,7 @@
 </ConvertReview>
 
 <style lang="scss">
-	:global(div.contents > div.header > button.collapsible-expand-icon) {
+	:global(.btc-convert-review-fees > div.contents > div.header > button.collapsible-expand-icon) {
 		justify-content: flex-end;
 	}
 </style>
