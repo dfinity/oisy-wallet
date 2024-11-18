@@ -9,12 +9,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
 # Install node
 RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 ENV NVM_DIR=/root/.nvm
-COPY .nvmrc .node-version
-RUN cat .node-version
+COPY .node-version .node-version
 RUN . "$NVM_DIR/nvm.sh" && nvm install "$(cat .node-version)"
-RUN . "$NVM_DIR/nvm.sh" && nvm use "$(cat .node-version)"
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default "$(cat .node-version)"
-RUN ln -s "$NVM_DIR/versions/node/$(cat .node-version)" "$NVM_DIR/versions/node/default"
+RUN . "$NVM_DIR/nvm.sh" && nvm use "v$(cat .node-version)"
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default "v$(cat .node-version)"
+RUN ln -s "$NVM_DIR/versions/node/v$(cat .node-version)" "$NVM_DIR/versions/node/default"
 ENV PATH="$NVM_DIR/versions/node/default/bin/:${PATH}"
 RUN node --version
 RUN npm --version
