@@ -73,7 +73,7 @@ const loadEthTransactions = async ({
 	return { success: true };
 };
 
-export const loadErc20Transactions = async ({
+const loadErc20Transactions = async ({
 	networkId,
 	tokenId
 }: {
