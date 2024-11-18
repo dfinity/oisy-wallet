@@ -17,28 +17,26 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
-	<ContentWithToolbar>
-		<ConvertAmount
-			bind:sendAmount
-			bind:receiveAmount
-			bind:insufficientFunds
-			bind:insufficientFundsForFee
-			{totalFee}
-		/>
+<ContentWithToolbar>
+	<ConvertAmount
+		bind:sendAmount
+		bind:receiveAmount
+		bind:insufficientFunds
+		bind:insufficientFundsForFee
+		{totalFee}
+	/>
 
-		<div class="mt-16 pb-5">
-			<slot name="message" />
+	<div class="mt-16 pb-5">
+		<slot name="message" />
 
-			<slot name="fee" />
-		</div>
+		<slot name="fee" />
+	</div>
 
-		<ButtonGroup slot="toolbar">
-			<slot name="cancel" />
+	<ButtonGroup slot="toolbar">
+		<slot name="cancel" />
 
-			<Button {disabled}>
-				{$i18n.convert.text.review_button}
-			</Button>
-		</ButtonGroup>
-	</ContentWithToolbar>
-</form>
+		<Button {disabled} on:click={() => dispatch('icNext')}>
+			{$i18n.convert.text.review_button}
+		</Button>
+	</ButtonGroup>
+</ContentWithToolbar>
