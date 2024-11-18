@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { loadTransactions } from '$eth/services/transactions.services';
+	import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import type { TokenId } from '$lib/types/token';
 
@@ -17,7 +17,7 @@
 			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
 				async ({ network: { id: networkId }, id: tokenId }) => {
 					if (!tokensLoaded.includes(tokenId)) {
-						await loadTransactions({ tokenId, networkId });
+						await loadEthereumTransactions({ tokenId, networkId });
 						tokensLoaded.push(tokenId);
 					}
 				}

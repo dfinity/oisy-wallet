@@ -13,7 +13,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadTransactions = ({
+export const loadEthereumTransactions = ({
 	networkId,
 	tokenId
 }: {

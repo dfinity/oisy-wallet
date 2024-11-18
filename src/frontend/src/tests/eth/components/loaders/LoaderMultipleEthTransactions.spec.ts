@@ -2,15 +2,15 @@ import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import * as ethEnv from '$env/networks.eth.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
-import { loadTransactions } from '$eth/services/transactions.services';
+import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$eth/services/transactions.services', () => ({
-	loadTransactions: vi.fn()
+vi.mock('$eth/services/eth-transactions.services', () => ({
+	loadEthereumTransactions: vi.fn()
 }));
 
 describe('LoaderMultipleEthTransactions', () => {
@@ -34,7 +34,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		render(LoaderMultipleEthTransactions);
 
 		await waitFor(() => {
-			expect(loadTransactions).not.toHaveBeenCalled();
+			expect(loadEthereumTransactions).not.toHaveBeenCalled();
 		});
 	});
 
@@ -51,7 +51,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 			await waitFor(() => {
 				// mockErc20UserTokens.length + both native tokens (Ethereum and Sepolia)
-				expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 2);
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 2);
 			});
 		});
 
@@ -60,21 +60,21 @@ describe('LoaderMultipleEthTransactions', () => {
 
 			await waitFor(() => {
 				// mockErc20UserTokens.length + Ethereum native token
-				expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
 			});
 
 			await new Promise((resolve) => setTimeout(resolve, 3000));
 
 			// same number of calls as before
-			expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+			expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
 		});
 
 		it('should not load transactions for native Sepolia token when testnets flag is disabled', async () => {
 			render(LoaderMultipleEthTransactions);
 
 			await waitFor(() => {
-				expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
-				expect(loadTransactions).not.toHaveBeenCalledWith({
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+				expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
 					networkId: SEPOLIA_NETWORK_ID,
 					tokenId: SEPOLIA_TOKEN_ID
 				});
@@ -88,8 +88,8 @@ describe('LoaderMultipleEthTransactions', () => {
 			render(LoaderMultipleEthTransactions);
 
 			await waitFor(() => {
-				expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
-				expect(loadTransactions).not.toHaveBeenCalledWith({
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+				expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
 					networkId: ETHEREUM_NETWORK_ID,
 					tokenId: ETHEREUM_TOKEN_ID
 				});
@@ -107,7 +107,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 			await waitFor(() => {
 				// mockErc20UserTokens.length + Ethereum native token
-				expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
 			});
 
 			erc20UserTokensStore.resetAll();
@@ -115,10 +115,10 @@ describe('LoaderMultipleEthTransactions', () => {
 
 			await waitFor(() => {
 				// the number of calls as before + mockAdditionalTokens.length
-				expect(loadTransactions).toHaveBeenCalledTimes(
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(
 					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length
 				);
-				expect(loadTransactions).not.toHaveBeenCalledTimes(
+				expect(loadEthereumTransactions).not.toHaveBeenCalledTimes(
 					2 * (mockErc20UserTokens.length + 1) + mockAdditionalTokens.length
 				);
 			});
@@ -135,7 +135,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 			await waitFor(() => {
 				// mockErc20UserTokens.length + Ethereum native token
-				expect(loadTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
 			});
 
 			erc20UserTokensStore.resetAll();
@@ -143,7 +143,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 			await waitFor(() => {
 				// the number of calls as before + mockAdditionalTokens.length
-				expect(loadTransactions).toHaveBeenCalledTimes(
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(
 					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length
 				);
 			});
@@ -152,7 +152,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 			await waitFor(() => {
 				// the number of calls of the first render + the number of additional tokens + Sepolia native token
-				expect(loadTransactions).toHaveBeenCalledTimes(
+				expect(loadEthereumTransactions).toHaveBeenCalledTimes(
 					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length + 1
 				);
 			});
