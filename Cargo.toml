@@ -12,7 +12,7 @@ ic-cdk-macros = "0.16.0"
 ic-cdk-timers = "0.9.0"
 ic-cycles-ledger-client = { path = "src/cycles_ledger_client" }
 ic-ledger-types = "0.13.0"
-ic-stable-structures = "0.6.5"
+ic-stable-structures = "0.6.6"
 ic-metrics-encoder = "1.1.1"
 ic-canister-sig-creation = "1.1.0"
 ic-verifiable-credentials = { git = "https://github.com/dfinity/verifiable-credentials-sdk", rev = "a116a2e53a13e4a1f6f7e8429960a7d0d6142e70" }
