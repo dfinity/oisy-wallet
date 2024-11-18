@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Identity } from '@dfinity/agent';
 	import { Principal } from '@dfinity/principal';
-	import { assertNonNullish, toNullable } from '@dfinity/utils';
+	import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -35,19 +35,11 @@
 			return { valid: false };
 		}
 
-		if (isNullishOrEmpty(indexCanisterId)) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.invalid_index }
-			});
-			return { valid: false };
-		}
-
 		return { valid: true };
 	};
 
 	const hideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(ledgerCanisterId);
-		assertNonNullish(indexCanisterId);
 
 		await setCustomToken({
 			...params,
@@ -57,7 +49,9 @@
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
-						index_id: toNullable(Principal.fromText(indexCanisterId))
+						index_id: toNullable(
+							nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
+						)
 					}
 				}
 			},

@@ -33,7 +33,7 @@
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let sendProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
 
@@ -110,10 +110,16 @@
 				destination,
 				amount,
 				utxosFee,
-				progress,
 				network,
 				source,
-				identity: $authIdentity
+				identity: $authIdentity,
+				onProgress: () => {
+					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
+						progress(ProgressStepsSendBtc.SEND);
+					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
+						progress(ProgressStepsSendBtc.DONE);
+					}
+				}
 			});
 
 			sendProgressStep = ProgressStepsSendBtc.DONE;

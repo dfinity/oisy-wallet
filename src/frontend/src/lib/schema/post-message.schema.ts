@@ -129,11 +129,11 @@ export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataRespons
 });
 
 // Transactions & {certified: boolean}
-const JsonTransactionsTextSchema = z.string();
+export const JsonTransactionsTextSchema = z.string();
 
-const PostMessageWalletDataSchema = z.object({
+export const PostMessageWalletDataSchema = z.object({
 	balance: z.custom<CertifiedData<bigint>>(),
-	newTransactions: JsonTransactionsTextSchema
+	newTransactions: JsonTransactionsTextSchema.optional()
 });
 
 export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema.extend({

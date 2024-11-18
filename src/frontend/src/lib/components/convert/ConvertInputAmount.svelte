@@ -11,7 +11,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let token: Token;
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 	export let name = 'convert-amount';
 	export let disabled: boolean | undefined = undefined;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
@@ -60,7 +60,7 @@
 					data-tid="convert-amount-reset"
 					aria-label={$i18n.convert.text.input_reset_button}
 					on:click|preventDefault={onReset}
-					class={errorState ? 'text-error' : 'text-aurometalsaurus'}
+					class={errorState ? 'text-error' : 'text-tertiary'}
 				>
 					<IconClose />
 				</button>
