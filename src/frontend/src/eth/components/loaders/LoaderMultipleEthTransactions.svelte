@@ -1,31 +1,48 @@
 <script lang="ts">
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import type { TokenId } from '$lib/types/token';
+	import { debounce, isNullish } from '@dfinity/utils';
+	import { ETHERSCAN_MAX_CALLS_PER_SECOND } from '$env/rest/etherscan.env';
 
 	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
 
 	const load = async () => {
-		if ($erc20UserTokensNotInitialized) {
+		if (isNullish($enabledEthereumTokens) || isNullish($enabledErc20Tokens) ) {
 			return;
 		}
 
-		await Promise.allSettled(
-			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
-				async ({ network: { id: networkId }, id: tokenId }) => {
-					if (!tokensLoaded.includes(tokenId)) {
+
+		const tokensToLoad = [...$enabledEthereumTokens, ...$enabledErc20Tokens].filter(
+			({ id }) => !tokensLoaded.includes(id)
+		);
+
+		const promisesBuckets = tokensToLoad.reduce<(()=>Promise<void>)[][]>(
+			(acc, { network: { id: networkId }, id: tokenId }, index) => {
+				const bucketIndex = Math.floor(index / ETHERSCAN_MAX_CALLS_PER_SECOND);
+				acc[bucketIndex] = [
+					...(acc[bucketIndex] ?? []),
+					async () => {
 						await loadEthereumTransactions({ tokenId, networkId });
 						tokensLoaded.push(tokenId);
 					}
-				}
-			)
+				];
+				return acc;
+			},
+			[]
 		);
+
+		for (const promises of promisesBuckets) {
+			await Promise.allSettled(promises.map((promise) => promise()));
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+		}
 	};
 
-	$: $enabledEthereumTokens, $enabledErc20Tokens, $erc20UserTokensNotInitialized, load();
+	const debounceLoad = debounce(load, 1000);
+
+	$: $enabledEthereumTokens, $enabledErc20Tokens, debounceLoad();
 </script>
 
 <slot />
