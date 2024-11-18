@@ -10,12 +10,12 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { InsufficientFundsError } from '$lib/types/send';
+	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
 	export let nativeEthereumToken: Token;
 

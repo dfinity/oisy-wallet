@@ -6,12 +6,13 @@
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let token: Token;
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let name = 'convert-amount';
 	export let disabled: boolean | undefined = undefined;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;

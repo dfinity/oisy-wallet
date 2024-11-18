@@ -10,10 +10,11 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let destination = '';
 	export let source: string;
 

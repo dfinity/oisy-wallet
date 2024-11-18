@@ -23,6 +23,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBTCRegtest,
@@ -33,7 +34,7 @@
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
 

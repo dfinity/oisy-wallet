@@ -7,11 +7,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
 
 	export let expectedToken: OptionToken;
 	export let destination: string | undefined;
-	export let amount: string | number | undefined;
+	export let amount: OptionAmount;
 	export let decodeQrCode: ({
 		status,
 		code,

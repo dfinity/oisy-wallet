@@ -9,9 +9,10 @@
 	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { OptionAmount } from '$lib/types/send';
 
 	export let destination = '';
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let source: string;
 	export let disabled: boolean | undefined = false;
 

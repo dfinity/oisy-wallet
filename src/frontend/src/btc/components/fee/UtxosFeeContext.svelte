@@ -6,9 +6,10 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);

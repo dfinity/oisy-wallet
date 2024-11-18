@@ -1,11 +1,12 @@
 <script lang="ts">
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let token: Token;
 
 	let amountDisplay: string;

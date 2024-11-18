@@ -14,13 +14,14 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;

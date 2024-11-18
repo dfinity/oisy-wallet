@@ -12,11 +12,12 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let utxosFee: UtxosFee | undefined = undefined;
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	const { sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);

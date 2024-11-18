@@ -42,6 +42,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -63,7 +64,7 @@
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.

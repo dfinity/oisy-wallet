@@ -4,6 +4,7 @@ import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import { addPendingBtcTransaction, selectUserUtxosFee } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import type { BtcAddress } from '$lib/types/address';
+import type { Amount } from '$lib/types/send';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
@@ -15,7 +16,7 @@ const DEFAULT_MIN_CONFIRMATIONS = 6;
 interface BtcSendServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;
-	amount: number | string;
+	amount: Amount;
 }
 
 export type SendBtcParams = BtcSendServiceParams & {

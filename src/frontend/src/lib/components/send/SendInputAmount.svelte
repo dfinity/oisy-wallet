@@ -7,10 +7,11 @@
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let tokenDecimals: number | undefined = undefined;
 	export let placeholder: string = $i18n.core.text.amount;
 	export let customValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
