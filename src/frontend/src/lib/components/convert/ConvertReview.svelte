@@ -18,7 +18,7 @@
 <ContentWithToolbar>
 	<ConvertReviewTokens />
 
-	<div slot="outer-content" class="my-4">
+	<div slot="outer-content" class="my-4 h-[50vh] sm:h-auto">
 		<ConvertReviewNetworks />
 
 		<ConvertReviewAmount {sendAmount} {receiveAmount} />
