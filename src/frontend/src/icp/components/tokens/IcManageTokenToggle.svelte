@@ -9,9 +9,6 @@
 
 	export let token: IcrcCustomToken;
 
-	let outdated = false;
-	$: outdated = token.indexCanisterVersion === 'outdated';
-
 	let disabled = false;
 	$: disabled = isIcrcTokenToggleDisabled(token);
 
@@ -34,10 +31,6 @@
 	};
 
 	const onClick = () => {
-		if (!outdated) {
-			return;
-		}
-
 		toastsShow({
 			text: replacePlaceholders(
 				replaceOisyPlaceholders($i18n.tokens.manage.info.outdated_index_canister),
@@ -53,7 +46,7 @@
 
 <!-- svelte-ignore a11y-interactive-supports-focus -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class:outdated role="button" on:click={onClick}>
+<div role="button" on:click={onClick}>
 	<Toggle
 		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
 		{disabled}

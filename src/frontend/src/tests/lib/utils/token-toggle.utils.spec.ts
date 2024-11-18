@@ -51,8 +51,7 @@ describe('isIcrcCustomTokenDisabled', () => {
 			...ICP_TOKEN,
 			enabled: false,
 			category: 'custom',
-			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaadu-cai',
-			indexCanisterVersion: 'outdated'
+			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaadu-cai'
 		};
 		expect(isIcrcTokenToggleDisabled(token)).toBe(true);
 	});
