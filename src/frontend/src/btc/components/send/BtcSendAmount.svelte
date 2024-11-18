@@ -7,9 +7,10 @@
 	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
 
 	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
