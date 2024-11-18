@@ -21,7 +21,7 @@ export const restRequest = async <Response, Error, Success>({
 	onSuccess,
 	onError,
 	onRetry,
-	maxRetries = 10
+	maxRetries = 3
 }: RestRequestParams<Response, Error, Success>): Promise<Success | undefined> => {
 	let retryCount = 0;
 
