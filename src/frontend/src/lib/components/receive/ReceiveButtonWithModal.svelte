@@ -12,6 +12,6 @@
 
 <ReceiveButton on:click={async () => await open(definedModalId)} />
 
-{#if isOpen && $modalStore?.data === definedModalId}
+{#if isOpen && $modalStore?.id === definedModalId}
 	<slot name="modal" />
 {/if}
