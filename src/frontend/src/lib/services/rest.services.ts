@@ -29,7 +29,7 @@ export const restRequest = async <Response, Error, Success>({
 		try {
 			const response = await request();
 			return onSuccess(response);
-		} catch (error) {
+		} catch (error: unknown) {
 			retryCount++;
 
 			if (retryCount > maxRetries) {
