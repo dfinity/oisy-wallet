@@ -11,26 +11,30 @@
 	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
 
+	type ResultByToken = ResultSuccess & { tokenId: TokenId };
+	type PromiseResult = Promise<ResultByToken>;
+
 	const load = async () => {
 		if (isNullish($enabledEthereumTokens) || isNullish($enabledErc20Tokens)) {
 			return;
 		}
 
-		const promises = [...$enabledEthereumTokens, ...$enabledErc20Tokens].reduce<
-			Promise<ResultSuccess & { tokenId: TokenId }>[]
-		>((acc, { network: { id: networkId }, id: tokenId }) => {
-			if (!tokensLoaded.includes(tokenId)) {
-				const promise = (async (): Promise<ResultSuccess & { tokenId: TokenId }> => {
-					const result = await loadEthereumTransactions({ tokenId, networkId });
-					return { ...result, tokenId };
-				})();
+		const promises = [...$enabledEthereumTokens, ...$enabledErc20Tokens].reduce<PromiseResult[]>(
+			(acc, { network: { id: networkId }, id: tokenId }) => {
+				if (!tokensLoaded.includes(tokenId)) {
+					const promise = (async (): PromiseResult => {
+						const result = await loadEthereumTransactions({ tokenId, networkId });
+						return { ...result, tokenId };
+					})();
 
-				return [...acc, promise];
-			}
-			return acc;
-		}, []);
+					return [...acc, promise];
+				}
+				return acc;
+			},
+			[]
+		);
 
-		const loader = batch<ResultSuccess & { tokenId: TokenId }>({
+		const loader = batch<ResultByToken>({
 			promises,
 			batchSize: ETHERSCAN_MAX_CALLS_PER_SECOND
 		});
