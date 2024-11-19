@@ -8,7 +8,7 @@
 <div class="flex flex-col gap-5">
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
 
-	<MessageBox level="plain" closable hideInfoKey="oisy_ic_hide_bitcoin_transactions_disclaimer">
+	<MessageBox level="plain" closable hideInfoKey="oisy_ic_hide_bitcoin_activity">
 		{$i18n.activity.info.btc_transactions}
 	</MessageBox>
 
