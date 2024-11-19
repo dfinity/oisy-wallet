@@ -1,0 +1,17 @@
+import { NAVIGATION_ITEM_EXPLORER } from '../../../src/frontend/src/lib/constants/test-ids.constants';
+import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
+
+export type ExplorerPageParams = HomepageLoggedInParams;
+
+export class ExplorerPage extends HomepageLoggedIn {
+	constructor({ page, iiPage, viewportSize }: ExplorerPageParams) {
+		super({ page, iiPage, viewportSize });
+	}
+
+	/**
+	 * @override
+	 */
+	async extendWaitForReady(): Promise<void> {
+		await this.clickByTestId(NAVIGATION_ITEM_EXPLORER);
+	}
+}
