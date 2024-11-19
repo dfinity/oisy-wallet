@@ -702,6 +702,7 @@ interface I18nLicense_agreement {
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string };
+	warning: { incomplete_transaction_list: string };
 }
 
 interface I18n {
