@@ -6,9 +6,12 @@
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
 
 	export let transaction: IcTransactionUi;
+	export let token: Token;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let type: IcTransactionType;
 	let transactionTypeLabel: string | undefined;
@@ -46,6 +49,8 @@
 	{type}
 	{timestamp}
 	{status}
+	{token}
+	{iconType}
 >
 	<IcTransactionLabel label={transactionTypeLabel} fallback={type} />
 </Transaction>

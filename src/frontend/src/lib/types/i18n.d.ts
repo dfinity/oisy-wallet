@@ -32,6 +32,7 @@ interface I18nNavigation {
 		tokens: string;
 		settings: string;
 		dapp_explorer: string;
+		activity: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -42,6 +43,7 @@ interface I18nNavigation {
 		tokens: string;
 		settings: string;
 		dapp_explorer: string;
+		activity: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
@@ -160,7 +162,12 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; top_up: string; learn_more_about_erc20_icp: string };
+	text: {
+		available_balance: string;
+		unavailable_balance: string;
+		top_up: string;
+		learn_more_about_erc20_icp: string;
+	};
 }
 
 interface I18nSettings {
@@ -392,6 +399,7 @@ interface I18nTokens {
 		twin_token: string;
 		standard: string;
 	};
+	balance: { error: { not_applicable: string } };
 	import: {
 		text: {
 			title: string;

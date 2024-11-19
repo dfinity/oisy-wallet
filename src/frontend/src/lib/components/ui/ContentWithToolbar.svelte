@@ -4,7 +4,7 @@
 	export let minHeight: string | undefined = undefined;
 </script>
 
-<div class={`stretch ${nonNullish(minHeight) ? `min-h-[${minHeight}]` : ''}`}>
+<div class={`stretch flex flex-col ${nonNullish(minHeight) ? `min-h-[${minHeight}]` : ''}`}>
 	<slot />
 </div>
 
