@@ -59,10 +59,11 @@
 
 	let selectedIcTransaction: IcTransactionUi | undefined;
 	let selectedIcToken: OptionToken;
-	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =mapTransactionModalData<IcTransactionUi>({
-		$modalOpen: $modalIcTransaction,
-		$modalStore: $modalStore
-	}));
+	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore: $modalStore
+		}));
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->

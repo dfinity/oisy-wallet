@@ -39,7 +39,6 @@
 	import { last } from '$lib/utils/array.utils';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
 
@@ -94,10 +93,11 @@
 
 	let selectedTransaction: IcTransactionUi | undefined;
 	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =mapTransactionModalData<IcTransactionUi>({
-		$modalOpen: $modalIcTransaction,
-		$modalStore: $modalStore
-	}));
+	$: ({ transaction: selectedTransaction, token: selectedToken } =
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore: $modalStore
+		}));
 
 	let noTransactions = false;
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
