@@ -7,7 +7,7 @@ import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
-import type { Token, TokenId } from '$lib/types/token';
+import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
@@ -138,29 +138,4 @@ const loadErc20Transactions = async ({
 	}
 
 	return { success: true };
-};
-
-export const batchLoadEthereumTransactions = async function* ({
-	tokensToLoad,
-	tokensLoaded,
-	maxCallsPerSecond
-}: {
-	tokensToLoad: Token[];
-	tokensLoaded: TokenId[];
-	maxCallsPerSecond: number;
-}): AsyncGenerator<void> {
-	for (let i = 0; i < tokensToLoad.length; i += maxCallsPerSecond) {
-		const batch = tokensToLoad.slice(i, i + maxCallsPerSecond);
-
-		const batchPromises = batch.map(({ network: { id: networkId }, id: tokenId }) => async () => {
-			if (!tokensLoaded.includes(tokenId)) {
-				await loadEthereumTransactions({ tokenId, networkId });
-				tokensLoaded.push(tokenId);
-			}
-		});
-
-		await Promise.all(batchPromises.map((fn) => fn()));
-		yield;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-	}
 };

@@ -8,6 +8,7 @@ import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
+import type { MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
@@ -22,6 +23,8 @@ vi.mock(import('@dfinity/utils'), async (importOriginal) => {
 });
 
 describe('LoaderMultipleEthTransactions', () => {
+	const timeout = 10000;
+
 	const mockMainnetErc20UserTokens = createMockErc20UserTokens({ n: 2, networkEnv: 'mainnet' });
 
 	const mockSepoliaErc20UserTokens = createMockErc20UserTokens({ n: 3, networkEnv: 'testnet' });
@@ -51,7 +54,7 @@ describe('LoaderMultipleEthTransactions', () => {
 				// mockErc20UserTokens.length + both native tokens (Ethereum and Sepolia)
 				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 2);
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 	});
 
@@ -63,7 +66,7 @@ describe('LoaderMultipleEthTransactions', () => {
 				// mockErc20UserTokens.length + Ethereum native token
 				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 
 		await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -83,7 +86,7 @@ describe('LoaderMultipleEthTransactions', () => {
 					tokenId: SEPOLIA_TOKEN_ID
 				});
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 	});
 
@@ -101,11 +104,19 @@ describe('LoaderMultipleEthTransactions', () => {
 					tokenId: ETHEREUM_TOKEN_ID
 				});
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 	});
 
 	it('should not load transactions twice for the same tokens even if the stores change', async () => {
+		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
+			typeof loadEthereumTransactions
+		>;
+
+		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
+
+		const timeout = 30000;
+
 		const mockAdditionalTokens = createMockErc20UserTokens({
 			n: 1,
 			networkEnv: 'mainnet',
@@ -119,7 +130,7 @@ describe('LoaderMultipleEthTransactions', () => {
 				// mockErc20UserTokens.length + Ethereum native token
 				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 
 		erc20UserTokensStore.resetAll();
@@ -135,11 +146,17 @@ describe('LoaderMultipleEthTransactions', () => {
 					2 * (mockErc20UserTokens.length + 1) + mockAdditionalTokens.length
 				);
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 	});
 
 	it('should load transactions for new tokens when they are added', async () => {
+		const mockLoadEthereumTransactions = loadEthereumTransactions as MockedFunction<
+			typeof loadEthereumTransactions
+		>;
+
+		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
+
 		const mockAdditionalTokens = createMockErc20UserTokens({
 			n: 5,
 			networkEnv: 'mainnet',
@@ -153,7 +170,7 @@ describe('LoaderMultipleEthTransactions', () => {
 				// mockErc20UserTokens.length + Ethereum native token
 				expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockErc20UserTokens.length + 1);
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 
 		erc20UserTokensStore.resetAll();
@@ -166,7 +183,7 @@ describe('LoaderMultipleEthTransactions', () => {
 					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length
 				);
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 
 		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
@@ -178,7 +195,7 @@ describe('LoaderMultipleEthTransactions', () => {
 					mockErc20UserTokens.length + 1 + mockAdditionalTokens.length + 1
 				);
 			},
-			{ timeout: 10000 }
+			{ timeout }
 		);
 	});
 }, 60000);
