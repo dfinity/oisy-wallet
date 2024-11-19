@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
@@ -8,22 +8,30 @@
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
 	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
-	export let closable = false;
-	export let hideInfoKey: HideInfoKey | undefined = undefined;
+	export let closable: { isClosable: boolean; hideInfoKey: HideInfoKey | undefined } = {
+		isClosable: false,
+		hideInfoKey: undefined
+	};
+
+	let isClosable: boolean;
+	let hideInfoKey: HideInfoKey | undefined;
+	$: ({ isClosable, hideInfoKey } = closable);
 
 	let visible = true;
-	$: visible = nonNullish(hideInfoKey) ? !shouldHideInfo(hideInfoKey) : true;
+	$: visible = isNullish(hideInfoKey) || !shouldHideInfo(hideInfoKey);
 
 	const close = () => {
 		visible = false;
 
-		if (nonNullish(hideInfoKey)) {
-			saveHideInfo(hideInfoKey);
+		if (!isClosable || isNullish(hideInfoKey)) {
+			return;
 		}
+
+		saveHideInfo(hideInfoKey);
 	};
 </script>
 
-{#if visible}
+{#if visible || !isClosable}
 	<div
 		class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
 		class:bg-primary={level === 'plain'}
@@ -43,7 +51,7 @@
 		<div>
 			<slot />
 		</div>
-		{#if closable}
+		{#if isClosable}
 			<button class="p-0.5 text-tertiary" on:click={close} aria-label={$i18n.core.text.close}>
 				<IconClose />
 			</button>
