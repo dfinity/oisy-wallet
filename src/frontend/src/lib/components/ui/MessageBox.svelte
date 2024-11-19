@@ -1,17 +1,27 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
 	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
 	export let closable = false;
+	export let hideInfoKey: HideInfoKey | undefined = undefined;
 
 	let visible = true;
+	$: visible = nonNullish(hideInfoKey) ? !shouldHideInfo(hideInfoKey) : true;
+
+	$: console.log(visible);
 
 	const close = () => {
 		visible = false;
+
+		if (nonNullish(hideInfoKey)) {
+			saveHideInfo(hideInfoKey);
+		}
 	};
 </script>
 
