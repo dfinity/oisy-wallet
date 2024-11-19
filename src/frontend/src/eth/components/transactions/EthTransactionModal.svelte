@@ -11,7 +11,6 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Transaction } from '$lib/types/transaction';
@@ -21,8 +20,10 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { OptionToken } from '$lib/types/token';
 
 	export let transaction: Transaction;
+	export let token: OptionToken;
 
 	let from: string;
 	let to: string | undefined;
@@ -124,14 +125,16 @@
 
 		<Value ref="amount">
 			<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
+			{#if nonNullish(token)}
 			<output>
 				{formatToken({
 					value,
-					unitName: $tokenWithFallback.decimals,
-					displayDecimals: $tokenWithFallback.decimals
+					unitName: token.decimals,
+					displayDecimals: token.decimals
 				})}
-				{$tokenWithFallback.symbol}
+				{token.symbol}
 			</output>
+				{/if}
 		</Value>
 
 		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
