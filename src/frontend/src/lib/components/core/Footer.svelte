@@ -53,20 +53,20 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto pl-6 pr-6 text-sm md:pl-0 md:pr-0 lg:max-w-48"
+			class="item pointer-events-auto px-6 text-sm md:pl-0 md:pr-0 lg:max-w-48"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
-			class:md:h-md:pr-4={$authNotSignedIn}
 			class:xl:max-w-none={$authNotSignedIn}
+			class:xl:max-w-80={$authSignedIn}
+			class:1.5xl:max-w-none={$authSignedIn}
+			class:md:h-md:pr-4={$authNotSignedIn}
 			class:md:transition-all={$authSignedIn}
 			class:md:duration-200={$authSignedIn}
 			class:md:ease-in-out={$authSignedIn}
 			class:md:invisible={$authSignedIn}
-			class:1.5md:visible={$authSignedIn}
 			class:md:translate-x-full={$authSignedIn}
 			class:1.5md:translate-x-0={$authSignedIn}
-			class:xl:max-w-80={$authSignedIn}
-			class:1.5xl:max-w-none={$authSignedIn}
+			class:1.5md:visible={$authSignedIn}
 		>
 			<div class="flex flex-col items-center pt-2 sm:flex-row sm:items-start sm:gap-2">
 				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
