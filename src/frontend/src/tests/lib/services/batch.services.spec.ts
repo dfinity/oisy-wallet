@@ -53,7 +53,7 @@ describe('batch.services', () => {
 			expect(end - start).toBeGreaterThanOrEqual(expectedMinDuration - 10 * values.length);
 		});
 
-		it('should handle an empty promises array gracefully', async () => {
+		it('should handle an empty promises array gracefully', () => {
 			const allSettledSpy = vi.spyOn(Promise, 'allSettled');
 
 			const generator = batch({
