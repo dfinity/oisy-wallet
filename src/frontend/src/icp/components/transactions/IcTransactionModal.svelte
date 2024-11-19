@@ -11,10 +11,11 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
+	import type { OptionToken } from '$lib/types/token';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
+	export let token: OptionToken;
 
 	let id: bigint | string;
 	let from: string | undefined;
@@ -136,14 +137,14 @@
 		{#if nonNullish(value)}
 			<Value ref="amount">
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-				{#if nonNullish($token)}
+				{#if nonNullish(token)}
 					<output>
 						{formatToken({
 							value: BigNumber.from(value),
-							unitName: $token.decimals,
-							displayDecimals: $token.decimals
+							unitName: token.decimals,
+							displayDecimals: token.decimals
 						})}
-						{$token.symbol}
+						{token.symbol}
 					</output>
 				{:else}
 					&ZeroWidthSpace;
