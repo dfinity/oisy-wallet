@@ -53,7 +53,7 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto flex flex-row items-center justify-end gap-2 pl-6 pr-6 text-sm md:pl-0 md:pr-0 lg:max-w-48"
+			class="item pointer-events-auto pl-6 pr-6 text-sm md:pl-0 md:pr-0 lg:max-w-48"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
 			class:md:h-md:pr-4={$authNotSignedIn}
@@ -68,7 +68,7 @@
 			class:xl:max-w-80={$authSignedIn}
 			class:1.5xl:max-w-none={$authSignedIn}
 		>
-			<div class="flex gap-2 pt-2">
+			<div class="flex pt-2 flex-col items-center sm:gap-2 sm:flex-row sm:items-start">
 				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 				<span
 					class:md:hidden={$authSignedIn}
@@ -83,7 +83,6 @@
 						ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
 						iconVisible={false}
 						color="blue"
-						styleClass="-mx-[0.2rem]"
 					>
 						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
 					</ExternalLink>
