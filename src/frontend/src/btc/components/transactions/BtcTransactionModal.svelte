@@ -7,8 +7,8 @@
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 	import type { OptionToken } from '$lib/types/token';
+	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
 	export let transaction: BtcTransactionUi;
 	export let token: OptionToken;
