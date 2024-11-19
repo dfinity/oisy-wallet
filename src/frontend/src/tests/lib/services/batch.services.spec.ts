@@ -4,7 +4,7 @@ import { expect } from 'vitest';
 describe('batch.services', () => {
 	describe('batch', () => {
 		const values = [1, 2, 3, 4, 5];
-		const maxCallsPerSecond = 3;
+		const batchSize = 3;
 
 		const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -19,7 +19,7 @@ describe('batch.services', () => {
 
 			const generator = batch({
 				promises,
-				maxCallsPerSecond
+				batchSize
 			});
 
 			for await (const _ of generator) {
@@ -38,7 +38,7 @@ describe('batch.services', () => {
 
 			const generator = batch({
 				promises,
-				maxCallsPerSecond
+				batchSize
 			});
 
 			const start = Date.now();
@@ -48,7 +48,7 @@ describe('batch.services', () => {
 			}
 
 			const end = Date.now();
-			const expectedMinDuration = Math.ceil(values.length / maxCallsPerSecond) * 1000;
+			const expectedMinDuration = Math.ceil(values.length / batchSize) * 1000;
 
 			expect(end - start).toBeGreaterThanOrEqual(expectedMinDuration - 10 * values.length);
 		});
@@ -58,7 +58,7 @@ describe('batch.services', () => {
 
 			const generator = batch({
 				promises: [],
-				maxCallsPerSecond
+				batchSize
 			});
 
 			expect(async () => {
@@ -87,7 +87,7 @@ describe('batch.services', () => {
 
 			const generator = batch({
 				promises,
-				maxCallsPerSecond
+				batchSize
 			});
 
 			for await (const _ of generator) {
