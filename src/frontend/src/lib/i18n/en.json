@@ -109,8 +109,8 @@
 	},
 	"footer": {
 		"text": {
-			"incubated_with": "Incubated with ❤\uFE0F by \uFE0F",
-			"dfinity_foundation": "DFINITY Foundation \uFE0F",
+			"incubated_with": "Incubated with ❤\uFE0F by",
+			"dfinity_foundation": "DFINITY Foundation",
 			"copyright": "© 2024"
 		},
 		"alt": {
