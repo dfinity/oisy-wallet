@@ -145,6 +145,7 @@ const loadErc20Transactions = async ({
 			return { success: false };
 		},
 		onRetry: async () => {
+			// TODO: extract this util when needed in other use cases
 			await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * 1000 + 1000)));
 		}
 	});
