@@ -2,13 +2,12 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { ETHERSCAN_MAX_CALLS_PER_SECOND } from '$env/rest/etherscan.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { batchLoadEthereumTransactions } from '$eth/services/eth-transactions-batch.services';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import type { TokenId } from '$lib/types/token';
-	import { batchLoadEthereumTransactions } from '$eth/services/eth-transactions-batch.services';
 
 	// TODO: make it more functional
 	let tokensLoaded: TokenId[] = [];
-
 
 	const load = async () => {
 		if (isNullish($enabledEthereumTokens) || isNullish($enabledErc20Tokens)) {
