@@ -7,8 +7,3 @@ export const EnvAdditionalIcrcTokensSchema = z.record(
 	EnvTokenSymbolSchema,
 	z.union([z.undefined(), EnvIcTokenSchema])
 );
-
-export const EnvTokensAdditionalIcrcSchema = z.object({
-	production: EnvAdditionalIcrcTokensSchema,
-	staging: EnvAdditionalIcrcTokensSchema
-});
