@@ -1,6 +1,6 @@
 export interface RestRequestParams<Response, Error = unknown, Success = void> {
 	request: () => Promise<Response>;
-	onSuccess: (response: Response) => Success | undefined;
+	onSuccess: (response: Response) => Success;
 	onError?: (error: Error) => Success | undefined;
 	onRetry?: (options: { error: Error; retryCount: number }) => Promise<void>;
 	maxRetries?: number;
