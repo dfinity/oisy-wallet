@@ -14,8 +14,6 @@
 	let visible = true;
 	$: visible = nonNullish(hideInfoKey) ? !shouldHideInfo(hideInfoKey) : true;
 
-	$: console.log(visible);
-
 	const close = () => {
 		visible = false;
 
