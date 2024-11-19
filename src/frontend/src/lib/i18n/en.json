@@ -36,6 +36,7 @@
 			"tokens": "Assets",
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
+			"activity": "Activity",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -46,6 +47,7 @@
 			"tokens": "Go to the assets view",
 			"settings": "Open your settings",
 			"dapp_explorer": "Open dapp explorer",
+			"activity": "Open the activity view",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -183,6 +185,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
+			"unavailable_balance": "$ value is not available",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
@@ -435,6 +438,11 @@
 			"contract_address_copied": "Contract address copied to clipboard.",
 			"twin_token": "Twin token",
 			"standard": "Standard"
+		},
+		"balance": {
+			"error": {
+				"not_applicable": "n/a"
+			}
 		},
 		"import": {
 			"text": {
