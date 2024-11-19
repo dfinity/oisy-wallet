@@ -8,9 +8,9 @@
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
 	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
-	export let closableKey:HideInfoKey | undefined = undefined;
+	export let closableKey: HideInfoKey | undefined = undefined;
 
-	let closable=false;
+	let closable = false;
 	$: closable = nonNullish(closableKey);
 
 	let visible = true;
