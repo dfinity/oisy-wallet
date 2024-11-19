@@ -21,8 +21,9 @@
 	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUi, TransactionsUiDateGroup } from '$lib/types/transaction';
-	import { groupTransactionsByDate } from '$lib/utils/transaction.utils';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionUi[];
@@ -57,9 +58,12 @@
 		: undefined;
 
 	let selectedIcTransaction: IcTransactionUi | undefined;
-	$: selectedIcTransaction = $modalIcTransaction
-		? ($modalStore?.data as IcTransactionUi | undefined)
-		: undefined;
+	let selectedIcToken: OptionToken;
+	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore: $modalStore
+		}));
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
@@ -78,5 +82,5 @@
 {:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
 	<EthTransactionModal transaction={selectedEthTransaction} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
-	<IcTransactionModal transaction={selectedIcTransaction} />
+	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
 {/if}

@@ -4,6 +4,8 @@ import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
+import type { ModalData } from '$lib/stores/modal.store';
+import type { OptionToken } from '$lib/types/token';
 import type {
 	AnyTransactionUi,
 	TransactionStatus,
@@ -11,7 +13,7 @@ import type {
 	TransactionType
 } from '$lib/types/transaction';
 import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { ComponentType } from 'svelte';
 
 export const mapTransactionIcon = ({
@@ -66,3 +68,14 @@ export const groupTransactionsByDate = <T extends AnyTransactionUi>(
 		return { ...acc, [date]: [...(acc[date] ?? []), transaction] };
 	}, {});
 };
+
+export const mapTransactionModalData = <T extends AnyTransactionUi>({
+	$modalOpen,
+	$modalStore
+}: {
+	$modalOpen: boolean;
+	$modalStore: ModalData<unknown>;
+}): { transaction: T | undefined; token: OptionToken } =>
+	$modalOpen && nonNullish($modalStore?.data)
+		? ($modalStore.data as { transaction: T; token: OptionToken })
+		: { transaction: undefined, token: undefined };
