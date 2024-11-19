@@ -7,33 +7,22 @@
 	import { batch } from '$lib/services/batch.services';
 	import type { TokenId } from '$lib/types/token';
 	import type { ResultSuccess } from '$lib/types/utils';
+	import { mapLoadTransactionsPromises, type ResultByToken } from '$eth/utils/transactions.utils';
 
 	// TODO: make it more functional
-	let tokensLoaded: TokenId[] = [];
+	let tokensAlreadyLoaded: TokenId[] = [];
 
-	type ResultByToken = ResultSuccess & { tokenId: TokenId };
-	type PromiseResult = Promise<ResultByToken>;
+
 
 	const load = async () => {
 		if (isNullish($enabledEthereumTokens) || isNullish($enabledErc20Tokens)) {
 			return;
 		}
 
-		const promises = [...$enabledEthereumTokens, ...$enabledErc20Tokens].reduce<PromiseResult[]>(
-			(acc, { network: { id: networkId }, id: tokenId }) => {
-				if (tokensLoaded.includes(tokenId)) {
-					return acc;
-				}
-
-				const promise = (async (): PromiseResult => {
-					const result = await loadEthereumTransactions({ tokenId, networkId });
-					return { ...result, tokenId };
-				})();
-
-				return [...acc, promise];
-			},
-			[]
-		);
+		const promises = mapLoadTransactionsPromises({
+			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens],
+			tokensAlreadyLoaded
+		});
 
 		const loader = batch<ResultByToken>({
 			promises,
@@ -41,14 +30,14 @@
 		});
 
 		for await (const results of loader) {
-			tokensLoaded = results.reduce<TokenId[]>(
+			tokensAlreadyLoaded = results.reduce<TokenId[]>(
 				(acc, result) => {
 					if (result.status === 'fulfilled' && result.value.success) {
 						return [...acc, result.value.tokenId];
 					}
 					return acc;
 				},
-				[...tokensLoaded]
+				[...tokensAlreadyLoaded]
 			);
 		}
 	};

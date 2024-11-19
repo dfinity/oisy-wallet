@@ -1,7 +1,10 @@
 import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
+import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { OptionEthAddress } from '$lib/types/address';
+import type { Token, TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
+import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
@@ -47,3 +50,26 @@ export const mapEthTransactionUi = ({
 					: 'receive'
 	};
 };
+
+export type ResultByToken = ResultSuccess & { tokenId: TokenId };
+type PromiseResult = Promise<ResultByToken>;
+
+export const mapLoadTransactionsPromises = ({
+	tokens,
+	tokensAlreadyLoaded
+}: {
+	tokens: Token[];
+	tokensAlreadyLoaded: TokenId[];
+}): PromiseResult[] =>
+	tokens.reduce<PromiseResult[]>((acc, { network: { id: networkId }, id: tokenId }) => {
+		if (tokensAlreadyLoaded.includes(tokenId)) {
+			return acc;
+		}
+
+		const promise = (async (): PromiseResult => {
+			const result = await loadEthereumTransactions({ tokenId, networkId });
+			return { ...result, tokenId };
+		})();
+
+		return [...acc, promise];
+	}, []);
