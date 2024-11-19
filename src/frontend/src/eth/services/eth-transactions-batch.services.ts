@@ -36,3 +36,16 @@ export const batchLoadTransactions = ({
 		batchSize: ETHERSCAN_MAX_CALLS_PER_SECOND
 	});
 };
+
+export const batchResultsToTokenId = (results: PromiseSettledResult<ResultByToken>[]): TokenId[] =>
+	results.reduce<TokenId[]>((acc, result) => {
+		if (result.status === 'rejected') {
+			return acc;
+		}
+
+		if (!result.value.success) {
+			return acc;
+		}
+
+		return [...acc, result.value.tokenId];
+	}, []);
