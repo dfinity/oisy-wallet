@@ -9,6 +9,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import type { Transaction } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
@@ -115,15 +116,15 @@ const loadErc20Transactions = async ({
 	}
 
 	const result = await restRequest({
-		request: async () => {
+		request: async (): Promise<Transaction[]> => {
 			const { transactions: transactionsRest } = etherscanRests(networkId);
 			return await transactionsRest({ contract: token, address });
 		},
-		onSuccess: (transactions) => {
+		onSuccess: (transactions: Transaction[]): ResultSuccess => {
 			ethTransactionsStore.set({ tokenId, transactions });
 			return { success: true };
 		},
-		onError: (err) => {
+		onError: (err: unknown): ResultSuccess => {
 			ethTransactionsStore.reset();
 
 			const {
