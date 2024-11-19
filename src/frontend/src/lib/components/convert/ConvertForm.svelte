@@ -35,7 +35,7 @@
 	<ButtonGroup slot="toolbar">
 		<slot name="cancel" />
 
-		<Button {disabled} on:click={() => dispatch('icNext')}>
+		<Button {disabled} on:click={() => dispatch('icNext')} testId="convert-form-button-next">
 			{$i18n.convert.text.review_button}
 		</Button>
 	</ButtonGroup>
