@@ -3,7 +3,7 @@ import { EnvTokenSymbolSchema } from '$env/schema/env-token-common.schema';
 import { z } from 'zod';
 
 // TODO, extract the union into it's own schema
-export const EnvTokensAdditionalIcrcSchema = z.record(
+export const EnvAdditionalIcrcTokensSchema = z.record(
 	EnvTokenSymbolSchema,
 	z.union([z.undefined(), EnvIcTokenSchema])
 );
