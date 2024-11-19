@@ -68,15 +68,14 @@
 			class:xl:max-w-80={$authSignedIn}
 			class:1.5xl:max-w-none={$authSignedIn}
 		>
-			<div class="flex flex-row items-center gap-2 pt-2">
-
-				<IconDfinity size="30" />
+			<div class="flex gap-2 pt-2">
+				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 				<span
 					class:md:hidden={$authSignedIn}
 					class:xl:block={$authSignedIn}
 					class:md:h-md:hidden={$authNotSignedIn}
 					class:1.5md:h-md:block={$authNotSignedIn}
-					class="text-center"
+					class="text-center md:text-left"
 				>
 					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
 					<ExternalLink
@@ -84,6 +83,7 @@
 						ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
 						iconVisible={false}
 						color="blue"
+						styleClass="-mx-[0.2rem]"
 					>
 						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
 					</ExternalLink>
