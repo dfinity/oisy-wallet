@@ -21,15 +21,16 @@
 
 		const promises = [...$enabledEthereumTokens, ...$enabledErc20Tokens].reduce<PromiseResult[]>(
 			(acc, { network: { id: networkId }, id: tokenId }) => {
-				if (!tokensLoaded.includes(tokenId)) {
-					const promise = (async (): PromiseResult => {
-						const result = await loadEthereumTransactions({ tokenId, networkId });
-						return { ...result, tokenId };
-					})();
-
-					return [...acc, promise];
+				if (tokensLoaded.includes(tokenId)) {
+					return acc;
 				}
-				return acc;
+
+				const promise = (async (): PromiseResult => {
+					const result = await loadEthereumTransactions({ tokenId, networkId });
+					return { ...result, tokenId };
+				})();
+
+				return [...acc, promise];
 			},
 			[]
 		);
