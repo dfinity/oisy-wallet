@@ -55,7 +55,7 @@ const loadEthTransactions = async ({
 		const transactions = await transactionsProviders({ address });
 		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
-		ethTransactionsStore.reset();
+		ethTransactionsStore.nullify(tokenId);
 
 		const {
 			transactions: {
@@ -118,7 +118,7 @@ const loadErc20Transactions = async ({
 		const transactions = await transactionsRest({ contract: token, address });
 		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
-		ethTransactionsStore.reset();
+		ethTransactionsStore.nullify(tokenId);
 
 		const {
 			transactions: {
