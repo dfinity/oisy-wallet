@@ -1,231 +1,154 @@
-import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$env/tokens.env';
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { initTransactionsStore } from '$lib/stores/transactions.store';
-import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
+import { bn3 } from '$tests/mocks/balances.mock';
+import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
+import { get } from 'svelte/store';
+import { expect } from 'vitest';
 
 describe('eth-transactions.store', () => {
-	const tokenId = ICP_TOKEN_ID;
+	const tokenId = ETHEREUM_TOKEN_ID;
+
+	const mockTransactions = createMockEthTransactions(5);
+
+	const mockOtherTransactions = createMockEthTransactions(3);
 
 	const store = ethTransactionsStore;
 
-	describe('prepend', () => {
-		it('should add transactions at the beginning of the list', () =>
-			new Promise<void>((done) => {
-				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
-				store.prepend({ tokenId, transactions: initialTx });
-
-				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
-				store.prepend({ tokenId, transactions: newTx });
-
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(2);
-					expect(state?.[tokenId]?.[0].data.id).toBe('tx2');
-					expect(state?.[tokenId]?.[1].data.id).toBe('tx1');
-
-					done();
-				})();
-			}));
-
-		it('should deduplicate transactions with same id', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
-
-				const tx = createCertifiedIcTransactionUiMock('tx1');
-				store.prepend({ tokenId, transactions: [tx] });
-
-				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
-				store.prepend({ tokenId, transactions: newTx });
-
-				store.prepend({ tokenId, transactions: [tx] });
-
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(2);
-
-					done();
-				})();
-			}));
+	beforeEach(() => {
+		store.reset();
 	});
 
-	describe('append', () => {
-		it('should add transactions at the end of the list', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+	describe('set', () => {
+		it('should set transactions for a specific token', () => {
+			store.set({ tokenId, transactions: mockTransactions });
 
-				const tx1 = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions: tx1 });
+			const state = get(store);
 
-				const tx2 = [createCertifiedIcTransactionUiMock('tx2')];
-				store.append({ tokenId, transactions: tx2 });
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual(mockTransactions);
+		});
 
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(2);
-					expect(state?.[tokenId]?.[0].data.id).toBe('tx1');
-					expect(state?.[tokenId]?.[1].data.id).toBe('tx2');
+		it('should re-set transactions for a specific token even if already set', () => {
+			store.set({ tokenId, transactions: mockTransactions });
 
-					done();
-				})();
-			}));
+			expect(get(store)?.[tokenId]).toHaveLength(mockTransactions.length);
 
-		it('should duplicate transactions with same id', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+			store.set({ tokenId, transactions: mockOtherTransactions });
 
-				const tx = createCertifiedIcTransactionUiMock('tx1');
-				store.append({ tokenId, transactions: [tx] });
+			const state = get(store);
 
-				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
-				store.append({ tokenId, transactions: newTx });
-
-				store.append({ tokenId, transactions: [tx] });
-
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(3);
-					expect(
-						(state?.[tokenId] ?? []).filter(({ data: { id } }) => id === tx.data.id)
-					).toHaveLength(2);
-
-					done();
-				})();
-			}));
+			expect(state?.[tokenId]).toHaveLength(mockOtherTransactions.length);
+			expect(state?.[tokenId]).toEqual(mockOtherTransactions);
+		});
 	});
 
-	describe('cleanUp', () => {
-		it('should remove specified transactions', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+	describe('add', () => {
+		beforeEach(() => {
+			store.set({ tokenId, transactions: mockTransactions });
+		});
 
-				const transactions = [
-					createCertifiedIcTransactionUiMock('tx1'),
-					createCertifiedIcTransactionUiMock('tx2'),
-					createCertifiedIcTransactionUiMock('tx3')
-				];
+		it('should add transactions at the end of the list', () => {
+			store.add({ tokenId, transactions: mockOtherTransactions });
 
-				store.append({ tokenId, transactions });
-				store.cleanUp({ tokenId, transactionIds: ['tx1', 'tx3'] });
+			const state = get(store);
 
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(1);
-					expect(state?.[tokenId]?.[0].data.id).toBe('tx2');
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length + mockOtherTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions, ...mockOtherTransactions]);
+		});
 
-					done();
-				})();
-			}));
+		it('should add transactions even if the list is empty', () => {
+			store.reset();
+			store.add({ tokenId, transactions: mockOtherTransactions });
 
-		it('should do nothing if specified transactions do no exist', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+			const state = get(store);
 
-				const transactions = [
-					createCertifiedIcTransactionUiMock('tx1'),
-					createCertifiedIcTransactionUiMock('tx2'),
-					createCertifiedIcTransactionUiMock('tx3')
-				];
+			expect(state?.[tokenId]).toHaveLength(mockOtherTransactions.length);
+			expect(state?.[tokenId]).toEqual(mockOtherTransactions);
+		});
 
-				store.append({ tokenId, transactions });
-				store.cleanUp({ tokenId, transactionIds: ['tx4', 'tx5'] });
+		it('should duplicate transactions with same id', () => {
+			store.add({ tokenId, transactions: mockTransactions });
 
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(3);
+			const state = get(store);
 
-					done();
-				})();
-			}));
+			expect(state?.[tokenId]).toHaveLength(2 * mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions, ...mockTransactions]);
+		});
 	});
 
-	describe('reset', () => {
-		it('should clear all transactions', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+	describe('update', () => {
+		const updatedTransaction = {
+			...mockTransactions[0],
+			value: mockTransactions[0].value.add(bn3)
+		};
 
-				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions });
-				store.reset(tokenId);
+		beforeEach(() => {
+			store.set({ tokenId, transactions: mockTransactions });
+		});
 
-				store.subscribe((state) => {
-					expect(state).toEqual({ [tokenId]: null });
+		it('should update a transaction with the same hash', () => {
+			store.update({ tokenId, transaction: updatedTransaction });
 
-					done();
-				})();
-			}));
+			const state = get(store);
 
-		it('should not clear other token transactions', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
+		});
 
-				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions });
-				store.reset(ETHEREUM_TOKEN_ID);
+		it('should add a transaction that does not exist in the list', () => {
+			store.set({ tokenId, transactions: mockTransactions.slice(1) });
 
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(1);
+			const updatedTransaction = { ...mockTransactions[0], hash: 'new-hash' };
+			store.update({ tokenId, transaction: updatedTransaction });
 
-					done();
-				})();
-			}));
+			const state = get(store);
+
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
+		});
+
+		it('should not duplicate transactions with same id', () => {
+			store.update({ tokenId, transaction: updatedTransaction });
+
+			const state = get(store);
+
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
+		});
 	});
 
 	describe('nullify', () => {
-		it('should set no transactions', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+		beforeEach(() => {
+			store.set({ tokenId, transactions: mockTransactions });
+		});
 
-				store.nullify(tokenId);
+		it('should set no transactions', () => {
+			store.nullify(tokenId);
 
-				store.subscribe((state) => {
-					expect(state).toEqual({ [tokenId]: null });
+			expect(get(store)).toEqual({ [tokenId]: null });
+		});
 
-					done();
-				})();
-			}));
+		it('should not clear other token transactions', () => {
+			store.set({ tokenId: SEPOLIA_TOKEN_ID, transactions: mockOtherTransactions });
+			store.nullify(tokenId);
 
-		it('should not clear other token transactions', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
+			expect(get(store)).toEqual({ [tokenId]: null, [SEPOLIA_TOKEN_ID]: mockOtherTransactions });
+		});
+	});
 
-				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId: ETHEREUM_TOKEN_ID, transactions });
-				store.nullify(tokenId);
+	describe('reset', () => {
+		it('should clear all transactions of all tokens', () => {
+			store.set({ tokenId, transactions: mockTransactions });
+			store.set({ tokenId: SEPOLIA_TOKEN_ID, transactions: mockOtherTransactions });
 
-				store.subscribe((state) => {
-					expect(state?.[ETHEREUM_TOKEN_ID]).toHaveLength(1);
+			expect(get(store)).toEqual({
+				[tokenId]: mockTransactions,
+				[SEPOLIA_TOKEN_ID]: mockOtherTransactions
+			});
 
-					done();
-				})();
-			}));
+			store.reset();
 
-		it('should prepend transactions if previously null', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
-
-				store.nullify(tokenId);
-
-				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
-				store.prepend({ tokenId, transactions: initialTx });
-
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(1);
-					expect(state?.[tokenId]?.[0].data.id).toBe('tx1');
-
-					done();
-				})();
-			}));
-
-		it('should append transactions if previously null', () =>
-			new Promise<void>((done) => {
-				const store = initTransactionsStore<IcTransactionUi>();
-
-				store.nullify(tokenId);
-
-				const initialTx = [createCertifiedIcTransactionUiMock('tx1')];
-				store.append({ tokenId, transactions: initialTx });
-
-				store.subscribe((state) => {
-					expect(state?.[tokenId]).toHaveLength(1);
-					expect(state?.[tokenId]?.[0].data.id).toBe('tx1');
-
-					done();
-				})();
-			}));
+			expect(get(store)).toEqual({});
+		});
 	});
 });
