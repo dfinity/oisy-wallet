@@ -10,7 +10,6 @@
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
