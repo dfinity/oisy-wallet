@@ -8,14 +8,14 @@
 	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
 	export let closable = false;
 
-	let closed = false;
+	let visible = true;
 
 	const close = () => {
-		closed = true;
+		visible = false;
 	};
 </script>
 
-{#if !closed}
+{#if visible}
 	<div
 		class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
 		class:bg-primary={level === 'plain'}
