@@ -3,16 +3,14 @@
 	import { ETHERSCAN_MAX_CALLS_PER_SECOND } from '$env/rest/etherscan.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
+	import { mapLoadTransactionsPromises, type ResultByToken } from '$eth/utils/transactions.utils';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import { batch } from '$lib/services/batch.services';
 	import type { TokenId } from '$lib/types/token';
 	import type { ResultSuccess } from '$lib/types/utils';
-	import { mapLoadTransactionsPromises, type ResultByToken } from '$eth/utils/transactions.utils';
 
 	// TODO: make it more functional
 	let tokensAlreadyLoaded: TokenId[] = [];
-
-
 
 	const load = async () => {
 		if (isNullish($enabledEthereumTokens) || isNullish($enabledErc20Tokens)) {
