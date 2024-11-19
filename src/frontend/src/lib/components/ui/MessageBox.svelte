@@ -1,15 +1,28 @@
 <script lang="ts">
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import { slide } from 'svelte/transition';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
+	export let closable = false;
+
+	let closed = false;
+
+	const close = () => {
+		closed = true;
+	};
 </script>
 
+{#if !closed}
 <div
 	class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
 	class:bg-primary={level === 'plain'}
 	class:bg-brand-subtle-alt={level === 'info'}
 	class:bg-warning-subtle={level === 'light-warning'}
 	class:bg-error-subtle-alt={level === 'error'}
+	transition:slide={SLIDE_EASING}
 >
 	<div
 		class="min-w-5 py-0 sm:py-0.5"
@@ -22,4 +35,10 @@
 	<div>
 		<slot />
 	</div>
+	{#if closable}
+		<button  class="p-0.5 text-tertiary" on:click={close} aria-label={$i18n.core.text.close}>
+			<IconClose />
+		</button>
+	{/if}
 </div>
+	{/if}
