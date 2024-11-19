@@ -17,21 +17,20 @@ export const restRequest = async <Response, Error>({
 	onRetry,
 	maxRetries = 3
 }: RestRequestParams<Response, Error>): Promise<Response | undefined> => {
-	let retryCount = 0;
-
-	while (retryCount <= maxRetries) {
+	const executeRequest = async (retryCount: number): Promise<Response> => {
 		try {
 			return await request();
 		} catch (error: unknown) {
-			retryCount++;
-
-			if (retryCount > maxRetries) {
+			if (retryCount >= maxRetries) {
 				console.error(`Max retries reached. Error:`, error);
 				throw error;
 			}
 
 			await onRetry?.({ error: error as Error, retryCount });
-			console.warn(`Request attempt ${retryCount} failed. Retrying...`);
+			console.warn(`Request attempt ${retryCount + 1} failed. Retrying...`);
+			return executeRequest(retryCount + 1);
 		}
-	}
+	};
+
+	return await executeRequest(0);
 };

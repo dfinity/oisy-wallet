@@ -69,11 +69,11 @@ describe('rest.services', () => {
 			expect(mockOnRetry).toHaveBeenCalledTimes(2);
 			expect(mockOnRetry).toHaveBeenCalledWith({
 				error: new Error('First attempt failed'),
-				retryCount: 1
+				retryCount: 0
 			});
 			expect(mockOnRetry).toHaveBeenCalledWith({
 				error: new Error('Second attempt failed'),
-				retryCount: 2
+				retryCount: 1
 			});
 
 			expect(console.warn).toHaveBeenCalledTimes(2);
@@ -133,7 +133,7 @@ describe('rest.services', () => {
 			expect(mockOnRetry).toHaveBeenCalledTimes(1);
 			expect(mockOnRetry).toHaveBeenCalledWith({
 				error: new Error('First attempt failed'),
-				retryCount: 1
+				retryCount: 0
 			});
 		});
 
