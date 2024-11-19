@@ -53,10 +53,11 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto mt-2 flex flex-row items-center justify-end gap-2 pl-6 pr-6 text-sm sm:mt-0 md:pl-0 md:pr-0 lg:max-w-48 xl:max-w-none"
+			class="item pointer-events-auto flex flex-row items-center justify-end gap-2 pl-6 pr-6 text-sm md:pl-0 md:pr-0 lg:max-w-48"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
 			class:md:h-md:pr-4={$authNotSignedIn}
+			class:xl:max-w-none={$authNotSignedIn}
 			class:md:transition-all={$authSignedIn}
 			class:md:duration-200={$authSignedIn}
 			class:md:ease-in-out={$authSignedIn}
@@ -64,14 +65,17 @@
 			class:1.5md:visible={$authSignedIn}
 			class:md:translate-x-full={$authSignedIn}
 			class:1.5md:translate-x-0={$authSignedIn}
+			class:xl:max-w-80={$authSignedIn}
+			class:1.5xl:max-w-none={$authSignedIn}
 		>
-			<div class="flex flex-row items-center gap-2">
-				<IconDfinity />
+			<div class="flex flex-row items-center gap-2 pt-2">
+
+				<IconDfinity size="30" />
 				<span
 					class:md:hidden={$authSignedIn}
-					class:xl:flex={$authSignedIn}
+					class:xl:block={$authSignedIn}
 					class:md:h-md:hidden={$authNotSignedIn}
-					class:1.5md:h-md:flex={$authNotSignedIn}
+					class:1.5md:h-md:block={$authNotSignedIn}
 					class="text-center"
 				>
 					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
@@ -83,7 +87,7 @@
 					>
 						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
 					</ExternalLink>
-					{replaceOisyPlaceholders($i18n.footer.text.copyright)}
+					<span class="whitespace-nowrap">{replaceOisyPlaceholders($i18n.footer.text.copyright)}</span>
 				</span>
 			</div>
 		</div>
