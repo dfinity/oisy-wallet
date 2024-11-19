@@ -403,7 +403,9 @@
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees"
 		},
 		"error": {
-			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
+			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
+			"unexpected": "Something went wrong while converting tokens.",
+			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
 		}
 	},
 	"buy": {
