@@ -162,7 +162,12 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; top_up: string; learn_more_about_erc20_icp: string };
+	text: {
+		available_balance: string;
+		unavailable_balance: string;
+		top_up: string;
+		learn_more_about_erc20_icp: string;
+	};
 }
 
 interface I18nSettings {
@@ -394,6 +399,7 @@ interface I18nTokens {
 		twin_token: string;
 		standard: string;
 	};
+	balance: { error: { not_applicable: string } };
 	import: {
 		text: {
 			title: string;
