@@ -87,7 +87,9 @@
 					>
 						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
 					</ExternalLink>
-					<span class="whitespace-nowrap">{replaceOisyPlaceholders($i18n.footer.text.copyright)}</span>
+					<span class="whitespace-nowrap"
+						>{replaceOisyPlaceholders($i18n.footer.text.copyright)}</span
+					>
 				</span>
 			</div>
 		</div>
