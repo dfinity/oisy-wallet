@@ -12,6 +12,7 @@ import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import type { Token } from '$lib/types/token';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import type { Identity } from '@dfinity/agent';
@@ -189,5 +190,35 @@ describe('BtcConvertTokenWizard', () => {
 		await clickConvertButton(container);
 
 		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('should render convert form if currentStep is CONVERT', () => {
+		const { getByTestId } = render(BtcConvertTokenWizard, {
+			props: {
+				...props,
+				currentStep: {
+					name: WizardStepsConvert.CONVERT,
+					title: 'test'
+				}
+			},
+			context: mockContext()
+		});
+
+		expect(getByTestId('convert-form-button-next')).toBeInTheDocument();
+	});
+
+	it('should render convert progress if currentStep is CONVERTING', () => {
+		const { container } = render(BtcConvertTokenWizard, {
+			props: {
+				...props,
+				currentStep: {
+					name: WizardStepsConvert.CONVERTING,
+					title: 'test'
+				}
+			},
+			context: mockContext()
+		});
+
+		expect(container).toHaveTextContent(en.core.warning.do_not_close);
 	});
 });

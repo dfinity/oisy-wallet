@@ -119,7 +119,7 @@
 				err
 			});
 
-			dispatch('icBack');
+			back();
 		}
 	};
 
