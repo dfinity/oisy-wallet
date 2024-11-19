@@ -10,6 +10,7 @@
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -21,9 +22,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionEthAddress } from '$lib/types/address';
-	import type { Transaction as TransactionType } from '$lib/types/transaction';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import type { OptionToken } from '$lib/types/token';
+	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
@@ -40,8 +40,6 @@
 			$ethAddress: $ethAddress
 		})
 	);
-
-
 
 	let selectedTransaction: TransactionType | undefined;
 	let selectedToken: OptionToken;

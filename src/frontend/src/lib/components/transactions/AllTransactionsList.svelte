@@ -83,7 +83,7 @@
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal transaction={selectedBtcTransaction} />
 {:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
-	<EthTransactionModal transaction={selectedEthTransaction}  token={selectedEthToken} />
+	<EthTransactionModal transaction={selectedEthTransaction} token={selectedEthToken} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
 	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
 {/if}

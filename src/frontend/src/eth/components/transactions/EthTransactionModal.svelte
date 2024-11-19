@@ -13,6 +13,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionToken } from '$lib/types/token';
 	import type { Transaction } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
@@ -20,7 +21,6 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { OptionToken } from '$lib/types/token';
 
 	export let transaction: Transaction;
 	export let token: OptionToken;
@@ -126,15 +126,15 @@
 		<Value ref="amount">
 			<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 			{#if nonNullish(token)}
-			<output>
-				{formatToken({
-					value,
-					unitName: token.decimals,
-					displayDecimals: token.decimals
-				})}
-				{token.symbol}
-			</output>
-				{/if}
+				<output>
+					{formatToken({
+						value,
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					})}
+					{token.symbol}
+				</output>
+			{/if}
 		</Value>
 
 		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
