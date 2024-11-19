@@ -1,4 +1,4 @@
-export interface RestRequestParams<Response, Error = unknown> {
+export interface RetryParams<Response, Error = unknown> {
 	request: () => Promise<Response>;
 	onRetry?: (options: { error: Error; retryCount: number }) => Promise<void>;
 	maxRetries?: number;
@@ -10,13 +10,14 @@ export interface RestRequestParams<Response, Error = unknown> {
  * @param request - The request function to call.
  * @param onRetry - The optional function to call when the request fails and a retry is needed.
  * @param maxRetries - The maximum number of retries to attempt.
- * @returns The result of the request or it throws an error if the max retries are reached.
+ * @returns The result of the request.
+ * @throws The error from the request if the max retries are reached.
  */
-export const restRequest = async <Response, Error>({
+export const retry = async <Response, Error>({
 	request,
 	onRetry,
 	maxRetries = 3
-}: RestRequestParams<Response, Error>): Promise<Response | undefined> => {
+}: RetryParams<Response, Error>): Promise<Response | undefined> => {
 	const executeRequest = async (retryCount: number): Promise<Response> => {
 		try {
 			return await request();
@@ -28,7 +29,7 @@ export const restRequest = async <Response, Error>({
 
 			await onRetry?.({ error: error as Error, retryCount });
 			console.warn(`Request attempt ${retryCount + 1} failed. Retrying...`);
-			return executeRequest(retryCount + 1);
+			return await executeRequest(retryCount + 1);
 		}
 	};
 

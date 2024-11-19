@@ -1,8 +1,8 @@
-import { restRequest } from '$lib/services/rest.services';
+import { retry } from '$lib/services/rest.services';
 import { expect } from 'vitest';
 
 describe('rest.services', () => {
-	describe('restRequest', () => {
+	describe('retry', () => {
 		const mockResult = 'success';
 		const mockError = new Error('Failed');
 
@@ -19,7 +19,7 @@ describe('rest.services', () => {
 		});
 
 		it('should call the request function when the request succeeds on the first try', async () => {
-			await restRequest({
+			await retry({
 				request: mockSuccessfulRequest
 			});
 
@@ -27,7 +27,7 @@ describe('rest.services', () => {
 		});
 
 		it('should return the result of the request when the request succeeds on the first try', async () => {
-			const result = await restRequest({
+			const result = await retry({
 				request: mockSuccessfulRequest
 			});
 
@@ -39,7 +39,7 @@ describe('rest.services', () => {
 
 			await expect(
 				async () =>
-					await restRequest({
+					await retry({
 						request: mockFailedRequest,
 						maxRetries
 					})
@@ -58,7 +58,7 @@ describe('rest.services', () => {
 				.mockRejectedValueOnce(new Error('Second attempt failed'))
 				.mockResolvedValue(mockResult);
 
-			const result = await restRequest({
+			const result = await retry({
 				request: mockRequest,
 				onRetry: mockOnRetry
 			});
@@ -86,7 +86,7 @@ describe('rest.services', () => {
 
 			await expect(
 				async () =>
-					await restRequest({
+					await retry({
 						request: mockFailedRequest,
 						onRetry: mockOnRetry,
 						maxRetries
@@ -100,7 +100,7 @@ describe('rest.services', () => {
 		it('should not retry if maxRetries is set to 0', async () => {
 			await expect(
 				async () =>
-					await restRequest({
+					await retry({
 						request: mockFailedRequest,
 						onRetry: mockOnRetry,
 						maxRetries: 0
@@ -121,7 +121,7 @@ describe('rest.services', () => {
 				.mockRejectedValueOnce(new Error('First attempt failed'))
 				.mockResolvedValue(mockResult);
 
-			const result = await restRequest({
+			const result = await retry({
 				request: mockRequest,
 				onRetry: mockOnRetry,
 				maxRetries: 2
@@ -138,7 +138,7 @@ describe('rest.services', () => {
 		});
 
 		it('should not call onRetry', async () => {
-			const result = await restRequest({
+			const result = await retry({
 				request: mockSuccessfulRequest,
 				onRetry: mockOnRetry
 			});
