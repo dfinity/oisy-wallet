@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import TokenBalanceSkeleton from '$lib/components/tokens/TokenBalanceSkeleton.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
 	import { TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
 
@@ -17,10 +17,7 @@
 				unitName: data.decimals
 			})}
 		{:else}
-			{formatToken({
-				value: ZERO,
-				unitName: data.decimals
-			}).replace('0', '-')}
+			<span>{$i18n.tokens.balance.error.not_applicable}</span>
 		{/if}
 	</output>
 </TokenBalanceSkeleton>

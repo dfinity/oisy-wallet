@@ -162,7 +162,12 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { available_balance: string; top_up: string; learn_more_about_erc20_icp: string };
+	text: {
+		available_balance: string;
+		unavailable_balance: string;
+		top_up: string;
+		learn_more_about_erc20_icp: string;
+	};
 }
 
 interface I18nSettings {
@@ -364,7 +369,7 @@ interface I18nConvert {
 		refreshing_ui: string;
 	};
 	assertion: { insufficient_funds: string; insufficient_funds_for_fee: string };
-	error: { loading_cketh_helper: string };
+	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
 }
 
 interface I18nBuy {
@@ -394,6 +399,7 @@ interface I18nTokens {
 		twin_token: string;
 		standard: string;
 	};
+	balance: { error: { not_applicable: string } };
 	import: {
 		text: {
 			title: string;

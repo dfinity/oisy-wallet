@@ -11,11 +11,12 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
+	import type { OptionAmount } from '$lib/types/send';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
-	export let sendAmount: number | undefined = undefined;
+	export let sendAmount: OptionAmount = undefined;
 	export let totalFee: bigint | undefined;
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
@@ -52,7 +53,7 @@
 	let convertAmountUSD: number;
 	$: convertAmountUSD =
 		nonNullish(sendAmount) && nonNullish($sourceTokenExchangeRate)
-			? sendAmount * $sourceTokenExchangeRate
+			? Number(sendAmount) * $sourceTokenExchangeRate
 			: 0;
 </script>
 
