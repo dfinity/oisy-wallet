@@ -1,17 +1,7 @@
-import { initModalStore, type ModalStore } from '$lib/stores/modal.store';
+import { modalStore } from '$lib/stores/modal.store';
 import { get } from 'svelte/store';
 
 describe('modal.store', () => {
-	interface TestData {
-		value: number;
-	}
-
-	let modalStore: ModalStore<TestData>;
-
-	beforeEach(() => {
-		modalStore = initModalStore<TestData>();
-	});
-
 	it('should initialise with undefined', () => {
 		expect(get(modalStore)).toBeUndefined();
 	});

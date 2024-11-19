@@ -69,8 +69,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	close: () => void;
 }
 
-// Exposed for test purposes
-export const initModalStore = <T>(): ModalStore<T> => {
+const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
 	const setType = (type: Modal<T>['type']) => () => set({ type });
