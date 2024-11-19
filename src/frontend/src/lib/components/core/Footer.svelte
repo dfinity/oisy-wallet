@@ -68,7 +68,7 @@
 			class:xl:max-w-80={$authSignedIn}
 			class:1.5xl:max-w-none={$authSignedIn}
 		>
-			<div class="flex pt-2 flex-col items-center sm:gap-2 sm:flex-row sm:items-start">
+			<div class="flex flex-col items-center pt-2 sm:flex-row sm:items-start sm:gap-2">
 				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 				<span
 					class:md:hidden={$authSignedIn}
