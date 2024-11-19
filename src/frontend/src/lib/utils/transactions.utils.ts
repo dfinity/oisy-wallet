@@ -7,12 +7,16 @@ import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
+import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
+import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionsUi, AnyTransactionUi } from '$lib/types/transaction';
+import type { AllTransactionUi, AnyTransactionUi } from '$lib/types/transaction';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
@@ -22,27 +26,34 @@ import {
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
- * Maps the transactions stores to a unified list of transactions with their respective components.
+ * Maps the transactions stores to a unified list of transactions with their respective token and components.
  *
  * @param tokens - The tokens to map the transactions for.
  * @param $btcTransactions - The BTC transactions store data.
  * @param $ethTransactions - The ETH transactions store data.
  * @param $ckEthMinterInfo - The CK Ethereum minter info store data.
  * @param $ethAddress - The ETH address of the user.
+ * @param $icTransactions - The ICP transactions store data.
+ * @param $btcStatuses - The BTC statuses store data.
+ * @returns The unified list of transactions with their respective token and components.
  */
 export const mapAllTransactionsUi = ({
 	tokens,
 	$btcTransactions,
 	$ethTransactions,
 	$ckEthMinterInfo,
-	$ethAddress
+	$ethAddress,
+	$icTransactions,
+	$btcStatuses
 }: {
 	tokens: Token[];
 	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
 	$ethTransactions: EthTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-}): AllTransactionsUi => {
+	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
+}): AllTransactionUi[] => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
 		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
 		networkId: ETHEREUM_NETWORK_ID
@@ -53,7 +64,7 @@ export const mapAllTransactionsUi = ({
 		networkId: SEPOLIA_NETWORK_ID
 	});
 
-	return tokens.reduce<AllTransactionsUi>((acc, token) => {
+	return tokens.reduce<AllTransactionUi[]>((acc, token) => {
 		const {
 			id: tokenId,
 			network: { id: networkId }
@@ -95,8 +106,24 @@ export const mapAllTransactionsUi = ({
 		}
 
 		if (isNetworkIdICP(networkId)) {
-			// TODO: Implement ICP transactions
-			return acc;
+			// TODO: Implement ckBTC and ckETH pending transactions
+
+			if (isNullish($icTransactions)) {
+				return acc;
+			}
+
+			return [
+				...acc,
+				...($icTransactions[tokenId] ?? []).map((transaction) => ({
+					...extendIcTransaction({
+						transaction,
+						token,
+						btcStatuses: $btcStatuses?.[tokenId] ?? undefined
+					}).data,
+					token,
+					component: IcTransaction
+				}))
+			];
 		}
 
 		return acc;
