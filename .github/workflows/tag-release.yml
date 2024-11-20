@@ -36,5 +36,8 @@ jobs:
       id: draft_release
       uses: release-drafter/release-drafter@v6
       with:
-        version: "v${{ steps.get_version.outputs.version }}"
-        token: ${{ secrets.GIX_CREATE_PR_PAT }}
+        version: 'v${{ steps.get_version.outputs.version }}'
+        tag: 'v${{ steps.get_version.outputs.version }}'
+        name: 'v${{ steps.get_version.outputs.version }}'
+        latest: true
+        publish: true
