@@ -4,6 +4,7 @@ import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ModalData } from '$lib/stores/modal.store';
 import type { OptionToken } from '$lib/types/token';
 import type {
@@ -16,6 +17,7 @@ import type {
 import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { ComponentType } from 'svelte';
+import { get } from 'svelte/store';
 
 export const mapTransactionIcon = ({
 	type,
@@ -55,10 +57,11 @@ export const groupTransactionsByDate = <T extends AnyTransactionUi>(
 	transactions: T[]
 ): TransactionsUiDateGroup<T> => {
 	const currentDate = new Date();
+	const undefinedKey = get(i18n).transaction.label.no_date_available;
 
 	return transactions.reduce<TransactionsUiDateGroup<T>>((acc, transaction) => {
 		if (isNullish(transaction.timestamp)) {
-			return { ...acc, undefined: [...(acc['undefined'] ?? []), transaction] };
+			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
 		}
 
 		const date = formatSecondsToNormalizedDate({
