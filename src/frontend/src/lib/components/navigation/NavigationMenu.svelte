@@ -23,7 +23,7 @@
 		isRouteTokens,
 		isRouteTransactions,
 		networkParam
-	} from '$lib/utils/nav.utils.js';
+	} from '$lib/utils/nav.utils';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually

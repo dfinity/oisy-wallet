@@ -144,5 +144,5 @@ export const sortTransactions = ({
 		);
 	}
 
-	return nonNullish(timestampA) ? 1 : -1;
+	return nonNullish(timestampA) ? -1 : 1;
 };
