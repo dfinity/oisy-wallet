@@ -48,6 +48,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
 
+      - run: |
+          echo "Head ref: ${{ github.event.pull_request.head.ref }} ${{ github.event.pull_request.head.label }}"
+          echo "Base ref: ${{ github.event.pull_request.base.ref }}"
+          echo "ref: ${{ github.ref }} ${{ github.head_ref }}"
+
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
@@ -72,7 +77,7 @@ jobs:
           add: e2e
           default_author: github_actions
           message: "🤖 update E2E snapshots"
-          push: origin HEAD:"${{ github.event.pull_request.head.ref }}"
+          push: origin HEAD:"refs/heads/${{ github.event.pull_request.head.ref }}"
 
       - name: Stage Changes
         if: github.ref == 'refs/heads/main'
