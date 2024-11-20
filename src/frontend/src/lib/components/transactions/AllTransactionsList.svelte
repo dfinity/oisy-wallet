@@ -56,9 +56,12 @@
 		}));
 
 	let selectedEthTransaction: EthTransactionUi | undefined;
-	$: selectedEthTransaction = $modalEthTransaction
-		? ($modalStore?.data as EthTransactionUi | undefined)
-		: undefined;
+	let selectedEthToken: OptionToken;
+	$: ({ transaction: selectedEthTransaction, token: selectedEthToken } =
+		mapTransactionModalData<EthTransactionUi>({
+			$modalOpen: $modalEthTransaction,
+			$modalStore: $modalStore
+		}));
 
 	let selectedIcTransaction: IcTransactionUi | undefined;
 	let selectedIcToken: OptionToken;
@@ -83,7 +86,7 @@
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal transaction={selectedBtcTransaction} token={selectedBtcToken} />
 {:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
-	<EthTransactionModal transaction={selectedEthTransaction} />
+	<EthTransactionModal transaction={selectedEthTransaction} token={selectedEthToken} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
 	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
 {/if}
