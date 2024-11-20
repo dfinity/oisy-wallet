@@ -6,6 +6,9 @@ import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 
 /**
  * All user-enabled tokens matching the selected network or chain fusion.
@@ -36,3 +39,17 @@ export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived
 			$exchanges
 		})
 );
+
+/**
+ * All user-enabled tokens matching the selected network or chain fusion that do not have an index canister.
+ */
+export const enabledNetworkTokensWithoutIndexCanister: Readable<Token[]> = derived(
+	[enabledNetworkTokens, btcTransactionsStore, ethTransactionsStore, icTransactionsStore],
+	([$enabledNetworkTokens, $btcTransactionsStore, $ethTransactionsStore, $icTransactionsStore ]) =>
+		$enabledNetworkTokens.filter(
+				(token: Token) =>
+					$btcTransactionsStore?.[token.id] === null ||
+					$ethTransactionsStore?.[token.id] === null ||
+					$icTransactionsStore?.[token.id] === null
+			)
+)
