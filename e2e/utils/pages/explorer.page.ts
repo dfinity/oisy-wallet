@@ -8,10 +8,7 @@ export class ExplorerPage extends HomepageLoggedIn {
 		super({ page, iiPage, viewportSize });
 	}
 
-	/**
-	 * @override
-	 */
-	async extendWaitForReady(): Promise<void> {
+	override async extendWaitForReady(): Promise<void> {
 		await this.clickByTestId(NAVIGATION_ITEM_EXPLORER);
 	}
 }
