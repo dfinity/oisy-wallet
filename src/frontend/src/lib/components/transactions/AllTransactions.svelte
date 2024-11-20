@@ -1,13 +1,11 @@
 <script lang="ts">
+	import type { Token } from '@dfinity/utils';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
-	import {
-		enabledNetworkTokensWithoutIndexCanister
-	} from '$lib/derived/network-tokens.derived';
+	import { enabledNetworkTokensWithoutIndexCanister } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import type { Token } from '@dfinity/utils';
 
 	let tokensWithoutCanister: Token[];
 	$: tokensWithoutCanister = $enabledNetworkTokensWithoutIndexCanister;

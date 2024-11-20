@@ -1,3 +1,6 @@
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
@@ -6,9 +9,6 @@ import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
-import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 
 /**
  * All user-enabled tokens matching the selected network or chain fusion.
@@ -45,11 +45,11 @@ export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived
  */
 export const enabledNetworkTokensWithoutIndexCanister: Readable<Token[]> = derived(
 	[enabledNetworkTokens, btcTransactionsStore, ethTransactionsStore, icTransactionsStore],
-	([$enabledNetworkTokens, $btcTransactionsStore, $ethTransactionsStore, $icTransactionsStore ]) =>
+	([$enabledNetworkTokens, $btcTransactionsStore, $ethTransactionsStore, $icTransactionsStore]) =>
 		$enabledNetworkTokens.filter(
-				(token: Token) =>
-					$btcTransactionsStore?.[token.id] === null ||
-					$ethTransactionsStore?.[token.id] === null ||
-					$icTransactionsStore?.[token.id] === null
-			)
-)
+			(token: Token) =>
+				$btcTransactionsStore?.[token.id] === null ||
+				$ethTransactionsStore?.[token.id] === null ||
+				$icTransactionsStore?.[token.id] === null
+		)
+);
