@@ -30,6 +30,9 @@ pub struct InitArg {
     pub api: Option<Guards>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id alias.
+    pub derivation_origin: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
@@ -74,6 +77,9 @@ pub struct Config {
     pub api: Option<Guards>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id alias.
+    pub derivation_origin: Option<String>,
 }
 
 pub mod transaction {
