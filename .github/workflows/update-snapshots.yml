@@ -37,7 +37,17 @@ jobs:
           exit 1
 
       - name: Checkout
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
+
+      - name: Checkout for pull request
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
