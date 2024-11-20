@@ -15,7 +15,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar styleClass="flex flex-col">
 	<ConvertReviewTokens />
 
 	<div slot="outer-content" class="my-4 flex-1">
