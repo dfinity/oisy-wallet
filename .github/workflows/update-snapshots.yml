@@ -49,6 +49,16 @@ jobs:
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
           fetch-depth: 0
 
+      - name: Ensure branch checkout
+        run: |
+          git fetch origin ${{ github.head_ref }}
+          git checkout ${{ github.head_ref }}
+
+      - run: |
+          echo "Head ref: ${{ github.head_ref }}"
+          echo "Ref: ${{ github.ref }}"
+          git status
+
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
