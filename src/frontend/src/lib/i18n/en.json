@@ -398,7 +398,8 @@
 			"conversion_may_take": "Conversion may take up to 1 hour",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
-			"refreshing_ui": "Refreshing UI"
+			"refreshing_ui": "Refreshing UI",
+			"unsupported_token_conversion": "Conversion for the selected token is not supported."
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance",
