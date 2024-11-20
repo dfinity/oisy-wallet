@@ -8,6 +8,7 @@ import type { ModalData } from '$lib/stores/modal.store';
 import type { OptionToken } from '$lib/types/token';
 import type {
 	AnyTransactionUi,
+	Transaction,
 	TransactionStatus,
 	TransactionsUiDateGroup,
 	TransactionType
@@ -69,7 +70,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUi>(
 	}, {});
 };
 
-export const mapTransactionModalData = <T extends AnyTransactionUi>({
+export const mapTransactionModalData = <T extends AnyTransactionUi | Transaction>({
 	$modalOpen,
 	$modalStore
 }: {

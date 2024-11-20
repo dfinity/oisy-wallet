@@ -111,7 +111,9 @@
 	},
 	"footer": {
 		"text": {
-			"developed_with": "© 2024 Developed with ❤\uFE0F at DFINITY"
+			"incubated_with": "Incubated with ❤\uFE0F by",
+			"dfinity_foundation": "DFINITY Foundation",
+			"copyright": "© 2024"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
@@ -396,7 +398,8 @@
 			"conversion_may_take": "Conversion may take up to 1 hour",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
-			"refreshing_ui": "Refreshing UI"
+			"refreshing_ui": "Refreshing UI",
+			"unsupported_token_conversion": "Conversion for the selected token is not supported."
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance",
