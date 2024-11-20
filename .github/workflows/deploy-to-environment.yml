@@ -93,6 +93,8 @@ jobs:
             echo "VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED=${{ secrets.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
+#             TODO: Remove this one once the feautre is implemented
+            echo "VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED=${{ secrets.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED_STAGING }}" >> $GITHUB_ENV
             if [[ "$NETWORK" == "staging" ]]; then
               echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
               echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" >> $GITHUB_ENV
