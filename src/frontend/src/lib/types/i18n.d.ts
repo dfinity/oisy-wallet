@@ -573,6 +573,7 @@ interface I18nTransaction {
 		status: string;
 		confirmations: string;
 	};
+	status: { included: string; safe: string; finalised: string };
 	label: {
 		reimbursement: string;
 		twin_token_sent: string;

@@ -642,6 +642,11 @@
 			"status": "Status",
 			"confirmations": "Confirmations"
 		},
+		"status": {
+			"included": "Included",
+			"safe": "Safe",
+			"finalised": "Finalised"
+		},
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_sent": "$twinToken sent",
