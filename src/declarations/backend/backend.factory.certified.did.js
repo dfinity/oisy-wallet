@@ -19,6 +19,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
+		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
@@ -128,6 +129,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),
+		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
@@ -331,6 +333,7 @@ export const init = ({ IDL }) => {
 	});
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
+		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
