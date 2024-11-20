@@ -51,8 +51,8 @@ jobs:
 
       - name: Ensure branch checkout
         run: |
-          git fetch origin ${{ github.head_ref }}
-          git checkout ${{ github.head_ref }}
+          git fetch origin "${{ github.head_ref }}"
+          git checkout "${{ github.head_ref }}"
 
       - run: |
           echo "Head ref: ${{ github.head_ref }}"
