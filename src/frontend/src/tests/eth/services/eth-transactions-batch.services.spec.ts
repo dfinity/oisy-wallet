@@ -100,10 +100,14 @@ describe('eth-transactions-batch.services', () => {
 				tokensAlreadyLoaded: []
 			});
 
-			const result = await generator.next();
-
 			expect(batch).toHaveBeenCalled();
-			expect(result.value).toEqual(expectedReturn);
+
+			try {
+				const result = await generator.next();
+				expect(result.value).toEqual(expectedReturn);
+			} catch (e: unknown) {
+				expect(e).toBeUndefined();
+			}
 		});
 
 		it('should respect ETHERSCAN_MAX_CALLS_PER_SECOND as batchSize', () => {
