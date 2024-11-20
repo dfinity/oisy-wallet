@@ -1,4 +1,5 @@
 import {
+	CAROUSEL_SLIDE_NAVIGATION,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -8,16 +9,15 @@ import {
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	TOKEN_BALANCE,
-	TOKEN_CARD,
-	CAROUSEL_SLIDE_NAVIGATION
+	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
+import { PromotionCarousel } from '../promotion-carousel.component';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
-import { PromotionCarousel } from '../promotion-carousel.component';
 
 interface HomepageParams {
 	page: Page;

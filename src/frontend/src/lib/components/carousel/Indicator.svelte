@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 
 	export let currentSlide: number;
 	export let index: number;

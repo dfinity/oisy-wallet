@@ -9,7 +9,7 @@ test('should display homepage in logged out state', async ({ page }) => {
 
 	await page.waitForLoadState('networkidle');
 
-	await expect(page).toHaveScreenshot({ 
+	await expect(page).toHaveScreenshot({
 		fullPage: true,
 		animations: 'disabled'
 	});
@@ -23,12 +23,12 @@ testWithII('should display homepage in logged in state', async ({ page, iiPage }
 	await page.waitForLoadState('networkidle');
 
 	const numberOfSlides = await homepageLoggedIn.getNumberOfSlides();
-	
+
 	for (let i = 1; i <= numberOfSlides; i++) {
 		await homepageLoggedIn.navigateToSlide(i);
 	}
 
-	await expect(page).toHaveScreenshot({ 
+	await expect(page).toHaveScreenshot({
 		fullPage: true,
 		animations: 'disabled'
 	});
