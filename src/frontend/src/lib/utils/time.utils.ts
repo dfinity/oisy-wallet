@@ -1,8 +1,8 @@
 /**
  * Wait for a random amount of time between min and max
  *
- * @param min - minimum time to sleep
- * @param max - maximum time to sleep
+ * @param min - minimum time to wait
+ * @param max - maximum time to wait
  */
 export const randomWait = async ({
 	min = 1000,
