@@ -10,6 +10,12 @@ jobs:
   update-tokens-sns:
     runs-on: ubuntu-24.04
     steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
       - name: Prepare
@@ -28,7 +34,7 @@ jobs:
         if: env.CHANGES_DETECTED == 'true'
         uses: ./.github/actions/create-pr
         with:
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           branch: bot-tokens-sns-update
           title: 'feat(frontend): Update Sns Tokens'
           body: |
@@ -37,6 +43,12 @@ jobs:
   update-tokens-ckerc20:
     runs-on: ubuntu-24.04
     steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
       - name: Prepare
@@ -58,7 +70,7 @@ jobs:
         if: env.CHANGES_DETECTED == 'true'
         uses: ./.github/actions/create-pr
         with:
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           branch: bot-tokens-ckerc20-update
           title: 'feat(frontend): Update ckErc20 Tokens'
           body: |
