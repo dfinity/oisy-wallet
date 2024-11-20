@@ -48,10 +48,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
 
-      - name: Fetch base branch
+      - name: Fetch branch of pull request
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           git fetch origin "${{ github.event.pull_request.head.ref }}"
+          git status
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
