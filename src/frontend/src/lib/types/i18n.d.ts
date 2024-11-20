@@ -437,7 +437,7 @@ interface I18nTokens {
 			all_tokens_zero_balance: string;
 		};
 		placeholder: { select_network: string };
-		info: { outdated_index_canister: string; no_changes: string };
+		info: { no_changes: string };
 		error: { unexpected_build: string; empty: string };
 	};
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
@@ -586,6 +586,7 @@ interface I18nTransaction {
 		converting_twin_token: string;
 		converting_ck_token: string;
 		twin_network: string;
+		no_date_available: string;
 	};
 	alt: {
 		open_block_explorer: string;
