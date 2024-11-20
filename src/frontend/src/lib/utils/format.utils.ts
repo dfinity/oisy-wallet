@@ -108,6 +108,7 @@ export const formatSecondsToNormalizedDate = ({
 	const date = new Date(seconds * 1000);
 	const today = currentDate ?? new Date();
 
+	// TODO: add additional test suite for the below calculations
 	const dateOnlyDate = new Date(date.setHours(0, 0, 0, 0));
 	const dateOnlyToday = new Date(today.setHours(0, 0, 0, 0));
 	const daysDifference = Math.ceil(
