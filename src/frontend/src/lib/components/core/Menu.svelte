@@ -67,7 +67,7 @@
 	$: activityRoute = isRouteActivity($page);
 
 	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute;
 </script>
 
 <ButtonIcon
