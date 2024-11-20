@@ -45,9 +45,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: refs/heads/${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
           fetch-depth: 0
+
+      - run: git status
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
