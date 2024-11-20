@@ -18,7 +18,7 @@
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
 
 	{#if tokenList}
-		<MessageBox level="light-warning" closable>
+		<MessageBox level="light-warning" closableKey="oisy_ic_hide_incomplete_transaction_list">
 			{replacePlaceholders($i18n.activity.warning.incomplete_transaction_list, {
 				$token_list: tokenList
 			})}
