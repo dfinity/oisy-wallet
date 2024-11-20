@@ -316,11 +316,11 @@ describe('transactions.utils', () => {
 			expect(result).toEqual([transaction3, transaction2, transaction1]);
 		});
 
-		it('should sort transactions with nullish timestamps first', () => {
+		it('should sort transactions with nullish timestamps last', () => {
 			const result = [transaction1, transactionWithNullTimestamp, transaction2].sort((a, b) =>
 				sortTransactions({ transactionA: a, transactionB: b })
 			);
-			expect(result).toEqual([transactionWithNullTimestamp, transaction2, transaction1]);
+			expect(result).toEqual([transaction2, transaction1, transactionWithNullTimestamp]);
 		});
 	});
 });

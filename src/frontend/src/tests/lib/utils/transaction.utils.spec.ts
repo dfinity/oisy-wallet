@@ -1,3 +1,5 @@
+import { ICP_TOKEN } from '$env/tokens.env';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import IconConvert from '$lib/components/icons/IconConvert.svelte';
 import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
@@ -5,8 +7,14 @@ import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
+import type { ModalData } from '$lib/stores/modal.store';
 import type { AnyTransactionUi } from '$lib/types/transaction';
-import { groupTransactionsByDate, mapTransactionIcon } from '$lib/utils/transaction.utils';
+import {
+	groupTransactionsByDate,
+	mapTransactionIcon,
+	mapTransactionModalData
+} from '$lib/utils/transaction.utils';
+import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createTransactionsUi } from '$tests/mocks/transactions.mock';
 
 describe('transaction.utils', () => {
@@ -145,6 +153,68 @@ describe('transaction.utils', () => {
 				'1': [transactions[0]],
 				[nowInSeconds.toString()]: [transactions[1]]
 			});
+		});
+	});
+
+	describe('mapTransactionModalData', () => {
+		const type = 'ic-transaction';
+
+		const mockToken = ICP_TOKEN;
+		const mockIcTransactionUi = createMockIcTransactionsUi(1)[0];
+
+		const mockModalStore = {
+			type,
+			data: { transaction: mockIcTransactionUi, token: mockToken }
+		} as ModalData<unknown>;
+
+		it('should return transaction and token if modal is open and store data is valid', () => {
+			const $modalOpen = true;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore: mockModalStore
+			});
+
+			expect(result.transaction).toEqual(mockIcTransactionUi);
+			expect(result.token).toEqual(mockToken);
+		});
+
+		it('should return undefined transaction and token if modal is closed', () => {
+			const $modalOpen = false;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore: mockModalStore
+			});
+
+			expect(result.transaction).toBeUndefined();
+			expect(result.token).toBeUndefined();
+		});
+
+		it('should return undefined transaction and token if store data is null', () => {
+			const $modalOpen = true;
+			const $modalStore = { type, data: null } as ModalData<unknown>;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore
+			});
+
+			expect(result.transaction).toBeUndefined();
+			expect(result.token).toBeUndefined();
+		});
+
+		it('should return undefined transaction and token if store data is missing', () => {
+			const $modalOpen = true;
+			const $modalStore = {} as ModalData<unknown>;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore: $modalStore
+			});
+
+			expect(result.transaction).toBeUndefined();
+			expect(result.token).toBeUndefined();
 		});
 	});
 });
