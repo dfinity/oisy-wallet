@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { setContext, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
@@ -14,11 +14,6 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertBTCToCkBTC } from '$lib/derived/modal.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import {
-		initConvertContext,
-		CONVERT_CONTEXT_KEY,
-		type ConvertContext
-	} from '$lib/stores/convert.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -29,17 +24,6 @@
 		tokenToPair: BTC_MAINNET_TOKEN,
 		tokens: $tokens
 	});
-
-	$: ckBtcToken,
-		(() =>
-			nonNullish(ckBtcToken) &&
-			setContext<ConvertContext>(
-				CONVERT_CONTEXT_KEY,
-				initConvertContext({
-					sourceToken: BTC_MAINNET_TOKEN,
-					destinationToken: ckBtcToken
-				})
-			))();
 
 	let minterInfoLoaded = false;
 
@@ -72,8 +56,8 @@
 	<span>{BTC_MAINNET_TOKEN.twinTokenSymbol}</span>
 </ButtonHero>
 
-{#if $modalConvertBTCToCkBTC}
-	<ConvertModal />
+{#if $modalConvertBTCToCkBTC && nonNullish(ckBtcToken)}
+	<ConvertModal sourceToken={BTC_MAINNET_TOKEN} destinationToken={ckBtcToken} />
 {/if}
 
 {#if !minterInfoLoaded && nonNullish(ckBtcToken)}
