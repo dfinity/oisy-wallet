@@ -1,16 +1,30 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher, setContext } from 'svelte';
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 	import { convertWizardSteps } from '$lib/config/convert.config';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps.js';
-	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
+	import {
+		CONVERT_CONTEXT_KEY,
+		type ConvertContext,
+		initConvertContext
+	} from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 
-	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	export let sourceToken: Token;
+	export let destinationToken: Token;
+
+	setContext<ConvertContext>(
+		CONVERT_CONTEXT_KEY,
+		initConvertContext({
+			sourceToken,
+			destinationToken
+		})
+	);
 
 	let sendAmount: OptionAmount = undefined;
 	let receiveAmount: number | undefined = undefined;
@@ -21,8 +35,8 @@
 	let steps: WizardSteps;
 	$: steps = convertWizardSteps({
 		i18n: $i18n,
-		sourceToken: $sourceToken.symbol,
-		destinationToken: $destinationToken.symbol
+		sourceToken: sourceToken.symbol,
+		destinationToken: destinationToken.symbol
 	});
 
 	const dispatch = createEventDispatcher();

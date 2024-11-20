@@ -1,4 +1,4 @@
-import { TOKEN_CARD } from '../../../src/frontend/src/lib/constants/test-ids.constants';
+import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 export type TransactionsPageParams = {
