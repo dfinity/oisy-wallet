@@ -52,5 +52,5 @@
 	{token}
 	{iconType}
 >
-	<IcTransactionLabel label={transactionTypeLabel} fallback={type} />
+	<IcTransactionLabel label={transactionTypeLabel} fallback={type} {token} />
 </Transaction>
