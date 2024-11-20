@@ -123,9 +123,9 @@
 			</Value>
 		{/if}
 
-		<Value ref="amount">
-			<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-			{#if nonNullish(token)}
+		{#if nonNullish(token)}
+			<Value ref="amount">
+				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 				<output>
 					{formatToken({
 						value,
@@ -134,8 +134,8 @@
 					})}
 					{token.symbol}
 				</output>
-			{/if}
-		</Value>
+			</Value>
+		{/if}
 
 		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
 	</ContentWithToolbar>
