@@ -20,7 +20,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<ContentWithToolbar minHeight="50vh">
+<ContentWithToolbar styleClass="min-h-50vh">
 	<ReceiveAddressQRCodeContent
 		{address}
 		{addressLabel}
