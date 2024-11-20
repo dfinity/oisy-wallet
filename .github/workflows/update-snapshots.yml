@@ -45,19 +45,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
-          fetch-depth: 0
 
-      - name: Ensure branch checkout
+      - name: Fetch base branch
         run: |
-          git fetch origin "${{ github.head_ref }}"
-          git checkout "${{ github.head_ref }}"
-
-      - run: |
-          echo "Head ref: ${{ github.head_ref }}"
-          echo "Ref: ${{ github.ref }}"
-          git status
+          git fetch origin "${{ github.base_ref }}:${{ github.base_ref }}"
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
