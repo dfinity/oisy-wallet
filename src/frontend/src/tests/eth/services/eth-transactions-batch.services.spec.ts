@@ -32,10 +32,13 @@ describe('eth-transactions-batch.services', () => {
 			})
 		);
 
+		const mockError = new Error('Failed to load transactions');
+
 		const batchSpy = vi.spyOn(batchServices, 'batch');
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			vi.resetAllMocks;
 		});
 
 		it('should create promises for tokens not already loaded', async () => {
@@ -81,14 +84,14 @@ describe('eth-transactions-batch.services', () => {
 		});
 
 		it('should handle rejected promises gracefully', async () => {
-			vi.mocked(loadEthereumTransactions).mockImplementation(({ tokenId }) =>
+			vi.mocked(loadEthereumTransactions).mockImplementationOnce(({ tokenId }) =>
 				tokenId === mockTokensNotLoaded[0].id
-					? Promise.reject(new Error('Failed to load transactions'))
+					? Promise.reject(mockError)
 					: Promise.resolve({ ...mockTransactionResult, tokenId })
 			);
 
 			const expectedReturn = [
-				{ status: 'rejected', reason: new Error('Failed to load transactions') },
+				{ status: 'rejected', reason: mockError },
 				...mockTokens.slice(1).map((token) => ({
 					status: 'fulfilled',
 					value: { ...mockTransactionResult, tokenId: token.id }
@@ -102,12 +105,8 @@ describe('eth-transactions-batch.services', () => {
 
 			expect(batch).toHaveBeenCalled();
 
-			try {
-				const result = await generator.next();
-				expect(result.value).toEqual(expectedReturn);
-			} catch (e: unknown) {
-				expect(e).toBeUndefined();
-			}
+			const result = await generator.next();
+			expect(result.value).toEqual(expectedReturn);
 		});
 
 		it('should respect ETHERSCAN_MAX_CALLS_PER_SECOND as batchSize', () => {
