@@ -127,7 +127,7 @@ describe('eth-transactions.services', () => {
 				});
 
 				expect(result).toEqual({ success: false });
-				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: mockTransactions });
+				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: null });
 				expect(spyToastsError).toHaveBeenCalledWith({
 					err: mockError,
 					msg: {
