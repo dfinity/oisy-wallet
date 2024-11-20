@@ -17,7 +17,7 @@ export const retry = async <Response, Error>({
 	request,
 	onRetry,
 	maxRetries = 3
-}: RetryParams<Response, Error>): Promise<Response | undefined> => {
+}: RetryParams<Response, Error>): Promise<Response> => {
 	const executeRequest = async (retryCount: number): Promise<Response> => {
 		try {
 			return await request();
