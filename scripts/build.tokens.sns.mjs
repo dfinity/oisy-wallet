@@ -1,12 +1,8 @@
 #!/usr/bin/env node
 
-import { AnonymousIdentity } from '@dfinity/agent';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
-import { IcrcIndexNgCanister, IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import {
 	candidNumberArrayToBigInt,
-	createAgent,
 	fromNullable,
 	isNullish,
 	jsonReplacer,
@@ -115,34 +111,6 @@ const mapOptionalToken = (response) => {
 	return nullishToken;
 };
 
-const assertIndexCanister = async (indexCanisterId) => {
-	try {
-		const agent = await createAgent({
-			identity: new AnonymousIdentity(),
-			host: 'https://icp-api.io'
-		});
-
-		const { getTransactions } = IcrcIndexNgCanister.create({
-			agent,
-			canisterId: Principal.fromText(indexCanisterId)
-		});
-
-		const { balance } = await getTransactions({
-			certified: true,
-			max_results: 0n,
-			account: { owner: Ed25519KeyIdentity.generate().getPrincipal() }
-		});
-
-		return balance >= 0n;
-	} catch (err) {
-		if (err.response?.body?.reject_message?.includes('out of cycles')) {
-			throw new Error(err.response.body.reject_message);
-		}
-
-		return false;
-	}
-};
-
 export const findSnses = async () => {
 	const data = await querySnsAggregator();
 
@@ -199,23 +167,7 @@ export const findSnses = async () => {
 			{ tokens: [], icons: [] }
 		);
 
-	const indexCanisterVersion = async (token) => {
-		const { indexCanisterId } = token;
-
-		const valid = await assertIndexCanister(indexCanisterId);
-
-		return {
-			...token,
-			indexCanisterVersion: valid ? 'up-to-date' : 'outdated'
-		};
-	};
-
-	const enhancedTokens = await Promise.all(tokens.map(indexCanisterVersion));
-
-	writeFileSync(
-		join(DATA_FOLDER, 'tokens.sns.json'),
-		JSON.stringify(enhancedTokens, jsonReplacer, 8)
-	);
+	writeFileSync(join(DATA_FOLDER, 'tokens.sns.json'), JSON.stringify(tokens, jsonReplacer, 8));
 
 	await saveLogos(icons);
 };

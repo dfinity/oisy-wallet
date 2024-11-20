@@ -485,7 +485,6 @@
 				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with $oisy_name. Contact the project team to propose an upgrade.",
 				"no_changes": "No changes need to be saved."
 			},
 			"error": {

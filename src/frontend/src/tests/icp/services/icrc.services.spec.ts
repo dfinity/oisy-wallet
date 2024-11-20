@@ -161,7 +161,6 @@ describe('icrc.services', () => {
 						fee: 100000n,
 						icon: '/icons/sns/zfcdd-tqaaa-aaaaq-aaaga-cai.png',
 						indexCanisterId: dragginzIndexCanisterId,
-						indexCanisterVersion: 'up-to-date',
 						ledgerCanisterId: dragginzLedgerCanisterId,
 						name: 'Draggin Karma Points'
 					})
