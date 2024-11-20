@@ -586,6 +586,7 @@ interface I18nTransaction {
 		converting_twin_token: string;
 		converting_ck_token: string;
 		twin_network: string;
+		no_date_available: string;
 	};
 	alt: {
 		open_block_explorer: string;

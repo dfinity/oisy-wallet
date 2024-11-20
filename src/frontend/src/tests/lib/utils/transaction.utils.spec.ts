@@ -14,6 +14,7 @@ import {
 	mapTransactionIcon,
 	mapTransactionModalData
 } from '$lib/utils/transaction.utils';
+import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createTransactionsUi } from '$tests/mocks/transactions.mock';
 
@@ -119,11 +120,12 @@ describe('transaction.utils', () => {
 		});
 
 		it('should handle transactions without timestamps', () => {
+			const undefinedKey = en.transaction.label.no_date_available;
 			const transactions = [mockTransactions[0], { ...mockTransactions[1], timestamp: undefined }];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': [transactions[0]],
-				undefined: [transactions[1]]
+				[undefinedKey]: [transactions[1]]
 			});
 		});
 
