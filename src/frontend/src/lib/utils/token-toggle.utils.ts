@@ -15,8 +15,7 @@ export function isEthereumTokenToggleEnabled(token: EthereumUserToken): boolean 
 // TODO: Like above - check why this functionality is used.
 export function isIcrcTokenToggleDisabled(token: IcrcCustomToken): boolean {
 	return nonNullish(token)
-		? token.indexCanisterVersion === 'outdated' ||
-				(token.category === 'default' && token.standard === 'icp') ||
+		? (token.category === 'default' && token.standard === 'icp') ||
 				ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(token.ledgerCanisterId)
 		: false;
 }
