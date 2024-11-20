@@ -24,11 +24,12 @@
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
-	let steps: [ProgressStep, ...ProgressStep[]];
+	let steps: ProgressSteps;
 	$: steps = [
 		{
 			step: ProgressStepsLoader.INITIALIZATION,

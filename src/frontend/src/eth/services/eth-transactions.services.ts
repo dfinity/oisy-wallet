@@ -4,12 +4,14 @@ import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
+import { retry } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -115,7 +117,10 @@ const loadErc20Transactions = async ({
 
 	try {
 		const { transactions: transactionsRest } = etherscanRests(networkId);
-		const transactions = await transactionsRest({ contract: token, address });
+		const transactions = await retry({
+			request: async () => await transactionsRest({ contract: token, address }),
+			onRetry: async () => await randomWait({})
+		});
 		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
