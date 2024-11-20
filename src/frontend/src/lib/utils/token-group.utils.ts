@@ -1,7 +1,7 @@
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
-import type { TokenUi } from '$lib/types/token';
+import type { TokenId, TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import {
 	isRequiredTokenWithLinkedData,
@@ -164,3 +164,53 @@ export const groupMainToken = ({ token, tokenGroup }: GroupTokenParams): TokenUi
  */
 export const groupSecondaryToken = ({ token, tokenGroup }: GroupTokenParams): TokenUiGroup =>
 	nonNullish(tokenGroup) ? updateTokenGroup({ token, tokenGroup }) : mapNewTokenGroup(token);
+
+/**
+ * Function to create a list of TokenUiGroup by grouping a provided list of tokens.
+ *
+ * The function loops through the tokens list and groups them according to a prop key that links a token to its "main token".
+ * For example, it could be `twinToken` as per ck token standard. But the logic can be extended to other props, if necessary.
+ *
+ * The tokens with no "main token" will still be included in a group, but it will be a single-element group, where the "main token" is the token itself.
+ * That, in general, makes sense for tokens that are not "secondary tokens" of a "main token".
+ *
+ * The returned list respects the sorting order of the initial tokens list, meaning that the group is created at each position of the first encountered token of the group.
+ * So, independently of being a "main token" or a "secondary token", the group will replace the first token of the group in the list.
+ * That is useful if a "secondary token" is before the "main token" in the list; for example, if the list is sorted by balance.
+ *
+ * NOTE: The function does not sort the groups by any criteria. It only groups the tokens. So, even if a group ends up having a total balance that would put it in a higher position in the list, it will not be moved.
+ *
+ * @param {TokenUi[]} tokens - The list of TokenUi objects to group. Each token may or may not have a prop key to identify a "main token".
+ * @returns {TokenUiGroup[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
+ */
+export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
+	const tokenGroupsMap = tokens.reduce<{
+		[id: TokenId]: TokenUiGroup | undefined;
+	}>(
+		(acc, token) => ({
+			...acc,
+			...(isIcCkToken(token) &&
+			nonNullish(token.twinToken) &&
+			// TODO: separate the check for decimals from the rest, since it seems important to the logic.
+			token.decimals === token.twinToken.decimals
+				? // If the token has a twinToken, and both have the same decimals, group them together.
+					{
+						[token.twinToken.id]: groupSecondaryToken({
+							token,
+							tokenGroup: acc[token.twinToken.id]
+						})
+					}
+				: {
+						[token.id]: groupMainToken({
+							token,
+							tokenGroup: acc[token.id]
+						})
+					})
+		}),
+		{}
+	);
+
+	return Object.getOwnPropertySymbols(tokenGroupsMap).map(
+		(id) => tokenGroupsMap[id as TokenId] as TokenUiGroup
+	);
+};
