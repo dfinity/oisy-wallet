@@ -35,7 +35,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import type { OptionToken } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
+	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -90,9 +92,12 @@
 	};
 
 	let selectedTransaction: IcTransactionUi | undefined;
-	$: selectedTransaction = $modalIcTransaction
-		? ($modalStore?.data as IcTransactionUi | undefined)
-		: undefined;
+	let selectedToken: OptionToken;
+	$: ({ transaction: selectedTransaction, token: selectedToken } =
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore: $modalStore
+		}));
 
 	let noTransactions = false;
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
@@ -133,7 +138,7 @@
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
-	<IcTransactionModal transaction={selectedTransaction} />
+	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalIcToken}
 	<IcTokenModal />
 {/if}

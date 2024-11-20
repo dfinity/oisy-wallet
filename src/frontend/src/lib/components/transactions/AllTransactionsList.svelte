@@ -21,8 +21,9 @@
 	} from '$lib/derived/modal.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUi, TransactionsUiDateGroup } from '$lib/types/transaction';
-	import { groupTransactionsByDate } from '$lib/utils/transaction.utils';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
 	let transactions: AllTransactionUi[];
@@ -47,19 +48,28 @@
 		: undefined;
 
 	let selectedBtcTransaction: BtcTransactionUi | undefined;
-	$: selectedBtcTransaction = $modalBtcTransaction
-		? ($modalStore?.data as BtcTransactionUi | undefined)
-		: undefined;
+	let selectedBtcToken: OptionToken;
+	$: ({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
+		mapTransactionModalData<BtcTransactionUi>({
+			$modalOpen: $modalBtcTransaction,
+			$modalStore: $modalStore
+		}));
 
 	let selectedEthTransaction: EthTransactionUi | undefined;
-	$: selectedEthTransaction = $modalEthTransaction
-		? ($modalStore?.data as EthTransactionUi | undefined)
-		: undefined;
+	let selectedEthToken: OptionToken;
+	$: ({ transaction: selectedEthTransaction, token: selectedEthToken } =
+		mapTransactionModalData<EthTransactionUi>({
+			$modalOpen: $modalEthTransaction,
+			$modalStore: $modalStore
+		}));
 
 	let selectedIcTransaction: IcTransactionUi | undefined;
-	$: selectedIcTransaction = $modalIcTransaction
-		? ($modalStore?.data as IcTransactionUi | undefined)
-		: undefined;
+	let selectedIcToken: OptionToken;
+	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore: $modalStore
+		}));
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
@@ -74,9 +84,9 @@
 {/if}
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
-	<BtcTransactionModal transaction={selectedBtcTransaction} />
+	<BtcTransactionModal transaction={selectedBtcTransaction} token={selectedBtcToken} />
 {:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
-	<EthTransactionModal transaction={selectedEthTransaction} />
+	<EthTransactionModal transaction={selectedEthTransaction} token={selectedEthToken} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
-	<IcTransactionModal transaction={selectedIcTransaction} />
+	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
 {/if}

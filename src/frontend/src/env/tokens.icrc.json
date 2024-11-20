@@ -1,4 +1,6 @@
 {
-	"production": {},
-	"staging": {}
+	"BURN": {
+		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai",
+		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai"
+	}
 }
