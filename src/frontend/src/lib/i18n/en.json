@@ -13,7 +13,6 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More",
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
@@ -66,7 +65,6 @@
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
 		"alt": {
-			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"warning": {
@@ -154,7 +152,6 @@
 			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
-			"no_infura_ckerc20_provider": "No Infura CkErc20 provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
@@ -205,8 +202,7 @@
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅",
-			"sign_in": "Sign in to start using $oisy_name."
+			"pouh_credential_verified": "Verified ✅"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -219,7 +215,6 @@
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
-		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
 		"chain_fusion": "Chain Fusion (all networks)"
 	},
@@ -472,7 +467,6 @@
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
-				"missing_index_id": "The Index ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
 			}
@@ -698,9 +692,6 @@
 		}
 	},
 	"about": {
-		"text": {
-			"title": "About $oisy_name"
-		},
 		"why_oisy": {
 			"text": {
 				"label": "Why $oisy_short",
