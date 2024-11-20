@@ -103,7 +103,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { developed_with: string };
+	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 
@@ -367,6 +367,7 @@ interface I18nConvert {
 		executing_transaction: string;
 		initializing: string;
 		refreshing_ui: string;
+		unsupported_token_conversion: string;
 	};
 	assertion: { insufficient_funds: string; insufficient_funds_for_fee: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
