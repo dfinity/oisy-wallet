@@ -25,7 +25,7 @@
 		</MessageBox>
 	{/if}
 
-	<MessageBox level="plain" closable>
+	<MessageBox level="plain" closableKey="oisy_ic_hide_bitcoin_activity">
 		{$i18n.activity.info.btc_transactions}
 	</MessageBox>
 
