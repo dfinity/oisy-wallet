@@ -83,7 +83,9 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
 
 				{#if nonNullish(fromLabel)}
-					<p class="mb-0.5 first-letter:capitalize"><IcTransactionLabel label={fromLabel} /></p>
+					<p class="mb-0.5 first-letter:capitalize">
+						<IcTransactionLabel label={fromLabel} {token} />
+					</p>
 				{/if}
 
 				{#if nonNullish(from)}
@@ -111,7 +113,9 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.to}</svelte:fragment>
 
 				{#if nonNullish(toLabel)}
-					<p class="mb-0.5 first-letter:capitalize"><IcTransactionLabel label={toLabel} /></p>
+					<p class="mb-0.5 first-letter:capitalize">
+						<IcTransactionLabel label={toLabel} {token} />
+					</p>
 				{/if}
 
 				{#if nonNullish(to)}
