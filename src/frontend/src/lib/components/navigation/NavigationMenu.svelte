@@ -14,15 +14,13 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
-		isRouteTransactions,
-		networkParam
+		isRouteTransactions
 	} from '$lib/utils/nav.utils';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
@@ -65,7 +63,7 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={`${AppPath.Settings}?${networkParam($networkId)}`}
+			href={AppPath.Settings}
 			ariaLabel={$i18n.navigation.alt.settings}
 			selected={isRouteSettings(pageData)}
 			testId={NAVIGATION_ITEM_SETTINGS}

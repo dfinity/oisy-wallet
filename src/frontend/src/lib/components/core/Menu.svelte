@@ -19,14 +19,12 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens,
-		networkParam
+		isRouteTokens
 	} from '$lib/utils/nav.utils';
 
 	let visible = false;
@@ -41,7 +39,7 @@
 
 	const gotoSettings = async () => {
 		hidePopover();
-		await goto(`${AppPath.Settings}?${networkParam($networkId)}`);
+		await goto(AppPath.Settings);
 	};
 
 	const goToDappExplorer = async () => {
