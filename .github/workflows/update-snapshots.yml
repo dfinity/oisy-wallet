@@ -30,7 +30,7 @@ jobs:
     needs: oisy-backend-wasm
     steps:
 
-      - name: Fail if branch is main 1234
+      - name: Fail if branch is main
         if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
         run: |
           echo "This workflow should not be triggered with workflow_dispatch on main"
