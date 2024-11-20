@@ -6,7 +6,7 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNetworkIdBitcoin } from '$lib/utils/network.utils.js';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
