@@ -21,7 +21,6 @@ export const checkAnyNonZeroBalance = ($balancesStore: CertifiedStoreData<Balanc
  * @param minLength - Minimum length of the store to be considered valid.
  * @returns `true` if all balances are zero and the conditions are met, `false` otherwise.
  */
-
 export const checkAllBalancesZero = ({
 	$balancesStore,
 	minLength
