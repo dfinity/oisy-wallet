@@ -103,7 +103,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { developed_with: string };
+	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 
