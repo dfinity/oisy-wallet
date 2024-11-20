@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
@@ -7,10 +6,11 @@
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
-	export let steps: [ProgressStep, ...ProgressStep[]];
+	export let steps: ProgressSteps;
 
 	onMount(() => confirmToCloseBrowser(true));
 	onDestroy(() => confirmToCloseBrowser(false));
