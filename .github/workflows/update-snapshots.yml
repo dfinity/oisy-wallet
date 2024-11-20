@@ -47,6 +47,7 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          fetch-depth: 0
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
