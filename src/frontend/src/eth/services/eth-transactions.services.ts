@@ -4,6 +4,7 @@ import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
+import { retry } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
@@ -13,7 +14,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadTransactions = ({
+export const loadEthereumTransactions = ({
 	networkId,
 	tokenId
 }: {
@@ -55,7 +56,7 @@ const loadEthTransactions = async ({
 		const transactions = await transactionsProviders({ address });
 		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
-		ethTransactionsStore.reset();
+		ethTransactionsStore.nullify(tokenId);
 
 		const {
 			transactions: {
@@ -73,7 +74,7 @@ const loadEthTransactions = async ({
 	return { success: true };
 };
 
-export const loadErc20Transactions = async ({
+const loadErc20Transactions = async ({
 	networkId,
 	tokenId
 }: {
@@ -115,10 +116,15 @@ export const loadErc20Transactions = async ({
 
 	try {
 		const { transactions: transactionsRest } = etherscanRests(networkId);
-		const transactions = await transactionsRest({ contract: token, address });
+		const transactions = await retry({
+			request: async () => await transactionsRest({ contract: token, address }),
+			onRetry: async () =>
+				// TODO: extract this util when needed in other use cases
+				await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * 1000 + 1000)))
+		});
 		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
-		ethTransactionsStore.reset();
+		ethTransactionsStore.nullify(tokenId);
 
 		const {
 			transactions: {
