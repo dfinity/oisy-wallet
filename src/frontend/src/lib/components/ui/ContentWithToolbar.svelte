@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-
-	export let minHeight: string | undefined = undefined;
+	export let styleClass: string | undefined = undefined;
 </script>
 
-<div class={`stretch flex flex-col ${nonNullish(minHeight) ? `min-h-[${minHeight}]` : ''}`}>
+<div class={`stretch ${styleClass ?? ''}`}>
 	<slot />
 </div>
 
