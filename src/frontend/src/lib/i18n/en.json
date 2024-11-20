@@ -809,7 +809,7 @@
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},
 		"warning": {
-			"incomplete_transaction_list": "Transaction list is incomplete because $BURN, $BOB don't have an index canister to provide transaction information."
+			"incomplete_transaction_list": "Transaction list is incomplete because $token_list don't have an index canister to provide transaction information."
 		}
 	}
 }
