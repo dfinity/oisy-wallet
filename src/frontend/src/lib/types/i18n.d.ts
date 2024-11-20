@@ -103,7 +103,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { developed_with: string };
+	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 
@@ -369,7 +369,7 @@ interface I18nConvert {
 		refreshing_ui: string;
 	};
 	assertion: { insufficient_funds: string; insufficient_funds_for_fee: string };
-	error: { loading_cketh_helper: string };
+	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
 }
 
 interface I18nBuy {

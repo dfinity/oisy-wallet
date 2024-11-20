@@ -1,9 +1,9 @@
-import { LOCAL } from '$lib/constants/app.constants';
+import { PROD } from '$lib/constants/app.constants';
 import { isNullish } from '@dfinity/utils';
 import { initOrbiter, trackEvent as trackEventOrbiter } from '@junobuild/analytics';
 
 export const initAnalytics = async () => {
-	if (LOCAL) {
+	if (!PROD) {
 		return;
 	}
 
@@ -33,7 +33,7 @@ export const trackEvent = async ({
 	name: string;
 	metadata?: Record<string, string>;
 }) => {
-	if (LOCAL) {
+	if (!PROD) {
 		return;
 	}
 
