@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let sendAmount: OptionAmount = undefined;

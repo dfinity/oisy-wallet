@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store.js';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let agreementList: string[];
 	$: agreementList = [

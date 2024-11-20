@@ -4,7 +4,7 @@
 	import IconMoveDown from '$lib/components/icons/lucide/IconMoveDown.svelte';
 	import IconMoveRight from '$lib/components/icons/lucide/IconMoveRight.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
