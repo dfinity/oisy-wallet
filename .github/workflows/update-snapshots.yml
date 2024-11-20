@@ -45,9 +45,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.head.ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
           fetch-depth: 0
+
+      - name: Ensure we're on the correct branch
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          git checkout ${{ github.event.pull_request.head.ref }}
+          git branch
 
       - run: git status
 
