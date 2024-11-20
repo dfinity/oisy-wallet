@@ -7,11 +7,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
-	let tokensWithoutCanister: Token[];
-	$: tokensWithoutCanister = $enabledNetworkTokensWithoutIndexCanister;
+	let enabledTokensWithoutCanister: Token[];
+	$: enabledTokensWithoutCanister = $enabledNetworkTokensWithoutIndexCanister;
 
 	let tokenList: string;
-	$: tokenList = tokensWithoutCanister.map((token) => `$${token.symbol}`).join(', ');
+	$: tokenList = enabledTokensWithoutCanister.map((token) => `$${token.symbol}`).join(', ');
 </script>
 
 <div class="flex flex-col gap-5">
