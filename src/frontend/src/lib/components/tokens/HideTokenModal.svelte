@@ -16,7 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { ProgressStepList } from '$lib/types/progress-steps';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	export let assertHide: () => { valid: boolean };
@@ -84,7 +84,7 @@
 		}
 	];
 
-	const HIDE_TOKEN_STEPS: ProgressStepList = [
+	const HIDE_TOKEN_STEPS: ProgressSteps = [
 		{
 			step: ProgressStepsHideToken.INITIALIZATION,
 			text: $i18n.tokens.text.initializing,

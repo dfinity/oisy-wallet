@@ -2,11 +2,11 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ProgressStepList } from '$lib/types/progress-steps';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 
 	export let sendProgressStep: string = ProgressStepsSendBtc.INITIALIZATION;
 
-	let steps: ProgressStepList;
+	let steps: ProgressSteps;
 	$: steps = [
 		{
 			step: ProgressStepsSendBtc.INITIALIZATION,

@@ -1,8 +1,8 @@
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import type { ProgressStepList } from '$lib/types/progress-steps';
+import type { ProgressSteps } from '$lib/types/progress-steps';
 import type { ProgressStep } from '@dfinity/gix-components';
 
-export const addTokenSteps = (i18n: I18n): ProgressStepList => [
+export const addTokenSteps = (i18n: I18n): ProgressSteps => [
 	{
 		step: ProgressStepsAddToken.INITIALIZATION,
 		text: i18n.tokens.text.initializing,

@@ -6,11 +6,11 @@
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { ProgressStepList } from '$lib/types/progress-steps';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
-	export let steps: ProgressStepList;
+	export let steps: ProgressSteps;
 
 	onMount(() => confirmToCloseBrowser(true));
 	onDestroy(() => confirmToCloseBrowser(false));
