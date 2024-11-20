@@ -16,7 +16,6 @@ interface I18nCore {
 		decimals: string;
 		amount: string;
 		max: string;
-		more: string;
 		reject: string;
 		approve: string;
 		view: string;
@@ -62,7 +61,7 @@ interface I18nAuth {
 		instant_and_private: string;
 		advanced_cryptography: string;
 	};
-	alt: { sign_in: string; preview: string };
+	alt: { preview: string };
 	warning: { not_signed_in: string; session_expired: string };
 	error: {
 		no_internet_identity: string;
@@ -132,7 +131,6 @@ interface I18nInit {
 		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
-		no_infura_ckerc20_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		eth_address_unknown: string;
@@ -186,7 +184,6 @@ interface I18nSettings {
 		pouh_credential_description: string;
 		present_pouh_credential: string;
 		pouh_credential_verified: string;
-		sign_in: string;
 	};
 	alt: { testnets_toggle: string; github_release: string };
 	error: { loading_profile: string };
@@ -195,7 +192,6 @@ interface I18nSettings {
 interface I18nNetworks {
 	title: string;
 	test_networks: string;
-	show_testnets: string;
 	more: string;
 	chain_fusion: string;
 }
@@ -426,7 +422,6 @@ interface I18nTokens {
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
-			missing_index_id: string;
 			missing_contract_address: string;
 			no_network: string;
 		};
@@ -626,7 +621,6 @@ interface I18nTransactions {
 }
 
 interface I18nAbout {
-	text: { title: string };
 	why_oisy: {
 		text: {
 			label: string;
