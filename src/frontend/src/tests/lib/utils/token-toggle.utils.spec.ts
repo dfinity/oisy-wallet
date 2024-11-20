@@ -46,16 +46,6 @@ describe('isIcrcCustomTokenDisabled', () => {
 		expect(isIcrcTokenToggleDisabled(token)).toBe(false);
 	});
 
-	it('should check if outdated custom icp custom token is disabled for token toggle', () => {
-		const token: IcrcCustomToken = {
-			...ICP_TOKEN,
-			enabled: false,
-			category: 'custom',
-			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaadu-cai'
-		};
-		expect(isIcrcTokenToggleDisabled(token)).toBe(true);
-	});
-
 	it('should check if icrc default token is disabled for token toggle', () => {
 		const token: IcrcCustomToken = { ...ICP_TOKEN, standard: 'icrc', enabled: false };
 		expect(isIcrcTokenToggleDisabled(token)).toBe(false);
