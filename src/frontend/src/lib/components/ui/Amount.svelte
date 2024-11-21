@@ -23,6 +23,6 @@
 	});
 </script>
 
-<data value={detailedValue} class:text-success={formatPositiveAmount && amount.gt(0)}
-	>{displayValue}</data
->
+<data value={detailedValue} class:text-success={formatPositiveAmount && amount.gt(0)}>
+	{displayValue}
+</data>
