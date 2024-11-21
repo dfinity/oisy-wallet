@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-	import { ICP_TOKEN } from '$env/tokens.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';

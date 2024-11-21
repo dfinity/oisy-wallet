@@ -1,6 +1,6 @@
 import { SEPOLIA_NETWORK } from '$env/networks.env';
-import { ICP_TOKEN } from '$env/tokens.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { mapHeaderData } from '$lib/utils/token-card.utils';

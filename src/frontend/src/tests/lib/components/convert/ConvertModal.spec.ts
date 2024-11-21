@@ -1,5 +1,5 @@
-import { ICP_TOKEN } from '$env/tokens.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';

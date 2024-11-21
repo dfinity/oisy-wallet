@@ -1,4 +1,4 @@
-import { ICP_TOKEN } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import IconConvert from '$lib/components/icons/IconConvert.svelte';
 import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';

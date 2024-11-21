@@ -1,7 +1,7 @@
 import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
-import { ICP_TOKEN } from '$env/tokens.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import EthListener from '$eth/components/core/EthListener.svelte';
 import type { OptionToken } from '$lib/types/token';
 import { mapListeners } from '$lib/utils/listener.utils';

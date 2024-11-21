@@ -1,4 +1,4 @@
-import { ICP_TOKEN } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';

@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { ICP_TOKEN } from '$env/tokens.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
