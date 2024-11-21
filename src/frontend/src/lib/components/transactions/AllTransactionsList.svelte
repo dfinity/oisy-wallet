@@ -19,12 +19,12 @@
 		modalIcTransaction,
 		modalEthTransaction
 	} from '$lib/derived/modal.derived';
+	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUi, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	let transactions: AllTransactionUi[];
 	$: transactions = mapAllTransactionsUi({
