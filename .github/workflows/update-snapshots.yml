@@ -54,15 +54,6 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Check for Changes
-        id: check_changes
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changes_detected=true" >> $GITHUB_OUTPUT
-          else
-            echo "changes_detected=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Run Playwright tests
         run: npm run e2e:snapshots
 
@@ -84,6 +75,15 @@ jobs:
 #          default_author: github_actions
 #          message: "🤖 Update E2E snapshots"
 #          push: ${{ steps.set-push-ref.outputs.push_ref }}
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Commit Playwright updated snapshots
         uses: EndBug/add-and-commit@v9
