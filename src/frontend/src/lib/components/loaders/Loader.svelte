@@ -24,11 +24,12 @@
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
-	let steps: [ProgressStep, ...ProgressStep[]];
+	let steps: ProgressSteps;
 	$: steps = [
 		{
 			step: ProgressStepsLoader.INITIALIZATION,
@@ -128,7 +129,9 @@
 		<div in:fade={{ delay: 0, duration: 250 }}>
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
-					<ImgBanner src={banner} />
+					<div class="relative mb-8 block md:h-40">
+						<ImgBanner src={banner} styleClass="h-full md:absolute aspect-auto" />
+					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
 

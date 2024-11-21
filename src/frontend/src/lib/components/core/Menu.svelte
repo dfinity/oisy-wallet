@@ -6,6 +6,7 @@
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
@@ -18,13 +19,12 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
-		networkParam
+		isRouteTokens
 	} from '$lib/utils/nav.utils';
 
 	let visible = false;
@@ -32,9 +32,14 @@
 
 	const hidePopover = () => (visible = false);
 
+	const goToTokens = async () => {
+		hidePopover();
+		await goto(AppPath.Tokens);
+	};
+
 	const gotoSettings = async () => {
 		hidePopover();
-		await goto(`${AppPath.Settings}?${networkParam($networkId)}`);
+		await goto(AppPath.Settings);
 	};
 
 	const goToDappExplorer = async () => {
@@ -47,6 +52,9 @@
 		await goto(AppPath.Activity);
 	};
 
+	let assetsRoute = false;
+	$: assetsRoute = isRouteTokens($page);
+
 	let settingsRoute = false;
 	$: settingsRoute = isRouteSettings($page);
 
@@ -57,7 +65,7 @@
 	$: activityRoute = isRouteActivity($page);
 
 	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute;
 </script>
 
 <ButtonIcon
@@ -74,6 +82,13 @@
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
+		{/if}
+
+		{#if !assetsRoute && !settingsRoute}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.tokens} on:click={goToTokens}>
+				<IconWallet size="20" />
+				{$i18n.navigation.text.tokens}
+			</ButtonMenu>
 		{/if}
 
 		{#if !activityRoute && !settingsRoute}

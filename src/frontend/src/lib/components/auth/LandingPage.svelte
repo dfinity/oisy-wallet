@@ -2,8 +2,8 @@
 	import preview from '$lib/assets/preview.webp';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { i18n } from '$lib/stores/i18n.store.js';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let ariaLabel: string;
 	$: ariaLabel = replaceOisyPlaceholders($i18n.auth.alt.preview);

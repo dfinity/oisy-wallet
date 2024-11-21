@@ -1,4 +1,4 @@
-import { TOKEN_CARD } from '../../../src/frontend/src/lib/constants/test-ids.constants';
+import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 export type TransactionsPageParams = {
@@ -14,10 +14,7 @@ export class TransactionsPage extends HomepageLoggedIn {
 		this.#tokenSymbol = tokenSymbol;
 	}
 
-	/**
-	 * @override
-	 */
-	async extendWaitForReady(): Promise<void> {
+	override async extendWaitForReady(): Promise<void> {
 		await this.clickByTestId(`${TOKEN_CARD}-${this.#tokenSymbol}`);
 	}
 }
