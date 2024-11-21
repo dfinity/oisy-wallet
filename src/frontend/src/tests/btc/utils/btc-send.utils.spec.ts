@@ -6,5 +6,7 @@ describe('convertNumberToSatoshis', () => {
 		expect(convertNumberToSatoshis({ amount: 0.00005 })).toEqual(5000n);
 		expect(convertNumberToSatoshis({ amount: 0.25 })).toEqual(25000000n);
 		expect(convertNumberToSatoshis({ amount: 0 })).toEqual(0n);
+		expect(convertNumberToSatoshis({ amount: 0.00004 })).toEqual(4000n);
+		expect(convertNumberToSatoshis({ amount: 0.00000001 })).toEqual(1n);
 	});
 });
