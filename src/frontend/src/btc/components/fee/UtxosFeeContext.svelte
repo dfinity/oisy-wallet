@@ -20,7 +20,7 @@
 			return;
 		}
 
-		if (isNullish(networkId) || isNullish(amount) || amount === 0) {
+		if (isNullish(networkId) || isNullish(amount) || Number(amount) === 0) {
 			store.reset();
 			return;
 		}
