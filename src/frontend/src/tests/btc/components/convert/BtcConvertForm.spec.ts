@@ -5,8 +5,8 @@ import {
 	UTXOS_FEE_CONTEXT_KEY,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
-import { ICP_TOKEN } from '$env/tokens.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import * as convertUtils from '$lib/utils/convert.utils';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
