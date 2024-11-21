@@ -22,11 +22,10 @@
 	export let source: string;
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
+	export let insufficientFunds = false;
+	export let insufficientFundsForFee = false;
 
 	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
-
-	let insufficientFunds: boolean;
-	let insufficientFundsForFee: boolean;
 
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);

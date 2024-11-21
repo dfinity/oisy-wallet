@@ -52,6 +52,9 @@
 
 	const progress = (step: ProgressStepsConvert) => (convertProgressStep = step);
 
+	let insufficientFunds: boolean;
+	let insufficientFundsForFee: boolean;
+
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sourceToken.network.id;
 
@@ -129,9 +132,21 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<UtxosFeeContext amount={sendAmount} {networkId}>
+<UtxosFeeContext
+	amount={sendAmount}
+	{networkId}
+	amountError={insufficientFunds || insufficientFundsForFee}
+>
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<BtcConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount source={sourceAddress}>
+		<BtcConvertForm
+			on:icNext
+			on:icClose
+			bind:sendAmount
+			bind:receiveAmount
+			bind:insufficientFunds
+			bind:insufficientFundsForFee
+			source={sourceAddress}
+		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
 					<ButtonBack on:click={back} />
