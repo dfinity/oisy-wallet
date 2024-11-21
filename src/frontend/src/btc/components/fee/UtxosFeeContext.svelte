@@ -11,6 +11,7 @@
 
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+	export let amountError = false;
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
@@ -21,7 +22,7 @@
 		}
 
 		// we need to make the value is not 0 because the utxos call fails if amount = 0
-		if (isNullish(networkId) || isNullish(amount) || Number(amount) === 0) {
+		if (amountError || isNullish(networkId) || isNullish(amount) || Number(amount) === 0) {
 			store.reset();
 			return;
 		}
