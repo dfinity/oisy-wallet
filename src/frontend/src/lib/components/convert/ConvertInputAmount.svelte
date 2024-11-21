@@ -84,8 +84,8 @@
 		@apply h-14;
 
 		&:disabled {
-			--disable: var(--color-bright-gray);
-			--input-background: var(--color-ghost-white);
+			--disable: var(--colors-neutrals-200);
+			--input-background: var(--colors-neutrals-100);
 		}
 	}
 </style>
