@@ -1,6 +1,7 @@
 import { SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
-import { ICP_TOKEN, SEPOLIA_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens.env';
+import { SEPOLIA_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';

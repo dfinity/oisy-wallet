@@ -1,4 +1,5 @@
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as exchanges from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initConvertContext } from '$lib/stores/convert.store';

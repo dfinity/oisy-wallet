@@ -1,5 +1,6 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { routeToken } from '$lib/derived/nav.derived';

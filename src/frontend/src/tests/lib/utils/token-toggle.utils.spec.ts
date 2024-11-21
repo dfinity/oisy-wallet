@@ -1,6 +1,7 @@
 import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {

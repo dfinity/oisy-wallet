@@ -3,7 +3,7 @@ import {
 	BTC_REGTEST_TOKEN_ID,
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens.btc.env';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import {
 	getIdbBtcAddressMainnet,
 	getIdbEthAddress,

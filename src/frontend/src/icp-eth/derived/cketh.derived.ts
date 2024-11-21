@@ -1,5 +1,5 @@
-import { ETHEREUM_TOKEN } from '$env/tokens.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';

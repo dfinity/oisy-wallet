@@ -5,7 +5,7 @@
 		LOCAL_CKETH_MINTER_CANISTER_ID,
 		STAGING_CKETH_MINTER_CANISTER_ID
 	} from '$env/networks.icrc.env';
-	import { SEPOLIA_TOKEN_ID } from '$env/tokens.env';
+	import { SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
