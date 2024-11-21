@@ -6,6 +6,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
+	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -26,6 +27,7 @@
 	name="destination"
 	bind:value={destination}
 	placeholder={inputPlaceholder}
+	testId={DESTINATION_INPUT}
 	on:nnsInput
 >
 	<svelte:fragment slot="inner-end">

@@ -8,6 +8,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
+	import { IN_PROGRESS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
 	export let steps: ProgressSteps;
@@ -27,7 +28,7 @@
 		})();
 </script>
 
-<div class="stretch">
+<div class="stretch" data-tid={IN_PROGRESS_MODAL}>
 	<MessageBox level="light-warning">
 		<span>{$i18n.core.warning.do_not_close}</span>
 	</MessageBox>

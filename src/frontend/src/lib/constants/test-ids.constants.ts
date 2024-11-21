@@ -46,3 +46,10 @@ export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+
+
+export const AMOUNT_INPUT = 'amount-input';
+export const DESTINATION_INPUT = 'destination-input';
+
+export const IN_PROGRESS_MODAL = 'in-progress-modal';
+export const AMOUNT_DATA = 'amount-data';
