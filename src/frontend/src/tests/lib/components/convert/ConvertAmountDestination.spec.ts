@@ -1,4 +1,4 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountDestination from '$lib/components/convert/ConvertAmountDestination.svelte';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { render } from '@testing-library/svelte';

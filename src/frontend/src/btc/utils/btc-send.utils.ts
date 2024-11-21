@@ -1,4 +1,4 @@
-import { BTC_DECIMALS } from '$env/tokens.btc.env';
+import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 import type { Amount } from '$lib/types/send';
 
 export const convertNumberToSatoshis = ({ amount }: { amount: Amount }): bigint =>

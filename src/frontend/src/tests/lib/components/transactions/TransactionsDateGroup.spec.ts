@@ -1,5 +1,5 @@
 import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';

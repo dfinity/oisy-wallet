@@ -1,5 +1,5 @@
 import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as ckMinterInfoWorkerServices from '$icp/services/worker.ck-minter-info.services';
 import type { IcCkToken } from '$icp/types/ic-token';
 import * as isBusyStore from '$lib/derived/busy.derived';

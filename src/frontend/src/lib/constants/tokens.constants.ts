@@ -1,5 +1,9 @@
 import { BTC_MAINNET_ENABLED } from '$env/networks.btc.env';
-import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import type { Token } from '$lib/types/token';
 
