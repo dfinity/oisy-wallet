@@ -1,4 +1,4 @@
-import { BTC_MAINNET_SYMBOL } from '$env/tokens.btc.env';
+import { BTC_MAINNET_SYMBOL } from '$env/tokens/tokens.btc.env';
 import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
 import { render } from '@testing-library/svelte';
 

@@ -1,6 +1,10 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import * as btcEnv from '$env/networks.btc.env';
-import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { get } from 'svelte/store';

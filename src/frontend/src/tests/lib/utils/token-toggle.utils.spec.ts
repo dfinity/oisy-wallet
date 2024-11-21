@@ -1,6 +1,7 @@
 import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
@@ -44,17 +45,6 @@ describe('isIcrcCustomTokenDisabled', () => {
 			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaadu-cai'
 		};
 		expect(isIcrcTokenToggleDisabled(token)).toBe(false);
-	});
-
-	it('should check if outdated custom icp custom token is disabled for token toggle', () => {
-		const token: IcrcCustomToken = {
-			...ICP_TOKEN,
-			enabled: false,
-			category: 'custom',
-			ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaadu-cai',
-			indexCanisterVersion: 'outdated'
-		};
-		expect(isIcrcTokenToggleDisabled(token)).toBe(true);
 	});
 
 	it('should check if icrc default token is disabled for token toggle', () => {

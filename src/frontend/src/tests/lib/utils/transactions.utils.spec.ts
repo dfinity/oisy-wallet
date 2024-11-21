@@ -3,20 +3,19 @@ import type { BtcTransactionUi } from '$btc/types/btc';
 import * as networkEnv from '$env/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens-erc20/tokens.pepe.env';
+import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
 	BTC_TESTNET_TOKEN,
 	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens.btc.env';
+} from '$env/tokens/tokens.btc.env';
 import {
 	ETHEREUM_TOKEN,
 	ETHEREUM_TOKEN_ID,
-	ICP_TOKEN,
-	ICP_TOKEN_ID,
 	SEPOLIA_TOKEN,
 	SEPOLIA_TOKEN_ID
-} from '$env/tokens.env';
+} from '$env/tokens/tokens.eth.env';
 import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';

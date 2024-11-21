@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { bn3 } from '$tests/mocks/balances.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';

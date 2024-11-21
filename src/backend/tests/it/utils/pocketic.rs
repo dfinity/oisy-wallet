@@ -322,6 +322,7 @@ pub(crate) fn init_arg() -> Arg {
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID.to_string()).expect("wrong cfs canister id"),
         ),
+        derivation_origin: Some("https://l7rua-raaaa-aaaap-ahh6a-cai.ic0.app".to_string()),
     })
 }
 
