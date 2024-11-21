@@ -7,8 +7,9 @@
 		ETHEREUM_NETWORK,
 		ICP_NETWORK
 	} from '$env/networks.env';
+	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
-	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+	import { ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
