@@ -9,6 +9,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
+	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { authSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -21,7 +22,6 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
