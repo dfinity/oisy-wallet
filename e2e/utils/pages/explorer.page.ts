@@ -1,4 +1,4 @@
-import { NAVIGATION_ITEM_EXPLORER } from '../../../src/frontend/src/lib/constants/test-ids.constants';
+import { NAVIGATION_ITEM_EXPLORER } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 export type ExplorerPageParams = HomepageLoggedInParams;

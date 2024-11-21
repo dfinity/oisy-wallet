@@ -21,6 +21,7 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -50,18 +51,15 @@
 </script>
 
 <KeyValuePairInfo>
-	<svelte:fragment slot="key"
-		><span class="font-bold">{$i18n.settings.text.principal}:</span></svelte:fragment
-	>
-	<svelte:fragment slot="value"
-		><output class="break-all"
-			>{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}</output
-		><Copy
-			inline
-			value={principal?.toText() ?? ''}
-			text={$i18n.settings.text.principal_copied}
-		/></svelte:fragment
-	>
+	<svelte:fragment slot="key">
+		<span class="font-bold">{$i18n.settings.text.principal}:</span>
+	</svelte:fragment>
+	<svelte:fragment slot="value">
+		<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
+			{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
+		</output>
+		<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
+	</svelte:fragment>
 	<svelte:fragment slot="info">
 		{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
 	</svelte:fragment>
