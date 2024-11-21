@@ -5,8 +5,8 @@ import {
 	UTXOS_FEE_CONTEXT_KEY,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
-import { ICP_TOKEN } from '$env/tokens.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import * as convertUtils from '$lib/utils/convert.utils';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
@@ -142,7 +142,7 @@ describe('BtcConvertForm', () => {
 		});
 	});
 
-	it('should render btc send warning message', async () => {
+	it('should render btc send warning message and keep button disabled if there some pending txs', async () => {
 		mockBtcPendingSendTransactionsStatusStore(
 			btcPendingSendTransactionsStatusStore.BtcPendingSentTransactionsStatus.SOME
 		);
@@ -156,6 +156,23 @@ describe('BtcConvertForm', () => {
 			expect(getByTestId(btcSendWarningsTestId)).toHaveTextContent(
 				en.send.info.pending_bitcoin_transaction
 			);
+
+			expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
+		});
+	});
+
+	it('should keep button disabled if there pending txs have not been loaded yet', async () => {
+		mockBtcPendingSendTransactionsStatusStore(
+			btcPendingSendTransactionsStatusStore.BtcPendingSentTransactionsStatus.LOADING
+		);
+
+		const { getByTestId } = render(BtcConvertForm, {
+			props,
+			context: mockContext({ utxosFeeStore: store })
+		});
+
+		await waitFor(() => {
+			expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 		});
 	});
 });
