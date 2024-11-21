@@ -20,6 +20,7 @@
 			return;
 		}
 
+		// we need to make the value is not 0 because the utxos call fails if amount = 0
 		if (isNullish(networkId) || isNullish(amount) || Number(amount) === 0) {
 			store.reset();
 			return;
