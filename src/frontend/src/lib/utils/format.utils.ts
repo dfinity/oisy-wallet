@@ -11,13 +11,15 @@ interface FormatTokenParams {
 	unitName?: string | BigNumberish;
 	displayDecimals?: number;
 	trailingZeros?: boolean;
+	showPlusSign?: boolean;
 }
 
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
 	displayDecimals = DEFAULT_DISPLAY_DECIMALS,
-	trailingZeros = false
+	trailingZeros = false,
+	showPlusSign = false
 }: FormatTokenParams): string => {
 	const res = Utils.formatUnits(value, unitName);
 	const formatted = (+res).toLocaleString('en-US', {
@@ -29,8 +31,7 @@ export const formatToken = ({
 	if (trailingZeros) {
 		return formatted;
 	}
-
-	return formatted.replace(/\.0+$/, '');
+	return (showPlusSign && +res > 0 ? '+' : '') + formatted;
 };
 
 export const formatTokenBigintToNumber = ({
