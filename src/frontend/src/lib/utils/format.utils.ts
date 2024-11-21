@@ -1,4 +1,4 @@
-import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens.env';
+import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber, type BigNumberish } from '@ethersproject/bignumber';

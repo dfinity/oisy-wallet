@@ -9,14 +9,13 @@ import {
 	BTC_TESTNET_TOKEN,
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens.btc.env';
+import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens.env';
 import {
 	ETHEREUM_TOKEN,
 	ETHEREUM_TOKEN_ID,
-	ICP_TOKEN,
-	ICP_TOKEN_ID,
 	SEPOLIA_TOKEN,
 	SEPOLIA_TOKEN_ID
-} from '$env/tokens.env';
+} from '$env/tokens/tokens.eth.env';
 import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';

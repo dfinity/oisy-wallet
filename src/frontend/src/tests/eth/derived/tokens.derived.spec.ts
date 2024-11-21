@@ -1,5 +1,5 @@
 import * as ethEnv from '$env/networks.eth.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';

@@ -8,7 +8,7 @@
 		ICP_NETWORK
 	} from '$env/networks.env';
 	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
-	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+	import { ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -34,6 +34,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
+	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 
 	const dispatch = createEventDispatcher();
 
