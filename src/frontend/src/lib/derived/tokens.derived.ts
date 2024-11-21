@@ -1,6 +1,6 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';

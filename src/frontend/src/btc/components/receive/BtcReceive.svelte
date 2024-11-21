@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
+	import {
+		BTC_MAINNET_TOKEN,
+		BTC_REGTEST_TOKEN,
+		BTC_TESTNET_TOKEN
+	} from '$env/tokens/tokens.btc.env';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalBtcReceive } from '$lib/derived/modal.derived';

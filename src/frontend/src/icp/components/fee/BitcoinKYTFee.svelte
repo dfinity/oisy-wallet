@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';

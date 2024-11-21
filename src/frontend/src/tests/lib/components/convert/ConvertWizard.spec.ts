@@ -1,5 +1,5 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';

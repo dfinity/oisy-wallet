@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks.env';
-import { BTC_MAINNET_SYMBOL, BTC_TESTNET_SYMBOL } from '$env/tokens.btc.env';
+import { BTC_MAINNET_SYMBOL, BTC_TESTNET_SYMBOL } from '$env/tokens/tokens.btc.env';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { IdbBtcAddress, IdbEthAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { Principal } from '@dfinity/principal';

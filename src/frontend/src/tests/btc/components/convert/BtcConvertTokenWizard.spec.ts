@@ -2,8 +2,8 @@ import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import * as backendApi from '$lib/api/backend.api';
