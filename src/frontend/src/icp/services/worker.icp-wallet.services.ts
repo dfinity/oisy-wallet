@@ -1,4 +1,4 @@
-import { ICP_TOKEN_ID } from '$env/tokens.env';
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { syncWallet } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,

@@ -11,6 +11,7 @@
 
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+	export let amountError = false;
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
@@ -20,7 +21,8 @@
 			return;
 		}
 
-		if (isNullish(networkId) || isNullish(amount) || amount === 0) {
+		// we need to make the value is not 0 because the utxos call fails if amount = 0
+		if (amountError || isNullish(networkId) || isNullish(amount) || Number(amount) === 0) {
 			store.reset();
 			return;
 		}
@@ -47,7 +49,7 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: amount, networkId, debounceEstimateFee();
+	$: amount, networkId, amountError, debounceEstimateFee();
 </script>
 
 <slot />

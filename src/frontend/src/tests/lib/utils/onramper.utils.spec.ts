@@ -7,8 +7,8 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks.env';
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
-import { ICP_TOKEN } from '$env/tokens.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type {
 	OnramperCryptoWallet,
 	OnramperNetworkWallet,

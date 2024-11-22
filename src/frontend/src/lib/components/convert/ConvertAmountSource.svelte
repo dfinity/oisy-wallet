@@ -89,7 +89,8 @@
 		{$i18n.convert.text.max_balance}:
 		{formatToken({
 			value: $sourceTokenBalance ?? ZERO,
-			unitName: $sourceToken.decimals
+			unitName: $sourceToken.decimals,
+			displayDecimals: $sourceToken.decimals
 		})}
 		{$sourceToken.symbol}
 	</button>
