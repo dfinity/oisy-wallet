@@ -7,7 +7,8 @@ import { Principal } from '@dfinity/principal';
 import { createAgent, fromNullable, isNullish, jsonReplacer } from '@dfinity/utils';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { CK_ERC20_JSON_FILE } from './utils.mjs';
+
+import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 const agent = await createAgent({
 	identity: new AnonymousIdentity(),

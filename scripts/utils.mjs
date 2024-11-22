@@ -4,13 +4,9 @@ import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { jsonReviver } from '@dfinity/utils';
 import { readdirSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import pemfile from 'pem-file';
-
-const DATA_DIR = join(process.cwd(), 'src', 'frontend', 'src', 'env');
-
-export const CK_ERC20_JSON_FILE = join(DATA_DIR, 'tokens.ckerc20.json');
-export const SNS_JSON_FILE = join(DATA_DIR, 'tokens.sns.json');
+import { SNS_JSON_FILE } from './constants.mjs';
 
 export const SNSES = JSON.parse((await readFile(SNS_JSON_FILE)).toString(), jsonReviver);
 

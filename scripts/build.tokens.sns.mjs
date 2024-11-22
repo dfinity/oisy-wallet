@@ -10,7 +10,8 @@ import {
 } from '@dfinity/utils';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { SNS_JSON_FILE } from './utils.mjs';
+
+import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
 const SNS_AGGREGATOR_CANISTER_URL = 'https://3r4gx-wqaaa-aaaaq-aaaia-cai.icp0.io';
