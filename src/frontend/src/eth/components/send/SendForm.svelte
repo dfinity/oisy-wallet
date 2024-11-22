@@ -11,7 +11,6 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
@@ -54,7 +53,7 @@
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
+		<SendSource token={$sendToken} balance={$sendBalance} />
 
 		<FeeDisplay />
 

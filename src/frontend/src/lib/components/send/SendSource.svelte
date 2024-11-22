@@ -9,13 +9,15 @@
 
 	export let token: OptionToken;
 	export let balance: OptionBalance;
-	export let source: string;
+	export let source: string | undefined = undefined;
 </script>
 
-<Value ref="source" element="div">
-	<svelte:fragment slot="label">{$i18n.send.text.source}</svelte:fragment>
-	{source}
-</Value>
+{#if nonNullish(source)}
+	<Value ref="source" element="div">
+		<svelte:fragment slot="label">{$i18n.send.text.source}</svelte:fragment>
+		{source}
+	</Value>
+{/if}
 
 <Value ref="balance" element="div">
 	<svelte:fragment slot="label">{$i18n.send.text.balance}</svelte:fragment>
