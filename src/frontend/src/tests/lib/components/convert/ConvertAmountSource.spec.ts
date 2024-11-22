@@ -1,4 +1,4 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
@@ -99,5 +99,14 @@ describe('ConvertAmountSource', () => {
 		await fireEvent.click(getByTestId(balanceTestId));
 
 		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(props.sendAmount);
+	});
+
+	it('should display max button value in a correct format', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props,
+			context: mockContext(BigNumber.from(50000438709n))
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveTextContent('Max: 500.00438709 BTC');
 	});
 });
