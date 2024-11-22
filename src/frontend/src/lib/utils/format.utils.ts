@@ -31,7 +31,8 @@ export const formatToken = ({
 	if (trailingZeros) {
 		return formatted;
 	}
-	return (showPlusSign && +res > 0 ? '+' : '') + formatted;
+
+	return `${showPlusSign ? '+' : ''}${formatted}`;
 };
 
 export const formatTokenBigintToNumber = ({
