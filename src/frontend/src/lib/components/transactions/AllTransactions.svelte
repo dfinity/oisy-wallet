@@ -8,11 +8,12 @@
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	let enabledTokensWithoutCanister: Token[];
 	$: enabledTokensWithoutCanister = $enabledNetworkTokens.filter(
-		(token: Token) => $icTransactionsStore?.[token.id] === null
+		(token: TokenUi) => $icTransactionsStore?.[token.id] === null
 	);
 
 	let tokenList: string;
