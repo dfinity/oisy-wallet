@@ -1,14 +1,14 @@
 <script lang="ts">
-	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import type { Token } from '@dfinity/utils';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
