@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { Token } from '@dfinity/utils';
-	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
@@ -14,10 +12,7 @@
 
 	let enabledTokensWithoutCanister: Token[];
 	$: enabledTokensWithoutCanister = $enabledNetworkTokens.filter(
-		(token: Token) =>
-			$btcTransactionsStore?.[token.id] === null ||
-			$ethTransactionsStore?.[token.id] === null ||
-			$icTransactionsStore?.[token.id] === null
+		(token: Token) => $icTransactionsStore?.[token.id] === null
 	);
 
 	let tokenList: string;
