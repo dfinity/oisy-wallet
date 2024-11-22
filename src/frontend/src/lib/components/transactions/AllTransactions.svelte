@@ -3,12 +3,18 @@
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
-	import { enabledNetworkTokensWithoutIndexCanister } from '$lib/derived/network-tokens.derived';
+	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 
 	let enabledTokensWithoutCanister: Token[];
-	$: enabledTokensWithoutCanister = $enabledNetworkTokensWithoutIndexCanister;
+	$: enabledTokensWithoutCanister = $enabledNetworkTokens.filter((token: Token) =>
+		$btcTransactionsStore?.[token.id] === null ||
+		$ethTransactionsStore?.[token.id] === null ||
+		$icTransactionsStore?.[token.id] === null);
 
 	let tokenList: string;
 	$: tokenList = enabledTokensWithoutCanister.map((token) => `$${token.symbol}`).join(', ');

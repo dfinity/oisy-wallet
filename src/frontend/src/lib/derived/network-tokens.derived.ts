@@ -1,6 +1,3 @@
-import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
@@ -38,18 +35,4 @@ export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived
 			$balances,
 			$exchanges
 		})
-);
-
-/**
- * All user-enabled tokens matching the selected network or chain fusion that do not have an index canister.
- */
-export const enabledNetworkTokensWithoutIndexCanister: Readable<Token[]> = derived(
-	[enabledNetworkTokens, btcTransactionsStore, ethTransactionsStore, icTransactionsStore],
-	([$enabledNetworkTokens, $btcTransactionsStore, $ethTransactionsStore, $icTransactionsStore]) =>
-		$enabledNetworkTokens.filter(
-			(token: Token) =>
-				$btcTransactionsStore?.[token.id] === null ||
-				$ethTransactionsStore?.[token.id] === null ||
-				$icTransactionsStore?.[token.id] === null
-		)
 );
