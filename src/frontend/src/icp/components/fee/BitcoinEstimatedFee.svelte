@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';

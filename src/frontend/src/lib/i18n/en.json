@@ -485,7 +485,6 @@
 				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with $oisy_name. Contact the project team to propose an upgrade.",
 				"no_changes": "No changes need to be saved."
 			},
 			"error": {
@@ -658,7 +657,8 @@
 			"sending_twin_token_failed": "Sending $twinToken failed",
 			"converting_twin_token": "Converting $twinToken to $ckToken",
 			"converting_ck_token": "Converting $ckToken to $twinToken",
-			"twin_network": "$twinNetwork network"
+			"twin_network": "$twinNetwork network",
+			"no_date_available": "No Date Available"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",

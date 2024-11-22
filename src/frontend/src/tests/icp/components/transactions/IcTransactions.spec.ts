@@ -1,4 +1,4 @@
-import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens.env';
+import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { token } from '$lib/stores/token.store';

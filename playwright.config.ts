@@ -21,7 +21,7 @@ const TIMEOUT = 5 * 60 * 1000;
 
 export default defineConfig({
 	timeout: TIMEOUT,
-	workers: 2,
+	workers: DEV ? 5 : 2,
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,

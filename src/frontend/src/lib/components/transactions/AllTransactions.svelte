@@ -1,4 +1,5 @@
 <script lang="ts">
+	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import type { Token } from '@dfinity/utils';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -6,6 +7,7 @@
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
@@ -24,6 +26,12 @@
 
 <div class="flex flex-col gap-5">
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
+
+	{#if $testnetsEnabled}
+		<div>
+			<NetworksSwitcher />
+		</div>
+	{/if}
 
 	{#if tokenList}
 		<MessageBox level="light-warning" closableKey="oisy_ic_hide_incomplete_transaction_list">
