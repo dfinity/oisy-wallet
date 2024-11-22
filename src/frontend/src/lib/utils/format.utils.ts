@@ -1,5 +1,6 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import type { AmountString } from '$lib/types/amount';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber, type BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
@@ -11,26 +12,28 @@ interface FormatTokenParams {
 	unitName?: string | BigNumberish;
 	displayDecimals?: number;
 	trailingZeros?: boolean;
+	showPlusSign?: boolean;
 }
 
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
 	displayDecimals = DEFAULT_DISPLAY_DECIMALS,
-	trailingZeros = false
-}: FormatTokenParams): string => {
+	trailingZeros = false,
+	showPlusSign = false
+}: FormatTokenParams): AmountString => {
 	const res = Utils.formatUnits(value, unitName);
 	const formatted = (+res).toLocaleString('en-US', {
 		useGrouping: false,
 		maximumFractionDigits: displayDecimals,
 		minimumFractionDigits: trailingZeros ? displayDecimals : undefined
-	});
+	}) as `${number}`;
 
 	if (trailingZeros) {
 		return formatted;
 	}
 
-	return formatted.replace(/\.0+$/, '');
+	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
 export const formatTokenBigintToNumber = ({
