@@ -11,7 +11,7 @@
 	import {
 		UTXOS_FEE_CONTEXT_KEY,
 		type UtxosFeeContext as UtxosFeeContextType,
-		initUtxosFeeStore
+		utxosFeeStore
 	} from '$btc/stores/utxos-fee.store';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -42,8 +42,6 @@
 	export let receiveAmount: number | undefined;
 	export let convertProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
-
-	const utxosFeeStore = initUtxosFeeStore();
 
 	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
 		store: utxosFeeStore

@@ -1,7 +1,6 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
-import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
-import type { UtxosFee } from '$btc/types/btc-send';
+import { utxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -73,14 +72,6 @@ describe('BtcConvertTokenWizard', () => {
 		vi
 			.spyOn(btcPendingSentTransactionsStore, 'loadBtcPendingSentTransactions')
 			.mockResolvedValue({ success: true });
-	const mockUtxosFeeStore = (utxosFee?: UtxosFee) => {
-		const store = utxosFeeStore.initUtxosFeeStore();
-
-		vi.spyOn(utxosFeeStore, 'initUtxosFeeStore').mockImplementation(() => {
-			store.setUtxosFee({ utxosFee });
-			return store;
-		});
-	};
 	const clickConvertButton = async (container: HTMLElement) => {
 		const convertButtonSelector = '[data-tid="convert-review-button-next"]';
 		const button: HTMLButtonElement | null = container.querySelector(convertButtonSelector);
@@ -91,6 +82,7 @@ describe('BtcConvertTokenWizard', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
+		utxosFeeStore.reset();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {
@@ -99,7 +91,7 @@ describe('BtcConvertTokenWizard', () => {
 		mockAuthStore();
 		mockBtcAddressStore();
 		mockAddressesStore();
-		mockUtxosFeeStore(mockUtxosFee);
+		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
 
 		const { container } = render(BtcConvertTokenWizard, {
 			props,
@@ -130,7 +122,7 @@ describe('BtcConvertTokenWizard', () => {
 		mockAuthStore(null);
 		mockBtcAddressStore();
 		mockAddressesStore();
-		mockUtxosFeeStore(mockUtxosFee);
+		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
 
 		const { container } = render(BtcConvertTokenWizard, {
 			props,
@@ -149,7 +141,7 @@ describe('BtcConvertTokenWizard', () => {
 		mockAuthStore();
 		mockAddressesStore();
 		mockBtcAddressStore();
-		mockUtxosFeeStore(mockUtxosFee);
+		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
 
 		const { container } = render(BtcConvertTokenWizard, {
 			props,
@@ -168,7 +160,7 @@ describe('BtcConvertTokenWizard', () => {
 		mockAuthStore();
 		mockAddressesStore();
 		mockBtcAddressStore('');
-		mockUtxosFeeStore(mockUtxosFee);
+		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
 
 		const { container } = render(BtcConvertTokenWizard, {
 			props,
@@ -187,7 +179,7 @@ describe('BtcConvertTokenWizard', () => {
 		mockAuthStore();
 		mockAddressesStore();
 		mockBtcAddressStore();
-		mockUtxosFeeStore(mockUtxosFee);
+		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
 
 		const { container } = render(BtcConvertTokenWizard, {
 			props: {
@@ -209,7 +201,6 @@ describe('BtcConvertTokenWizard', () => {
 		mockAuthStore();
 		mockAddressesStore();
 		mockBtcAddressStore();
-		mockUtxosFeeStore(undefined);
 
 		const { container } = render(BtcConvertTokenWizard, {
 			props,

@@ -1,9 +1,11 @@
 import type { UtxosFee } from '$btc/types/btc-send';
+import type { OptionAmount } from '$lib/types/send';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type UtxosFeeStoreData = Option<{
 	utxosFee?: UtxosFee;
+	amount?: OptionAmount;
 }>;
 
 export interface UtxosFeeStore extends Readable<UtxosFeeStoreData> {
@@ -11,7 +13,7 @@ export interface UtxosFeeStore extends Readable<UtxosFeeStoreData> {
 	reset: () => void;
 }
 
-export const initUtxosFeeStore = (): UtxosFeeStore => {
+const initUtxosFeeStore = (): UtxosFeeStore => {
 	const { subscribe, set } = writable<UtxosFeeStoreData>(undefined);
 
 	return {
@@ -32,3 +34,5 @@ export interface UtxosFeeContext {
 }
 
 export const UTXOS_FEE_CONTEXT_KEY = Symbol('utxos-fee');
+
+export const utxosFeeStore = initUtxosFeeStore();

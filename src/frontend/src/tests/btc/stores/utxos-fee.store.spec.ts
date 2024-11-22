@@ -1,4 +1,4 @@
-import { initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
+import { utxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.utils';
@@ -9,34 +9,35 @@ describe('utxosFeeStore', () => {
 		mockPage.reset();
 	});
 
-	it('should ensure derived stores update at most once when the store changes', async () => {
-		const store = initUtxosFeeStore();
+	const amount = 10;
 
+	it('should ensure derived stores update at most once when the store changes', async () => {
 		await testDerivedUpdates(() =>
-			store.setUtxosFee({
-				utxosFee: mockUtxosFee
+			utxosFeeStore.setUtxosFee({
+				utxosFee: mockUtxosFee,
+				amount
 			})
 		);
 	});
 
 	it('should have all expected values', () => {
-		const store = initUtxosFeeStore();
-
-		store.setUtxosFee({
-			utxosFee: mockUtxosFee
+		utxosFeeStore.setUtxosFee({
+			utxosFee: mockUtxosFee,
+			amount
 		});
 
-		expect(get(store)?.utxosFee).toStrictEqual(mockUtxosFee);
+		expect(get(utxosFeeStore)?.utxosFee).toStrictEqual(mockUtxosFee);
+		expect(get(utxosFeeStore)?.amount).toStrictEqual(amount);
 	});
 
 	it('should reset the value', () => {
-		const store = initUtxosFeeStore();
-
-		store.setUtxosFee({
-			utxosFee: mockUtxosFee
+		utxosFeeStore.setUtxosFee({
+			utxosFee: mockUtxosFee,
+			amount
 		});
-		store.reset();
+		utxosFeeStore.reset();
 
-		expect(get(store)?.utxosFee).toBe(undefined);
+		expect(get(utxosFeeStore)?.utxosFee).toBe(undefined);
+		expect(get(utxosFeeStore)?.amount).toBe(undefined);
 	});
 });
