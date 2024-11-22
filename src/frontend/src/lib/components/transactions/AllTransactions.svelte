@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Token } from '@dfinity/utils';
+	import { notEmptyString, type Token } from '@dfinity/utils';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
@@ -29,7 +29,7 @@
 		</div>
 	{/if}
 
-	{#if tokenList}
+	{#if notEmptyString(tokenList)}
 		<MessageBox level="light-warning" closableKey="oisy_ic_hide_incomplete_transaction_list">
 			{replacePlaceholders($i18n.activity.warning.incomplete_transaction_list, {
 				$token_list: tokenList
