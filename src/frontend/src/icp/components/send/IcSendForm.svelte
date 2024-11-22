@@ -35,7 +35,6 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
-
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 
 		<SendSource token={$sendToken} balance={$balance} />
