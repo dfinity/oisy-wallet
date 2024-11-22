@@ -33,7 +33,7 @@ export const formatToken = ({
 		return formatted;
 	}
 
-	return `${showPlusSign ? '+' : ''}${formatted}`;
+	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
 export const formatTokenBigintToNumber = ({
