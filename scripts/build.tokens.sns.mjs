@@ -10,6 +10,7 @@ import {
 } from '@dfinity/utils';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
 const SNS_AGGREGATOR_CANISTER_URL = 'https://3r4gx-wqaaa-aaaaq-aaaia-cai.icp0.io';
@@ -167,7 +168,7 @@ export const findSnses = async () => {
 			{ tokens: [], icons: [] }
 		);
 
-	writeFileSync(join(DATA_FOLDER, 'tokens.sns.json'), JSON.stringify(tokens, jsonReplacer, 8));
+	writeFileSync(SNS_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
 
 	await saveLogos(icons);
 };

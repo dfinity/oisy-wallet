@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import path from 'path';
 import { ENV } from './build.utils.mjs';
+import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 dotenv.config({ path: `.env.${ENV}` });
 
@@ -313,7 +314,7 @@ const flattenEnvironmentData = (data) =>
 	);
 
 const readSupportedTokens = () => {
-	const jsonPath = resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
+	const jsonPath = resolve(CK_ERC20_JSON_FILE);
 	return JSON.parse(readFileSync(jsonPath, 'utf-8'));
 };
 
