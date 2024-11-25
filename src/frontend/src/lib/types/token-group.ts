@@ -8,5 +8,3 @@ export type TokenUiGroup = {
 	nativeToken: TokenUi;
 	tokens: [TokenUi, ...TokenUi[]];
 } & TokenFinancialData;
-
-export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;

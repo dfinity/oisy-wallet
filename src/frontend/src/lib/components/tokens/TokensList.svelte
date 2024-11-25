@@ -12,10 +12,9 @@
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
-	import { isTokenUiGroup } from '$lib/utils/token-group.utils';
+	import type { TokenUiGroup } from '$lib/types/token-group';
 
-	let tokens: TokenUiOrGroupUi[] | undefined;
+	let tokenGroups: TokenUiGroup[] | undefined;
 
 	let animating = false;
 
@@ -36,13 +35,13 @@
 	}, 250);
 
 	let loading: boolean;
-	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+	$: loading = $erc20UserTokensNotInitialized || isNullish(tokenGroups);
 </script>
 
-<TokensDisplayHandler bind:tokens>
+<TokensDisplayHandler bind:tokenGroups>
 	<TokensSkeletons {loading}>
 		<div class="mb-3 flex flex-col gap-3">
-			{#each tokens ?? [] as token (token.id)}
+			{#each tokenGroups ?? [] as tokenGroup (tokenGroup.id)}
 				<div
 					transition:fade
 					animate:flip={{ duration: 250 }}
@@ -50,9 +49,11 @@
 					on:animationend={handleAnimationEnd}
 					class:pointer-events-none={animating}
 				>
-					{#if isTokenUiGroup(token)}
-						<TokenGroupCard tokenGroup={token} />
+					{#if tokenGroup.tokens.length > 1}
+						<TokenGroupCard {tokenGroup} />
 					{:else}
+						{@const token = tokenGroup.tokens[0]}
+
 						<Listener {token}>
 							<TokenCardWithUrl {token}>
 								<TokenCardContent data={token} />
@@ -63,7 +64,7 @@
 			{/each}
 		</div>
 
-		{#if tokens?.length === 0}
+		{#if tokenGroups?.length === 0}
 			<NoTokensPlaceholder />
 		{/if}
 
