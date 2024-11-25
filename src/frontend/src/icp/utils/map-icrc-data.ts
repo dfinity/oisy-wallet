@@ -17,7 +17,6 @@ export const mapIcrcData = (
 				nonNullish(value) && {
 					[key]: {
 						...value,
-						exchangeCoinId: 'internet-computer'
 					}
 				})
 		}),
