@@ -198,7 +198,7 @@
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm on:icNext bind:amount bind:networkId on:icQRCodeScan {destination}>
+			<IcSendForm on:icNext bind:amount bind:networkId on:icQRCodeScan>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
 						<ButtonBack on:click={back} />
