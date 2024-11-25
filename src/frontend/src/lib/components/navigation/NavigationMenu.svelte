@@ -8,7 +8,7 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
-	import { AppPath, NETWORK_PARAM } from '$lib/constants/routes.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_EXPLORER,
