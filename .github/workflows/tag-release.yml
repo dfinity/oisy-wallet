@@ -32,9 +32,12 @@ jobs:
         git tag "v${{ steps.get_version.outputs.version }}"
         git push origin "v${{ steps.get_version.outputs.version }}"
 
-    - name: Draft Release Notes
-      id: draft_release
+    - name: Publish Release Notes
+      id: publish_release
       uses: release-drafter/release-drafter@v6
       with:
-        version: "v${{ steps.get_version.outputs.version }}"
-        token: ${{ secrets.GIX_CREATE_PR_PAT }}
+        version: 'v${{ steps.get_version.outputs.version }}'
+        tag: 'v${{ steps.get_version.outputs.version }}'
+        name: 'v${{ steps.get_version.outputs.version }}'
+        latest: true
+        publish: true

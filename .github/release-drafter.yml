@@ -1,6 +1,6 @@
 # .github/release-drafter.yml
 
-name-template: 'Release v{{version}}'
+name-template: 'v{{version}}'
 tag-template: 'v{{version}}'
 categories:
   - title: '🚀 Features'
