@@ -16,7 +16,7 @@ onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataRequestExch
 	const { msg, data: payload } = data;
 
 	//TODO: remove after debugging
-	console.log(data,'data onmessage');
+	console.log(data, 'data onmessage');
 	switch (msg) {
 		case 'stopExchangeTimer':
 			stopTimer();
@@ -34,9 +34,9 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 	if (nonNullish(timer)) {
 		return;
 	}
-	
+
 	//TODO: remove after debugging
-	console.log(data,'data startExchangeTimer');
+	console.log(data, 'data startExchangeTimer');
 
 	const sync = async () =>
 		await syncExchange({

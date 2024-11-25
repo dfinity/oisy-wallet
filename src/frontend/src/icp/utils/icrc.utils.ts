@@ -48,7 +48,7 @@ export const mapIcrcToken = ({
 		...metadataToken,
 		...rest
 	};
-	console.log(temp,'temp');
+	console.log(temp, 'temp');
 	return temp as IcTokenWithoutIdExtended;
 };
 

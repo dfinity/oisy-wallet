@@ -60,9 +60,9 @@ export const exchanges: Readable<ExchangesData> = derived(
 
 				const icrcPrice = $exchangeStore?.[ledgerCanisterId];
 				//TODO: remove after debugging
-				console.log($exchangeStore,'exchangeStore');
-				console.log(icrcPrice,'icrcPrice');
-				console.log(token,'token');
+				console.log($exchangeStore, 'exchangeStore');
+				console.log(icrcPrice, 'icrcPrice');
+				console.log(token, 'token');
 
 				if (nonNullish(icrcPrice)) {
 					return {

@@ -396,7 +396,7 @@ const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCT
 		}
 	: undefined;
 
-	export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
+export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
 		? [CKUSDC_STAGING_DATA.ledgerCanisterId]
@@ -458,7 +458,7 @@ const ICRC_CK_TOKENS: IcInterface[] = [
 	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : []),
 	...(nonNullish(CKEURC_IC_DATA) ? [CKEURC_IC_DATA] : []),
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
-]
+];
 
 const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : [])];
 
@@ -468,9 +468,9 @@ export const ICRC_TOKENS: IcInterface[] = [
 	...ICRC_CK_TOKENS
 ];
 
-export const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_CK_TOKENS.concat(PUBLIC_ICRC_TOKENS).map(
-	({ ledgerCanisterId }) => ledgerCanisterId
-);
+export const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_CK_TOKENS.concat(
+	PUBLIC_ICRC_TOKENS
+).map(({ ledgerCanisterId }) => ledgerCanisterId);
 
 export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
