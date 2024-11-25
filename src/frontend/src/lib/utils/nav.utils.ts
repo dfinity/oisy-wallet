@@ -48,6 +48,14 @@ const tokenUrl = ({
 export const networkParam = (networkId: NetworkId | undefined): string =>
 	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description ?? ''}`;
 
+export const networkUrl = ({
+	path,
+	networkId
+}: {
+	path: AppPath;
+	networkId: NetworkId | undefined;
+}) => (nonNullish(networkId) ? `${path}?${networkParam(networkId)}` : path);
+
 export const back = async ({ pop }: { pop: boolean }) => {
 	if (pop) {
 		history.back();

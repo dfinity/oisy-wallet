@@ -14,13 +14,15 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
+	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
-		isRouteTransactions
+		isRouteTransactions,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
@@ -33,7 +35,7 @@
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
 	<div class="flex flex-col gap-3">
 		<NavigationItem
-			href="/"
+			href={networkUrl({ path: AppPath.Tokens, networkId: $networkId })}
 			ariaLabel={$i18n.navigation.alt.tokens}
 			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
 			testId={NAVIGATION_ITEM_TOKENS}
@@ -43,7 +45,7 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href="/activity"
+			href={networkUrl({ path: AppPath.Activity, networkId: $networkId })}
 			ariaLabel={$i18n.navigation.alt.activity}
 			selected={isRouteActivity(pageData)}
 			testId={NAVIGATION_ITEM_ACTIVITY}
@@ -53,7 +55,7 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={AppPath.Explore}
+			href={networkUrl({ path: AppPath.Explore, networkId: $networkId })}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
 			selected={isRouteDappExplorer(pageData)}
 			testId={NAVIGATION_ITEM_EXPLORER}
@@ -63,7 +65,7 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={AppPath.Settings}
+			href={networkUrl({ path: AppPath.Settings, networkId: $networkId })}
 			ariaLabel={$i18n.navigation.alt.settings}
 			selected={isRouteSettings(pageData)}
 			testId={NAVIGATION_ITEM_SETTINGS}

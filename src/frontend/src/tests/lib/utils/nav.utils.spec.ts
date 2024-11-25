@@ -1,5 +1,5 @@
 import * as appNavigation from '$app/navigation';
-import { ICP_NETWORK_ID } from '$env/networks.env';
+import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -17,6 +17,7 @@ import {
 	isRouteTransactions,
 	loadRouteParams,
 	networkParam,
+	networkUrl,
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';
@@ -39,6 +40,22 @@ describe('nav.utils', () => {
 
 		it('should return the formatted network parameter when networkId is provided', () => {
 			expect(networkParam(ICP_NETWORK_ID)).toBe(`${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
+		});
+	});
+
+	describe('networkUrl', () => {
+		const mockPath = AppPath.Activity;
+		const mockNetworkId = ETHEREUM_NETWORK_ID;
+		const mockQueryParam = `${NETWORK_PARAM}=${mockNetworkId.description}`;
+
+		it('should return the path without query params when networkId is undefined', () => {
+			expect(networkUrl({ path: mockPath, networkId: undefined })).toBe(mockPath);
+		});
+
+		it('should return the path with query params when networkId is defined', () => {
+			expect(networkUrl({ path: mockPath, networkId: mockNetworkId })).toBe(
+				`${mockPath}?${mockQueryParam}`
+			);
 		});
 	});
 

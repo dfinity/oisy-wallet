@@ -19,12 +19,14 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
+	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens
+		isRouteTokens,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 
 	let visible = false;
@@ -34,22 +36,22 @@
 
 	const goToTokens = async () => {
 		hidePopover();
-		await goto(AppPath.Tokens);
+		await goto(networkUrl({ path: AppPath.Tokens, networkId: $networkId }));
 	};
 
 	const gotoSettings = async () => {
 		hidePopover();
-		await goto(AppPath.Settings);
+		await goto(networkUrl({ path: AppPath.Settings, networkId: $networkId }));
 	};
 
 	const goToDappExplorer = async () => {
 		hidePopover();
-		await goto(AppPath.Explore);
+		await goto(networkUrl({ path: AppPath.Explore, networkId: $networkId }));
 	};
 
 	const goToActivity = async () => {
 		hidePopover();
-		await goto(AppPath.Activity);
+		await goto(networkUrl({ path: AppPath.Activity, networkId: $networkId }));
 	};
 
 	let assetsRoute = false;
