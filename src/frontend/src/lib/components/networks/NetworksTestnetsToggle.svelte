@@ -15,6 +15,7 @@
 
 	const toggleTestnets = async () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
+
 		// Reset network param, since the network is selectable only when testnets are enabled
 		if (checked) {
 			const url = new URL(window.location.href);
