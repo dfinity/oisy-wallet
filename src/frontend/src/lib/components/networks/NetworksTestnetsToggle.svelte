@@ -13,14 +13,16 @@
 	$: checked = $testnetsEnabled;
 
 	const toggleTestnets = async () => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
-
 		// Reset network param, since the network is selectable only when testnets are enabled
 		if (checked) {
 			const url = new URL(window.location.href);
 			url.searchParams.delete(NETWORK_PARAM);
 			await goto(url, { replaceState: true, noScroll: true });
 		}
+
+		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
+
+
 	};
 </script>
 
