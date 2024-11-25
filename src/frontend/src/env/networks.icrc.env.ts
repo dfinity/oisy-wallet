@@ -439,11 +439,7 @@ export const PUBLIC_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
 ];
 
-const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : [])];
-
-export const ICRC_TOKENS: IcInterface[] = [
-	...PUBLIC_ICRC_TOKENS,
-	...ADDITIONAL_ICRC_TOKENS,
+const ICRC_CK_TOKENS: IcInterface[] = [
 	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
 	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
@@ -462,9 +458,18 @@ export const ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : []),
 	...(nonNullish(CKEURC_IC_DATA) ? [CKEURC_IC_DATA] : []),
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
+]
+
+const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : [])];
+
+export const ICRC_TOKENS: IcInterface[] = [
+	...PUBLIC_ICRC_TOKENS,
+	...ADDITIONAL_ICRC_TOKENS,
+	...ICRC_CK_TOKENS
+
 ];
 
-export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(
+export const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_CK_TOKENS.concat(PUBLIC_ICRC_TOKENS).map(
 	({ ledgerCanisterId }) => ledgerCanisterId
 );
 
