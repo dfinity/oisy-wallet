@@ -11,7 +11,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
@@ -60,8 +60,8 @@ export const networkUrl = ({
 	fromRoute: NavigationTarget | null;
 }) =>
 	isTransactionsRoute
-		? nonNullish(fromRoute?.url.searchParams.get(NETWORK_PARAM))
-			? `${path}?${NETWORK_PARAM}=${fromRoute.url.searchParams.get(NETWORK_PARAM)}`
+		? notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))
+			? `${path}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`
 			: path
 		: nonNullish(networkId)
 			? `${path}?${networkParam(networkId)}`
