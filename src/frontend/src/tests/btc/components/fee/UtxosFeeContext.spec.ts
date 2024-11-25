@@ -55,7 +55,7 @@ describe('UtxosFeeContext', () => {
 				identity: mockIdentity
 			});
 			expect(setUtxosFeeSpy).toHaveBeenCalledOnce();
-			expect(setUtxosFeeSpy).toHaveBeenCalledWith({ utxosFee: mockUtxosFee });
+			expect(setUtxosFeeSpy).toHaveBeenCalledWith({ utxosFee: mockUtxosFee, amountForFee: amount });
 		});
 	});
 
@@ -161,6 +161,43 @@ describe('UtxosFeeContext', () => {
 		await waitFor(() => {
 			expect(resetSpy).toHaveBeenCalledOnce();
 			expect(selectUtxosFeeSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	it('should not call selectUtxosFee if provided amountForFee has not changed since last request', async () => {
+		const selectUtxosFeeSpy = mockBtcSendApi();
+
+		mockAuthStore();
+
+		store.setUtxosFee({ utxosFee: mockUtxosFee, amountForFee: amount });
+
+		render(UtxosFeeContext, {
+			props,
+			context: mockContext(store)
+		});
+
+		await waitFor(() => {
+			expect(selectUtxosFeeSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	it('should call selectUtxosFee if provided amountForFee has changed since last request', async () => {
+		const selectUtxosFeeSpy = mockBtcSendApi();
+
+		mockAuthStore();
+
+		store.setUtxosFee({ utxosFee: mockUtxosFee, amountForFee: amount });
+
+		render(UtxosFeeContext, {
+			props: {
+				...props,
+				amount: amount + 1
+			},
+			context: mockContext(store)
+		});
+
+		await waitFor(() => {
+			expect(selectUtxosFeeSpy).toHaveBeenCalled();
 		});
 	});
 });

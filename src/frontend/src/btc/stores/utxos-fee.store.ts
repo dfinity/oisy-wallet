@@ -1,9 +1,13 @@
 import type { UtxosFee } from '$btc/types/btc-send';
+import type { OptionAmount } from '$lib/types/send';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type UtxosFeeStoreData = Option<{
 	utxosFee?: UtxosFee;
+	// We need to save the inputted amount for which UTXOs have been already fetched.
+	// It allows us to compare it with the new value to prevent a re-fetch on consumer component re-render.
+	amountForFee?: OptionAmount;
 }>;
 
 export interface UtxosFeeStore extends Readable<UtxosFeeStoreData> {

@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
+	import {
+		initUtxosFeeStore,
+		UTXOS_FEE_CONTEXT_KEY,
+		type UtxosFeeContext as UtxosFeeContextType
+	} from '$btc/stores/utxos-fee.store';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
@@ -23,6 +28,10 @@
 	$: ckBtcToken = findTwinToken({
 		tokenToPair: BTC_MAINNET_TOKEN,
 		tokens: $tokens
+	});
+
+	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
+		store: initUtxosFeeStore()
 	});
 
 	let minterInfoLoaded = false;

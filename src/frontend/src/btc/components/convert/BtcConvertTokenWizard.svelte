@@ -1,18 +1,14 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount, setContext } from 'svelte';
+	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 	import BtcConvertProgress from '$btc/components/convert/BtcConvertProgress.svelte';
 	import BtcConvertReview from '$btc/components/convert/BtcConvertReview.svelte';
 	import UtxosFeeContext from '$btc/components/fee/UtxosFeeContext.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import { sendBtc } from '$btc/services/btc-send.services';
-	import {
-		UTXOS_FEE_CONTEXT_KEY,
-		type UtxosFeeContext as UtxosFeeContextType,
-		initUtxosFeeStore
-	} from '$btc/stores/utxos-fee.store';
+	import { UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -43,11 +39,7 @@
 	export let convertProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
 
-	const utxosFeeStore = initUtxosFeeStore();
-
-	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
-		store: utxosFeeStore
-	});
+	const { store: utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
