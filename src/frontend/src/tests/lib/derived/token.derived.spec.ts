@@ -36,42 +36,42 @@ describe('token.derived', () => {
 			expect(get(tokenToggleable)).toBe(false);
 		});
 
-		it('should return if default erc20 user token is toggleable', () => {
+		it('should return true if default erc20 user token is toggleable', () => {
 			token.set(mockEr20UserToken);
 			expect(get(tokenToggleable)).toBe(true);
 		});
 
-		it('should return if custom erc20 user token is toggleable', () => {
+		it('should return true if custom erc20 user token is toggleable', () => {
 			token.set({ ...mockEr20UserToken, category: 'custom' });
 			expect(get(tokenToggleable)).toBe(true);
 		});
 
-		it('should return if default ethereum user token is toggleable', () => {
+		it('should return false if default ethereum user token is toggleable', () => {
 			token.set({ ...mockEr20UserToken, standard: 'ethereum' });
 			expect(get(tokenToggleable)).toBe(false);
 		});
 
-		it('should return if custom ethereum user token is toggleable', () => {
+		it('should return true if custom ethereum user token is toggleable', () => {
 			token.set({ ...mockEr20UserToken, category: 'custom', standard: 'ethereum' });
 			expect(get(tokenToggleable)).toBe(true);
 		});
 
-		it('should return if icrc default token is toggleable', () => {
+		it('should return false if icrc default token is toggleable', () => {
 			token.set(mockIcrcCustomToken);
 			expect(get(tokenToggleable)).toBe(false);
 		});
 
-		it('should return if icrc custom token is toggleable', () => {
+		it('should return true if icrc custom token is toggleable', () => {
 			token.set({ ...mockIcrcCustomToken, category: 'custom' });
 			expect(get(tokenToggleable)).toBe(true);
 		});
 
-		it('should return if btc token is toggleable', () => {
+		it('should return false if btc token is toggleable', () => {
 			token.set(BTC_MAINNET_TOKEN);
 			expect(get(tokenToggleable)).toBe(false);
 		});
 
-		it('should return if sepolia token is toggleable', () => {
+		it('should return false if sepolia token is toggleable', () => {
 			token.set(SEPOLIA_TOKEN);
 			expect(get(tokenToggleable)).toBe(false);
 		});
