@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ckBtcPendingUtxoTransactions } from '$icp/derived/ckbtc-transactions.derived';
 import { token } from '$lib/stores/token.store';
 import { mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';

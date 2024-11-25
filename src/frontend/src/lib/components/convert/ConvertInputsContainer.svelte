@@ -1,6 +1,6 @@
 <div class="flex flex-col items-start justify-between md:flex-row">
 	<div
-		class="mb-3 flex h-14 w-full items-center rounded-lg border border-tertiary bg-secondary px-3 md:mb-0 md:w-[35%]"
+		class="mb-3 flex h-14 w-full items-center rounded-lg border border-disabled bg-secondary px-3 md:mb-0 md:w-[35%]"
 	>
 		<slot name="token-info" />
 	</div>

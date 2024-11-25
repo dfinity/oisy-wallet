@@ -1,10 +1,10 @@
-import type { Erc20Contract } from '$eth/types/erc20';
 import {
 	ERC20_CONTRACTS_PRODUCTION,
 	ERC20_CONTRACTS_SEPOLIA,
 	ERC20_TWIN_TOKENS_MAINNET,
 	ERC20_TWIN_TOKENS_SEPOLIA
-} from '../src/frontend/src/env/tokens.erc20.env';
+} from '$env/tokens.erc20.env';
+import type { Erc20Contract } from '$eth/types/erc20';
 
 const getAddresses = (contracts: Erc20Contract[]): string[] =>
 	contracts.map((contract) => contract.address.toLowerCase());

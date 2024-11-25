@@ -4,10 +4,10 @@ import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { jsonReviver } from '@dfinity/utils';
 import { readdirSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import pemfile from 'pem-file';
+import { SNS_JSON_FILE } from './constants.mjs';
 
-const SNS_JSON_FILE = join(process.cwd(), 'src', 'frontend', 'src', 'env', 'tokens.sns.json');
 export const SNSES = JSON.parse((await readFile(SNS_JSON_FILE)).toString(), jsonReviver);
 
 /**
