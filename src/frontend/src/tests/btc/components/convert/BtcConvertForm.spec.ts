@@ -1,8 +1,8 @@
 import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 import * as btcPendingSendTransactionsStatusStore from '$btc/derived/btc-pending-sent-transactions-status.derived';
 import {
+	initUtxosFeeStore,
 	UTXOS_FEE_CONTEXT_KEY,
-	utxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -17,6 +17,7 @@ import { BigNumber } from 'alchemy-sdk';
 import { readable } from 'svelte/store';
 
 describe('BtcConvertForm', () => {
+	let store: UtxosFeeStore;
 	const mockContext = ({
 		utxosFeeStore,
 		sourceTokenBalance = 1000000n
@@ -55,23 +56,24 @@ describe('BtcConvertForm', () => {
 
 	beforeEach(() => {
 		mockPage.reset();
-		utxosFeeStore.reset();
+		store = initUtxosFeeStore();
+		store.reset();
 	});
 
 	it('should keep the next button clickable if all requirements are met', () => {
-		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcConvertForm, {
 			props,
-			context: mockContext({ utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 
 		expect(getByTestId(buttonTestId)).not.toHaveAttribute('disabled');
 	});
 
 	it('should keep the next button disabled if amount is undefined', () => {
-		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcConvertForm, {
@@ -79,14 +81,14 @@ describe('BtcConvertForm', () => {
 				...props,
 				sendAmount: undefined
 			},
-			context: mockContext({ utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
 	it('should keep the next button disabled if amount is invalid', () => {
-		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcConvertForm, {
@@ -94,7 +96,7 @@ describe('BtcConvertForm', () => {
 				...props,
 				sendAmount: -1
 			},
-			context: mockContext({ utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
@@ -105,19 +107,19 @@ describe('BtcConvertForm', () => {
 
 		const { getByTestId } = render(BtcConvertForm, {
 			props,
-			context: mockContext({ utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
 	it('should keep the next button disabled if utxos are not available', () => {
-		utxosFeeStore.setUtxosFee({ utxosFee: { ...mockUtxosFee, utxos: [] } });
+		store.setUtxosFee({ utxosFee: { ...mockUtxosFee, utxos: [] } });
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcConvertForm, {
 			props,
-			context: mockContext({ utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
@@ -130,7 +132,7 @@ describe('BtcConvertForm', () => {
 
 		const { getByTestId } = render(BtcConvertForm, {
 			props,
-			context: mockContext({ utxosFeeStore, sourceTokenBalance: 0n })
+			context: mockContext({ utxosFeeStore: store, sourceTokenBalance: 0n })
 		});
 
 		await waitFor(() => {
@@ -147,7 +149,7 @@ describe('BtcConvertForm', () => {
 
 		const { getByTestId } = render(BtcConvertForm, {
 			props,
-			context: mockContext({ utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 
 		await waitFor(() => {
@@ -166,7 +168,7 @@ describe('BtcConvertForm', () => {
 
 		const { getByTestId } = render(BtcConvertForm, {
 			props,
-			context: mockContext({ utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 
 		await waitFor(() => {

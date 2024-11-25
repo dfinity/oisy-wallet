@@ -13,7 +13,7 @@ export interface UtxosFeeStore extends Readable<UtxosFeeStoreData> {
 	reset: () => void;
 }
 
-const initUtxosFeeStore = (): UtxosFeeStore => {
+export const initUtxosFeeStore = (): UtxosFeeStore => {
 	const { subscribe, set } = writable<UtxosFeeStoreData>(undefined);
 
 	return {
@@ -34,5 +34,3 @@ export interface UtxosFeeContext {
 }
 
 export const UTXOS_FEE_CONTEXT_KEY = Symbol('utxos-fee');
-
-export const utxosFeeStore = initUtxosFeeStore();

@@ -1,8 +1,8 @@
 import BtcConvertFeeTotal from '$btc/components/convert/BtcConvertFeeTotal.svelte';
 import { BTC_CONVERT_FEE } from '$btc/constants/btc.constants';
 import {
+	initUtxosFeeStore,
 	UTXOS_FEE_CONTEXT_KEY,
-	utxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -17,16 +17,17 @@ import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('BtcConvertFeeTotal', () => {
+	let store: UtxosFeeStore;
 	const exchangeRate = 0.01;
 	const mockContext = ({
-		mockUtxosFeeStore,
+		utxosFeeStore,
 		destinationTokenId = ICP_TOKEN.id
 	}: {
-		mockUtxosFeeStore: UtxosFeeStore;
+		utxosFeeStore: UtxosFeeStore;
 		destinationTokenId?: TokenId;
 	}) =>
 		new Map([
-			[UTXOS_FEE_CONTEXT_KEY, { store: mockUtxosFeeStore }],
+			[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }],
 			[
 				CONVERT_CONTEXT_KEY,
 				{
@@ -39,20 +40,21 @@ describe('BtcConvertFeeTotal', () => {
 
 	beforeEach(() => {
 		mockPage.reset();
-		utxosFeeStore.reset();
+		store = initUtxosFeeStore();
+		store.reset();
 	});
 
 	it('should calculate totalFee correctly if only default fee is available', () => {
 		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ mockUtxosFeeStore: utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(BTC_CONVERT_FEE);
 	});
 
 	it('should calculate totalFee correctly if default and utxos fees are available', () => {
-		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
 		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ mockUtxosFeeStore: utxosFeeStore })
+			context: mockContext({ utxosFeeStore: store })
 		});
 		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(
 			BTC_CONVERT_FEE + mockUtxosFee.feeSatoshis
@@ -62,7 +64,7 @@ describe('BtcConvertFeeTotal', () => {
 	it('should calculate totalFee correctly if default and ckBTC minter fees are available', () => {
 		const tokenId = setupCkBTCStores();
 		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ mockUtxosFeeStore: utxosFeeStore, destinationTokenId: tokenId })
+			context: mockContext({ utxosFeeStore: store, destinationTokenId: tokenId })
 		});
 		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(
 			BTC_CONVERT_FEE + mockCkBtcMinterInfo.kyt_fee
@@ -70,10 +72,10 @@ describe('BtcConvertFeeTotal', () => {
 	});
 
 	it('should calculate totalFee correctly if all fees are available', () => {
-		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee });
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
 		const tokenId = setupCkBTCStores();
 		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ mockUtxosFeeStore: utxosFeeStore, destinationTokenId: tokenId })
+			context: mockContext({ utxosFeeStore: store, destinationTokenId: tokenId })
 		});
 		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(
 			BTC_CONVERT_FEE + mockCkBtcMinterInfo.kyt_fee + mockUtxosFee.feeSatoshis

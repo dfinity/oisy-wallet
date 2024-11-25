@@ -1,8 +1,8 @@
 import UtxosFeeContext from '$btc/components/fee/UtxosFeeContext.svelte';
 import * as btcSendApi from '$btc/services/btc-send.services';
 import {
+	initUtxosFeeStore,
 	UTXOS_FEE_CONTEXT_KEY,
-	utxosFeeStore,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
@@ -23,6 +23,7 @@ describe('UtxosFeeContext', () => {
 		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
 	const mockAuthStore = (value: Identity | null = mockIdentity) =>
 		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
+	let store: UtxosFeeStore;
 
 	const props = {
 		amount,
@@ -31,18 +32,19 @@ describe('UtxosFeeContext', () => {
 
 	beforeEach(() => {
 		mockPage.reset();
-		utxosFeeStore.reset();
+		store = initUtxosFeeStore();
+		store.reset();
 	});
 
 	it('should call selectUtxosFee with proper params', async () => {
-		const setUtxosFeeSpy = vi.spyOn(utxosFeeStore, 'setUtxosFee');
+		const setUtxosFeeSpy = vi.spyOn(store, 'setUtxosFee');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
 		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props,
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -64,7 +66,7 @@ describe('UtxosFeeContext', () => {
 
 		render(UtxosFeeContext, {
 			props,
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -73,7 +75,7 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if no networkId provided', async () => {
-		const resetSpy = vi.spyOn(utxosFeeStore, 'reset');
+		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 		const { networkId: _, ...newProps } = props;
 
@@ -81,7 +83,7 @@ describe('UtxosFeeContext', () => {
 
 		render(UtxosFeeContext, {
 			props: newProps,
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -91,7 +93,7 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if amountError is true', async () => {
-		const resetSpy = vi.spyOn(utxosFeeStore, 'reset');
+		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
 		mockAuthStore();
@@ -101,7 +103,7 @@ describe('UtxosFeeContext', () => {
 				...props,
 				amountError: true
 			},
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -111,7 +113,7 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if no amount provided', async () => {
-		const resetSpy = vi.spyOn(utxosFeeStore, 'reset');
+		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 		const { amount: _, ...newProps } = props;
 
@@ -119,7 +121,7 @@ describe('UtxosFeeContext', () => {
 
 		render(UtxosFeeContext, {
 			props: newProps,
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -129,14 +131,14 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if provided amount is 0', async () => {
-		const resetSpy = vi.spyOn(utxosFeeStore, 'reset');
+		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
 		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props: { ...props, amount: 0 },
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -146,14 +148,14 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call selectUtxosFee if provided networkId is not BTC', async () => {
-		const resetSpy = vi.spyOn(utxosFeeStore, 'reset');
+		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
 		mockAuthStore();
 
 		render(UtxosFeeContext, {
 			props: { ...props, networkId: ICP_NETWORK_ID },
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -167,11 +169,11 @@ describe('UtxosFeeContext', () => {
 
 		mockAuthStore();
 
-		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee, amount });
+		store.setUtxosFee({ utxosFee: mockUtxosFee, amount });
 
 		render(UtxosFeeContext, {
 			props,
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
@@ -184,14 +186,14 @@ describe('UtxosFeeContext', () => {
 
 		mockAuthStore();
 
-		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee, amount });
+		store.setUtxosFee({ utxosFee: mockUtxosFee, amount });
 
 		render(UtxosFeeContext, {
 			props: {
 				...props,
 				amount: amount + 1
 			},
-			context: mockContext(utxosFeeStore)
+			context: mockContext(store)
 		});
 
 		await waitFor(() => {
