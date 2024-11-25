@@ -4,6 +4,8 @@ import {
 } from '$env/networks.icrc.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
+import type { IcCkToken } from '$icp/types/ic-token';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -207,3 +209,22 @@ export const sumUsdBalances = ([usdBalance1, usdBalance2]: [
  */
 export const isRequiredTokenWithLinkedData = (token: Token): token is RequiredTokenWithLinkedData =>
 	'twinTokenSymbol' in token && typeof token.twinTokenSymbol === 'string';
+
+/** Find in the provided tokens list a twin IC token by symbol.
+ *
+ * @param tokenToPair - token to find a twin for.
+ * @param tokens - The list of tokens.
+ * @returns IcCkToken or undefined if no twin token found.
+ * */
+export const findTwinToken = ({
+	tokenToPair,
+	tokens
+}: {
+	tokenToPair: Token;
+	tokens: Token[];
+}): IcCkToken | undefined =>
+	isRequiredTokenWithLinkedData(tokenToPair)
+		? (tokens.find(
+				(token) => token.symbol === tokenToPair.twinTokenSymbol && isIcCkToken(token)
+			) as IcCkToken | undefined)
+		: undefined;

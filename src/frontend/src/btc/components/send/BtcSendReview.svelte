@@ -10,17 +10,16 @@
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import SendReview from '$lib/components/send/SendReview.svelte';
-	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
 	export let utxosFee: UtxosFee | undefined = undefined;
-	export let progress: (step: ProgressStepsSendBtc) => void;
 
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
@@ -45,7 +44,7 @@
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
 	<BtcReviewNetwork {networkId} slot="network" />
 
-	<BtcUtxosFee slot="fee" bind:utxosFee {progress} {networkId} {amount} />
+	<BtcUtxosFee slot="fee" bind:utxosFee {networkId} {amount} />
 
 	<BtcSendWarnings
 		slot="info"

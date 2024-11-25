@@ -8,7 +8,7 @@
 </script>
 
 <button
-	class="text-secondary min-w-72 justify-between gap-2 rounded-xl border border-light-grey bg-white px-4 py-3 text-left font-medium leading-5 text-inherit hover:border-brand-primary"
+	class="text-secondary min-w-72 justify-between gap-2 rounded-xl border border-tertiary bg-white px-4 py-3 text-left font-medium leading-5 text-inherit hover:border-brand-primary"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}

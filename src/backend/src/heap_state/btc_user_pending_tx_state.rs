@@ -29,7 +29,7 @@ pub struct BtcUserPendingTransactions {
     pending_transactions_map: HashMap<Principal, PendingTransactionsMap>,
     /// Maximum number of transactions that will be stored per `(principal, address)` tuple.
     max_pending_transactions: usize,
-    /// Maxumum number of addresses per user.
+    /// Maximum number of addresses per user.
     max_addresses_per_user: usize,
 }
 

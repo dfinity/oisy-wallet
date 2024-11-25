@@ -6,11 +6,12 @@
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionToken } from '$lib/types/token';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
 	export let transaction: BtcTransactionUi;
+	export let token: OptionToken;
 
 	let from: string;
 	let to: string | undefined;
@@ -24,9 +25,9 @@
 
 	let explorerUrl: string | undefined;
 	$: {
-		explorerUrl = isNetworkIdBTCTestnet($tokenWithFallback.network.id)
+		explorerUrl = isNetworkIdBTCTestnet(token?.network.id)
 			? BTC_TESTNET_EXPLORER_URL
-			: isNetworkIdBTCRegtest($tokenWithFallback.network.id)
+			: isNetworkIdBTCRegtest(token?.network.id)
 				? undefined
 				: BTC_MAINNET_EXPLORER_URL;
 	}

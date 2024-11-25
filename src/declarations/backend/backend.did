@@ -60,6 +60,7 @@ type CanisterStatusResultV2 = record {
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
   api : opt Guards;
+  derivation_origin : opt text;
   ecdsa_key_name : text;
   cfs_canister_id : opt principal;
   allowed_callers : vec principal;
@@ -99,6 +100,7 @@ type HttpResponse = record {
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
   api : opt Guards;
+  derivation_origin : opt text;
   ecdsa_key_name : text;
   cfs_canister_id : opt principal;
   allowed_callers : vec principal;
@@ -192,6 +194,11 @@ type SupportedCredential = record {
 };
 type Token = variant { Icrc : IcrcToken };
 type TopUpCyclesLedgerError = variant {
+  InvalidArgPercentageOutOfRange : record {
+    max : nat8;
+    min : nat8;
+    percentage : nat8;
+  };
   CouldNotGetBalanceFromCyclesLedger;
   CouldNotTopUpCyclesLedger : record { tried_to_send : nat; available : nat };
 };

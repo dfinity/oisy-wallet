@@ -11,7 +11,7 @@ const PATH_TO_OUTPUT = join(PATH_FROM_ROOT, 'lib', 'types', 'i18n.d.ts');
  * Generates TypeScript interfaces from the English translation file.
  */
 const generateTypes = async () => {
-	const { default: en } = await import(PATH_TO_EN_JSON, { assert: { type: 'json' } });
+	const { default: en } = await import(PATH_TO_EN_JSON, { with: { type: 'json' } });
 
 	const mapValues = (values) =>
 		Object.entries(values).reduce(

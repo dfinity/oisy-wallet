@@ -2,7 +2,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
-import { jsonReviver } from '@dfinity/utils';
+import { isNullish, jsonReviver } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export const syncWallet = ({
@@ -26,6 +26,11 @@ export const syncWallet = ({
 			certified
 		}
 	});
+
+	if (isNullish(newTransactions)) {
+		icTransactionsStore.nullify(tokenId);
+		return;
+	}
 
 	icTransactionsStore.prepend({
 		tokenId,

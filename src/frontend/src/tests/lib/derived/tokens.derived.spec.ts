@@ -1,7 +1,8 @@
 import * as btcEnv from '$env/networks.btc.env';
 import * as ethEnv from '$env/networks.eth.env';
-import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
-import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -17,7 +18,6 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('tokens.derived', () => {
 	const mockErc20DefaultToken: Erc20Token = {
