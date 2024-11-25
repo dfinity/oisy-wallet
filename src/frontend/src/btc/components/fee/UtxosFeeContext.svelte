@@ -21,9 +21,17 @@
 			return;
 		}
 
+		const parsedAmount = nonNullish(amount) ? Number(amount) : undefined;
+
 		// we need to make the value is not 0 because the utxos call fails if amount = 0
-		if (amountError || isNullish(networkId) || isNullish(amount) || Number(amount) === 0) {
+		if (amountError || isNullish(networkId) || isNullish(parsedAmount) || parsedAmount === 0) {
 			store.reset();
+			return;
+		}
+
+		// WizardModal re-renders content on step change (e.g. when switching between Convert to Review steps)
+		// To avoid re-fetching the fees, we need to check if amount hasn't changed since the last request
+		if (nonNullish($store) && $store.amountForFee === parsedAmount) {
 			return;
 		}
 
@@ -31,7 +39,7 @@
 
 		const utxosFee = nonNullish(network)
 			? await selectUtxosFeeApi({
-					amount,
+					amount: parsedAmount,
 					network,
 					identity: $authIdentity
 				})
@@ -43,7 +51,8 @@
 		}
 
 		store.setUtxosFee({
-			utxosFee
+			utxosFee,
+			amountForFee: parsedAmount
 		});
 	};
 
