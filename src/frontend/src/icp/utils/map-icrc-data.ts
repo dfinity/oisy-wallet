@@ -16,7 +16,7 @@ export const mapIcrcData = (
 			...(!LOCAL &&
 				nonNullish(value) && {
 					[key]: {
-						...value,
+						...value
 					}
 				})
 		}),
