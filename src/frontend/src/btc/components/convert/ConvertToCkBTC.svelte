@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
