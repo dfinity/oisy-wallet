@@ -92,6 +92,26 @@ describe('UtxosFeeContext', () => {
 		});
 	});
 
+	it('should not call selectUtxosFee if amountError is true', async () => {
+		const resetSpy = vi.spyOn(store, 'reset');
+		const selectUtxosFeeSpy = mockBtcSendApi();
+
+		mockAuthStore();
+
+		render(UtxosFeeContext, {
+			props: {
+				...props,
+				amountError: true
+			},
+			context: mockContext(store)
+		});
+
+		await waitFor(() => {
+			expect(resetSpy).toHaveBeenCalledOnce();
+			expect(selectUtxosFeeSpy).not.toHaveBeenCalled();
+		});
+	});
+
 	it('should not call selectUtxosFee if no amount provided', async () => {
 		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
