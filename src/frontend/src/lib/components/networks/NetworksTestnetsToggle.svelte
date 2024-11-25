@@ -18,9 +18,10 @@
 
 		// Reset network param, since the network is selectable only when testnets are enabled
 		if (checked) {
-			const url = URL.parse(window.location.href);
+			const href = window.location.href;
 
-			if (nonNullish(url)) {
+			if (URL.canParse(href)) {
+				const url = new URL(href);
 				url.searchParams.delete(NETWORK_PARAM);
 				await goto(url, { replaceState: true, noScroll: true });
 			}
