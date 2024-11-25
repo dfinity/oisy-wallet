@@ -15,7 +15,7 @@ ic-ledger-types = "0.13.0"
 ic-stable-structures = "0.6.6"
 ic-metrics-encoder = "1.1.1"
 ic-canister-sig-creation = "1.1.0"
-ic-verifiable-credentials = { git = "https://github.com/dfinity/verifiable-credentials-sdk", rev = "a116a2e53a13e4a1f6f7e8429960a7d0d6142e70" }
+ic-verifiable-credentials = "1.0.1"
 candid = "0.10.10"
 ethers-core = "= 2.0.11"
 futures = "0.3"

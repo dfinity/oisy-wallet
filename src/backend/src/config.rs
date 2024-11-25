@@ -4,7 +4,7 @@ use shared::types::{user_profile::AddUserCredentialRequest, Config, CredentialTy
 pub fn find_credential_config(
     request: &AddUserCredentialRequest,
     config: &Config,
-) -> Option<(VcFlowSigners, Vec<u8>, CredentialType)> {
+) -> Option<(VcFlowSigners, Vec<u8>, CredentialType, String)> {
     config
         .supported_credentials
         .as_ref()
@@ -28,6 +28,7 @@ pub fn find_credential_config(
                                 .clone()
                                 .expect("Missing root key to perform validation"),
                             supported_credential.credential_type.clone(),
+                            config.derivation_origin.clone().expect("Missing derivation origin in config. Credential can't be validated.")
                         ))
                     } else {
                         None
