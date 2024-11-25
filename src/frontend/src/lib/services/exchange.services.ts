@@ -47,14 +47,11 @@ export const exchangeRateICRCToUsd = (
 		include_market_cap: true
 	});
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
-	//TODO: remove after debugging
-	console.log(data, 'data');
-	return exchangeStore.set([
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
+	exchangeStore.set([
 		...(nonNullish(data) ? [data.currentEthPrice] : []),
 		...(nonNullish(data) ? [data.currentBtcPrice] : []),
 		...(nonNullish(data) ? [data.currentIcpPrice] : []),
 		...(nonNullish(data) ? [data.currentErc20Prices] : []),
 		...(nonNullish(data) ? [data.currentIcrcPrices] : [])
 	]);
-};
