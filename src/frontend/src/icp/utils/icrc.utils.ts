@@ -33,7 +33,7 @@ export const mapIcrcToken = ({
 
 	const icon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
 
-	const temp = {
+	return {
 		network: ICP_NETWORK,
 		standard: 'icrc',
 		symbol,
@@ -48,8 +48,6 @@ export const mapIcrcToken = ({
 		...metadataToken,
 		...rest
 	};
-	console.log(temp, 'temp');
-	return temp as IcTokenWithoutIdExtended;
 };
 
 type IcrcTokenMetadata = TokenMetadata & IcFee;
