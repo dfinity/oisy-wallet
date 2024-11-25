@@ -12,23 +12,16 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
-	let invalidDestination: boolean;
 
 	let invalid = true;
-	$: invalid =
-		invalidDestination ||
-		nonNullish(amountError) ||
-		isNullishOrEmpty(destination) ||
-		isNullish(amount);
+	$: invalid = nonNullish(amountError) || isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 </script>
