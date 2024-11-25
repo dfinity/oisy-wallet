@@ -76,7 +76,7 @@
 		"@dfinity/eslint-config-oisy-wallet": "^0.0.6",
 		"@dfinity/identity-secp256k1": "^2.1.2",
 		"@dfinity/internet-identity-playwright": "^0.0.4",
-		"@playwright/test": "^1.48.2",
+		"@playwright/test": "^1.49.0",
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.6",
 		"@sveltejs/kit": "^2.8.3",
