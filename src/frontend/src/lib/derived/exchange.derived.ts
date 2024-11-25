@@ -59,7 +59,8 @@ export const exchanges: Readable<ExchangesData> = derived(
 				const { id, ledgerCanisterId, exchangeCoinId } = token;
 
 				const icrcPrice = $exchangeStore?.[ledgerCanisterId];
-
+				console.log($exchangeStore,'exchangeStore');
+				console.log(icrcPrice,'icrcPrice');
 				if (nonNullish(icrcPrice)) {
 					return {
 						...acc,

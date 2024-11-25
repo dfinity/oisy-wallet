@@ -48,10 +48,14 @@ export const exchangeRateICRCToUsd = (
 	});
 
 export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
-	exchangeStore.set([
-		...(nonNullish(data) ? [data.currentEthPrice] : []),
-		...(nonNullish(data) ? [data.currentBtcPrice] : []),
-		...(nonNullish(data) ? [data.currentIcpPrice] : []),
-		...(nonNullish(data) ? [data.currentErc20Prices] : []),
-		...(nonNullish(data) ? [data.currentIcrcPrices] : [])
-	]);
+	{
+		//TODO: remove after debugging
+		console.log(data,'data');
+		return exchangeStore.set([
+			...(nonNullish(data) ? [data.currentEthPrice] : []),
+			...(nonNullish(data) ? [data.currentBtcPrice] : []),
+			...(nonNullish(data) ? [data.currentIcpPrice] : []),
+			...(nonNullish(data) ? [data.currentErc20Prices] : []),
+			...(nonNullish(data) ? [data.currentIcrcPrices] : [])
+		]);
+	};
