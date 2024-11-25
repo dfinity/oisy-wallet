@@ -1,5 +1,5 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
-import { SEPOLIA_TOKEN } from '$env/tokens.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { tokenToggleable } from '$lib/derived/token.derived';
