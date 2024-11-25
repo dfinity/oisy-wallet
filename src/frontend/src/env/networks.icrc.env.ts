@@ -433,6 +433,7 @@ export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
  */
 
 // The subset of the ICRC tokens that are also displayed if the user is not signed in.
+// TODO merge PUBLIC_ICRC_TOKENS and ICRC_CK_TOKENS
 export const PUBLIC_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKBTC_IC_DATA) ? [CKBTC_IC_DATA] : []),
 	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
