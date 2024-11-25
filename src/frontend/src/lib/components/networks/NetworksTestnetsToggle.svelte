@@ -21,8 +21,6 @@
 		}
 
 		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
-
-
 	};
 </script>
 
