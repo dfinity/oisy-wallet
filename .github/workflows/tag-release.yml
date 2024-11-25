@@ -32,8 +32,8 @@ jobs:
         git tag "v${{ steps.get_version.outputs.version }}"
         git push origin "v${{ steps.get_version.outputs.version }}"
 
-    - name: Draft Release Notes
-      id: draft_release
+    - name: Publish Release Notes
+      id: publish_release
       uses: release-drafter/release-drafter@v6
       with:
         version: 'v${{ steps.get_version.outputs.version }}'
