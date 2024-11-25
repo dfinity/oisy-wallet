@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconUser, Popover } from '@dfinity/gix-components';
-	import { goto } from '$app/navigation';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
@@ -26,32 +27,50 @@
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
+		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
+
+	let isTransactionsRoute = false;
+	$: isTransactionsRoute = isRouteTransactions($page);
+
 	const hidePopover = () => (visible = false);
 
 	const goToTokens = async () => {
 		hidePopover();
-		await goto(networkUrl({ path: AppPath.Tokens, networkId: $networkId }));
+		await goto(
+			networkUrl({ path: AppPath.Tokens, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	const gotoSettings = async () => {
 		hidePopover();
-		await goto(networkUrl({ path: AppPath.Settings, networkId: $networkId }));
+		await goto(
+			networkUrl({ path: AppPath.Settings, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	const goToDappExplorer = async () => {
 		hidePopover();
-		await goto(networkUrl({ path: AppPath.Explore, networkId: $networkId }));
+		await goto(
+			networkUrl({ path: AppPath.Explore, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	const goToActivity = async () => {
 		hidePopover();
-		await goto(networkUrl({ path: AppPath.Activity, networkId: $networkId }));
+		await goto(
+			networkUrl({ path: AppPath.Activity, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	let assetsRoute = false;

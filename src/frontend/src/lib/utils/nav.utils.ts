@@ -12,7 +12,7 @@ import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { LoadEvent, Page } from '@sveltejs/kit';
+import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -50,11 +50,22 @@ export const networkParam = (networkId: NetworkId | undefined): string =>
 
 export const networkUrl = ({
 	path,
-	networkId
+	networkId,
+	isTransactionsRoute,
+	fromRoute
 }: {
 	path: AppPath;
-	networkId: NetworkId | undefined;
-}) => (nonNullish(networkId) ? `${path}?${networkParam(networkId)}` : path);
+	networkId: Option<NetworkId>;
+	isTransactionsRoute: boolean;
+	fromRoute: NavigationTarget | null;
+}) =>
+	isTransactionsRoute
+		? nonNullish(fromRoute?.url.searchParams.get(NETWORK_PARAM))
+			? `${path}?${NETWORK_PARAM}=${fromRoute.url.searchParams.get(NETWORK_PARAM)}`
+			: path
+		: nonNullish(networkId)
+			? `${path}?${networkParam(networkId)}`
+			: path;
 
 export const back = async ({ pop }: { pop: boolean }) => {
 	if (pop) {

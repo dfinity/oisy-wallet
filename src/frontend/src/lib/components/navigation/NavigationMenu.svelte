@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Page } from '@sveltejs/kit';
+	import type { NavigationTarget, Page } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -7,7 +8,7 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import InfoMenu from '$lib/components/navigation/InfoMenu.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import { AppPath, NETWORK_PARAM } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_EXPLORER,
@@ -30,12 +31,26 @@
 	// cast it to `Page`.
 	let pageData: Page;
 	$: pageData = $page;
+
+	let isTransactionsRoute = false;
+	$: isTransactionsRoute = isRouteTransactions($page);
+
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
 	<div class="flex flex-col gap-3">
 		<NavigationItem
-			href={networkUrl({ path: AppPath.Tokens, networkId: $networkId })}
+			href={networkUrl({
+				path: AppPath.Tokens,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.tokens}
 			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
 			testId={NAVIGATION_ITEM_TOKENS}
@@ -45,7 +60,12 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={networkUrl({ path: AppPath.Activity, networkId: $networkId })}
+			href={networkUrl({
+				path: AppPath.Activity,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.activity}
 			selected={isRouteActivity(pageData)}
 			testId={NAVIGATION_ITEM_ACTIVITY}
@@ -55,7 +75,12 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={networkUrl({ path: AppPath.Explore, networkId: $networkId })}
+			href={networkUrl({
+				path: AppPath.Explore,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
 			selected={isRouteDappExplorer(pageData)}
 			testId={NAVIGATION_ITEM_EXPLORER}
@@ -65,7 +90,12 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={networkUrl({ path: AppPath.Settings, networkId: $networkId })}
+			href={networkUrl({
+				path: AppPath.Settings,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.settings}
 			selected={isRouteSettings(pageData)}
 			testId={NAVIGATION_ITEM_SETTINGS}
