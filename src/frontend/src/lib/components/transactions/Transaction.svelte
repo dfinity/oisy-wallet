@@ -29,7 +29,7 @@
 
 <button class={`contents ${styleClass ?? ''}`} on:click>
 	<Card>
-		<span class="inline-block first-letter:capitalize"><slot /></span>
+		<span class="inline-block"><slot /></span>
 
 		<div slot="icon">
 			{#if iconType === 'token'}

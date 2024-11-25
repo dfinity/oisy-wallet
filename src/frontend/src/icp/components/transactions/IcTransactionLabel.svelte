@@ -8,6 +8,8 @@
 	export let fallback = '';
 	export let token: OptionToken;
 
+	$: fallback = fallback.charAt(0).toUpperCase() + fallback.slice(1);
+
 	let twinToken: Token | undefined;
 	$: twinToken = (token as OptionIcCkToken)?.twinToken;
 </script>
