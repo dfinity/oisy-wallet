@@ -1,5 +1,5 @@
 import * as appNavigation from '$app/navigation';
-import { ICP_NETWORK_ID } from '$env/networks.env';
+import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -17,10 +17,11 @@ import {
 	isRouteTransactions,
 	loadRouteParams,
 	networkParam,
+	networkUrl,
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';
-import type { LoadEvent, Page } from '@sveltejs/kit';
+import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 import { describe, expect } from 'vitest';
 
 describe('nav.utils', () => {
@@ -39,6 +40,81 @@ describe('nav.utils', () => {
 
 		it('should return the formatted network parameter when networkId is provided', () => {
 			expect(networkParam(ICP_NETWORK_ID)).toBe(`${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
+		});
+	});
+
+	describe('networkUrl', () => {
+		const mockPath = AppPath.Activity;
+		const mockNetworkId = ETHEREUM_NETWORK_ID;
+		const mockQueryParam = `${NETWORK_PARAM}=${mockNetworkId.description}`;
+		const mockFromRoute: NavigationTarget = {
+			url: new URL(`https://example.com/?${NETWORK_PARAM}=test-network`)
+		} as unknown as NavigationTarget;
+
+		it('should return the path without query params when networkId and fromRoute are undefined', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: undefined,
+					isTransactionsRoute: false,
+					fromRoute: null
+				})
+			).toBe(mockPath);
+		});
+
+		it('should return the path with query params when networkId is defined and isTransactionsRoute is false', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					isTransactionsRoute: false,
+					fromRoute: null
+				})
+			).toBe(`${mockPath}?${mockQueryParam}`);
+		});
+
+		it('should return the path without query params when isTransactionsRoute is true but fromRoute is null', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					isTransactionsRoute: true,
+					fromRoute: null
+				})
+			).toBe(mockPath);
+		});
+
+		it('should return the path with query params from fromRoute when isTransactionsRoute is true and fromRoute is non-null', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: undefined,
+					isTransactionsRoute: true,
+					fromRoute: mockFromRoute
+				})
+			).toBe(`${mockPath}?${NETWORK_PARAM}=test-network`);
+		});
+
+		it('should prioritize fromRoute query params when isTransactionsRoute is true and both networkId and fromRoute are provided', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					isTransactionsRoute: true,
+					fromRoute: mockFromRoute
+				})
+			).toBe(`${mockPath}?${NETWORK_PARAM}=test-network`);
+		});
+
+		it('should return the path without query params from fromRoute when isTransactionsRoute is true and ther is no network selected', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					isTransactionsRoute: true,
+					fromRoute: { url: new URL(`https://example.com/`) } as unknown as NavigationTarget
+				})
+			).toBe(mockPath);
 		});
 	});
 
