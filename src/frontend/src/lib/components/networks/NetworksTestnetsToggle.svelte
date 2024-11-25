@@ -5,6 +5,7 @@
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { testnetsStore } from '$lib/stores/settings.store';
+	import { UrlSchema } from '$lib/validation/url.validation';
 
 	// TODO: create tests for this component once we have testId from GIX-CMP
 	// PR: https://github.com/dfinity/gix-components/pull/531
@@ -13,14 +14,18 @@
 	$: checked = $testnetsEnabled;
 
 	const toggleTestnets = async () => {
+		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
+
 		// Reset network param, since the network is selectable only when testnets are enabled
 		if (checked) {
-			const url = new URL(window.location.href);
-			url.searchParams.delete(NETWORK_PARAM);
-			await goto(url, { replaceState: true, noScroll: true });
-		}
+			const parsedUrl = UrlSchema.safeParse(window.location.href);
 
-		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
+			if (parsedUrl.success) {
+				const url = new URL(parsedUrl.data);
+				url.searchParams.delete(NETWORK_PARAM);
+				await goto(url, { replaceState: true, noScroll: true });
+			}
+		}
 	};
 </script>
 
