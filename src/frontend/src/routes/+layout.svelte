@@ -83,17 +83,9 @@
 		const spinner = document.querySelector('body > #app-spinner');
 		spinner?.remove();
 	})();
-
-	/**
-	 * Event handler
-	 */
-
-	window.onpopstate = function () {
-		modalStore.close();
-	};
 </script>
 
-<svelte:window on:storage={syncAuthStore} />
+<svelte:window on:storage={syncAuthStore} on:popstate={() => modalStore.close()} />
 
 {#await init()}
 	<div in:fade>
