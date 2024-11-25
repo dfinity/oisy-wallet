@@ -9,7 +9,7 @@ describe('utxosFeeStore', () => {
 		mockPage.reset();
 	});
 
-	const amount = 10;
+	const amountForFee = 10;
 
 	it('should ensure derived stores update at most once when the store changes', async () => {
 		const store = initUtxosFeeStore();
@@ -17,7 +17,7 @@ describe('utxosFeeStore', () => {
 		await testDerivedUpdates(() =>
 			store.setUtxosFee({
 				utxosFee: mockUtxosFee,
-				amount
+				amountForFee
 			})
 		);
 	});
@@ -27,11 +27,11 @@ describe('utxosFeeStore', () => {
 
 		store.setUtxosFee({
 			utxosFee: mockUtxosFee,
-			amount
+			amountForFee
 		});
 
 		expect(get(store)?.utxosFee).toStrictEqual(mockUtxosFee);
-		expect(get(store)?.amount).toStrictEqual(amount);
+		expect(get(store)?.amountForFee).toStrictEqual(amountForFee);
 	});
 
 	it('should reset the value', () => {
@@ -39,11 +39,11 @@ describe('utxosFeeStore', () => {
 
 		store.setUtxosFee({
 			utxosFee: mockUtxosFee,
-			amount
+			amountForFee
 		});
 		store.reset();
 
 		expect(get(store)?.utxosFee).toBe(undefined);
-		expect(get(store)?.amount).toBe(undefined);
+		expect(get(store)?.amountForFee).toBe(undefined);
 	});
 });

@@ -31,7 +31,7 @@
 
 		// WizardModal re-renders content on step change (e.g. when switching between Convert to Review steps)
 		// To avoid re-fetching the fees, we need to check if amount hasn't changed since the last request
-		if (nonNullish($store) && $store.amount === parsedAmount) {
+		if (nonNullish($store) && $store.amountForFee === parsedAmount) {
 			return;
 		}
 
@@ -52,7 +52,7 @@
 
 		store.setUtxosFee({
 			utxosFee,
-			amount: parsedAmount
+			amountForFee: parsedAmount
 		});
 	};
 

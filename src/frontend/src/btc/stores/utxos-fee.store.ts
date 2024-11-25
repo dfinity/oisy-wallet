@@ -5,7 +5,9 @@ import { writable, type Readable } from 'svelte/store';
 
 export type UtxosFeeStoreData = Option<{
 	utxosFee?: UtxosFee;
-	amount?: OptionAmount;
+	// We need to save the inputted amount for which UTXOs have been already fetched.
+	// It allows us to compare it with the new value to prevent a re-fetch on consumer component re-render.
+	amountForFee?: OptionAmount;
 }>;
 
 export interface UtxosFeeStore extends Readable<UtxosFeeStoreData> {

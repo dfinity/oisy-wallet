@@ -55,7 +55,7 @@ describe('UtxosFeeContext', () => {
 				identity: mockIdentity
 			});
 			expect(setUtxosFeeSpy).toHaveBeenCalledOnce();
-			expect(setUtxosFeeSpy).toHaveBeenCalledWith({ utxosFee: mockUtxosFee, amount });
+			expect(setUtxosFeeSpy).toHaveBeenCalledWith({ utxosFee: mockUtxosFee, amountForFee: amount });
 		});
 	});
 
@@ -164,12 +164,12 @@ describe('UtxosFeeContext', () => {
 		});
 	});
 
-	it('should not call selectUtxosFee if provided amount has not changed since last request', async () => {
+	it('should not call selectUtxosFee if provided amountForFee has not changed since last request', async () => {
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
 		mockAuthStore();
 
-		store.setUtxosFee({ utxosFee: mockUtxosFee, amount });
+		store.setUtxosFee({ utxosFee: mockUtxosFee, amountForFee: amount });
 
 		render(UtxosFeeContext, {
 			props,
@@ -181,12 +181,12 @@ describe('UtxosFeeContext', () => {
 		});
 	});
 
-	it('should call selectUtxosFee if provided amount has changed since last request', async () => {
+	it('should call selectUtxosFee if provided amountForFee has changed since last request', async () => {
 		const selectUtxosFeeSpy = mockBtcSendApi();
 
 		mockAuthStore();
 
-		store.setUtxosFee({ utxosFee: mockUtxosFee, amount });
+		store.setUtxosFee({ utxosFee: mockUtxosFee, amountForFee: amount });
 
 		render(UtxosFeeContext, {
 			props: {
