@@ -490,13 +490,14 @@ pub fn add_user_credential(
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
 
-    let (vc_flow_signers, root_pk_raw, credential_type) =
+    let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
         read_config(|config| find_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
         user_principal,
+        derivation_origin,
         &vc_flow_signers,
         &request.credential_spec,
         &root_pk_raw,
