@@ -9,6 +9,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionToken } from '$lib/types/token';
 	import type { TransactionUiCommon } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
@@ -16,7 +17,6 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { OptionToken } from '$lib/types/token';
 
 	export let commonData: TransactionUiCommon;
 	export let hash: string | undefined;
