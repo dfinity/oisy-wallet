@@ -46,7 +46,7 @@ describe('BtcSendReview', () => {
 		mockPage.reset();
 	});
 
-	it('should keep the next button clickable if all requirements are met', () => {
+	it('should enable the next button if all requirements are met', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
@@ -60,7 +60,7 @@ describe('BtcSendReview', () => {
 		expect(getByTestId(buttonTestId)).not.toHaveAttribute('disabled');
 	});
 
-	it('should keep the next button disabled if amount is undefined', () => {
+	it('should disable the next button if amount is undefined', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
@@ -74,7 +74,7 @@ describe('BtcSendReview', () => {
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
-	it('should keep the next button disabled if amount is invalid', () => {
+	it('should disable the next button if amount is invalid', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
@@ -88,7 +88,7 @@ describe('BtcSendReview', () => {
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
-	it('should keep the next button disabled if utxos are undefined', () => {
+	it('should disable the next button if utxos are undefined', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
@@ -102,7 +102,7 @@ describe('BtcSendReview', () => {
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
-	it('should keep the next button disabled if utxos are not available', () => {
+	it('should disable the next button if utxos are not available', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
@@ -136,7 +136,7 @@ describe('BtcSendReview', () => {
 		});
 	});
 
-	it('should keep button disabled if there pending txs have not been loaded yet', async () => {
+	it('should disable the next button if pending txs have not been loaded yet', async () => {
 		mockBtcPendingSendTransactionsStatusStore(
 			btcPendingSendTransactionsStatusStore.BtcPendingSentTransactionsStatus.LOADING
 		);
