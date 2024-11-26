@@ -114,7 +114,7 @@
 			</Value>
 		{/if}
 
-		{#if nonNullish(value)}
+		{#if nonNullish(value) && nonNullish(token)}
 			<Value ref="amount">
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 				<output>
