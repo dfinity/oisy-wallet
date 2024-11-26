@@ -137,7 +137,7 @@ describe('BtcConvertForm', () => {
 
 		await waitFor(() => {
 			expect(getByTestId(insufficientFundsForFeeTestId)).toHaveTextContent(
-				en.convert.assertion.insufficient_funds_for_fee
+				en.fee.assertion.insufficient_funds_for_fee
 			);
 		});
 	});
