@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Page } from '@sveltejs/kit';
+	import type { NavigationTarget, Page } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -14,13 +15,15 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
+	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
-		isRouteTransactions
+		isRouteTransactions,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
@@ -28,12 +31,26 @@
 	// cast it to `Page`.
 	let pageData: Page;
 	$: pageData = $page;
+
+	let isTransactionsRoute = false;
+	$: isTransactionsRoute = isRouteTransactions($page);
+
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
 	<div class="flex flex-col gap-3">
 		<NavigationItem
-			href="/"
+			href={networkUrl({
+				path: AppPath.Tokens,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.tokens}
 			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
 			testId={NAVIGATION_ITEM_TOKENS}
@@ -43,7 +60,12 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href="/activity"
+			href={networkUrl({
+				path: AppPath.Activity,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.activity}
 			selected={isRouteActivity(pageData)}
 			testId={NAVIGATION_ITEM_ACTIVITY}
@@ -53,7 +75,12 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={AppPath.Explore}
+			href={networkUrl({
+				path: AppPath.Explore,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
 			selected={isRouteDappExplorer(pageData)}
 			testId={NAVIGATION_ITEM_EXPLORER}
@@ -63,7 +90,12 @@
 		</NavigationItem>
 
 		<NavigationItem
-			href={AppPath.Settings}
+			href={networkUrl({
+				path: AppPath.Settings,
+				networkId: $networkId,
+				isTransactionsRoute,
+				fromRoute
+			})}
 			ariaLabel={$i18n.navigation.alt.settings}
 			selected={isRouteSettings(pageData)}
 			testId={NAVIGATION_ITEM_SETTINGS}

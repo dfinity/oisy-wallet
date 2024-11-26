@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconUser, Popover } from '@dfinity/gix-components';
-	import { goto } from '$app/navigation';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
@@ -19,37 +20,57 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
+	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens
+		isRouteTokens,
+		isRouteTransactions,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
+
+	let isTransactionsRoute = false;
+	$: isTransactionsRoute = isRouteTransactions($page);
+
 	const hidePopover = () => (visible = false);
 
 	const goToTokens = async () => {
 		hidePopover();
-		await goto(AppPath.Tokens);
+		await goto(
+			networkUrl({ path: AppPath.Tokens, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	const gotoSettings = async () => {
 		hidePopover();
-		await goto(AppPath.Settings);
+		await goto(
+			networkUrl({ path: AppPath.Settings, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	const goToDappExplorer = async () => {
 		hidePopover();
-		await goto(AppPath.Explore);
+		await goto(
+			networkUrl({ path: AppPath.Explore, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	const goToActivity = async () => {
 		hidePopover();
-		await goto(AppPath.Activity);
+		await goto(
+			networkUrl({ path: AppPath.Activity, networkId: $networkId, isTransactionsRoute, fromRoute })
+		);
 	};
 
 	let assetsRoute = false;
