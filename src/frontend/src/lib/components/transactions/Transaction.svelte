@@ -41,7 +41,7 @@
 
 		<svelte:fragment slot="amount">
 			{#if nonNullish(amount)}
-				<Amount {amount} decimals={token.decimals} />
+				<Amount {amount} decimals={token.decimals} formatPositiveAmount />
 			{/if}
 		</svelte:fragment>
 

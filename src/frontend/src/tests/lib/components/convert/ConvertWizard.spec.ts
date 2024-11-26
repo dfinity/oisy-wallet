@@ -1,6 +1,7 @@
-import { ICP_TOKEN } from '$env/tokens.env';
+import { initUtxosFeeStore, UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
@@ -25,6 +26,7 @@ describe('ConvertWizard', () => {
 
 	const mockContext = (sourceToken: Token) =>
 		new Map([
+			[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }],
 			[
 				CONVERT_CONTEXT_KEY,
 				{

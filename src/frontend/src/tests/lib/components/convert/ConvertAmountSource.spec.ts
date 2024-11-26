@@ -100,4 +100,13 @@ describe('ConvertAmountSource', () => {
 
 		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(props.sendAmount);
 	});
+
+	it('should display max button value in a correct format', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props,
+			context: mockContext(BigNumber.from(50000438709n))
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveTextContent('Max: 500.00438709 BTC');
+	});
 });

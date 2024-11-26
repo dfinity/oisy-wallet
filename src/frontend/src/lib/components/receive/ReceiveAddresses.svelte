@@ -13,7 +13,7 @@
 		BTC_TESTNET_TOKEN
 	} from '$env/tokens/tokens.btc.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-	import { ICP_TOKEN } from '$env/tokens.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
