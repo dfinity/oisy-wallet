@@ -12,25 +12,41 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 
+	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+	export let source: string;
+	export let simplifiedForm = false;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
+	let invalidDestination: boolean;
+
+	let sourceValue = simplifiedForm ? undefined : source;
 
 	let invalid = true;
-	$: invalid = nonNullish(amountError) || isNullish(amount);
+	$: invalid =
+		invalidDestination ||
+		nonNullish(amountError) ||
+		isNullishOrEmpty(destination) ||
+		isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
+		{#if !simplifiedForm}
+			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{/if}
+
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 
-		<SendSource token={$sendToken} balance={$balance} />
+		<SendSource token={$sendToken} balance={$balance} source={sourceValue} />
 
 		<IcFeeDisplay {networkId} />
 

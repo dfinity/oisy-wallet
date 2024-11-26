@@ -15,6 +15,7 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import type { SendContextPurpose } from '$lib/stores/send.store';
 
 	/**
 	 * Props
@@ -52,6 +53,9 @@
 		...otherSteps
 	];
 
+	let sendPurpose: SendContextPurpose;
+	$: sendPurpose = isNetworkIdEthereum(networkId) ? 'convert-cketh-to-eth' : 'send';
+
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
@@ -83,7 +87,7 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<SendTokenContext token={$token}>
+	<SendTokenContext token={$token} {sendPurpose}>
 		<IcSendTokenWizard
 			{source}
 			{currentStep}

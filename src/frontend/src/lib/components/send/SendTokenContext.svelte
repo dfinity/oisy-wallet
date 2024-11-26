@@ -5,6 +5,7 @@
 	import type { OptionToken, Token } from '$lib/types/token';
 
 	export let token: OptionToken;
+	export let sendPurpose: string = 'send';
 
 	let selectedToken: Token;
 	$: selectedToken = token ?? DEFAULT_ETHEREUM_TOKEN;
@@ -13,7 +14,7 @@
 	 * Send modal context store
 	 */
 	const { sendToken, ...rest } = initSendContext({
-		sendPurpose: 'send',
+		sendPurpose,
 		token: selectedToken
 	});
 

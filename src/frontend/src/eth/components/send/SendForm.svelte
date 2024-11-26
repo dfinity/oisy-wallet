@@ -16,10 +16,12 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { ethAddress } from '$lib/derived/address.derived';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
+	export let simplifiedForm = false;
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
@@ -31,6 +33,8 @@
 	let invalid = true;
 	$: invalid =
 		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
+
+	let sourceValue = simplifiedForm ? undefined : $ethAddress ?? '';
 
 	const dispatch = createEventDispatcher();
 
@@ -53,7 +57,7 @@
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} />
+		<SendSource token={$sendToken} balance={$sendBalance} source={sourceValue} />
 
 		<FeeDisplay />
 
