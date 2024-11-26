@@ -100,7 +100,7 @@ export const onLoadTransactionsError = ({
 	balancesStore.reset(tokenId);
 
 	if (silent) {
-		// We print to console the error just for debugging purposes
+		// We print the error to console just for debugging purposes
 		console.error(`${get(i18n).transactions.error.loading_transactions}:`, err);
 		return;
 	}
