@@ -45,33 +45,18 @@
 
 	const hidePopover = () => (visible = false);
 
-	const goToTokens = async () => {
+	const navigateTo = async (path: AppPath) => {
 		hidePopover();
-		await goto(
-			networkUrl({ path: AppPath.Tokens, networkId: $networkId, isTransactionsRoute, fromRoute })
-		);
+		await goto(networkUrl({ path, networkId: $networkId, isTransactionsRoute, fromRoute }));
 	};
 
-	const gotoSettings = async () => {
-		hidePopover();
-		await goto(
-			networkUrl({ path: AppPath.Settings, networkId: $networkId, isTransactionsRoute, fromRoute })
-		);
-	};
+	const goToTokens = async () => await navigateTo(AppPath.Tokens);
 
-	const goToDappExplorer = async () => {
-		hidePopover();
-		await goto(
-			networkUrl({ path: AppPath.Explore, networkId: $networkId, isTransactionsRoute, fromRoute })
-		);
-	};
+	const gotoSettings = async () => await navigateTo(AppPath.Settings);
 
-	const goToActivity = async () => {
-		hidePopover();
-		await goto(
-			networkUrl({ path: AppPath.Activity, networkId: $networkId, isTransactionsRoute, fromRoute })
-		);
-	};
+	const goToDappExplorer = async () => await navigateTo(AppPath.Explore);
+
+	const goToActivity = async () => await navigateTo(AppPath.Activity);
 
 	let assetsRoute = false;
 	$: assetsRoute = isRouteTokens($page);
