@@ -365,7 +365,7 @@ interface I18nConvert {
 		refreshing_ui: string;
 		unsupported_token_conversion: string;
 	};
-	assertion: { insufficient_funds: string; insufficient_funds_for_fee: string };
+	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
 }
 
@@ -402,6 +402,7 @@ interface I18nTokens {
 			title: string;
 			review: string;
 			saving: string;
+			updating: string;
 			ledger_canister_id: string;
 			index_canister_id: string;
 			minter_canister_id: string;
@@ -425,6 +426,7 @@ interface I18nTokens {
 			missing_contract_address: string;
 			no_network: string;
 		};
+		warning: { do_not_close_manage: string };
 	};
 	manage: {
 		text: {
@@ -478,6 +480,7 @@ interface I18nFee {
 		zero_fee: string;
 		total_fee: string;
 	};
+	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
 }
 
