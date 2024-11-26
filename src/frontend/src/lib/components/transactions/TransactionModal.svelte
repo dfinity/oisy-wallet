@@ -7,7 +7,6 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { TransactionUiCommon } from '$lib/types/transaction';
@@ -17,10 +16,12 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { OptionToken } from '$lib/types/token';
 
 	export let commonData: TransactionUiCommon;
 	export let hash: string | undefined;
 	export let value: BigNumber | undefined;
+	export let token: OptionToken;
 	export let typeLabel: string;
 	export let sendToLabel: string | undefined;
 
@@ -119,10 +120,10 @@
 				<output>
 					{formatToken({
 						value,
-						unitName: $tokenWithFallback.decimals,
-						displayDecimals: $tokenWithFallback.decimals
+						unitName: token.decimals,
+						displayDecimals: token.decimals
 					})}
-					{$tokenWithFallback.symbol}
+					{token.symbol}
 				</output>
 			</Value>
 		{/if}
