@@ -2,7 +2,6 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 
 	export let amount: BigNumber;
 	export let decimals: number;
@@ -22,4 +21,4 @@
 	});
 </script>
 
-<data data-tid={AMOUNT_DATA} value={detailedValue}>{displayValue}</data>
+<data value={detailedValue}>{displayValue}</data>

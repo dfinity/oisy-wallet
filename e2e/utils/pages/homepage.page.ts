@@ -1,4 +1,5 @@
 import {
+	AMOUNT_DATA,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -206,21 +207,9 @@ abstract class Homepage {
 		return await this.#page.getByTestId(testId).isVisible().catch(() => false);
 	}
 
-	async getValueBy({ testId }: TestIdOperationParams): Promise<string | null> {
-		return await this.#page.getByTestId(testId).getAttribute('value');
-	}
-
-	async waitForValueToChangeByTestId({ testId, initialValue }: TestIdOperationParams & { initialValue: string }): Promise<string | null> {
-		await this.#page.waitForFunction(
-			([testId, initialValue]) => {
-				const element = document.querySelector(`[data-tid="${testId}"]`);
-				return element && element.getAttribute('value') !== initialValue;
-			},
-			[testId, initialValue]
-		);
-
-		return this.getValueBy({ testId });
-	}
+  getBalance(): Locator {
+		return this.#page.getByTestId(AMOUNT_DATA);
+  }
 
 	async getInputValueBy({ testId }: TestIdOperationParams): Promise<string | undefined> {
 		return await this.#page.getByTestId(testId).inputValue();

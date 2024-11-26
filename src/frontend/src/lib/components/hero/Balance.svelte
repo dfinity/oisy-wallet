@@ -6,6 +6,7 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
+	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 
 	export let token: OptionTokenUi;
 
@@ -14,7 +15,7 @@
 
 <span class="flex flex-col gap-2">
 	<output
-		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
+	data-tid={AMOUNT_DATA} class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !token.balance.isZero()}
 			<span><Amount amount={token.balance} decimals={token.decimals} /> {token.symbol}</span>

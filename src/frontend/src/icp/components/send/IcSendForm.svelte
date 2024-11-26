@@ -14,6 +14,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -47,7 +48,7 @@
 
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
-			<ButtonNext disabled={invalid} />
+			<ButtonNext disabled={invalid} testId={SEND_FORM_NEXT_BUTTON}/>
 		</ButtonGroup>
 	</ContentWithToolbar>
 </form>
