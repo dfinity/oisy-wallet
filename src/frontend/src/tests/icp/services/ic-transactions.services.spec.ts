@@ -13,7 +13,6 @@ describe('ic-transactions.services', () => {
 	describe('onLoadTransactionsError', () => {
 		const tokenId = ICP_TOKEN_ID;
 		const mockError = new Error('Test error');
-		const mockFallback = vi.fn();
 		const mockTransactions = createMockIcTransactionsUi(5).map((transaction) => ({
 			data: transaction,
 			certified: false
@@ -40,15 +39,14 @@ describe('ic-transactions.services', () => {
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
 		});
 
-		it('should call fallback if provided', () => {
-			onLoadTransactionsError({ tokenId, error: mockError, fallback: mockFallback });
+		it('should call not display a toast if silent', () => {
+			onLoadTransactionsError({ tokenId, error: mockError, silent: true });
 
-			expect(mockFallback).toHaveBeenCalled();
 			expect(spyToastsError).not.toHaveBeenCalled();
 		});
 
-		it('should log error to console when fallback is provided', () => {
-			onLoadTransactionsError({ tokenId, error: mockError, fallback: mockFallback });
+		it('should log error to console when silent', () => {
+			onLoadTransactionsError({ tokenId, error: mockError, silent: true });
 
 			expect(console.error).toHaveBeenCalledWith(
 				`${get(i18n).transactions.error.loading_transactions}:`,
@@ -56,7 +54,7 @@ describe('ic-transactions.services', () => {
 			);
 		});
 
-		it('should call toastsError if no fallback is provided', () => {
+		it('should call toastsError by default', () => {
 			onLoadTransactionsError({ tokenId, error: mockError });
 
 			expect(spyToastsError).toHaveBeenCalledWith({
@@ -73,7 +71,7 @@ describe('ic-transactions.services', () => {
 				err: null
 			});
 
-			onLoadTransactionsError({ tokenId, error: undefined, fallback: mockFallback });
+			onLoadTransactionsError({ tokenId, error: undefined, silent: true });
 
 			expect(console.error).toHaveBeenCalledWith(
 				`${get(i18n).transactions.error.loading_transactions}:`,
