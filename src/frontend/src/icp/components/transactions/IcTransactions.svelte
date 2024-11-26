@@ -13,6 +13,7 @@
 	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
+	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
 	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
 		tokenCkBtcLedger,
@@ -30,7 +31,6 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;

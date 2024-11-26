@@ -7,8 +7,8 @@
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { last } from '$lib/utils/array.utils';
 	import type { Token } from '$lib/types/token';
+	import { last } from '$lib/utils/array.utils';
 
 	export let token: Token;
 
