@@ -13,6 +13,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { Principal } from '@dfinity/principal';
+import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const getTransactions = async ({
@@ -87,15 +88,24 @@ export const loadNextTransactions = ({
 
 export const onLoadTransactionsError = ({
 	tokenId,
-	error: err
+	error: err,
+	fallback
 }: {
 	tokenId: TokenId;
 	error: unknown;
+	fallback?: () => void;
 }) => {
 	icTransactionsStore.reset(tokenId);
 
 	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
 	balancesStore.reset(tokenId);
+
+	if (nonNullish(fallback)) {
+		// We print to console the error just for debugging purposes
+		console.error(`${get(i18n).transactions.error.loading_transactions}:`, err);
+		fallback();
+		return;
+	}
 
 	toastsError({
 		msg: { text: get(i18n).transactions.error.loading_transactions },

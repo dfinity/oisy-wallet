@@ -42,7 +42,18 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: (data.data as PostMessageDataResponseError).error,
+					// In case of error, we start the listener again, but only with the ledgerCanisterId,
+					// to make it request only the balance and not the transactions
+					fallback: () => {
+						worker.postMessage({
+							msg: 'startIcrcWalletTimer',
+							data: {
+								ledgerCanisterId,
+								env
+							}
+						});
+					}
 				});
 				return;
 			case 'syncIcrcWalletCleanUp':
