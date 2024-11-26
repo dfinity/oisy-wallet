@@ -9,12 +9,12 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -48,7 +48,7 @@
 
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
-			<ButtonNext disabled={invalid} testId={SEND_FORM_NEXT_BUTTON}/>
+			<ButtonNext disabled={invalid} testId={SEND_FORM_NEXT_BUTTON} />
 		</ButtonGroup>
 	</ContentWithToolbar>
 </form>

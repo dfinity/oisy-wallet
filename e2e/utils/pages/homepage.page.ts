@@ -13,7 +13,13 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
-import { expect, type Locator, type Page, type ViewportSize, type BrowserContext } from '@playwright/test';
+import {
+	expect,
+	type BrowserContext,
+	type Locator,
+	type Page,
+	type ViewportSize
+} from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
@@ -204,18 +210,24 @@ abstract class Homepage {
 	}
 
 	async elementExistsBy({ testId }: TestIdOperationParams): Promise<boolean> {
-		return await this.#page.getByTestId(testId).isVisible().catch(() => false);
+		return await this.#page
+			.getByTestId(testId)
+			.isVisible()
+			.catch(() => false);
 	}
 
-  getBalance(): Locator {
+	getBalance(): Locator {
 		return this.#page.getByTestId(AMOUNT_DATA);
-  }
+	}
 
 	async getInputValueBy({ testId }: TestIdOperationParams): Promise<string | undefined> {
 		return await this.#page.getByTestId(testId).inputValue();
 	}
 
-	async setInputValueByTestId({ testId, value }: TestIdOperationParams & { value: string }): Promise<void> {
+	async setInputValueByTestId({
+		testId,
+		value
+	}: TestIdOperationParams & { value: string }): Promise<void> {
 		await this.#page.getByTestId(testId).fill(value);
 	}
 

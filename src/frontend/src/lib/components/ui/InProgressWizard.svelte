@@ -3,12 +3,12 @@
 	import { onDestroy, onMount } from 'svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { IN_PROGRESS_MODAL } from '$lib/constants/test-ids.constants';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
-	import { IN_PROGRESS_MODAL } from '$lib/constants/test-ids.constants';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;

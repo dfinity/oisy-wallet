@@ -5,12 +5,12 @@
 	import { slide } from 'svelte/transition';
 	import MaxButton from '$lib/components/common/MaxButton.svelte';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
+	import { AMOUNT_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { AMOUNT_INPUT } from '$lib/constants/test-ids.constants';
 
 	export let amount: OptionAmount = undefined;
 	export let tokenDecimals: number | undefined = undefined;

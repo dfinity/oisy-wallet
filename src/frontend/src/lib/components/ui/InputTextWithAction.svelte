@@ -16,7 +16,7 @@
 	{placeholder}
 	spellcheck={false}
 	autocomplete="off"
-	testId={testId}
+	{testId}
 	on:nnsInput
 >
 	<slot name="inner-end" slot="inner-end" />

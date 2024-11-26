@@ -37,13 +37,13 @@ class DockerCommandExecutor implements CommandRunner {
 		const exec = await container.exec({
 			Cmd: command.toString().split(' '),
 			AttachStdout: true,
-			AttachStderr: true,
+			AttachStderr: true
 		});
 
 		const stream = await exec.start({});
 		return new Promise((resolve, reject) => {
 			let result = '';
-			stream.on('data', (data) => result += data.toString());
+			stream.on('data', (data) => (result += data.toString()));
 			stream.on('end', () => resolve(result));
 			stream.on('error', reject);
 		});
@@ -61,5 +61,5 @@ function createCommandRunner(
 	}
 }
 
-export { LocalCommandRunner, DockerCommandExecutor, createCommandRunner };    export type { Command, CommandRunner };
-
+export { DockerCommandExecutor, LocalCommandRunner, createCommandRunner };
+export type { Command, CommandRunner };
