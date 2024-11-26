@@ -9,13 +9,13 @@
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { SendContextPurpose } from '$lib/stores/send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import type { SendContextPurpose } from '$lib/stores/send.store';
 
 	/**
 	 * Props

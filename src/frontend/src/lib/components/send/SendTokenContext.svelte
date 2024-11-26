@@ -5,7 +5,7 @@
 	import type { OptionToken, Token } from '$lib/types/token';
 
 	export let token: OptionToken;
-	export let sendPurpose: string = 'send';
+	export let sendPurpose = 'send';
 
 	let selectedToken: Token;
 	$: selectedToken = token ?? DEFAULT_ETHEREUM_TOKEN;

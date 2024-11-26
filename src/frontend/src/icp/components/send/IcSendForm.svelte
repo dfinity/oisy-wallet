@@ -3,6 +3,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
+	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -13,7 +14,6 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
