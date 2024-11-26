@@ -124,7 +124,11 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Hiding'}
-		<InProgressWizard progressStep={hideProgressStep} steps={HIDE_TOKEN_STEPS} />
+		<InProgressWizard
+			progressStep={hideProgressStep}
+			steps={HIDE_TOKEN_STEPS}
+			warningType="manage"
+		/>
 	{:else}
 		<HideTokenReview on:icCancel={close} on:icHide={hide} />
 	{/if}

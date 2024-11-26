@@ -44,7 +44,7 @@
 		},
 		{
 			name: 'Saving',
-			title: $i18n.tokens.import.text.saving
+			title: $i18n.tokens.import.text.updating
 		}
 	];
 
@@ -182,7 +182,11 @@
 			/>
 		{/if}
 	{:else if currentStep?.name === 'Saving'}
-		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
+		<InProgressWizard
+			progressStep={saveProgressStep}
+			steps={addTokenSteps($i18n)}
+			warningType="manage"
+		/>
 	{:else if currentStep?.name === 'Import'}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}

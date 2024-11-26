@@ -402,6 +402,7 @@ interface I18nTokens {
 			title: string;
 			review: string;
 			saving: string;
+			updating: string;
 			ledger_canister_id: string;
 			index_canister_id: string;
 			minter_canister_id: string;
@@ -425,6 +426,7 @@ interface I18nTokens {
 			missing_contract_address: string;
 			no_network: string;
 		};
+		warning: { do_not_close_manage: string };
 	};
 	manage: {
 		text: {

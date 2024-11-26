@@ -8,9 +8,11 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
 	export let steps: ProgressSteps;
+	export let warningType: 'transaction' | 'manage' = 'transaction';
 
 	onMount(() => confirmToCloseBrowser(true));
 	onDestroy(() => confirmToCloseBrowser(false));
@@ -29,7 +31,13 @@
 
 <div class="stretch">
 	<MessageBox level="light-warning">
-		<span>{$i18n.core.warning.do_not_close}</span>
+		<span>
+			{replaceOisyPlaceholders(
+				warningType === 'manage'
+					? $i18n.tokens.import.warning.do_not_close_manage
+					: $i18n.core.warning.do_not_close
+			)}
+		</span>
 	</MessageBox>
 
 	<InProgress {progressStep} {steps} />
