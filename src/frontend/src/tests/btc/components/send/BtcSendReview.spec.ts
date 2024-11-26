@@ -10,7 +10,8 @@ import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('BtcSendReview', () => {
-	const mockContext = (balance: bigint | undefined = 1000000n) =>
+	const defaultBalance = 1000000n;
+	const mockContext = (balance: bigint | undefined = defaultBalance) =>
 		new Map([
 			[
 				SEND_CONTEXT_KEY,
@@ -41,6 +42,7 @@ describe('BtcSendReview', () => {
 			.mockImplementation(() => readable(status));
 
 	const buttonTestId = REVIEW_FORM_SEND_BUTTON;
+	const insufficientFundsForFeeTestId = 'btc-send-form-insufficient-funds-for-fee';
 
 	beforeEach(() => {
 		mockPage.reset();
@@ -50,10 +52,7 @@ describe('BtcSendReview', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
-			props: {
-				...props,
-				utxosFee: mockUtxosFee
-			},
+			props,
 			context: mockContext()
 		});
 
@@ -149,5 +148,20 @@ describe('BtcSendReview', () => {
 		await waitFor(() => {
 			expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 		});
+	});
+
+	it('should disable the next button and render insufficient funds for fee message', () => {
+		const { getByTestId } = render(BtcSendReview, {
+			props: {
+				...props,
+				amount: defaultBalance
+			},
+			context: mockContext()
+		});
+
+		expect(getByTestId(insufficientFundsForFeeTestId)).toHaveTextContent(
+			en.fee.assertion.insufficient_funds_for_fee
+		);
+		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 });
