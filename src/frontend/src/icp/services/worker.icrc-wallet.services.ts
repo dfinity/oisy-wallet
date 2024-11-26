@@ -21,6 +21,15 @@ export const initIcrcWalletWorker = async ({
 	const WalletWorker = await import('$icp/workers/icrc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
+	const restartWorkerWithLedgerOnly = () =>
+		worker.postMessage({
+			msg: 'startIcrcWalletTimer',
+			data: {
+				ledgerCanisterId,
+				env
+			}
+		});
+
 	worker.onmessage = ({
 		data
 	}: MessageEvent<
@@ -43,18 +52,13 @@ export const initIcrcWalletWorker = async ({
 				onLoadTransactionsError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error,
-					// In case of error, we start the listener again, but only with the ledgerCanisterId,
-					// to make it request only the balance and not the transactions
-					fallback: () => {
-						worker.postMessage({
-							msg: 'startIcrcWalletTimer',
-							data: {
-								ledgerCanisterId,
-								env
-							}
-						});
-					}
+					silent: true
 				});
+
+				// In case of error, we start the listener again, but only with the ledgerCanisterId,
+				// to make it request only the balance and not the transactions
+				restartWorkerWithLedgerOnly();
+
 				return;
 			case 'syncIcrcWalletCleanUp':
 				onTransactionsCleanUp({
