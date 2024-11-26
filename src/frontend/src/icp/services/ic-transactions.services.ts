@@ -101,7 +101,7 @@ export const onLoadTransactionsError = ({
 
 	if (silent) {
 		// We print the error to console just for debugging purposes
-		console.error(`${get(i18n).transactions.error.loading_transactions}:`, err);
+		console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
 		return;
 	}
 

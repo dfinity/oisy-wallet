@@ -18,8 +18,8 @@ describe('ic-transactions.services', () => {
 			certified: false
 		}));
 
-		// we mock console.error just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		// we mock console.warn just to avoid unnecessary logs while running the tests
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
 		let spyToastsError: MockInstance;
 
@@ -48,7 +48,7 @@ describe('ic-transactions.services', () => {
 		it('should log error to console when silent', () => {
 			onLoadTransactionsError({ tokenId, error: mockError, silent: true });
 
-			expect(console.error).toHaveBeenCalledWith(
+			expect(console.warn).toHaveBeenCalledWith(
 				`${get(i18n).transactions.error.loading_transactions}:`,
 				mockError
 			);
@@ -73,7 +73,7 @@ describe('ic-transactions.services', () => {
 
 			onLoadTransactionsError({ tokenId, error: undefined, silent: true });
 
-			expect(console.error).toHaveBeenCalledWith(
+			expect(console.warn).toHaveBeenCalledWith(
 				`${get(i18n).transactions.error.loading_transactions}:`,
 				undefined
 			);
