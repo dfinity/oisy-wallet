@@ -4,17 +4,17 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
-import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
-import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
-import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
-import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
-import { UNI_TOKEN } from '$env/tokens-erc20/tokens.uni.env';
-import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
-import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
-import { WSTETH_TOKEN } from '$env/tokens-erc20/tokens.wsteth.env';
-import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
+import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
+import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
+import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
+import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
+import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
+import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
+import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
