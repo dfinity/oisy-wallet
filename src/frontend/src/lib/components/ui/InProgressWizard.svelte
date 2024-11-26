@@ -31,13 +31,13 @@
 
 <div class="stretch">
 	<MessageBox level="light-warning">
-		<span
-			>{$i18n.core.warning.do_not_close}{replaceOisyPlaceholders(
+		<span>
+			{replaceOisyPlaceholders(
 				warningType === 'manage'
 					? $i18n.tokens.import.warning.do_not_close_manage
 					: $i18n.core.warning.do_not_close
-			)}</span
-		>
+			)}
+		</span>
 	</MessageBox>
 
 	<InProgress {progressStep} {steps} />
