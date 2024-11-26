@@ -365,7 +365,7 @@ interface I18nConvert {
 		refreshing_ui: string;
 		unsupported_token_conversion: string;
 	};
-	assertion: { insufficient_funds: string; insufficient_funds_for_fee: string };
+	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
 }
 
@@ -478,6 +478,7 @@ interface I18nFee {
 		zero_fee: string;
 		total_fee: string;
 	};
+	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
 }
 
