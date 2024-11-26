@@ -1,5 +1,5 @@
 import { SEPOLIA_NETWORK_ID } from '$env/networks.env';
-import { SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
+import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
