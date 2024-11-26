@@ -1,5 +1,5 @@
 import { ETHERSCAN_MAX_CALLS_PER_SECOND } from '$env/rest/etherscan.env';
-import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import {
 	batchLoadTransactions,
