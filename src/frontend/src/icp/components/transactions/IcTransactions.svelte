@@ -101,6 +101,9 @@
 
 	let noTransactions = false;
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
+
+	let hasIndexCanister = false;
+	$: hasIndexCanister = nonNullish($tokenAsIcToken) && nonNullish($tokenAsIcToken.indexCanisterId);
 </script>
 
 <Info />
@@ -130,7 +133,7 @@
 		{/if}
 
 		{#if noTransactions}
-			<IcNoIndexPlaceholder />
+			<IcNoIndexPlaceholder issueType={hasIndexCanister ? 'not-working' : 'missing'} />
 		{:else if $icTransactions.length === 0}
 			<TransactionsPlaceholder />
 		{/if}
