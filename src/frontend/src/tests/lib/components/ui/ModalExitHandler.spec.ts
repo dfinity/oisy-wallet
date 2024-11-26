@@ -1,7 +1,7 @@
-import { modalStore } from '$lib/stores/modal.store';
-import { get } from 'svelte/store';
 import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
+import { modalStore } from '$lib/stores/modal.store';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('ModalExitHandler', () => {
 	it('closes modal on popstate event', () => {
