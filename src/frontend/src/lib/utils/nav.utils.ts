@@ -11,8 +11,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import type { LoadEvent, Page } from '@sveltejs/kit';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -47,6 +47,25 @@ const tokenUrl = ({
 
 export const networkParam = (networkId: NetworkId | undefined): string =>
 	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description ?? ''}`;
+
+export const networkUrl = ({
+	path,
+	networkId,
+	isTransactionsRoute,
+	fromRoute
+}: {
+	path: AppPath;
+	networkId: Option<NetworkId>;
+	isTransactionsRoute: boolean;
+	fromRoute: NavigationTarget | null;
+}) =>
+	isTransactionsRoute
+		? notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))
+			? `${path}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`
+			: path
+		: nonNullish(networkId)
+			? `${path}?${networkParam(networkId)}`
+			: path;
 
 export const back = async ({ pop }: { pop: boolean }) => {
 	if (pop) {

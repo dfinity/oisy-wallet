@@ -1,27 +1,22 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
-import { ICP_TOKEN } from '$env/tokens.env';
+import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
-import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
 
 describe('ConvertModal', () => {
-	const mockContext = () =>
-		new Map([
-			[
-				CONVERT_CONTEXT_KEY,
-				{
-					sourceToken: readable(BTC_MAINNET_TOKEN),
-					destinationToken: readable(ICP_TOKEN)
-				}
-			]
-		]);
+	const props = {
+		sourceToken: BTC_MAINNET_TOKEN,
+		destinationToken: ICP_TOKEN
+	};
 
 	it('should display correct modal title after navigating between steps', async () => {
 		const { container, getByText } = render(ConvertModal, {
-			context: mockContext()
+			props,
+			context: new Map([[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }]])
 		});
+
 		const firstStepTitle = 'Swap BTC → ICP';
 
 		expect(container).toHaveTextContent(firstStepTitle);
