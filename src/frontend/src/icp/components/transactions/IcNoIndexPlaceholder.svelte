@@ -5,12 +5,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let issueType: 'missing' | 'not-working' = 'missing';
+	export let placeholderType: 'missing' | 'not-working' = 'missing';
 </script>
 
 <div class="py-12" data-tid="ic-no-index-placeholder">
 	<div class="mb-5 flex justify-center">
-		<RoundedIcon icon={issueType === 'not-working' ? IconAlertTriangle : IconSearchClose} />
+		<RoundedIcon icon={placeholderType === 'not-working' ? IconAlertTriangle : IconSearchClose} />
 	</div>
 
 	<div class="space-y-4">
@@ -19,7 +19,7 @@
 		</p>
 		<p class="text-secondary m-0 text-center opacity-50">
 			{replaceOisyPlaceholders(
-				issueType === 'not-working'
+				placeholderType === 'not-working'
 					? $i18n.transactions.text.index_canister_not_working_explanation
 					: $i18n.transactions.text.missing_index_canister_explanation
 			)}

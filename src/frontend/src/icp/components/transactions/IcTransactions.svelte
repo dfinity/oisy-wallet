@@ -133,7 +133,7 @@
 		{/if}
 
 		{#if noTransactions}
-			<IcNoIndexPlaceholder issueType={hasIndexCanister ? 'not-working' : 'missing'} />
+			<IcNoIndexPlaceholder placeholderType={hasIndexCanister ? 'not-working' : 'missing'} />
 		{:else if $icTransactions.length === 0}
 			<TransactionsPlaceholder />
 		{/if}
