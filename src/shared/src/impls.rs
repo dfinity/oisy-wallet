@@ -1,16 +1,19 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
+use crate::types::dapp::Dapp;
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
-use crate::types::{ApiEnabled, Config, CredentialType, DappVersion, InitArg, Migration, MigrationProgress, MigrationReport, Timestamp, TokenVersion, Version};
+use crate::types::{
+    ApiEnabled, Config, CredentialType, DappVersion, InitArg, Migration, MigrationProgress,
+    MigrationReport, Timestamp, TokenVersion, Version,
+};
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(test)]
 use strum::IntoEnumIterator;
-use crate::types::dapp::Dapp;
 
 impl DappVersion for Dapp {
     fn get_version(&self) -> Option<Version> {

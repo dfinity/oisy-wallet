@@ -183,13 +183,11 @@ pub trait DappVersion: Debug {
         Self: Sized + Clone;
 }
 
-
 /// Dapp
 pub mod dapp {
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
     use serde::Serialize;
-
 
     #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct Dapp {
@@ -203,7 +201,6 @@ pub mod dapp {
         pub id: String,
     }
 }
-
 
 pub mod bitcoin {
     use candid::CandidType;
