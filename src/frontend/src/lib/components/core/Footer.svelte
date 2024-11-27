@@ -53,35 +53,44 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto flex flex-row items-center justify-end gap-2 text-sm lg:max-w-48 xl:max-w-none"
+			class="item pointer-events-auto px-6 text-sm md:px-0 lg:max-w-48"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
+			class:xl:max-w-none={$authNotSignedIn}
+			class:xl:max-w-80={$authSignedIn}
+			class:1.5xl:max-w-none={$authSignedIn}
 			class:md:h-md:pr-4={$authNotSignedIn}
 			class:md:transition-all={$authSignedIn}
 			class:md:duration-200={$authSignedIn}
 			class:md:ease-in-out={$authSignedIn}
 			class:md:invisible={$authSignedIn}
-			class:1.5md:visible={$authSignedIn}
 			class:md:translate-x-full={$authSignedIn}
 			class:1.5md:translate-x-0={$authSignedIn}
+			class:1.5md:visible={$authSignedIn}
 		>
-			<ExternalLink
-				href="https://dfinity.org"
-				ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
-				iconVisible={false}
-			>
-				<div class="flex flex-row items-center gap-2">
-					<IconDfinity />
-					<span
-						class:md:hidden={$authSignedIn}
-						class:xl:flex={$authSignedIn}
-						class:md:h-md:hidden={$authNotSignedIn}
-						class:1.5md:h-md:flex={$authNotSignedIn}
+			<div class="flex flex-col items-center pt-2 sm:flex-row sm:items-start sm:gap-2">
+				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
+				<span
+					class:md:hidden={$authSignedIn}
+					class:xl:block={$authSignedIn}
+					class:md:h-md:hidden={$authNotSignedIn}
+					class:1.5md:h-md:block={$authNotSignedIn}
+					class="text-center md:text-left"
+				>
+					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
+					<ExternalLink
+						href="https://dfinity.org"
+						ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
+						iconVisible={false}
+						color="blue"
 					>
-						{replaceOisyPlaceholders($i18n.footer.text.developed_with)}
-					</span>
-				</div>
-			</ExternalLink>
+						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
+					</ExternalLink>
+					<span class="whitespace-nowrap"
+						>{replaceOisyPlaceholders($i18n.footer.text.copyright)}</span
+					>
+				</span>
+			</div>
 		</div>
 	</div>
 </footer>

@@ -15,7 +15,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar styleClass="flex flex-col">
 	<ConvertReviewTokens />
 
 	<div slot="outer-content" class="my-4 flex-1">
@@ -31,7 +31,7 @@
 	<ButtonGroup slot="toolbar">
 		<slot name="cancel" />
 
-		<Button on:click={() => dispatch('icConvert')}>
+		<Button on:click={() => dispatch('icConvert')} testId="convert-review-button-next">
 			{$i18n.convert.text.convert_button}
 		</Button>
 	</ButtonGroup>

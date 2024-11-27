@@ -44,9 +44,6 @@ export const mapIcrcToken = ({
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.alternativeName) && {
 			alternativeName: icrcCustomTokens[ledgerCanisterId].alternativeName
 		}),
-		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.indexCanisterVersion) && {
-			indexCanisterVersion: icrcCustomTokens[ledgerCanisterId].indexCanisterVersion
-		}),
 		ledgerCanisterId,
 		...metadataToken,
 		...rest

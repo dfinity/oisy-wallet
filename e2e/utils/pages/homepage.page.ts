@@ -75,7 +75,9 @@ abstract class Homepage {
 		}
 	}
 
-	private async mockSelector({ selector }: SelectorOperationParams): Promise<void> {
+	protected async mockSelector({ selector }: SelectorOperationParams): Promise<void> {
+		await this.#page.locator(selector).innerHTML();
+
 		if (await this.isSelectorVisible({ selector })) {
 			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
 		}
@@ -199,6 +201,8 @@ abstract class Homepage {
 		await expect(modal).toHaveScreenshot();
 	}
 
+	abstract extendWaitForReady(): Promise<void>;
+
 	abstract waitForReady(): Promise<void>;
 }
 
@@ -206,6 +210,8 @@ export class HomepageLoggedOut extends Homepage {
 	constructor(params: HomepageParams) {
 		super(params);
 	}
+
+	override async extendWaitForReady(): Promise<void> {}
 
 	/**
 	 * @override
@@ -277,7 +283,7 @@ export class HomepageLoggedIn extends Homepage {
 		await expect(qrCodeOutputLocator).toHaveText(qrCode ?? '');
 	}
 
-	async extendWaitForReady(): Promise<void> {
+	override async extendWaitForReady(): Promise<void> {
 		// Extend the waitForReady method in a subclass
 	}
 

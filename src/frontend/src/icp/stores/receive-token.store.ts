@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
-import { ETHEREUM_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';

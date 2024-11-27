@@ -11,6 +11,13 @@ export enum ProgressStepsSend {
 	DONE = 'done'
 }
 
+export enum ProgressStepsConvert {
+	INITIALIZATION = 'initialization',
+	CONVERT = 'convert',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
 export enum ProgressStepsSign {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',

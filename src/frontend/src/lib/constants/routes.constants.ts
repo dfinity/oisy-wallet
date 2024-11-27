@@ -1,4 +1,5 @@
 export enum AppPath {
+	Tokens = '/',
 	Explore = '/explore',
 	Settings = '/settings',
 	Transactions = '/transactions',

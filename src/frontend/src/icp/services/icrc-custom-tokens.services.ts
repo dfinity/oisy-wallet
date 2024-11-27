@@ -1,7 +1,7 @@
 import { SNS_EXPLORER_URL } from '$env/explorers.env';
 import { ICP_NETWORK } from '$env/networks.env';
 import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
-import snsTokens from '$env/tokens.sns.json';
+import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
@@ -63,7 +63,6 @@ export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 const mapIcrcCustomToken = ({
 	ledgerCanisterId,
 	indexCanisterId,
-	indexCanisterVersion,
 	rootCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName }
 }: EnvSnsToken): IcTokenWithoutIdExtended => ({
@@ -80,6 +79,5 @@ const mapIcrcCustomToken = ({
 	icon: `/icons/sns/${ledgerCanisterId}.png`,
 	fee,
 	alternativeName,
-	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
-	indexCanisterVersion
+	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`
 });

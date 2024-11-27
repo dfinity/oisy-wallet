@@ -13,7 +13,6 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More",
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
@@ -66,7 +65,6 @@
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
 		"alt": {
-			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"warning": {
@@ -111,7 +109,9 @@
 	},
 	"footer": {
 		"text": {
-			"developed_with": "© 2024 Developed with ❤\uFE0F at DFINITY"
+			"incubated_with": "Incubated with ❤\uFE0F by",
+			"dfinity_foundation": "DFINITY Foundation",
+			"copyright": "© 2024"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
@@ -152,7 +152,6 @@
 			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
-			"no_infura_ckerc20_provider": "No Infura CkErc20 provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
@@ -203,8 +202,7 @@
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅",
-			"sign_in": "Sign in to start using $oisy_name."
+			"pouh_credential_verified": "Verified ✅"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -217,7 +215,6 @@
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
-		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
 		"chain_fusion": "Chain Fusion (all networks)"
 	},
@@ -396,14 +393,16 @@
 			"conversion_may_take": "Conversion may take up to 1 hour",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
-			"refreshing_ui": "Refreshing UI"
+			"refreshing_ui": "Refreshing UI",
+			"unsupported_token_conversion": "Conversion for the selected token is not supported."
 		},
 		"assertion": {
-			"insufficient_funds": "Insufficient balance",
-			"insufficient_funds_for_fee": "Insufficient balance to cover the fees"
+			"insufficient_funds": "Insufficient balance"
 		},
 		"error": {
-			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
+			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
+			"unexpected": "Something went wrong while converting tokens.",
+			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
 		}
 	},
 	"buy": {
@@ -447,6 +446,7 @@
 				"title": "Import token",
 				"review": "Review",
 				"saving": "Saving...",
+				"updating": "Updating token list",
 				"ledger_canister_id": "Ledger Canister ID",
 				"index_canister_id": "Index Canister ID",
 				"minter_canister_id": "Minter Canister ID",
@@ -467,9 +467,11 @@
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
-				"missing_index_id": "The Index ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
 			}
 		},
 		"manage": {
@@ -486,7 +488,6 @@
 				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with $oisy_name. Contact the project team to propose an upgrade.",
 				"no_changes": "No changes need to be saved."
 			},
 			"error": {
@@ -541,6 +542,9 @@
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
 			"total_fee": "Total fee"
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
@@ -659,7 +663,8 @@
 			"sending_twin_token_failed": "Sending $twinToken failed",
 			"converting_twin_token": "Converting $twinToken to $ckToken",
 			"converting_ck_token": "Converting $ckToken to $twinToken",
-			"twin_network": "$twinNetwork network"
+			"twin_network": "$twinNetwork network",
+			"no_date_available": "No Date Available"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",
@@ -680,7 +685,8 @@
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
-			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
+			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
@@ -693,9 +699,6 @@
 		}
 	},
 	"about": {
-		"text": {
-			"title": "About $oisy_name"
-		},
 		"why_oisy": {
 			"text": {
 				"label": "Why $oisy_short",
