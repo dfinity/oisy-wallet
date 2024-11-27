@@ -31,13 +31,3 @@ jobs:
       run: |
         git tag "v${{ steps.get_version.outputs.version }}"
         git push origin "v${{ steps.get_version.outputs.version }}"
-
-    - name: Publish Release Notes
-      id: publish_release
-      uses: release-drafter/release-drafter@v6
-      with:
-        version: 'v${{ steps.get_version.outputs.version }}'
-        tag: 'v${{ steps.get_version.outputs.version }}'
-        name: 'v${{ steps.get_version.outputs.version }}'
-        latest: true
-        publish: true
