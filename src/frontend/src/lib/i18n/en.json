@@ -397,8 +397,7 @@
 			"unsupported_token_conversion": "Conversion for the selected token is not supported."
 		},
 		"assertion": {
-			"insufficient_funds": "Insufficient balance",
-			"insufficient_funds_for_fee": "Insufficient balance to cover the fees"
+			"insufficient_funds": "Insufficient balance"
 		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
@@ -447,6 +446,7 @@
 				"title": "Import token",
 				"review": "Review",
 				"saving": "Saving...",
+				"updating": "Updating token list",
 				"ledger_canister_id": "Ledger Canister ID",
 				"index_canister_id": "Index Canister ID",
 				"minter_canister_id": "Minter Canister ID",
@@ -469,6 +469,9 @@
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
 			}
 		},
 		"manage": {
@@ -539,6 +542,9 @@
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
 			"total_fee": "Total fee"
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."

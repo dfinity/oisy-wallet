@@ -1,10 +1,10 @@
 import * as NetworksModule from '$env/networks.icrc.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID, IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
-import { LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
-import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
-import { ckErc20Production } from '$env/tokens.ckerc20.env';
+import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcCkToken } from '$icp/types/ic-token';
