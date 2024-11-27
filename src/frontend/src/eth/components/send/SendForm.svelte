@@ -63,7 +63,7 @@
 
 		<SendInfo />
 
-		<ButtonGroup slot="toolbar">
+		<ButtonGroup slot="toolbar" testId="toolbar">
 			<slot name="cancel" />
 			<ButtonNext disabled={invalid} />
 		</ButtonGroup>
