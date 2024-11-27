@@ -172,17 +172,12 @@ async fn hourly_housekeeping_tasks() {
     }
 }
 
-
-
-
 #[init]
 pub fn init(arg: Arg) {
-    
-
     match arg {
-        Arg::Init(arg) => set_config(arg), Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
+        Arg::Init(arg) => set_config(arg),
+        Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
-
 
     start_periodic_housekeeping_timers();
 }
