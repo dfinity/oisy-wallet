@@ -1,8 +1,8 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
-import { LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
-import { PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
-import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN_ID } from '$env/tokens-erc20/tokens.usdt.env';
+import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import * as foo from '$eth/rest/etherscan.rest';
 import { EtherscanRest } from '$eth/rest/etherscan.rest';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';

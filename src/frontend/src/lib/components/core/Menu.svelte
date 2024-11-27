@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconUser, Popover } from '@dfinity/gix-components';
-	import { goto } from '$app/navigation';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
@@ -19,38 +20,43 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
+	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens
+		isRouteTokens,
+		isRouteTransactions,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
+
+	let isTransactionsRoute = false;
+	$: isTransactionsRoute = isRouteTransactions($page);
+
 	const hidePopover = () => (visible = false);
 
-	const goToTokens = async () => {
+	const navigateTo = async (path: AppPath) => {
 		hidePopover();
-		await goto(AppPath.Tokens);
+		await goto(networkUrl({ path, networkId: $networkId, isTransactionsRoute, fromRoute }));
 	};
 
-	const gotoSettings = async () => {
-		hidePopover();
-		await goto(AppPath.Settings);
-	};
+	const goToTokens = async () => await navigateTo(AppPath.Tokens);
 
-	const goToDappExplorer = async () => {
-		hidePopover();
-		await goto(AppPath.Explore);
-	};
+	const gotoSettings = async () => await navigateTo(AppPath.Settings);
 
-	const goToActivity = async () => {
-		hidePopover();
-		await goto(AppPath.Activity);
-	};
+	const goToDappExplorer = async () => await navigateTo(AppPath.Explore);
+
+	const goToActivity = async () => await navigateTo(AppPath.Activity);
 
 	let assetsRoute = false;
 	$: assetsRoute = isRouteTokens($page);
