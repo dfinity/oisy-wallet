@@ -1,4 +1,3 @@
-use shared::types::Stats;
 use crate::{
     types::{Candid, StoredPrincipal},
     State,
@@ -6,6 +5,7 @@ use crate::{
 use candid::{CandidType, Deserialize, Principal};
 use core::ops::Deref;
 use ic_stable_structures::storable::{Blob, Bound, Storable};
+use shared::types::Stats;
 use std::borrow::Cow;
 
 impl<T> Storable for Candid<T>
