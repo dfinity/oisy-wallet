@@ -178,7 +178,6 @@ pub fn init(arg: Arg) {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
-
     start_periodic_housekeeping_timers();
 }
 
