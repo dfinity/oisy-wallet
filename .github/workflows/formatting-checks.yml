@@ -21,7 +21,20 @@ jobs:
   format:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Check if commits can be added
+        id: check_can_add_commit
+        run: |
+          echo "can_add_commit=${{ secrets.GIX_CREATE_PR_PAT != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
+      - name: Checkout code
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+      - name: Checkout code
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
+        uses: actions/checkout@v4
       - name: Install shfmt
         run: sudo snap install --classic shfmt
       - name: Install binstall
@@ -35,9 +48,23 @@ jobs:
       - name: Format
         run: ./scripts/format.sh
       - name: Check formatted
+        id: check_changes
         run: |
-          test -z "$(git status --porcelain)" || {
-                  echo "FIX: Please run ./scripts/format.sh"
-                  git diff
-                  exit 1
-          }
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Commit format
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'true' && steps.check_changes.outputs.changes_detected == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: .
+          default_author: github_actions
+          message: '🤖 Apply formatting changes'
+      - name: Provide diff
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
+        run: |
+          echo "FIX: Please run ./scripts/format.sh"
+          git diff
+          exit 1
