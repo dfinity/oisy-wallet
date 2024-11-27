@@ -56,7 +56,7 @@
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
 
 	let hasIndexCanister = false;
-	$: hasIndexCanister = isIcTokenCanistersStrict($tokenAsIcToken ?? ICP_TOKEN);
+	$: hasIndexCanister = nonNullish($tokenAsIcToken) && isIcTokenCanistersStrict($tokenAsIcToken);
 </script>
 
 <Info />
