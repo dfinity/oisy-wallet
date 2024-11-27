@@ -7,23 +7,9 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-24.04
+
     steps:
-
-      - name: Check if commits can be added
-        id: check_can_add_commit
-        run: |
-          echo "can_add_commit=${{ secrets.GIX_CREATE_PR_PAT != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
-
       - name: Checkout code
-        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
-
-      - name: Checkout code
-        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@v4
 
       - uses: dorny/paths-filter@v3
@@ -85,6 +71,20 @@ jobs:
           else
             echo "changes_detected=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Check if commits can be added
+        id: check_can_add_commit
+        if: steps.changes.outputs.src == 'true'
+        run: |
+          echo "can_add_commit=${{ secrets.GIX_CREATE_PR_PAT != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
+
+      - name: Checkout code to commit
+        if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
 
       - name: Commit bindings
         if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'true' && steps.check_changes.outputs.changes_detected == 'true'
