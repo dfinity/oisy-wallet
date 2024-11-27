@@ -5,7 +5,6 @@
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
-	import { CAROUSEL_AUTOPLAY_DISABLED } from '$env/carousel.autoplay.env';
 
 	export let autoplay = 5000;
 	export let duration = 300;
@@ -116,8 +115,6 @@
 	 * Start autoplay timer
 	 */
 	const initialiseAutoplayTimer = () => {
-		
-		if (CAROUSEL_AUTOPLAY_DISABLED) {return}
 		
 		autoplayTimer = setInterval(() => {
 			goToNextSlide();
