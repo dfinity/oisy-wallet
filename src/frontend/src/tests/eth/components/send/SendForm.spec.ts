@@ -1,24 +1,30 @@
-import { BigNumber } from 'alchemy-sdk';
 import { ETHEREUM_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { render } from '@testing-library/svelte';
 import SendForm from '$eth/components/send/SendForm.svelte';
-import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
+import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+import { render } from '@testing-library/svelte';
+import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
 
 describe('SendForm', () => {
 	const mockContext = new Map([]);
-	mockContext.set(SEND_CONTEXT_KEY, initSendContext({
-		sendPurpose: 'convert-eth-to-cketh',
-		token: ETHEREUM_TOKEN
-	}));
-	mockContext.set(FEE_CONTEXT_KEY, initFeeContext({
-		feeStore: initFeeStore(),
-		feeSymbolStore: writable(undefined),
-		feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-		feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
-	}));
+	mockContext.set(
+		SEND_CONTEXT_KEY,
+		initSendContext({
+			sendPurpose: 'convert-eth-to-cketh',
+			token: ETHEREUM_TOKEN
+		})
+	);
+	mockContext.set(
+		FEE_CONTEXT_KEY,
+		initFeeContext({
+			feeStore: initFeeStore(),
+			feeSymbolStore: writable(undefined),
+			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+		})
+	);
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
@@ -56,7 +62,9 @@ describe('SendForm', () => {
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 		expect(maxFeeEth).not.toBeNull();
 
-		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(sendInfoMessageBoxSelector);
+		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(
+			sendInfoMessageBoxSelector
+		);
 		expect(sendInfoMessageBox).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
@@ -64,7 +72,7 @@ describe('SendForm', () => {
 	});
 	it('should not render source field', () => {
 		const { container } = render(SendForm, {
-			props: {...props, simplifiedForm: true},
+			props: { ...props, simplifiedForm: true },
 			context: mockContext
 		});
 
@@ -82,7 +90,9 @@ describe('SendForm', () => {
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 		expect(maxFeeEth).not.toBeNull();
 
-		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(sendInfoMessageBoxSelector);
+		const sendInfoMessageBox: HTMLDivElement | null = container.querySelector(
+			sendInfoMessageBoxSelector
+		);
 		expect(sendInfoMessageBox).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);

@@ -1,24 +1,24 @@
-import { BigNumber } from 'alchemy-sdk';
 import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
-import { render } from '@testing-library/svelte';
-import IcSendForm from '$icp/components/send/IcSendForm.svelte';
-import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import {
-	ETHEREUM_FEE_CONTEXT_KEY,
-	initEthereumFeeStore
-} from '$icp/stores/ethereum-fee.store';
+import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
+import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
+import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+import { render } from '@testing-library/svelte';
+import { BigNumber } from 'alchemy-sdk';
 
 describe('IcSendForm', () => {
 	const ethereumFeeStore = initEthereumFeeStore();
-	ethereumFeeStore.setFee({maxTransactionFee: BigInt(300)});
+	ethereumFeeStore.setFee({ maxTransactionFee: BigInt(300) });
 
 	const mockContext = new Map([]);
-	mockContext.set(SEND_CONTEXT_KEY, initSendContext({
-		sendPurpose: 'convert-cketh-to-eth',
-		token: ETHEREUM_TOKEN
-	}));
+	mockContext.set(
+		SEND_CONTEXT_KEY,
+		initSendContext({
+			sendPurpose: 'convert-cketh-to-eth',
+			token: ETHEREUM_TOKEN
+		})
+	);
 	mockContext.set(ETHEREUM_FEE_CONTEXT_KEY, {
 		store: ethereumFeeStore
 	});
@@ -61,7 +61,9 @@ describe('IcSendForm', () => {
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
 		expect(fee).not.toBeNull();
 
-		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(ethereumEstimatedFeeSelector);
+		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(
+			ethereumEstimatedFeeSelector
+		);
 		expect(ethereumEstimatedFee).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
@@ -87,7 +89,9 @@ describe('IcSendForm', () => {
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
 		expect(fee).not.toBeNull();
 
-		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(ethereumEstimatedFeeSelector);
+		const ethereumEstimatedFee: HTMLParagraphElement | null = container.querySelector(
+			ethereumEstimatedFeeSelector
+		);
 		expect(ethereumEstimatedFee).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);

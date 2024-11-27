@@ -1,6 +1,6 @@
-import { render } from '@testing-library/svelte';
-import SendSource from '$lib/components/send/SendSource.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import SendSource from '$lib/components/send/SendSource.svelte';
+import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 
 describe('SendSource', () => {
@@ -14,7 +14,7 @@ describe('SendSource', () => {
 	const balanceSelector = 'div[id="balance"]';
 
 	it('should render all fields with values', () => {
-		const { container } = render(SendSource, {props});
+		const { container } = render(SendSource, { props });
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
@@ -23,7 +23,7 @@ describe('SendSource', () => {
 		expect(balance?.textContent).toBe('0.22 BTC');
 	});
 	it('should render all field but balance without value', () => {
-		const { container } = render(SendSource, {...props, token: undefined});
+		const { container } = render(SendSource, { ...props, token: undefined });
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
@@ -32,7 +32,7 @@ describe('SendSource', () => {
 		expect(balance?.textContent).toBe('\u200B');
 	});
 	it('should render only balance', () => {
-		const { container } = render(SendSource, {...props, source: undefined});
+		const { container } = render(SendSource, { ...props, source: undefined });
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
