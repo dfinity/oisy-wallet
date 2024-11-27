@@ -24,6 +24,7 @@
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
@@ -55,7 +56,7 @@
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
 
 	let hasIndexCanister = false;
-	$: hasIndexCanister = nonNullish($tokenAsIcToken) && nonNullish($tokenAsIcToken.indexCanisterId);
+	$: hasIndexCanister = isIcTokenCanistersStrict($tokenAsIcToken ?? ICP_TOKEN);
 </script>
 
 <Info />
