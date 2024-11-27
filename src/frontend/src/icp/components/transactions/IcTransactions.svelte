@@ -16,6 +16,7 @@
 	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
 	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
+		tokenAsIcToken,
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
@@ -23,6 +24,7 @@
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { isIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
@@ -52,6 +54,9 @@
 
 	let noTransactions = false;
 	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
+
+	let hasIndexCanister = false;
+	$: hasIndexCanister = nonNullish($tokenAsIcToken) && isIcTokenCanistersStrict($tokenAsIcToken);
 </script>
 
 <Info />
@@ -81,7 +86,7 @@
 		{/if}
 
 		{#if noTransactions}
-			<IcNoIndexPlaceholder />
+			<IcNoIndexPlaceholder placeholderType={hasIndexCanister ? 'not-working' : 'missing'} />
 		{:else if $icTransactions.length === 0}
 			<TransactionsPlaceholder />
 		{/if}
