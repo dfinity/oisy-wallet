@@ -206,11 +206,6 @@ type TopUpCyclesLedgerRequest = record {
   threshold : opt nat;
   percentage : opt nat8;
 };
-type TopUpCyclesLedgerResponse = record {
-  backend_cycles : nat;
-  ledger_balance : nat;
-  topped_up : nat;
-};
 type UserCredential = record {
   issuer : text;
   verified_date_timestamp : opt nat64;
@@ -251,8 +246,6 @@ service : (Arg) -> {
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
   migrate_user_data_to : (principal) -> (Result_6);
   migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_7);
-  remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
