@@ -1,5 +1,4 @@
 import {
-	CAROUSEL_SLIDE_NAVIGATION,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -10,12 +9,12 @@ import {
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	TOKEN_BALANCE,
 	TOKEN_CARD
-} from '$lib/constants/test-ids.constants';
+} from '../../../src/frontend/src/lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
-import { PromotionCarousel } from '../promotion-carousel.component';
+import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
@@ -184,20 +183,6 @@ abstract class Homepage {
 		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
 	}
 
-	public async navigateToSlide(slideNumber: number): Promise<void> {
-		const navigationTestId = `${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}`;
-		const element = this.#page.locator(`[data-tid="${navigationTestId}"]:visible`);
-		await element.waitFor({ state: 'visible' });
-		await element.click();
-	}
-
-	public async getNumberOfSlides(): Promise<number> {
-		const slides = this.#page.locator(`[data-tid^="${CAROUSEL_SLIDE_NAVIGATION}"]:visible`);
-		await slides.first().waitFor({ state: 'visible' });
-		const count = await slides.count();
-		return count;
-	}
-
 	async testModalSnapshot({
 		modalOpenButtonTestId,
 		modalTestId,
@@ -235,13 +220,11 @@ export class HomepageLoggedOut extends Homepage {
 
 export class HomepageLoggedIn extends Homepage {
 	readonly #iiPage: InternetIdentityPage;
-	readonly promotionCarousel: PromotionCarousel;
 
 	constructor({ page, iiPage, viewportSize }: HomepageLoggedInParams) {
 		super({ page, viewportSize });
 
 		this.#iiPage = iiPage;
-		this.promotionCarousel = new PromotionCarousel(page);
 	}
 
 	async waitForAuthentication(): Promise<void> {
