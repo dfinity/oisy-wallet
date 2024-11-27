@@ -1,31 +1,34 @@
 <script lang="ts">
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
+	import {
+		batchLoadTransactions,
+		batchResultsToTokenId
+	} from '$eth/services/eth-transactions-batch.services';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import type { TokenId } from '$lib/types/token';
 
 	// TODO: make it more functional
-	let tokensLoaded: TokenId[] = [];
+	let tokensAlreadyLoaded: TokenId[] = [];
 
 	const load = async () => {
-		if ($erc20UserTokensNotInitialized) {
+		if (isNullish($enabledEthereumTokens) || isNullish($enabledErc20Tokens)) {
 			return;
 		}
 
-		await Promise.allSettled(
-			[...$enabledEthereumTokens, ...$enabledErc20Tokens].map(
-				async ({ network: { id: networkId }, id: tokenId }) => {
-					if (!tokensLoaded.includes(tokenId)) {
-						await loadEthereumTransactions({ tokenId, networkId });
-						tokensLoaded.push(tokenId);
-					}
-				}
-			)
-		);
+		const loader = batchLoadTransactions({
+			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens],
+			tokensAlreadyLoaded
+		});
+
+		for await (const results of loader) {
+			tokensAlreadyLoaded = [...tokensAlreadyLoaded, ...batchResultsToTokenId(results)];
+		}
 	};
 
-	$: $enabledEthereumTokens, $enabledErc20Tokens, $erc20UserTokensNotInitialized, load();
+	const debounceLoad = debounce(load, 1000);
+
+	$: $enabledEthereumTokens, $enabledErc20Tokens, debounceLoad();
 </script>
 
 <slot />

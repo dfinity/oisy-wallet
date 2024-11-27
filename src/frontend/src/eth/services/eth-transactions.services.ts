@@ -11,6 +11,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -118,9 +119,7 @@ const loadErc20Transactions = async ({
 		const { transactions: transactionsRest } = etherscanRests(networkId);
 		const transactions = await retry({
 			request: async () => await transactionsRest({ contract: token, address }),
-			onRetry: async () =>
-				// TODO: extract this util when needed in other use cases
-				await new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * 1000 + 1000)))
+			onRetry: async () => await randomWait({})
 		});
 		ethTransactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {

@@ -9,7 +9,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
+	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
 	export let amount: BigNumber | undefined;
@@ -41,7 +41,7 @@
 
 		<svelte:fragment slot="amount">
 			{#if nonNullish(amount)}
-				<Amount {amount} decimals={token.decimals} />
+				<Amount {amount} decimals={token.decimals} formatPositiveAmount />
 			{/if}
 		</svelte:fragment>
 
