@@ -26,6 +26,14 @@ jobs:
         run: |
           echo "can_add_commit=${{ secrets.GIX_CREATE_PR_PAT != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
       - name: Checkout code
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+      - name: Checkout code
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@v4
       - name: Install shfmt
         run: sudo snap install --classic shfmt
