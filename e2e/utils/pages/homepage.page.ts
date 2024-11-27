@@ -9,7 +9,7 @@ import {
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	TOKEN_BALANCE,
 	TOKEN_CARD
-} from '../../../src/frontend/src/lib/constants/test-ids.constants';
+} from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';

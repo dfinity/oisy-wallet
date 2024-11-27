@@ -1,4 +1,4 @@
-import { CAROUSEL_CONTAINER, CAROUSEL_SLIDE_NAVIGATION } from '../../../src/frontend/src/lib/constants/test-ids.constants';
+import { CAROUSEL_CONTAINER, CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 import { Locator, Page } from '@playwright/test';
 
 export class PromotionCarousel {
