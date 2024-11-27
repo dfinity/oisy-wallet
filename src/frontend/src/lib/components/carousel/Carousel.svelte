@@ -116,7 +116,7 @@
 	 */
 	const initialiseAutoplayTimer = () => {
 		
-		if (JSON.parse(import.meta.env.VITE_DISABLE_CAROUSEL_AUTO_PLAY ?? false) === true) return
+		if (JSON.parse(import.meta.env.VITE_DISABLE_CAROUSEL_AUTO_PLAY ?? false) === true) {return}
 		
 		autoplayTimer = setInterval(() => {
 			goToNextSlide();
