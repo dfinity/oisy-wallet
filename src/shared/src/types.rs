@@ -312,9 +312,6 @@ pub mod signer {
     }
 }
 
-
-
-
 pub mod dapp {
     use candid::{CandidType, Deserialize};
 
@@ -323,7 +320,6 @@ pub mod dapp {
         pub hidden_dapp_ids: Vec<String>,
     }
 
-
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct DappSettings {
         pub dapp_carousel: DappCarouselSettings,
@@ -331,8 +327,8 @@ pub mod dapp {
 }
 
 pub mod settings {
-    use candid::{CandidType, Deserialize};
     use crate::types::dapp::DappSettings;
+    use candid::{CandidType, Deserialize};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct Settings {
@@ -340,16 +336,14 @@ pub mod settings {
     }
 }
 
-
-
 /// Types specifics to the user profile.
 pub mod user_profile {
     use super::{CredentialType, Timestamp};
+    use crate::types::settings::Settings;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use ic_verifiable_credentials::issuer_api::CredentialSpec;
     use std::collections::BTreeMap;
-    use crate::types::settings::Settings;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {

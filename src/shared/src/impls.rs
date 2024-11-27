@@ -1,4 +1,6 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
+use crate::types::dapp::{DappCarouselSettings, DappSettings};
+use crate::types::settings::Settings;
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
@@ -13,8 +15,6 @@ use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(test)]
 use strum::IntoEnumIterator;
-use crate::types::dapp::{DappCarouselSettings, DappSettings};
-use crate::types::settings::Settings;
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -173,7 +173,7 @@ impl From<&StoredUserProfile> for UserProfile {
             updated_timestamp,
             version,
             credentials,
-            settings
+            settings,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
