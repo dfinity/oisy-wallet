@@ -9,8 +9,6 @@ export class PromotionCarousel {
 	constructor(page: Page) {
 		this.#page = page;
 		this.#container = this.#page.locator(`[data-tid="${CAROUSEL_CONTAINER}"]:visible`);
-		this.#slideNavigation = this.#page.locator(
-			`[data-tid="${CAROUSEL_SLIDE_NAVIGATION}"]:visible`
-		);
+		this.#slideNavigation = this.#page.locator(`[data-tid="${CAROUSEL_SLIDE_NAVIGATION}"]:visible`);
 	}
 }

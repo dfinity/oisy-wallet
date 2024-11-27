@@ -1,7 +1,7 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { expect, test } from '@playwright/test';
-import { HomepageLoggedIn, HomepageLoggedOut } from './utils/pages/homepage.page';
 import { disableCarouselAutoplay } from './utils/carousel-autoplay.utils';
+import { HomepageLoggedIn, HomepageLoggedOut } from './utils/pages/homepage.page';
 
 test('should display homepage in logged out state', async ({ page }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({ page });

@@ -1,9 +1,9 @@
-import { Page } from "@playwright/test";
+import { Page } from '@playwright/test';
 
-export async function disableCarouselAutoplay(page:Page) {
-  await page.addInitScript(() => {
-    window.setInterval = () => {
-      return null;
-    };
-  });
+export async function disableCarouselAutoplay(page: Page) {
+	await page.addInitScript(() => {
+		window.setInterval = () => {
+			return null;
+		};
+	});
 }
