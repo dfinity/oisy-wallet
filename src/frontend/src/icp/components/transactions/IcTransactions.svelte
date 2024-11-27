@@ -16,6 +16,7 @@
 	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
 	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
+		tokenAsIcToken,
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
