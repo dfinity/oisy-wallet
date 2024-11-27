@@ -2,7 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SendForm from '$eth/components/send/SendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
-import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';

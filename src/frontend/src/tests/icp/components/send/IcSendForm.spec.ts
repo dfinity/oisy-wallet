@@ -3,7 +3,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
 import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
-import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 
