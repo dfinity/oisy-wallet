@@ -170,6 +170,41 @@ pub mod custom_token {
     }
 }
 
+pub trait DappVersion: Debug {
+    #[must_use]
+    fn get_version(&self) -> Option<Version>;
+    #[must_use]
+    fn clone_with_incremented_version(&self) -> Self
+    where
+        Self: Sized + Clone;
+    #[must_use]
+    fn clone_with_initial_version(&self) -> Self
+    where
+        Self: Sized + Clone;
+}
+
+
+/// Dapp
+pub mod dapp {
+    use crate::types::Version;
+    use candid::{CandidType, Deserialize};
+    use serde::Serialize;
+
+
+    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct Dapp {
+        pub id: String,
+        pub version: Option<Version>,
+        pub hide_carousel: Option<bool>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone)]
+    pub struct DappId {
+        pub id: String,
+    }
+}
+
+
 pub mod bitcoin {
     use candid::CandidType;
     use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Utxo};

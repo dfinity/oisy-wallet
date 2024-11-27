@@ -3,16 +3,32 @@ use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
-use crate::types::{
-    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
-    Timestamp, TokenVersion, Version,
-};
+use crate::types::{ApiEnabled, Config, CredentialType, DappVersion, InitArg, Migration, MigrationProgress, MigrationReport, Timestamp, TokenVersion, Version};
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(test)]
 use strum::IntoEnumIterator;
+use crate::types::dapp::Dapp;
+
+impl DappVersion for Dapp {
+    fn get_version(&self) -> Option<Version> {
+        self.version
+    }
+
+    fn clone_with_incremented_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned
+    }
+
+    fn clone_with_initial_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(1);
+        cloned
+    }
+}
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
