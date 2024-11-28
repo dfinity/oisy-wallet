@@ -1,4 +1,6 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
+use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
+use crate::types::settings::Settings;
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
@@ -120,8 +122,16 @@ impl TokenVersion for StoredUserProfile {
 impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
+        let settings = Settings {
+            dapp: DappSettings {
+                dapp_carousel: DappCarouselSettings {
+                    hidden_dapp_ids: Vec::new(),
+                },
+            },
+        };
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
+            settings,
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
@@ -154,6 +164,35 @@ impl StoredUserProfile {
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
+
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if the dApp ID is already hidden.
+    pub fn add_hidden_dapp_id(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        dapp_id: String,
+    ) -> Result<StoredUserProfile, AddDappSettingsError> {
+        if profile_version != self.version {
+            return Err(AddDappSettingsError::VersionMismatch);
+        }
+        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_settings = new_profile.settings.clone();
+        let mut new_dapp_settings = new_settings.dapp.clone();
+        let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
+        let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
+        if new_hidden_dapp_ids.contains(&dapp_id) {
+            return Err(AddDappSettingsError::DappIdAlreadyHidden);
+        }
+        new_hidden_dapp_ids.push(dapp_id);
+        new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
+        new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;
+        new_settings.dapp = new_dapp_settings;
+        new_profile.settings = new_settings;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
 }
 
 impl From<&StoredUserProfile> for UserProfile {
@@ -163,12 +202,14 @@ impl From<&StoredUserProfile> for UserProfile {
             updated_timestamp,
             version,
             credentials,
+            settings,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
             updated_timestamp: *updated_timestamp,
             version: *version,
             credentials: credentials.clone().into_values().collect(),
+            settings: settings.clone(),
         }
     }
 }
