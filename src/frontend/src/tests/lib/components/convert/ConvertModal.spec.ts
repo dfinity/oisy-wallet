@@ -1,3 +1,4 @@
+import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
@@ -12,8 +13,10 @@ describe('ConvertModal', () => {
 
 	it('should display correct modal title after navigating between steps', async () => {
 		const { container, getByText } = render(ConvertModal, {
-			props
+			props,
+			context: new Map([[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }]])
 		});
+
 		const firstStepTitle = 'Swap BTC → ICP';
 
 		expect(container).toHaveTextContent(firstStepTitle);
