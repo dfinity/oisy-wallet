@@ -18,23 +18,20 @@ export class PromotionCarousel {
 		};
 
   public async freezeCarousel(): Promise<void> {
-    try
-		{
-			await this.#page.$$eval(`div[data-tid="carousel-slide"]`, elements => {
-        elements.forEach(el => {
-					el.style.transform = el.style.transform
-				})
-      });
+    await this.#page.$$eval(`div[data-tid="carousel-slide"]`, elements => {
+      elements.forEach(el => {
+				const slideStyle = el.style.transform
+				el.style.transform = slideStyle
+			})
+    });
 
-      await this.#page.$$eval(`[data-tid^="carousel-slide-navigation-"]`, elements => {
-        elements.forEach(el => {
-          el.style.width = el.style.width;
-          el.style.backgroundColor = el.style.backgroundColor;
-        });
+    await this.#page.$$eval(`[data-tid^="carousel-slide-navigation-"]`, elements => {
+    	elements.forEach(el => {
+				const indicatorWidth = el.style.width
+				const indicatorBackgroundColor = el.style.backgroundColor
+        el.style.width = indicatorWidth;
+        el.style.backgroundColor = indicatorBackgroundColor;
       });
-      console.log('Carousel animations disabled successfully using inline styles.');
-    } catch (error) {
-      console.error('Failed to disable carousel animations:', error);
-    }
+    });
   }
 }
