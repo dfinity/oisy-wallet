@@ -115,10 +115,6 @@
 	 * Start autoplay timer
 	 */
 	const initialiseAutoplayTimer = () => {
-<<<<<<< HEAD
-		
-=======
->>>>>>> c3142adb1d93ec6593ff46de4941466c5cfd50d9
 		autoplayTimer = setInterval(() => {
 			goToNextSlide();
 		}, autoplay);
