@@ -11,12 +11,11 @@ export class PromotionCarousel {
 		this.#container = this.#page.locator(`[data-tid="${CAROUSEL_CONTAINER}"]:visible`);
 		this.#slideNavigation = this.#page.locator(`[data-tid="${CAROUSEL_SLIDE_NAVIGATION}"]:visible`);
 	}
-  
-	public async navigateToSlide(slideNumber: number): Promise<void> {
-			const navigation1Selector = `[data-tid="carousel-slide-navigation-${slideNumber}"]`;
-			await this.#page.click(navigation1Selector);
-		};
 
+	public async navigateToSlide(slideNumber: number): Promise<void> {
+		const navigation1Selector = `[data-tid="carousel-slide-navigation-${slideNumber}"]`;
+		await this.#page.click(navigation1Selector);
+	}
   public async freezeCarousel(): Promise<void> {
     await this.#page.$$eval(`div[data-tid="carousel-slide"]`, elements => {
       elements.forEach(el => {
