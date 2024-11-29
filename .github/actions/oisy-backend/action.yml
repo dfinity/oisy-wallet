@@ -7,9 +7,6 @@ outputs: {}
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Cache backend canister WASM
       uses: actions/cache@v4
       id: backend-wasm-cache
