@@ -17,13 +17,17 @@ test('should display homepage in logged out state', async ({ page }) => {
 });
 
 testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
-	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
+	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage});
 
 	await disableCarouselAutoplay(page);
 
 	await homepageLoggedIn.waitForReady();
 
 	await page.waitForLoadState('networkidle');
+
+	await homepageLoggedIn.promotionCarousel.navigateToSlide(1);
+
+	await homepageLoggedIn.promotionCarousel.freezeCarousel();
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,

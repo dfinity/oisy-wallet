@@ -115,6 +115,10 @@
 	 * Start autoplay timer
 	 */
 	const initialiseAutoplayTimer = () => {
+<<<<<<< HEAD
+		
+=======
+>>>>>>> c3142adb1d93ec6593ff46de4941466c5cfd50d9
 		autoplayTimer = setInterval(() => {
 			goToNextSlide();
 		}, autoplay);
@@ -250,7 +254,7 @@
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
-		<div class="flex" bind:this={sliderFrame}>
+		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>
