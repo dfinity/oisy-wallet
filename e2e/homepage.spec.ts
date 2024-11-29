@@ -17,7 +17,7 @@ test('should display homepage in logged out state', async ({ page }) => {
 });
 
 testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
-	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage});
+	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
 
 	await disableCarouselAutoplay(page);
 
