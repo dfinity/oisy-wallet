@@ -9,4 +9,8 @@ export type TokenUiGroup = {
 	tokens: [TokenUi, ...TokenUi[]];
 } & TokenFinancialData;
 
+
 export type TokenUiOrGroupUi = TokenUi | TokenUiGroup;
+
+// TODO: rename this object TokenUiOrGroupUi when the old one is deprecated
+export type TokenUiOrGroupUiObj = { token: TokenUi } | { group: TokenUiGroup };
