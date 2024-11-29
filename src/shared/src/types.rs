@@ -313,6 +313,7 @@ pub mod signer {
 }
 
 pub mod dapp {
+    use crate::types::Version;
     use candid::{CandidType, Deserialize};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -323,6 +324,19 @@ pub mod dapp {
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct DappSettings {
         pub dapp_carousel: DappCarouselSettings,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AddDappSettingsError {
+        DappIdAlreadyHidden,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AddHiddenDappIdRequest {
+        pub dapp_id: String,
+        pub current_user_version: Option<Version>,
     }
 }
 
