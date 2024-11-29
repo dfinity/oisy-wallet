@@ -4,6 +4,7 @@ import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
 import { get } from 'svelte/store';
@@ -11,10 +12,8 @@ import { get } from 'svelte/store';
 vi.mock('$lib/api/backend.api');
 
 const mockProfile: UserProfile = {
-	credentials: [],
-	version: [1n],
-	created_timestamp: 1234n,
-	updated_timestamp: 1234n
+	...mockUserProfile,
+	version: [1n]
 };
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
