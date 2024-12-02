@@ -40,7 +40,7 @@
 	</div>
 {/if}
 
-<div class="flex no-scrollbar overflow-x-auto md:flex-wrap gap-4 p-1 md:p-0">
+<div class="no-scrollbar flex gap-4 overflow-x-auto p-1 md:flex-wrap md:p-0">
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.dapps.alt.show_all}
@@ -60,7 +60,7 @@
 	{/each}
 </div>
 
-<ul class="mt-10 grid list-none grid-cols-2 flex-row md:grid-cols-3 gap-x-4 gap-y-10 ">
+<ul class="mt-10 grid list-none grid-cols-2 flex-row gap-x-4 gap-y-10 md:grid-cols-3">
 	{#each filteredDapps as dApp}
 		<li class="flex" in:fade>
 			<DappCard
