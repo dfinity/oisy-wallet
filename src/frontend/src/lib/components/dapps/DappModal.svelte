@@ -144,11 +144,7 @@
 </Modal>
 
 <style lang="scss">
-	@use '../../styles/mixins/modal';
-
 	article {
-		@include modal.content;
-
 		padding: var(--padding-3x) var(--padding-2_5x);
 		margin: 0 0 var(--padding-3x);
 	}
