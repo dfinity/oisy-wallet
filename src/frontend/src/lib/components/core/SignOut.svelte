@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { goto } from '$app/navigation';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { goto } from '$app/navigation';
 
 	const dispatch = createEventDispatcher();
 
