@@ -57,6 +57,7 @@
 	}}
 	hash={id}
 	value={nonNullish(value) ? BigNumber.from(value) : undefined}
+	{token}
 	sendToLabel={$i18n.transaction.text.to}
 	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}
 >
