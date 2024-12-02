@@ -204,6 +204,15 @@ abstract class Homepage {
 		await expect(modal).toHaveScreenshot();
 	}
 
+	async setCarouselFirstSlide() {
+		await this.promotionCarousel.navigateToSlide(1);
+		await this.promotionCarousel.freezeCarousel();
+	}
+
+	async waitForLoadState() {
+		await this.#page.waitForLoadState('networkidle');
+	}
+
 	abstract extendWaitForReady(): Promise<void>;
 
 	abstract waitForReady(): Promise<void>;
@@ -221,6 +230,7 @@ export class HomepageLoggedOut extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
+		await this.waitForLoadState();
 	}
 }
 
@@ -301,6 +311,10 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
 		await this.waitForTokensInitialization();
+
+		await this.waitForLoadState();
+
+		await this.setCarouselFirstSlide();
 
 		await this.extendWaitForReady();
 	}

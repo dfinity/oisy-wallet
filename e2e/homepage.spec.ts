@@ -7,12 +7,7 @@ test('should display homepage in logged out state', async ({ page }) => {
 
 	await homepageLoggedOut.waitForReady();
 
-	await page.waitForLoadState('networkidle');
-
-	await expect(page).toHaveScreenshot({
-		fullPage: true,
-		animations: 'disabled'
-	});
+	await expect(page).toHaveScreenshot({ fullPage: true });
 });
 
 testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
@@ -20,14 +15,5 @@ testWithII('should display homepage in logged in state', async ({ page, iiPage }
 
 	await homepageLoggedIn.waitForReady();
 
-	await page.waitForLoadState('networkidle');
-
-	await homepageLoggedIn.promotionCarousel.navigateToSlide(1);
-
-	await homepageLoggedIn.promotionCarousel.freezeCarousel();
-
-	await expect(page).toHaveScreenshot({
-		fullPage: true,
-		animations: 'disabled'
-	});
+	await expect(page).toHaveScreenshot({ fullPage: true });
 });
