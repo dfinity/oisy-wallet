@@ -4,12 +4,12 @@
 	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceHistory } from '$lib/utils/route.utils';
+	import { goto } from '$app/navigation';
 
 	const dispatch = createEventDispatcher();
 
 	const logout = async () => {
-		replaceHistory(new URL(window.location.origin));
+		await goto(new URL(window.location.origin));
 		dispatch('icLogoutTriggered');
 		await signOut();
 	};
