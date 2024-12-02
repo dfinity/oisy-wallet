@@ -37,16 +37,25 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
         (),
     );
 
-    assert_eq!(
-        get_profile_response
-            .expect("Call to get profile failed")
-            .expect("Get profile failed")
+    let user_profile = get_profile_response.expect("Call to get profile failed").expect("Get profile failed");
+
+        assert_eq!(
+            user_profile
             .settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
             .len(),
         1
+    );
+
+    assert_eq!(
+        user_profile
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids,
+        vec!["test_dapp_id".to_string()]
     );
 }
 
