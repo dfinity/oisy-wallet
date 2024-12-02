@@ -1,5 +1,5 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/networks.icrc.env';
+import { ICRC_TOKENS } from '$env/networks.icrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -28,14 +28,6 @@ import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
 	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
-};
-
-export const unsafeLoadDefaultPublicIcrcTokens = async () => {
-	await Promise.all(
-		PUBLIC_ICRC_TOKENS.map(mapTokenOisyName).map((token) =>
-			loadDefaultIcrc({ data: token, strategy: 'query' })
-		)
-	);
 };
 
 const loadDefaultIcrcTokens = async () => {
