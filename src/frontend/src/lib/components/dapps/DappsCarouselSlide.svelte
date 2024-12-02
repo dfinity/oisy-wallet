@@ -1,17 +1,48 @@
 <script lang="ts">
+	import { fromNullable } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
+	import { addUserHiddenDappId } from '$lib/api/backend.api';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
+	import type { OptionIdentity } from '$lib/types/identity';
+	import { emit } from '$lib/utils/events.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
+
 	$: ({
+		id: dappId,
 		carousel: { text, callToAction },
 		logo,
 		name: dAppName
 	} = dappsCarouselSlide);
+
+	let identity: OptionIdentity;
+	$: identity = $authIdentity;
+
+	const dispatch = createEventDispatcher();
+
+	const close = async () => {
+		dispatch('icHideCarouselDapp', {
+			dappId
+		});
+
+		emit({ message: 'oisyRefreshCarouselSlides' });
+
+		await addUserHiddenDappId({
+			dappId,
+			identity,
+			currentUserVersion: fromNullable($userProfileStore?.profile.version ?? [])
+		});
+
+		await loadUserProfile({ identity });
+	};
 </script>
 
 <div class="flex h-full items-center justify-between">
@@ -24,7 +55,7 @@
 			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
 		/>
 	</div>
-	<div class="justify-start w-full">
+	<div class="w-full justify-start">
 		<div class="mb-1">{text}</div>
 		<button
 			on:click={() => {
@@ -36,7 +67,11 @@
 			{callToAction} →
 		</button>
 	</div>
-	<div class="items-start h-full p-1 text-tertiary">
-		<IconClose size="20"/>
-	</div>
+	<button
+		class="h-full items-start p-1 text-tertiary"
+		on:click={close}
+		aria-label={$i18n.core.text.close}
+	>
+		<IconClose size="20" />
+	</button>
 </div>

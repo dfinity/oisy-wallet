@@ -110,13 +110,17 @@
 		}
 	};
 
+	const refreshSlides = () => {
+		totalSlides = totalSlides - 1;
+	};
+
 	/**
 	 * Start autoplay timer
 	 */
 	const initialiseAutoplayTimer = () => {
-		// autoplayTimer = setInterval(() => {
-		// 	goToNextSlide();
-		// }, autoplay);
+		autoplayTimer = setInterval(() => {
+			goToNextSlide();
+		}, autoplay);
 	};
 
 	/**
@@ -242,7 +246,7 @@
 </script>
 
 <!-- Resize listener to re-calculate slide frame width -->
-<svelte:window on:resize={onResize} />
+<svelte:window on:resize={onResize} on:oisyRefreshCarouselSlides={refreshSlides} />
 
 <div
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
