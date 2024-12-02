@@ -57,12 +57,10 @@ abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
 	private promotionCarousel?: PromotionCarousel;
-	
 
 	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
 		this.#viewportSize = viewportSize;
-		
 	}
 
 	protected async clickByTestId(testId: string): Promise<void> {
