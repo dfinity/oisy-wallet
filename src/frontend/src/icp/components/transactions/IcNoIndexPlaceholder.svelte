@@ -17,7 +17,7 @@
 		<p class="m-0 text-center text-lg font-bold">
 			{$i18n.transactions.text.transaction_history_unavailable}
 		</p>
-		<p class="text-secondary m-0 text-center opacity-50">
+		<p class="m-0 text-center text-black opacity-50">
 			{replaceOisyPlaceholders(
 				placeholderType === 'not-working'
 					? $i18n.transactions.text.index_canister_not_working_explanation

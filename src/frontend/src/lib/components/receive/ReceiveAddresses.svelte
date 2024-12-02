@@ -146,7 +146,7 @@
 		>
 			<svelte:fragment slot="title">{$i18n.receive.ethereum.text.ethereum}</svelte:fragment>
 
-			<span slot="text" class="text-secondary text-sm"
+			<span slot="text" class="text-sm text-black"
 				>{$i18n.receive.icp.text.your_private_eth_address}</span
 			>
 		</ReceiveAddress>
@@ -172,7 +172,7 @@
 		>
 			<svelte:fragment slot="title">{$i18n.receive.icp.text.principal}</svelte:fragment>
 
-			<span slot="text" class="text-secondary text-sm"
+			<span slot="text" class="text-sm text-black"
 				>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
 			>
 		</ReceiveAddress>

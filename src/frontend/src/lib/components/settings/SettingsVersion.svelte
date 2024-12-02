@@ -9,7 +9,7 @@
 	const releaseUrl = `${OISY_REPO_URL}/releases/tag/${version}`;
 </script>
 
-<p class="text-secondary mt-24 text-center text-xs opacity-50">
+<p class="mt-24 text-center text-xs text-black opacity-50">
 	{OISY_NAME}
 	<ExternalLink
 		href={releaseUrl}

@@ -21,6 +21,6 @@
 
 	<div class="space-y-4">
 		<p class="m-0 text-center text-lg font-bold">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
-		<p class="text-secondary m-0 text-center opacity-50">{$i18n.tokens.text.buy_or_receive}</p>
+		<p class="m-0 text-center text-black opacity-50">{$i18n.tokens.text.buy_or_receive}</p>
 	</div>
 </div>

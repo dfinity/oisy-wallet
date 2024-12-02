@@ -4,6 +4,7 @@
 	--color-white: theme(colors.white);
 	--color-white-rgb: theme(colors.white-rgb);
 	--color-black-rgb: theme(colors.black-rgb);
+	--color-black: rgb(var(--color-black-rgb));
 	--color-grey: theme(colors.grey);
 	--color-dust: theme(colors.dust);
 	--color-dark-blue: theme(colors.dark-blue);
