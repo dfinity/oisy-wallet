@@ -31,6 +31,12 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
 
     // assert!(add_hidden_dapp_id_response.is_ok());
 
+    assert!(
+        add_hidden_dapp_id_response.is_ok(),
+        "Add hidden dapp ID failed: {:?}",
+        add_hidden_dapp_id_response
+    );
+
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
         "get_user_profile",
