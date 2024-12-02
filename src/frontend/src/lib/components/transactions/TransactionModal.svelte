@@ -2,7 +2,6 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -17,6 +16,7 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 
 	export let commonData: TransactionUiCommon;
 	export let hash: string | undefined;
@@ -127,6 +127,6 @@
 			</Value>
 		{/if}
 
-		<Button fullWidth on:click={modalStore.close} slot="toolbar">{$i18n.core.text.close}</Button>
+		<ButtonCloseModal slot="toolbar"/>
 	</ContentWithToolbar>
 </Modal>
