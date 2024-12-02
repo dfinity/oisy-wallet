@@ -3,4 +3,4 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<p class="text-secondary mt-4 opacity-50">{replaceOisyPlaceholders($i18n.dapps.text.sign_in)}</p>
+<p class="text-black mt-4 opacity-50">{replaceOisyPlaceholders($i18n.dapps.text.sign_in)}</p>
