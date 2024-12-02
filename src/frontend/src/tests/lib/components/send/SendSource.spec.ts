@@ -32,7 +32,7 @@ describe('SendSource', () => {
 		expect(balance?.textContent).toBe('\u200B');
 	});
 	it('should render only balance', () => {
-		const { container } = render(SendSource, { ...props, source: undefined });
+		const { container } = render(SendSource, { ...props, hideSource: true });
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
