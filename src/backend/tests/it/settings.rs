@@ -1,11 +1,10 @@
 use crate::utils::{
-    mock::{ VC_HOLDER },
+    mock::VC_HOLDER,
     pocketic::{setup, PicCanisterTrait},
 };
 use candid::Principal;
 use shared::types::dapp::{AddDappSettingsError, AddHiddenDappIdRequest};
-use shared::types::user_profile::{GetUserProfileError, UserProfile,
-};
+use shared::types::user_profile::{GetUserProfileError, UserProfile};
 
 #[test]
 fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
@@ -42,7 +41,10 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
-            .settings.dapp.dapp_carousel.hidden_dapp_ids
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids
             .len(),
         1
     );
@@ -96,7 +98,10 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
-            .settings.dapp.dapp_carousel.hidden_dapp_ids
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids
             .len(),
         2
     );
@@ -137,7 +142,10 @@ fn test_add_user_hidden_dapp_id_cannot_updated_wrong_version() {
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
-            .settings.dapp.dapp_carousel.hidden_dapp_ids
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids
             .len(),
         1
     );
@@ -178,7 +186,10 @@ fn test_add_user_hidden_dapp_id_does_not_update_if_version_is_none() {
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
-            .settings.dapp.dapp_carousel.hidden_dapp_ids
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids
             .len(),
         0
     );
@@ -227,7 +238,10 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
-            .settings.dapp.dapp_carousel.hidden_dapp_ids
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids
             .len(),
         1
     );
