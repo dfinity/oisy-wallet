@@ -9,7 +9,7 @@
 	const dispatch = createEventDispatcher();
 
 	const logout = async () => {
-		replaceHistory('/')
+		replaceHistory(window.location.origin);
 		dispatch('icLogoutTriggered');
 		await signOut();
 	};
