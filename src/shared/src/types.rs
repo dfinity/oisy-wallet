@@ -367,7 +367,7 @@ pub mod user_profile {
     }
 
     // Used in the endpoint
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug,Default)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
     pub struct UserProfile {
         #[serde(default)]
         pub settings: Settings,
