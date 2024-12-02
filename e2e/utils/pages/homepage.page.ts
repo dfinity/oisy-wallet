@@ -56,12 +56,13 @@ interface WaitForLocatorOptions {
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
-	readonly promotionCarousel: PromotionCarousel;
+	private promotionCarousel?: PromotionCarousel;
+	
 
 	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
 		this.#viewportSize = viewportSize;
-		this.promotionCarousel = new PromotionCarousel(page);
+		
 	}
 
 	protected async clickByTestId(testId: string): Promise<void> {
@@ -204,7 +205,11 @@ abstract class Homepage {
 		await expect(modal).toHaveScreenshot();
 	}
 
-	async setCarouselFirstSlide() {
+	async setCarouselFirstSlide(): Promise<void> {
+		if (!this.promotionCarousel) {
+			this.promotionCarousel = new PromotionCarousel(this.#page);
+		}
+
 		await this.promotionCarousel.navigateToSlide(1);
 		await this.promotionCarousel.freezeCarousel();
 	}
