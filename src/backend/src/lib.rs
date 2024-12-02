@@ -543,7 +543,7 @@ pub fn add_user_hidden_dapp_id(
         );
 
         match result {
-            Ok(_) => Ok(()),
+            Ok(()) => Ok(()),
             Err(err) => Err(err),
         }
     })
