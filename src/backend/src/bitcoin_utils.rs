@@ -1,6 +1,6 @@
-use ic_cdk::api::management_canister::bitcoin::Utxo;
+//! Functions [inspired by ckBTC Minter](https://github.com/dfinity/ic/blob/285a5db07da50a4e350ec43bf3b488cc6fe36102/rs/bitcoin/ckbtc/minter/src/lib.rs#L1258)
 
-/// Functions [inspired by ckBTC Minter](https://github.com/dfinity/ic/blob/285a5db07da50a4e350ec43bf3b488cc6fe36102/rs/bitcoin/ckbtc/minter/src/lib.rs#L1258)
+use ic_cdk::api::management_canister::bitcoin::Utxo;
 
 /// Selects a subset of UTXOs with the specified total target value and removes
 /// the selected UTXOs from the available set.
