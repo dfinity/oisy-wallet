@@ -4,6 +4,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	$: ({
@@ -13,7 +14,7 @@
 	} = dappsCarouselSlide);
 </script>
 
-<div class="flex h-full items-center">
+<div class="flex h-full items-center justify-between">
 	<div class="mr-4 shrink-0">
 		<Img
 			height="64"
@@ -23,7 +24,7 @@
 			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
 		/>
 	</div>
-	<div>
+	<div class="justify-start w-full">
 		<div class="mb-1">{text}</div>
 		<button
 			on:click={() => {
@@ -34,5 +35,8 @@
 		>
 			{callToAction} →
 		</button>
+	</div>
+	<div class="items-start h-full p-1 text-tertiary">
+		<IconClose size="20"/>
 	</div>
 </div>
