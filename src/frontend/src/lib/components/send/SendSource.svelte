@@ -9,10 +9,11 @@
 
 	export let token: OptionToken;
 	export let balance: OptionBalance;
-	export let source: string | undefined = undefined;
+	export let source: string;
+	export let hideSource = false;
 </script>
 
-{#if nonNullish(source)}
+{#if !hideSource}
 	<Value ref="source" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.source}</svelte:fragment>
 		{source}

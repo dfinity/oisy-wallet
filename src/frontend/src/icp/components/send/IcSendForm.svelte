@@ -26,8 +26,6 @@
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
 
-	let sourceValue = simplifiedForm ? undefined : source;
-
 	let invalid = true;
 	$: invalid =
 		invalidDestination ||
@@ -46,7 +44,7 @@
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 
-		<SendSource token={$sendToken} balance={$balance} source={sourceValue} />
+		<SendSource token={$sendToken} balance={$balance} {source} hideSource={simplifiedForm} />
 
 		<IcFeeDisplay {networkId} />
 

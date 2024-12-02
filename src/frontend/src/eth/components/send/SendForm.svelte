@@ -34,8 +34,6 @@
 	$: invalid =
 		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
 
-	let sourceValue = simplifiedForm ? undefined : ($ethAddress ?? '');
-
 	const dispatch = createEventDispatcher();
 
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -57,7 +55,7 @@
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} source={sourceValue} />
+		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} hideSource={simplifiedForm} />
 
 		<FeeDisplay />
 
