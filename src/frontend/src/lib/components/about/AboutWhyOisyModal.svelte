@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
+	import AboutFeatureItem from './AboutFeatureItem.svelte';
 	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -23,35 +24,49 @@
 	<div class="stretch pt-4">
 		<ImgBanner styleClass="max-h-56" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
 
-		<p class="mt-6">
-			<IconCrypto />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.hold_crypto)} />
-		</p>
+		<div class="mt-5 flex flex-col gap-6">
+			<AboutFeatureItem
+				title={$i18n.about.why_oisy.text.hold_crypto.title}
+				description={$i18n.about.why_oisy.text.hold_crypto.description}
+			>
+				<IconCrypto slot="icon" />
+			</AboutFeatureItem>
 
-		<p class="mt-6">
-			<IconKey />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.network_custody)} />
-		</p>
+			<AboutFeatureItem
+				title={$i18n.about.why_oisy.text.network_custody.title}
+				description={$i18n.about.why_oisy.text.network_custody.description}
+			>
+				<IconKey slot="icon" />
+			</AboutFeatureItem>
 
-		<p class="mt-6">
-			<IconIcLogoPlain />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.fully_on_chain)} />
-		</p>
+			<AboutFeatureItem
+				title={$i18n.about.why_oisy.text.fully_on_chain.title}
+				description={$i18n.about.why_oisy.text.fully_on_chain.description}
+			>
+				<IconIcLogoPlain slot="icon" />
+			</AboutFeatureItem>
 
-		<p class="mt-6">
-			<IconWorld />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.cross_device)} />
-		</p>
+			<AboutFeatureItem
+				title={$i18n.about.why_oisy.text.cross_device.title}
+				description={$i18n.about.why_oisy.text.cross_device.description}
+			>
+				<IconWorld slot="icon" />
+			</AboutFeatureItem>
 
-		<p class="mt-6">
-			<IconIdCard />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.verifiable_credentials)} />
-		</p>
+			<AboutFeatureItem
+				title={$i18n.about.why_oisy.text.verifiable_credentials.title}
+				description={$i18n.about.why_oisy.text.verifiable_credentials.description}
+			>
+				<IconIdCard slot="icon" />
+			</AboutFeatureItem>
 
-		<p class="my-6">
-			<IconGitHub />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.open_source)} />
-		</p>
+			<AboutFeatureItem
+				title={$i18n.about.why_oisy.text.open_source.title}
+				description={$i18n.about.why_oisy.text.open_source.description}
+			>
+				<IconGitHub slot="icon" />
+			</AboutFeatureItem>
+		</div>
 	</div>
 
 	<ButtonCloseModal colorStyle="primary" />
