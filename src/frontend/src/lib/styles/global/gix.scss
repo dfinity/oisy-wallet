@@ -58,20 +58,27 @@
 	// Modal
 
 	--alert-width: calc(100% - var(--padding-8x));
-	--alert-max-width: calc(100vw - var(--padding-4x));
-	--alert-max-height: calc(100dvh - var(--padding-4x));
+	--alert-max-width: 100vw;
+	--alert-max-height: 100dvh;
 	--alert-border-radius: var(--border-radius-xs);
 	--alert-padding-y: 0;
 	--alert-padding-x: 0;
 
-	--dialog-width: 560px;
+	--dialog-width: 100vw;
 	--dialog-max-width: var(--alert-max-width);
 	--dialog-max-height: var(--alert-max-height);
 	--dialog-min-height: var(--alert-max-height);
 	--dialog-height: initial;
-	--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	--dialog-border-radius: 0px;
 	--dialog-padding-y: 0;
 	--dialog-padding-x: 0;
+
+	@screen sm {
+		--dialog-width: 560px;
+		--alert-max-width: calc(100vw - var(--padding-4x));
+		--alert-max-height: calc(100dvh - var(--padding-4x));
+		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	}
 
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
