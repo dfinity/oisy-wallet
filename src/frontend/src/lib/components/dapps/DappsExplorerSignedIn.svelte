@@ -74,3 +74,11 @@
 </ul>
 
 <SubmitDappButton />
+
+<style lang="postcss">
+	@media (max-width: 360px) {
+		ul {
+			@apply grid-cols-1;
+		}
+	}
+</style>
