@@ -1,5 +1,6 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
 use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
+use crate::types::dapp::{DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
