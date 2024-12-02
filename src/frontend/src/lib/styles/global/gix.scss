@@ -128,6 +128,13 @@ div.modal {
 	--overlay-content-background-contrast: var(--color-secondary);
 
 	color: var(--color-secondary);
+
+	--toolbar-height: 78px;
+
+	@screen sm {
+		--toolbar-height: 90px;
+	}
+
 	font-weight: var(--font-weight-normal);
 
 	div.wrapper.dialog {
@@ -149,6 +156,14 @@ div.modal {
 		h2 {
 			font-size: var(--font-size-h3);
 		}
+	}
+
+	div.container-wrapper:has(div.toolbar) {
+		@apply pb-[var(--toolbar-height)];
+	}
+
+	div.toolbar {
+		@apply fixed bottom-0 left-0 h-[var(--toolbar-height)] w-full px-3 sm:px-6 pb-4 sm:pb-6 pt-4 sm:pt-5 bg-white border-t border-secondary;
 	}
 
 	div.wrapper.dialog > div.container-wrapper {
