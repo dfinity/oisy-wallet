@@ -17,7 +17,7 @@ describe('ConvertModal', () => {
 			context: new Map([[UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() }]])
 		});
 
-		const firstStepTitle = 'Swap BTC → ICP';
+		const firstStepTitle = 'Convert BTC → ICP';
 
 		expect(container).toHaveTextContent(firstStepTitle);
 
