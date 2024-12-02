@@ -147,10 +147,3 @@
 		</svelte:fragment>
 	</ContentWithToolbar>
 </Modal>
-
-<style lang="scss">
-	article {
-		padding: var(--padding-3x) var(--padding-2_5x);
-		margin: 0 0 var(--padding-3x);
-	}
-</style>
