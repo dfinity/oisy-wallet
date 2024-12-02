@@ -1,4 +1,6 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
+use crate::types::dapp::{DappCarouselSettings, DappSettings};
+use crate::types::settings::Settings;
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
@@ -120,8 +122,16 @@ impl TokenVersion for StoredUserProfile {
 impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
+        let settings = Settings {
+            dapp: DappSettings {
+                dapp_carousel: DappCarouselSettings {
+                    hidden_dapp_ids: Vec::new(),
+                },
+            },
+        };
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
+            settings,
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
@@ -163,12 +173,14 @@ impl From<&StoredUserProfile> for UserProfile {
             updated_timestamp,
             version,
             credentials,
+            settings,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
             updated_timestamp: *updated_timestamp,
             version: *version,
             credentials: credentials.clone().into_values().collect(),
+            settings: settings.clone(),
         }
     }
 }

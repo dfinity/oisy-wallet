@@ -312,9 +312,34 @@ pub mod signer {
     }
 }
 
+pub mod dapp {
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappCarouselSettings {
+        pub hidden_dapp_ids: Vec<String>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappSettings {
+        pub dapp_carousel: DappCarouselSettings,
+    }
+}
+
+pub mod settings {
+    use crate::types::dapp::DappSettings;
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct Settings {
+        pub dapp: DappSettings,
+    }
+}
+
 /// Types specifics to the user profile.
 pub mod user_profile {
     use super::{CredentialType, Timestamp};
+    use crate::types::settings::Settings;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use ic_verifiable_credentials::issuer_api::CredentialSpec;
@@ -328,16 +353,20 @@ pub mod user_profile {
     }
 
     // Used in the endpoint
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
     pub struct UserProfile {
+        #[serde(default)]
+        pub settings: Settings,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
         pub version: Option<Version>,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
     pub struct StoredUserProfile {
+        #[serde(default)]
+        pub settings: Settings,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
