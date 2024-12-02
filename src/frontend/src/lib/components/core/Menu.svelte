@@ -47,7 +47,7 @@
 
 	const navigateTo = async (path: AppPath) => {
 		hidePopover();
-		await goto(networkUrl({ path, networkId: $networkId, isTransactionsRoute, fromRoute }));
+		await goto(networkUrl({ path, networkId: $networkId, usePreviousRoute: isTransactionsRoute, fromRoute }));
 	};
 
 	const goToTokens = async () => await navigateTo(AppPath.Tokens);
