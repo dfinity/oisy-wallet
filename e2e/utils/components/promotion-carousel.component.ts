@@ -8,18 +8,18 @@ export class PromotionCarousel {
 	}
 
 	public async navigateToSlide(slideNumber: number): Promise<void> {
-		const navigation1Selector = `[data-tid="carousel-slide-navigation-${slideNumber}"]`;
+		const navigation1Selector = `[data-tid="carousel-slide-navigation-${slideNumber}"]:visible`;
 		await this.#page.click(navigation1Selector);
 	}
 	public async freezeCarousel(): Promise<void> {
-		await this.#page.$$eval(`div[data-tid="carousel-slide"]`, (elements) => {
+		await this.#page.$$eval(`div[data-tid="carousel-slide"]:visible`, (elements) => {
 			elements.forEach((el) => {
 				const slideStyle = el.style.transform;
 				el.style.transform = slideStyle;
 			});
 		});
 
-		await this.#page.$$eval(`[data-tid^="carousel-slide-navigation-"]`, (elements) => {
+		await this.#page.$$eval(`[data-tid^="carousel-slide-navigation-"]:visible`, (elements) => {
 			elements.forEach((el) => {
 				const indicatorWidth = el.style.width;
 				const indicatorBackgroundColor = el.style.backgroundColor;
