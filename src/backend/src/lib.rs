@@ -534,12 +534,18 @@ pub fn add_user_hidden_dapp_id(
     mutate_state(|s| {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        add_hidden_dapp_id(
+
+        let result = add_hidden_dapp_id(
             stored_principal,
             request.current_user_version,
             request.dapp_id,
             &mut user_profile_model,
-        )
+        );
+
+        match result {
+            Ok(_) => Ok(()),
+            Err(err) => Err(err),
+        }
     })
 }
 
