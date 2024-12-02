@@ -94,7 +94,7 @@
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
 		"postcss": "^8.4.49",
-		"prettier": "^3.3.3",
+		"prettier": "^3.4.1",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.3.2",
 		"prettier-plugin-tailwindcss": "^0.6.9",
