@@ -10,7 +10,7 @@ describe('mapIcrcData', () => {
 	};
 
 	const expected = {
-		TESTTOKEN: { ...token.TESTTOKEN, exchangeCoinId: 'internet-computer' }
+		TESTTOKEN: token.TESTTOKEN
 	};
 
 	const envs = [
