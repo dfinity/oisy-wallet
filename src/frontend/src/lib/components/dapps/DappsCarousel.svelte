@@ -2,13 +2,13 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
 		dAppDescriptions,
 		type OisyDappDescription
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
 
 	export let styleClass: string | undefined = undefined;
 
