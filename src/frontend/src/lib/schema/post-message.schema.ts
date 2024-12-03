@@ -1,4 +1,3 @@
-import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import {
 	IcCanistersSchema,
@@ -10,7 +9,7 @@ import type { JsonText } from '$icp/types/btc.post-message';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
 import type { BtcAddress } from '$lib/types/address';
-import { CanisterIdTextSchema } from '$lib/types/canister';
+import { CanisterIdTextSchema, type OptionCanisterIdText } from '$lib/types/canister';
 import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
@@ -78,7 +77,8 @@ export const PostMessageDataRequestBtcSchema = z.object({
 	btcAddress: z.custom<CertifiedData<BtcAddress>>(),
 	shouldFetchTransactions: z.boolean(),
 	// TODO: can we implement a generic way to convert Candid types to Zod?
-	bitcoinNetwork: z.custom<SignerBitcoinNetwork>()
+	bitcoinNetwork: z.custom<BitcoinNetwork>(),
+	minterCanisterId: z.custom<OptionCanisterIdText>().optional()
 });
 
 export const PostMessageResponseStatusSchema = z.enum([
