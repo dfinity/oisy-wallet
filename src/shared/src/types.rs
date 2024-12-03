@@ -339,15 +339,17 @@ pub mod dapp {
         pub dapp_id: String,
         pub current_user_version: Option<Version>,
     }
-    
+
     impl AddHiddenDappIdRequest {
         /// The maximum supported app name length.
         pub const MAX_LEN: usize = 32;
         /// Checks whether the request is syntactically valid
         pub fn check(&self) -> Result<(), AddDappSettingsError> {
-            (self.dapp_id.len() < Self::MAX_LEN).then_some(()).ok_or(AddDappSettingsError::DappIdTooLong)
-        }        
-    }    
+            (self.dapp_id.len() < Self::MAX_LEN)
+                .then_some(())
+                .ok_or(AddDappSettingsError::DappIdTooLong)
+        }
+    }
 }
 
 pub mod settings {
