@@ -15,14 +15,4 @@ runs:
         run: solana --version
       - name: Start Solana
         shell: bash
-        run: |
-          set -euxo piprfail
-          # The solana CLI doesn't have a --background flag so we use bash '&' to background it.
-          solana-test-validator >/dev/null 2>&1 &
-          # Wait for the service to be ready
-          RPC_PORT=8899
-          while ! echo exit | nc localhost "$RPC_PORT"; do sleep 1; done
-          # Basic health checks
-          solana config get
-          solana-keygen new --no-bip39-passphrase --silent
-          solana address
+        run: ./scripts/start-solana
