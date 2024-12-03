@@ -3,15 +3,20 @@
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import {
+		type CarouselSlideOisyDappDescription,
 		dAppDescriptions,
-		type CarouselSlideOisyDappDescription
+		type OisyDappDescription
 	} from '$lib/types/dapp-description';
+	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 
 	export let styleClass: string | undefined = undefined;
 
-	const dappsCarouselSlides = dAppDescriptions.filter(({ carousel }) =>
-		nonNullish(carousel)
-	) as CarouselSlideOisyDappDescription[];
+	let hiddenDappsIds: OisyDappDescription['id'][];
+	$: hiddenDappsIds = $userProfileStore?.profile.settings.dapp.dapp_carousel.hidden_dapp_ids ?? [];
+
+	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
+	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 </script>
 
 {#if nonNullish(dappsCarouselSlides)}
