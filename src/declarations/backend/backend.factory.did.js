@@ -53,7 +53,6 @@ export const idlFactory = ({ IDL }) => {
 		dapp_id: IDL.Text
 	});
 	const AddDappSettingsError = IDL.Variant({
-		DappIdAlreadyHidden: IDL.Null,
 		VersionMismatch: IDL.Null,
 		DappIdTooLong: IDL.Null,
 		UserNotFound: IDL.Null
