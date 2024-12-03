@@ -64,6 +64,9 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
 
+      - name: Set Environment Variables
+        run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
+
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
