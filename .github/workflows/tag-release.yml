@@ -48,3 +48,4 @@ jobs:
         name: 'v${{ steps.get_version.outputs.version }}'
         latest: true
         publish: true
+
