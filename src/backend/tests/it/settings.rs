@@ -168,6 +168,20 @@ fn test_add_user_hidden_dapp_id_cannot_update_wrong_version() {
 
     assert!(add_hidden_dapp_id_response.is_ok());
 
+
+    let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
+        dapp_id: "test_dapp_id_2".to_string(),
+        current_user_version: profile.version,
+    };
+
+    let add_hidden_dapp_id_response = pic_setup.update::<Result<(), AddDappSettingsError>>(
+        caller,
+        "add_user_hidden_dapp_id",
+        add_hidden_dapp_id_arg,
+    );
+
+    assert!(add_hidden_dapp_id_response.is_err());
+
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
         "get_user_profile",
