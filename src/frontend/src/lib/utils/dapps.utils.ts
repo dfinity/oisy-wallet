@@ -7,6 +7,6 @@ import { nonNullish } from '@dfinity/utils';
 export const filterCarouselDapps = (
 	dAppDescriptions: OisyDappDescription[]
 ): CarouselSlideOisyDappDescription[] =>
-	dAppDescriptions.filter(({ id, carousel }) =>
+	dAppDescriptions.filter(({ carousel }) =>
 		nonNullish(carousel)
 	) as CarouselSlideOisyDappDescription[];
