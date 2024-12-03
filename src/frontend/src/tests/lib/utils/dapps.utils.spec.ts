@@ -46,10 +46,13 @@ describe('dapps.utils', () => {
 				})
 			).toEqual(mockDapps);
 		});
-    
+
 		it('should return an empty array if all dApps have nullish carousel property', () => {
 			expect(
-				filterCarouselDapps(mockDapps.map((dapps) => ({ ...dapps, carousel: undefined })))
+				filterCarouselDapps({
+					dAppDescriptions: mockDapps.map((dapps) => ({ ...dapps, carousel: undefined })),
+					hiddenDappsIds: []
+				})
 			).toEqual([]);
 		});
 	});
