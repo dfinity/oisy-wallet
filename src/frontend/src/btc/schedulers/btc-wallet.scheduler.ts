@@ -170,7 +170,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					shouldFetchTransactions: data?.shouldFetchTransactions,
 					minterCanisterId: data?.minterCanisterId
 				}),
-			onLoad: ({ certified: _, ...rest }) => this.syncWalletData({ ...rest }),
+			onLoad: ({ certified: _, ...rest }) => this.syncWalletData(rest),
 			identity,
 			resolution: 'all_settled'
 		});
