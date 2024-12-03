@@ -2,7 +2,7 @@ import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
-import { jsonReviver } from '@dfinity/utils';
+import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export const syncWallet = ({
@@ -19,13 +19,17 @@ export const syncWallet = ({
 		}
 	} = data;
 
-	balancesStore.set({
-		tokenId,
-		data: {
-			data: BigNumber.from(balance),
-			certified
-		}
-	});
+	if (nonNullish(balance)) {
+		balancesStore.set({
+			tokenId,
+			data: {
+				data: BigNumber.from(balance),
+				certified
+			}
+		});
+	} else {
+		balancesStore.reset(tokenId);
+	}
 
 	btcTransactionsStore.prepend({
 		tokenId,

@@ -1,10 +1,12 @@
 import {
 	JsonTransactionsTextSchema,
-	PostMessageDataResponseSchema,
-	PostMessageWalletDataSchema
+	PostMessageDataResponseSchema
 } from '$lib/schema/post-message.schema';
+import type { CertifiedData } from '$lib/types/store';
+import { z } from 'zod';
 
-const BtcPostMessageWalletDataSchema = PostMessageWalletDataSchema.extend({
+const BtcPostMessageWalletDataSchema = z.object({
+	balance: z.custom<CertifiedData<bigint | null>>(),
 	newTransactions: JsonTransactionsTextSchema
 });
 

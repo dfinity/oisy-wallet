@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
+	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
@@ -8,7 +10,7 @@
 		btcAddressRegtest,
 		btcAddressTestnet
 	} from '$lib/derived/address.derived';
-	import { enabledBtcTokens } from '$lib/derived/tokens.derived';
+	import { enabledBtcTokens, tokens } from '$lib/derived/tokens.derived';
 	import type { InitWalletWorkerFn } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
 	import {
@@ -16,21 +18,36 @@
 		isNetworkIdBTCRegtest,
 		isNetworkIdBTCTestnet
 	} from '$lib/utils/network.utils';
+	import { findTwinToken } from '$lib/utils/token.utils';
 
-	let tokens: Token[];
+	let ckBtcToken: IcCkToken | undefined;
+	$: ckBtcToken = findTwinToken({
+		tokenToPair: BTC_MAINNET_TOKEN,
+		tokens: $tokens
+	});
 
+	let walletWorkerTokens: Token[];
 	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
-	$: tokens = $enabledBtcTokens.filter(({ network: { id: networkId } }) =>
+	$: walletWorkerTokens = $enabledBtcTokens.filter(({ network: { id: networkId } }) =>
 		LOCAL
 			? isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)
 			: !isNetworkIdBTCRegtest(networkId) &&
 				((isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet)) ||
-					(isNetworkIdBTCMainnet(networkId) && nonNullish($btcAddressMainnet)))
+					// To query mainnet BTC balance, we need to wait for ckBtcToken.minterCanisterId to be available
+					(nonNullish(ckBtcToken) &&
+						isNetworkIdBTCMainnet(networkId) &&
+						nonNullish($btcAddressMainnet)))
 	);
 
-	const initWalletWorker: InitWalletWorkerFn = ({ token }) => initBtcWalletWorker(token);
+	const initWalletWorker: InitWalletWorkerFn = ({ token }) =>
+		initBtcWalletWorker({
+			token,
+			...(isNetworkIdBTCMainnet(token.network.id) && {
+				minterCanisterId: ckBtcToken?.minterCanisterId
+			})
+		});
 </script>
 
-<WalletWorkers {tokens} {initWalletWorker}>
+<WalletWorkers tokens={walletWorkerTokens} {initWalletWorker}>
 	<slot />
 </WalletWorkers>
