@@ -1,6 +1,7 @@
 type AddDappSettingsError = variant {
   DappIdAlreadyHidden;
   VersionMismatch;
+  DappIdTooLong;
   UserNotFound;
 };
 type AddHiddenDappIdRequest = record {

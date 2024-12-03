@@ -5,6 +5,7 @@ import type { Principal } from '@dfinity/principal';
 export type AddDappSettingsError =
 	| { DappIdAlreadyHidden: null }
 	| { VersionMismatch: null }
+	| { DappIdTooLong: null }
 	| { UserNotFound: null };
 export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
