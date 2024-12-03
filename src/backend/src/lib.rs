@@ -534,6 +534,7 @@ pub fn add_user_credential(
 pub fn add_user_hidden_dapp_id(
     request: AddHiddenDappIdRequest,
 ) -> Result<(), AddDappSettingsError> {
+    request.check()?;
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 
