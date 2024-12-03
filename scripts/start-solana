@@ -23,8 +23,10 @@ command -v solana-test-validator || {
 	echo "ERROR: solana-test-validator not found.  Have you added the solana bin to your PATH?"
 	exit 1
 } >&2
-# The solana CLI doesn't have a --background flag so we use bash '&' to background it.
+
+: "The solana CLI doesn't have a --background flag so we use bash '&' to background it."
 solana-test-validator --rpc-port "$RPC_PORT" >/dev/null 2>&1 &
+
 printf "Waiting for solana to be ready..."
 for ((i = 10; i--; )); do
 	if nc -z localhost "$RPC_PORT"; then
@@ -38,7 +40,8 @@ for ((i = 10; i--; )); do
 		sleep 1
 	fi
 done
-# Basic health checks
+
+: "Basic health checks"
 echo "== Config =="
 solana config get
 echo "== Address =="
