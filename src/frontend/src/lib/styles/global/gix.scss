@@ -109,7 +109,7 @@ article.gix {
 	}
 }
 
-label + div[class*='input-block'] {
+label+div[class*='input-block'] {
 	margin: calc(-1 * var(--padding-0_25x)) 0 var(--padding-2x);
 }
 
@@ -137,7 +137,7 @@ div.modal {
 
 	font-weight: var(--font-weight-normal);
 
-	div.wrapper.dialog > div.header {
+	div.wrapper.dialog>div.header {
 		// TODO: Improve padding definition when the Modal of GIX Components has an updated way of setting it and not being hard-coded (https://github.com/dfinity/gix-components/blob/1c4ab390f9cab1d0e3ec73a23384e045679eb6b8/src/lib/components/Modal.svelte#L195)
 		--padding-3x: 0;
 		--padding: 0;
@@ -152,24 +152,19 @@ div.modal {
 		}
 	}
 
-	div.container-wrapper:has(div.toolbar) {
-		@apply pb-[var(--toolbar-height)];
-	}
-
-	div.toolbar {
-		@apply fixed bottom-0 left-0 h-[var(--toolbar-height)] w-full px-3 sm:px-6 pb-4 sm:pb-6 pt-4 sm:pt-5 bg-white border-t border-secondary;
-	}
-
-	div.wrapper.dialog > div.container-wrapper {
+	div.wrapper.dialog>div.container-wrapper {
 		margin: 0;
 
-		& > div.container {
+		&>div.container {
 			border-radius: 0;
 		}
 	}
 
 	div.container {
-		& > div.content {
+		
+		// If using ContentWithToolbar, we need to set some padding manually
+		&>div.content div.stretch {
+
 			--dialog-padding-x: 12px;
 			--dialog-padding-y: 16px;
 
@@ -177,6 +172,41 @@ div.modal {
 				--dialog-padding-x: 24px;
 				--dialog-padding-y: 24px;
 			}
+
+			@apply px-[var(--dialog-padding-x)] py-[var(--dialog-padding-y)] flex-1;
+		
+		}
+
+		// If not using ContentWithToolbar, we need to set some decent padding via modal variables
+		&>div.content:not(:has(div.stretch)) {
+		
+			--dialog-padding-x: 12px;
+			--dialog-padding-y: 16px;
+
+			@screen sm {
+				--dialog-padding-x: 24px;
+				--dialog-padding-y: 24px;
+			}
+		}
+
+
+		div.toolbar {
+			@apply sticky bottom-0 left-0 w-full px-3 md:px-6 pb-4 md:pb-6 pt-4 md:pt-5 bg-white border-t border-secondary;
+		}
+	}
+
+	div.content:not(:has(+ div.transition)),
+	div.transition:not(:has(+ form)),
+	div.transition > form {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-height: 100%;
+
+		--stretch-padding-bottom: 0;
+
+		&.min-h-auto {
+			min-height: auto;
 		}
 	}
 }
