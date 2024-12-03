@@ -59,15 +59,10 @@ pub fn add_hidden_dapp_id(
     dapp_id: String,
     user_profile_model: &mut UserProfileModel,
 ) -> Result<(), AddDappSettingsError> {
-    if let Ok(user_profile) = find_profile(principal, user_profile_model) {
-        let now = time();
-        if let Ok(new_profile) = user_profile.add_hidden_dapp_id(profile_version, now, dapp_id) {
-            user_profile_model.store_new(principal, now, &new_profile);
-            Ok(())
-        } else {
-            Err(AddDappSettingsError::VersionMismatch)
-        }
-    } else {
-        Err(AddDappSettingsError::UserNotFound)
-    }
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| AddDappSettingsError::UserNotFound)?;
+    let now = time();
+    let new_profile = user_profile.add_hidden_dapp_id(profile_version, now, dapp_id)?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
 }
