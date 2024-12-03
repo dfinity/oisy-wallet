@@ -289,9 +289,6 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
     );
 }
 
-
-
-
 #[test]
 fn test_add_user_hidden_dapp_id_does_not_allow_long_ids() {
     let pic_setup = setup();
