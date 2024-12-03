@@ -128,6 +128,6 @@
 			</Value>
 		{/if}
 
-		<ButtonCloseModal slot="toolbar"/>
+		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>
