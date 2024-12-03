@@ -4,12 +4,11 @@
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import {
 		type CarouselSlideOisyDappDescription,
-		dAppDescriptions,
+		dAppDescriptions
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 
 	export let styleClass: string | undefined = undefined;
-
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = filterCarouselDapps(dAppDescriptions);
