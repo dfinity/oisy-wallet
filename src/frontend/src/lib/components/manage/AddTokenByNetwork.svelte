@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
@@ -36,7 +36,13 @@
 	// only the data related to the selected network is passed.
 	$: {
 		if (isNetworkIdICP(network?.id)) {
-			tokenData = { ledgerCanisterId, indexCanisterId };
+			tokenData = {
+				ledgerCanisterId,
+				indexCanisterId:
+					nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
+						? indexCanisterId
+						: undefined
+			};
 		} else if (isNetworkIdEthereum(network?.id)) {
 			tokenData = { contractAddress: erc20ContractAddress };
 		} else {
@@ -50,7 +56,7 @@
 	$: invalidErc20 = isNullishOrEmpty(erc20ContractAddress);
 
 	let invalidIc = true;
-	$: invalidIc = isNullishOrEmpty(ledgerCanisterId) || isNullishOrEmpty(indexCanisterId);
+	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
 
 	let invalid = true;
 	$: invalid = isNetworkIdEthereum(network?.id) ? invalidErc20 : invalidIc;

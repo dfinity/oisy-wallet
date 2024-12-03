@@ -17,10 +17,13 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalToken, modalEthTransaction } from '$lib/derived/modal.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionEthAddress } from '$lib/types/address';
+	import type { OptionToken } from '$lib/types/token';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
+	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
 	$: ckMinterInfoAddresses = toCkMinterInfoAddresses({
@@ -38,9 +41,12 @@
 	);
 
 	let selectedTransaction: TransactionType | undefined;
-	$: selectedTransaction = $modalEthTransaction
-		? ($modalStore?.data as TransactionType | undefined)
-		: undefined;
+	let selectedToken: OptionToken;
+	$: ({ transaction: selectedTransaction, token: selectedToken } =
+		mapTransactionModalData<TransactionType>({
+			$modalOpen: $modalEthTransaction,
+			$modalStore: $modalStore
+		}));
 </script>
 
 <Header>{$i18n.transactions.text.title}</Header>
@@ -49,7 +55,7 @@
 	<EthTransactionsSkeletons>
 		{#each sortedTransactionsUi as transaction (transaction.hash)}
 			<div transition:slide={SLIDE_DURATION}>
-				<EthTransaction {transaction} />
+				<EthTransaction {transaction} token={$tokenWithFallback} />
 			</div>
 		{/each}
 
@@ -60,7 +66,7 @@
 </LoaderEthTransactions>
 
 {#if $modalEthTransaction && nonNullish(selectedTransaction)}
-	<EthTransactionModal transaction={selectedTransaction} />
+	<EthTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalToken}
 	<TokenModal />
 {/if}

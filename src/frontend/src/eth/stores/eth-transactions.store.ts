@@ -3,19 +3,20 @@ import type { Transaction } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type TransactionsData = Record<TokenId, Transaction[]>;
+export type EthTransactionsData = Record<TokenId, Transaction[]>;
 
-export interface TransactionsStore extends Readable<TransactionsData> {
+export interface EthTransactionsStore extends Readable<EthTransactionsData> {
 	set: (params: { tokenId: TokenId; transactions: Transaction[] }) => void;
 	add: (params: { tokenId: TokenId; transactions: Transaction[] }) => void;
 	update: (params: { tokenId: TokenId; transaction: Transaction }) => void;
+	nullify: (tokenId: TokenId) => void;
 	reset: () => void;
 }
 
-const initTransactionsStore = (): TransactionsStore => {
-	const INITIAL: TransactionsData = {} as Record<TokenId, Transaction[]>;
+const initEthTransactionsStore = (): EthTransactionsStore => {
+	const INITIAL: EthTransactionsData = {} as Record<TokenId, Transaction[]>;
 
-	const { subscribe, update, set } = writable<TransactionsData>(INITIAL);
+	const { subscribe, update, set } = writable<EthTransactionsData>(INITIAL);
 
 	return {
 		set: ({ tokenId, transactions }: { tokenId: TokenId; transactions: Transaction[] }) =>
@@ -36,9 +37,14 @@ const initTransactionsStore = (): TransactionsStore => {
 					transaction
 				]
 			})),
+		nullify: (tokenId) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: null
+			})),
 		reset: () => set(INITIAL),
 		subscribe
 	};
 };
 
-export const ethTransactionsStore = initTransactionsStore();
+export const ethTransactionsStore = initEthTransactionsStore();

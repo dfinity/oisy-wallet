@@ -18,7 +18,9 @@
 </script>
 
 <button
-	class={`text-${color} pointer-events-auto flex gap-0.5 font-bold`}
+	class="pointer-events-auto flex gap-0.5 font-bold"
+	class:text-current={color === 'current'}
+	class:text-brand-primary={color === 'primary'}
 	class:icon={onlyArrow}
 	on:click={() => back({ pop: nonNullish(fromRoute) })}
 	aria-label={$i18n.core.alt.back}

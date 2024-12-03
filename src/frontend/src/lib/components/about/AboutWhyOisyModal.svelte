@@ -21,9 +21,9 @@
 	</svelte:fragment>
 
 	<div class="stretch pt-4">
-		<ImgBanner size="small" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
+		<ImgBanner styleClass="max-h-56" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
 
-		<p class="mt-12">
+		<p class="mt-6">
 			<IconCrypto />
 			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.hold_crypto)} />
 		</p>
