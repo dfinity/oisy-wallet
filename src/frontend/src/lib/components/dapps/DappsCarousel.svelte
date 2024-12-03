@@ -3,14 +3,22 @@
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
+	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		type CarouselSlideOisyDappDescription,
 		dAppDescriptions,
 		type OisyDappDescription
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 
 	export let styleClass: string | undefined = undefined;
+
+	$: {
+		if ($authSignedIn) {
+			loadUserProfile({ identity:$authIdentity });
+		}
+	}
 
 	let hiddenDappsIds: OisyDappDescription['id'][];
 	$: hiddenDappsIds = $userProfileStore?.profile.settings.dapp.dapp_carousel.hidden_dapp_ids ?? [];
