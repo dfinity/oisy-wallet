@@ -27,6 +27,8 @@ export const syncWallet = ({
 				certified
 			}
 		});
+	} else {
+		balancesStore.reset(tokenId);
 	}
 
 	btcTransactionsStore.prepend({
