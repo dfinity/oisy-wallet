@@ -328,7 +328,6 @@ pub mod dapp {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum AddDappSettingsError {
-        DappIdAlreadyHidden,
         DappIdTooLong,
         UserNotFound,
         VersionMismatch,

@@ -259,7 +259,7 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
 
     assert_eq!(
         add_hidden_dapp_id_response,
-        Ok(Err(AddDappSettingsError::DappIdAlreadyHidden))
+        Ok(Ok(())),
     );
 
     let get_final_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
@@ -268,15 +268,26 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
         (),
     );
 
+    let final_user_profile = get_final_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
     assert_eq!(
-        get_final_profile_response
-            .expect("Call to get profile failed")
-            .expect("Get profile failed")
+        final_user_profile
             .settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
             .len(),
         1
+    );
+
+    assert_eq!(
+        final_user_profile
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids,
+        vec!["test_dapp_id".to_string()]
     );
 }
