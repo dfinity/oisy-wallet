@@ -5,27 +5,21 @@ import {
 	btcAddressRegtestStore,
 	btcAddressTestnetStore
 } from '$lib/stores/address.store';
-import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCRegtest,
-	isNetworkIdBTCTestnet
+	isNetworkIdBTCTestnet,
+	mapToSignerBitcoinNetwork
 } from '$lib/utils/network.utils';
 import { get } from 'svelte/store';
 
 export const initBtcWalletWorker = async ({
-	token: {
-		id: tokenId,
-		network: { id: networkId }
-	},
-	minterCanisterId
-}: {
-	token: Token;
-	minterCanisterId?: OptionCanisterIdText;
-}): Promise<WalletWorker> => {
+	id: tokenId,
+	network: { id: networkId }
+}: Token): Promise<WalletWorker> => {
 	const WalletWorker = await import('$btc/workers/btc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
@@ -54,10 +48,11 @@ export const initBtcWalletWorker = async ({
 					? btcAddressRegtestStore
 					: btcAddressMainnetStore
 		),
-		bitcoinNetwork: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet',
+		bitcoinNetwork: mapToSignerBitcoinNetwork({
+			network: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet'
+		}),
 		// only mainnet transactions can be fetched via Blockchain API
-		shouldFetchTransactions: isNetworkIdBTCMainnet(networkId),
-		minterCanisterId
+		shouldFetchTransactions: isNetworkIdBTCMainnet(networkId)
 	};
 
 	return {

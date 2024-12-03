@@ -34,3 +34,4 @@
 <WalletWorkers {tokens} {initWalletWorker}>
 	<slot />
 </WalletWorkers>
+
