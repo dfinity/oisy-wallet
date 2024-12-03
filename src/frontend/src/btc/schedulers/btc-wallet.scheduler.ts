@@ -26,12 +26,12 @@ interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	minterCanisterId?: OptionCanisterIdText;
 }
 interface BtcWalletStore {
-	balance: CertifiedData<bigint> | undefined;
+	balance: CertifiedData<bigint | null> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
 }
 
 interface BtcWalletData {
-	balance: CertifiedData<bigint> | null;
+	balance: CertifiedData<bigint | null>;
 	uncertifiedTransactions: CertifiedData<BtcTransactionUi>[];
 }
 
@@ -94,26 +94,25 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		btcAddress,
 		minterCanisterId,
 		certified = true
-	}: Omit<
-		LoadBtcWalletParams,
-		'shouldFetchTransactions'
-	>): Promise<CertifiedData<bigint> | null> => {
-		// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
+	}: Omit<LoadBtcWalletParams, 'shouldFetchTransactions'>): Promise<
+		CertifiedData<bigint | null>
+	> => {
 		if (!certified) {
-			if (nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]) {
-				return {
-					data: await getBalanceQuery({
-						identity,
-						network: bitcoinNetwork,
-						address: btcAddress,
-						bitcoinCanisterId: BITCOIN_CANISTER_IDS[minterCanisterId]
-					}),
-					certified: false
-				};
-			}
-
-			// corner case in which minter and/or BTC canister ids are not set
-			return null;
+			// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
+			// These values will be there only for "mainnet", for other networks - balance on "query" will be null
+			return {
+				data:
+					nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
+						? await getBalanceQuery({
+								identity,
+								network: bitcoinNetwork,
+								address: btcAddress,
+								bitcoinCanisterId: BITCOIN_CANISTER_IDS[minterCanisterId],
+								minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
+							})
+						: null,
+				certified: false
+			};
 		}
 
 		return {
@@ -183,10 +182,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		response: BtcWalletData;
 	}) => {
 		const newBalance =
-			nonNullish(balance) &&
-			(isNullish(this.store.balance) ||
-				this.store.balance.data !== balance.data ||
-				(!this.store.balance.certified && balance.certified));
+			isNullish(this.store.balance) ||
+			this.store.balance.data !== balance.data ||
+			(!this.store.balance.certified && balance.certified);
 		const newTransactions = uncertifiedTransactions.length > 0;
 
 		this.store = {
@@ -206,7 +204,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			})
 		};
 
-		if (isNullish(balance) || (!newBalance && !newTransactions)) {
+		if (!newBalance && !newTransactions) {
 			return;
 		}
 
