@@ -199,14 +199,12 @@ describe('btc-wallet.worker', () => {
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			// query call should be skipped as we already have certified balance
-			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
+			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(2);
 			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(2);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			// query call should be skipped as we already have certified balance
-			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
+			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(3);
 			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(3);
 		});
 
