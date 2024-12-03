@@ -11,7 +11,7 @@ export class PromotionCarousel {
 		const navigation1Selector = `[data-tid="carousel-slide-navigation-${slideNumber}"]:visible`;
 		await this.#page.click(navigation1Selector);
 	}
-	
+
 	public async freezeCarousel(): Promise<void> {
 		// Freeze the carousel by applying the first slide's transform style to all visible slides
 		await this.#page.$$eval(`div[data-tid="carousel-slide"]:visible`, (elements) => {
