@@ -23,9 +23,9 @@
 	];
 </script>
 
-<div class="flex flex-col items-center text-center md:items-start md:text-left">
+<div class="flex flex-col items-center text-center md:items-start md:text-left lg:mb-20">
 	<div class="mb-7 mt-5 pt-2">
-		<h1 class="text-4xl md:text-5xl md:leading-tight">
+		<h1 class="text-4xl md:leading-tight lg:text-5xl">
 			{$i18n.auth.text.title_part_1}<br /><span class="text-brand-primary"
 				>{$i18n.auth.text.title_part_2}</span
 			>
