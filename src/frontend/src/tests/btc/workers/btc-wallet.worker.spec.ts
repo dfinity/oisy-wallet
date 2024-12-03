@@ -11,12 +11,18 @@ import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { HttpAgent } from '@dfinity/agent';
+import { BitcoinCanister, type BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer } from '@dfinity/utils';
-import { beforeAll, type MockInstance } from 'vitest';
+import { waitFor } from '@testing-library/svelte';
+import { type MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('btc-wallet.worker', () => {
-	let spyGetBalance: MockInstance;
+	let spyGetCertifiedBalance: MockInstance;
+	let spyGetUncertifiedBalance: MockInstance;
+
+	const signerCanisterMock = mock<SignerCanister>();
+	const bitcoinCanisterMock = mock<BitcoinCanister>();
 
 	let originalPostmessage: unknown;
 
@@ -104,6 +110,15 @@ describe('btc-wallet.worker', () => {
 			n_unredeemed: 100,
 			total_sent: 100
 		});
+
+		vi.spyOn(SignerCanister, 'create').mockResolvedValue(signerCanisterMock);
+		vi.spyOn(BitcoinCanister, 'create').mockReturnValue(bitcoinCanisterMock);
+
+		spyGetUncertifiedBalance = bitcoinCanisterMock.getBalanceQuery.mockResolvedValue(mockBalance);
+		spyGetCertifiedBalance = signerCanisterMock.getBtcBalance.mockImplementation(async () => {
+			await waitFor(() => Promise.resolve(), { timeout: 1000 });
+			return mockBalance;
+		});
 	});
 
 	afterEach(() => {
@@ -115,19 +130,47 @@ describe('btc-wallet.worker', () => {
 	}: {
 		startData?: PostMessageDataRequestBtc | undefined;
 	}) => {
-		let scheduler: BtcWalletScheduler = new BtcWalletScheduler();
+		const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
-		const mockPostMessageCertifiedWithTransactions = mockPostMessage({
-			certified: true,
-			withTransactions: startData?.shouldFetchTransactions ?? false
+		const mockPostMessageUncertified = mockPostMessage({
+			certified: false,
+			withTransactions: true
 		});
-		const mockPostMessageCertifiedWithoutTransactions = mockPostMessage({
+		const mockPostMessageCertified = mockPostMessage({
 			certified: true,
 			withTransactions: false
 		});
 
 		afterEach(() => {
+			// reset internal store with transactions
+			scheduler['store'] = {
+				transactions: {},
+				balance: undefined
+			};
+
 			scheduler.stop();
+		});
+
+		it('should trigger postMessage with correct data', async () => {
+			await scheduler.start(startData);
+
+			expect(postMessageMock).toHaveBeenCalledTimes(4);
+			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+
+			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+			expect(postMessageMock).toHaveBeenCalledTimes(6);
+			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+			expect(postMessageMock).toHaveBeenCalledTimes(8);
+			expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
 		});
 
 		it('should start the scheduler with an interval', async () => {
@@ -139,8 +182,8 @@ describe('btc-wallet.worker', () => {
 		it('should trigger the scheduler manually', async () => {
 			await scheduler.trigger(startData);
 
-			// update call only = 1
-			expect(spyGetBalance).toHaveBeenCalledTimes(1);
+			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
+			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
 		});
 
 		it('should stop the scheduler', () => {
@@ -148,54 +191,21 @@ describe('btc-wallet.worker', () => {
 			expect(scheduler['timer']['timer']).toBeUndefined();
 		});
 
-		// TODO: update this test after "queryAndUpdate" approach is introduced in the following PR
 		it('should trigger syncWallet periodically', async () => {
 			await scheduler.start(startData);
 
-			expect(spyGetBalance).toHaveBeenCalledTimes(1);
+			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
+			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(spyGetBalance).toHaveBeenCalledTimes(2);
+			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(2);
+			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(2);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(spyGetBalance).toHaveBeenCalledTimes(3);
-		});
-
-		// TODO: right now, postMessage is triggered even on changes (it is fixed in the following PR and the test will be updated accordingly)
-		it('should trigger postMessage with correct data', async () => {
-			// create a new wallet instance to reset internal store with transactions
-			scheduler = new BtcWalletScheduler();
-
-			await scheduler.start(startData);
-
-			expect(postMessageMock).toHaveBeenCalledTimes(3);
-			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageCertifiedWithTransactions);
-			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
-
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
-
-			expect(postMessageMock).toHaveBeenCalledTimes(6);
-			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
-			// mocked transaction is already cached at this point so the next postMessage should not have it
-			expect(postMessageMock).toHaveBeenNthCalledWith(
-				5,
-				mockPostMessageCertifiedWithoutTransactions
-			);
-			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
-
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
-
-			expect(postMessageMock).toHaveBeenCalledTimes(9);
-			expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
-			// mocked transaction is already cached at this point so the next postMessage should not have it
-			expect(postMessageMock).toHaveBeenNthCalledWith(
-				8,
-				mockPostMessageCertifiedWithoutTransactions
-			);
-			expect(postMessageMock).toHaveBeenNthCalledWith(9, mockPostMessageStatusIdle);
+			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(3);
+			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(3);
 		});
 
 		it('should postMessage with status of the worker', async () => {
@@ -207,38 +217,16 @@ describe('btc-wallet.worker', () => {
 	};
 
 	describe('btc-wallet worker should work', () => {
-		const signerCanisterMock = mock<SignerCanister>();
-
 		const startData = {
 			btcAddress: {
 				certified: true,
 				data: mockBtcAddress
 			},
-			bitcoinNetwork: { mainnet: null }
+			shouldFetchTransactions: true,
+			bitcoinNetwork: 'mainnet' as BitcoinNetwork,
+			minterCanisterId: 'mqygn-kiaaa-aaaar-qaadq-cai'
 		};
 
-		beforeEach(() => {
-			vi.spyOn(SignerCanister, 'create').mockResolvedValue(signerCanisterMock);
-
-			spyGetBalance = signerCanisterMock.getBtcBalance.mockResolvedValue(mockBalance);
-		});
-
-		describe('with balance only', () => {
-			testWorker({
-				startData: {
-					...startData,
-					shouldFetchTransactions: false
-				}
-			});
-		});
-
-		describe('with balance and transactions', () => {
-			testWorker({
-				startData: {
-					...startData,
-					shouldFetchTransactions: true
-				}
-			});
-		});
+		testWorker({ startData });
 	});
 });
