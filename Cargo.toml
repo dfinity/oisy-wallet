@@ -12,7 +12,7 @@ ic-cdk-macros = "0.16.0"
 ic-cdk-timers = "0.9.0"
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-ledger-types = "0.13.0"
-ic-stable-structures = "0.6.6"
+ic-stable-structures = "0.6.7"
 ic-metrics-encoder = "1.1.1"
 ic-canister-sig-creation = "1.1.0"
 ic-verifiable-credentials = "1.0.1"
