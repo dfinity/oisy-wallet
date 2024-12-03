@@ -11,8 +11,9 @@ import {
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
+import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
@@ -55,6 +56,7 @@ interface WaitForLocatorOptions {
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
+	private promotionCarousel?: PromotionCarousel;
 
 	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
@@ -201,6 +203,19 @@ abstract class Homepage {
 		await expect(modal).toHaveScreenshot();
 	}
 
+	async setCarouselFirstSlide(): Promise<void> {
+		if (isNullish(this.promotionCarousel)) {
+			this.promotionCarousel = new PromotionCarousel(this.#page);
+		}
+
+		await this.promotionCarousel.navigateToSlide(1);
+		await this.promotionCarousel.freezeCarousel();
+	}
+
+	async waitForLoadState() {
+		await this.#page.waitForLoadState('networkidle');
+	}
+
 	abstract extendWaitForReady(): Promise<void>;
 
 	abstract waitForReady(): Promise<void>;
@@ -218,6 +233,7 @@ export class HomepageLoggedOut extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
+		await this.waitForLoadState();
 	}
 }
 
@@ -298,6 +314,10 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
 		await this.waitForTokensInitialization();
+
+		await this.waitForLoadState();
+
+		await this.setCarouselFirstSlide();
 
 		await this.extendWaitForReady();
 	}

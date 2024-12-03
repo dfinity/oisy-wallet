@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
+	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
 	export let autoplay = 5000;
@@ -245,10 +246,11 @@
 <svelte:window on:resize={onResize} />
 
 <div
+	data-tid={CAROUSEL_CONTAINER}
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
-		<div class="flex" bind:this={sliderFrame}>
+		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>

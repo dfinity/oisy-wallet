@@ -10,5 +10,6 @@ export class ExplorerPage extends HomepageLoggedIn {
 
 	override async extendWaitForReady(): Promise<void> {
 		await this.clickByTestId(NAVIGATION_ITEM_EXPLORER);
+		await this.waitForLoadState();
 	}
 }

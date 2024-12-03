@@ -15,5 +15,7 @@ export class SettingsPage extends HomepageLoggedIn {
 		await this.clickByTestId(NAVIGATION_ITEM_SETTINGS);
 
 		await this.mockSelector({ selector: `[data-tid="${SETTINGS_ADDRESS_LABEL}"]` });
+
+		await this.waitForLoadState();
 	}
 }
