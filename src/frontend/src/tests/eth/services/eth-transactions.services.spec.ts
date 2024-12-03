@@ -1,8 +1,10 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
+import * as etherscanEnv from '$env/rest/etherscan.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import * as foo from '$eth/rest/etherscan.rest';
 import { EtherscanRest } from '$eth/rest/etherscan.rest';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
@@ -33,6 +35,21 @@ describe('eth-transactions.services', () => {
 			vi.resetAllMocks();
 
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			ethAddressStore.set({ data: mockEthAddress, certified: false });
+		});
+
+		it('should not load transactions if there is no Etherscan API key', async () => {
+			vi.spyOn(etherscanEnv, 'ETHERSCAN_API_KEY', 'get').mockReturnValueOnce('');
+
+			const result = await loadEthereumTransactions({
+				networkId: ETHEREUM_NETWORK_ID,
+				tokenId: ETHEREUM_TOKEN_ID
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(spyToastsError).not.toHaveBeenCalled();
 		});
 
 		describe('when token is ERC20', () => {
@@ -51,7 +68,6 @@ describe('eth-transactions.services', () => {
 			let etherscanRestsSpy: MockInstance;
 
 			beforeEach(() => {
-				ethAddressStore.set({ data: mockEthAddress, certified: false });
 				erc20UserTokensStore.setAll(mockErc20UserTokens);
 
 				etherscanRestsSpy = vi.spyOn(foo, 'etherscanRests');

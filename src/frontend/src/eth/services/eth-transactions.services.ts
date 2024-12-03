@@ -1,3 +1,4 @@
+import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
@@ -11,6 +12,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -22,6 +24,10 @@ export const loadEthereumTransactions = ({
 	tokenId: TokenId;
 	networkId: NetworkId;
 }): Promise<ResultSuccess> => {
+	if (isNullishOrEmpty(ETHERSCAN_API_KEY)) {
+		return Promise.resolve({ success: false });
+	}
+
 	if (isSupportedEthTokenId(tokenId)) {
 		return loadEthTransactions({ networkId, tokenId });
 	}
