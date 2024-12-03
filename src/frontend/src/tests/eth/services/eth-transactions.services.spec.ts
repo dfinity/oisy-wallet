@@ -36,7 +36,7 @@ describe('eth-transactions.services', () => {
 
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			ethAddressStore.set({ data: mockEthAddress, certified: false });
+			vi.spyOn(etherscanEnv, 'ETHERSCAN_API_KEY', 'get').mockReturnValue('test-api-key');
 		});
 
 		it('should not load transactions if there is no Etherscan API key', async () => {
@@ -47,7 +47,7 @@ describe('eth-transactions.services', () => {
 				tokenId: ETHEREUM_TOKEN_ID
 			});
 
-			expect(result).toEqual({ success: false });
+			expect(result).toEqual({ success: true });
 
 			expect(spyToastsError).not.toHaveBeenCalled();
 		});
@@ -68,6 +68,7 @@ describe('eth-transactions.services', () => {
 			let etherscanRestsSpy: MockInstance;
 
 			beforeEach(() => {
+				ethAddressStore.set({ data: mockEthAddress, certified: false });
 				erc20UserTokensStore.setAll(mockErc20UserTokens);
 
 				etherscanRestsSpy = vi.spyOn(foo, 'etherscanRests');

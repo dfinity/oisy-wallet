@@ -25,7 +25,7 @@ export const loadEthereumTransactions = ({
 	networkId: NetworkId;
 }): Promise<ResultSuccess> => {
 	if (isNullishOrEmpty(ETHERSCAN_API_KEY)) {
-		return Promise.resolve({ success: false });
+		return Promise.resolve({ success: true });
 	}
 
 	if (isSupportedEthTokenId(tokenId)) {
