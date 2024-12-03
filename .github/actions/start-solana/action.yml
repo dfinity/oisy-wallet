@@ -1,0 +1,28 @@
+name: Start Solana
+
+description: Start a local Solana testnet
+
+runs:
+  using: composite
+  steps:
+      - name: Install solana cli
+        shell: bash
+        run: |
+          ./scripts/setup solana
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      - name: Verifies that Solana is installed
+        shell: bash
+        run: solana --version
+      - name: Start Solana
+        shell: bash
+        run: |
+          set -euxo piprfail
+          # The solana CLI doesn't have a --background flag so we use bash '&' to background it.
+          solana-test-validator >/dev/null 2>&1 &
+          # Wait for the service to be ready
+          RPC_PORT=8899
+          while ! echo exit | nc localhost "$RPC_PORT"; do sleep 1; done
+          # Basic health checks
+          solana config get
+          solana-keygen new --no-bip39-passphrase --silent
+          solana address
