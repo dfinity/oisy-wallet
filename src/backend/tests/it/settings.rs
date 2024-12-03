@@ -29,7 +29,7 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
         add_hidden_dapp_id_arg,
     );
 
-    assert!(add_hidden_dapp_id_response.is_ok());
+    assert_eq!(add_hidden_dapp_id_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -88,7 +88,7 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
         add_hidden_dapp_id_arg.clone(),
     );
 
-    assert!(add_hidden_dapp_id_response.is_ok());
+    assert_eq!(add_hidden_dapp_id_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -111,7 +111,7 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
         add_hidden_dapp_id_arg,
     );
 
-    assert!(add_hidden_dapp_id_response.is_ok());
+    assert_eq!(add_hidden_dapp_id_response, Ok(Ok(())));
 
     let get_final_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -226,7 +226,8 @@ fn test_add_user_hidden_dapp_id_does_not_update_if_version_is_none() {
         add_hidden_dapp_id_arg,
     );
 
-    assert!(add_hidden_dapp_id_response.is_err());
+    assert_eq!(add_hidden_dapp_id_response,
+            Ok(Err(AddDappSettingsError::VersionMismatch)));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -278,7 +279,7 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
         add_hidden_dapp_id_arg.clone(),
     );
 
-    assert!(add_hidden_dapp_id_response.is_ok());
+    assert_eq!(add_hidden_dapp_id_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -301,7 +302,8 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
         add_hidden_dapp_id_arg,
     );
 
-    assert!(add_hidden_dapp_id_response.is_err());
+    assert_eq!(add_hidden_dapp_id_response,
+        Ok(Err(AddDappSettingsError::DappIdAlreadyHidden)));
 
     let get_final_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
