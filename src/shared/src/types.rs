@@ -363,7 +363,7 @@ pub mod user_profile {
         pub version: Option<Version>,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
         #[serde(default)]
         pub settings: Settings,
