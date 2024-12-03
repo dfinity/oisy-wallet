@@ -141,9 +141,15 @@ export const idlFactory = ({ IDL }) => {
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
+	const DappCarouselSettings = IDL.Record({
+		hidden_dapp_ids: IDL.Vec(IDL.Text)
+	});
+	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
+	const Settings = IDL.Record({ dapp: DappSettings });
 	const UserProfile = IDL.Record({
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
+		settings: Settings,
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});

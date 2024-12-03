@@ -48,7 +48,7 @@
 			href={networkUrl({
 				path: AppPath.Tokens,
 				networkId: $networkId,
-				isTransactionsRoute,
+				usePreviousRoute: isTransactionsRoute,
 				fromRoute
 			})}
 			ariaLabel={$i18n.navigation.alt.tokens}
@@ -63,7 +63,7 @@
 			href={networkUrl({
 				path: AppPath.Activity,
 				networkId: $networkId,
-				isTransactionsRoute,
+				usePreviousRoute: isTransactionsRoute,
 				fromRoute
 			})}
 			ariaLabel={$i18n.navigation.alt.activity}
@@ -78,7 +78,7 @@
 			href={networkUrl({
 				path: AppPath.Explore,
 				networkId: $networkId,
-				isTransactionsRoute,
+				usePreviousRoute: isTransactionsRoute,
 				fromRoute
 			})}
 			ariaLabel={$i18n.navigation.alt.dapp_explorer}
@@ -93,7 +93,7 @@
 			href={networkUrl({
 				path: AppPath.Settings,
 				networkId: $networkId,
-				isTransactionsRoute,
+				usePreviousRoute: isTransactionsRoute,
 				fromRoute
 			})}
 			ariaLabel={$i18n.navigation.alt.settings}

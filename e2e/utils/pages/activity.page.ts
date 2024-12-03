@@ -17,5 +17,6 @@ export class ActivityPage extends HomepageLoggedIn {
 	// TODO: Implement this method clicking on the navigation item instead of using the URL, when the activity page is implemented
 	override async extendWaitForReady(): Promise<void> {
 		await this.#page.goto(ACTIVITY_URL);
+		await this.waitForLoadState();
 	}
 }
