@@ -344,8 +344,8 @@ pub mod dapp {
         /// The maximum supported app name length.
         pub const MAX_LEN: usize = 32;
         /// Checks whether the request is syntactically valid
-        pub fn check() -> Result<(), 'static str> {
-            (self.dapp_id.len() < Self::MAX_LEN).then(()).ok_or(AddDappSettingsError::DappIdTooLong)
+        pub fn check(&self) -> Result<(), AddDappSettingsError> {
+            (self.dapp_id.len() < Self::MAX_LEN).then_some(()).ok_or(AddDappSettingsError::DappIdTooLong)
         }        
     }    
 }
