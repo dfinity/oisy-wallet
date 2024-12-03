@@ -67,7 +67,15 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let initial_profile = create_profile_response.expect("Create failed");
-    assert_eq!(initial_profile.settings.dapp.dapp_carousel.hidden_dapp_ids.len(), 0);
+    assert_eq!(
+        initial_profile
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids
+            .len(),
+        0
+    );
 
     let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
         dapp_id: "test_dapp_id".to_string(),
@@ -115,7 +123,6 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
         .expect("Call to get profile failed")
         .expect("Get profile failed");
 
-
     assert_eq!(
         final_user_profile
             .settings
@@ -127,7 +134,11 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
     );
 
     assert_eq!(
-        final_user_profile.settings.dapp.dapp_carousel.hidden_dapp_ids,
+        final_user_profile
+            .settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids,
         vec!["test_dapp_id".to_string(), "test_dapp_id_2".to_string()]
     );
 }
