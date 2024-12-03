@@ -9,9 +9,7 @@ import { parseNetworkId } from '$lib/validation/network.validation';
 
 export const SOLANA_NETWORK_SYMBOL = 'SOL';
 
-export const SOLANA_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(
-	`${SOLANA_NETWORK_SYMBOL}_Mainnet`
-);
+export const SOLANA_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_NETWORK_SYMBOL);
 
 export const SOLANA_MAINNET_NETWORK: Network = {
 	id: SOLANA_MAINNET_NETWORK_ID,
