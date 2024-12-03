@@ -3,15 +3,16 @@
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import {
+		type CarouselSlideOisyDappDescription,
 		dAppDescriptions,
-		type CarouselSlideOisyDappDescription
 	} from '$lib/types/dapp-description';
+	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 
 	export let styleClass: string | undefined = undefined;
 
-	const dappsCarouselSlides = dAppDescriptions.filter(({ carousel }) =>
-		nonNullish(carousel)
-	) as CarouselSlideOisyDappDescription[];
+
+	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
+	$: dappsCarouselSlides = filterCarouselDapps(dAppDescriptions);
 </script>
 
 {#if nonNullish(dappsCarouselSlides)}
