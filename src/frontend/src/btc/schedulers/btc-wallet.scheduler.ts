@@ -1,7 +1,10 @@
 import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
-import type { BitcoinNetwork } from '$declarations/signer/signer.did';
+import { BITCOIN_CANISTER_IDS } from '$env/networks.btc.env';
+import { getBalanceQuery } from '$icp/api/bitcoin.api';
+import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
@@ -9,14 +12,27 @@ import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
-import type { OptionIdentity } from '$lib/types/identity';
+import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { type BitcoinNetwork } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
+interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
+	bitcoinNetwork: BitcoinNetwork;
+	btcAddress: BtcAddress;
+	shouldFetchTransactions?: boolean;
+	minterCanisterId?: OptionCanisterIdText;
+}
 interface BtcWalletStore {
-	balance: CertifiedData<bigint> | undefined;
+	balance: CertifiedData<bigint | null> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
+}
+
+interface BtcWalletData {
+	balance: CertifiedData<bigint | null>;
+	uncertifiedTransactions: CertifiedData<BtcTransactionUi>[];
 }
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
@@ -46,10 +62,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
-	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
-		newTransactions: BitcoinTransaction[];
-		latestBitcoinBlockHeight: number | undefined;
-	}> {
+	private async loadBtcTransactionsData({
+		btcAddress
+	}: {
+		btcAddress: BtcAddress;
+	}): Promise<CertifiedData<BtcTransactionUi>[]> {
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
@@ -57,84 +74,139 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				isNullish(this.store.transactions[`${hash}`])
 			);
 
-			this.store = {
-				...this.store,
-				transactions: {
-					...this.store.transactions,
-					...newTransactions.reduce(
-						(acc, transaction) => ({
-							...acc,
-							[transaction.hash]: {
-								certified: false,
-								data: transaction
-							}
-						}),
-						{}
-					)
-				}
-			};
-
 			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
 
-			return { newTransactions, latestBitcoinBlockHeight };
+			return newTransactions.map((transaction) => ({
+				data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),
+				certified: false
+			}));
 		} catch (error) {
 			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
 			console.error('Error fetching BTC transactions data:', error);
-			// TODO: Return an error instead of an object with empty array.
-			return { newTransactions: [], latestBitcoinBlockHeight: undefined };
+			// TODO: Return an error instead of an empty array.
+			return [];
 		}
 	}
 
-	private async loadBtcBalance({
+	private loadBtcBalance = async ({
 		identity,
-		bitcoinNetwork
-	}: {
-		identity: OptionIdentity;
-		bitcoinNetwork: BitcoinNetwork;
-	}): Promise<CertifiedData<bigint>> {
-		const balance = await getBtcBalance({
-			identity,
-			network: bitcoinNetwork,
-			minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
-		});
-		const certifiedBalance = {
-			data: balance,
+		bitcoinNetwork,
+		btcAddress,
+		minterCanisterId,
+		certified = true
+	}: Omit<LoadBtcWalletParams, 'shouldFetchTransactions'>): Promise<
+		CertifiedData<bigint | null>
+	> => {
+		if (!certified) {
+			// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
+			// These values will be there only for "mainnet", for other networks - balance on "query" will be null
+			return {
+				data:
+					nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
+						? await getBalanceQuery({
+								identity,
+								network: bitcoinNetwork,
+								address: btcAddress,
+								bitcoinCanisterId: BITCOIN_CANISTER_IDS[minterCanisterId],
+								minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
+							})
+						: null,
+				certified: false
+			};
+		}
+
+		return {
+			data: await getBtcBalance({
+				identity,
+				network: mapToSignerBitcoinNetwork({
+					network: bitcoinNetwork
+				}),
+				minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
+			}),
 			certified: true
 		};
+	};
 
-		this.store = {
-			...this.store,
-			balance: certifiedBalance
-		};
+	private loadWalletData = async ({
+		certified,
+		identity,
+		bitcoinNetwork,
+		btcAddress,
+		minterCanisterId,
+		shouldFetchTransactions
+	}: LoadBtcWalletParams) => {
+		const balance = await this.loadBtcBalance({
+			identity,
+			bitcoinNetwork,
+			certified,
+			btcAddress,
+			minterCanisterId
+		});
 
-		return certifiedBalance;
-	}
+		// TODO: investigate and implement "update" call for BTC transactions
+		const uncertifiedTransactions =
+			shouldFetchTransactions && !certified
+				? await this.loadBtcTransactionsData({ btcAddress })
+				: [];
 
-	/* TODO: The following steps need to be done:
-	 * 1. [Required] Fetch uncertified transactions via BTC transaction API.
-	 * 2. [Improvement] Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
-	 * 3. [Required] Fetch certified transactions via BE endpoint (to be discussed).
-	 * */
+		return { balance, uncertifiedTransactions };
+	};
+
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
 		const bitcoinNetwork = data?.bitcoinNetwork;
-		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get BTC certified balance.');
+		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get BTC balance.');
 
 		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
-		const balance = await this.loadBtcBalance({ identity, bitcoinNetwork });
-		const { newTransactions, latestBitcoinBlockHeight } =
-			nonNullish(data) && data.shouldFetchTransactions
-				? await this.loadBtcTransactionsData({ btcAddress })
-				: { newTransactions: [], latestBitcoinBlockHeight: undefined };
+		// TODO: implement "onCertifiedError" to handle errors in update calls
+		await queryAndUpdate<BtcWalletData>({
+			request: ({ identity: _, certified }) =>
+				this.loadWalletData({
+					certified,
+					identity,
+					btcAddress,
+					bitcoinNetwork,
+					shouldFetchTransactions: data?.shouldFetchTransactions,
+					minterCanisterId: data?.minterCanisterId
+				}),
+			onLoad: ({ certified: _, ...rest }) => this.syncWalletData(rest),
+			identity,
+			resolution: 'all_settled'
+		});
+	};
 
-		// TODO: handle the case when tx data is available but latestBitcoinBlockHeight is undefined
-		const uncertifiedTransactions = nonNullish(latestBitcoinBlockHeight)
-			? newTransactions.map((transaction) => ({
-					data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),
-					certified: false
-				}))
-			: [];
+	private syncWalletData = ({
+		response: { balance, uncertifiedTransactions }
+	}: {
+		response: BtcWalletData;
+	}) => {
+		const newBalance =
+			isNullish(this.store.balance) ||
+			this.store.balance.data !== balance.data ||
+			(!this.store.balance.certified && balance.certified);
+		const newTransactions = uncertifiedTransactions.length > 0;
+
+		this.store = {
+			...this.store,
+			...(newBalance && { balance }),
+			...(newTransactions && {
+				transactions: {
+					...this.store.transactions,
+					...uncertifiedTransactions.reduce(
+						(acc, uncertifiedTransaction) => ({
+							...acc,
+							[uncertifiedTransaction.data.id]: uncertifiedTransaction
+						}),
+						{}
+					)
+				}
+			})
+		};
+
+		if (!newBalance && !newTransactions) {
+			return;
+		}
 
 		this.postMessageWallet({
 			wallet: {
