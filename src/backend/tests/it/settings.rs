@@ -168,7 +168,6 @@ fn test_add_user_hidden_dapp_id_cannot_update_wrong_version() {
 
     assert!(add_hidden_dapp_id_response.is_ok());
 
-
     let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
         dapp_id: "test_dapp_id_2".to_string(),
         current_user_version: profile.version,
