@@ -356,7 +356,7 @@ pub mod user_profile {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
     pub struct UserProfile {
         #[serde(default)]
-        pub settings: Settings,
+        pub settings: Option<Settings>,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
@@ -366,7 +366,7 @@ pub mod user_profile {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
     pub struct StoredUserProfile {
         #[serde(default)]
-        pub settings: Settings,
+        pub settings: Option<Settings>,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
