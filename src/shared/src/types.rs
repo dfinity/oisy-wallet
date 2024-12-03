@@ -329,6 +329,7 @@ pub mod dapp {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum AddDappSettingsError {
         DappIdAlreadyHidden,
+        DappIdTooLong,
         UserNotFound,
         VersionMismatch,
     }
@@ -344,7 +345,7 @@ pub mod dapp {
         pub const MAX_LEN: usize = 32;
         /// Checks whether the request is syntactically valid
         pub fn check() -> Result<(), 'static str> {
-            (self.dapp_id.len() < Self::MAX_LEN).then(()).ok_or("App name too long.")
+            (self.dapp_id.len() < Self::MAX_LEN).then(()).ok_or(AddDappSettingsError::DappIdTooLong)
         }        
     }    
 }
