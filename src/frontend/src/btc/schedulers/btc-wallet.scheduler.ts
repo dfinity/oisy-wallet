@@ -4,7 +4,7 @@ import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-messa
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import { BITCOIN_CANISTER_IDS } from '$env/networks.btc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
-import { queryAndUpdate } from '$lib/actors/query.ic';
+import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
@@ -13,17 +13,14 @@ import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/sche
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { type BitcoinNetwork } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
-interface LoadBtcWalletParams {
-	identity: OptionIdentity;
+interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	bitcoinNetwork: BitcoinNetwork;
-	certified: boolean;
 	btcAddress: BtcAddress;
 	shouldFetchTransactions?: boolean;
 	minterCanisterId?: OptionCanisterIdText;
@@ -34,8 +31,8 @@ interface BtcWalletStore {
 }
 
 interface BtcWalletData {
-	balance: CertifiedData<bigint> | undefined;
-	transactions: CertifiedData<BtcTransactionUi>[];
+	balance: CertifiedData<bigint> | null;
+	uncertifiedTransactions: CertifiedData<BtcTransactionUi>[];
 }
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
@@ -79,12 +76,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 
 			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
 
-			return nonNullish(latestBitcoinBlockHeight)
-				? newTransactions.map((transaction) => ({
-						data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),
-						certified: false
-					}))
-				: [];
+			return newTransactions.map((transaction) => ({
+				data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight }),
+				certified: false
+			}));
 		} catch (error) {
 			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
 			console.error('Error fetching BTC transactions data:', error);
@@ -99,12 +94,13 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		btcAddress,
 		minterCanisterId,
 		certified = true
-	}: Omit<LoadBtcWalletParams, 'shouldFetchTransactions'>): Promise<
-		CertifiedData<bigint> | undefined
-	> => {
-		// Query BTC balance only if minterCanisterId is available
+	}: Omit<
+		LoadBtcWalletParams,
+		'shouldFetchTransactions'
+	>): Promise<CertifiedData<bigint> | null> => {
+		// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
 		if (!certified) {
-			if (nonNullish(minterCanisterId) && isNullish(this.store.balance)) {
+			if (nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]) {
 				return {
 					data: await getBalanceQuery({
 						identity,
@@ -116,7 +112,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				};
 			}
 
-			return;
+			// corner case in which minter and/or BTC canister ids are not set
+			return null;
 		}
 
 		return {
@@ -148,12 +145,12 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 
 		// TODO: investigate and implement "update" call for BTC transactions
-		const transactions =
+		const uncertifiedTransactions =
 			shouldFetchTransactions && !certified
 				? await this.loadBtcTransactionsData({ btcAddress })
 				: [];
 
-		return { balance, transactions };
+		return { balance, uncertifiedTransactions };
 	};
 
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
@@ -174,24 +171,23 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					shouldFetchTransactions: data?.shouldFetchTransactions,
 					minterCanisterId: data?.minterCanisterId
 				}),
-			onLoad: ({ certified, ...rest }) => this.syncWalletData({ certified, ...rest }),
+			onLoad: ({ certified: _, ...rest }) => this.syncWalletData({ ...rest }),
 			identity,
 			resolution: 'all_settled'
 		});
 	};
 
 	private syncWalletData = ({
-		response: { balance, transactions }
+		response: { balance, uncertifiedTransactions }
 	}: {
 		response: BtcWalletData;
-		certified: boolean;
 	}) => {
 		const newBalance =
-			isNullish(this.store.balance) ||
-			(nonNullish(balance) &&
-				(this.store.balance.data !== balance.data ||
-					(!this.store.balance.certified && balance.certified)));
-		const newTransactions = transactions.length > 0;
+			nonNullish(balance) &&
+			(isNullish(this.store.balance) ||
+				this.store.balance.data !== balance.data ||
+				(!this.store.balance.certified && balance.certified));
+		const newTransactions = uncertifiedTransactions.length > 0;
 
 		this.store = {
 			...this.store,
@@ -199,10 +195,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			...(newTransactions && {
 				transactions: {
 					...this.store.transactions,
-					...transactions.reduce(
-						(acc, certifiedTransaction) => ({
+					...uncertifiedTransactions.reduce(
+						(acc, uncertifiedTransaction) => ({
 							...acc,
-							[certifiedTransaction.data.id]: certifiedTransaction
+							[uncertifiedTransaction.data.id]: uncertifiedTransaction
 						}),
 						{}
 					)
@@ -217,7 +213,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		this.postMessageWallet({
 			wallet: {
 				balance,
-				newTransactions: JSON.stringify(transactions, jsonReplacer)
+				newTransactions: JSON.stringify(uncertifiedTransactions, jsonReplacer)
 			}
 		});
 	};
