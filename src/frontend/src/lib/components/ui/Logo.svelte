@@ -9,6 +9,7 @@
 	export let size: LogoSize = 'xs';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
+	export let testId: string | undefined = undefined;
 
 	const sizes = {
 		xs: '22px',
@@ -42,6 +43,7 @@
 	class:opacity-10={!loaded}
 	class:ring-2={ring}
 	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
+	data-tid={testId}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img

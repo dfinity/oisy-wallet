@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { ProgressSteps, type ProgressStep } from '@dfinity/gix-components';
+	import { ProgressSteps as ProgressStepsCmp, type ProgressStep } from '@dfinity/gix-components';
 	import type { ComponentType } from 'svelte';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import type { StaticStep } from '$lib/types/steps';
 
 	export let progressStep: string;
@@ -9,7 +10,7 @@
 	export let type: 'progress' | 'static' = 'progress';
 
 	let cmp: ComponentType;
-	$: cmp = type === 'static' ? StaticSteps : ProgressSteps;
+	$: cmp = type === 'static' ? StaticSteps : ProgressStepsCmp;
 
 	let dynamicSteps: [ProgressStep | StaticStep, ...(ProgressStep | StaticStep)[]] = [...steps];
 
@@ -26,7 +27,7 @@
 						...step,
 						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
 					}
-		) as [ProgressStep, ...ProgressStep[]];
+		) as ProgressSteps;
 	};
 
 	$: progressStep, updateSteps();

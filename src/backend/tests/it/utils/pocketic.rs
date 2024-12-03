@@ -16,6 +16,7 @@ use std::{env, time::Duration};
 
 use super::mock::{
     CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, SIGNER_CANISTER_ID,
+    VC_DERIVATION_ORIGIN,
 };
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
@@ -322,6 +323,7 @@ pub(crate) fn init_arg() -> Arg {
         cfs_canister_id: Some(
             Principal::from_text(SIGNER_CANISTER_ID.to_string()).expect("wrong cfs canister id"),
         ),
+        derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
     })
 }
 

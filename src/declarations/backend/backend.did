@@ -60,6 +60,7 @@ type CanisterStatusResultV2 = record {
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
   api : opt Guards;
+  derivation_origin : opt text;
   ecdsa_key_name : text;
   cfs_canister_id : opt principal;
   allowed_callers : vec principal;
@@ -76,6 +77,8 @@ type CustomToken = record {
   version : opt nat64;
   enabled : bool;
 };
+type DappCarouselSettings = record { hidden_dapp_ids : vec text };
+type DappSettings = record { dapp_carousel : DappCarouselSettings };
 type DefiniteCanisterSettingsArgs = record {
   controller : principal;
   freezing_threshold : nat;
@@ -99,6 +102,7 @@ type HttpResponse = record {
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
   api : opt Guards;
+  derivation_origin : opt text;
   ecdsa_key_name : text;
   cfs_canister_id : opt principal;
   allowed_callers : vec principal;
@@ -177,6 +181,7 @@ type SelectedUtxosFeeResponse = record {
   fee_satoshis : nat64;
   utxos : vec Utxo;
 };
+type Settings = record { dapp : DappSettings };
 type Stats = record {
   user_profile_count : nat64;
   custom_token_count : nat64;
@@ -217,6 +222,7 @@ type UserCredential = record {
 type UserProfile = record {
   credentials : vec UserCredential;
   version : opt nat64;
+  settings : Settings;
   created_timestamp : nat64;
   updated_timestamp : nat64;
 };

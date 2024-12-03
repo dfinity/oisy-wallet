@@ -7,7 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div class="py-12">
+<div class="py-12" data-tid="no-transactions-placeholder">
 	<div class="mb-5 flex justify-center p-2">
 		<span class="-mr-3.5">
 			<RoundedIcon icon={IconReceive} />
@@ -25,7 +25,7 @@
 
 	<div class="space-y-4">
 		<p class="m-0 text-center text-lg font-bold">{$i18n.transactions.text.transaction_history}</p>
-		<p class="text-secondary m-0 text-center opacity-50">
+		<p class="m-0 text-center text-black opacity-50">
 			{$i18n.transactions.text.buy_or_receive}
 		</p>
 	</div>

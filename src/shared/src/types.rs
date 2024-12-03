@@ -30,6 +30,9 @@ pub struct InitArg {
     pub api: Option<Guards>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id alias.
+    pub derivation_origin: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
@@ -74,6 +77,9 @@ pub struct Config {
     pub api: Option<Guards>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id alias.
+    pub derivation_origin: Option<String>,
 }
 
 pub mod transaction {
@@ -271,7 +277,7 @@ pub mod signer {
             }
         }
         /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
-        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
+        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 50_000_000_000_000; // 50T
         /// The proportion of the backend canister's own cycles to send to the cycles ledger.
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
         /// The minimum sensible percentage to send to the cycles ledger.
@@ -306,9 +312,34 @@ pub mod signer {
     }
 }
 
+pub mod dapp {
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappCarouselSettings {
+        pub hidden_dapp_ids: Vec<String>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappSettings {
+        pub dapp_carousel: DappCarouselSettings,
+    }
+}
+
+pub mod settings {
+    use crate::types::dapp::DappSettings;
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct Settings {
+        pub dapp: DappSettings,
+    }
+}
+
 /// Types specifics to the user profile.
 pub mod user_profile {
     use super::{CredentialType, Timestamp};
+    use crate::types::settings::Settings;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use ic_verifiable_credentials::issuer_api::CredentialSpec;
@@ -322,16 +353,20 @@ pub mod user_profile {
     }
 
     // Used in the endpoint
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
     pub struct UserProfile {
+        #[serde(default)]
+        pub settings: Settings,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
         pub version: Option<Version>,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
     pub struct StoredUserProfile {
+        #[serde(default)]
+        pub settings: Settings,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,

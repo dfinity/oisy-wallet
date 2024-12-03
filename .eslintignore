@@ -14,7 +14,7 @@ yarn.lock
 
 src/declarations/**/*
 
-src/frontend/src/env/tokens.sns.json
+src/frontend/src/env/tokens/tokens.sns.json
 
 playwright-report
 

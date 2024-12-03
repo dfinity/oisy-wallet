@@ -6,7 +6,6 @@ import {
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
 import { Principal } from '@dfinity/principal';
-import { describe, expect, it } from 'vitest';
 
 describe('mapCkEthereumTransaction', () => {
 	const mockTransaction: IcrcTransaction = {

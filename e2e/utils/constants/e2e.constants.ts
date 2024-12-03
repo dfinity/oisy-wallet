@@ -1,4 +1,4 @@
-import { AppPath } from '../../../src/frontend/src/lib/constants/routes.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 
 export const HOMEPAGE_URL = '/';
 export const ACTIVITY_URL = AppPath.Activity;

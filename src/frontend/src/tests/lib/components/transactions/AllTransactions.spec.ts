@@ -15,6 +15,12 @@ describe('Activity', () => {
 		expect(title.textContent).toBe(en.activity.text.title);
 	});
 
+	it('renders the info box list', () => {
+		const { getByText } = render(AllTransactions);
+
+		expect(getByText(en.activity.info.btc_transactions)).toBeInTheDocument();
+	});
+
 	it('renders the transactions list', () => {
 		const { getByText } = render(AllTransactions);
 
