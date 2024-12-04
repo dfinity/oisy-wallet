@@ -1,4 +1,5 @@
 @use '../mixins/media';
+@use '../mixins/modal';
 
 :root {
 	--positive-emphasis: var(--color-green-crayola);
