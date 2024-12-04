@@ -76,7 +76,7 @@
 	@screen sm {
 		--dialog-width: 560px;
 		--alert-max-width: calc(100vw - var(--padding-4x));
-		--alert-max-height: calc(100dvh - var(--padding-4x));
+		--alert-max-height: initial;
 		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
 	}
 
