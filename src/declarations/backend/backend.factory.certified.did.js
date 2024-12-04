@@ -162,7 +162,7 @@ export const idlFactory = ({ IDL }) => {
 	const UserProfile = IDL.Record({
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
-		settings: Settings,
+		settings: IDL.Opt(Settings),
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
