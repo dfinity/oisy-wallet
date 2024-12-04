@@ -19,7 +19,8 @@ fn test_create_user_profile_creates_default_profile() {
     let user_profile = response.expect("Create failed");
 
     assert!(user_profile
-        .settings.unwrap()
+        .settings
+        .unwrap()
         .dapp
         .dapp_carousel
         .hidden_dapp_ids
