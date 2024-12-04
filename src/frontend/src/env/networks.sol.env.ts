@@ -4,7 +4,7 @@ import solTestnetIconBW from '$lib/assets/networks/sol-testnet-bw.svg';
 import sol from '$lib/assets/networks/sol.svg';
 import type { NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import type { SolNetwork } from '../sol/types/network';
+import type { SolNetwork } from '$sol/types/network';
 
 /**
  * SOL
