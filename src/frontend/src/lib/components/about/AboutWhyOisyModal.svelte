@@ -54,5 +54,5 @@
 		</p>
 	</div>
 
-	<ButtonCloseModal colorStyle="primary" />
+	<ButtonCloseModal />
 </Modal>
