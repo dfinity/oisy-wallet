@@ -631,12 +631,12 @@ interface I18nAbout {
 		text: {
 			label: string;
 			title: string;
-			hold_crypto: string;
-			network_custody: string;
-			fully_on_chain: string;
-			cross_device: string;
-			verifiable_credentials: string;
-			open_source: string;
+			hold_crypto: { title: string; description: string };
+			network_custody: { title: string; description: string };
+			fully_on_chain: { title: string; description: string };
+			cross_device: { title: string; description: string };
+			verifiable_credentials: { title: string; description: string };
+			open_source: { title: string; description: string };
 		};
 	};
 }
