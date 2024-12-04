@@ -21,6 +21,12 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+    - name: Create GitHub App Token
+      uses: actions/create-github-app-token@v1
+      id: app-token
+      with:
+        app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+        private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -43,7 +49,7 @@ jobs:
     - name: Create Pull Request
       uses: ./.github/actions/create-pr
       with:
-        token: ${{ secrets.GIX_CREATE_PR_PAT }}
+        token: ${{ steps.app-token.outputs.token }}
         branch: "chore(release)/v${{ steps.bump_version.outputs.new_version }}"
         title: "chore(release): v${{ steps.bump_version.outputs.new_version }}"
         body: |
