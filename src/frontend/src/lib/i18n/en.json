@@ -713,7 +713,7 @@
 				},
 				"fully_on_chain": {
 					"title": "Tamper-Proof Security with a Fully On-Chain Wallet",
-					"description": "Not only are your keys secured, but the entire wallet application is stored <a class='no-underline blue-link'rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure."
+					"description": "Not only are your keys secured, but the entire wallet application is stored <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure."
 				},
 				"cross_device": {
 					"title": "Access your wallet anytime from anywhere",
@@ -721,11 +721,11 @@
 				},
 				"verifiable_credentials": {
 					"title": "Unlock Extra Features with Verifiable Credentials",
-					"description": "$oisy_short integrates with the Internet Computer's <a class='no-underline blue-link'rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience."
+					"description": "$oisy_short integrates with the Internet Computer's <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience."
 				},
 				"open_source": {
 					"title": "Trust in Transparency with Open Source",
-					"description": "$oisy_short is an <a class='no-underline blue-link'rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source</a> project led by a dedicated team within the <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
+					"description": "$oisy_short is an <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">open-source</a> project led by a dedicated team within the <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
 				}
 			}
 		}
