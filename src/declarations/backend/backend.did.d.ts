@@ -80,12 +80,6 @@ export interface CustomToken {
 	version: [] | [bigint];
 	enabled: boolean;
 }
-export interface DappCarouselSettings {
-	hidden_dapp_ids: Array<string>;
-}
-export interface DappSettings {
-	dapp_carousel: DappCarouselSettings;
-}
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -195,9 +189,6 @@ export interface SelectedUtxosFeeResponse {
 	fee_satoshis: bigint;
 	utxos: Array<Utxo>;
 }
-export interface Settings {
-	dapp: DappSettings;
-}
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
@@ -244,7 +235,6 @@ export interface UserCredential {
 export interface UserProfile {
 	credentials: Array<UserCredential>;
 	version: [] | [bigint];
-	settings: Settings;
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
