@@ -1,4 +1,6 @@
-import solIconBW from '$lib/assets/networks/sol-bw.svg';
+import solDevnetIconBW from '$lib/assets/networks/sol-devnet-bw.svg';
+import solMainnetIconBW from '$lib/assets/networks/sol-mainnet-bw.svg';
+import solTestnetIconBW from '$lib/assets/networks/sol-testnet-bw.svg';
 import sol from '$lib/assets/networks/sol.svg';
 import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
@@ -17,7 +19,7 @@ export const SOLANA_MAINNET_NETWORK: Network = {
 	name: 'Solana Mainnet Beta',
 	// TODO: Add the correct icons
 	icon: sol,
-	iconBW: solIconBW
+	iconBW: solMainnetIconBW
 };
 
 export const SOLANA_TESTNET_NETWORK_SYMBOL = 'SOL (Testnet)';
@@ -30,7 +32,7 @@ export const SOLANA_TESTNET_NETWORK: Network = {
 	name: 'Solana Testnet',
 	// TODO: Add the correct icons
 	icon: sol,
-	iconBW: solIconBW
+	iconBW: solTestnetIconBW
 };
 
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
@@ -43,7 +45,7 @@ export const SOLANA_DEVNET_NETWORK: Network = {
 	name: 'Solana Devnet',
 	// TODO: Add the correct icons
 	icon: sol,
-	iconBW: solIconBW
+	iconBW: solDevnetIconBW
 };
 
 export const SOLANA_LOCAL_NETWORK_SYMBOL = 'SOL (Local)';
@@ -56,5 +58,5 @@ export const SOLANA_LOCAL_NETWORK: Network = {
 	name: 'Solana Local',
 	// TODO: Add the correct icons
 	icon: sol,
-	iconBW: solIconBW
+	iconBW: solDevnetIconBW
 };
