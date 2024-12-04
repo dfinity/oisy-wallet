@@ -16,6 +16,7 @@ import type { ToastLevel } from '@dfinity/gix-components';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 export const signIn = async (
 	params: AuthSignInParams
@@ -58,7 +59,7 @@ export const signIn = async (
 	}
 };
 
-export const signOut = (): Promise<void> => logout({});
+export const signOut = (resetUrl: boolean = false): Promise<void> => logout({resetUrl});
 
 export const errorSignOut = (text: string): Promise<void> =>
 	logout({
@@ -115,10 +116,12 @@ const clearTestnetsOption = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearStorages = true
+	clearStorages = true,
+	resetUrl = false
 }: {
 	msg?: ToastMsg;
 	clearStorages?: boolean;
+	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
@@ -131,6 +134,10 @@ const logout = async ({
 
 	if (msg) {
 		appendMsgToUrl(msg);
+	}
+
+	if (resetUrl) {
+		await gotoReplaceRoot();
 	}
 
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these

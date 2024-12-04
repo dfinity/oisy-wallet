@@ -9,9 +9,8 @@
 	const dispatch = createEventDispatcher();
 
 	const logout = async () => {
-		await goto(new URL(window.location.origin));
 		dispatch('icLogoutTriggered');
-		await signOut();
+		await signOut(true);
 	};
 </script>
 
