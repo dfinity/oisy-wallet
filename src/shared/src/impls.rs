@@ -190,10 +190,7 @@ impl StoredUserProfile {
         }
 
         let mut new_profile = self.clone_with_incremented_version();
-        let mut new_settings = new_profile
-            .settings
-            .clone()
-            .unwrap_or_default();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
         let mut new_dapp_settings = new_settings.dapp.clone();
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
