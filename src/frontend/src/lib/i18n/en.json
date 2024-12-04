@@ -176,7 +176,8 @@
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
-			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support."
+			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
+			"btc_wallet_error": "Error while loading BTC wallet information."
 		}
 	},
 	"hero": {
@@ -379,14 +380,14 @@
 			"fees_explanation": "You need enough $token to cover the smart contract execution fees.",
 			"current_balance": "👉 Current balance:",
 			"review_button": "Review",
-			"convert_button": "Swap",
+			"convert_button": "Convert",
 			"input_reset_button": "Reset input value",
-			"swap_to_token": "Swap $sourceToken → $destinationToken",
+			"swap_to_token": "Convert $sourceToken → $destinationToken",
 			"review": "Review transaction",
 			"available_balance": "Available",
 			"max_balance": "Max",
-			"review_tokens_info_title": "You're swapping",
-			"amount_to_convert": "Amount to swap",
+			"review_tokens_info_title": "You're converting",
+			"amount_to_convert": "Amount to convert",
 			"amount_to_receive": "Amount to receive",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
@@ -397,8 +398,7 @@
 			"unsupported_token_conversion": "Conversion for the selected token is not supported."
 		},
 		"assertion": {
-			"insufficient_funds": "Insufficient balance",
-			"insufficient_funds_for_fee": "Insufficient balance to cover the fees"
+			"insufficient_funds": "Insufficient balance"
 		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
@@ -447,6 +447,7 @@
 				"title": "Import token",
 				"review": "Review",
 				"saving": "Saving...",
+				"updating": "Updating token list",
 				"ledger_canister_id": "Ledger Canister ID",
 				"index_canister_id": "Index Canister ID",
 				"minter_canister_id": "Minter Canister ID",
@@ -469,6 +470,9 @@
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
 			}
 		},
 		"manage": {
@@ -534,11 +538,14 @@
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
 			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:",
-			"convert_fee": "Swap fee",
+			"convert_fee": "Conversion fee",
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
 			"total_fee": "Total fee"
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
@@ -679,7 +686,8 @@
 			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
-			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
+			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
