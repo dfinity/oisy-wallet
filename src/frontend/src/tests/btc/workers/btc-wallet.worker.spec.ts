@@ -214,6 +214,24 @@ describe('btc-wallet.worker', () => {
 			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
 			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 		});
+
+		it('should trigger postMessage with error', async () => {
+			const err = new Error('test');
+			signerCanisterMock.getBtcBalance.mockRejectedValue(err);
+
+			await scheduler.start(startData);
+
+			// idle and in_progress
+			// error
+			expect(postMessageMock).toHaveBeenCalledTimes(3);
+
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'syncBtcWalletError',
+				data: {
+					error: err
+				}
+			});
+		});
 	};
 
 	describe('btc-wallet worker should work', () => {
