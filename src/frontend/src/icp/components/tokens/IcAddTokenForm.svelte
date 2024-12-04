@@ -10,7 +10,7 @@
 <p class="mb-6">{$i18n.tokens.import.text.info}</p>
 
 <label for="ledgerCanisterId" class="px-4.5 font-bold"
->{$i18n.tokens.import.text.ledger_canister_id}: <span class="text-blue-ribbon">*</span></label
+	>{$i18n.tokens.import.text.ledger_canister_id}: <span class="text-blue-ribbon">*</span></label
 >
 <InputText
 	name="ledgerCanisterId"
@@ -19,7 +19,7 @@
 />
 
 <label for="indexCanisterId" class="px-4.5 mt-6 block font-bold"
->{$i18n.tokens.import.text.index_canister_id}:</label
+	>{$i18n.tokens.import.text.index_canister_id}:</label
 >
 <InputText
 	name="indexCanisterId"
