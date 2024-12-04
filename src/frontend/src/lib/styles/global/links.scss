@@ -1,6 +1,12 @@
+@import '../theme/base-colors.scss';
+
 a.no-underline {
 	&:hover,
 	&:focus {
 		text-decoration: none;
 	}
+}
+
+a.blue-link {
+	color: #{$brandeis-blue};
 }
