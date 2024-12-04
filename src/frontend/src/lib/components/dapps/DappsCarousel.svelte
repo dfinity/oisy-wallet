@@ -6,8 +6,8 @@
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
-		dAppDescriptions,
-		type CarouselSlideOisyDappDescription
+		type CarouselSlideOisyDappDescription,
+		dAppDescriptions
 	} from '$lib/types/dapp-description';
 	import type { OptionIdentity } from '$lib/types/identity';
 
