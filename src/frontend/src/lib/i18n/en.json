@@ -721,7 +721,7 @@
 				},
 				"verifiable_credentials": {
 					"title": "Unlock Extra Features with Verifiable Credentials",
-					"description": "$oisy_short integrates with the Internet Computer's <a class='no-underline blue-link'rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience."
+					"description": "$oisy_short integrates with the Internet Computer's <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience."
 				},
 				"open_source": {
 					"title": "Trust in Transparency with Open Source",
