@@ -222,7 +222,7 @@ type UserCredential = record {
 type UserProfile = record {
   credentials : vec UserCredential;
   version : opt nat64;
-  settings : Settings;
+  settings : opt Settings;
   created_timestamp : nat64;
   updated_timestamp : nat64;
 };

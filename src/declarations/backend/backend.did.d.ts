@@ -244,7 +244,7 @@ export interface UserCredential {
 export interface UserProfile {
 	credentials: Array<UserCredential>;
 	version: [] | [bigint];
-	settings: Settings;
+	settings: [] | [Settings];
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }

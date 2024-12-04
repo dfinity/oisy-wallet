@@ -131,7 +131,7 @@ impl StoredUserProfile {
         };
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
-            settings,
+            settings: Some(settings),
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
