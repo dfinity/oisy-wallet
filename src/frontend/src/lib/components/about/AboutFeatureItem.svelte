@@ -11,7 +11,7 @@
 		<slot name="icon" />
 		<Html text={replaceOisyPlaceholders(title)} />
 	</div>
-	<p class="mb-0 mt-2">
+	<p class="mb-0 mt-2 text-sm sm:text-base">
 		<Html text={replaceOisyPlaceholders(description)} />
 	</p>
 </div>
