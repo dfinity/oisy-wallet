@@ -61,8 +61,8 @@
 
 			<article>
 				<div
-				class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
-			>
+					class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
+				>
 					<Logo
 						size="md"
 						src={logo}
