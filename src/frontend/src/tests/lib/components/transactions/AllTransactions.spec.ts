@@ -37,7 +37,8 @@ describe('Activity', () => {
 		icrcCustomTokensStore.set({ data: tokenWithBrokenIndexCanister, certified: true });
 
 		const store = get(icrcCustomTokensStore);
-		icTransactionsStore.nullify(store!.at(0)!.data!.id!);
+		const tokenId = store!.at(0)!.data.id!;
+		icTransactionsStore.nullify(tokenId);
 
 		const { getByText } = render(AllTransactions);
 
@@ -57,7 +58,8 @@ describe('Activity', () => {
 		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
 
 		const store = get(icrcCustomTokensStore);
-		icTransactionsStore.nullify(store!.at(0)!.data!.id!);
+		const tokenId = store!.at(0)!.data.id!;
+		icTransactionsStore.nullify(tokenId);
 
 		const { getByText } = render(AllTransactions);
 
