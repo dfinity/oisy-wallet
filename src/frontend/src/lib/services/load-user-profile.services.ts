@@ -66,6 +66,10 @@ export const loadUserProfile = async ({
 	identity: OptionIdentity;
 	reload?: boolean;
 }): Promise<void> => {
+	// We just want to verify that the store is empty, without being interested in the data.
+	// So we fetch it imperatively, instead of passing as parameter.
+	// If it is not empty, and we don't want to reload, we can return early.
+	// In any case, if `reload` is true, we will always fetch the profile.
 	if (nonNullish(get(userProfileStore)) && !reload) {
 		return;
 	}
