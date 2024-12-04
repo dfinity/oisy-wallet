@@ -2,14 +2,14 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionToken } from '$lib/types/token';
 	import type { TransactionUiCommon } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
@@ -21,6 +21,7 @@
 	export let commonData: TransactionUiCommon;
 	export let hash: string | undefined;
 	export let value: BigNumber | undefined;
+	export let token: OptionToken;
 	export let typeLabel: string;
 	export let sendToLabel: string | undefined;
 
@@ -113,20 +114,20 @@
 			</Value>
 		{/if}
 
-		{#if nonNullish(value)}
+		{#if nonNullish(value) && nonNullish(token)}
 			<Value ref="amount">
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 				<output>
 					{formatToken({
 						value,
-						unitName: $tokenWithFallback.decimals,
-						displayDecimals: $tokenWithFallback.decimals
+						unitName: token.decimals,
+						displayDecimals: token.decimals
 					})}
-					{$tokenWithFallback.symbol}
+					{token.symbol}
 				</output>
 			</Value>
 		{/if}
 
-		<Button fullWidth on:click={modalStore.close} slot="toolbar">{$i18n.core.text.close}</Button>
+		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>
