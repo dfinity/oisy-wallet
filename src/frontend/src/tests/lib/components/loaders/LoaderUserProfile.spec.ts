@@ -1,17 +1,23 @@
 import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
+import * as authStore from '$lib/derived/auth.derived';
 import * as loadUserServices from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { render } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, readable } from 'svelte/store';
 
 describe('LoaderUserProfile', () => {
+	const mockAuthStore = (value = false) =>
+		vi.spyOn(authStore, 'authNotSignedIn', 'get').mockImplementation(() => readable(value));
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
 
 		vi.clearAllMocks();
 		vi.resetAllMocks();
+
+		mockAuthStore();
 
 		userProfileStore.reset();
 	});
@@ -51,5 +57,29 @@ describe('LoaderUserProfile', () => {
 			certified: true,
 			profile: { ...mockUserProfile, version: [2n] }
 		});
+	});
+
+	it('should not load user profile if not signed in', () => {
+		mockAuthStore(true);
+
+		const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
+
+		render(LoaderUserProfile);
+
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('should reset the user profile if not signed in', () => {
+		mockAuthStore(true);
+
+		userProfileStore.set({ certified: true, profile: mockUserProfile });
+
+		const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
+
+		render(LoaderUserProfile);
+
+		expect(spy).not.toHaveBeenCalled();
+
+		expect(get(userProfileStore)).toBeNull();
 	});
 });
