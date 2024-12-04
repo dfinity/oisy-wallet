@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { authIdentity, authNotSignedIn } from '$lib/derived/auth.derived';
+	import { isNullish } from '@dfinity/utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 
 	const load = ({ reload = false }: { reload?: boolean }) => {
-		if ($authNotSignedIn) {
+		if (isNullish($authIdentity)) {
 			userProfileStore.reset();
 			return;
 		}
@@ -13,9 +13,7 @@
 		loadUserProfile({ identity: $authIdentity, reload });
 	};
 
-	onMount(() => {
-		load({});
-	});
+	$: $authIdentity, load({});
 
 	const reload = () => {
 		load({ reload: true });

@@ -3,13 +3,15 @@ import * as authStore from '$lib/derived/auth.derived';
 import * as loadUserServices from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { emit } from '$lib/utils/events.utils';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
+import type { Identity } from '@dfinity/agent';
 import { render } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
 describe('LoaderUserProfile', () => {
-	const mockAuthStore = (value = false) =>
-		vi.spyOn(authStore, 'authNotSignedIn', 'get').mockImplementation(() => readable(value));
+	const mockAuthStore = (value: Identity | null = mockIdentity) =>
+		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -36,7 +38,7 @@ describe('LoaderUserProfile', () => {
 	});
 
 	it('should re-load user profile on event', () => {
-		const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
+		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(vi.fn());
 
 		render(LoaderUserProfile);
 
@@ -59,12 +61,12 @@ describe('LoaderUserProfile', () => {
 		});
 	});
 
-	describe('not signed in', () => {
+	describe('when identity is nullish', () => {
 		beforeEach(() => {
-			mockAuthStore(true);
+			mockAuthStore(null);
 		});
 
-		it('should not load user profile if not signed in', () => {
+		it('should not load user profile', () => {
 			const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
 
 			render(LoaderUserProfile);
@@ -72,7 +74,7 @@ describe('LoaderUserProfile', () => {
 			expect(spy).not.toHaveBeenCalled();
 		});
 
-		it('should reset the user profile if not signed in', () => {
+		it('should reset the user profile', () => {
 			userProfileStore.set({ certified: true, profile: mockUserProfile });
 
 			const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
