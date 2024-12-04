@@ -51,15 +51,15 @@ export const networkParam = (networkId: NetworkId | undefined): string =>
 export const networkUrl = ({
 	path,
 	networkId,
-	isTransactionsRoute,
+	usePreviousRoute,
 	fromRoute
 }: {
 	path: AppPath;
 	networkId: Option<NetworkId>;
-	isTransactionsRoute: boolean;
+	usePreviousRoute: boolean;
 	fromRoute: NavigationTarget | null;
 }) =>
-	isTransactionsRoute
+	usePreviousRoute
 		? notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))
 			? `${path}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`
 			: path
