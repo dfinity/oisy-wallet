@@ -43,7 +43,7 @@
 		</p>
 	</Value>
 
-	<div class="flex flex-col w-full gap-3" slot="toolbar">
+	<div class="flex w-full flex-col gap-3" slot="toolbar">
 		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icConvert')}>
 			<span class="text-dark-slate-blue font-bold"
 				>{replacePlaceholders(
