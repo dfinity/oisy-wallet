@@ -12,7 +12,7 @@
 <output class="break-all">
 	{#if nonNullish(balance) && nonNullish(usdBalance)}
 		{formatUSD({ value: usdBalance })}
-	{:else if isNullish(balance)}
+	{:else if isNullish(balance) || isNullish(usdBalance)}
 		<span class="animate-pulse">{nullishBalanceMessage ?? '-'}</span>
 	{:else}
 		<span class:animate-pulse={isNullish(balance)}>{$i18n.tokens.balance.error.not_applicable}</span
