@@ -276,12 +276,8 @@
 {/if}
 
 <style lang="scss">
-	@use '../../styles/mixins/modal';
-
 	.tokens {
 		padding: var(--padding-1_5x) 0;
-
-		@include modal.content;
 	}
 
 	.tokens-scroll {
