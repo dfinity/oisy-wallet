@@ -7,9 +7,15 @@ outputs: {}
 runs:
   using: 'composite'
   steps:
-    - name: Update system packages
+
+    - name: Update system packages (Ubuntu)
+      if: ${{ runner.os == 'Linux' }}
       run: sudo apt-get update
       shell: bash
+
+    - name: Update system packages (macOS)
+      if: ${{ runner.os == 'macOS' }}
+      run: brew update
 
     # We use buildx and its GitHub Actions caching support `type=gha`. For
     # more information, see
