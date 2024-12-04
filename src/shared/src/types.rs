@@ -315,12 +315,12 @@ pub mod signer {
 pub mod dapp {
     use candid::{CandidType, Deserialize};
 
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct DappCarouselSettings {
         pub hidden_dapp_ids: Vec<String>,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct DappSettings {
         pub dapp_carousel: DappCarouselSettings,
     }
@@ -330,7 +330,7 @@ pub mod settings {
     use crate::types::dapp::DappSettings;
     use candid::{CandidType, Deserialize};
 
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct Settings {
         pub dapp: DappSettings,
     }
@@ -353,9 +353,8 @@ pub mod user_profile {
     }
 
     // Used in the endpoint
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
-        #[serde(default)]
         pub settings: Option<Settings>,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
@@ -363,9 +362,8 @@ pub mod user_profile {
         pub version: Option<Version>,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
-        #[serde(default)]
         pub settings: Option<Settings>,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
