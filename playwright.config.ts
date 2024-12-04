@@ -16,7 +16,7 @@ dotenv.populate(
 );
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
-
+const isMac = process.platform === 'darwin';
 const TIMEOUT = 5 * 60 * 1000;
 
 export default defineConfig({
@@ -41,6 +41,19 @@ export default defineConfig({
 		{
 			name: 'Google Chrome',
 			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
-		}
+		},
+		/*Test against Apple devices. */
+		...(isMac
+			? [
+					{
+						name: 'Safari',
+						use: devices['Desktop Safari']
+					},
+					{
+						name: 'iPhone SE',
+						use: devices['iPhone SE']
+					}
+				]
+			: []) // If not on macOS, don't include Apple devices
 	]
 });
