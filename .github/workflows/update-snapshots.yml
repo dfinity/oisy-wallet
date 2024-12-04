@@ -15,7 +15,10 @@ concurrency:
 jobs:
 
   oisy-backend-wasm:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-14]
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     steps:
       - name: Checkout
@@ -34,9 +37,13 @@ jobs:
         uses: ./.github/actions/oisy-backend
 
   update_snapshots:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-14]
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     needs: oisy-backend-wasm
+    
     steps:
 
       - name: Fail if branch is main
@@ -64,6 +71,10 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
 
+      - name: Prepare macOS
+        if: runner.os == 'macOS'
+        uses: ./.github/actions/prepare-macos
+        
       - name: Set Environment Variables
         run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 
