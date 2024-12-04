@@ -1,4 +1,6 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
+use crate::types::dapp::{DappCarouselSettings, DappSettings};
+use crate::types::settings::Settings;
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
@@ -53,6 +55,7 @@ impl From<InitArg> for Config {
             ic_root_key_der,
             api,
             cfs_canister_id,
+            derivation_origin,
         } = arg;
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
@@ -67,6 +70,7 @@ impl From<InitArg> for Config {
             supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
             api,
+            derivation_origin,
         }
     }
 }
@@ -118,8 +122,16 @@ impl TokenVersion for StoredUserProfile {
 impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
+        let settings = Settings {
+            dapp: DappSettings {
+                dapp_carousel: DappCarouselSettings {
+                    hidden_dapp_ids: Vec::new(),
+                },
+            },
+        };
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
+            settings: Some(settings),
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
@@ -161,12 +173,14 @@ impl From<&StoredUserProfile> for UserProfile {
             updated_timestamp,
             version,
             credentials,
+            settings,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
             updated_timestamp: *updated_timestamp,
             version: *version,
             credentials: credentials.clone().into_values().collect(),
+            settings: settings.clone(),
         }
     }
 }

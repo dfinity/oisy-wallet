@@ -6,8 +6,11 @@
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
 
 	export let transaction: BtcTransactionUi;
+	export let token: Token;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
@@ -21,11 +24,13 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openBtcTransaction(transaction)}
+	on:click={() => modalStore.openBtcTransaction({ transaction, token })}
 	amount={nonNullish(value) ? BigNumber.from(value) : undefined}
 	{type}
 	timestamp={Number(timestamp)}
 	{status}
+	{token}
+	{iconType}
 >
 	{label}
 </Transaction>

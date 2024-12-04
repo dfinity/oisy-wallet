@@ -44,7 +44,7 @@
 		},
 		{
 			name: 'Saving',
-			title: $i18n.tokens.import.text.saving
+			title: $i18n.tokens.import.text.updating
 		}
 	];
 
@@ -76,13 +76,6 @@
 		if (isNullish(ledgerCanisterId)) {
 			toastsError({
 				msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
-			});
-			return;
-		}
-
-		if (isNullish(indexCanisterId)) {
-			toastsError({
-				msg: { text: get(i18n).tokens.import.error.missing_index_id }
 			});
 			return;
 		}
@@ -189,7 +182,11 @@
 			/>
 		{/if}
 	{:else if currentStep?.name === 'Saving'}
-		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
+		<InProgressWizard
+			progressStep={saveProgressStep}
+			steps={addTokenSteps($i18n)}
+			warningType="manage"
+		/>
 	{:else if currentStep?.name === 'Import'}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}

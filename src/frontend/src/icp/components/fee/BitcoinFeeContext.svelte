@@ -6,12 +6,13 @@
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let token: Token;
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	let ckBTC = false;

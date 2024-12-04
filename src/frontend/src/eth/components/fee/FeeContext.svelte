@@ -26,13 +26,14 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let observe: boolean;
 	export let destination = '';
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 	export let nativeEthereumToken: Token;

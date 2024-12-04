@@ -1,4 +1,4 @@
-import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens.env';
+import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';

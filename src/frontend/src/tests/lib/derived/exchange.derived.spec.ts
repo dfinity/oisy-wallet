@@ -2,7 +2,6 @@ import * as exchangeEnv from '$env/exchange.env';
 import { exchangeInitialized } from '$lib/derived/exchange.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('exchange.derived', () => {
 	describe('exchangeInitialized', () => {

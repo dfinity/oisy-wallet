@@ -23,8 +23,7 @@
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { type HeroContext, initHeroContext } from '$lib/stores/hero.store';
-	import { HERO_CONTEXT_KEY } from '$lib/stores/hero.store.js';
+	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';

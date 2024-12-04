@@ -16,20 +16,26 @@ dotenv.populate(
 );
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
-
 const isMac = process.platform === 'darwin';
+const TIMEOUT = 5 * 60 * 1000;
+
 
 export default defineConfig({
+	timeout: TIMEOUT,
+	workers: DEV ? 5 : 2,
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
-		port: DEV ? 5173 : 4173
+		port: DEV ? 5173 : 4173,
+		timeout: TIMEOUT
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',
+		actionTimeout: TIMEOUT,
+		navigationTimeout: TIMEOUT,
 		...(DEV && { headless: false })
 	},
 	projects: [

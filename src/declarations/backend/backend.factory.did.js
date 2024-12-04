@@ -19,6 +19,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
+		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
@@ -128,6 +129,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),
+		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
@@ -139,9 +141,15 @@ export const idlFactory = ({ IDL }) => {
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
+	const DappCarouselSettings = IDL.Record({
+		hidden_dapp_ids: IDL.Vec(IDL.Text)
+	});
+	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
+	const Settings = IDL.Record({ dapp: DappSettings });
 	const UserProfile = IDL.Record({
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
+		settings: IDL.Opt(Settings),
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
@@ -266,6 +274,11 @@ export const idlFactory = ({ IDL }) => {
 		topped_up: IDL.Nat
 	});
 	const TopUpCyclesLedgerError = IDL.Variant({
+		InvalidArgPercentageOutOfRange: IDL.Record({
+			max: IDL.Nat8,
+			min: IDL.Nat8,
+			percentage: IDL.Nat8
+		}),
 		CouldNotGetBalanceFromCyclesLedger: IDL.Null,
 		CouldNotTopUpCyclesLedger: IDL.Record({
 			tried_to_send: IDL.Nat,
@@ -326,6 +339,7 @@ export const init = ({ IDL }) => {
 	});
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
+		derivation_origin: IDL.Opt(IDL.Text),
 		ecdsa_key_name: IDL.Text,
 		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),

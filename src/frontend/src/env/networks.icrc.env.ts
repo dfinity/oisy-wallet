@@ -4,24 +4,26 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
-import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
-import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
-import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
-import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
-import { UNI_TOKEN } from '$env/tokens-erc20/tokens.uni.env';
-import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
-import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
-import { WSTETH_TOKEN } from '$env/tokens-erc20/tokens.wsteth.env';
-import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
-import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
-import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import type { EnvTokens } from '$env/types/env-token-ckerc20';
+import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
+import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
+import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
+import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
+import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
+import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
+import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ckErc20Production, ckErc20Staging } from '$env/tokens/tokens.ckerc20.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
+import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
+import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
@@ -228,7 +230,7 @@ const mapCkErc20Data = ({
 	ledgerCanisterId,
 	env
 }: {
-	ckErc20Tokens: EnvTokens;
+	ckErc20Tokens: EnvCkErc20Tokens;
 	minterCanisterId: OptionCanisterIdText;
 	ledgerCanisterId: OptionCanisterIdText;
 	env: NetworkEnvironment;
@@ -385,6 +387,15 @@ const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 		}
 	: undefined;
 
+const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokens);
+
+const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BURN)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.BURN,
+			position: 12
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -428,8 +439,7 @@ export const PUBLIC_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
 ];
 
-export const ICRC_TOKENS: IcInterface[] = [
-	...PUBLIC_ICRC_TOKENS,
+const ICRC_CK_TOKENS: IcInterface[] = [
 	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
 	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
@@ -450,9 +460,17 @@ export const ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
 ];
 
-export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(
-	({ ledgerCanisterId }) => ledgerCanisterId
-);
+const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : [])];
+
+export const ICRC_TOKENS: IcInterface[] = [
+	...PUBLIC_ICRC_TOKENS,
+	...ADDITIONAL_ICRC_TOKENS,
+	...ICRC_CK_TOKENS
+];
+
+export const ICRC_CK_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_CK_TOKENS.concat(
+	PUBLIC_ICRC_TOKENS
+).map(({ ledgerCanisterId }) => ledgerCanisterId);
 
 export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,

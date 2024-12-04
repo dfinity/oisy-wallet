@@ -28,8 +28,11 @@ pub struct InitArg {
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
-    /// Chain Fussion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id alias.
+    pub derivation_origin: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
@@ -72,8 +75,11 @@ pub struct Config {
     pub ic_root_key_raw: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
-    /// Chain Fussion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id alias.
+    pub derivation_origin: Option<String>,
 }
 
 pub mod transaction {
@@ -240,6 +246,22 @@ pub mod signer {
             pub percentage: Option<u8>,
         }
         impl TopUpCyclesLedgerRequest {
+            /// Checks that the request is valid.
+            ///
+            /// # Errors
+            /// - If the percentage is out of bounds.
+            pub fn check(&self) -> Result<(), TopUpCyclesLedgerError> {
+                if let Some(percentage) = self.percentage {
+                    if !(MIN_PERCENTAGE..=MAX_PERCENTAGE).contains(&percentage) {
+                        return Err(TopUpCyclesLedgerError::InvalidArgPercentageOutOfRange {
+                            percentage,
+                            min: MIN_PERCENTAGE,
+                            max: MAX_PERCENTAGE,
+                        });
+                    }
+                }
+                Ok(())
+            }
             /// The requested threshold for topping up the cycles ledger, if provided, else the default.
             #[must_use]
             pub fn threshold(&self) -> Nat {
@@ -255,27 +277,34 @@ pub mod signer {
             }
         }
         /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
-        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
-        /// The proportion of the backend canitster's own cycles to send to the cycles ledger.
+        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 50_000_000_000_000; // 50T
+        /// The proportion of the backend canister's own cycles to send to the cycles ledger.
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
+        /// The minimum sensible percentage to send to the cycles ledger.
+        /// - Note: With 0% the backend canister would never top up the cycles ledger.
+        pub const MIN_PERCENTAGE: u8 = 1;
+        /// The maximum sensible percentage to send to the cycles ledger.
+        /// - Note: With 100% the backend canister would be left with no cycles.
+        pub const MAX_PERCENTAGE: u8 = 99;
 
         /// Possible error conditions when topping up the cycles ledger.
         #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
         pub enum TopUpCyclesLedgerError {
             CouldNotGetBalanceFromCyclesLedger,
+            InvalidArgPercentageOutOfRange { percentage: u8, min: u8, max: u8 },
             CouldNotTopUpCyclesLedger { available: Nat, tried_to_send: Nat },
         }
         /// Possible successful responses when topping up the cycles ledger.
         #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
         pub struct TopUpCyclesLedgerResponse {
             /// The ledger balance after topping up.
-            ledger_balance: Nat,
+            pub ledger_balance: Nat,
             /// The backend canister cycles after topping up.
-            backend_cycles: Nat,
+            pub backend_cycles: Nat,
             /// The amount topped up.
             /// - Zero if the ledger balance was already sufficient.
             /// - The requested amount otherwise.
-            topped_up: Nat,
+            pub topped_up: Nat,
         }
 
         pub type TopUpCyclesLedgerResult =
@@ -283,9 +312,34 @@ pub mod signer {
     }
 }
 
+pub mod dapp {
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub struct DappCarouselSettings {
+        pub hidden_dapp_ids: Vec<String>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub struct DappSettings {
+        pub dapp_carousel: DappCarouselSettings,
+    }
+}
+
+pub mod settings {
+    use crate::types::dapp::DappSettings;
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub struct Settings {
+        pub dapp: DappSettings,
+    }
+}
+
 /// Types specifics to the user profile.
 pub mod user_profile {
     use super::{CredentialType, Timestamp};
+    use crate::types::settings::Settings;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use ic_verifiable_credentials::issuer_api::CredentialSpec;
@@ -301,6 +355,7 @@ pub mod user_profile {
     // Used in the endpoint
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
+        pub settings: Option<Settings>,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
@@ -309,6 +364,7 @@ pub mod user_profile {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
+        pub settings: Option<Settings>,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
