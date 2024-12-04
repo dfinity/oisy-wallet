@@ -177,8 +177,10 @@ impl StoredUserProfile {
         if profile_version != self.version {
             return Err(AddDappSettingsError::VersionMismatch);
         }
-        if self
-            .settings
+
+        let settings = self.settings.clone().unwrap_or_else(Settings::default);
+
+        if settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
@@ -186,16 +188,18 @@ impl StoredUserProfile {
         {
             return Ok(self.clone());
         }
+
         let mut new_profile = self.clone_with_incremented_version();
-        let mut new_settings = new_profile.settings.clone();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_else(Settings::default);
         let mut new_dapp_settings = new_settings.dapp.clone();
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
+
         new_hidden_dapp_ids.push(dapp_id);
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
         new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;
         new_settings.dapp = new_dapp_settings;
-        new_profile.settings = new_settings;
+        new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
