@@ -33,15 +33,19 @@ export const getBalanceQuery = async ({
 	identity,
 	address,
 	network,
-	bitcoinCanisterId
-}: BitcoinCanisterParams): Promise<bigint> => {
+	bitcoinCanisterId,
+	minConfirmations
+}: BitcoinCanisterParams & {
+	minConfirmations?: number;
+}): Promise<bigint> => {
 	assertNonNullish(identity);
 
 	const { getBalanceQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
 
 	return getBalanceQuery({
 		address,
-		network
+		network,
+		minConfirmations
 	});
 };
 
