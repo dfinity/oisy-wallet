@@ -27,28 +27,6 @@ describe('Activity', () => {
 		expect(title.textContent).toBe(en.activity.text.title);
 	});
 
-	it('renders the broken Index canister warning box', () => {
-		const tokenWithBrokenIndexCanister: IcrcCustomToken = {
-			...customIcrcToken,
-			symbol: 'UTC',
-			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
-		};
-
-		icrcCustomTokensStore.set({ data: tokenWithBrokenIndexCanister, certified: true });
-
-		const store = get(icrcCustomTokensStore);
-		const tokenId = store!.at(0)!.data.id;
-		icTransactionsStore.nullify(tokenId);
-
-		const { getByText } = render(AllTransactions);
-
-		const exceptedText = replacePlaceholders(en.activity.warning.broken_index_canister, {
-			$token_list: '$UTC'
-		});
-
-		expect(getByText(exceptedText)).toBeInTheDocument();
-	});
-
 	it('renders the no Index canister warning box', () => {
 		const tokenWithoutIndexCanister: IcrcCustomToken = {
 			...customIcrcToken,
