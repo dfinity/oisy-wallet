@@ -2,7 +2,7 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
-	Result_1,
+	Result_2,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
@@ -690,7 +690,7 @@ describe('backend.canister', () => {
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
 			const response = { Err: { UnrecognizedError: 'Some unknown error' } };
 
-			service.allow_signing.mockResolvedValue(response as unknown as Result_1);
+			service.allow_signing.mockResolvedValue(response as unknown as Result_2);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service

@@ -3,8 +3,8 @@ import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
 export type AddDappSettingsError =
-	| { DappIdAlreadyHidden: null }
 	| { VersionMismatch: null }
+	| { DappIdTooLong: null }
 	| { UserNotFound: null };
 export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
@@ -253,7 +253,7 @@ export interface UserCredential {
 export interface UserProfile {
 	credentials: Array<UserCredential>;
 	version: [] | [bigint];
-	settings: Settings;
+	settings: [] | [Settings];
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }

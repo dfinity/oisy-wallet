@@ -520,14 +520,21 @@ pub fn add_user_credential(
     }
 }
 
-/// Adds a dApp ID to the user's list of hidden dApp IDs.
+/// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
+///
+/// # Arguments
+/// * `request` - The request to add a hidden dApp ID.
+///
+/// # Returns
+/// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
 ///
 /// # Errors
-/// - Returns `Err` if the ID is already in the `hidden_dapp_ids`, or the user profile is not found, or the user profile version is not up-to-date.
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "may_write_user_data")]
 pub fn add_user_hidden_dapp_id(
     request: AddHiddenDappIdRequest,
 ) -> Result<(), AddDappSettingsError> {
+    request.check()?;
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 

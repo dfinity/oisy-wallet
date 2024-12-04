@@ -1,5 +1,5 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
-use crate::types::dapp::{DappCarouselSettings, DappSettings};
+use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
@@ -131,7 +131,7 @@ impl StoredUserProfile {
         };
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
-            settings,
+            settings: Some(settings),
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
@@ -177,19 +177,29 @@ impl StoredUserProfile {
         if profile_version != self.version {
             return Err(AddDappSettingsError::VersionMismatch);
         }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        if settings
+            .dapp
+            .dapp_carousel
+            .hidden_dapp_ids
+            .contains(&dapp_id)
+        {
+            return Ok(self.clone());
+        }
+
         let mut new_profile = self.clone_with_incremented_version();
-        let mut new_settings = new_profile.settings.clone();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
         let mut new_dapp_settings = new_settings.dapp.clone();
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
-        if new_hidden_dapp_ids.contains(&dapp_id) {
-            return Err(AddDappSettingsError::DappIdAlreadyHidden);
-        }
+
         new_hidden_dapp_ids.push(dapp_id);
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
         new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;
         new_settings.dapp = new_dapp_settings;
-        new_profile.settings = new_settings;
+        new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }

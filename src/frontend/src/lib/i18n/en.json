@@ -704,12 +704,30 @@
 			"text": {
 				"label": "Why $oisy_short",
 				"title": "Why $oisy_short",
-				"hold_crypto": "<strong>Unified Management of All Your Digital Assets</strong><br>$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms.",
-				"network_custody": "<strong>No more private key anxiety with Network Custody</strong><br>$oisy_name implements <strong>network custody</strong>, an innovative approach that leverages the Internet Computer’s advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online” movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network.",
-				"fully_on_chain": "<strong>Tamper-Proof Security with a Fully On-Chain Wallet</strong><br>Not only are your keys secured, but the entire wallet application is stored <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a></strong> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure.",
-				"cross_device": "<strong>Access your wallet anytime from anywhere</strong><br>Using <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a></strong>, $oisy_short can easily be used across all devices you have linked to your private decentralized identity. This ensures seamless and secure access to your wallet whether you're on a smartphone, tablet, or desktop.",
-				"verifiable_credentials": "<strong>Unlock Extra Features with Verifiable Credentials</strong><br>$oisy_short integrates with the Internet Computer’s <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a></strong> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience.",
-				"open_source": "<strong>Trust in Transparency with Open Source</strong><br>$oisy_short is an <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source</a></strong> project led by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
+				"hold_crypto": {
+					"title": "Unified Management of All Your Digital Assets",
+					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+				},
+				"network_custody": {
+					"title": "No more private key anxiety with Network Custody",
+					"description": "$oisy_name implements network custody, an innovative approach that leverages the Internet Computer's advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online“ movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network."
+				},
+				"fully_on_chain": {
+					"title": "Tamper-Proof Security with a Fully On-Chain Wallet",
+					"description": "Not only are your keys secured, but the entire wallet application is stored <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure."
+				},
+				"cross_device": {
+					"title": "Access your wallet anytime from anywhere",
+					"description": "Using <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a>, $oisy_short can easily be used across all devices you have linked to your private decentralized identity. This ensures seamless and secure access to your wallet whether you're on a smartphone, tablet, or desktop."
+				},
+				"verifiable_credentials": {
+					"title": "Unlock Extra Features with Verifiable Credentials",
+					"description": "$oisy_short integrates with the Internet Computer's <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience."
+				},
+				"open_source": {
+					"title": "Trust in Transparency with Open Source",
+					"description": "$oisy_short is an <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">open-source</a> project led by a dedicated team within the <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
+				}
 			}
 		}
 	},
