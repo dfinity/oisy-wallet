@@ -26,6 +26,7 @@
 	name="destination"
 	bind:value={destination}
 	placeholder={inputPlaceholder}
+	testId="destination-input"
 	on:nnsInput
 >
 	<svelte:fragment slot="inner-end">

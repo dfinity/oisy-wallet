@@ -21,6 +21,7 @@
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
+	export let simplifiedForm = false;
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
@@ -54,13 +55,18 @@
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
+		<SendSource
+			token={$sendToken}
+			balance={$sendBalance}
+			source={$ethAddress ?? ''}
+			hideSource={simplifiedForm}
+		/>
 
 		<FeeDisplay />
 
 		<SendInfo />
 
-		<ButtonGroup slot="toolbar">
+		<ButtonGroup slot="toolbar" testId="toolbar">
 			<slot name="cancel" />
 			<ButtonNext disabled={invalid} />
 		</ButtonGroup>

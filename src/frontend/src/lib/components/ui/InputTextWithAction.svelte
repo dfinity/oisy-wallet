@@ -5,6 +5,7 @@
 	export let name: string;
 	export let placeholder: string;
 	export let required = true;
+	export let testId: string | undefined = undefined;
 </script>
 
 <Input
@@ -15,6 +16,7 @@
 	{placeholder}
 	spellcheck={false}
 	autocomplete="off"
+	{testId}
 	on:nnsInput
 >
 	<slot name="inner-end" slot="inner-end" />
