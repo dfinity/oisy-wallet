@@ -19,7 +19,6 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 const isMac = process.platform === 'darwin';
 const TIMEOUT = 5 * 60 * 1000;
 
-
 export default defineConfig({
 	timeout: TIMEOUT,
 	workers: DEV ? 5 : 2,
