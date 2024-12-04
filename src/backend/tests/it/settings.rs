@@ -16,7 +16,7 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.dapp.dapp_carousel.hidden_dapp_ids.len(), 0);
+    assert_eq!(profile.settings.unwrap().dapp.dapp_carousel.hidden_dapp_ids.len(), 0);
 
     let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
         dapp_id: "test_dapp_id".to_string(),
