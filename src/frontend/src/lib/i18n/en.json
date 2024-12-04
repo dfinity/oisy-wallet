@@ -713,7 +713,7 @@
 				},
 				"fully_on_chain": {
 					"title": "Tamper-Proof Security with a Fully On-Chain Wallet",
-					"description": "Not only are your keys secured, but the entire wallet application is stored <a class='no-underline blue-link'rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure."
+					"description": "Not only are your keys secured, but the entire wallet application is stored <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure."
 				},
 				"cross_device": {
 					"title": "Access your wallet anytime from anywhere",
