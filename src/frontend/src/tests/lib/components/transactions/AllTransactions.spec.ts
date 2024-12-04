@@ -1,19 +1,19 @@
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { get } from 'svelte/store';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 describe('Activity', () => {
 	const customIcrcToken: IcrcCustomToken = {
 		...mockValidIcToken,
 		version: 1n,
-		enabled: true,
+		enabled: true
 	};
 
 	it('renders the title', () => {
@@ -34,7 +34,7 @@ describe('Activity', () => {
 			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
 		};
 
-		icrcCustomTokensStore.set(({ data: tokenWithBrokenIndexCanister, certified: true }));
+		icrcCustomTokensStore.set({ data: tokenWithBrokenIndexCanister, certified: true });
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store!.at(0)!.data!.id!;
@@ -53,9 +53,9 @@ describe('Activity', () => {
 		const tokenWithoutIndexCanister: IcrcCustomToken = {
 			...customIcrcToken,
 			symbol: 'UWT'
-		}
+		};
 
-		icrcCustomTokensStore.set(({ data: tokenWithoutIndexCanister, certified: true }));
+		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store!.at(0)!.data!.id!;
