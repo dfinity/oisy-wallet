@@ -58,7 +58,7 @@
 		{:else if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
 				<BtcSendWarnings
-					utxosFee={$storeUtxosFeeData?.utxosFee}
+					utxosFee={nonNullish(sendAmount) ? $storeUtxosFeeData?.utxosFee : undefined}
 					pendingTransactionsStatus={$hasPendingTransactionsStore}
 				/>
 			</div>
