@@ -48,6 +48,19 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
+	const AddHiddenDappIdRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		dapp_id: IDL.Text
+	});
+	const AddDappSettingsError = IDL.Variant({
+		VersionMismatch: IDL.Null,
+		DappIdTooLong: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const Result_1 = IDL.Variant({
+		Ok: IDL.Null,
+		Err: AddDappSettingsError
+	});
 	const ApproveError = IDL.Variant({
 		GenericError: IDL.Record({
 			message: IDL.Text,
@@ -67,7 +80,7 @@ export const idlFactory = ({ IDL }) => {
 		Other: IDL.Text,
 		FailedToContactCyclesLedger: IDL.Null
 	});
-	const Result_1 = IDL.Variant({ Ok: IDL.Null, Err: AllowSigningError });
+	const Result_2 = IDL.Variant({ Ok: IDL.Null, Err: AllowSigningError });
 	const BitcoinNetwork = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
@@ -91,7 +104,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcAddPendingTransactionError = IDL.Variant({
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_2 = IDL.Variant({
+	const Result_3 = IDL.Variant({
 		Ok: IDL.Null,
 		Err: BtcAddPendingTransactionError
 	});
@@ -106,7 +119,7 @@ export const idlFactory = ({ IDL }) => {
 	const BtcGetPendingTransactionsReponse = IDL.Record({
 		transactions: IDL.Vec(PendingTransaction)
 	});
-	const Result_3 = IDL.Variant({
+	const Result_4 = IDL.Variant({
 		Ok: BtcGetPendingTransactionsReponse,
 		Err: BtcAddPendingTransactionError
 	});
@@ -123,7 +136,7 @@ export const idlFactory = ({ IDL }) => {
 		PendingTransactions: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_4 = IDL.Variant({
+	const Result_5 = IDL.Variant({
 		Ok: SelectedUtxosFeeResponse,
 		Err: SelectedUtxosFeeError
 	});
@@ -177,7 +190,7 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-	const Result_5 = IDL.Variant({
+	const Result_6 = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -258,8 +271,8 @@ export const idlFactory = ({ IDL }) => {
 		to: IDL.Principal,
 		progress: MigrationProgress
 	});
-	const Result_6 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
-	const Result_7 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
+	const Result_7 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
+	const Result_8 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -285,28 +298,29 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_8 = IDL.Variant({
+	const Result_9 = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
-		allow_signing: IDL.Func([], [Result_1], []),
-		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_2], []),
-		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_3], []),
-		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_4], []),
+		add_user_hidden_dapp_id: IDL.Func([AddHiddenDappIdRequest], [Result_1], []),
+		allow_signing: IDL.Func([], [Result_2], []),
+		btc_add_pending_transaction: IDL.Func([BtcAddPendingTransactionRequest], [Result_3], []),
+		btc_get_pending_transactions: IDL.Func([BtcGetPendingTransactionsRequest], [Result_4], []),
+		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_5], []),
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_user_profile: IDL.Func([], [Result_5]),
+		get_user_profile: IDL.Func([], [Result_6]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse]),
-		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_6], []),
+		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_7], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)]),
-		migration_stop_timer: IDL.Func([], [Result_7], []),
+		migration_stop_timer: IDL.Func([], [Result_8], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
@@ -315,7 +329,7 @@ export const idlFactory = ({ IDL }) => {
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats]),
 		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_8], [])
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_9], [])
 	});
 };
 // @ts-ignore

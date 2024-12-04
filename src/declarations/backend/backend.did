@@ -1,3 +1,12 @@
+type AddDappSettingsError = variant {
+  VersionMismatch;
+  DappIdTooLong;
+  UserNotFound;
+};
+type AddHiddenDappIdRequest = record {
+  current_user_version : opt nat64;
+  dapp_id : text;
+};
 type AddUserCredentialError = variant {
   InvalidCredential;
   VersionMismatch;
@@ -151,20 +160,21 @@ type OisyUser = record {
 type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
-type Result_1 = variant { Ok; Err : AllowSigningError };
-type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
-type Result_3 = variant {
+type Result_1 = variant { Ok; Err : AddDappSettingsError };
+type Result_2 = variant { Ok; Err : AllowSigningError };
+type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
+type Result_4 = variant {
   Ok : BtcGetPendingTransactionsReponse;
   Err : BtcAddPendingTransactionError;
 };
-type Result_4 = variant {
+type Result_5 = variant {
   Ok : SelectedUtxosFeeResponse;
   Err : SelectedUtxosFeeError;
 };
-type Result_5 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_6 = variant { Ok : MigrationReport; Err : text };
-type Result_7 = variant { Ok; Err : text };
-type Result_8 = variant {
+type Result_6 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_7 = variant { Ok : MigrationReport; Err : text };
+type Result_8 = variant { Ok; Err : text };
+type Result_9 = variant {
   Ok : TopUpCyclesLedgerResponse;
   Err : TopUpCyclesLedgerError;
 };
@@ -238,24 +248,25 @@ type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
-  allow_signing : () -> (Result_1);
-  btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_2);
+  add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (Result_1);
+  allow_signing : () -> (Result_2);
+  btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_3);
   btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
-      Result_3,
+      Result_4,
     );
-  btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
+  btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_5);
   bulk_up : (blob) -> ();
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_user_profile : () -> (Result_5) query;
+  get_user_profile : () -> (Result_6) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
-  migrate_user_data_to : (principal) -> (Result_6);
+  migrate_user_data_to : (principal) -> (Result_7);
   migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_7);
+  migration_stop_timer : () -> (Result_8);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();
@@ -264,5 +275,5 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_8);
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_9);
 }
