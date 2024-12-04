@@ -5,7 +5,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const queryProfile = async ({
@@ -60,10 +60,16 @@ export const loadCertifiedUserProfile = async ({
 };
 
 export const loadUserProfile = async ({
-	identity
+	identity,
+	reload = true
 }: {
 	identity: OptionIdentity;
+	reload?: boolean;
 }): Promise<void> => {
+	if (nonNullish(get(userProfileStore)) && !reload) {
+		return;
+	}
+
 	try {
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
