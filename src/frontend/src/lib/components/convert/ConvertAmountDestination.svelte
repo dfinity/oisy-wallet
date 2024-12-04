@@ -17,6 +17,7 @@
 	const { destinationToken, destinationTokenBalance, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
+	// receiveAmount will always be equal to sendAmount unless there are some fees on the receiver end (future case)
 	$: receiveAmount = insufficientFunds || isNullish(sendAmount) ? undefined : Number(sendAmount);
 
 	let receiveAmountUSD: number;
@@ -35,7 +36,7 @@
 	</span>
 
 	<span slot="balance" data-tid="convert-amount-destination-balance">
-		{$i18n.convert.text.available_balance}:
+		{$i18n.send.text.balance}:
 		{formatToken({
 			value: $destinationTokenBalance ?? ZERO,
 			unitName: $destinationToken.decimals
