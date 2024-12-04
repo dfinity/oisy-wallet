@@ -39,5 +39,5 @@
 		{/if}
 	</TokensSkeletons>
 
-	<ButtonCloseModal slot="toolbar"/>
+	<ButtonCloseModal slot="toolbar" />
 </ContentWithToolbar>
