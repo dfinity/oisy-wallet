@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
@@ -30,6 +30,7 @@
 		temporaryHiddenDappIds = [...temporaryHiddenDappIds, event.detail.dappId];
 	};
 
+
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = isNullish($userProfileStore)
 		? []
@@ -37,7 +38,7 @@
 				({ id, carousel }) =>
 					nonNullish(carousel) &&
 					!(
-						$userProfileStore.profile.settings.dapp.dapp_carousel.hidden_dapp_ids?.includes(id) ||
+						fromNullable($userProfileStore.profile.settings)?.dapp.dapp_carousel.hidden_dapp_ids?.includes(id) ||
 						temporaryHiddenDappIds.includes(id)
 					)
 			) as CarouselSlideOisyDappDescription[]);
