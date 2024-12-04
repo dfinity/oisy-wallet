@@ -31,10 +31,8 @@ export const isIcCkToken = (token: Token): token is IcCkToken => {
 export const isNotIcCkToken = (token: Token): token is Exclude<Token, IcCkToken> =>
 	!isIcCkToken(token);
 
-export const hasIndexCanister = (token: IcToken): token is IcToken & IcCanistersStrict => {
-	return nonNullish(token) && isIcTokenCanistersStrict(token);
-};
+export const hasIndexCanister = (token: IcToken): token is IcToken & IcCanistersStrict =>
+	nonNullish(token) && isIcTokenCanistersStrict(token);
 
-export const hasNoIndexCanister = (token: IcToken): token is IcToken & IcCanistersStrict => {
-	return !hasIndexCanister(token);
-};
+export const hasNoIndexCanister = (token: IcToken): token is IcToken & IcCanistersStrict =>
+	!hasIndexCanister(token);
