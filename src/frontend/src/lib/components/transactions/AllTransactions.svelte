@@ -2,7 +2,10 @@
 	import { notEmptyString, type Token } from '@dfinity/utils';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { hasIndexCanister, hasNoIndexCanister } from '$icp/validation/ic-token.validation';
+	import {
+		hasIndexCanister,
+		hasNoIndexCanister
+	} from '$icp/validation/ic-token.validation';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -15,9 +18,9 @@
 
 	let enabledTokensWithoutCanister: Token[];
 	let enabledTokensWithBrokenCanister: Token[];
-	$: enabledTokensWithoutTransaction = $enabledNetworkTokens.filter(
-		(token: TokenUi) => $icTransactionsStore?.[token.id] === null
-	);
+	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
+		.filter((token: TokenUi) => $icTransactionsStore?.[token.id] === null)
+		.map((token: TokenUi) => token as IcToken);
 	$: enabledTokensWithoutCanister = enabledTokensWithoutTransaction.filter((token: IcToken) =>
 		hasNoIndexCanister(token)
 	);
