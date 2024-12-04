@@ -22,6 +22,11 @@
 			return;
 		}
 
+		// If utxos are already known and the new amount is nullish or zero, we keep using the previous fee value
+		if (nonNullish($store?.utxosFee) && (isNullish(amount) || Number(amount) === 0)) {
+			return;
+		}
+
 		// UTXOs API call is very time-consuming operation, even though the fees do not change often (no matter what amount is provided)
 		// Therefore, to improve UX, we start fetching the fee directly on modal open event
 		// Initially, we fetch fees with default value and then re-fetch it in the background on value change

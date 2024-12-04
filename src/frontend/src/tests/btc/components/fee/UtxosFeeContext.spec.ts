@@ -150,6 +150,24 @@ describe('UtxosFeeContext', () => {
 		});
 	});
 
+	it('should not call selectUtxosFee if provided amount is 0 or undefined and the fee is already known', async () => {
+		const selectUtxosFeeSpy = mockBtcSendApi();
+
+		mockAuthStore();
+
+		const { rerender } = render(UtxosFeeContext, {
+			props,
+			context: mockContext(store)
+		});
+
+		await rerender({ amount: 0 });
+		await rerender({ amount: undefined });
+
+		await waitFor(() => {
+			expect(selectUtxosFeeSpy).toHaveBeenCalledOnce();
+		});
+	});
+
 	it('should not call selectUtxosFee if provided networkId is not BTC', async () => {
 		const resetSpy = vi.spyOn(store, 'reset');
 		const selectUtxosFeeSpy = mockBtcSendApi();
