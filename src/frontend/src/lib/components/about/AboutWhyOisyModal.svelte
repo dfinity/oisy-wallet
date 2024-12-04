@@ -60,7 +60,7 @@
 		<div class="mt-5 flex flex-col gap-6">
 			{#each features as feature}
 				<AboutFeatureItem title={feature.title} description={feature.description}>
-					<svelte:component slot="icon" this={feature.icon} />
+					<svelte:component this={feature.icon} slot="icon" />
 				</AboutFeatureItem>
 			{/each}
 		</div>
