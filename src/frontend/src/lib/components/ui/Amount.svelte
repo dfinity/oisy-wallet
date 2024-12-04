@@ -5,6 +5,7 @@
 
 	export let amount: BigNumber;
 	export let decimals: number;
+	export let symbol: string;
 	export let formatPositiveAmount = false;
 
 	let detailedValue: string;
@@ -23,6 +24,9 @@
 	});
 </script>
 
-<data value={detailedValue} class:text-success={formatPositiveAmount && amount.gt(0)}>
-	{displayValue}
-</data>
+<span class:text-success={formatPositiveAmount && amount.gt(0)}>
+	<data value={detailedValue}>
+		{displayValue}
+	</data>
+	{symbol}
+</span>
