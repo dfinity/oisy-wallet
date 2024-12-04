@@ -59,7 +59,8 @@
 
 		<article>
 			<div
-				class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 sm:gap-4 border-b border-tertiary pb-2 sm:pb-4">
+				class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
+			>
 				<Logo
 					size="md"
 					src={logo}
@@ -136,21 +137,21 @@
 			})}
 			styleClass="as-button primary padding-sm mt-auto flex flex-row-reverse"
 			href={websiteURL.toString()}
-		>{callToAction ??
-		replacePlaceholders($i18n.dapps.text.open_dapp, {
-			$dAppName: dAppName
-		})}</ExternalLink
+			>{callToAction ??
+				replacePlaceholders($i18n.dapps.text.open_dapp, {
+					$dAppName: dAppName
+				})}</ExternalLink
 		>
 	{/if}
 </Modal>
 
 <style lang="scss">
-  @use '../../styles/mixins/modal';
+	@use '../../styles/mixins/modal';
 
-  article {
-    @include modal.content;
+	article {
+		@include modal.content;
 
-    padding: var(--padding-3x) var(--padding-2_5x);
-    margin: 0 0 var(--padding-3x);
-  }
+		padding: var(--padding-3x) var(--padding-2_5x);
+		margin: 0 0 var(--padding-3x);
+	}
 </style>
