@@ -34,7 +34,7 @@
 				{/each}
 			</div>
 		{:else}
-			<p class="text-secondary">
+			<p class="text-black">
 				{$i18n.tokens.manage.text.all_tokens_zero_balance}
 			</p>
 		{/if}

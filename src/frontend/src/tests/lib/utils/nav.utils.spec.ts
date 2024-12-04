@@ -56,62 +56,62 @@ describe('nav.utils', () => {
 				networkUrl({
 					path: mockPath,
 					networkId: undefined,
-					isTransactionsRoute: false,
+					usePreviousRoute: false,
 					fromRoute: null
 				})
 			).toBe(mockPath);
 		});
 
-		it('should return the path with query params when networkId is defined and isTransactionsRoute is false', () => {
+		it('should return the path with query params when networkId is defined and usePreviousRoute is false', () => {
 			expect(
 				networkUrl({
 					path: mockPath,
 					networkId: mockNetworkId,
-					isTransactionsRoute: false,
+					usePreviousRoute: false,
 					fromRoute: null
 				})
 			).toBe(`${mockPath}?${mockQueryParam}`);
 		});
 
-		it('should return the path without query params when isTransactionsRoute is true but fromRoute is null', () => {
+		it('should return the path without query params when usePreviousRoute is true but fromRoute is null', () => {
 			expect(
 				networkUrl({
 					path: mockPath,
 					networkId: mockNetworkId,
-					isTransactionsRoute: true,
+					usePreviousRoute: true,
 					fromRoute: null
 				})
 			).toBe(mockPath);
 		});
 
-		it('should return the path with query params from fromRoute when isTransactionsRoute is true and fromRoute is non-null', () => {
+		it('should return the path with query params from fromRoute when usePreviousRoute is true and fromRoute is non-null', () => {
 			expect(
 				networkUrl({
 					path: mockPath,
 					networkId: undefined,
-					isTransactionsRoute: true,
+					usePreviousRoute: true,
 					fromRoute: mockFromRoute
 				})
 			).toBe(`${mockPath}?${NETWORK_PARAM}=test-network`);
 		});
 
-		it('should prioritize fromRoute query params when isTransactionsRoute is true and both networkId and fromRoute are provided', () => {
+		it('should prioritize fromRoute query params when usePreviousRoute is true and both networkId and fromRoute are provided', () => {
 			expect(
 				networkUrl({
 					path: mockPath,
 					networkId: mockNetworkId,
-					isTransactionsRoute: true,
+					usePreviousRoute: true,
 					fromRoute: mockFromRoute
 				})
 			).toBe(`${mockPath}?${NETWORK_PARAM}=test-network`);
 		});
 
-		it('should return the path without query params from fromRoute when isTransactionsRoute is true and ther is no network selected', () => {
+		it('should return the path without query params from fromRoute when usePreviousRoute is true and ther is no network selected', () => {
 			expect(
 				networkUrl({
 					path: mockPath,
 					networkId: mockNetworkId,
-					isTransactionsRoute: true,
+					usePreviousRoute: true,
 					fromRoute: { url: new URL(`https://example.com/`) } as unknown as NavigationTarget
 				})
 			).toBe(mockPath);
