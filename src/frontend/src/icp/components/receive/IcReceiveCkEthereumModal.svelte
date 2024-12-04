@@ -103,6 +103,23 @@
 		bind:sendProgressStep
 		{currentStep}
 	>
+		{#if currentStep?.name === howToSteps[0].name}
+			<HowToConvertEthereumInfo
+				on:icBack={() => modal.set(0)}
+				on:icQRCode={modal.next}
+				on:icConvert={() => modal.set(4)}
+			/>
+		{:else if currentStep?.name === steps[1].name}
+			<ReceiveAddressQRCode
+				on:icBack={modal.back}
+				address={$icrcAccountIdentifierText ?? ''}
+				addressToken={ICP_TOKEN}
+				network={ICP_NETWORK}
+				qrCodeAction={{ enabled: false }}
+				copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+			/>
+		{:else}
 			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
+		{/if}
 	</ConvertETHToCkETHWizard>
 </WizardModal>
