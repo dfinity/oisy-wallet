@@ -7,6 +7,7 @@
 	} from '$icp/stores/receive-token.store';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -43,23 +44,19 @@
 		</p>
 	</Value>
 
-	<Button
-		colorStyle="secondary"
-		fullWidth
-		styleClass="mb-8"
-		on:click={() => dispatch('icConvert')}
-		slot="toolbar"
-	>
-		<span class="text-dark-slate-blue font-bold"
-			>{replacePlaceholders(
-				replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
-				{
-					$token: $ckEthereumTwinToken.symbol,
-					$ckToken: $token.symbol
-				}
-			)}</span
-		>
-	</Button>
-</ContentWithToolbar>
+	<div class="flex flex-col w-full gap-3" slot="toolbar">
+		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icConvert')}>
+			<span class="text-dark-slate-blue font-bold"
+				>{replacePlaceholders(
+					replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
+					{
+						$token: $ckEthereumTwinToken.symbol,
+						$ckToken: $token.symbol
+					}
+				)}</span
+			>
+		</Button>
 
-<ButtonDone on:click={close} />
+		<ButtonDone on:click={close} />
+	</div>
+</ContentWithToolbar>
