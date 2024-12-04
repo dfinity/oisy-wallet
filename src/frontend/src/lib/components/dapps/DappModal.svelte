@@ -136,7 +136,7 @@
 					ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
 						$dAppName: dAppName
 					})}
-					styleClass="as-button primary padding-sm w-full"
+					styleClass="as-button primary padding-sm flex-1 flex-row-reverse"
 					href={websiteURL.toString()}
 					>{callToAction ??
 						replacePlaceholders($i18n.dapps.text.open_dapp, {
