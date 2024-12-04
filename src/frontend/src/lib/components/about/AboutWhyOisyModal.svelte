@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
+	import AboutFeatureItem from './AboutFeatureItem.svelte';
 	import CoverWhyOisy from '$lib/assets/cover-why-oisy.png';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -13,6 +14,39 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
+	const features = [
+		{
+			title: $i18n.about.why_oisy.text.hold_crypto.title,
+			description: $i18n.about.why_oisy.text.hold_crypto.description,
+			icon: IconCrypto
+		},
+		{
+			title: $i18n.about.why_oisy.text.network_custody.title,
+			description: $i18n.about.why_oisy.text.network_custody.description,
+			icon: IconKey
+		},
+		{
+			title: $i18n.about.why_oisy.text.fully_on_chain.title,
+			description: $i18n.about.why_oisy.text.fully_on_chain.description,
+			icon: IconIcLogoPlain
+		},
+		{
+			title: $i18n.about.why_oisy.text.cross_device.title,
+			description: $i18n.about.why_oisy.text.cross_device.description,
+			icon: IconWorld
+		},
+		{
+			title: $i18n.about.why_oisy.text.verifiable_credentials.title,
+			description: $i18n.about.why_oisy.text.verifiable_credentials.description,
+			icon: IconIdCard
+		},
+		{
+			title: $i18n.about.why_oisy.text.open_source.title,
+			description: $i18n.about.why_oisy.text.open_source.description,
+			icon: IconGitHub
+		}
+	];
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_WHY_OISY_MODAL}>
@@ -23,35 +57,13 @@
 	<div class="stretch pt-4">
 		<ImgBanner styleClass="max-h-56" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
 
-		<p class="mt-6">
-			<IconCrypto />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.hold_crypto)} />
-		</p>
-
-		<p class="mt-6">
-			<IconKey />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.network_custody)} />
-		</p>
-
-		<p class="mt-6">
-			<IconIcLogoPlain />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.fully_on_chain)} />
-		</p>
-
-		<p class="mt-6">
-			<IconWorld />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.cross_device)} />
-		</p>
-
-		<p class="mt-6">
-			<IconIdCard />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.verifiable_credentials)} />
-		</p>
-
-		<p class="my-6">
-			<IconGitHub />
-			<Html text={replaceOisyPlaceholders($i18n.about.why_oisy.text.open_source)} />
-		</p>
+		<div class="mt-5 flex flex-col gap-6">
+			{#each features as feature}
+				<AboutFeatureItem title={feature.title} description={feature.description}>
+					<svelte:component this={feature.icon} slot="icon" />
+				</AboutFeatureItem>
+			{/each}
+		</div>
 	</div>
 
 	<ButtonCloseModal colorStyle="primary" />
