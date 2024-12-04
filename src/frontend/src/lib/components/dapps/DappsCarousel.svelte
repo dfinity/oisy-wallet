@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
-	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
@@ -15,7 +15,7 @@
 	export let styleClass: string | undefined = undefined;
 
 	$: {
-		if ($authSignedIn) {
+		if (isNullish($userProfileStore)) {
 			loadUserProfile({ identity: $authIdentity });
 		}
 	}
@@ -27,7 +27,7 @@
 	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 </script>
 
-{#if nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
+{#if nonNullish($userProfileStore) && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
 	<Carousel controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
 		{#each dappsCarouselSlides as dappsCarouselSlide}
