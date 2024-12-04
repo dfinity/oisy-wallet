@@ -20,12 +20,10 @@ describe('sol-balance-services', () => {
 			async (network) => {
 				const balance = await getLamportsBalance({ address: mockSolAddress, network });
 
-				console.log(balance);
-
 				expect(balance).toBeGreaterThanOrEqual(0);
 			}
 		);
-	});
+	}, 60000);
 
 	describe('getSolBalance', () => {
 		it.each(solanaNetworks)(
@@ -33,10 +31,8 @@ describe('sol-balance-services', () => {
 			async (network) => {
 				const balance = await getSolBalance({ address: mockSolAddress, network });
 
-				console.log(balance);
-
 				expect(balance).toBeGreaterThanOrEqual(0);
 			}
 		);
-	});
+	}, 60000);
 });
