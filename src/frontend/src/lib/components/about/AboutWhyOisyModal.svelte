@@ -9,6 +9,7 @@
 	import IconKey from '$lib/components/icons/IconKey.svelte';
 	import IconWorld from '$lib/components/icons/IconWorld.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { ABOUT_WHY_OISY_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -54,7 +55,7 @@
 		><span class="text-xl">{replaceOisyPlaceholders($i18n.about.why_oisy.text.title)}</span>
 	</svelte:fragment>
 
-	<div class="stretch pt-4">
+	<ContentWithToolbar>
 		<ImgBanner styleClass="max-h-56" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
 
 		<div class="mt-5 flex flex-col gap-6">
@@ -64,7 +65,7 @@
 				</AboutFeatureItem>
 			{/each}
 		</div>
-	</div>
 
-	<ButtonCloseModal />
+		<ButtonCloseModal slot="toolbar" />
+	</ContentWithToolbar>
 </Modal>
