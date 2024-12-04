@@ -14,6 +14,39 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
+	const features = [
+		{
+			title: $i18n.about.why_oisy.text.hold_crypto.title,
+			description: $i18n.about.why_oisy.text.hold_crypto.description,
+			icon: IconCrypto
+		},
+		{
+			title: $i18n.about.why_oisy.text.network_custody.title,
+			description: $i18n.about.why_oisy.text.network_custody.description,
+			icon: IconKey
+		},
+		{
+			title: $i18n.about.why_oisy.text.fully_on_chain.title,
+			description: $i18n.about.why_oisy.text.fully_on_chain.description,
+			icon: IconIcLogoPlain
+		},
+		{
+			title: $i18n.about.why_oisy.text.cross_device.title,
+			description: $i18n.about.why_oisy.text.cross_device.description,
+			icon: IconWorld
+		},
+		{
+			title: $i18n.about.why_oisy.text.verifiable_credentials.title,
+			description: $i18n.about.why_oisy.text.verifiable_credentials.description,
+			icon: IconIdCard
+		},
+		{
+			title: $i18n.about.why_oisy.text.open_source.title,
+			description: $i18n.about.why_oisy.text.open_source.description,
+			icon: IconGitHub
+		}
+	];
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_WHY_OISY_MODAL}>
@@ -25,47 +58,11 @@
 		<ImgBanner styleClass="max-h-56" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
 
 		<div class="mt-5 flex flex-col gap-6">
-			<AboutFeatureItem
-				title={$i18n.about.why_oisy.text.hold_crypto.title}
-				description={$i18n.about.why_oisy.text.hold_crypto.description}
-			>
-				<IconCrypto slot="icon" />
-			</AboutFeatureItem>
-
-			<AboutFeatureItem
-				title={$i18n.about.why_oisy.text.network_custody.title}
-				description={$i18n.about.why_oisy.text.network_custody.description}
-			>
-				<IconKey slot="icon" />
-			</AboutFeatureItem>
-
-			<AboutFeatureItem
-				title={$i18n.about.why_oisy.text.fully_on_chain.title}
-				description={$i18n.about.why_oisy.text.fully_on_chain.description}
-			>
-				<IconIcLogoPlain slot="icon" />
-			</AboutFeatureItem>
-
-			<AboutFeatureItem
-				title={$i18n.about.why_oisy.text.cross_device.title}
-				description={$i18n.about.why_oisy.text.cross_device.description}
-			>
-				<IconWorld slot="icon" />
-			</AboutFeatureItem>
-
-			<AboutFeatureItem
-				title={$i18n.about.why_oisy.text.verifiable_credentials.title}
-				description={$i18n.about.why_oisy.text.verifiable_credentials.description}
-			>
-				<IconIdCard slot="icon" />
-			</AboutFeatureItem>
-
-			<AboutFeatureItem
-				title={$i18n.about.why_oisy.text.open_source.title}
-				description={$i18n.about.why_oisy.text.open_source.description}
-			>
-				<IconGitHub slot="icon" />
-			</AboutFeatureItem>
+			{#each features as feature}
+				<AboutFeatureItem title={feature.title} description={feature.description}>
+					<svelte:component slot="icon" this={feature.icon} />
+				</AboutFeatureItem>
+			{/each}
 		</div>
 	</div>
 
