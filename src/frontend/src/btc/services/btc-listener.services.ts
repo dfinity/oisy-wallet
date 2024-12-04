@@ -43,11 +43,11 @@ export const syncWallet = ({
 export const syncWalletError = ({
 	tokenId,
 	error: err,
-	silent
+	hideToast = false
 }: {
 	tokenId: TokenId;
 	error: unknown;
-	silent?: boolean;
+	hideToast?: boolean;
 }) => {
 	const errorText = get(i18n).init.error.btc_wallet_error;
 
@@ -56,7 +56,7 @@ export const syncWalletError = ({
 	// Currently, the certified error can only happen while fetching balance, but we still want to reset transactions to avoid displaying incorrect data
 	btcTransactionsStore.reset(tokenId);
 
-	if (silent) {
+	if (!hideToast) {
 		console.warn(`${errorText}:`, err);
 		return;
 	}

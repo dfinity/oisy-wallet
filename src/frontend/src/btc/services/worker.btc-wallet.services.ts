@@ -1,5 +1,6 @@
 import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
+import { LOCAL } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -47,7 +48,8 @@ export const initBtcWalletWorker = async ({
 				syncWalletError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error,
-					silent: isRegtestNetwork || isTestnetNetwork
+					// TODO: do not launch worker locally if BTC canister is not deployed, and remove the below param afterwards
+					hideToast: isRegtestNetwork && LOCAL
 				});
 				return;
 		}
