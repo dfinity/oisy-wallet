@@ -59,27 +59,29 @@ describe('LoaderUserProfile', () => {
 		});
 	});
 
-	it('should not load user profile if not signed in', () => {
-		mockAuthStore(true);
+	describe('not signed in', () => {
+		beforeEach(() => {
+			mockAuthStore(true);
+		});
 
-		const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
+		it('should not load user profile if not signed in', () => {
+			const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
 
-		render(LoaderUserProfile);
+			render(LoaderUserProfile);
 
-		expect(spy).not.toHaveBeenCalled();
-	});
+			expect(spy).not.toHaveBeenCalled();
+		});
 
-	it('should reset the user profile if not signed in', () => {
-		mockAuthStore(true);
+		it('should reset the user profile if not signed in', () => {
+			userProfileStore.set({ certified: true, profile: mockUserProfile });
 
-		userProfileStore.set({ certified: true, profile: mockUserProfile });
+			const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
 
-		const spy = vi.spyOn(loadUserServices, 'loadUserProfile');
+			render(LoaderUserProfile);
 
-		render(LoaderUserProfile);
+			expect(spy).not.toHaveBeenCalled();
 
-		expect(spy).not.toHaveBeenCalled();
-
-		expect(get(userProfileStore)).toBeNull();
+			expect(get(userProfileStore)).toBeNull();
+		});
 	});
 });
