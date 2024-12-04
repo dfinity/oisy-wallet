@@ -41,9 +41,9 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
         .expect("Call to get profile failed")
         .expect("Get profile failed");
 
-    assert_eq!(
-        user_profile
-            .settings
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
@@ -52,7 +52,7 @@ fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
     );
 
     assert_eq!(
-        user_profile.settings.dapp.dapp_carousel.hidden_dapp_ids,
+       settings.dapp.dapp_carousel.hidden_dapp_ids,
         vec!["test_dapp_id".to_string()]
     );
 }
@@ -69,7 +69,7 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
     let initial_profile = create_profile_response.expect("Create failed");
     assert_eq!(
         initial_profile
-            .settings
+            .settings.unwrap()
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
@@ -123,9 +123,9 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
         .expect("Call to get profile failed")
         .expect("Get profile failed");
 
-    assert_eq!(
-        final_user_profile
-            .settings
+    let settings = final_user_profile.settings.unwrap();
+
+    assert_eq!(settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
@@ -133,9 +133,7 @@ fn test_add_user_hidden_dapp_id_adds_multiple_dapp_ids() {
         2
     );
 
-    assert_eq!(
-        final_user_profile
-            .settings
+    assert_eq!(settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids,
@@ -153,7 +151,7 @@ fn test_add_user_hidden_dapp_id_cannot_update_wrong_version() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.dapp.dapp_carousel.hidden_dapp_ids.len(), 0);
+    assert_eq!(profile.settings.unwrap().dapp.dapp_carousel.hidden_dapp_ids.len(), 0);
 
     let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
         dapp_id: "test_dapp_id".to_string(),
@@ -194,7 +192,7 @@ fn test_add_user_hidden_dapp_id_cannot_update_wrong_version() {
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
-            .settings
+            .settings.unwrap()
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
@@ -215,7 +213,7 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
     let initial_profile = create_profile_response.expect("Create failed");
     assert_eq!(
         initial_profile
-            .settings
+            .settings.unwrap()
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
@@ -269,9 +267,9 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
         .expect("Call to get profile failed")
         .expect("Get profile failed");
 
-    assert_eq!(
-        final_user_profile
-            .settings
+    let settings = final_user_profile.settings.unwrap();
+
+    assert_eq!(settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
@@ -279,9 +277,7 @@ fn test_add_user_hidden_dapp_id_does_not_add_duplicate_dapp_id() {
         1
     );
 
-    assert_eq!(
-        final_user_profile
-            .settings
+    assert_eq!(settings
             .dapp
             .dapp_carousel
             .hidden_dapp_ids,
@@ -299,7 +295,7 @@ fn test_add_user_hidden_dapp_id_does_not_allow_long_ids() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.dapp.dapp_carousel.hidden_dapp_ids.len(), 0);
+    assert_eq!(profile.settings.unwrap().dapp.dapp_carousel.hidden_dapp_ids.len(), 0);
 
     let add_hidden_dapp_id_arg = AddHiddenDappIdRequest {
         dapp_id: "test_dapp_id".repeat(100),
@@ -327,7 +323,7 @@ fn test_add_user_hidden_dapp_id_does_not_allow_long_ids() {
         get_profile_response
             .expect("Call to get profile failed")
             .expect("Get profile failed")
-            .settings
+            .settings.unwrap()
             .dapp
             .dapp_carousel
             .hidden_dapp_ids
