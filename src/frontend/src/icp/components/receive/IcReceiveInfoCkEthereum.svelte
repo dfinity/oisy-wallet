@@ -7,7 +7,6 @@
 	} from '$icp/stores/receive-token.store';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
