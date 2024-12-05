@@ -7,6 +7,7 @@ import { Principal } from '@dfinity/principal';
 import { createAgent, fromNullable, isNullish, jsonReplacer } from '@dfinity/utils';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 const agent = await createAgent({
 	identity: new AnonymousIdentity(),
@@ -33,12 +34,13 @@ const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 		canisterId
 	});
 
-	return getOrchestratorInfo({ certified: true });
+	return await getOrchestratorInfo({ certified: true });
 };
 
 const buildOrchestratorInfo = async (orchestratorId) => {
 	const { managed_canisters } = await orchestratorInfo({ orchestratorId });
 
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a destructuring assignment
 	const mapManagedCanisters = (
 		acc,
 		{ ledger, index, ckerc20_token_symbol, erc20_contract: { address: erc20ContractAddress } }
@@ -91,11 +93,9 @@ const buildOrchestratorInfo = async (orchestratorId) => {
 const ORCHESTRATOR_STAGING_ID = Principal.fromText('2s5qh-7aaaa-aaaar-qadya-cai');
 const ORCHESTRATOR_PRODUCTION_ID = Principal.fromText('vxkom-oyaaa-aaaar-qafda-cai');
 
-const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
-
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
-const saveTokenLogo = async (canisterId, name) => {
+const saveTokenLogo = async ({ canisterId, name }) => {
 	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
 	const file = join(LOGO_FOLDER, `${logoName}.svg`);
 
@@ -137,7 +137,7 @@ const findCkErc20 = async () => {
 		staging
 	};
 
-	writeFileSync(join(DATA_FOLDER, 'tokens.ckerc20.json'), JSON.stringify(tokens, jsonReplacer, 8));
+	writeFileSync(CK_ERC20_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
 
 	await Promise.allSettled(
 		Object.entries({
@@ -145,7 +145,7 @@ const findCkErc20 = async () => {
 			...tokens.staging
 		})
 			.filter(([_, { ledgerCanisterId }]) => !SKIP_CANISTER_IDS_LOGOS.includes(ledgerCanisterId))
-			.map(([name, { ledgerCanisterId }]) => saveTokenLogo(ledgerCanisterId, name))
+			.map(([name, { ledgerCanisterId }]) => saveTokenLogo({ canisterId: ledgerCanisterId, name }))
 	);
 };
 

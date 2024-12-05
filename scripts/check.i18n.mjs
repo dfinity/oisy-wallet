@@ -8,10 +8,10 @@ const PATH_FROM_ROOT = join(process.cwd(), 'src', 'frontend', 'src');
 const PATH_TO_EN_JSON = join(PATH_FROM_ROOT, 'lib', 'i18n', 'en.json');
 const PATH_TO_CODEBASE = join(PATH_FROM_ROOT);
 
-const extractKeys = (obj, prefix = '') =>
+const extractKeys = ({ obj, prefix = '' }) =>
 	Object.keys(obj).reduce((res, el) => {
 		if (typeof obj[el] === 'object') {
-			return [...res, ...extractKeys(obj[el], `${prefix}${el}.`)];
+			return [...res, ...extractKeys({ obj: obj[el], prefix: `${prefix}${el}.` })];
 		}
 		return [...res, `${prefix}${el}`];
 	}, []);
@@ -21,10 +21,10 @@ const checkKeyUsage = ({ key, content }) =>
 	content.includes(key) ||
 	(content.includes(`get(i18n)`) && key.split('.').every((k) => content.includes(k)));
 
-const main = async () => {
+const main = () => {
 	const en = JSON.parse(readFileSync(PATH_TO_EN_JSON, 'utf8'));
 
-	let potentialUnusedKeys = extractKeys(en);
+	let potentialUnusedKeys = extractKeys({ obj: en });
 
 	const files = findFiles({ dir: PATH_TO_CODEBASE, extensions: ['.svelte', '.ts'] });
 
@@ -47,7 +47,4 @@ const main = async () => {
 	}
 };
 
-main().catch((err) => {
-	console.error(err);
-	process.exit(1);
-});
+main();

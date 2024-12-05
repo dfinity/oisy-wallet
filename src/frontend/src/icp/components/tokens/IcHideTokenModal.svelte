@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Identity } from '@dfinity/agent';
+	import { Principal } from '@dfinity/principal';
+	import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import type { LedgerCanisterIdText } from '$icp/types/canister';
+	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { setCustomToken } from '$lib/api/backend.api';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
-	import type { Identity } from '@dfinity/agent';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import { assertNonNullish, toNullable } from '@dfinity/utils';
-	import { Principal } from '@dfinity/principal';
-	import { onMount } from 'svelte';
-	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	let selectedToken: OptionIcrcCustomToken;
 
@@ -35,19 +35,11 @@
 			return { valid: false };
 		}
 
-		if (isNullishOrEmpty(indexCanisterId)) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.invalid_index }
-			});
-			return { valid: false };
-		}
-
 		return { valid: true };
 	};
 
 	const hideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(ledgerCanisterId);
-		assertNonNullish(indexCanisterId);
 
 		await setCustomToken({
 			...params,
@@ -57,10 +49,13 @@
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
-						index_id: toNullable(Principal.fromText(indexCanisterId))
+						index_id: toNullable(
+							nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
+						)
 					}
 				}
-			}
+			},
+			nullishIdentityErrorMessage: $i18n.auth.error.no_internet_identity
 		});
 	};
 

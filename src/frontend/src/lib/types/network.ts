@@ -1,10 +1,18 @@
-export type NetworkId = symbol;
+import {
+	NetworkAppMetadataSchema,
+	NetworkBuySchema,
+	NetworkEnvironmentSchema,
+	NetworkSchema,
+	type NetworkIdSchema
+} from '$lib/schema/network.schema';
+import { z } from 'zod';
 
-export type NetworkEnvironment = 'mainnet' | 'testnet';
+export type NetworkId = z.infer<typeof NetworkIdSchema>;
 
-export interface Network {
-	id: NetworkId;
-	env: NetworkEnvironment;
-	name: string;
-	icon?: string;
-}
+export type NetworkEnvironment = z.infer<typeof NetworkEnvironmentSchema>;
+
+export type Network = z.infer<typeof NetworkSchema>;
+
+export type NetworkBuy = z.infer<typeof NetworkBuySchema>;
+
+export type NetworkAppMetadata = z.infer<typeof NetworkAppMetadataSchema>;

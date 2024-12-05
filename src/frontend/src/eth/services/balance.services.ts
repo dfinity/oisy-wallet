@@ -1,4 +1,4 @@
-import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens.env';
+import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -15,7 +15,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const reloadBalance = async (token: Token): Promise<ResultSuccess> => {
+export const reloadBalance = (token: Token): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(token.id)) {
 		return loadBalance({ networkId: token.network.id, tokenId: token.id });
 	}

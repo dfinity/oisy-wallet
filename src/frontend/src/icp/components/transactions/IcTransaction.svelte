@@ -1,76 +1,56 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
-	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import { type ComponentType } from 'svelte';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import Card from '$lib/components/ui/Card.svelte';
-	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
-	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
-	import IconMint from '$lib/components/icons/IconMint.svelte';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
-	import Amount from '$lib/components/ui/Amount.svelte';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
-	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
+	import type { TransactionStatus } from '$lib/types/transaction';
 
 	export let transaction: IcTransactionUi;
+	export let token: Token;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
-	let transactionType: IcTransactionType;
+	let type: IcTransactionType;
 	let transactionTypeLabel: string | undefined;
 	let value: bigint | undefined;
-	let timestamp: bigint | undefined;
+	let timestampNanoseconds: bigint | undefined;
 	let incoming: boolean | undefined;
 
 	$: ({
-		type: transactionType,
+		type,
 		typeLabel: transactionTypeLabel,
 		value,
-		timestamp,
+		timestamp: timestampNanoseconds,
 		incoming
 	} = transaction);
 
 	let pending = false;
 	$: pending = transaction?.status === 'pending';
 
-	let icon: ComponentType;
-	$: icon =
-		['burn', 'approve', 'mint'].includes(transactionType) && pending
-			? IconConvert
-			: ['burn', 'approve'].includes(transactionType)
-				? IconBurn
-				: transactionType === 'mint'
-					? IconMint
-					: incoming === false
-						? IconSend
-						: IconReceive;
+	let status: TransactionStatus;
+	$: status = pending ? 'pending' : 'confirmed';
 
 	let amount: bigint | undefined;
 	$: amount = !incoming && nonNullish(value) ? value * -1n : value;
+
+	let timestamp: number | undefined;
+	$: timestamp = nonNullish(timestampNanoseconds)
+		? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
+		: undefined;
 </script>
 
-<button on:click={() => modalStore.openIcTransaction(transaction)} class="block w-full border-0">
-	<Card>
-		<span class="first-letter:capitalize inline-block"
-			><IcTransactionLabel label={transactionTypeLabel} fallback={transactionType} /></span
-		>
-
-		<RoundedIcon slot="icon" {icon} />
-
-		<svelte:fragment slot="amount">
-			{#if nonNullish(amount)}
-				<Amount amount={BigNumber.from(amount)} />
-			{/if}
-		</svelte:fragment>
-
-		<svelte:fragment slot="description">
-			{#if nonNullish(timestamp)}
-				{formatNanosecondsToDate(timestamp)}
-			{/if}
-
-			<TransactionPending {pending} />
-		</svelte:fragment>
-	</Card>
-</button>
+<Transaction
+	on:click={() => modalStore.openIcTransaction({ transaction, token })}
+	styleClass="block w-full border-0"
+	amount={BigNumber.from(amount)}
+	{type}
+	{timestamp}
+	{status}
+	{token}
+	{iconType}
+>
+	<IcTransactionLabel label={transactionTypeLabel} fallback={type} {token} />
+</Transaction>

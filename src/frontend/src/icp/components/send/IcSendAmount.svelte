@@ -1,54 +1,56 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { tokenDecimals } from '$lib/derived/token.derived';
-	import type { OptionIcToken } from '$icp/types/ic';
-	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { NetworkId } from '$lib/types/network';
-	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
-	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { getContext } from 'svelte';
+	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
+	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import {
+		ETHEREUM_FEE_CONTEXT_KEY,
+		type EthereumFeeContext
+	} from '$icp/stores/ethereum-fee.store';
+	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import type { OptionIcToken } from '$icp/types/ic-token';
+	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import {
 		assertCkETHBalanceEstimatedFee,
 		assertCkETHMinFee,
 		assertCkETHMinWithdrawalAmount
 	} from '$icp/utils/cketh.utils';
-	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import { getContext } from 'svelte';
-	import {
-		ETHEREUM_FEE_CONTEXT_KEY,
-		type EthereumFeeContext
-	} from '$icp/stores/ethereum-fee.store';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-	import { token } from '$lib/stores/token.store';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { balance } from '$lib/derived/balances.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
+	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let fee: bigint | undefined;
-	$: fee = ($token as OptionIcToken)?.fee;
+	$: fee = ($sendToken as OptionIcToken)?.fee;
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
-		if (isNullish(fee) || isNullish($token)) {
+		if (isNullish(fee) || isNullish($sendToken)) {
 			return;
 		}
 
 		if (isNetworkIdBitcoin(networkId)) {
 			const error = assertCkBTCUserInputAmount({
 				amount: userAmount,
-				minterInfo: $ckBtcMinterInfoStore?.[$token.id],
-				tokenDecimals: $token.decimals,
+				minterInfo: $ckBtcMinterInfoStore?.[$sendToken.id],
+				tokenDecimals: $sendToken.decimals,
 				i18n: $i18n
 			});
 
@@ -61,8 +63,8 @@
 		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
 			const error = assertCkETHMinWithdrawalAmount({
 				amount: userAmount,
-				tokenDecimals: $token.decimals,
-				tokenSymbol: $token.symbol,
+				tokenDecimals: $sendToken.decimals,
+				tokenSymbol: $sendToken.symbol,
 				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
 				i18n: $i18n
 			});
@@ -73,7 +75,7 @@
 
 			return assertCkETHMinFee({
 				amount: userAmount,
-				tokenSymbol: $token.symbol,
+				tokenSymbol: $sendToken.symbol,
 				fee,
 				i18n: $i18n
 			});
@@ -117,13 +119,13 @@
 	};
 
 	$: calculateMax = (): number | undefined =>
-		isNullish($token)
+		isNullish($sendToken)
 			? undefined
 			: getMaxTransactionAmount({
-					balance: $balance?.toBigInt(),
-					fee: fee,
-					tokenDecimals: $token.decimals,
-					tokenStandard: $token.standard
+					balance: $balance ?? ZERO,
+					fee: BigNumber.from(fee),
+					tokenDecimals: $sendToken.decimals,
+					tokenStandard: $sendToken.standard
 				});
 
 	let sendInputAmount: SendInputAmount | undefined;
@@ -133,7 +135,7 @@
 <SendInputAmount
 	bind:amount
 	bind:this={sendInputAmount}
-	tokenDecimals={$tokenDecimals}
+	tokenDecimals={$sendTokenDecimals}
 	{customValidate}
 	{calculateMax}
 	bind:error={amountError}

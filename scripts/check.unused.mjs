@@ -15,6 +15,8 @@ const REMOVE_FILES = process.argv.includes('--remove-files');
 
 const findSvelteFiles = (dir) => findFiles({ dir, extensions: ['.svelte'] });
 
+const findSearchFiles = (dir) => findFiles({ dir, extensions: ['.svelte', '.ts'] });
+
 const noUnusedFiles = () => {
 	console.log(`${GREEN}No unused components found.${NC}`);
 	process.exit(0);
@@ -24,14 +26,25 @@ const main = async () => {
 	console.log(`${NC}Scanning ${DATA_DIR} folder to find all .svelte files\n`);
 
 	const allSvelteFiles = findSvelteFiles(DATA_DIR_PATH);
+	const allSearchFiles = findSearchFiles(DATA_DIR_PATH).filter(
+		(file) => !file.includes('.spec.ts')
+	);
 
 	let potentialUnusedFiles = allSvelteFiles.filter((file) => !dirname(file).includes('routes'));
 
-	allSvelteFiles.forEach((file) => {
+	allSearchFiles.forEach((file) => {
 		const content = readFileSync(file, 'utf-8');
-		potentialUnusedFiles = potentialUnusedFiles.filter(
-			(potentialUnusedFile) => !content.includes(basename(potentialUnusedFile))
-		);
+
+		potentialUnusedFiles = potentialUnusedFiles.filter((potentialUnusedFile) => {
+			const fileBasename = basename(potentialUnusedFile);
+
+			if (content.includes(`./${fileBasename}`)) {
+				console.log(`${RED}Relative import of '${fileBasename}' found in '${file}${NC}'`);
+				return false;
+			}
+
+			return !content.includes(`${basename(dirname(potentialUnusedFile))}/${fileBasename}`);
+		});
 
 		if (potentialUnusedFiles.length === 0) {
 			noUnusedFiles();

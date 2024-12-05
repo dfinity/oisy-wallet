@@ -1,20 +1,19 @@
 <script lang="ts">
-	import IconSync from '$lib/components/icons/IconSync.svelte';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { updateBalance } from '$icp/services/ckbtc.services';
-	import { authStore } from '$lib/stores/auth.store';
-	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
-	import { Modal } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
-	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
-	import type { SyncState } from '$lib/types/sync';
-	import { blur } from 'svelte/transition';
+	import { IconReimbursed, Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
+	import { blur } from 'svelte/transition';
+	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import { updateBalance } from '$icp/services/ckbtc.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
+	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { token } from '$lib/stores/token.store';
+	import type { SyncState } from '$lib/types/sync';
 
 	let receiveProgressStep: string | undefined = undefined;
 
@@ -33,7 +32,7 @@
 		try {
 			await updateBalance({
 				token: $tokenAsIcToken,
-				identity: $authStore.identity,
+				identity: $authIdentity,
 				progress: (step: ProgressStepsUpdateBalanceCkBtc) => (receiveProgressStep = step)
 			});
 
@@ -82,13 +81,14 @@
 <svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
-	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="text-misty-rose animate-pulse">
+	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-misty-rose">
 			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
 			in:blur
-			class="text text-blue border-0 flex gap-2"
-			on:click={async () => await receive()}><IconSync /> {$i18n.core.text.refresh}</button
+			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
+			on:click={async () => await receive()}
+			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
 {/if}
@@ -102,12 +102,3 @@
 		</div>
 	</Modal>
 {/if}
-
-<style lang="scss">
-	button {
-		&:hover,
-		&:active {
-			color: var(--color-dark-blue);
-		}
-	}
-</style>

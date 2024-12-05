@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { sendWizardSteps } from '$lib/config/send.config';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -11,7 +11,7 @@ export const howToConvertWizardSteps = ({
 	i18n: I18n;
 	twinToken: Token;
 }): WizardSteps => {
-	const [send, ...rest] = sendWizardSteps(i18n);
+	const [send, ...rest] = sendWizardSteps({ i18n });
 
 	const { id: tokenId, symbol } = twinToken;
 

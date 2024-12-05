@@ -7,12 +7,13 @@ import {
 	VC_POPUP_WIDTH
 } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
+import { loadCertifiedUserProfile } from '$lib/services/load-user-profile.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -22,7 +23,6 @@ import {
 	type VerifiablePresentationResponse
 } from '@dfinity/verifiable-credentials/request-verifiable-presentation';
 import { get } from 'svelte/store';
-import { loadCertifiedUserProfile } from './load-user-profile.services';
 
 const addPouhCredential = async ({
 	identity,
@@ -44,7 +44,8 @@ const addPouhCredential = async ({
 				arguments: []
 			},
 			issuerCanisterId,
-			currentUserVersion: fromNullable(userProfile?.profile.version ?? [])
+			currentUserVersion: fromNullable(userProfile?.profile.version ?? []),
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
 		if ('Ok' in response) {
 			return { success: true };
@@ -59,9 +60,12 @@ const addPouhCredential = async ({
 			const errorKey = Object.keys(response.Err)[0];
 			toastsError({
 				msg: {
-					text: replacePlaceholders(authI18n.error.error_validating_pouh_credential_oisy, {
-						$error: errorKey
-					})
+					text: replacePlaceholders(
+						replaceOisyPlaceholders(authI18n.error.error_validating_pouh_credential_oisy),
+						{
+							$error: errorKey
+						}
+					)
 				}
 			});
 		}
@@ -101,7 +105,7 @@ const handleSuccess = async ({
 	return { success: false };
 };
 
-export const requestPouhCredential = async ({
+export const requestPouhCredential = ({
 	identity
 }: {
 	identity: Identity;

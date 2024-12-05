@@ -1,28 +1,34 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
+	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
+	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
-	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
-	import type { Network, NetworkId } from '$lib/types/network';
-	import { token } from '$lib/stores/token.store';
-	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
-	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import { token } from '$lib/stores/token.store';
+	import type { Network, NetworkId } from '$lib/types/network';
+	import {
+		isNetworkIdEthereum,
+		isNetworkIdICP,
+		isNetworkIdBitcoin
+	} from '$lib/utils/network.utils';
 
+	export let source: string;
 	export let destination: string;
 	export let targetNetwork: Network | undefined;
 	export let networkId: NetworkId | undefined;
 	export let amount: number | undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
+	export let formCancelAction: 'back' | 'close' = 'back';
 </script>
 
-{#if isNetworkIdEthereum($token?.network.id)}
-	<!-- TODO: Move the context one level down -->
-	<SendTokenContext token={$token}>
+<SendTokenContext token={$token}>
+	{#if isNetworkIdEthereum($token?.network.id)}
 		<EthSendTokenWizard
 			{currentStep}
-			formCancelAction="back"
+			{formCancelAction}
 			sourceNetwork={$selectedEthereumNetwork}
 			nativeEthereumToken={$ethereumToken}
 			bind:destination
@@ -36,21 +42,36 @@
 			on:icQRCodeScan
 			on:icQRCodeBack
 		/>
-	</SendTokenContext>
-{:else if isNetworkIdICP($token?.network.id)}
-	<IcSendTokenWizard
-		{currentStep}
-		formCancelAction="back"
-		bind:destination
-		bind:networkId
-		bind:amount
-		bind:sendProgressStep
-		on:icBack
-		on:icNext
-		on:icClose
-		on:icQRCodeScan
-		on:icQRCodeBack
-	/>
-{:else}
-	<slot />
-{/if}
+	{:else if isNetworkIdICP($token?.network.id)}
+		<IcSendTokenWizard
+			{source}
+			{currentStep}
+			{formCancelAction}
+			bind:destination
+			bind:networkId
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icNext
+			on:icClose
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else if isNetworkIdBitcoin($token?.network.id)}
+		<BtcSendTokenWizard
+			{currentStep}
+			{formCancelAction}
+			bind:destination
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icNext
+			on:icClose
+			on:icSendBack
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else}
+		<slot />
+	{/if}
+</SendTokenContext>

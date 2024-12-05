@@ -19,11 +19,6 @@ build/
 .svelte-kit/
 package/
 
-# environment variables
-.env
-.env.*
-!.env.example
-!.env.test
 
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
@@ -33,5 +28,4 @@ internet_identity.did
 
 codes.txt
 
-backend.wasm.gz
 backend-v*.wasm.gz

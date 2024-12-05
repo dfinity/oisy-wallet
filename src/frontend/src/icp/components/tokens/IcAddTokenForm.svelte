@@ -1,45 +1,33 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
+	import InputText from '$lib/components/ui/InputText.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
 </script>
 
-<p class="text-dark-blue mt-1 mb-2">{$i18n.tokens.import.text.info}</p>
-
-<p class="text-blue font-bold mb-4">
-	<ExternalLink
-		href="https://github.com/dfinity/oisy-wallet/blob/main/HOW-TO.md#custom-icrc-token-integration"
-		ariaLabel={$i18n.tokens.import.text.open_github_howto}
-	>
-		{$i18n.tokens.import.text.github_howto}
-	</ExternalLink>
-</p>
-
 <div class="stretch">
-	<label for="ledgerCanisterId" class="font-bold px-4.5"
-		>{$i18n.tokens.import.text.ledger_canister_id}:</label
+	<p class="mb-6">{$i18n.tokens.import.text.info}</p>
+
+	<label for="ledgerCanisterId" class="px-4.5 font-bold"
+		>{$i18n.tokens.import.text.ledger_canister_id}: <span class="text-blue-ribbon">*</span></label
 	>
-	<Input
+	<InputText
 		name="ledgerCanisterId"
-		inputType="text"
-		required
 		bind:value={ledgerCanisterId}
 		placeholder="_____-_____-_____-_____-cai"
-		spellcheck={false}
 	/>
 
-	<label for="indexCanisterId" class="font-bold px-4.5"
+	<label for="indexCanisterId" class="px-4.5 mt-6 block font-bold"
 		>{$i18n.tokens.import.text.index_canister_id}:</label
 	>
-	<Input
+	<InputText
 		name="indexCanisterId"
-		inputType="text"
-		required
 		bind:value={indexCanisterId}
 		placeholder="_____-_____-_____-_____-cai"
-		spellcheck={false}
+		required={false}
 	/>
+
+	<p class="mb-6">{replaceOisyPlaceholders($i18n.tokens.import.text.info_index)}</p>
 </div>

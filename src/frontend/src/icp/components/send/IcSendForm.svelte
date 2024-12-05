@@ -1,22 +1,27 @@
 <script lang="ts">
-	import SendSource from '$lib/components/send/SendSource.svelte';
-	import { createEventDispatcher } from 'svelte';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import type { NetworkId } from '$lib/types/network';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext } from 'svelte';
+	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
-	import { balance } from '$lib/derived/balances.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { token } from '$lib/stores/token.store';
+	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { balance } from '$lib/derived/balances.derived';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+	export let source: string;
+	export let simplifiedForm = false;
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
@@ -32,25 +37,20 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<div class="stretch">
-		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+	<ContentWithToolbar>
+		{#if !simplifiedForm}
+			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{/if}
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 
-		<SendSource token={$token} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
+		<SendSource token={$sendToken} balance={$balance} {source} hideSource={simplifiedForm} />
 
 		<IcFeeDisplay {networkId} />
-	</div>
 
-	<ButtonGroup>
-		<slot name="cancel" />
-		<button
-			class="primary block flex-1"
-			type="submit"
-			disabled={invalid}
-			class:opacity-10={invalid}
-		>
-			{$i18n.core.text.next}
-		</button>
-	</ButtonGroup>
+		<ButtonGroup slot="toolbar" testId="toolbar">
+			<slot name="cancel" />
+			<ButtonNext disabled={invalid} />
+		</ButtonGroup>
+	</ContentWithToolbar>
 </form>

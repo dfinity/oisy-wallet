@@ -1,18 +1,33 @@
 <script lang="ts">
-	import Card from '$lib/components/ui/Card.svelte';
+	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import type { Token } from '$lib/types/token';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
+	import TokenSymbol from '$lib/components/tokens/TokenSymbol.svelte';
+	import Card from '$lib/components/ui/Card.svelte';
+	import { TOKEN_CARD, TOKEN_GROUP } from '$lib/constants/test-ids.constants';
+	import type { LogoSize } from '$lib/types/components';
+	import type { CardData } from '$lib/types/token-card';
 
-	export let token: Token;
+	export let data: CardData;
+	export let testIdPrefix: typeof TOKEN_CARD | typeof TOKEN_GROUP = TOKEN_CARD;
+	export let logoSize: LogoSize = 'lg';
+	export let hideNetworkLogo = false;
 </script>
 
-<Card noMargin>
-	<TokenName {token} />
+<Card noMargin testId={`${testIdPrefix}-${data.symbol}`}>
+	<TokenSymbol {data} {hideNetworkLogo} />
 
-	<TokenLogo {token} slot="icon" color="white" />
+	<TokenName {data} slot="description" />
 
-	<slot name="description" slot="description" />
+	<TokenLogo
+		{data}
+		badge={nonNullish(data.tokenCount) ? { type: 'tokenCount', count: data.tokenCount } : undefined}
+		slot="icon"
+		color="white"
+		{logoSize}
+	/>
 
-	<slot name="exchange" slot="action" />
+	<slot name="balance" slot="amount" />
+
+	<slot name="exchange" slot="amountDescription" />
 </Card>

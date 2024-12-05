@@ -1,10 +1,11 @@
-mod address;
+mod bitcoin;
 mod config;
 mod custom_token;
 mod guard;
 mod list_users;
 mod migration;
-mod sign;
+mod settings;
+mod signer;
 mod stats;
 mod token;
 mod upgrade;

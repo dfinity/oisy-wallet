@@ -1,3 +1,4 @@
+import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
@@ -7,18 +8,19 @@ export interface Modal<T> {
 		| 'icrc-receive'
 		| 'ckbtc-receive'
 		| 'cketh-receive'
+		| 'btc-receive'
 		| 'receive'
 		| 'send'
-		| 'eth-send'
+		| 'buy'
 		| 'convert-ckbtc-btc'
+		| 'convert-btc-ckbtc'
 		| 'convert-to-twin-token-cketh'
 		| 'convert-to-twin-token-eth'
 		| 'how-to-convert-to-twin-token-eth'
-		| 'ic-send'
 		| 'wallet-connect-auth'
 		| 'wallet-connect-sign'
 		| 'wallet-connect-send'
-		| 'transaction'
+		| 'eth-transaction'
 		| 'ic-transaction'
 		| 'manage-tokens'
 		| 'hide-token'
@@ -26,73 +28,88 @@ export interface Modal<T> {
 		| 'token'
 		| 'ic-token'
 		| 'receive-bitcoin'
-		| 'about-what'
-		| 'about-how';
+		| 'about-why-oisy'
+		| 'btc-transaction'
+		| 'dapp-details';
 	data?: T;
+	id?: symbol;
 }
 
-export type ModalData<T> = Modal<T> | undefined | null;
+export type ModalData<T> = Option<Modal<T>>;
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
-	openEthReceive: <D extends T>(data: D) => void;
-	openIcpReceive: <D extends T>(data: D) => void;
-	openIcrcReceive: <D extends T>(data: D) => void;
-	openCkBTCReceive: <D extends T>(data: D) => void;
-	openCkETHReceive: <D extends T>(data: D) => void;
-	openReceive: <D extends T>(data: D) => void;
-	openSend: <D extends T>(data: D) => void;
-	openEthSend: <D extends T>(data: D) => void;
+	openEthReceive: (id: symbol) => void;
+	openIcpReceive: (id: symbol) => void;
+	openIcrcReceive: (id: symbol) => void;
+	openCkBTCReceive: (id: symbol) => void;
+	openCkETHReceive: (id: symbol) => void;
+	openBtcReceive: (id: symbol) => void;
+	openReceive: (id: symbol) => void;
+	openSend: (id: symbol) => void;
+	openBuy: (id: symbol) => void;
 	openConvertCkBTCToBTC: () => void;
+	openConvertBTCToCkBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
 	openConvertToTwinTokenEth: () => void;
 	openHowToConvertToTwinTokenEth: () => void;
-	openIcSend: <D extends T>(data: D) => void;
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
 	openWalletConnectSend: <D extends T>(data: D) => void;
-	openTransaction: <D extends T>(data: D) => void;
+	openEthTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
+	openBtcTransaction: <D extends T>(data: D) => void;
 	openManageTokens: () => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
 	openToken: () => void;
 	openIcToken: () => void;
 	openReceiveBitcoin: () => void;
-	openAboutWhat: () => void;
-	openAboutHow: () => void;
+	openAboutWhyOisy: () => void;
+	openDappDetails: <D extends T>(data: D) => void;
 	close: () => void;
 }
 
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
+	const setType = (type: Modal<T>['type']) => () => set({ type });
+
+	const setTypeWithId = (type: Modal<T>['type']) => (id: symbol) => set({ type, id });
+
+	const setTypeWithData =
+		(type: Modal<T>['type']) =>
+		<D extends T>(data: D) =>
+			set({ type, data });
+
 	return {
-		openEthReceive: <D extends T>(data: D) => set({ type: 'eth-receive', data }),
-		openIcpReceive: <D extends T>(data: D) => set({ type: 'icp-receive', data }),
-		openIcrcReceive: <D extends T>(data: D) => set({ type: 'icrc-receive', data }),
-		openCkBTCReceive: <D extends T>(data: D) => set({ type: 'ckbtc-receive', data }),
-		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
-		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
-		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
-		openEthSend: <D extends T>(data: D) => set({ type: 'eth-send', data }),
-		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
-		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
-		openConvertToTwinTokenEth: () => set({ type: 'convert-to-twin-token-eth' }),
-		openHowToConvertToTwinTokenEth: () => set({ type: 'how-to-convert-to-twin-token-eth' }),
-		openIcSend: <D extends T>(data: D) => set({ type: 'ic-send', data }),
-		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
-		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
-		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
-		openTransaction: <D extends T>(data: D) => set({ type: 'transaction', data }),
-		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
-		openManageTokens: () => set({ type: 'manage-tokens' }),
-		openHideToken: () => set({ type: 'hide-token' }),
-		openIcHideToken: () => set({ type: 'ic-hide-token' }),
-		openToken: () => set({ type: 'token' }),
-		openIcToken: () => set({ type: 'ic-token' }),
-		openReceiveBitcoin: () => set({ type: 'receive-bitcoin' }),
-		openAboutWhat: () => set({ type: 'about-what' }),
-		openAboutHow: () => set({ type: 'about-how' }),
+		openEthReceive: setTypeWithId('eth-receive'),
+		openIcpReceive: setTypeWithId('icp-receive'),
+		openIcrcReceive: setTypeWithId('icrc-receive'),
+		openCkBTCReceive: setTypeWithId('ckbtc-receive'),
+		openCkETHReceive: setTypeWithId('cketh-receive'),
+		openBtcReceive: setTypeWithId('btc-receive'),
+		openReceive: setTypeWithId('receive'),
+		openSend: setTypeWithId('send'),
+		openBuy: setTypeWithId('buy'),
+		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
+		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),
+		openConvertToTwinTokenCkEth: setType('convert-to-twin-token-cketh'),
+		openConvertToTwinTokenEth: setType('convert-to-twin-token-eth'),
+		openHowToConvertToTwinTokenEth: setType('how-to-convert-to-twin-token-eth'),
+		openWalletConnectAuth: setType('wallet-connect-auth'),
+		openWalletConnectSign: setTypeWithData('wallet-connect-sign'),
+		openWalletConnectSend: setTypeWithData('wallet-connect-send'),
+		openEthTransaction: setTypeWithData('eth-transaction'),
+		openIcTransaction: setTypeWithData('ic-transaction'),
+		openBtcTransaction: setTypeWithData('btc-transaction'),
+		openManageTokens: setType('manage-tokens'),
+		openHideToken: setType('hide-token'),
+		openIcHideToken: setType('ic-hide-token'),
+		openToken: setType('token'),
+		openIcToken: setType('ic-token'),
+		openReceiveBitcoin: setType('receive-bitcoin'),
+		openAboutWhyOisy: setType('about-why-oisy'),
+		openDappDetails: setTypeWithData('dapp-details'),
 		close: () => set(null),
 		subscribe
 	};

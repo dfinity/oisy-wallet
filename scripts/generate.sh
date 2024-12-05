@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -exuo pipefail
 
 [[ "${1:-}" != "--help" ]] || {
   cat <<-EOF
@@ -32,6 +32,7 @@ function install_did_files() {
       canister_name="${array[0]}"
       source="${array[1]}"
       filename="${source##*/}"
+      filename="${filename//-/_}" # dfx uses underscores rather than hyphens
       destination=".dfx/local/canisters/${array[0]}/${filename}"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
@@ -42,7 +43,10 @@ function install_did_files() {
 }
 
 # Create local .did files
+# .. gets candid from Rust code
 ./scripts/did.sh
+# .. downloads candid for the signer
+DFX_NETWORK=ic ./scripts/build.signer.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate bindings for canisters with directories in `declarations`:

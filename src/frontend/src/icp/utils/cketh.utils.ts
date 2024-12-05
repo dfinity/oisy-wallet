@@ -1,8 +1,10 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
-import type { IcToken } from '$icp/types/ic';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
+import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
+import type { OptionBalance } from '$lib/types/balance';
+import type { Option } from '$lib/types/utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { fromNullable, isNullish } from '@dfinity/utils';
@@ -18,7 +20,7 @@ export const assertCkETHMinWithdrawalAmount = ({
 	amount: BigNumber;
 	tokenDecimals: number;
 	tokenSymbol: string;
-	minterInfo: CkEthMinterInfoData | undefined | null;
+	minterInfo: Option<CkEthMinterInfoData>;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
@@ -93,7 +95,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 	feeStoreData,
 	i18n
 }: {
-	balance: BigNumber | undefined | null;
+	balance: OptionBalance;
 	tokenCkEth: IcToken | undefined;
 	feeStoreData: EthereumFeeStoreData;
 	i18n: I18n;

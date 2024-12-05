@@ -1,14 +1,16 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
-import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/scheduler';
-import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
-import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
+import { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
+import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
+import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type {
 	GetAccountIdentifierTransactionsResponse,
 	Transaction,
 	TransactionWithId
 } from '@dfinity/ledger-icp';
+import { isNullish } from '@dfinity/utils';
 
 const getTransactions = ({
 	identity,
@@ -32,21 +34,45 @@ const mapTransaction = ({
 	jobData: SchedulerJobData<PostMessageDataRequest>;
 }): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
-const scheduler: WalletScheduler<Transaction, TransactionWithId, PostMessageDataRequest> =
-	new WalletScheduler(getTransactions, mapTransactionIcpToSelf, mapTransaction, 'syncIcpWallet');
+const initIcpWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
+	Transaction,
+	TransactionWithId,
+	PostMessageDataRequest
+> =>
+	new IcWalletTransactionsScheduler(
+		getTransactions,
+		mapTransactionIcpToSelf,
+		mapTransaction,
+		'syncIcpWallet'
+	);
+
+// Exposed for test purposes
+export const initIcpWalletScheduler = (
+	_data: PostMessageDataRequest | undefined
+): IcWalletScheduler<PostMessageDataRequest> => initIcpWalletTransactionsScheduler();
+
+let scheduler: IcWalletScheduler<PostMessageDataRequest> | undefined;
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopIcpWalletTimer':
-			scheduler.stop();
-			return;
 		case 'startIcpWalletTimer':
+		case 'stopIcpWalletTimer':
+			scheduler?.stop();
+	}
+
+	switch (msg) {
+		case 'startIcpWalletTimer': {
+			scheduler = initIcpWalletScheduler(data);
 			await scheduler.start(data);
-			return;
-		case 'triggerIcpWalletTimer':
+			break;
+		}
+		case 'triggerIcpWalletTimer': {
+			if (isNullish(scheduler)) {
+				scheduler = initIcpWalletScheduler(data);
+			}
 			await scheduler.trigger(data);
-			return;
+		}
 	}
 };

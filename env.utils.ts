@@ -11,11 +11,11 @@ export const readCanisterIds = ({
 	prefix?: string;
 }): Record<string, string> => {
 	try {
-		type Details = {
+		interface Details {
 			ic?: string;
 			staging?: string;
 			local?: string;
-		};
+		}
 
 		const config: Record<string, Details> = JSON.parse(readFileSync(filePath, 'utf8'));
 
@@ -25,7 +25,7 @@ export const readCanisterIds = ({
 			const ids = Object.entries(canisterDetails).reduce(
 				(acc, [network, id]) => ({
 					...acc,
-					[`${prefix ?? ''}${network.toUpperCase()}_${canisterName
+					[`${prefix ?? ''}${network.toUpperCase().replaceAll('-', '_')}_${canisterName
 						.replaceAll('-', '_')
 						.replaceAll("'", '')
 						.toUpperCase()}_CANISTER_ID`]: id

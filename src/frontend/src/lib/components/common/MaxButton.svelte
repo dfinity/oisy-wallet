@@ -1,14 +1,15 @@
 <script lang="ts">
+	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let disabled = false;
 </script>
 
 <button
-	data-tid="max-button"
+	data-tid={MAX_BUTTON}
 	type="button"
 	on:click|preventDefault
-	class="text-blue hover:text-dark-blue active:text-dark-blue font-medium"
+	class="font-medium text-brand-primary hover:text-inherit active:text-inherit"
 	{disabled}
 	class:opacity-50={disabled}
 >

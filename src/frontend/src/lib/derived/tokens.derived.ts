@@ -1,13 +1,20 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
+import { exchanges } from '$lib/derived/exchange.derived';
+import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenToPin } from '$lib/types/token';
-import { filterEnabledTokens } from '$lib/utils/tokens.utils';
+import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import {
+	filterEnabledTokens,
+	sumMainnetTokensUsdBalancesPerNetwork
+} from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
@@ -24,9 +31,9 @@ export const tokens: Readable<Token[]> = derived(
 export const tokensToPin: Readable<TokenToPin[]> = derived(
 	[icrcChainFusionDefaultTokens],
 	([$icrcChainFusionDefaultTokens]) => [
-		ICP_TOKEN,
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
+		ICP_TOKEN,
 		...$icrcChainFusionDefaultTokens
 	]
 );
@@ -45,8 +52,17 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 		$enabledTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
 );
 
+// TODO: add tests when https://github.com/dfinity/oisy-wallet/pull/2450 is merged
 /**
- * The following store is use as reference for the list of WalletWorkers that are started/stopped in the main token page.
+ * The following store is used as reference for the list of WalletWorkers that are started/stopped in the main token page.
+ */
+export const enabledBtcTokens: Readable<Token[]> = derived(
+	[enabledBitcoinTokens],
+	filterEnabledTokens
+);
+
+/**
+ * The following store is used as reference for the list of WalletWorkers that are started/stopped in the main token page.
  */
 // TODO: The several dependencies of enabledIcTokens are not strictly only IC tokens, but other tokens too.
 //  We should find a better way to handle this, improving the store.
@@ -55,3 +71,15 @@ export const enabledIcTokens: Readable<IcToken[]> = derived(
 	([$enabledTokens]) =>
 		$enabledTokens.filter(({ standard }) => standard === 'icp' || standard === 'icrc') as IcToken[]
 );
+
+/**
+ * A store with NetworkId-number dictionary with total USD balance of mainnet tokens per network.
+ */
+export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
+	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
+		sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: $enabledTokens,
+			$balances,
+			$exchanges
+		})
+	);

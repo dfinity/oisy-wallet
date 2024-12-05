@@ -1,6 +1,6 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
@@ -22,10 +22,7 @@ const config: UserConfig = {
 	css: {
 		preprocessorOptions: {
 			scss: {
-				additionalData: `
-          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/media";
-          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/text";
-        `
+				api: 'modern-compiler'
 			}
 		}
 	},
@@ -39,7 +36,7 @@ const config: UserConfig = {
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
 
 					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components', 'three', ...lazy].find((lib) =>
+						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>
 							folder.includes(lib)
 						) === undefined &&
 						folder.includes('node_modules')
@@ -62,7 +59,12 @@ const config: UserConfig = {
 				inject({
 					modules: { Buffer: ['buffer', 'Buffer'] }
 				})
-			]
+			],
+			external: (id) => {
+				// A list of file to exclude because we parse those manually with custom scripts.
+				const filename = basename(id);
+				return ['+oisy.page.css'].includes(filename);
+			}
 		}
 	},
 	// proxy /api to port 4943 during development
@@ -72,7 +74,6 @@ const config: UserConfig = {
 		}
 	},
 	optimizeDeps: {
-		include: ['three'],
 		esbuildOptions: {
 			define: {
 				global: 'globalThis'

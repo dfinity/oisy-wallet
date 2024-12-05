@@ -5,6 +5,9 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -16,12 +19,10 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	<div class="mb-6">
-		<Hr />
-	</div>
+	<Hr spacing="lg" />
 
 	<Value ref="ethereum-helper-contract" element="div">
 		<svelte:fragment slot="label"
@@ -30,7 +31,7 @@
 			})}</svelte:fragment
 		>
 
-		<p class="text-misty-rose break-normal py-2">
+		<p class="break-normal py-2 text-misty-rose">
 			{replacePlaceholders(
 				replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
 				{
@@ -41,18 +42,24 @@
 			)}
 		</p>
 	</Value>
-</div>
 
-<button class="secondary full center mb-8" on:click={() => dispatch('icConvert')}>
-	<span class="text-dark-slate-blue font-bold"
-		>{replacePlaceholders(
-			replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
-			{
-				$token: $ckEthereumTwinToken.symbol,
-				$ckToken: $token.symbol
-			}
-		)}</span
+	<Button
+		colorStyle="secondary"
+		fullWidth
+		styleClass="mb-8"
+		on:click={() => dispatch('icConvert')}
+		slot="toolbar"
 	>
-</button>
+		<span class="text-dark-slate-blue font-bold"
+			>{replacePlaceholders(
+				replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
+				{
+					$token: $ckEthereumTwinToken.symbol,
+					$ckToken: $token.symbol
+				}
+			)}</span
+		>
+	</Button>
+</ContentWithToolbar>
 
-<button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>
+<ButtonDone on:click={close} />

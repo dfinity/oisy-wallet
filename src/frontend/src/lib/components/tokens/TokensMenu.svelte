@@ -1,35 +1,40 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
-	import IconMore from '$lib/components/icons/IconMore.svelte';
-	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import ManageTokensMenuButton from '$icp-eth/components/tokens/ManageTokensMenuButton.svelte';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import ManageTokensMenuButton from '$lib/components/manage/ManageTokensMenuButton.svelte';
+	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
+	import TokensZeroBalanceCheckbox from '$lib/components/tokens/TokensZeroBalanceCheckbox.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 </script>
 
-<button
-	class="icon"
-	bind:this={button}
-	on:click={() => (visible = true)}
-	aria-label={$i18n.navigation.alt.menu}
-	disabled={$erc20UserTokensNotInitialized}
-	class:opacity-10={$erc20UserTokensNotInitialized}
->
-	<IconMore />
-</button>
+<div class="hidden sm:block">
+	<TokensZeroBalanceCheckbox />
+</div>
 
-<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
-	<div class="flex flex-col gap-3">
-		<TokensZeroBalance />
+<div class="block sm:hidden">
+	<ButtonIcon
+		bind:button
+		on:click={() => (visible = true)}
+		ariaLabel={$i18n.navigation.alt.menu}
+		disabled={$erc20UserTokensNotInitialized}
+		link={false}
+	>
+		<IconManage slot="icon" />
+	</ButtonIcon>
 
-		<div class="my">
+	<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+		<div class="flex flex-col gap-3">
+			<TokensZeroBalance />
+
 			<Hr />
-		</div>
 
-		<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
-	</div>
-</Popover>
+			<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
+		</div>
+	</Popover>
+</div>

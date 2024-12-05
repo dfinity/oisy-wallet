@@ -1,104 +1,209 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher } from 'svelte';
+	import {
+		BTC_MAINNET_NETWORK,
+		BTC_REGTEST_NETWORK,
+		BTC_TESTNET_NETWORK,
+		ETHEREUM_NETWORK,
+		ICP_NETWORK
+	} from '$env/networks.env';
+	import {
+		BTC_MAINNET_TOKEN,
+		BTC_REGTEST_TOKEN,
+		BTC_TESTNET_TOKEN
+	} from '$env/tokens/tokens.btc.env';
+	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
-	import Hr from '$lib/components/ui/Hr.svelte';
-	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
-	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
-		RECEIVE_TOKENS_MODAL_BTC_SECTION
+		RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
+		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet,
+		ethAddress
+	} from '$lib/derived/address.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (details: { address: string; addressLabel: string }) =>
+	const displayQRCode = (details: Omit<Required<ReceiveQRCode>, 'qrCodeAriaLabel'>) =>
 		dispatch('icQRCode', details);
 </script>
 
-<div class="stretch">
-	<ReceiveAddressWithLogo
-		on:click={() =>
-			displayQRCode({
-				address: $icrcAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.principal
-			})}
-		address={$icrcAccountIdentifierText ?? ''}
-		token={ICP_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
-		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
-		testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
-	>
-		{$i18n.receive.icp.text.principal}
-
-		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.use_for_icrc_deposit}</p>
-	</ReceiveAddressWithLogo>
-
-	<ReceiveAddressWithLogo
-		on:click={() =>
-			displayQRCode({
-				address: $icpAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.icp_account
-			})}
-		address={$icpAccountIdentifierText ?? ''}
-		token={ICP_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_account_qr}
-		copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
-		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
-		invisibleLogo
-	>
-		{$i18n.receive.icp.text.icp_account}
-
-		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.use_for_icp_deposit}</p>
-	</ReceiveAddressWithLogo>
-
-	{#if NETWORK_BITCOIN_ENABLED}
-		<div class="mb-6">
-			<Hr />
-		</div>
-
-		<ReceiveAddressWithLogo
+<ContentWithToolbar>
+	<div class="flex flex-col gap-2">
+		<ReceiveAddress
+			labelRef="btcAddressMainnet"
 			on:click={() =>
 				displayQRCode({
 					address: $btcAddressMainnet ?? '',
-					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
+					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
+					addressToken: BTC_MAINNET_TOKEN,
+					copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 				})}
-			address={$btcAddressMainnet ?? ''}
-			token={BTC_MAINNET_TOKEN}
-			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
-			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
-			testId={RECEIVE_TOKENS_MODAL_BTC_SECTION}
-		>
-			{$i18n.receive.bitcoin.text.bitcoin_address}
-		</ReceiveAddressWithLogo>
-	{/if}
+			address={$btcAddressMainnet}
+			network={BTC_MAINNET_NETWORK}
+			qrCodeAction={{
+				enabled: true,
 
-	<div class="mb-6">
-		<Hr />
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+			}}
+			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			testId={RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION}
+		>
+			<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
+		</ReceiveAddress>
+
+		{#if $testnets}
+			<ReceiveAddress
+				labelRef="btcAddressTestnet"
+				on:click={() =>
+					displayQRCode({
+						address: $btcAddressTestnet ?? '',
+						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address,
+						addressToken: BTC_TESTNET_TOKEN,
+						copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
+					})}
+				address={$btcAddressTestnet}
+				network={BTC_TESTNET_NETWORK}
+				qrCodeAction={{
+					enabled: true,
+
+					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+					ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+				}}
+				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+				testId={RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION}
+			>
+				<svelte:fragment slot="title"
+					>{$i18n.receive.bitcoin.text.bitcoin_testnet_address}</svelte:fragment
+				>
+			</ReceiveAddress>
+
+			{#if LOCAL}
+				<!-- Same address for Regtest and for Testnet are used. -->
+				<ReceiveAddress
+					labelRef="btcAddressRegtest"
+					on:click={() =>
+						displayQRCode({
+							address: $btcAddressRegtest ?? '',
+							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address,
+							addressToken: BTC_REGTEST_TOKEN,
+							copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
+						})}
+					address={$btcAddressRegtest}
+					network={BTC_REGTEST_NETWORK}
+					qrCodeAction={{
+						enabled: true,
+						testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+						ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+					}}
+					copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+					testId={RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION}
+				>
+					<svelte:fragment slot="title"
+						>{$i18n.receive.bitcoin.text.bitcoin_regtest_address}</svelte:fragment
+					>
+				</ReceiveAddress>
+			{/if}
+		{/if}
+
+		<ReceiveAddress
+			labelRef="ethAddress"
+			on:click={() =>
+				displayQRCode({
+					address: $ethAddress ?? '',
+					addressLabel: $i18n.receive.ethereum.text.ethereum_address,
+					addressToken: ETHEREUM_TOKEN,
+					copyAriaLabel: $i18n.receive.ethereum.text.ethereum_address_copied
+				})}
+			address={$ethAddress}
+			network={ETHEREUM_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr
+			}}
+			copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
+			testId={RECEIVE_TOKENS_MODAL_ETH_SECTION}
+		>
+			<svelte:fragment slot="title">{$i18n.receive.ethereum.text.ethereum}</svelte:fragment>
+
+			<span slot="text" class="text-sm text-black"
+				>{$i18n.receive.icp.text.your_private_eth_address}</span
+			>
+		</ReceiveAddress>
+
+		<ReceiveAddress
+			labelRef="icrcTokenAddress"
+			on:click={() =>
+				displayQRCode({
+					address: $icrcAccountIdentifierText ?? '',
+					addressLabel: $i18n.receive.icp.text.principal,
+					addressToken: ICP_TOKEN,
+					copyAriaLabel: $i18n.receive.icp.text.internet_computer_principal_copied
+				})}
+			address={$icrcAccountIdentifierText}
+			network={ICP_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: $i18n.receive.icp.text.display_internet_computer_principal_qr
+			}}
+			copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+			testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
+		>
+			<svelte:fragment slot="title">{$i18n.receive.icp.text.principal}</svelte:fragment>
+
+			<span slot="text" class="text-sm text-black"
+				>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
+			>
+		</ReceiveAddress>
+
+		<ReceiveAddress
+			labelRef="icpTokenAddress"
+			on:click={() =>
+				displayQRCode({
+					address: $icpAccountIdentifierText ?? '',
+					addressLabel: $i18n.receive.icp.text.icp_account,
+					addressToken: ICP_TOKEN,
+					copyAriaLabel: $i18n.receive.icp.text.icp_account_copied
+				})}
+			address={$icpAccountIdentifierText}
+			network={ICP_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: $i18n.receive.icp.text.display_icp_account_qr
+			}}
+			copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
+			testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
+		>
+			<svelte:fragment slot="title">{$i18n.receive.icp.text.icp_account}</svelte:fragment>
+		</ReceiveAddress>
 	</div>
 
-	<ReceiveAddressWithLogo
-		on:click={() =>
-			displayQRCode({
-				address: $ethAddress ?? '',
-				addressLabel: $i18n.receive.ethereum.text.ethereum_address
-			})}
-		address={$ethAddress ?? ''}
-		token={ETHEREUM_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.ethereum.text.display_ethereum_address_qr}
-		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
-		testId={RECEIVE_TOKENS_MODAL_ETH_SECTION}
-	>
-		{$i18n.receive.ethereum.text.ethereum}
-	</ReceiveAddressWithLogo>
-</div>
-
-<button class="primary full center text-center" on:click={modalStore.close}
-	>{$i18n.core.text.done}</button
->
+	<ButtonDone
+		testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
+		on:click={modalStore.close}
+		slot="toolbar"
+	/>
+</ContentWithToolbar>

@@ -2,6 +2,14 @@ import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
+export type AddDappSettingsError =
+	| { VersionMismatch: null }
+	| { DappIdTooLong: null }
+	| { UserNotFound: null };
+export interface AddHiddenDappIdRequest {
+	current_user_version: [] | [bigint];
+	dapp_id: string;
+}
 export type AddUserCredentialError =
 	| { InvalidCredential: null }
 	| { VersionMismatch: null }
@@ -13,10 +21,42 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
+export type AllowSigningError =
+	| { ApproveError: ApproveError }
+	| { Other: string }
+	| { FailedToContactCyclesLedger: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
+export type ApproveError =
+	| {
+			GenericError: { message: string; error_code: bigint };
+	  }
+	| { TemporarilyUnavailable: null }
+	| { Duplicate: { duplicate_of: bigint } }
+	| { BadFee: { expected_fee: bigint } }
+	| { AllowanceChanged: { current_allowance: bigint } }
+	| { CreatedInFuture: { ledger_time: bigint } }
+	| { TooOld: null }
+	| { Expired: { ledger_time: bigint } }
+	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
+export type BtcAddPendingTransactionError = {
+	InternalError: { msg: string };
+};
+export interface BtcAddPendingTransactionRequest {
+	txid: Uint8Array | number[];
+	network: BitcoinNetwork;
+	address: string;
+	utxos: Array<Utxo>;
+}
+export interface BtcGetPendingTransactionsReponse {
+	transactions: Array<PendingTransaction>;
+}
+export interface BtcGetPendingTransactionsRequest {
+	network: BitcoinNetwork;
+	address: string;
+}
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -31,7 +71,9 @@ export interface CanisterStatusResultV2 {
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface Config {
 	api: [] | [Guards];
+	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
+	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array | number[]];
@@ -45,6 +87,12 @@ export interface CustomToken {
 	token: Token;
 	version: [] | [bigint];
 	enabled: boolean;
+}
+export interface DappCarouselSettings {
+	hidden_dapp_ids: Array<string>;
+}
+export interface DappSettings {
+	dapp_carousel: DappCarouselSettings;
 }
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
@@ -75,7 +123,9 @@ export interface IcrcToken {
 }
 export interface InitArg {
 	api: [] | [Guards];
+	derivation_origin: [] | [string];
 	ecdsa_key_name: string;
+	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
@@ -122,19 +172,40 @@ export interface OisyUser {
 	pouh_verified: boolean;
 	updated_timestamp: bigint;
 }
+export interface Outpoint {
+	txid: Uint8Array | number[];
+	vout: number;
+}
+export interface PendingTransaction {
+	txid: Uint8Array | number[];
+	utxos: Array<Utxo>;
+}
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
-export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_2 = { Ok: MigrationReport } | { Err: string };
-export type Result_3 = { Ok: null } | { Err: string };
-export interface SignRequest {
-	to: string;
-	gas: bigint;
-	value: bigint;
-	max_priority_fee_per_gas: bigint;
-	data: [] | [string];
-	max_fee_per_gas: bigint;
-	chain_id: bigint;
-	nonce: bigint;
+export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
+export type Result_2 = { Ok: null } | { Err: AllowSigningError };
+export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
+export type Result_4 =
+	| { Ok: BtcGetPendingTransactionsReponse }
+	| { Err: BtcAddPendingTransactionError };
+export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
+export type Result_6 = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type Result_7 = { Ok: MigrationReport } | { Err: string };
+export type Result_8 = { Ok: null } | { Err: string };
+export type Result_9 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
+export type SelectedUtxosFeeError =
+	| { PendingTransactions: null }
+	| { InternalError: { msg: string } };
+export interface SelectedUtxosFeeRequest {
+	network: BitcoinNetwork;
+	amount_satoshis: bigint;
+	min_confirmations: [] | [number];
+}
+export interface SelectedUtxosFeeResponse {
+	fee_satoshis: bigint;
+	utxos: Array<Utxo>;
+}
+export interface Settings {
+	dapp: DappSettings;
 }
 export interface Stats {
 	user_profile_count: bigint;
@@ -150,6 +221,30 @@ export interface SupportedCredential {
 	credential_type: CredentialType;
 }
 export type Token = { Icrc: IcrcToken };
+export type TopUpCyclesLedgerError =
+	| {
+			InvalidArgPercentageOutOfRange: {
+				max: number;
+				min: number;
+				percentage: number;
+			};
+	  }
+	| { CouldNotGetBalanceFromCyclesLedger: null }
+	| {
+			CouldNotTopUpCyclesLedger: {
+				tried_to_send: bigint;
+				available: bigint;
+			};
+	  };
+export interface TopUpCyclesLedgerRequest {
+	threshold: [] | [bigint];
+	percentage: [] | [number];
+}
+export interface TopUpCyclesLedgerResponse {
+	backend_cycles: bigint;
+	ledger_balance: bigint;
+	topped_up: bigint;
+}
 export interface UserCredential {
 	issuer: string;
 	verified_date_timestamp: [] | [bigint];
@@ -158,6 +253,7 @@ export interface UserCredential {
 export interface UserProfile {
 	credentials: Array<UserCredential>;
 	version: [] | [bigint];
+	settings: [] | [Settings];
 	created_timestamp: bigint;
 	updated_timestamp: bigint;
 }
@@ -173,34 +269,39 @@ export interface UserTokenId {
 	chain_id: bigint;
 	contract_address: string;
 }
+export interface Utxo {
+	height: number;
+	value: bigint;
+	outpoint: Outpoint;
+}
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
+	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result_1>;
+	allow_signing: ActorMethod<[], Result_2>;
+	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
+	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
+	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
-	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
-	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
-	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_user_profile: ActorMethod<[], Result_1>;
+	get_user_profile: ActorMethod<[], Result_6>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_2>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_7>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_3>;
-	personal_sign: ActorMethod<[string], string>;
+	migration_stop_timer: ActorMethod<[], Result_8>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
-	sign_prehash: ActorMethod<[string], string>;
-	sign_transaction: ActorMethod<[SignRequest], string>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_9>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

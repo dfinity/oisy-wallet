@@ -14,7 +14,6 @@ import {
 	hexStringToUint8Array,
 	uint8ArrayToHexString
 } from '@dfinity/utils';
-import { expect } from 'vitest';
 
 describe('cketh-memo.utils', () => {
 	describe('decode mint memo', () => {

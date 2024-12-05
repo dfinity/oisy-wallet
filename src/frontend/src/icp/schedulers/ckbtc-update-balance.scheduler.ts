@@ -2,10 +2,10 @@ import { BITCOIN_CANISTER_IDS } from '$env/networks.btc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type {

@@ -2,7 +2,7 @@ import type { Networkish } from '@ethersproject/networks';
 import { Network } from 'alchemy-sdk';
 
 export const ETH_MAINNET_ENABLED =
-	JSON.parse(import.meta.env.VITE_ETHEREUM_MAINNET ?? false) === true;
+	JSON.parse(import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED ?? false) === false;
 
 export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
 export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';

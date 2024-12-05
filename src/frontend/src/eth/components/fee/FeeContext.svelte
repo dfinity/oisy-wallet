@@ -16,7 +16,6 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
@@ -24,15 +23,17 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let observe: boolean;
 	export let destination = '';
-	export let amount: string | number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 	export let nativeEthereumToken: Token;
@@ -63,12 +64,12 @@
 			if (isSupportedEthTokenId($sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
-					gas: await getEthFeeData({
+					gas: getEthFeeData({
 						...params,
-						helperContractAddress: toCkEthHelperContractAddress(
-							$ckEthMinterInfoStore?.[nativeEthereumToken.id],
-							sourceNetwork.id
-						)
+						helperContractAddress: toCkEthHelperContractAddress({
+							minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
+							networkId: sourceNetwork.id
+						})
 					})
 				});
 				return;
@@ -128,6 +129,7 @@
 
 		debounceUpdateFeeData();
 		listener = initMinedTransactionsListener({
+			// eslint-disable-next-line require-await
 			callback: async () => debounceUpdateFeeData(),
 			networkId: sourceNetwork.id
 		});

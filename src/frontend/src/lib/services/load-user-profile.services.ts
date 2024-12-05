@@ -5,7 +5,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const queryProfile = async ({
@@ -15,7 +15,11 @@ const queryProfile = async ({
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<UserProfile> => {
-	const response = await getUserProfile({ identity, certified });
+	const response = await getUserProfile({
+		identity,
+		certified,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 	if ('Ok' in response) {
 		return response.Ok;
 	}
@@ -56,14 +60,27 @@ export const loadCertifiedUserProfile = async ({
 };
 
 export const loadUserProfile = async ({
-	identity
+	identity,
+	reload = true
 }: {
 	identity: OptionIdentity;
+	reload?: boolean;
 }): Promise<void> => {
+	// We just want to verify that the store is empty, without being interested in the data.
+	// So we fetch it imperatively, instead of passing as parameter.
+	// If it is not empty, and we don't want to reload, we can return early.
+	// In any case, if `reload` is true, we will always fetch the profile.
+	if (nonNullish(get(userProfileStore)) && !reload) {
+		return;
+	}
+
 	try {
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
-			profile = await createUserProfile({ identity });
+			profile = await createUserProfile({
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			});
 			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.

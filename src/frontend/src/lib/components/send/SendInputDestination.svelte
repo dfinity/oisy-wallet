@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
-	import type { NetworkId } from '$lib/types/network';
-	import { slide } from 'svelte/transition';
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { slide } from 'svelte/transition';
 	import QRButton from '$lib/components/common/QRButton.svelte';
+	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkId } from '$lib/types/network';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -20,14 +21,12 @@
 	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
-<label for="destination" class="font-bold px-4.5">{$i18n.send.text.destination}:</label>
-<Input
+<label for="destination" class="px-4.5 font-bold">{$i18n.send.text.destination}:</label>
+<InputTextWithAction
 	name="destination"
-	inputType="text"
-	required
 	bind:value={destination}
 	placeholder={inputPlaceholder}
-	spellcheck={false}
+	testId="destination-input"
 	on:nnsInput
 >
 	<svelte:fragment slot="inner-end">
@@ -35,10 +34,10 @@
 			<QRButton on:click={onQRButtonClick} />
 		{/if}
 	</svelte:fragment>
-</Input>
+</InputTextWithAction>
 
 {#if invalidDestination}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">
+	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">
 		{$i18n.send.assertion.invalid_destination_address}
 	</p>
 {/if}

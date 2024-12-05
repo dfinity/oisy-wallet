@@ -47,7 +47,7 @@
 	$: {
 		valueType = getValueType(json);
 		isExpandable = valueType === 'object';
-		value = isExpandable ? json : stringifyJson(json);
+		value = isExpandable ? json : stringifyJson({ value: json });
 		keyLabel = `${_key}${_key.length > 0 ? ': ' : ''}`;
 		children = isExpandable ? Object.entries(json as object) : [];
 		hasChildren = children.length > 0;

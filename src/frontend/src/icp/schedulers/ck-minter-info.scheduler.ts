@@ -1,6 +1,6 @@
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { MinterInfoParams } from '$icp/types/ck';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,

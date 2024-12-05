@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.eth.env';
+import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ICP_ABI } from '$eth/constants/erc20-icp.constants';
 import type { Erc20Provider, PopulateTransactionParams } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
@@ -15,13 +16,11 @@ import { InfuraProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 import { get } from 'svelte/store';
 
-const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
-
 export class InfuraErc20IcpProvider implements Erc20Provider {
 	private readonly provider: InfuraProvider;
 
 	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, API_KEY);
+		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
 	}
 
 	getFeeData = ({

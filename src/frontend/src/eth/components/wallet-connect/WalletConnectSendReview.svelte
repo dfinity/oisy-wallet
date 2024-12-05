@@ -2,16 +2,17 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import WalletConnectActions from './WalletConnectActions.svelte';
-	import WalletConnectSendData from './WalletConnectSendData.svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
+	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectSendData from '$eth/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balance } from '$lib/derived/balances.derived';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
@@ -28,7 +29,7 @@
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
 		{destination}
@@ -42,6 +43,6 @@
 
 		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
 	</SendData>
-</div>
 
-<WalletConnectActions on:icApprove on:icReject />
+	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+</ContentWithToolbar>

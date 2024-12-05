@@ -17,12 +17,12 @@ export interface GetFeeData {
 	to: EthAddress;
 }
 
-export const getEthFeeData = async ({
+export const getEthFeeData = ({
 	to,
 	helperContractAddress
 }: GetFeeData & {
 	helperContractAddress: OptionEthAddress;
-}): Promise<BigNumber> => {
+}): BigNumber => {
 	if (isDestinationContractAddress({ destination: to, contractAddress: helperContractAddress })) {
 		return BigNumber.from(CKETH_FEE);
 	}

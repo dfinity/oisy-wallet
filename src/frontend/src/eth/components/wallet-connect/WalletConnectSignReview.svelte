@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectActions from './WalletConnectActions.svelte';
+	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
 	import {
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
 	} from '$eth/utils/wallet-connect.utils';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Json from '$lib/components/ui/Json.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -24,15 +25,15 @@
 	})();
 </script>
 
-<div class="stretch">
-	<p class="font-bold">{$i18n.wallet_connect.text.method}</p>
+<ContentWithToolbar>
+	<p class="mb-0 font-bold">{$i18n.wallet_connect.text.method}:</p>
 	<p class="mb-4 font-normal">
 		{request.params.request.method}
 	</p>
 
-	<p class="font-bold">{$i18n.wallet_connect.text.message}</p>
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 	{#if nonNullish(json)}
-		<div class="bg-dust rounded-sm p-4 mt-4">
+		<div class="mt-4 rounded-sm bg-dust p-4">
 			<Json {json} _collapsed={true} />
 		</div>
 	{:else}
@@ -40,6 +41,6 @@
 			<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
 		</p>
 	{/if}
-</div>
 
-<WalletConnectActions on:icApprove on:icReject />
+	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+</ContentWithToolbar>

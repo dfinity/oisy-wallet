@@ -3,11 +3,11 @@ import { isNullish } from '@dfinity/utils';
 
 export type QueryAndUpdateOnResponse<R> = (options: { certified: boolean; response: R }) => void;
 
-export type QueryAndUpdateOnErrorOptions<E = unknown> = {
+export interface QueryAndUpdateOnErrorOptions<E = unknown> {
 	error: E;
 	// The identity used for the request
 	identity: OptionIdentity;
-};
+}
 
 export type QueryAndUpdateOnError<E = unknown> = (
 	options: {

@@ -1,36 +1,38 @@
 <script lang="ts">
-	import IcTransactionsSkeletons from './IcTransactionsSkeletons.svelte';
-	import IcTransaction from './IcTransaction.svelte';
-	import { InfiniteScroll } from '@dfinity/gix-components';
-	import { last } from '$lib/utils/array.utils';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
-	import { modalStore } from '$lib/stores/modal.store';
-	import IcpTransactionModal from './IcTransactionModal.svelte';
-	import type { IcTransactionUi } from '$icp/types/ic';
-	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
-	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import Info from '$icp/components/info/Info.svelte';
-	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
+	import { nonNullish } from '@dfinity/utils';
 	import type { ComponentType } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import Info from '$icp/components/info/Info.svelte';
+	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import IcNoIndexPlaceholder from '$icp/components/transactions/IcNoIndexPlaceholder.svelte';
+	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
+	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
+	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
+	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
+	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
+	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
 		tokenAsIcToken,
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
-	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
-	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
-	import { slide } from 'svelte/transition';
-	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
+	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
+	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import type { OptionToken } from '$lib/types/token';
+	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -42,46 +44,16 @@
 			? IcTransactionsCkEthereumListeners
 			: IcTransactionsNoListener;
 
-	let disableInfiniteScroll = false;
-
-	const onIntersect = async () => {
-		if (isNullish($authStore.identity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		const lastId = last($icTransactions)?.data.id;
-
-		if (isNullish(lastId)) {
-			// No transactions, we do nothing here and wait for the worker to post the first transactions
-			return;
-		}
-
-		if (typeof lastId !== 'bigint') {
-			// Pseudo transactions are displayed at the end of the list. There is not such use case in Oisy.
-			// Additionally, if it would be the case, that would mean that we display pseudo transactions at the end of the list and therefore we could assume all valid transactions have been fetched
-			return;
-		}
-
-		if (isNullish($token)) {
-			// Prevent unlikely events. UI wise if we are about to load the next transactions, it's probably because transactions for a loaded token have been fetched.
-			return;
-		}
-
-		await loadNextTransactions({
-			owner: $authStore.identity.getPrincipal(),
-			identity: $authStore.identity,
-			maxResults: WALLET_PAGINATION,
-			start: lastId,
-			token: $tokenAsIcToken,
-			signalEnd: () => (disableInfiniteScroll = true)
-		});
-	};
-
 	let selectedTransaction: IcTransactionUi | undefined;
-	$: selectedTransaction = $modalIcTransaction
-		? ($modalStore?.data as IcTransactionUi | undefined)
-		: undefined;
+	let selectedToken: OptionToken;
+	$: ({ transaction: selectedTransaction, token: selectedToken } =
+		mapTransactionModalData<IcTransactionUi>({
+			$modalOpen: $modalIcTransaction,
+			$modalStore: $modalStore
+		}));
+
+	let noTransactions = false;
+	$: noTransactions = nonNullish($token) && $icTransactionsStore?.[$token.id] === null;
 </script>
 
 <Info />
@@ -101,23 +73,27 @@
 <IcTransactionsSkeletons>
 	<svelte:component this={additionalListener}>
 		{#if $icTransactions.length > 0}
-			<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
+			<IcTransactionsScroll token={$token ?? ICP_TOKEN}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction transaction={transaction.data} />
+						<IcTransaction transaction={transaction.data} token={$token ?? ICP_TOKEN} />
 					</li>
 				{/each}
-			</InfiniteScroll>
+			</IcTransactionsScroll>
 		{/if}
 
-		{#if $icTransactions.length === 0}
-			<p class="mt-4 text-dark opacity-50">{$i18n.transactions.text.no_transactions}</p>
+		{#if noTransactions}
+			<IcNoIndexPlaceholder
+				placeholderType={hasIndexCanister($tokenAsIcToken) ? 'not-working' : 'missing'}
+			/>
+		{:else if $icTransactions.length === 0}
+			<TransactionsPlaceholder />
 		{/if}
 	</svelte:component>
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
-	<IcpTransactionModal transaction={selectedTransaction} />
+	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {:else if $modalIcToken}
 	<IcTokenModal />
 {/if}

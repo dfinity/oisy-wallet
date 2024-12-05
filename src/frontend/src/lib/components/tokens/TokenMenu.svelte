@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
-	import IconMore from '$lib/components/icons/IconMore.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { tokenToggleable } from '$lib/derived/token.derived';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import IconMoreVertical from '$lib/components/icons/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
+	import { networkICP } from '$lib/derived/network.derived';
+	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -34,15 +33,15 @@
 	});
 </script>
 
-<ButtonHero
-	bind:button
+<button
+	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
+	bind:this={button}
 	on:click={() => (visible = true)}
-	ariaLabel={$i18n.tokens.alt.context_menu}
+	aria-label={$i18n.tokens.alt.context_menu}
 	disabled={$erc20UserTokensNotInitialized}
 >
-	<IconMore size="28" slot="icon" />
-	{$i18n.core.text.more}
-</ButtonHero>
+	<IconMoreVertical />
+</button>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-3">

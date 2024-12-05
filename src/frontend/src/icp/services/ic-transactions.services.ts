@@ -1,7 +1,8 @@
 import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { IcToken, IcTransaction } from '$icp/types/ic';
+import type { IcCanistersStrict, IcToken } from '$icp/types/ic-token';
+import type { IcTransaction } from '$icp/types/ic-transaction';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
@@ -22,7 +23,7 @@ const getTransactions = async ({
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
-	token: IcToken;
+	token: IcToken & IcCanistersStrict;
 }): Promise<IcTransaction[]> => {
 	if (standard === 'icrc') {
 		const { transactions } = await getTransactionsIcrc({
@@ -38,7 +39,7 @@ const getTransactions = async ({
 	return transactions.flatMap(mapTransactionIcpToSelf);
 };
 
-export const loadNextTransactions = async ({
+export const loadNextTransactions = ({
 	token,
 	identity,
 	signalEnd,
@@ -48,7 +49,7 @@ export const loadNextTransactions = async ({
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
-	token: IcToken;
+	token: IcToken & IcCanistersStrict;
 	signalEnd: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcTransaction[]>({
@@ -86,15 +87,23 @@ export const loadNextTransactions = async ({
 
 export const onLoadTransactionsError = ({
 	tokenId,
-	error: err
+	error: err,
+	silent = false
 }: {
 	tokenId: TokenId;
 	error: unknown;
+	silent?: boolean;
 }) => {
 	icTransactionsStore.reset(tokenId);
 
 	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
 	balancesStore.reset(tokenId);
+
+	if (silent) {
+		// We print the error to console just for debugging purposes
+		console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
+		return;
+	}
 
 	toastsError({
 		msg: { text: get(i18n).transactions.error.loading_transactions },

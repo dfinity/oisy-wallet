@@ -6,9 +6,9 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isDestinationContractAddress } from '$eth/utils/send.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 
@@ -21,7 +21,7 @@
 
 	let networkName: string | undefined = network?.name;
 
-	const onDestinationAddressInput = debounce(async () => {
+	const onDestinationAddressInput = debounce(() => {
 		if (nonNullish(network)) {
 			// A network was already manually selected except if disabled, in that case we always recalculate the network based on the provided destination
 			return;
@@ -35,10 +35,10 @@
 		if (
 			isDestinationContractAddress({
 				destination,
-				contractAddress: toCkEthHelperContractAddress(
-					$ckEthMinterInfoStore?.[$sendTokenId],
-					sourceNetwork.id
-				)
+				contractAddress: toCkEthHelperContractAddress({
+					minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
+					networkId: sourceNetwork.id
+				})
 			})
 		) {
 			networkName = ICP_NETWORK.name;
@@ -73,7 +73,7 @@
 		})();
 </script>
 
-<label for="network" class="font-bold px-4.5">{$i18n.send.text.network}:</label>
+<label for="network" class="px-4.5 font-bold">{$i18n.send.text.network}:</label>
 
 <div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>

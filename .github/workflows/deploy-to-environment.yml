@@ -1,0 +1,203 @@
+name: Deploy Frontend / Backend to Environment
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs:
+      network:
+        required: true
+        type: choice
+        description: 'Select the network to deploy to.'
+        options:
+          - staging
+          - beta
+          - test_fe_1
+          - test_fe_2
+          - test_fe_3
+          - test_fe_4
+          - test_be_1
+      canister:
+        required: true
+        type: choice
+        description: 'Select the canister to deploy.'
+        options:
+          - frontend
+          - backend
+      force-backend:
+        required: false
+        type: boolean
+        description: 'Force backend deployment even if no changes are detected.'
+        default: false
+
+run-name: >-
+  ${{ 
+    github.event_name == 'push' && 'Deploying Frontend / Backend to Staging'
+    || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
+    || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deployment:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Determine Deployment Network
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            if [ "${{ github.ref_type }}" == "branch" ]; then
+              echo "NETWORK=staging" >> $GITHUB_ENV
+            elif [ "${{ github.ref_type }}" == "tag" ]; then
+              echo "NETWORK=beta" >> $GITHUB_ENV
+            else
+              echo "Error: Unsupported ref type."
+              exit 1
+            fi
+            echo "CANISTER=frontend" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "NETWORK=${{ github.event.inputs.network }}" >> $GITHUB_ENV
+            echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
+          else
+            echo "Error: Unsupported event type."
+            exit 1
+          fi
+
+      - name: Check release policy
+        run: |
+          if [[ "$NETWORK" ==  "staging" ]] && [[ "${{ github.ref }}" != "refs/heads/main" ]] ; then
+            echo "Only the main branch may be deployed to staging."
+            exit 1
+          fi
+          if [[ "$NETWORK" = test_fe_* ]] && [[ "$CANISTER" != "frontend" ]] ; then
+            echo "Only a frontend may be deployed to test_fe_* networks"
+            exit 1
+          fi
+          if [[ "$NETWORK" = test_be_* ]] && [[ "$CANISTER" != "backend" ]] ; then
+            echo "Only a backend may be deployed to test_be_* networks"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set Environment Variables Based on Network
+        run: |
+          if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_fe_* ]]; then
+            echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED=${{ secrets.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
+            if [[ "$NETWORK" == "staging" ]]; then
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
+              echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" >> $GITHUB_ENV
+            else
+              SUBDOMAIN="fe${NETWORK#test_fe_}" # E.g. test_fe_1 -> fe1
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" | sed "s/staging/$SUBDOMAIN/g" >> $GITHUB_ENV
+              echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" | sed "s/staging/$SUBDOMAIN/g" >> $GITHUB_ENV
+            fi
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
+          elif [ "$NETWORK" == "beta" ]; then
+            echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}" >> $GITHUB_ENV
+            echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}" >> $GITHUB_ENV
+            echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}" >> $GITHUB_ENV
+            echo "VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED=${{ secrets.VITE_BTC_TO_CKBTC_EXCHANGE_ENABLED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}" >> $GITHUB_ENV
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_BETA }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
+          fi
+
+      - name: Fail if no Identity is provided
+        run: |
+          if [ -z "$DFX_DEPLOY_KEY" ]; then
+            echo "Error: DFX_DEPLOY_KEY for $NETWORK is not set or is empty. Please provide the deployment identity key."
+            exit 1
+          fi
+    
+      - name: Restore cargo cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /home/runner/.cargo/registry
+            /home/runner/.cargo/git
+            target/
+            ~/.cargo/bin/
+          key: ${{ runner.os }}-deploy-cargo-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
+          restore-keys: |
+              ${{ runner.os }}-deploy-cargo-
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Set up DFX
+        uses: dfinity/setup-dfx@main
+
+      - name: Install key
+        run: |
+          key_pem=$(mktemp)
+          printenv "DFX_DEPLOY_KEY" > "$key_pem"
+          dfx identity import --disable-encryption --force default "$key_pem"
+          rm "$key_pem"
+          dfx identity use default
+          dfx identity get-principal
+
+      - name: Pre-build
+        run: npm run build
+
+      - name: Deploy Frontend to Environment
+        run: |
+          if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ]; then
+            dfx deploy $CANISTER --network $NETWORK
+          fi
+
+      - name: Deploy Backend to Environment
+        run: |
+          DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
+          [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
+
+          if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ]; then
+            if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
+              if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
+                echo "No changes in specified files/folders detected, skipping backend deployment."
+              else
+                ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
+              fi
+            else            
+              ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
+            fi
+          fi

@@ -1,12 +1,10 @@
+import type { Option } from '$lib/types/utils';
 import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
 import { writable, type Readable } from 'svelte/store';
 
-export type BitcoinFeeStoreData =
-	| {
-			bitcoinFee?: EstimateWithdrawalFee;
-	  }
-	| undefined
-	| null;
+export type BitcoinFeeStoreData = Option<{
+	bitcoinFee?: EstimateWithdrawalFee;
+}>;
 
 export interface BitcoinFeeStore extends Readable<BitcoinFeeStoreData> {
 	setFee: (data: BitcoinFeeStoreData) => void;

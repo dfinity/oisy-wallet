@@ -1,15 +1,15 @@
 <script lang="ts">
+	import { setContext } from 'svelte';
+	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { modalHowToConvertToTwinTokenEth } from '$lib/derived/modal.derived';
-	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { setContext } from 'svelte';
-	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Token } from '$lib/types/token';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let twinToken: Token;
 	export let ckTokenSymbol: string;
@@ -34,7 +34,7 @@
 </script>
 
 <div class="pr-2">
-	<h4 class="flex gap-2 items-center font-medium">
+	<h4 class="flex items-center gap-2 font-medium">
 		<Logo
 			src={eth}
 			alt={replacePlaceholders($i18n.core.alt.logo, {
@@ -48,7 +48,7 @@
 		>
 	</h4>
 
-	<p class="text-misty-rose mt-3">
+	<p class="mt-3 text-misty-rose">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
 			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol,
@@ -56,14 +56,14 @@
 		})}
 	</p>
 
-	<p class="text-misty-rose mt-3">
+	<p class="mt-3 text-misty-rose">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.note), {
 			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol
 		})}
 	</p>
 
-	<button class="primary mt-6" disabled={$isBusy} class:opacity-50={$isBusy} on:click={openReceive}>
+	<button class="primary mt-6" disabled={$isBusy} on:click={openReceive}>
 		{replacePlaceholders($i18n.info.ethereum.how_to, {
 			$ckToken: ckTokenSymbol
 		})}</button

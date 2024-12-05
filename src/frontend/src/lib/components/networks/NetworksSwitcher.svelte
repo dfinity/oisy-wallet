@@ -1,82 +1,72 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
-	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
+	import { slide } from 'svelte/transition';
+	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
+	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
+	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
+	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
-	import { testnetsStore } from '$lib/stores/settings.store';
-	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
+	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
-	import chainFusion from '$lib/assets/chain_fusion.svg';
-	import ButtonSwitcher from '$lib/components/ui/ButtonSwitcher.svelte';
 
 	export let disabled = false;
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	let dropdown: Dropdown | undefined;
 
-	const close = () => (visible = false);
-
-	let testnets: boolean;
-	$: testnets = $testnetsStore?.enabled ?? false;
+	let mainnetTokensUsdBalance: number;
+	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
+		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
+		0
+	);
 </script>
 
-<ButtonSwitcher
-	bind:button
-	on:click={() => (visible = true)}
-	ariaLabel={$i18n.networks.title}
-	{disabled}
-	>{$selectedNetwork?.name ?? $i18n.networks.chain_fusion} <IconChevronDown /></ButtonSwitcher
->
+<Dropdown bind:this={dropdown} ariaLabel={$i18n.networks.title} {disabled}>
+	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
-<Popover bind:visible anchor={button}>
-	<ul class="flex flex-col gap-4 list-none font-normal">
-		<li>
-			<NetworkButton
-				id={undefined}
-				name={$i18n.networks.chain_fusion}
-				icon={chainFusion}
-				on:icSelected={close}
-			/>
-		</li>
-
-		{#each $networksMainnets as network}
+	<div slot="items">
+		<ul class="flex list-none flex-col gap-4 font-normal">
 			<li>
-				<Network {network} on:icSelected={close} />
+				<NetworkButton
+					id={undefined}
+					name={$i18n.networks.chain_fusion}
+					icon={chainFusion}
+					usdBalance={mainnetTokensUsdBalance}
+					on:icSelected={dropdown.close}
+				/>
 			</li>
-		{/each}
-	</ul>
 
-	<div class="flex justify-between items-center mt-8 mb-4">
-		<span class="font-bold px-4.5">{$i18n.networks.show_testnets}</span>
-		<NetworksTestnetsToggle />
-	</div>
-
-	{#if testnets}
-		<ul
-			class="flex flex-col gap-4 list-none mb-2 font-normal"
-			transition:slide={{ easing: quintOut, axis: 'y' }}
-		>
-			{#each $networksTestnets as network}
+			{#each $networksMainnets as network}
 				<li>
-					<Network {network} on:icSelected={close} />
+					<MainnetNetwork {network} on:icSelected={dropdown.close} />
 				</li>
 			{/each}
 		</ul>
-	{/if}
 
-	<hr class="bg-dark-blue opacity-10 my-4 w-10/12" style="border: 0.05rem solid" />
+		<span class="px-4.5 mb-5 mt-8 flex font-bold">{$i18n.networks.test_networks}</span>
 
-	<ul class="flex flex-col gap-4 list-none font-normal">
-		<li class="flex justify-between items-center">
-			<div class="flex gap-2 items-center">
-				<IconMorePlain />
-				<span class="text-grey">{$i18n.networks.more}</span>
-			</div>
-		</li>
-	</ul>
-</Popover>
+		{#if $testnetsEnabled}
+			<ul class="mb-2 flex list-none flex-col gap-4 font-normal" transition:slide={SLIDE_EASING}>
+				{#each $networksTestnets as network}
+					<li>
+						<Network {network} on:icSelected={dropdown.close} />
+					</li>
+				{/each}
+			</ul>
+		{/if}
+
+		<hr class="my-4 w-10/12 opacity-10" style="border: 0.05rem solid" />
+
+		<ul class="flex list-none flex-col gap-4 font-normal">
+			<li class="flex items-center justify-between">
+				<div class="flex items-center gap-2">
+					<IconMorePlain />
+					<span class="text-grey">{$i18n.networks.more}</span>
+				</div>
+			</li>
+		</ul>
+	</div>
+</Dropdown>

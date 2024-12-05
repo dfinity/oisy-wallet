@@ -9,6 +9,7 @@ This document lists a couple of useful information for development and deploymen
 - [Faucets](#faucets)
 - [Testing](#testing)
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
+- [Routes Styles](#routes-styles)
 
 ## Deployment
 
@@ -66,13 +67,13 @@ Translations are handled in JSON file - for example [en.json](src/frontend/src/l
 
 To add support for an additional language, proceed as following:
 
-> Note that Oisy's repo **does not** accept external contributions yet.
+> Note that OISY's repo **does not** accept external contributions yet.
 
 1. Copy `en.json` to a new filename reflecting the language ISO code (such as for example `zh-cn.json` for simplified Chinese).
 2. Translate each key of the newly created file.
 3. Replace the file imported in [i18n.store.ts](src/frontend/src/lib/stores/i18n.store.ts).
 
-In the future, Oisy might be extended to support multiple languages on production.
+In the future, OISY might be extended to support multiple languages on production.
 
 ### Adding additional keys
 
@@ -115,11 +116,11 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 ## Integrate ckERC20 Tokens
 
-While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.mjs] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within Oisy.
+While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.mjs] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
 
 The steps are as follows:
 
-1. **Collect the Ethereum logo** for the specific token as an SVG, ideally from an official source. Ensure using the logo in Oisy respects brand/trade guidelines.
+1. **Collect the Ethereum logo** for the specific token as an SVG, ideally from an official source. Ensure using the logo in OISY respects brand/trade guidelines.
 2. **Verify the SVG asset size** is acceptable (small) and **copy** it into [src/frontend/src/icp-eth/assets].
 3. Create a new source environment file in [src/frontend/src/env] by cloning [src/frontend/src/env/tokens.usdc.env.ts] and renaming `usdc` to the token's name.
 4. **Adapt the content of the tokens:**
@@ -133,3 +134,136 @@ Note that setting up the twin token counterpart or collecting their logo is unne
 To help with steps 3 to 5, one can use the script [./scripts/add.tokens.erc20.mjs] (or [./scripts/add.tokens.erc20.sh]) to generate the environment files for the new tokens. It requires the EtherScan API key to fetch the token information from the Ethereum network, to be set in the `.env` file as `VITE_ETHERSCAN_API_KEY`.
 The script will run through the supported ckERC20 tokens in the production dashboard and will automatically generate the necessary environment files for the new tokens that have a respective testnet token, and that do not yet exist in the repository.
 Please be aware of the instructions provided by the script and follow them accordingly, if there are any, and possibly double-check the generated files.
+
+## Bitcoin
+
+Some setup is necessary to be able to develop locally with Bitcoin tokens.
+
+There are three necessary items before starting to develop locally:
+
+- Environment variables.
+- Local Bitcoin node running (regtest).
+- Start dfx with bitcoin.
+
+### Bitcoin Environment Variables
+
+The following var should be disabled or completely absent in `.env.development`.
+
+```
+VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
+```
+
+### Bitcoin Development
+
+There are some important notes related to the BTC development:
+
+1. Wallet workers:
+   - Locally, only the Regex network wallet worker is launched
+   - On all other ens (staging, beta, prod), we launch Testnet and Mainnet workers
+2. Transactions:
+   - To test them locally, you need to hardcode a mainnet BTC address with some txs inside. In the future, we plan to create mocks and use them during the local development.
+   - Currently, only Mainnet transactions (uncertified) can be loaded on staging/beta/prod, since the Blockchain API we're using to fetch this data doesn't provide txs for testnet.
+
+### Local Bitcoin Node (Or Regtest)
+
+To interact with a Bitcoun network, we can set up a local test node.
+
+The script to set it up and start running it is `./scripts/setup.bitcoin-node.sh`.
+
+The first time you will run it withuot arguments:
+
+```bash
+./scripts/setup.bitcoin-node.sh
+```
+
+This script will download and set up a local bitcoin node from [Bitcoin.org](https://bitcoin.org/en/download).
+
+Running this script again will start the node without doing the initial setup again.
+
+**Resetting Node:**
+
+It's recommended to reset the node from time to time:
+
+```bash
+./scripts/setup.bitcoin-node.sh --reset
+```
+
+### Start dfx with Bitcoin
+
+Dfx needs to be aware that a Bitcoin node is running.
+
+There is a script to run dfx with Bitcoin:
+
+```bash
+./scripts/dfx.start-with-bitcoin.sh
+```
+
+You can also run it by cleaning up the state:
+
+```bash
+./scripts/dfx.start-with-bitcoin.sh --clean
+```
+
+You would normally do this along resetting the bitcoin node as mentioned before.
+
+**IMPORTANT: If you were running a local replica before without bitcoin, use the `--clean` flag.**
+
+### Mining Bitcoins
+
+To start testing Bitcoin feature you'll need some tokens.
+
+For that, you can get the address of your test user from the UI and get yourlsef some bitcoins:
+
+```bash
+./scripts/add.tokens.bitcoin.sh --amount <amount-in-blocks> --address <test-user-address>
+```
+
+**One block equals 50 Bitcoin.**
+
+### Mining After Transactions
+
+Tokens transferred are not immediately available in the new destination.
+
+Before they become available, there must be a new block mined. You can mine one:
+
+```bash
+./scripts/add.tokens.bitcoin.sh
+```
+
+# Routes Styles
+
+The designer, or the foundation, might want to use different background colors for specific routes, such as using white generally speaking in the wallet and light blue on the signer (`/sign`) route.
+
+On the other hand, we want to prerender the background color because, if we don’t, the user will experience a "glitchy" loading effect where the dapp initially loads with a white background before applying the correct color.
+
+That's why, when there is such a specific requests, some CSS can be defined at the route level. CSS which is then prerendered within the generated HTML page at build time.
+
+For example, if I wanted to add a route `/hello` with a red background, we would add the following files in `src`:
+
+```
+src/routes/(group)/hello/+page.svelte
+src/routes/(group)/hello/+oisy.page.css
+```
+
+And in the CSS:
+
+```css
+:root {
+	background: red;
+}
+```
+
+Furthermore, given that parsing happens at build time, the developer might want to load the style at runtime for local development purposes. This can be achieved by importing the style in the related `+layout.svelte`:
+
+```javascript
+<script lang="ts">
+	import { LOCAL } from '$lib/constants/app.constants';
+
+	onMount(async () => {
+		if (!LOCAL) {
+			return;
+		}
+		await import('./+oisy.page.css');
+	});
+</script>
+```

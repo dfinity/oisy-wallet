@@ -1,8 +1,8 @@
 import { withdrawalStatuses } from '$icp/api/ckbtc-minter.api';
 import { BTC_STATUSES_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
-import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
@@ -62,12 +62,12 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 		response: RetrieveBtcStatusV2WithId[];
 		certified: boolean;
 	}) => {
-		const statuses = response.reduce(
+		const statuses = response.reduce<BtcWithdrawalStatuses>(
 			(acc, { id, status }) => ({
 				...acc,
 				...(nonNullish(status) && { [`${id}`]: status })
 			}),
-			{} as BtcWithdrawalStatuses
+			{}
 		);
 
 		const data: CertifiedData<BtcWithdrawalStatuses> = {

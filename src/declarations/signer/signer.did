@@ -1,19 +1,16 @@
-type AddUserCredentialError = variant {
-  InvalidCredential;
-  VersionMismatch;
-  ConfigurationError;
-  UserNotFound;
-};
-type AddUserCredentialRequest = record {
-  credential_jwt : text;
-  issuer_canister_id : principal;
-  current_user_version : opt nat64;
-  credential_spec : CredentialSpec;
-};
-type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
+type Account = record { owner : principal; subaccount : opt blob };
 type Arg = variant { Upgrade; Init : InitArg };
-type ArgumentValue = variant { Int : int32; String : text };
+type BitcoinAddressType = variant { P2WPKH };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
+type BtcTxOutput = record { destination_address : text; sent_satoshis : nat64 };
+type BuildP2wpkhTxError = variant {
+  NotEnoughFunds : record { available : nat64; required : nat64 };
+  WrongBitcoinNetwork;
+  NotP2WPKHSourceAddress;
+  InvalidDestinationAddress : GetAddressResponse;
+  InvalidSourceAddress : GetAddressResponse;
+};
+type CallerPaysIcrc2Tokens = record { ledger : principal };
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -27,21 +24,9 @@ type CanisterStatusResultV2 = record {
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
-  api : opt Guards;
   ecdsa_key_name : text;
-  allowed_callers : vec principal;
-  supported_credentials : opt vec SupportedCredential;
   ic_root_key_raw : opt blob;
-};
-type CredentialSpec = record {
-  arguments : opt vec record { text; ArgumentValue };
-  credential_type : text;
-};
-type CredentialType = variant { ProofOfUniqueness };
-type CustomToken = record {
-  token : Token;
-  version : opt nat64;
-  enabled : bool;
+  cycles_ledger : principal;
 };
 type DefiniteCanisterSettingsArgs = record {
   controller : principal;
@@ -50,8 +35,49 @@ type DefiniteCanisterSettingsArgs = record {
   memory_allocation : nat;
   compute_allocation : nat;
 };
-type GetUserProfileError = variant { NotFound };
-type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
+type EcdsaCurve = variant { secp256k1 };
+type EcdsaKeyId = record { name : text; curve : EcdsaCurve };
+type EcdsaPublicKeyArgument = record {
+  key_id : EcdsaKeyId;
+  canister_id : opt principal;
+  derivation_path : vec blob;
+};
+type EcdsaPublicKeyResponse = record { public_key : blob; chain_code : blob };
+type EthAddressError = variant {
+  SigningError : record { RejectionCode_1; text };
+  PaymentError : PaymentError;
+};
+type EthAddressRequest = record { "principal" : opt principal };
+type EthAddressResponse = record { address : text };
+type EthPersonalSignRequest = record { message : text };
+type EthPersonalSignResponse = record { signature : text };
+type EthSignPrehashRequest = record { hash : text };
+type EthSignPrehashResponse = record { signature : text };
+type EthSignTransactionRequest = record {
+  to : text;
+  gas : nat;
+  value : nat;
+  max_priority_fee_per_gas : nat;
+  data : opt text;
+  max_fee_per_gas : nat;
+  chain_id : nat;
+  nonce : nat;
+};
+type GetAddressError = variant {
+  InternalError : record { msg : text };
+  PaymentError : PaymentError;
+};
+type GetAddressRequest = record {
+  network : BitcoinNetwork;
+  address_type : BitcoinAddressType;
+};
+type GetAddressResponse = record { address : text };
+type GetBalanceRequest = record {
+  network : BitcoinNetwork;
+  address_type : BitcoinAddressType;
+  min_confirmations : opt nat32;
+};
+type GetBalanceResponse = record { balance : nat64 };
 type HttpRequest = record {
   url : text;
   method : text;
@@ -63,127 +89,133 @@ type HttpResponse = record {
   headers : vec record { text; text };
   status_code : nat16;
 };
-type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
-  api : opt Guards;
   ecdsa_key_name : text;
-  allowed_callers : vec principal;
-  supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
+  cycles_ledger : opt principal;
 };
-type ListUsersRequest = record {
-  updated_after_timestamp : opt nat64;
-  matches_max_length : opt nat64;
+type Outpoint = record { txid : blob; vout : nat32 };
+type PatronPaysIcrc2Tokens = record { ledger : principal; patron : Account };
+type PaymentError = variant {
+  LedgerWithdrawFromError : record {
+    error : WithdrawFromError;
+    ledger : principal;
+  };
+  LedgerUnreachable : CallerPaysIcrc2Tokens;
+  InvalidPatron;
+  LedgerTransferFromError : record {
+    error : TransferFromError;
+    ledger : principal;
+  };
+  UnsupportedPaymentType;
+  InsufficientFunds : record { needed : nat64; available : nat64 };
 };
-type ListUsersResponse = record {
-  users : vec OisyUser;
-  matches_max_length : nat64;
+type PaymentType = variant {
+  PatronPaysIcrc2Tokens : PatronPaysIcrc2Tokens;
+  AttachedCycles;
+  CallerPaysIcrc2Cycles;
+  CallerPaysIcrc2Tokens : CallerPaysIcrc2Tokens;
+  PatronPaysIcrc2Cycles : Account;
 };
-type MigrationError = variant {
-  TargetLockFailed;
-  TargetUnlockFailed;
-  CouldNotGetTargetPostStats;
-  CouldNotGetTargetPriorStats;
-  DataMigrationFailed;
-  TargetStatsMismatch : record { Stats; Stats };
+type RejectionCode = variant {
+  NoError;
+  CanisterError;
+  SysTransient;
+  DestinationInvalid;
   Unknown;
-  TargetCanisterNotEmpty : Stats;
-  NoMigrationInProgress;
+  SysFatal;
+  CanisterReject;
 };
-type MigrationProgress = variant {
-  MigratedUserTokensUpTo : opt principal;
-  Failed : MigrationError;
-  MigratedUserTimestampsUpTo : opt principal;
-  MigratedCustomTokensUpTo : opt principal;
-  CheckingDataMigration;
-  MigratedUserProfilesUpTo : opt record { nat64; principal };
-  UnlockingTarget;
-  Unlocking;
-  Completed;
-  Pending;
-  LockingTarget;
-  CheckingTarget;
+type RejectionCode_1 = variant {
+  NoError;
+  CanisterError;
+  SysTransient;
+  DestinationInvalid;
+  Unknown;
+  SysFatal;
+  CanisterReject;
 };
-type MigrationReport = record { to : principal; progress : MigrationProgress };
-type OisyUser = record {
-  "principal" : principal;
-  pouh_verified : bool;
-  updated_timestamp : nat64;
+type Result = variant { Ok : GetAddressResponse; Err : GetAddressError };
+type Result_1 = variant { Ok : GetBalanceResponse; Err : GetAddressError };
+type Result_2 = variant { Ok : SendBtcResponse; Err : SendBtcError };
+type Result_3 = variant { Ok : EthAddressResponse; Err : EthAddressError };
+type Result_4 = variant { Ok : EthPersonalSignResponse; Err : EthAddressError };
+type Result_5 = variant { Ok : EthSignPrehashResponse; Err : EthAddressError };
+type Result_6 = variant {
+  Ok : record { EcdsaPublicKeyResponse };
+  Err : EthAddressError;
 };
-type Result = variant { Ok; Err : AddUserCredentialError };
-type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_2 = variant { Ok : MigrationReport; Err : text };
-type Result_3 = variant { Ok; Err : text };
-type SignRequest = record {
-  to : text;
-  gas : nat;
-  value : nat;
-  max_priority_fee_per_gas : nat;
-  data : opt text;
-  max_fee_per_gas : nat;
-  chain_id : nat;
-  nonce : nat;
+type Result_7 = variant {
+  Ok : record { SignWithEcdsaResponse };
+  Err : EthAddressError;
 };
-type Stats = record {
-  user_profile_count : nat64;
-  custom_token_count : nat64;
-  user_timestamps_count : nat64;
-  user_token_count : nat64;
+type SendBtcError = variant {
+  BuildP2wpkhError : BuildP2wpkhTxError;
+  InternalError : record { msg : text };
+  PaymentError : PaymentError;
 };
-type SupportedCredential = record {
-  ii_canister_id : principal;
-  issuer_origin : text;
-  issuer_canister_id : principal;
-  ii_origin : text;
-  credential_type : CredentialType;
+type SendBtcRequest = record {
+  fee_satoshis : opt nat64;
+  network : BitcoinNetwork;
+  utxos_to_spend : vec Utxo;
+  address_type : BitcoinAddressType;
+  outputs : vec BtcTxOutput;
 };
-type Token = variant { Icrc : IcrcToken };
-type UserCredential = record {
-  issuer : text;
-  verified_date_timestamp : opt nat64;
-  credential_type : CredentialType;
+type SendBtcResponse = record { txid : text };
+type SignWithEcdsaArgument = record {
+  key_id : EcdsaKeyId;
+  derivation_path : vec blob;
+  message_hash : blob;
 };
-type UserProfile = record {
-  credentials : vec UserCredential;
-  version : opt nat64;
-  created_timestamp : nat64;
-  updated_timestamp : nat64;
+type SignWithEcdsaResponse = record { signature : blob };
+type TransferFromError = variant {
+  GenericError : record { message : text; error_code : nat };
+  TemporarilyUnavailable;
+  InsufficientAllowance : record { allowance : nat };
+  BadBurn : record { min_burn_amount : nat };
+  Duplicate : record { duplicate_of : nat };
+  BadFee : record { expected_fee : nat };
+  CreatedInFuture : record { ledger_time : nat64 };
+  TooOld;
+  InsufficientFunds : record { balance : nat };
 };
-type UserToken = record {
-  decimals : opt nat8;
-  version : opt nat64;
-  enabled : opt bool;
-  chain_id : nat64;
-  contract_address : text;
-  symbol : opt text;
+type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
+type WithdrawFromError = variant {
+  GenericError : record { message : text; error_code : nat };
+  TemporarilyUnavailable;
+  InsufficientAllowance : record { allowance : nat };
+  Duplicate : record { duplicate_of : nat };
+  InvalidReceiver : record { receiver : principal };
+  CreatedInFuture : record { ledger_time : nat64 };
+  TooOld;
+  FailedToWithdrawFrom : record {
+    withdraw_from_block : opt nat;
+    rejection_code : RejectionCode_1;
+    refund_block : opt nat;
+    approval_refund_block : opt nat;
+    rejection_reason : text;
+  };
+  InsufficientFunds : record { balance : nat };
 };
-type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
-  add_user_credential : (AddUserCredentialRequest) -> (Result);
-  bulk_up : (blob) -> ();
-  caller_btc_address : (BitcoinNetwork) -> (text);
-  caller_eth_address : () -> (text);
+  btc_caller_address : (GetAddressRequest, opt PaymentType) -> (Result);
+  btc_caller_balance : (GetBalanceRequest, opt PaymentType) -> (Result_1);
+  btc_caller_send : (SendBtcRequest, opt PaymentType) -> (Result_2);
   config : () -> (Config) query;
-  create_user_profile : () -> (UserProfile);
-  eth_address_of : (principal) -> (text);
+  eth_address : (EthAddressRequest, opt PaymentType) -> (Result_3);
+  eth_address_of_caller : (opt PaymentType) -> (Result_3);
+  eth_personal_sign : (EthPersonalSignRequest, opt PaymentType) -> (Result_4);
+  eth_sign_prehash : (EthSignPrehashRequest, opt PaymentType) -> (Result_5);
+  eth_sign_transaction : (EthSignTransactionRequest, opt PaymentType) -> (
+      Result_5,
+    );
+  generic_caller_ecdsa_public_key : (
+      EcdsaPublicKeyArgument,
+      opt PaymentType,
+    ) -> (Result_6);
+  generic_sign_with_ecdsa : (opt PaymentType, SignWithEcdsaArgument) -> (
+      Result_7,
+    );
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_user_profile : () -> (Result_1) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
-  list_custom_tokens : () -> (vec CustomToken) query;
-  list_user_tokens : () -> (vec UserToken) query;
-  list_users : (ListUsersRequest) -> (ListUsersResponse) query;
-  migrate_user_data_to : (principal) -> (Result_2);
-  migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_3);
-  personal_sign : (text) -> (text);
-  remove_user_token : (UserTokenId) -> ();
-  set_custom_token : (CustomToken) -> ();
-  set_guards : (Guards) -> ();
-  set_many_custom_tokens : (vec CustomToken) -> ();
-  set_many_user_tokens : (vec UserToken) -> ();
-  set_user_token : (UserToken) -> ();
-  sign_prehash : (text) -> (text);
-  sign_transaction : (SignRequest) -> (text);
-  stats : () -> (Stats) query;
-  step_migration : () -> ();
 }

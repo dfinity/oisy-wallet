@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -11,20 +11,26 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	const { tokenId, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { tokenId, token, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
 	const displayQRCode = (address: string) =>
 		dispatch('icQRCode', {
 			address,
-			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
+			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address,
+			addressToken: twinToken,
+			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 		});
 
 	let btcAddress: string | undefined = undefined;
@@ -32,20 +38,25 @@
 
 	let kytFee: bigint | undefined = undefined;
 	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
+
+	let twinToken: Token | undefined;
+	$: twinToken = ($token as IcCkToken | undefined)?.twinToken;
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	{#if nonNullish(btcAddress)}
-		<div class="mb-6">
-			<Hr />
-		</div>
+	{#if nonNullish(btcAddress) && nonNullish(twinToken)}
+		<Hr spacing="lg" />
 
 		<ReceiveAddress
 			labelRef="bitcoin-address"
 			address={btcAddress}
-			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+			network={twinToken.network}
+			qrCodeAction={{
+				enabled: true,
+				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+			}}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			on:click={() => displayQRCode(btcAddress ?? '')}
 		>
@@ -63,6 +74,6 @@
 			</svelte:fragment>
 		</ReceiveAddress>
 	{/if}
-</div>
 
-<button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>
+	<ButtonDone on:click={close} slot="toolbar" />
+</ContentWithToolbar>

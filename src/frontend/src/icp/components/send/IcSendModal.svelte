@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-	import type { NetworkId } from '$lib/types/network';
 	import { createEventDispatcher } from 'svelte';
+	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { SendContextPurpose } from '$lib/stores/send.store';
+	import { token } from '$lib/stores/token.store';
+	import type { NetworkId } from '$lib/types/network';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 
 	/**
 	 * Props
@@ -29,7 +33,10 @@
 
 	let firstStep: WizardStep;
 	let otherSteps: WizardStep[];
-	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan($i18n);
+	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan({
+		i18n: $i18n,
+		converting: isNetworkIdBitcoin(networkId) || isNetworkIdEthereum(networkId)
+	});
 
 	let steps: WizardSteps;
 	$: steps = [
@@ -45,6 +52,9 @@
 		},
 		...otherSteps
 	];
+
+	let sendPurpose: SendContextPurpose;
+	$: sendPurpose = isNetworkIdEthereum(networkId) ? 'convert-cketh-to-eth' : 'send';
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -63,6 +73,9 @@
 
 			dispatch('nnsClose');
 		});
+
+	let source: string;
+	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <WizardModal
@@ -74,26 +87,29 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<IcSendTokenWizard
-		{currentStep}
-		bind:destination
-		bind:networkId
-		bind:amount
-		bind:sendProgressStep
-		on:icBack={modal.back}
-		on:icNext={modal.next}
-		on:icClose={close}
-		on:icQRCodeScan={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsSend.QR_CODE_SCAN
-			})}
-		on:icQRCodeBack={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsSend.SEND
-			})}
-	/>
+	<SendTokenContext token={$token} {sendPurpose}>
+		<IcSendTokenWizard
+			{source}
+			{currentStep}
+			bind:destination
+			bind:networkId
+			bind:amount
+			bind:sendProgressStep
+			on:icBack={modal.back}
+			on:icNext={modal.next}
+			on:icClose={close}
+			on:icQRCodeScan={() =>
+				goToWizardSendStep({
+					modal,
+					steps,
+					stepName: WizardStepsSend.QR_CODE_SCAN
+				})}
+			on:icQRCodeBack={() =>
+				goToWizardSendStep({
+					modal,
+					steps,
+					stepName: WizardStepsSend.SEND
+				})}
+		/>
+	</SendTokenContext>
 </WizardModal>

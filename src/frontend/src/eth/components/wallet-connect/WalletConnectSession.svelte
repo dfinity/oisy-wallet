@@ -4,10 +4,10 @@
 	import { getSdkError } from '@walletconnect/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
-	import WalletConnectButton from './WalletConnectButton.svelte';
-	import WalletConnectForm from './WalletConnectForm.svelte';
-	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
-	import WalletConnectReview from './WalletConnectReview.svelte';
+	import WalletConnectButton from '$eth/components/wallet-connect/WalletConnectButton.svelte';
+	import WalletConnectForm from '$eth/components/wallet-connect/WalletConnectForm.svelte';
+	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectReview from '$eth/components/wallet-connect/WalletConnectReview.svelte';
 	import {
 		SESSION_REQUEST_SEND_TRANSACTION,
 		SESSION_REQUEST_PERSONAL_SIGN,
@@ -17,17 +17,20 @@
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-	import type { WalletConnectListener } from '$eth/types/wallet-connect';
+	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
+	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionWalletConnectListener;
 
 	const STEP_CONNECT: WizardStep = {
 		name: 'Connect',
@@ -50,7 +53,7 @@
 		close();
 	};
 
-	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	let proposal: Option<Web3WalletTypes.SessionProposal>;
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -335,12 +338,25 @@
 	$: walletConnectPaired.set(nonNullish(listener));
 
 	onDestroy(() => walletConnectPaired.set(false));
+
+	const openWalletConnectAuth = async () => {
+		modalStore.openWalletConnectAuth();
+
+		await trackEvent({
+			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
+		});
+	};
 </script>
 
 {#if nonNullish(listener)}
 	<WalletConnectButton on:click={disconnect}
 		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
 	>
+{:else}
+	<WalletConnectButton
+		ariaLabel={$i18n.wallet_connect.text.name}
+		on:click={openWalletConnectAuth}
+	/>
 {/if}
 
 {#if $modalWalletConnectAuth}

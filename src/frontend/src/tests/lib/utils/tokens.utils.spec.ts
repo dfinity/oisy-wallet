@@ -1,40 +1,26 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	filterEnabledTokens,
+	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
-	sumTokensUsdBalance
+	sumMainnetTokensUsdBalancesPerNetwork,
+	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
-import { BigNumber } from 'alchemy-sdk';
-import { describe, expect, it, type MockedFunction } from 'vitest';
-
-const usd = 1;
-
-const certified = true;
-
-const bn1 = BigNumber.from(1n);
-const bn2 = BigNumber.from(2n);
-const bn3 = BigNumber.from(3n);
-
-const $tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
-
-const $balances: CertifiedStoreData<BalancesData> = {
-	[ICP_TOKEN.id]: { data: bn1, certified },
-	[BTC_MAINNET_TOKEN.id]: { data: bn2, certified },
-	[ETHEREUM_TOKEN.id]: { data: bn3, certified }
-};
-
-const $exchanges: ExchangesData = $tokens.reduce<ExchangesData>((acc, token) => {
-	acc[token.id] = { usd };
-	return acc;
-}, {});
+import { bn1, bn2, bn3, certified, mockBalances } from '$tests/mocks/balances.mock';
+import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
+import { mockTokens } from '$tests/mocks/tokens.mock';
+import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
@@ -43,40 +29,40 @@ vi.mock('$lib/utils/exchange.utils', () => ({
 describe('sortTokens', () => {
 	it('should sort tokens by market cap, then by name, and finally by network name', () => {
 		const $exchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd_market_cap: 200, usd },
-			[BTC_MAINNET_TOKEN.id]: { usd },
-			[ETHEREUM_TOKEN.id]: { usd_market_cap: 300, usd }
+			[ICP_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd },
+			[BTC_MAINNET_TOKEN.id]: { usd: mockOneUsd },
+			[ETHEREUM_TOKEN.id]: { usd_market_cap: 300, usd: mockOneUsd }
 		};
-		const sortedTokens = sortTokens({ $tokens, $exchanges, $tokensToPin: [] });
+		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);
 	});
 
 	it('should sort tokens with same market cap by name', () => {
 		const $exchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd_market_cap: 200, usd },
-			[BTC_MAINNET_TOKEN.id]: { usd_market_cap: 200, usd },
-			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd }
+			[ICP_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd },
+			[BTC_MAINNET_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd },
+			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd }
 		};
-		const sortedTokens = sortTokens({ $tokens, $exchanges, $tokensToPin: [] });
+		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
 	it('should sort tokens by name if market cap is not provided', () => {
 		const $exchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd },
-			[BTC_MAINNET_TOKEN.id]: { usd },
-			[ETHEREUM_TOKEN.id]: { usd }
+			[ICP_TOKEN.id]: { usd: mockOneUsd },
+			[BTC_MAINNET_TOKEN.id]: { usd: mockOneUsd },
+			[ETHEREUM_TOKEN.id]: { usd: mockOneUsd }
 		};
-		const sortedTokens = sortTokens({ $tokens, $exchanges, $tokensToPin: [] });
+		const sortedTokens = sortTokens({ $tokens: mockTokens, $exchanges, $tokensToPin: [] });
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
 	it('should sort tokens with same market cap and name by network name', () => {
-		const newTokens: Token[] = $tokens.map((token) => ({ ...token, name: 'Test Token' }));
+		const newTokens: Token[] = mockTokens.map((token) => ({ ...token, name: 'Test Token' }));
 		const $exchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd_market_cap: 200, usd },
-			[BTC_MAINNET_TOKEN.id]: { usd_market_cap: 200, usd },
-			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd }
+			[ICP_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd },
+			[BTC_MAINNET_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd },
+			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({
 			$tokens: newTokens,
@@ -92,11 +78,11 @@ describe('sortTokens', () => {
 	});
 
 	it('should sort tokens with same name by network name if market cap is not provided', () => {
-		const newTokens: Token[] = $tokens.map((token) => ({ ...token, name: 'Test Token' }));
+		const newTokens: Token[] = mockTokens.map((token) => ({ ...token, name: 'Test Token' }));
 		const $exchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd },
-			[BTC_MAINNET_TOKEN.id]: { usd },
-			[ETHEREUM_TOKEN.id]: { usd }
+			[ICP_TOKEN.id]: { usd: mockOneUsd },
+			[BTC_MAINNET_TOKEN.id]: { usd: mockOneUsd },
+			[ETHEREUM_TOKEN.id]: { usd: mockOneUsd }
 		};
 		const sortedTokens = sortTokens({
 			$tokens: newTokens,
@@ -113,13 +99,13 @@ describe('sortTokens', () => {
 
 	it('should pin tokens at the top of the list', () => {
 		const $exchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd_market_cap: 200, usd },
-			[BTC_MAINNET_TOKEN.id]: { usd },
-			[ETHEREUM_TOKEN.id]: { usd_market_cap: 300, usd }
+			[ICP_TOKEN.id]: { usd_market_cap: 200, usd: mockOneUsd },
+			[BTC_MAINNET_TOKEN.id]: { usd: mockOneUsd },
+			[ETHEREUM_TOKEN.id]: { usd_market_cap: 300, usd: mockOneUsd }
 		};
 		const tokensToPin: TokenToPin[] = [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN];
 		const sortedTokens = sortTokens({
-			$tokens,
+			$tokens: mockTokens,
 			$exchanges,
 			$tokensToPin: tokensToPin
 		});
@@ -138,56 +124,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 		);
 	});
 
-	it('should return a list of tokens with balance as prop if balance data not undefined', () => {
-		const newBalances: CertifiedStoreData<BalancesData> = {
-			[ICP_TOKEN.id]: { data: bn1, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: bn2, certified }
-		};
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
-
-		expect(result).toContainEqual({
-			...ICP_TOKEN,
-			balance: bn1,
-			usdBalance: 1
-		});
-		expect(result).toContainEqual({
-			...BTC_MAINNET_TOKEN,
-			balance: bn2,
-			usdBalance: 2
-		});
-		expect(result).toContainEqual({
-			...ETHEREUM_TOKEN,
-			balance: undefined,
-			usdBalance: 0
-		});
-	});
-
-	it('should return a list of tokens with usd balance as prop if exchange data not undefined', () => {
-		const newExchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd },
-			[BTC_MAINNET_TOKEN.id]: { usd }
-		};
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances, $exchanges: newExchanges });
-
-		expect(result).toContainEqual({
-			...ICP_TOKEN,
-			balance: bn1,
-			usdBalance: 1
-		});
-		expect(result).toContainEqual({
-			...BTC_MAINNET_TOKEN,
-			balance: bn2,
-			usdBalance: 2
-		});
-		expect(result).toContainEqual({
-			...ETHEREUM_TOKEN,
-			balance: bn3,
-			usdBalance: undefined
-		});
-	});
-
 	it('should pin tokens with usd balance at the top and sort by usd balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
 			[ICP_TOKEN.id]: { data: bn2, certified },
@@ -195,11 +131,11 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
 		};
 
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
+		const result = pinTokensWithBalanceAtTop({
+			$tokens: mockTokens,
+			$balances: newBalances,
+			$exchanges: mockExchanges
+		});
 
 		expect(result.map((token) => token.id)).toEqual([
 			ETHEREUM_TOKEN.id,
@@ -210,10 +146,14 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should put tokens with no usd balance after the ones with and sort them by balance', () => {
 		const newExchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd }
+			[ICP_TOKEN.id]: { usd: mockOneUsd }
 		};
 
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances, $exchanges: newExchanges });
+		const result = pinTokensWithBalanceAtTop({
+			$tokens: mockTokens,
+			$balances: mockBalances,
+			$exchanges: newExchanges
+		});
 
 		expect(result.map((token) => token.id)).toEqual([
 			ICP_TOKEN.id,
@@ -229,11 +169,11 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 		};
 
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
+		const result = pinTokensWithBalanceAtTop({
+			$tokens: mockTokens,
+			$balances: newBalances,
+			$exchanges: mockExchanges
+		});
 
 		expect(result.map((token) => token.id)).toEqual([
 			ICP_TOKEN.id,
@@ -249,11 +189,11 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 		};
 
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
+		const result = pinTokensWithBalanceAtTop({
+			$tokens: mockTokens,
+			$balances: newBalances,
+			$exchanges: mockExchanges
+		});
 
 		expect(result.map((token) => token.id)).toEqual([
 			BTC_MAINNET_TOKEN.id,
@@ -268,11 +208,11 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
 		};
 
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
+		const result = pinTokensWithBalanceAtTop({
+			$tokens: mockTokens,
+			$balances: newBalances,
+			$exchanges: mockExchanges
+		});
 
 		expect(result.map((token) => token.id)).toEqual([
 			ETHEREUM_TOKEN.id,
@@ -282,7 +222,7 @@ describe('pinTokensWithBalanceAtTop', () => {
 	});
 });
 
-describe('sumTokensTotalUsdBalance', () => {
+describe('sumTokensUiUsdBalance', () => {
 	it('should correctly calculate USD total balance when tokens have usdBalance', () => {
 		const tokens: TokenUi[] = [
 			{ ...ICP_TOKEN, usdBalance: 50 },
@@ -290,7 +230,7 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN, usdBalance: 100 }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(200);
 	});
 
@@ -301,12 +241,12 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(50);
 	});
 
 	it('should correctly calculate USD total balance when tokens list is empty', () => {
-		const result = sumTokensUsdBalance([]);
+		const result = sumTokensUiUsdBalance([]);
 		expect(result).toEqual(0);
 	});
 });
@@ -338,5 +278,115 @@ describe('filterEnabledTokens', () => {
 
 		const result = filterEnabledTokens([tokens]);
 		expect(result).toEqual([ENABLED_BY_DEFAULT_ICP_TOKEN, ENABLED_BY_DEFAULT_ETHEREUM_TOKEN]);
+	});
+});
+
+describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
+		const balances = {
+			...mockBalances,
+			[BTC_TESTNET_TOKEN.id]: { data: bn3, certified }
+		};
+		const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: tokens,
+			$balances: balances,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual({
+			[BTC_MAINNET_NETWORK_ID]: bn2.toNumber(),
+			[ETHEREUM_NETWORK_ID]: bn3.toNumber(),
+			[ICP_NETWORK_ID]: bn1.toNumber()
+		});
+	});
+
+	it('should return a dictionary with correct balances if all token balances are 0', () => {
+		const balances = {
+			[ICP_TOKEN.id]: { data: ZERO, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
+			[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
+			[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
+		};
+		const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: tokens,
+			$balances: balances,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual({
+			[BTC_MAINNET_NETWORK_ID]: ZERO.toNumber(),
+			[ETHEREUM_NETWORK_ID]: ZERO.toNumber(),
+			[ICP_NETWORK_ID]: ZERO.toNumber()
+		});
+	});
+
+	it('should return an empty dictionary if no mainnet tokens are in the list', () => {
+		const balances = {
+			...mockBalances,
+			[BTC_TESTNET_TOKEN.id]: { data: bn2, certified }
+		};
+		const tokens = [BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: tokens,
+			$balances: balances,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual({});
+	});
+
+	it('should return an empty dictionary if no tokens are provided', () => {
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: [],
+			$balances: mockBalances,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual({});
+	});
+});
+
+describe('pinEnabledTokensAtTop', () => {
+	it('should pin enabled tokens at the top while preserving the order', () => {
+		const tokens: TokenToggleable<Token>[] = [
+			{ ...ICP_TOKEN, enabled: false },
+			{ ...BTC_MAINNET_TOKEN, enabled: true },
+			{ ...ETHEREUM_TOKEN, enabled: true }
+		];
+
+		const result = pinEnabledTokensAtTop(tokens);
+
+		expect(result).toEqual([
+			{ ...BTC_MAINNET_TOKEN, enabled: true },
+			{ ...ETHEREUM_TOKEN, enabled: true },
+			{ ...ICP_TOKEN, enabled: false }
+		]);
+	});
+
+	it('should return the same array when all tokens are enabled', () => {
+		const tokens: TokenToggleable<Token>[] = mockTokens.map((t) => ({ ...t, enabled: true }));
+
+		const result = pinEnabledTokensAtTop(tokens);
+
+		expect(result).toEqual(tokens);
+	});
+
+	it('should return the same array when all tokens are disabled', () => {
+		const tokens: TokenToggleable<Token>[] = mockTokens.map((t) => ({ ...t, enabled: false }));
+
+		const result = pinEnabledTokensAtTop(tokens);
+
+		expect(result).toEqual(tokens);
 	});
 });

@@ -1,17 +1,36 @@
+import type { UserToken } from '$declarations/backend/backend.did';
+import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 import { loadUserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { OptionIcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { setUserToken as setUserTokenApi } from '$lib/api/backend.api';
-import { busy } from '$lib/stores/busy.store';
+import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
-import { assertNonNullish, toNullable } from '@dfinity/utils';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+const assertIcrcSendTokenData = (sendToken: IcCkToken): AutoLoadTokenResult | undefined => {
+	if (sendToken.twinToken?.standard !== 'erc20') {
+		return { result: 'skipped' };
+	}
+};
+
+const findUserToken = ({
+	tokens,
+	sendToken
+}: {
+	tokens: Erc20UserToken[];
+	sendToken: IcCkToken;
+}): Erc20UserToken | undefined =>
+	tokens.find(
+		({ address }) =>
+			address.toLowerCase() === (sendToken.twinToken as Erc20Token).address.toLowerCase()
+	);
 
 /**
  * When a user converts an ERC20 token to a ckERC20 twin token, the UI needs information about the counterpart token (ERC20).
@@ -35,55 +54,34 @@ export const autoLoadUserToken = async ({
 	erc20UserTokens: Erc20UserToken[];
 	sendToken: Token;
 	identity: OptionIdentity;
-}): Promise<{ result: 'loaded' | 'skipped' | 'error' }> => {
-	if (sendToken.standard !== 'icrc') {
-		return { result: 'skipped' };
-	}
+}): Promise<AutoLoadTokenResult> =>
+	await autoLoadToken({
+		tokens: erc20UserTokens,
+		sendToken: sendToken as IcCkToken,
+		identity,
+		expectedSendTokenStandard: 'icrc',
+		assertSendTokenData: assertIcrcSendTokenData,
+		findToken: findUserToken,
+		setToken: setUserToken,
+		loadTokens: loadUserTokens,
+		errorMessage: get(i18n).init.error.erc20_user_token
+	});
 
-	const twinToken = (sendToken as OptionIcCkToken)?.twinToken;
-
-	if (twinToken?.standard !== 'erc20') {
-		return { result: 'skipped' };
-	}
-
-	const erc20UserToken = erc20UserTokens.find(
-		({ address }) => address.toLowerCase() === (twinToken as Erc20Token).address.toLowerCase()
-	);
-
-	if (erc20UserToken?.enabled === true) {
-		return { result: 'skipped' };
-	}
-
-	busy.start();
-
-	try {
-		assertNonNullish(identity);
-
-		await setUserToken({
-			identity,
-			token: erc20UserToken ?? {
-				...(twinToken as Erc20Token),
-				enabled: false,
-				version: undefined
-			},
-			enabled: true
-		});
-
-		// TODO(GIX-2740): Only reload the tokens we need.
-		await loadUserTokens({ identity });
-	} catch (err: unknown) {
-		toastsError({
-			msg: { text: get(i18n).init.error.erc20_user_token },
-			err
-		});
-
-		return { result: 'error' };
-	} finally {
-		busy.stop();
-	}
-
-	return { result: 'loaded' };
-};
+export const toUserToken = ({
+	address: contract_address,
+	network,
+	decimals,
+	symbol,
+	version,
+	enabled
+}: SaveUserToken): UserToken => ({
+	contract_address,
+	chain_id: (network as EthereumNetwork).chainId,
+	decimals: toNullable(decimals),
+	symbol: toNullable(symbol),
+	version: toNullable(version),
+	enabled: toNullable(enabled)
+});
 
 export const setUserToken = async ({
 	token,
@@ -93,19 +91,12 @@ export const setUserToken = async ({
 	identity: Identity;
 	token: Erc20UserToken;
 	enabled: boolean;
-}) => {
-	const { version, symbol, network, address, decimals } = token;
-	const { chainId } = network as EthereumNetwork;
-
+}) =>
 	await setUserTokenApi({
 		identity,
-		token: {
-			chain_id: chainId,
-			decimals: toNullable(decimals),
-			contract_address: address,
-			symbol: toNullable(symbol),
-			version: toNullable(version),
-			enabled: toNullable(enabled)
-		}
+		token: toUserToken({
+			...token,
+			enabled
+		}),
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
-};

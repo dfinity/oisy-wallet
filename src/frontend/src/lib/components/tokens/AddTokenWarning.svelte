@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import Warning from '$lib/components/ui/Warning.svelte';
 	import { Html } from '@dfinity/gix-components';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<Warning>
-	<p>
+<MessageBox level="light-warning">
+	<span>
 		<Html text={$i18n.tokens.warning.trust_token} />
-	</p>
-</Warning>
+	</span>
+</MessageBox>
 
 <style lang="scss">
-	p {
+	span {
 		:global(a) {
 			&:active,
 			&:hover {

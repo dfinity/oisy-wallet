@@ -1,59 +1,33 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import SendData from '$lib/components/send/SendData.svelte';
-	import { tokenStandard } from '$lib/derived/token.derived';
-	import { invalidAmount } from '$lib/utils/input.utils';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import type { NetworkId } from '$lib/types/network';
+	import { isNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
-	import { balance } from '$lib/derived/balances.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { token } from '$lib/stores/token.store';
+	import SendReview from '$lib/components/send/SendReview.svelte';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
+	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+	export let source: string;
+
+	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =
-		isNullish($tokenStandard) ||
+		isNullish($sendTokenStandard) ||
 		isInvalidDestinationIc({
 			destination,
-			tokenStandard: $tokenStandard,
+			tokenStandard: $sendTokenStandard,
 			networkId
 		}) ||
 		invalidAmount(amount);
-
-	const dispatch = createEventDispatcher();
-
-	let source: string;
-	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
-<div class="stretch">
-	{#if nonNullish($token)}
-		<SendData {amount} {destination} token={$token} balance={$balance} {source}>
-			<IcFeeDisplay slot="fee" {networkId} />
-			<IcReviewNetwork {networkId} slot="network" />
-		</SendData>
-	{/if}
-</div>
-
-<ButtonGroup>
-	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-		>{$i18n.core.text.back}</button
-	>
-	<button
-		class="primary block flex-1"
-		disabled={invalid}
-		class:opacity-10={invalid}
-		on:click={() => dispatch('icSend')}
-	>
-		{$i18n.send.text.send}
-	</button>
-</ButtonGroup>
+<SendReview on:icBack on:icSend {source} {amount} {destination} disabled={invalid}>
+	<IcReviewNetwork {networkId} slot="network" />
+</SendReview>

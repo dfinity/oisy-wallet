@@ -1,7 +1,8 @@
 import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
+import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
-import type { WalletConnectListener } from '$eth/types/wallet-connect';
+import type { OptionWalletConnectListener, WalletConnectListener } from '$eth/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
@@ -10,16 +11,10 @@ import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
-	TRACK_COUNT_WC_ETH_SEND_SUCCESS,
-	TRACK_DURATION_WC_ETH_SEND
+	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
-import {
-	initTimedEvent,
-	trackEvent,
-	trackTimedEventError,
-	trackTimedEventSuccess
-} from '$lib/services/analytics.services';
+import { trackEvent } from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -31,19 +26,18 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
-import { send as executeSend } from './send.services';
 
-export type WalletConnectCallBackParams = {
+export interface WalletConnectCallBackParams {
 	request: Web3WalletTypes.SessionRequest;
 	listener: WalletConnectListener;
-};
+}
 
 export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'request'> & {
-	listener: WalletConnectListener | null | undefined;
+	listener: OptionWalletConnectListener;
 };
 
 export type WalletConnectSendParams = WalletConnectExecuteParams & {
-	listener: WalletConnectListener | null | undefined;
+	listener: OptionWalletConnectListener;
 	address: OptionEthAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
@@ -51,7 +45,7 @@ export type WalletConnectSendParams = WalletConnectExecuteParams & {
 } & SendParams;
 
 export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
-	listener: WalletConnectListener | null | undefined;
+	listener: OptionWalletConnectListener;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign) => void;
 };
@@ -178,13 +172,6 @@ export const send = ({
 
 			modalNext();
 
-			const timedEvent = initTimedEvent({
-				name: TRACK_DURATION_WC_ETH_SEND,
-				metadata: {
-					token: token.symbol
-				}
-			});
-
 			try {
 				const { hash } = await executeSend({
 					from: address,
@@ -207,27 +194,21 @@ export const send = ({
 
 				progress(lastProgressStep);
 
-				await Promise.allSettled([
-					trackTimedEventSuccess(timedEvent),
-					trackEvent({
-						name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
-						metadata: {
-							token: token.symbol
-						}
-					})
-				]);
+				await trackEvent({
+					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
+					metadata: {
+						token: token.symbol
+					}
+				});
 
 				return { success: true };
 			} catch (err: unknown) {
-				await Promise.allSettled([
-					trackTimedEventError(timedEvent),
-					trackEvent({
-						name: TRACK_COUNT_WC_ETH_SEND_ERROR,
-						metadata: {
-							token: token.symbol
-						}
-					})
-				]);
+				await trackEvent({
+					name: TRACK_COUNT_WC_ETH_SEND_ERROR,
+					metadata: {
+						token: token.symbol
+					}
+				});
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
@@ -266,13 +247,21 @@ export const signMessage = ({
 
 					try {
 						const hash = getSignParamsMessageTypedDataV4Hash(params);
-						return signPrehash({ hash, identity });
+						return signPrehash({
+							hash,
+							identity,
+							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+						});
 					} catch (err: unknown) {
 						// If the above failed, it's because JSON.parse throw an exception.
 						// We are assuming that it did so because it tried to parse a string that does not represent an object.
 						// Therefore, we continue with a message as hex string.
 						const message = getSignParamsMessageHex(params);
-						return signMessageApi({ message, identity });
+						return signMessageApi({
+							message,
+							identity,
+							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+						});
 					}
 				};
 

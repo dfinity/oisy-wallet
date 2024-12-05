@@ -1,40 +1,36 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
-use crate::bitcoin_utils::public_key_to_p2pkh_address;
-use crate::guards::{
-    caller_is_allowed, caller_is_allowed_and_may_read_threshold_keys, may_read_threshold_keys,
-    may_read_user_data, may_threshold_sign, may_write_user_data,
-};
+use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{Nat, Principal};
+use crate::user_profile::add_hidden_dapp_id;
+use bitcoin_utils::estimate_fee;
+use candid::Principal;
 use config::find_credential_config;
-use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
-use ethers_core::types::transaction::eip2930::AccessList;
-use ethers_core::types::Bytes;
-use ethers_core::utils::keccak256;
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
-use ic_cdk::api::management_canister::ecdsa::{
-    ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
-    SignWithEcdsaArgument,
-};
+use ethers_core::abi::ethereum_types::H160;
+use heap_state::btc_user_pending_tx_state::StoredPendingTransaction;
+use heap_state::state::with_btc_pending_transactions;
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::{clear_timer, set_timer_interval};
+use ic_cdk_timers::{clear_timer, set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
-use k256::PublicKey;
 use oisy_user::oisy_users;
-use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
+use shared::types::bitcoin::{
+    BtcAddPendingTransactionError, BtcAddPendingTransactionRequest, BtcGetPendingTransactionsError,
+    BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, PendingTransaction,
+    SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+};
 use shared::types::custom_token::{CustomToken, CustomTokenId};
+use shared::types::dapp::{AddDappSettingsError, AddHiddenDappIdRequest};
+use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
 use shared::types::token::{UserToken, UserTokenId};
-use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
@@ -42,8 +38,8 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
+use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
-use std::str::FromStr;
 use std::time::Duration;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
@@ -53,12 +49,16 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
 mod guards;
+mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
+pub mod signer;
+mod state;
 mod token;
 mod types;
 mod user_profile;
@@ -90,11 +90,11 @@ thread_local! {
     );
 }
 
-pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(&cell.borrow()))
 }
 
-pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
+fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
     STATE.with(|cell| f(&mut cell.borrow_mut()))
 }
 
@@ -102,7 +102,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 ///
 /// # Panics
 /// - If the `STATE.config` is not initialized.
-pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
+fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
             .config
@@ -149,16 +149,46 @@ fn set_config(arg: InitArg) {
     });
 }
 
+/// Runs housekeeping tasks immediately, then periodically:
+/// - `hourly_housekeeping_tasks`
+fn start_periodic_housekeeping_timers() {
+    // Run housekeeping tasks once, immediately but asynchronously.
+    let immediate = Duration::ZERO;
+    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+
+    // Then periodically:
+    let hour = Duration::from_secs(60 * 60);
+    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+}
+
+/// Runs hourly housekeeping tasks:
+/// - Top up the cycles ledger.
+async fn hourly_housekeeping_tasks() {
+    // Tops up the account on the cycles ledger
+    {
+        let result = top_up_cycles_ledger(None).await;
+        if let Err(err) = result {
+            eprintln!("Failed to top up cycles ledger: {err:?}");
+        }
+        // TODO: Add monitoring for how many cycles have been topped up and whether topping up is failing.
+    }
+}
+
 #[init]
-fn init(arg: Arg) {
+pub fn init(arg: Arg) {
     match arg {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+    start_periodic_housekeeping_timers();
 }
 
+/// Post-upgrade handler.
+///
+/// # Panics
+/// - If the config is not initialized, which should not happen during an upgrade.  Maybe this is a new installation?
 #[post_upgrade]
-fn post_upgrade(arg: Option<Arg>) {
+pub fn post_upgrade(arg: Option<Arg>) {
     match arg {
         Some(Arg::Init(arg)) => set_config(arg),
         _ => {
@@ -169,13 +199,25 @@ fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    start_periodic_housekeeping_timers();
 }
 
-/// Show the canister configuration.
+/// Gets the canister configuration.
 #[query(guard = "caller_is_allowed")]
 #[must_use]
-fn config() -> Config {
+pub fn config() -> Config {
     read_config(std::clone::Clone::clone)
+}
+
+/// Adds cycles to the cycles ledger, if it is below a certain threshold.
+///
+/// # Errors
+/// Error conditions are enumerated by: `TopUpCyclesLedgerError`
+#[update(guard = "caller_is_allowed")]
+pub async fn top_up_cycles_ledger(
+    request: Option<TopUpCyclesLedgerRequest>,
+) -> TopUpCyclesLedgerResult {
+    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.
@@ -198,44 +240,6 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
     }
 }
 
-fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
-    const SCHEMA: u8 = 1;
-
-    vec![vec![SCHEMA], p.as_slice().to_vec()]
-}
-
-/// Converts the public key bytes to an Ethereum address with a checksum.
-fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
-    use k256::elliptic_curve::sec1::ToEncodedPoint;
-
-    let key =
-        PublicKey::from_sec1_bytes(pubkey_bytes).expect("failed to parse the public key as SEC1");
-    let point = key.to_encoded_point(false);
-    // we re-encode the key to the decompressed representation.
-    let point_bytes = point.as_bytes();
-    assert_eq!(point_bytes[0], 0x04);
-
-    let hash = keccak256(&point_bytes[1..]);
-
-    ethers_core::utils::to_checksum(&Address::from_slice(&hash[12..32]), None)
-}
-
-/// Computes the public key of the specified principal.
-async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
-    let name = read_config(|s| s.ecdsa_key_name.clone());
-    let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
-        canister_id: None,
-        derivation_path: principal_to_derivation_path(principal),
-        key_id: EcdsaKeyId {
-            curve: EcdsaCurve::Secp256k1,
-            name,
-        },
-    })
-    .await
-    .expect("failed to get public key");
-    key.public_key
-}
-
 fn parse_eth_address(address: &str) -> [u8; 20] {
     match address.parse() {
         Ok(H160(addr)) => addr,
@@ -245,149 +249,9 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
     }
 }
 
-/// Returns the Ethereum address of the caller.
-#[update(guard = "may_read_threshold_keys")]
-async fn caller_eth_address() -> String {
-    pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
-}
-
-/// Returns the Ethereum address of the specified user.
-#[update(guard = "caller_is_allowed_and_may_read_threshold_keys")]
-async fn eth_address_of(p: Principal) -> String {
-    if p == Principal::anonymous() {
-        ic_cdk::trap("Anonymous principal is not authorized");
-    }
-    pubkey_bytes_to_address(&ecdsa_pubkey_of(&p).await)
-}
-
-/// Returns the Bitcoin address of the caller.
-#[update(guard = "may_read_threshold_keys")]
-async fn caller_btc_address(network: BitcoinNetwork) -> String {
-    public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
-}
-
-fn nat_to_u256(n: &Nat) -> U256 {
-    let be_bytes = n.0.to_bytes_be();
-    U256::from_big_endian(&be_bytes)
-}
-
-fn nat_to_u64(n: &Nat) -> U64 {
-    let be_bytes = n.0.to_bytes_be();
-    U64::from_big_endian(&be_bytes)
-}
-
-/// Returns the public key and a message signature for the specified principal.
-async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec<u8>, Vec<u8>) {
-    // Fetch the pubkey and the signature concurrently to reduce latency.
-    let (pubkey, response) = futures::join!(
-        ecdsa_pubkey_of(caller),
-        sign_with_ecdsa(SignWithEcdsaArgument {
-            message_hash,
-            derivation_path: principal_to_derivation_path(caller),
-            key_id: EcdsaKeyId {
-                curve: EcdsaCurve::Secp256k1,
-                name: read_config(|s| s.ecdsa_key_name.clone()),
-            },
-        })
-    );
-    (
-        pubkey,
-        response.expect("failed to sign the message").0.signature,
-    )
-}
-
-/// Computes a signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
-#[update(guard = "may_threshold_sign")]
-async fn sign_transaction(req: SignRequest) -> String {
-    use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
-    use ethers_core::types::Signature;
-
-    const EIP1559_TX_ID: u8 = 2;
-
-    let caller = ic_cdk::caller();
-
-    let data = req.data.as_ref().map(|s| decode_hex(s));
-
-    let tx = Eip1559TransactionRequest {
-        chain_id: Some(nat_to_u64(&req.chain_id)),
-        from: None,
-        to: Some(
-            Address::from_str(&req.to)
-                .expect("failed to parse the destination address")
-                .into(),
-        ),
-        gas: Some(nat_to_u256(&req.gas)),
-        value: Some(nat_to_u256(&req.value)),
-        nonce: Some(nat_to_u256(&req.nonce)),
-        data,
-        access_list: AccessList::default(),
-        max_priority_fee_per_gas: Some(nat_to_u256(&req.max_priority_fee_per_gas)),
-        max_fee_per_gas: Some(nat_to_u256(&req.max_fee_per_gas)),
-    };
-
-    let mut unsigned_tx_bytes = tx.rlp().to_vec();
-    unsigned_tx_bytes.insert(0, EIP1559_TX_ID);
-
-    let txhash = keccak256(&unsigned_tx_bytes);
-
-    let (pubkey, signature) = pubkey_and_signature(&caller, txhash.to_vec()).await;
-
-    let signature = Signature {
-        v: y_parity(&txhash, &signature, &pubkey),
-        r: U256::from_big_endian(&signature[0..32]),
-        s: U256::from_big_endian(&signature[32..64]),
-    };
-
-    let mut signed_tx_bytes = tx.rlp_signed(&signature).to_vec();
-    signed_tx_bytes.insert(0, EIP1559_TX_ID);
-
-    format!("0x{}", hex::encode(&signed_tx_bytes))
-}
-
-/// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
-#[update(guard = "may_threshold_sign")]
-async fn personal_sign(plaintext: String) -> String {
-    let caller = ic_cdk::caller();
-
-    let bytes = decode_hex(&plaintext);
-
-    let message = [
-        b"\x19Ethereum Signed Message:\n",
-        bytes.len().to_string().as_bytes(),
-        bytes.as_ref(),
-    ]
-    .concat();
-
-    let msg_hash = keccak256(&message);
-
-    let (pubkey, mut signature) = pubkey_and_signature(&caller, msg_hash.to_vec()).await;
-
-    let v = y_parity(&msg_hash, &signature, &pubkey);
-    signature.push(u8::try_from(v).unwrap_or_else(|_| {
-        unreachable!("The value should be one bit, so should easily fit into a byte")
-    }));
-    format!("0x{}", hex::encode(&signature))
-}
-
-/// Computes a signature for a precomputed hash.
-#[update(guard = "may_threshold_sign")]
-async fn sign_prehash(prehash: String) -> String {
-    let caller = ic_cdk::caller();
-
-    let hash_bytes = decode_hex(&prehash);
-
-    let (pubkey, mut signature) = pubkey_and_signature(&caller, hash_bytes.to_vec()).await;
-
-    let v = y_parity(&hash_bytes, &signature, &pubkey);
-    signature.push(u8::try_from(v).unwrap_or_else(|_| {
-        unreachable!("The value should be just one bit, so should fit easily into a byte")
-    }));
-    format!("0x{}", hex::encode(&signature))
-}
-
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn set_user_token(token: UserToken) {
+pub fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
     assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
 
@@ -403,7 +267,7 @@ fn set_user_token(token: UserToken) {
 }
 
 #[update(guard = "may_write_user_data")]
-fn set_many_user_tokens(tokens: Vec<UserToken>) {
+pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -423,7 +287,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
 
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn remove_user_token(token_id: UserTokenId) {
+pub fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -435,7 +299,8 @@ fn remove_user_token(token_id: UserTokenId) {
 }
 
 #[query(guard = "may_read_user_data")]
-fn list_user_tokens() -> Vec<UserToken> {
+#[must_use]
+pub fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
@@ -443,7 +308,7 @@ fn list_user_tokens() -> Vec<UserToken> {
 /// Add, remove or update custom token for the user.
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn set_custom_token(token: CustomToken) {
+pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &CustomToken| -> bool {
@@ -454,7 +319,7 @@ fn set_custom_token(token: CustomToken) {
 }
 
 #[update(guard = "may_write_user_data")]
-fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
+pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -469,29 +334,176 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 }
 
 #[query(guard = "may_read_user_data")]
-fn list_custom_tokens() -> Vec<CustomToken> {
+#[must_use]
+pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
+const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
+/// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+///
+/// # Errors
+/// Errors are enumerated by: `SelectedUtxosFeeError`.
+#[update(guard = "may_read_user_data")]
+pub async fn btc_select_user_utxos_fee(
+    params: SelectedUtxosFeeRequest,
+) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+    let principal = ic_cdk::caller();
+    let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    let all_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        source_address.clone(),
+        Some(
+            params
+                .min_confirmations
+                .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        ),
+    )
+    .await
+    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    let now_ns = time();
+
+    let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
+        !pending_transactions
+            .get_pending_transactions(&principal, &source_address)
+            .is_empty()
+    });
+
+    if has_pending_transactions {
+        return Err(SelectedUtxosFeeError::PendingTransactions);
+    }
+
+    let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    // We support sending to one destination only.
+    // Therefore, the outputs are the destination and the source address for the change.
+    let output_count = 2;
+    let mut available_utxos = all_utxos.clone();
+    let selected_utxos =
+        bitcoin_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
+
+    // Fee calculation might still take into account default tx size and expected output.
+    // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
+    if selected_utxos.is_empty() {
+        return Ok(SelectedUtxosFeeResponse {
+            utxos: selected_utxos,
+            fee_satoshis: 0,
+        });
+    }
+
+    let fee_satoshis = estimate_fee(
+        selected_utxos.len() as u64,
+        median_fee_millisatoshi_per_vbyte,
+        output_count as u64,
+    );
+
+    Ok(SelectedUtxosFeeResponse {
+        utxos: selected_utxos,
+        fee_satoshis,
+    })
+}
+
+/// Adds a pending Bitcoin transaction for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcAddPendingTransactionError`.
+#[update(guard = "may_write_user_data")]
+pub async fn btc_add_pending_transaction(
+    params: BtcAddPendingTransactionRequest,
+) -> Result<(), BtcAddPendingTransactionError> {
+    let principal = ic_cdk::caller();
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+    let now_ns = time();
+
+    with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        let current_pending_transaction = StoredPendingTransaction {
+            txid: params.txid,
+            utxos: params.utxos,
+            created_at_timestamp_ns: now_ns,
+        };
+        pending_transactions
+            .add_pending_transaction(principal, params.address, current_pending_transaction)
+            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
+    })
+}
+
+/// Returns the pending Bitcoin transactions for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcGetPendingTransactionsError`.
+#[update(guard = "may_read_user_data")]
+pub async fn btc_get_pending_transactions(
+    params: BtcGetPendingTransactionsRequest,
+) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+    let principal = ic_cdk::caller();
+    let now_ns = time();
+
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+
+    let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        pending_transactions
+            .get_pending_transactions(&principal, &params.address)
+            .clone()
+    });
+
+    let pending_transactions = stored_transactions
+        .iter()
+        .map(|tx| PendingTransaction {
+            txid: tx.txid.clone(),
+            utxos: tx.utxos.clone(),
+        })
+        .collect();
+
+    Ok(BtcGetPendingTransactionsReponse {
+        transactions: pending_transactions,
+    })
+}
+
+/// Adds a verifiable credential to the user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
+pub fn add_user_credential(
+    request: AddUserCredentialRequest,
+) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
-    let current_time_ns = time() as u128;
+    let current_time_ns = u128::from(time());
 
-    let (vc_flow_signers, root_pk_raw, credential_type) =
+    let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
         read_config(|config| find_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
         user_principal,
+        derivation_origin,
         &vc_flow_signers,
         &request.credential_spec,
         &root_pk_raw,
-        current_time_ns as u128,
+        current_time_ns,
     ) {
         Ok(()) => mutate_state(|s| {
             let mut user_profile_model =
@@ -508,10 +520,41 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
     }
 }
 
+/// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
+///
+/// # Arguments
+/// * `request` - The request to add a hidden dApp ID.
+///
+/// # Returns
+/// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn add_user_hidden_dapp_id(
+    request: AddHiddenDappIdRequest,
+) -> Result<(), AddDappSettingsError> {
+    request.check()?;
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        add_hidden_dapp_id(
+            stored_principal,
+            request.current_user_version,
+            request.dapp_id,
+            &mut user_profile_model,
+        )
+    })
+}
+
 /// It create a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
 #[update(guard = "may_write_user_data")]
-fn create_user_profile() -> UserProfile {
+#[must_use]
+pub fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -522,8 +565,15 @@ fn create_user_profile() -> UserProfile {
     })
 }
 
+/// Returns the caller's user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `GetUserProfileError`.
+///
+/// # Panics
+/// - If the caller is anonymous.  See: `may_read_user_data`.
 #[query(guard = "may_read_user_data")]
-fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -536,9 +586,25 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     })
 }
 
+/// An endpoint to be called by users on first login, to enable them to
+/// use the chain fusion signer together with Oisy.
+///
+/// Note:
+/// - The chain fusion signer performs threshold key operations including providing
+///   public keys, creating signatures and assisting with performing signed Bitcoin
+///   and Ethereum transactions.
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`.
+#[update(guard = "may_read_user_data")]
+pub async fn allow_signing() -> Result<(), AllowSigningError> {
+    signer::allow_signing().await
+}
+
 #[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
-fn list_users(request: ListUsersRequest) -> ListUsersResponse {
+#[must_use]
+pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
     // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
     let (users, matches_max_length): (Vec<OisyUser>, u64) =
@@ -552,19 +618,20 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 
 /// API method to get cycle balance and burn rate.
 #[update]
-async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }
 
 /// Gets the state of any migration currently in progress.
 #[query(guard = "caller_is_allowed")]
-fn migration() -> Option<MigrationReport> {
+#[must_use]
+pub fn migration() -> Option<MigrationReport> {
     read_state(|s| s.migration.as_ref().map(MigrationReport::from))
 }
 
 /// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.
 #[update(guard = "caller_is_allowed")]
-fn set_guards(guards: Guards) {
+pub fn set_guards(guards: Guards) {
     mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
 }
 
@@ -572,7 +639,8 @@ fn set_guards(guards: Guards) {
 ///
 /// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
 #[query(guard = "caller_is_allowed")]
-fn stats() -> Stats {
+#[must_use]
+pub fn stats() -> Stats {
     read_state(|s| Stats::from(s))
 }
 
@@ -581,7 +649,7 @@ fn stats() -> Stats {
 /// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
 #[update(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
-fn bulk_up(data: Vec<u8>) {
+pub fn bulk_up(data: Vec<u8>) {
     migrate::bulk_up(&data);
 }
 
@@ -590,7 +658,7 @@ fn bulk_up(data: Vec<u8>) {
 /// # Errors
 /// - There is a current migration in progress to a different canister.
 #[update(guard = "caller_is_allowed")]
-fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
+pub fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
             if migration.to == to {
@@ -614,8 +682,11 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 }
 
 /// Switch off the migration timer; migrate with manual API calls instead.
+///
+/// # Errors
+/// - There is no migration in progress.
 #[update(guard = "caller_is_allowed")]
-fn migration_stop_timer() -> Result<(), String> {
+pub fn migration_stop_timer() -> Result<(), String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
             clear_timer(migration.timer_id);
@@ -630,7 +701,7 @@ fn migration_stop_timer() -> Result<(), String> {
 ///
 /// On error, the migration is marked as failed and the timer is cleared.
 #[update(guard = "caller_is_allowed")]
-async fn step_migration() {
+pub async fn step_migration() {
     let result = migrate::step_migration().await;
     eprintln!("Stepped migration: {:?}", result);
     if let Err(err) = result {
@@ -642,32 +713,6 @@ async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
-}
-
-/// Computes the parity bit allowing to recover the public key from the signature.
-fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
-    use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
-
-    let orig_key = VerifyingKey::from_sec1_bytes(pubkey).expect("failed to parse the pubkey");
-    let signature = Signature::try_from(sig).unwrap();
-    for parity in [0u8, 1] {
-        let recid = RecoveryId::try_from(parity).unwrap();
-        let recovered_key = VerifyingKey::recover_from_prehash(prehash, &signature, recid)
-            .expect("failed to recover key");
-        if recovered_key == orig_key {
-            return u64::from(parity);
-        }
-    }
-
-    panic!(
-        "failed to recover the parity bit from a signature; sig: {}, pubkey: {}",
-        hex::encode(sig),
-        hex::encode(pubkey)
-    )
-}
-
-fn decode_hex(hex: &str) -> Bytes {
-    Bytes::from(hex::decode(hex.trim_start_matches("0x")).expect("failed to decode hex"))
 }
 
 export_candid!();

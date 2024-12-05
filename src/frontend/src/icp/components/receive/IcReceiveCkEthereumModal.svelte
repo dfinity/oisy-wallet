@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -32,11 +33,11 @@
 	let destination = '';
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
-			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress(
-					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					$ckEthereumNativeToken.network.id
-				) ?? '';
+			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
+			: (toCkEthHelperContractAddress({
+					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
+					networkId: $ckEthereumNativeToken.network.id
+				}) ?? '');
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 
@@ -109,7 +110,14 @@
 				on:icConvert={() => modal.set(4)}
 			/>
 		{:else if currentStep?.name === steps[1].name}
-			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
+			<ReceiveAddressQRCode
+				on:icBack={modal.back}
+				address={$icrcAccountIdentifierText ?? ''}
+				addressToken={ICP_TOKEN}
+				network={ICP_NETWORK}
+				qrCodeAction={{ enabled: false }}
+				copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+			/>
 		{:else}
 			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
 		{/if}

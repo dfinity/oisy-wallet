@@ -1,14 +1,15 @@
 <script lang="ts">
-	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
-	import type { TokenUi } from '$lib/types/token';
 	import { createEventDispatcher } from 'svelte';
-	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { i18n } from '$lib/stores/i18n.store';
-	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
+	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
+	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { TokenUi } from '$lib/types/token';
 
 	const dispatch = createEventDispatcher();
 
@@ -21,18 +22,22 @@
 	$: loading = $erc20UserTokensNotInitialized;
 </script>
 
-<TokensSkeletons {loading}>
-	{#each tokens as token (token.id)}
-		<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
-			<TokenCardContent {token} />
-		</TokenCardWithOnClick>
-	{/each}
+<ContentWithToolbar>
+	<TokensSkeletons {loading}>
+		{#if tokens.length > 0}
+			<div class="mb-6 flex flex-col gap-6">
+				{#each tokens as token (token.id)}
+					<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
+						<TokenCardContent data={token} />
+					</TokenCardWithOnClick>
+				{/each}
+			</div>
+		{:else}
+			<p class="text-black">
+				{$i18n.tokens.manage.text.all_tokens_zero_balance}
+			</p>
+		{/if}
+	</TokensSkeletons>
 
-	{#if tokens.length === 0}
-		<p class="mt-4 mb-6 text-dark opacity-50">{$i18n.tokens.manage.text.all_tokens_zero_balance}</p>
-	{/if}
-</TokensSkeletons>
-
-<button class="secondary full center text-center" on:click={modalStore.close}>
-	{$i18n.core.text.close}
-</button>
+	<ButtonCloseModal slot="toolbar" />
+</ContentWithToolbar>

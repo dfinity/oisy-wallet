@@ -1,31 +1,32 @@
 @use '../mixins/media';
+@use '../mixins/modal';
 
 :root {
-	--positive-emphasis: var(--color-mountain-meadow);
+	--positive-emphasis: var(--color-green-crayola);
 	--positive-emphasis-rgb: 48, 175, 145;
 
 	--warning-emphasis-shade: var(--color-goldenrod);
 
 	--negative-emphasis: var(--color-cyclamen);
 
-	--primary: var(--color-blue);
+	--primary: var(--color-blue-ribbon);
 	--primary-contrast: var(--color-white);
-	--tertiary: var(--color-dark);
+	--tertiary: var(--color-secondary);
 
-	--value-color: var(--color-dark);
+	--value-color: var(--color-secondary);
 
 	--border-radius-2x: var(--border-radius-lg);
-	--border-radius-0_5x: calc(0.5 * var(--border-radius-sm));
+	--border-radius-0_5x: var(--border-radius-xs);
 	--border-radius: var(--border-radius-sm);
 
 	--animation-time-normal: 0.2s;
 
-	--progress-color: var(--color-medium-purple);
+	--progress-color: var(--color-primary);
 	--progress-color-contrast: var(--color-white);
-	--progress-color-rgb: 137, 105, 213;
+	--progress-color-rgb: var(--color-primary-rgb);
 
 	--overlay-background: var(--color-white);
-	--overlay-background-contrast: var(--color-dark);
+	--overlay-background-contrast: var(--color-secondary);
 
 	--dropdown-background: var(--overlay-background);
 	--dropdown-border-size: 1.5px;
@@ -50,26 +51,34 @@
 	--font-size-standard: 1rem;
 
 	// Segment
-	--segment-selected-background: var(--color-dark);
+	--segment-selected-background: var(--color-secondary);
+
+	// Checkbox
+	--checkbox-padding: 0;
 
 	// Modal
 
 	--alert-width: calc(100% - var(--padding-8x));
 	--alert-max-width: calc(100vw - var(--padding-4x));
-	--alert-max-height: calc(100vh - var(--padding-4x));
-	--alert-border-radius: var(--border-radius-md);
-	--alert-padding-y: var(--padding-4x);
-	--alert-padding-x: var(--padding-2x);
+	--alert-max-height: calc(100dvh - var(--padding-4x));
+	--alert-border-radius: var(--border-radius-xs);
+	--alert-padding-y: 0;
+	--alert-padding-x: 0;
 
-	--dialog-width: 100vw;
-	--dialog-max-width: 100vw;
-	--dialog-height: 100vh;
-	--dialog-border-radius: 0;
-	--dialog-padding-y: var(--padding-1_5x);
-	--dialog-padding-x: var(--padding-2x);
+	--dialog-width: 560px;
+	--dialog-max-width: var(--alert-max-width);
+	--dialog-max-height: var(--alert-max-height);
+	--dialog-min-height: var(--alert-max-height);
+	--dialog-height: initial;
+	--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	--dialog-padding-y: 0;
+	--dialog-padding-x: 0;
 
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
+
+	--backdrop-contrast: var(--color-secondary);
+	--backdrop-filter: blur(4px);
 
 	@supports (-webkit-touch-callout: none) {
 		--dialog-height: -webkit-fill-available;
@@ -79,23 +88,12 @@
 	@include media.min-width(medium) {
 		--alert-width: 464px;
 
-		--dialog-width: 464px;
-		--dialog-max-width: var(--alert-max-width);
-		--dialog-min-height: calc(100vh - var(--padding-8x));
-		--dialog-height: initial;
-		--dialog-max-height: var(--alert-max-height);
-		--dialog-border-radius: var(--alert-border-radius);
-		--dialog-padding-x: var(--padding-3x);
-
 		--section-max-width: 576px;
 	}
 
 	@media (min-width: 768px) and (min-height: 560px) {
 		--dialog-min-height: 200px;
 	}
-
-	--backdrop-contrast: var(--color-dark);
-	--backdrop-filter: blur(4px);
 }
 
 article.gix {
@@ -118,22 +116,55 @@ div.input-field input[id]::placeholder {
 }
 
 div.modal {
-	--overlay-background: var(--color-light-blue);
-	--overlay-background-contrast: var(--color-dark);
-	--overlay-content-background: var(--color-white);
-	--overlay-content-background-contrast: var(--color-dark);
+	--overlay-background: var(--color-ghost-white);
+	--overlay-background-contrast: var(--color-secondary);
+	--overlay-content-background: var(--color-ghost-white);
+	--overlay-content-background-contrast: var(--color-secondary);
 
-	color: var(--color-dark);
+	color: var(--color-secondary);
 	font-weight: var(--font-weight-normal);
 
-	div.wrapper.dialog div.container-wrapper {
-		margin: var(--padding-1_5x) var(--padding-1_5x) auto;
+	div.wrapper.dialog {
+		color: var(--color-secondary);
+		padding-block: var(--padding-3x);
+		padding-inline: var(--padding);
+	}
+
+	div.wrapper.dialog > div.header {
+		// TODO: Improve padding definition when the Modal of GIX Components has an updated way of setting it and not being hard-coded (https://github.com/dfinity/gix-components/blob/1c4ab390f9cab1d0e3ec73a23384e045679eb6b8/src/lib/components/Modal.svelte#L195)
+		--padding-3x: 0;
+		--padding: var(--padding-2x);
+		--dialog-padding-y: 0;
+
+		margin-inline: calc(3 / 2 * var(--padding));
+
+		--color-grey: rgba(0, 0, 0, 0.05);
+
+		h2 {
+			font-size: var(--font-size-h3);
+		}
+	}
+
+	div.wrapper.dialog > div.container-wrapper {
+		margin: 0;
+
+		& > div.container {
+			border-radius: 0;
+
+			& > div.content {
+				padding-inline: var(--padding-1_5x);
+
+				@include media.min-width(medium) {
+					padding-inline: var(--padding-2_5x);
+				}
+			}
+		}
 	}
 
 	div.container {
 		max-width: 100%;
 
-		div.content {
+		& > div.content {
 			border-radius: var(--padding-0_75x);
 
 			overscroll-behavior: contain;
@@ -144,12 +175,28 @@ div.modal {
 	div.transition:not(:has(+ form)),
 	div.transition > form {
 		display: flex;
+		flex: 1;
 		flex-direction: column;
 		min-height: 100%;
 
+		--stretch-padding-bottom: 0;
+
+		&.min-h-auto {
+			min-height: auto;
+		}
+
 		> div.stretch {
 			flex: 1;
-			margin: 0 0 var(--padding-3x);
+
+			@include modal.content;
+
+			padding: var(--padding-3x) var(--padding-2_5x) var(--stretch-padding-bottom);
+
+			margin: 0 0 var(--padding-0_5x);
+
+			&:has(+ *) {
+				margin: 0 0 var(--padding-3x);
+			}
 		}
 	}
 }
@@ -178,12 +225,51 @@ div.toggle {
 	--card-background: var(--color-white);
 
 	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--color-blue);
+		--card-background-contrast: var(--color-blue-ribbon);
 	}
 }
 
 div.segment-button {
 	button.selected {
 		color: var(--color-white);
+	}
+}
+
+div.step.completed {
+	svg {
+		--icon-check-circle-background: var(--color-primary);
+	}
+
+	div.line {
+		--line-color: var(--color-primary);
+	}
+}
+
+div.checkbox {
+	input[type='checkbox'] {
+		--secondary: var(--color-primary);
+		--focus-background: var(--color-white);
+
+		&:focus {
+			--secondary: var(--color-primary);
+			--focus-background: var(--color-white);
+		}
+
+		&:checked {
+			--secondary: var(--color-primary);
+			--focus-background: var(--color-cobalt);
+			--input-custom-border-color: var(--color-primary);
+			--input-background: var(--color-primary);
+
+			&:focus {
+				--secondary: var(--color-cobalt);
+				--focus-background: var(--color-cobalt);
+				--input-custom-border-color: var(--color-cobalt);
+			}
+		}
+
+		&:checked:after {
+			--background-contrast: var(--color-white);
+		}
 	}
 }

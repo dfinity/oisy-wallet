@@ -11,6 +11,13 @@ export enum ProgressStepsSend {
 	DONE = 'done'
 }
 
+export enum ProgressStepsConvert {
+	INITIALIZATION = 'initialization',
+	CONVERT = 'convert',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
 export enum ProgressStepsSign {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
@@ -42,6 +49,13 @@ export enum ProgressStepsSendIc {
 	INITIALIZATION = 'initialization',
 	APPROVE_FEES = 'approve_fees',
 	APPROVE_TRANSFER = 'approve_transfer',
+	SEND = 'send',
+	RELOAD = 'reload',
+	DONE = 'done'
+}
+
+export enum ProgressStepsSendBtc {
+	INITIALIZATION = 'initialization',
 	SEND = 'send',
 	RELOAD = 'reload',
 	DONE = 'done'

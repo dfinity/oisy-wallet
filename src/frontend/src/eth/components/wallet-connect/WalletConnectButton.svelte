@@ -1,14 +1,29 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
+
+	export let ariaLabel: string | undefined = undefined;
 </script>
 
 <button
+	aria-label={ariaLabel}
 	on:click
-	class="wallet-connect icon desktop-wide text-white"
+	in:fade
+	class="tertiary h-10 text-brand-primary"
+	class:icon={!$$slots.default}
 	disabled={$ethAddressNotLoaded}
-	class:opacity-0={$ethAddressNotLoaded}
 >
 	<IconWalletConnect size="24" />
-	<span class="font-bold"><slot /></span>
+	<slot />
 </button>
+
+<style lang="scss">
+	button {
+		border-radius: var(--border-radius-sm-1_5x);
+
+		&:hover {
+			color: inherit;
+		}
+	}
+</style>

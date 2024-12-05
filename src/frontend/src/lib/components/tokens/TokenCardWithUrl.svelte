@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Token } from '$lib/types/token';
-	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { transactionsUrl } from '$lib/utils/nav.utils';
 
 	export let token: Token;
 	export let disableTabSelector = false;
@@ -11,9 +11,9 @@
 	$: url = transactionsUrl({ token });
 </script>
 
-<div class="flex gap-3 sm:gap-8 mb-6">
+<div class="group flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8">
 	<a
-		class="no-underline flex-1"
+		class="flex-1 no-underline"
 		href={url}
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol

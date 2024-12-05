@@ -1,15 +1,18 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
-	import InProgress from '$lib/components/ui/InProgress.svelte';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { onDestroy, onMount } from 'svelte';
-	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
-	import Warning from '$lib/components/ui/Warning.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
+	import { onDestroy, onMount } from 'svelte';
+	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
+	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
-	export let steps: [ProgressStep, ...ProgressStep[]];
+	export let steps: ProgressSteps;
+	export let warningType: 'transaction' | 'manage' = 'transaction';
 
 	onMount(() => confirmToCloseBrowser(true));
 	onDestroy(() => confirmToCloseBrowser(false));
@@ -27,10 +30,15 @@
 </script>
 
 <div class="stretch">
-	<Warning>
-		<p>This may take a few seconds.</p>
-		<p>Please do not close your browser tab.</p>
-	</Warning>
+	<MessageBox level="light-warning">
+		<span>
+			{replaceOisyPlaceholders(
+				warningType === 'manage'
+					? $i18n.tokens.import.warning.do_not_close_manage
+					: $i18n.core.warning.do_not_close
+			)}
+		</span>
+	</MessageBox>
 
 	<InProgress {progressStep} {steps} />
 </div>

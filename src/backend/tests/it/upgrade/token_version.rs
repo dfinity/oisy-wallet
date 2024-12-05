@@ -1,9 +1,7 @@
 use crate::upgrade::constants::{BACKEND_V0_0_13_WASM_PATH, BACKEND_V0_0_19_WASM_PATH};
 use crate::upgrade::types::{AddUserTokenAfterUpgradeOptions, UserTokenV0_0_13, UserTokenV0_0_19};
 use crate::utils::assertion::assert_tokens_data_eq;
-use crate::utils::mock::{
-    CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
-};
+use crate::utils::mock::{CALLER, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL};
 use crate::utils::pocketic::{BackendBuilder, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
@@ -55,31 +53,6 @@ fn test_upgrade_user_token() {
     let results_tokens = results.unwrap();
 
     assert_tokens_data_eq(&results_tokens, &expected_tokens);
-}
-
-#[test]
-fn test_upgrade_allowed_caller_eth_address_of() {
-    // Deploy a released canister
-    let pic_setup = BackendBuilder::default()
-        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
-        .deploy();
-
-    // Caller is allowed to call eth_address_of
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let result = pic_setup.update::<String>(caller, "eth_address_of", caller);
-    assert!(result.is_ok());
-
-    // Upgrade canister with new wasm
-    pic_setup
-        .upgrade_latest_wasm(None)
-        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
-
-    // Caller is still allowed to call eth_address_of
-    let post_upgrade_result = pic_setup.update::<String>(caller, "eth_address_of", caller);
-
-    assert!(post_upgrade_result.is_ok());
-    assert_eq!(post_upgrade_result.unwrap(), CALLER_ETH_ADDRESS.to_string());
 }
 
 #[test]

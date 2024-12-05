@@ -5,17 +5,19 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import WalletConnectActions from './WalletConnectActions.svelte';
-	import WalletConnectDomainVerification from './WalletConnectDomainVerification.svelte';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
+	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectDomainVerification from '$eth/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	export let proposal: Option<Web3WalletTypes.SessionProposal>;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
@@ -44,8 +46,10 @@
 
 {#if nonNullish(proposal) && nonNullish(params)}
 	<div class="stretch" in:fade>
-		<p class="font-bold">{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}</p>
-		<p>{params.proposer.metadata.description}</p>
+		<p class="mb-0 font-bold">
+			{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}
+		</p>
+		<p class="mb-0">{params.proposer.metadata.description}</p>
 		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
 			>{params.proposer.metadata.url}</a
 		>
@@ -59,19 +63,19 @@
 			{#each value.chains ?? [] as chainId}
 				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
-				<p class="font-bold mt-6">
+				<p class="mt-6 font-bold">
 					{replacePlaceholders($i18n.wallet_connect.text.review, {
 						$chain_name: chainName,
 						$key: key
 					})}:
 				</p>
 
-				<article class="bg-dust rounded-sm p-4 mt-4">
+				<article class="mt-4 rounded-sm bg-dust p-4">
 					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
 
-					<p class="font-bold mt-4">{$i18n.wallet_connect.text.events}:</p>
+					<p class="mt-4 font-bold">{$i18n.wallet_connect.text.events}:</p>
 
 					<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
 				</article>
@@ -84,7 +88,7 @@
 	</div>
 {:else}
 	<div class="stretch">
-		<div class="flex flex-col items-center justify-center h-[100%] gap-2 min-h-[30vh] pt-8">
+		<div class="flex h-[100%] min-h-[30vh] flex-col items-center justify-center gap-2 pt-8">
 			<div>
 				<Spinner inline />
 			</div>
@@ -95,11 +99,10 @@
 	{#if displayCancel}
 		<div class="mt-8" in:fade>
 			<ButtonGroup>
-				<button
-					class="secondary block flex-1"
+				<ButtonCancel
 					on:click={() => dispatch('icCancel')}
-					disabled={$isBusy || $ethAddressNotCertified}>{$i18n.core.text.cancel}</button
-				>
+					disabled={$isBusy || $ethAddressNotCertified}
+				/>
 			</ButtonGroup>
 		</div>
 	{/if}

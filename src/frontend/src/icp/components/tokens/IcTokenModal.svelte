@@ -1,16 +1,18 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import type { OptionIcCkToken } from '$icp/types/ic';
-	import type { Token as TokenType } from '$lib/types/token';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import Token from '$lib/components/tokens/Token.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Value from '$lib/components/ui/Value.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import type { Token as TokenType } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($token as OptionIcCkToken)?.twinToken;
@@ -22,13 +24,13 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.tokens.details.title}</svelte:fragment>
 
-	<div class="stretch">
+	<ContentWithToolbar>
 		{#if nonNullish($token)}
 			<Token token={$token}>
 				{#if nonNullish(twinToken)}
 					<Value ref="name">
 						<svelte:fragment slot="label">{$i18n.tokens.details.twin_token}</svelte:fragment>
-						<span class="flex gap-1 items-center">
+						<span class="flex items-center gap-1">
 							<output>{twinToken.name}</output>
 							<Logo
 								src={twinToken.icon}
@@ -81,9 +83,7 @@
 				{/if}
 			</Token>
 		{/if}
-	</div>
 
-	<button class="primary full center text-center" on:click={modalStore.close}
-		>{$i18n.core.text.done}</button
-	>
+		<ButtonDone on:click={modalStore.close} slot="toolbar" />
+	</ContentWithToolbar>
 </Modal>

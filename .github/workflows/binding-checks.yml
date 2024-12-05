@@ -2,72 +2,108 @@ name: Binding Checks
 
 on:
   pull_request:
-    paths:
-      - # Any new or changed canisters
-        'dfx.json'
-      - # Any new or changed .did files
-        '**/*.did'
-      - # Scripts, GitHub actions that contain 'backend' in their path.
-        '**/*backend*'
-      - # The backend source code
-        'src/backend/**'
-      - 'src/shared/**'
-      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
-        '**/Cargo*'
-      - '**/*rust*'
-      - # This workflow
-        '.github/workflows/binding-checks.yml'
   workflow_dispatch:
 
 jobs:
-
   generate:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Cache backend wasm
-        uses: actions/cache@v4
-        id: backend-wasm-cache
+
+      - name: Check if commits can be added
+        id: check_can_add_commit
+        run: |
+          echo "can_add_commit=${{ secrets.GIX_CREATE_PR_PAT != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
+
+      - name: Checkout code
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
+        uses: actions/checkout@v4
         with:
-          path: |
-            target/wasm32-unknown-unknown/release/backend.wasm
-          key: backend-wasm-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
-      - name: Cache cargo dependencies
-        if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+
+      - name: Checkout code
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
+        uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
-      - name: Remove the old Wasm to force a rebuild
-        if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
-        run: rm -f target/wasm32-unknown-unknown/release/backend.wasm
+          filters: |
+            src:
+              - # Any new or changed canisters
+                'dfx.json'
+              - # Any new or changed .did files
+                '**/*.did'
+              - # Scripts, GitHub actions that contain 'backend' in their path.
+                '**/*backend*'
+              - # The backend source code
+                'src/backend/**'
+              - 'src/shared/**'
+              - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
+                '**/Cargo*'
+              - '**/*rust*'
+              - # Scripts that download external Candid files, with false positives.
+                'scripts/build.*.sh'
+              - # This workflow
+                '.github/workflows/binding-checks.yml'
+
+      - name: Build oisy-backend WASM
+        if: steps.changes.outputs.src == 'true'
+        uses: ./.github/actions/oisy-backend
+
       - name: Prepare
+        if: steps.changes.outputs.src == 'true'
         uses: ./.github/actions/prepare
+
       - name: Install dfx
+        if: steps.changes.outputs.src == 'true'
         uses: dfinity/setup-dfx@main
+
       - name: Install binstall
+        if: steps.changes.outputs.src == 'true'
         run: |
           BINSTALL_VERSION="1.8.0"
           curl -L --proto '=https' --tlsv1.2 -sSf "https://github.com/cargo-bins/cargo-binstall/releases/download/v${BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" | tar -xvzf - cargo-binstall
           ./cargo-binstall -y --force "cargo-binstall@$BINSTALL_VERSION"
           rm cargo-binstall
+
       - name: Install candid-extractor
+        if: steps.changes.outputs.src == 'true'
         run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
+
       - name: Generate bindings
+        if: steps.changes.outputs.src == 'true'
         run: npm run generate
+
       - name: Check bindings
+        id: check_changes
+        if: steps.changes.outputs.src == 'true'
         run: |
-          test -z "$(git status --porcelain)" || {
-                  echo "FIX: Please execute npm run generate"
-                  git diff
-                  exit 1
-          }
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit bindings
+        if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'true' && steps.check_changes.outputs.changes_detected == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: .
+          default_author: github_actions
+          message: '🤖 Apply bindings changes'
+
+      - name: Provide diff
+        if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
+        run: |
+          echo "FIX: Please execute npm run generate"
+          git diff
+          exit 1
+
   binding-checks-pass:
     needs: [ 'generate' ]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
         run: echo OK

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
+	import { hideZeroBalances } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 
 	let checked: boolean;
-	$: checked = $hideZeroBalancesStore?.enabled ?? false;
+	$: checked = $hideZeroBalances;
 
 	const toggleHide = () =>
 		hideZeroBalancesStore.set({ key: 'hide-zero-balances', value: { enabled: !checked } });

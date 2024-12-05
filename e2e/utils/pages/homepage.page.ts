@@ -1,58 +1,74 @@
 import {
-	HERO_ANIMATION_CANVAS,
+	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
-	TOKENS_SKELETONS_INITIALIZED
+	RECEIVE_TOKENS_MODAL,
+	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TOKEN_BALANCE,
+	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
+import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
+import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
-type HomepageParams = {
+interface HomepageParams {
 	page: Page;
 	viewportSize?: ViewportSize;
-};
+}
 
-type HomepageLoggedInParams = {
+export type HomepageLoggedInParams = {
 	iiPage: InternetIdentityPage;
 } & HomepageParams;
 
-type SelectorOperationParams = {
+interface SelectorOperationParams {
 	selector: string;
-};
+}
 
-type WaitForModalParams = {
+interface TestIdOperationParams {
+	testId: string;
+}
+
+interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
-};
+}
 
 type TestModalSnapshotParams = {
 	selectorsToMock?: string[];
 } & WaitForModalParams;
 
-type ClickMenuItemParams = {
+interface ClickMenuItemParams {
 	menuItemTestId: string;
-};
+}
 
-type WaitForLocatorOptions = {
+interface WaitForLocatorOptions {
 	state: 'attached' | 'detached' | 'visible' | 'hidden';
-};
+	timeout?: number;
+}
 
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
+	private promotionCarousel?: PromotionCarousel;
 
 	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
 		this.#viewportSize = viewportSize;
 	}
 
+	protected async clickByTestId(testId: string): Promise<void> {
+		await this.#page.getByTestId(testId).click();
+	}
+
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
-		return this.#page.isVisible(selector);
+		return await this.#page.isVisible(selector);
 	}
 
 	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
@@ -61,7 +77,9 @@ abstract class Homepage {
 		}
 	}
 
-	private async mockSelector({ selector }: SelectorOperationParams): Promise<void> {
+	protected async mockSelector({ selector }: SelectorOperationParams): Promise<void> {
+		await this.#page.locator(selector).innerHTML();
+
 		if (await this.isSelectorVisible({ selector })) {
 			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
 		}
@@ -69,17 +87,6 @@ abstract class Homepage {
 
 	private async goto(): Promise<void> {
 		await this.#page.goto(HOMEPAGE_URL);
-	}
-
-	private async waitForModal({
-		modalOpenButtonTestId,
-		modalTestId
-	}: WaitForModalParams): Promise<Locator> {
-		await this.#page.getByTestId(modalOpenButtonTestId).click();
-		const modal = this.#page.getByTestId(modalTestId);
-		await modal.waitFor();
-
-		return modal;
 	}
 
 	private async setViewportSize(viewportSize: ViewportSize) {
@@ -97,13 +104,10 @@ abstract class Homepage {
 	private async getCanvasAsDataURL({
 		selector
 	}: SelectorOperationParams): Promise<string | undefined> {
-		return this.#page.evaluate<string | undefined, { selector: string }>(
+		return await this.#page.evaluate<string | undefined, { selector: string }>(
 			({ selector }) => {
 				const canvas = document.querySelector<HTMLCanvasElement>(selector);
-
-				if (nonNullish(canvas)) {
-					return canvas.toDataURL();
-				}
+				return canvas?.toDataURL();
 			},
 			{
 				selector
@@ -111,7 +115,7 @@ abstract class Homepage {
 		);
 	}
 
-	private async readQRCode({ selector }: SelectorOperationParams): Promise<string | undefined> {
+	protected async readQRCode({ selector }: SelectorOperationParams): Promise<string | undefined> {
 		await this.#page.locator(selector).waitFor();
 
 		const dataUrl = await this.getCanvasAsDataURL({ selector });
@@ -121,27 +125,63 @@ abstract class Homepage {
 		}
 	}
 
+	protected async waitForModal({
+		modalOpenButtonTestId,
+		modalTestId
+	}: WaitForModalParams): Promise<Locator> {
+		await this.clickByTestId(modalOpenButtonTestId);
+		const modal = this.#page.getByTestId(modalTestId);
+		await modal.waitFor();
+
+		return modal;
+	}
+
 	protected async waitForHomepageReady(): Promise<void> {
 		if (nonNullish(this.#viewportSize)) {
 			await this.setViewportSize(this.#viewportSize);
 		}
 
 		await this.goto();
-		await this.waitForLoginButton();
-		await this.hideSelector({ selector: `[data-tid="${HERO_ANIMATION_CANVAS}"]` });
+		await this.waitForLoggedOutIndicator();
 	}
 
-	protected async waitForTokenSkeletonsInitialization(
-		options?: WaitForLocatorOptions
-	): Promise<void> {
-		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor(options);
+	protected async waitForLoaderModal(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
+	}
+
+	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
-		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).click();
+		await this.clickByTestId(NAVIGATION_MENU_BUTTON);
 		await this.waitForNavigationMenu();
 
-		await this.#page.getByTestId(menuItemTestId).click();
+		await this.clickByTestId(menuItemTestId);
+	}
+
+	protected async clickSelector({ selector }: SelectorOperationParams): Promise<void> {
+		await this.#page.locator(selector).click();
+	}
+
+	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
+		return await this.#page.getByTestId(testId);
+	}
+
+	async waitForTimeout(timeout: number): Promise<void> {
+		await this.#page.waitForTimeout(timeout);
+	}
+
+	async waitForLoggedOutIndicator(): Promise<void> {
+		await this.waitForLoginButton();
+	}
+
+	async waitForLoggedInIndicator(): Promise<void> {
+		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
 	}
 
 	async testModalSnapshot({
@@ -155,11 +195,28 @@ abstract class Homepage {
 		});
 
 		if (nonNullish(selectorsToMock)) {
-			await Promise.all(selectorsToMock.map(async (selector) => this.mockSelector({ selector })));
+			await Promise.all(
+				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
+			);
 		}
 
 		await expect(modal).toHaveScreenshot();
 	}
+
+	async setCarouselFirstSlide(): Promise<void> {
+		if (isNullish(this.promotionCarousel)) {
+			this.promotionCarousel = new PromotionCarousel(this.#page);
+		}
+
+		await this.promotionCarousel.navigateToSlide(1);
+		await this.promotionCarousel.freezeCarousel();
+	}
+
+	async waitForLoadState() {
+		await this.#page.waitForLoadState('networkidle');
+	}
+
+	abstract extendWaitForReady(): Promise<void>;
 
 	abstract waitForReady(): Promise<void>;
 }
@@ -169,11 +226,14 @@ export class HomepageLoggedOut extends Homepage {
 		super(params);
 	}
 
+	override async extendWaitForReady(): Promise<void> {}
+
 	/**
 	 * @override
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
+		await this.waitForLoadState();
 	}
 }
 
@@ -197,11 +257,50 @@ export class HomepageLoggedIn extends Homepage {
 		await this.#iiPage.signInWithNewIdentity();
 	}
 
+	async checkIfStillLoggedIn(timeout = 10000): Promise<void> {
+		await this.waitForLoggedInIndicator();
+
+		await this.waitForTimeout(timeout);
+
+		await this.waitForLoggedInIndicator();
+	}
+
 	async waitForLogout(): Promise<void> {
 		await this.clickMenuItem({ menuItemTestId: LOGOUT_BUTTON });
 
-		await this.waitForLoginButton();
-		await this.waitForTokenSkeletonsInitialization({ state: 'detached' });
+		await this.waitForLoggedOutIndicator();
+	}
+
+	async testReceiveModalQrCode({
+		receiveModalSectionSelector
+	}: {
+		receiveModalSectionSelector: string;
+	}): Promise<void> {
+		await this.waitForModal({
+			modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+			modalTestId: RECEIVE_TOKENS_MODAL
+		});
+
+		await this.clickSelector({
+			selector: getReceiveTokensModalQrCodeButtonSelector({
+				sectionSelector: receiveModalSectionSelector
+			})
+		});
+
+		const qrCodeOutputLocator = await this.getLocatorByTestId({
+			testId: RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT
+		});
+		await qrCodeOutputLocator.waitFor();
+
+		const qrCode = await this.readQRCode({
+			selector: `[data-tid="${RECEIVE_TOKENS_MODAL}"] canvas`
+		});
+
+		await expect(qrCodeOutputLocator).toHaveText(qrCode ?? '');
+	}
+
+	override async extendWaitForReady(): Promise<void> {
+		// Extend the waitForReady method in a subclass
 	}
 
 	/**
@@ -210,6 +309,16 @@ export class HomepageLoggedIn extends Homepage {
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
 
-		await this.waitForTokenSkeletonsInitialization();
+		await this.waitForLoaderModal();
+
+		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
+
+		await this.waitForTokensInitialization();
+
+		await this.waitForLoadState();
+
+		await this.setCarouselFirstSlide();
+
+		await this.extendWaitForReady();
 	}
 }

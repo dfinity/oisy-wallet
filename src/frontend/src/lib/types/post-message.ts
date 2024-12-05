@@ -1,124 +1,80 @@
-import type { Erc20ContractAddress } from '$eth/types/erc20';
-import type { PostMessageWalletData } from '$icp/types/ic.post-message';
-import type {
-	CoingeckoSimplePriceResponse,
-	CoingeckoSimpleTokenPriceResponse
-} from '$lib/types/coingecko';
+import {
+	PostMessageDataRequestBtcSchema,
+	PostMessageDataRequestExchangeTimerSchema,
+	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
+	PostMessageDataRequestIcCkSchema,
+	PostMessageDataRequestIcrcSchema,
+	PostMessageDataRequestIcrcStrictSchema,
+	PostMessageDataRequestSchema,
+	PostMessageDataResponseAuthSchema,
+	PostMessageDataResponseBTCAddressSchema,
+	PostMessageDataResponseErrorSchema,
+	PostMessageDataResponseExchangeErrorSchema,
+	PostMessageDataResponseExchangeSchema,
+	PostMessageDataResponseSchema,
+	PostMessageDataResponseWalletCleanUpSchema,
+	PostMessageDataResponseWalletSchema,
+	PostMessageJsonDataResponseSchema,
+	PostMessageRequestSchema,
+	PostMessageResponseSchema,
+	PostMessageResponseStatusSchema,
+	PostMessageSyncStateSchema,
+	inferPostMessageSchema
+} from '$lib/schema/post-message.schema';
 
-import type { BtcAddressData } from '$icp/stores/btc.store';
-import type { JsonText } from '$icp/types/btc.post-message';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
-import type { Network } from '$lib/types/network';
-import type { SyncState } from '$lib/types/sync';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import { z, type ZodType } from 'zod';
 
-export type PostMessageRequest =
-	| 'startIdleTimer'
-	| 'stopIdleTimer'
-	| 'startCodeTimer'
-	| 'stopCodeTimer'
-	| 'startExchangeTimer'
-	| 'stopExchangeTimer'
-	| 'stopIcpWalletTimer'
-	| 'startIcpWalletTimer'
-	| 'triggerIcpWalletTimer'
-	| 'stopIcrcWalletTimer'
-	| 'startIcrcWalletTimer'
-	| 'triggerIcrcWalletTimer'
-	| 'stopBtcStatusesTimer'
-	| 'startBtcStatusesTimer'
-	| 'triggerBtcStatusesTimer'
-	| 'stopCkBTCUpdateBalanceTimer'
-	| 'startCkBTCUpdateBalanceTimer'
-	| 'stopCkMinterInfoTimer'
-	| 'startCkMinterInfoTimer'
-	| 'triggerCkMinterInfoTimer';
+export type PostMessageRequest = z.infer<typeof PostMessageRequestSchema>;
 
-export type PostMessageDataRequest = never;
-export type PostMessageDataResponse = object;
+export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
+export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;
 
-export interface PostMessageDataRequestExchangeTimer {
-	erc20Addresses: Erc20ContractAddress[];
-	icrcCanisterIds: LedgerCanisterIdText[];
-}
+export type PostMessageDataRequestExchangeTimer = z.infer<
+	typeof PostMessageDataRequestExchangeTimerSchema
+>;
 
-export type PostMessageDataRequestIcrc = IcCanisters & Pick<Network, 'env'>;
+export type PostMessageDataRequestIcrc = z.infer<typeof PostMessageDataRequestIcrcSchema>;
 
-export type PostMessageDataRequestIcCk = Partial<Pick<IcCkMetadata, 'minterCanisterId'>>;
+export type PostMessageDataRequestIcrcStrict = z.infer<
+	typeof PostMessageDataRequestIcrcStrictSchema
+>;
 
-export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestIcCk & {
-	btcAddress: string | undefined;
-	bitcoinNetwork: BitcoinNetwork;
-};
+export type PostMessageDataRequestIcCk = z.infer<typeof PostMessageDataRequestIcCkSchema>;
 
-export type PostMessageResponseStatus =
-	| 'syncWalletStatus'
-	| 'syncBtcStatusesStatus'
-	| 'syncCkMinterInfoStatus'
-	| 'syncCkBTCUpdateBalanceStatus';
+export type PostMessageDataRequestIcCkBTCUpdateBalance = z.infer<
+	typeof PostMessageDataRequestIcCkBTCUpdateBalanceSchema
+>;
 
-export type PostMessageResponse =
-	| 'signOutIdleTimer'
-	| 'delegationRemainingTime'
-	| 'syncExchange'
-	| 'syncExchangeError'
-	| 'syncIcpWallet'
-	| 'syncIcrcWallet'
-	| 'syncIcpWalletError'
-	| 'syncIcrcWalletError'
-	| 'syncIcpWalletCleanUp'
-	| 'syncIcrcWalletCleanUp'
-	| 'syncBtcStatuses'
-	| 'syncBtcStatusesError'
-	| 'syncCkMinterInfo'
-	| 'syncCkMinterInfoError'
-	| 'syncBtcPendingUtxos'
-	| 'syncCkBTCUpdateOk'
-	| 'syncBtcAddress'
-	| PostMessageResponseStatus;
+export type PostMessageDataRequestBtc = z.infer<typeof PostMessageDataRequestBtcSchema>;
 
-export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
-	authRemainingTime: number;
-}
+export type PostMessageResponseStatus = z.infer<typeof PostMessageResponseStatusSchema>;
 
-export interface PostMessageDataResponseExchange extends PostMessageDataResponse {
-	currentEthPrice: CoingeckoSimplePriceResponse;
-	currentBtcPrice: CoingeckoSimplePriceResponse;
-	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
-	currentIcpPrice: CoingeckoSimplePriceResponse;
-	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
-}
+export type PostMessageResponse = z.infer<typeof PostMessageResponseSchema>;
 
-export interface PostMessageDataResponseExchangeError extends PostMessageDataResponse {
-	err: string | undefined;
-}
+export type PostMessageDataResponseAuth = z.infer<typeof PostMessageDataResponseAuthSchema>;
 
-export interface PostMessageDataResponseWallet<T> extends PostMessageDataResponse {
-	wallet: PostMessageWalletData<T>;
-}
+export type PostMessageDataResponseExchange = z.infer<typeof PostMessageDataResponseExchangeSchema>;
 
-export interface PostMessageDataResponseError extends PostMessageDataResponse {
-	error: unknown;
-}
+export type PostMessageDataResponseExchangeError = z.infer<
+	typeof PostMessageDataResponseExchangeErrorSchema
+>;
 
-export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataResponse {
-	transactionIds: string[];
-}
+export type PostMessageDataResponseWallet = z.infer<typeof PostMessageDataResponseWalletSchema>;
 
-export interface PostMessageJsonDataResponse extends PostMessageDataResponse {
-	json: JsonText;
-}
+export type PostMessageDataResponseError = z.infer<typeof PostMessageDataResponseErrorSchema>;
 
-export interface PostMessageSyncState extends PostMessageDataResponse {
-	state: SyncState;
-}
+export type PostMessageDataResponseWalletCleanUp = z.infer<
+	typeof PostMessageDataResponseWalletCleanUpSchema
+>;
 
-export interface PostMessageDataResponseBTCAddress extends PostMessageDataResponse {
-	address: BtcAddressData;
-}
+export type PostMessageJsonDataResponse = z.infer<typeof PostMessageJsonDataResponseSchema>;
 
-export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {
-	msg: PostMessageRequest | PostMessageResponse;
-	data?: T;
-}
+export type PostMessageSyncState = z.infer<typeof PostMessageSyncStateSchema>;
+
+export type PostMessageDataResponseBTCAddress = z.infer<
+	typeof PostMessageDataResponseBTCAddressSchema
+>;
+
+export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> = z.infer<
+	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
+>;

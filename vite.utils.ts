@@ -33,20 +33,20 @@ const readRemoteCanisterIds = ({ prefix }: { prefix?: string }): Record<string, 
 	const dfxJsonFile = join(process.cwd(), 'dfx.json');
 
 	try {
-		type DetailsId = {
+		interface DetailsId {
 			ic: string;
 			staging?: string;
-		};
+		}
 
-		type Details = {
+		interface Details {
 			remote?: {
 				id: DetailsId;
 			};
-		};
+		}
 
-		type DfxJson = {
+		interface DfxJson {
 			canisters: Record<string, Details>;
-		};
+		}
 
 		const { canisters }: DfxJson = JSON.parse(readFileSync(dfxJsonFile, 'utf8'));
 
@@ -57,7 +57,7 @@ const readRemoteCanisterIds = ({ prefix }: { prefix?: string }): Record<string, 
 				const ids = Object.entries(canisterDetails.remote.id).reduce(
 					(acc, [network, id]) => ({
 						...acc,
-						[`${prefix ?? ''}${network.toUpperCase()}_${canisterName
+						[`${prefix ?? ''}${network.toUpperCase().replaceAll('-', '_')}_${canisterName
 							.replaceAll('-', '_')
 							.replaceAll("'", '')
 							.toUpperCase()}_CANISTER_ID`]: id

@@ -1,8 +1,12 @@
-import type { IcrcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+import type {
+	IcTransactionType,
+	IcTransactionUi,
+	IcrcTransaction
+} from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
@@ -66,7 +70,7 @@ export const mapIcrcTransaction = ({
 		fromNullable(approve) ?? fromNullable(burn) ?? fromNullable(mint) ?? fromNullable(transfer);
 
 	if (isNullish(data)) {
-		throw new Error(`Unknown transaction type ${JSON.stringify(transaction)}`);
+		throw new Error(`Unknown transaction type ${JSON.stringify(transaction, jsonReplacer)}`);
 	}
 
 	const accountIdentifier = nonNullish(identity)
@@ -111,7 +115,7 @@ export const mapIcrcTransaction = ({
 		: nonNullish(data?.amount)
 			? data.amount +
 				(isTransfer && source.incoming === false
-					? fromNullable(fromNullable(transfer)?.fee ?? []) ?? 0n
+					? (fromNullable(fromNullable(transfer)?.fee ?? []) ?? 0n)
 					: 0n)
 			: undefined;
 

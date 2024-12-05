@@ -1,50 +1,56 @@
-import type { Network } from '$lib/types/network';
-import type { RequiredExcept } from '$lib/types/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
+import {
+	TokenAppearanceSchema,
+	TokenBuySchema,
+	TokenBuyableSchema,
+	TokenCategorySchema,
+	TokenMetadataSchema,
+	TokenSchema,
+	TokenStandardSchema,
+	type TokenIdSchema
+} from '$lib/schema/token.schema';
+import type { OptionBalance } from '$lib/types/balance';
+import type { Option, RequiredExcept } from '$lib/types/utils';
+import { z } from 'zod';
 
-export type TokenId = symbol;
+export type TokenId = z.infer<typeof TokenIdSchema>;
 
-export type TokenStandard = 'ethereum' | 'erc20' | 'icp' | 'icrc' | 'bitcoin';
+export type TokenStandard = z.infer<typeof TokenStandardSchema>;
 
-export type TokenCategory = 'default' | 'custom';
+export type TokenCategory = z.infer<typeof TokenCategorySchema>;
 
-export type Token = {
-	id: TokenId;
-	network: Network;
-	standard: TokenStandard;
-	category: TokenCategory;
-} & TokenMetadata &
-	TokenAppearance;
+export type Token = z.infer<typeof TokenSchema>;
 
-export interface TokenMetadata {
-	name: string;
-	symbol: string;
-	decimals: number;
-	icon?: string;
+export type TokenMetadata = z.infer<typeof TokenMetadataSchema>;
+
+export type TokenAppearance = z.infer<typeof TokenAppearanceSchema>;
+
+export type TokenBuyable = z.infer<typeof TokenBuyableSchema>;
+
+export type TokenBuy = z.infer<typeof TokenBuySchema>;
+
+export interface TokenLinkedData {
+	twinTokenSymbol?: string;
 }
 
-export interface TokenAppearance {
-	oisyName?: TokenOisyName;
-}
+export type TokenWithLinkedData = Token & TokenLinkedData;
 
-export type TokenOisyName = {
-	prefix: string | undefined;
-	oisyName: string;
-};
+export type NonRequiredProps = TokenAppearance & TokenBuyable;
 
-export type RequiredToken = RequiredExcept<Token, keyof TokenAppearance>;
+export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof NonRequiredProps>;
 
-export type OptionToken = Token | undefined | null;
-export type OptionTokenId = TokenId | undefined | null;
-export type OptionTokenStandard = TokenStandard | undefined | null;
+export type RequiredTokenWithLinkedData = RequiredToken<TokenWithLinkedData>;
+
+export type OptionToken = Option<Token>;
+export type OptionTokenId = Option<TokenId>;
+export type OptionTokenStandard = Option<TokenStandard>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
-interface TokenFinancialData {
-	balance?: BigNumber;
+export interface TokenFinancialData {
+	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
 }
 
 export type TokenUi = Token & TokenFinancialData;
 
-export type TokenIndexKey = string;
+export type OptionTokenUi = Option<TokenUi>;

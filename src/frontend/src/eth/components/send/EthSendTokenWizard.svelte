@@ -3,9 +3,9 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import SendForm from './SendForm.svelte';
-	import SendReview from './SendReview.svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import SendForm from '$eth/components/send/SendForm.svelte';
+	import SendReview from '$eth/components/send/SendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -22,30 +22,27 @@
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
-		TRACK_COUNT_ETH_SEND_SUCCESS,
-		TRACK_DURATION_ETH_SEND
+		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import {
-		initTimedEvent,
-		trackTimedEventError,
-		trackTimedEventSuccess,
-		trackEvent
-	} from '$lib/services/analytics.services';
-	import { authStore } from '$lib/stores/auth.store';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -67,7 +64,7 @@
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.
@@ -75,6 +72,9 @@
 
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose === 'send';
+
+	let simplifiedForm = false;
+	$: simplifiedForm = sendPurpose === 'convert-eth-to-cketh';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
@@ -173,13 +173,6 @@
 
 		dispatch('icNext');
 
-		const timedEvent = initTimedEvent({
-			name: TRACK_DURATION_ETH_SEND,
-			metadata: {
-				token: $sendToken.symbol
-			}
-		});
-
 		try {
 			await executeSend({
 				from: $ethAddress,
@@ -195,31 +188,25 @@
 				gas,
 				sourceNetwork,
 				targetNetwork,
-				identity: $authStore.identity,
+				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
-			await Promise.allSettled([
-				trackTimedEventSuccess(timedEvent),
-				trackEvent({
-					name: TRACK_COUNT_ETH_SEND_SUCCESS,
-					metadata: {
-						token: $sendToken.symbol
-					}
-				})
-			]);
+			await trackEvent({
+				name: TRACK_COUNT_ETH_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await Promise.allSettled([
-				trackTimedEventError(timedEvent),
-				trackEvent({
-					name: TRACK_COUNT_ETH_SEND_ERROR,
-					metadata: {
-						token: $sendToken.symbol
-					}
-				})
-			]);
+			await trackEvent({
+				name: TRACK_COUNT_ETH_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
 
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
@@ -286,16 +273,13 @@
 			{nativeEthereumToken}
 			{destinationEditable}
 			{sourceNetwork}
+			{simplifiedForm}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<button type="button" class="secondary block flex-1" on:click={back}
-						>{$i18n.core.text.back}</button
-					>
+					<ButtonBack on:click={back} />
 				{:else}
-					<button type="button" class="secondary block flex-1" on:click={close}
-						>{$i18n.core.text.cancel}</button
-					>
+					<ButtonCancel on:click={close} />
 				{/if}
 			</svelte:fragment>
 		</SendForm>

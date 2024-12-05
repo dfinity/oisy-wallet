@@ -12,7 +12,7 @@
 		"./env.utils.ts",
 		"./vitest.setup.ts",
 		"./vitest.config.ts",
-		"./tailwind.config.js",
+		"./tailwind.config.ts",
 		"./svelte.config.js",
 		"./postcss.config.js",
 		"./playwright.config.ts",

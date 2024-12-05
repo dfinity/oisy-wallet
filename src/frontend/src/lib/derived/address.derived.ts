@@ -1,4 +1,9 @@
-import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
+import {
+	btcAddressMainnetStore,
+	btcAddressRegtestStore,
+	btcAddressTestnetStore,
+	ethAddressStore
+} from '$lib/stores/address.store';
 import type {
 	BtcAddress,
 	EthAddress,
@@ -17,6 +22,16 @@ export const ethAddressNotLoaded: Readable<boolean> = derived(
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
 	[btcAddressMainnetStore],
 	([$btcAddressMainnetStore]) => mapAddress<BtcAddress>($btcAddressMainnetStore)
+);
+
+export const btcAddressTestnet: Readable<OptionBtcAddress> = derived(
+	[btcAddressTestnetStore],
+	([$btcAddressTestnetStore]) => mapAddress<BtcAddress>($btcAddressTestnetStore)
+);
+
+export const btcAddressRegtest: Readable<OptionBtcAddress> = derived(
+	[btcAddressRegtestStore],
+	([$btcAddressRegtestStore]) => mapAddress<BtcAddress>($btcAddressRegtestStore)
 );
 
 export const ethAddress: Readable<OptionEthAddress> = derived(

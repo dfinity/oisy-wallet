@@ -22,6 +22,8 @@ const initAddressStore = <T extends Address>(): AddressStore<T> => {
 	};
 };
 
+export const btcAddressRegtestStore = initAddressStore<BtcAddress>();
+export const btcAddressTestnetStore = initAddressStore<BtcAddress>();
 export const btcAddressMainnetStore = initAddressStore<BtcAddress>();
 
 export const ethAddressStore = initAddressStore<EthAddress>();

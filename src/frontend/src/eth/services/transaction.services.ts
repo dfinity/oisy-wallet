@@ -1,5 +1,6 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
-import { transactionsStore } from '$eth/stores/transactions.store';
+import { reloadBalance } from '$eth/services/balance.services';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { i18n } from '$lib/stores/i18n.store';
@@ -10,7 +11,6 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
-import { reloadBalance } from './balance.services';
 
 export const processTransactionSent = async ({
 	token,
@@ -79,7 +79,7 @@ const processPendingTransaction = async ({
 		return;
 	}
 
-	transactionsStore.add({
+	ethTransactionsStore.add({
 		tokenId: token.id,
 		transactions: [
 			{
@@ -131,7 +131,7 @@ const processMinedTransaction = async ({
 	// This is for simplicity reasons and because it allows us to avoid making an additional call to getTransaction.
 	const { timestamp, ...rest } = minedTransaction;
 
-	transactionsStore.update({
+	ethTransactionsStore.update({
 		tokenId: token.id,
 		transaction: {
 			...rest,

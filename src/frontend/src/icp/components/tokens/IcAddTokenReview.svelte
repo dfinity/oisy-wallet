@@ -1,22 +1,24 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { fade, blur } from 'svelte/transition';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
 	} from '$icp/services/ic-add-custom-tokens.service';
-	import { authStore } from '$lib/stores/auth.store';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
-	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;
@@ -33,7 +35,7 @@
 		const { result, data } = await loadAndAssertAddCustomToken({
 			ledgerCanisterId,
 			indexCanisterId,
-			identity: $authStore.identity,
+			identity: $authIdentity,
 			icrcTokens: $icrcTokens
 		});
 
@@ -47,7 +49,7 @@
 </script>
 
 <div class="stretch min-h-[20vh]">
-	<div class="bg-light-blue p-4 mb-4 rounded-lg">
+	<div class="mb-4 rounded-lg bg-brand-subtle p-4">
 		{#if isNullish(token)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 		{:else}
@@ -59,7 +61,7 @@
 						src={token.token.icon}
 						slot="icon"
 						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
-						size="medium"
+						size="lg"
 						color="white"
 					/>
 
@@ -84,10 +86,14 @@
 				{token.token.ledgerCanisterId}
 			</Value>
 
-			<Value ref="ledgerId" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.import.text.index_canister_id}</svelte:fragment>
-				{token.token.indexCanisterId}
-			</Value>
+			{#if nonNullish(indexCanisterId)}
+				<Value ref="indexId" element="div">
+					<svelte:fragment slot="label"
+						>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
+					>
+					{token.token.indexCanisterId}
+				</Value>
+			{/if}
 
 			<AddTokenWarning />
 		</div>
@@ -97,15 +103,10 @@
 {#if nonNullish(token)}
 	<div in:fade>
 		<ButtonGroup>
-			<button class="secondary block flex-1" on:click={back}>{$i18n.core.text.back}</button>
-			<button
-				class="primary block flex-1"
-				disabled={invalid}
-				class:opacity-10={invalid}
-				on:click={() => dispatch('icSave')}
-			>
+			<ButtonBack on:click={back} />
+			<Button disabled={invalid} on:click={() => dispatch('icSave')}>
 				{$i18n.tokens.import.text.add_the_token}
-			</button>
+			</Button>
 		</ButtonGroup>
 	</div>
 {/if}

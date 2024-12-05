@@ -1,15 +1,15 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/networks.icrc.env';
+import { ICRC_TOKENS } from '$env/networks.icrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
-import type { IcInterface } from '$icp/types/ic';
+import type { IcInterface } from '$icp/types/ic-token';
 import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
-	mapCkTokenOisyName,
 	mapIcrcToken,
+	mapTokenOisyName,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
 import {
@@ -30,17 +30,9 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
 };
 
-export const unsafeLoadDefaultPublicIcrcTokens = async () => {
-	await Promise.all(
-		PUBLIC_ICRC_TOKENS.map(mapCkTokenOisyName).map((token) =>
-			loadDefaultIcrc({ data: token, strategy: 'query' })
-		)
-	);
-};
-
 const loadDefaultIcrcTokens = async () => {
 	await Promise.all(
-		ICRC_TOKENS.map(mapCkTokenOisyName).map((token) => loadDefaultIcrc({ data: token }))
+		ICRC_TOKENS.map(mapTokenOisyName).map((token) => loadDefaultIcrc({ data: token }))
 	);
 };
 
@@ -105,11 +97,17 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
+/**
+ * @todo Add missing document and test for this function.
+ */
 const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<IcrcCustomTokenWithoutId[]> => {
-	const tokens = await listCustomTokens(params);
+	const tokens = await listCustomTokens({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
 	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);
@@ -131,6 +129,7 @@ const loadCustomIcrcTokensData = async ({
 }): Promise<IcrcCustomTokenWithoutId[]> => {
 	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
 
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
 		token: CustomToken,
 		index: number
@@ -145,11 +144,6 @@ const loadCustomIcrcTokensData = async ({
 
 		const indexCanisterId = fromNullable(index_id);
 
-		// Index canister ID currently mandatory in Oisy's frontend
-		if (isNullish(indexCanisterId)) {
-			return undefined;
-		}
-
 		const ledgerCanisterIdText = ledger_id.toText();
 
 		// For performance reasons, if we can build the token metadata using the known custom tokens from the environments, we do so and save a call to the ledger to fetch the metadata.
@@ -163,7 +157,7 @@ const loadCustomIcrcTokensData = async ({
 				? meta
 				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
 			ledgerCanisterId: ledgerCanisterIdText,
-			indexCanisterId: indexCanisterId.toText(),
+			...(nonNullish(indexCanisterId) && { indexCanisterId: indexCanisterId.toText() }),
 			position: ICRC_TOKENS.length + 1 + index,
 			category: 'custom',
 			icrcCustomTokens: indexedIcrcCustomTokens

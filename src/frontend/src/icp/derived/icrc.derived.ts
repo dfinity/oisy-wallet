@@ -1,11 +1,11 @@
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
-	ICRC_TOKENS_LEDGER_CANISTER_IDS
+	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
 } from '$env/networks.icrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
@@ -71,7 +71,7 @@ const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 					userLedgerCanisterId === ledgerCanisterId && userIndexCanisterId === indexCanisterId
 			);
 
-			return mapDefaultTokenToToggleable({
+			return mapDefaultTokenToToggleable<IcToken>({
 				defaultToken: {
 					ledgerCanisterId,
 					indexCanisterId,
@@ -139,7 +139,7 @@ const enabledIcrcTokensNoCk: Readable<IcToken[]> = derived(
 	[enabledIcrcTokens],
 	([$enabledIcrcTokens]) =>
 		$enabledIcrcTokens.filter(
-			({ ledgerCanisterId }) => !ICRC_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)
+			({ ledgerCanisterId }) => !ICRC_CK_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)
 		)
 );
 

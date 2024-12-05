@@ -1,18 +1,21 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
-	import Value from '$lib/components/ui/Value.svelte';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
-	import { token } from '$lib/stores/token.store';
+	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionToken } from '$lib/types/token';
+	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
+	export let token: OptionToken;
 
 	let id: bigint | string;
 	let from: string | undefined;
@@ -44,7 +47,7 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
-	<div class="stretch">
+	<ContentWithToolbar>
 		<Value ref="id" element="div">
 			<svelte:fragment slot="label">{$i18n.transaction.text.id}</svelte:fragment>
 			<output>{id}</output><Copy
@@ -80,7 +83,9 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
 
 				{#if nonNullish(fromLabel)}
-					<p class="first-letter:capitalize mb-0.5"><IcTransactionLabel label={fromLabel} /></p>
+					<p class="mb-0.5 first-letter:capitalize">
+						<IcTransactionLabel label={fromLabel} {token} />
+					</p>
 				{/if}
 
 				{#if nonNullish(from)}
@@ -108,7 +113,9 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.to}</svelte:fragment>
 
 				{#if nonNullish(toLabel)}
-					<p class="first-letter:capitalize mb-0.5"><IcTransactionLabel label={toLabel} /></p>
+					<p class="mb-0.5 first-letter:capitalize">
+						<IcTransactionLabel label={toLabel} {token} />
+					</p>
 				{/if}
 
 				{#if nonNullish(to)}
@@ -134,23 +141,21 @@
 		{#if nonNullish(value)}
 			<Value ref="amount">
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-				{#if nonNullish($token)}
+				{#if nonNullish(token)}
 					<output>
 						{formatToken({
 							value: BigNumber.from(value),
-							unitName: $token.decimals,
-							displayDecimals: $token.decimals
+							unitName: token.decimals,
+							displayDecimals: token.decimals
 						})}
-						{$token.symbol}
+						{token.symbol}
 					</output>
 				{:else}
 					&ZeroWidthSpace;
 				{/if}
 			</Value>
 		{/if}
-	</div>
 
-	<button class="primary full center text-center" on:click={modalStore.close}
-		>{$i18n.core.text.close}</button
-	>
+		<ButtonCloseModal slot="toolbar" />
+	</ContentWithToolbar>
 </Modal>

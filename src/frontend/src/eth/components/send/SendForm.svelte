@@ -1,25 +1,28 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import SendNetworkICP from './SendNetworkICP.svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
+	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
-	export let amount: number | undefined = undefined;
+	export let simplifiedForm = false;
+	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
@@ -37,7 +40,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<div class="stretch">
+	<ContentWithToolbar>
 		{#if destinationEditable}
 			<SendDestination
 				token={$sendToken}
@@ -52,22 +55,20 @@
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
+		<SendSource
+			token={$sendToken}
+			balance={$sendBalance}
+			source={$ethAddress ?? ''}
+			hideSource={simplifiedForm}
+		/>
 
 		<FeeDisplay />
 
 		<SendInfo />
-	</div>
 
-	<ButtonGroup>
-		<slot name="cancel" />
-		<button
-			class="primary block flex-1"
-			type="submit"
-			disabled={invalid}
-			class:opacity-10={invalid}
-		>
-			{$i18n.core.text.next}
-		</button>
-	</ButtonGroup>
+		<ButtonGroup slot="toolbar" testId="toolbar">
+			<slot name="cancel" />
+			<ButtonNext disabled={invalid} />
+		</ButtonGroup>
+	</ContentWithToolbar>
 </form>

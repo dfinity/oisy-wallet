@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import path from 'path';
 import { ENV } from './build.utils.mjs';
+import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 dotenv.config({ path: `.env.${ENV}` });
 
@@ -23,7 +24,7 @@ if (isNullish(ETHERSCAN_API_KEY)) {
 	process.exit(1);
 }
 
-const DATA_DIR = 'src/frontend/src/env';
+const DATA_DIR = 'src/frontend/src/env/tokens';
 const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
 const ERC20_DATA_DIR = `${DATA_DIR}/tokens-erc20`;
@@ -160,6 +161,8 @@ const manageEnvFile = async ({ mainSymbol: symbol, contractAddress, testnetContr
 			? existingFileContent
 			: `import type { RequiredErc20Token } from '$eth/types/erc20';
 import ${icon} from '$icp-eth/assets/${icon}.svg';
+import type { TokenId } from '$lib/types/token';
+import { parseTokenId } from '$lib/utils/zod.utils';
 `;
 
 	const { content: fileContentFirstPartWithImports } = updateImportsInContent({
@@ -181,7 +184,7 @@ import ${icon} from '$icp-eth/assets/${icon}.svg';
 			? `
 export const ${symbol}_SYMBOL = '${mainnetSymbol}';
 
-export const ${symbol}_TOKEN_ID: unique symbol = Symbol(${symbol}_SYMBOL);
+export const ${symbol}_TOKEN_ID: TokenId = parseTokenId(${symbol}_SYMBOL);
 
 export const ${mainnetToken}: RequiredErc20Token = {
 	id: ${symbol}_TOKEN_ID,
@@ -189,7 +192,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: '${mainnetName}',
-	symbol: '${mainnetSymbol}',
+	symbol: ${symbol}_SYMBOL,
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${contractAddress}',
@@ -204,7 +207,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 			? `
 export const SEPOLIA_${symbol}_SYMBOL = 'Sepolia${testnetSymbol}';
 
-export const SEPOLIA_${symbol}_TOKEN_ID: unique symbol = Symbol(SEPOLIA_${symbol}_SYMBOL);
+export const SEPOLIA_${symbol}_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_${symbol}_SYMBOL);
 
 export const ${testnetToken}: RequiredErc20Token = {
 	id: SEPOLIA_${symbol}_TOKEN_ID,
@@ -311,7 +314,7 @@ const flattenEnvironmentData = (data) =>
 	);
 
 const readSupportedTokens = () => {
-	const jsonPath = resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
+	const jsonPath = resolve(CK_ERC20_JSON_FILE);
 	return JSON.parse(readFileSync(jsonPath, 'utf-8'));
 };
 

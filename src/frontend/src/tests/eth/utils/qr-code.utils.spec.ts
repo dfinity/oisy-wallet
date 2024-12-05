@@ -1,11 +1,11 @@
-import { SEPOLIA_TOKEN } from '$env/tokens.env';
+import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { get } from 'svelte/store';
-import { expect, type MockedFunction } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/qr-code.utils', () => ({
 	decodeQrCodeUrn: vi.fn()

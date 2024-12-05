@@ -2,21 +2,28 @@ import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
-export type AddUserCredentialError =
-	| { InvalidCredential: null }
-	| { VersionMismatch: null }
-	| { ConfigurationError: null }
-	| { UserNotFound: null };
-export interface AddUserCredentialRequest {
-	credential_jwt: string;
-	issuer_canister_id: Principal;
-	current_user_version: [] | [bigint];
-	credential_spec: CredentialSpec;
+export interface Account {
+	owner: Principal;
+	subaccount: [] | [Uint8Array | number[]];
 }
-export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
-export type ArgumentValue = { Int: number } | { String: string };
+export type BitcoinAddressType = { P2WPKH: null };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
+export interface BtcTxOutput {
+	destination_address: string;
+	sent_satoshis: bigint;
+}
+export type BuildP2wpkhTxError =
+	| {
+			NotEnoughFunds: { available: bigint; required: bigint };
+	  }
+	| { WrongBitcoinNetwork: null }
+	| { NotP2WPKHSourceAddress: null }
+	| { InvalidDestinationAddress: GetAddressResponse }
+	| { InvalidSourceAddress: GetAddressResponse };
+export interface CallerPaysIcrc2Tokens {
+	ledger: Principal;
+}
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -30,21 +37,9 @@ export interface CanisterStatusResultV2 {
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface Config {
-	api: [] | [Guards];
 	ecdsa_key_name: string;
-	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array | number[]];
-}
-export interface CredentialSpec {
-	arguments: [] | [Array<[string, ArgumentValue]>];
-	credential_type: string;
-}
-export type CredentialType = { ProofOfUniqueness: null };
-export interface CustomToken {
-	token: Token;
-	version: [] | [bigint];
-	enabled: boolean;
+	cycles_ledger: Principal;
 }
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
@@ -53,10 +48,66 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
-export type GetUserProfileError = { NotFound: null };
-export interface Guards {
-	user_data: ApiEnabled;
-	threshold_key: ApiEnabled;
+export type EcdsaCurve = { secp256k1: null };
+export interface EcdsaKeyId {
+	name: string;
+	curve: EcdsaCurve;
+}
+export interface EcdsaPublicKeyArgument {
+	key_id: EcdsaKeyId;
+	canister_id: [] | [Principal];
+	derivation_path: Array<Uint8Array | number[]>;
+}
+export interface EcdsaPublicKeyResponse {
+	public_key: Uint8Array | number[];
+	chain_code: Uint8Array | number[];
+}
+export type EthAddressError =
+	| { SigningError: [RejectionCode_1, string] }
+	| { PaymentError: PaymentError };
+export interface EthAddressRequest {
+	principal: [] | [Principal];
+}
+export interface EthAddressResponse {
+	address: string;
+}
+export interface EthPersonalSignRequest {
+	message: string;
+}
+export interface EthPersonalSignResponse {
+	signature: string;
+}
+export interface EthSignPrehashRequest {
+	hash: string;
+}
+export interface EthSignPrehashResponse {
+	signature: string;
+}
+export interface EthSignTransactionRequest {
+	to: string;
+	gas: bigint;
+	value: bigint;
+	max_priority_fee_per_gas: bigint;
+	data: [] | [string];
+	max_fee_per_gas: bigint;
+	chain_id: bigint;
+	nonce: bigint;
+}
+export type GetAddressError = { InternalError: { msg: string } } | { PaymentError: PaymentError };
+export interface GetAddressRequest {
+	network: BitcoinNetwork;
+	address_type: BitcoinAddressType;
+}
+export interface GetAddressResponse {
+	address: string;
+}
+export interface GetBalanceRequest {
+	network: BitcoinNetwork;
+	address_type: BitcoinAddressType;
+	min_confirmations: [] | [number];
+}
+export interface GetBalanceResponse {
+	balance: bigint;
 }
 export interface HttpRequest {
 	url: string;
@@ -69,138 +120,142 @@ export interface HttpResponse {
 	headers: Array<[string, string]>;
 	status_code: number;
 }
-export interface IcrcToken {
-	ledger_id: Principal;
-	index_id: [] | [Principal];
-}
 export interface InitArg {
-	api: [] | [Guards];
 	ecdsa_key_name: string;
-	allowed_callers: Array<Principal>;
-	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
+	cycles_ledger: [] | [Principal];
 }
-export interface ListUsersRequest {
-	updated_after_timestamp: [] | [bigint];
-	matches_max_length: [] | [bigint];
+export interface Outpoint {
+	txid: Uint8Array | number[];
+	vout: number;
 }
-export interface ListUsersResponse {
-	users: Array<OisyUser>;
-	matches_max_length: bigint;
+export interface PatronPaysIcrc2Tokens {
+	ledger: Principal;
+	patron: Account;
 }
-export type MigrationError =
-	| { TargetLockFailed: null }
-	| { TargetUnlockFailed: null }
-	| { CouldNotGetTargetPostStats: null }
-	| { CouldNotGetTargetPriorStats: null }
-	| { DataMigrationFailed: null }
-	| { TargetStatsMismatch: [Stats, Stats] }
-	| { Unknown: null }
-	| { TargetCanisterNotEmpty: Stats }
-	| { NoMigrationInProgress: null };
-export type MigrationProgress =
+export type PaymentError =
 	| {
-			MigratedUserTokensUpTo: [] | [Principal];
+			LedgerWithdrawFromError: {
+				error: WithdrawFromError;
+				ledger: Principal;
+			};
 	  }
-	| { Failed: MigrationError }
-	| { MigratedUserTimestampsUpTo: [] | [Principal] }
-	| { MigratedCustomTokensUpTo: [] | [Principal] }
-	| { CheckingDataMigration: null }
-	| { MigratedUserProfilesUpTo: [] | [[bigint, Principal]] }
-	| { UnlockingTarget: null }
-	| { Unlocking: null }
-	| { Completed: null }
-	| { Pending: null }
-	| { LockingTarget: null }
-	| { CheckingTarget: null };
-export interface MigrationReport {
-	to: Principal;
-	progress: MigrationProgress;
+	| { LedgerUnreachable: CallerPaysIcrc2Tokens }
+	| { InvalidPatron: null }
+	| {
+			LedgerTransferFromError: {
+				error: TransferFromError;
+				ledger: Principal;
+			};
+	  }
+	| { UnsupportedPaymentType: null }
+	| { InsufficientFunds: { needed: bigint; available: bigint } };
+export type PaymentType =
+	| { PatronPaysIcrc2Tokens: PatronPaysIcrc2Tokens }
+	| { AttachedCycles: null }
+	| { CallerPaysIcrc2Cycles: null }
+	| { CallerPaysIcrc2Tokens: CallerPaysIcrc2Tokens }
+	| { PatronPaysIcrc2Cycles: Account };
+export type RejectionCode =
+	| { NoError: null }
+	| { CanisterError: null }
+	| { SysTransient: null }
+	| { DestinationInvalid: null }
+	| { Unknown: null }
+	| { SysFatal: null }
+	| { CanisterReject: null };
+export type RejectionCode_1 =
+	| { NoError: null }
+	| { CanisterError: null }
+	| { SysTransient: null }
+	| { DestinationInvalid: null }
+	| { Unknown: null }
+	| { SysFatal: null }
+	| { CanisterReject: null };
+export type Result = { Ok: GetAddressResponse } | { Err: GetAddressError };
+export type Result_1 = { Ok: GetBalanceResponse } | { Err: GetAddressError };
+export type Result_2 = { Ok: SendBtcResponse } | { Err: SendBtcError };
+export type Result_3 = { Ok: EthAddressResponse } | { Err: EthAddressError };
+export type Result_4 = { Ok: EthPersonalSignResponse } | { Err: EthAddressError };
+export type Result_5 = { Ok: EthSignPrehashResponse } | { Err: EthAddressError };
+export type Result_6 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
+export type Result_7 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
+export type SendBtcError =
+	| { BuildP2wpkhError: BuildP2wpkhTxError }
+	| { InternalError: { msg: string } }
+	| { PaymentError: PaymentError };
+export interface SendBtcRequest {
+	fee_satoshis: [] | [bigint];
+	network: BitcoinNetwork;
+	utxos_to_spend: Array<Utxo>;
+	address_type: BitcoinAddressType;
+	outputs: Array<BtcTxOutput>;
 }
-export interface OisyUser {
-	principal: Principal;
-	pouh_verified: boolean;
-	updated_timestamp: bigint;
+export interface SendBtcResponse {
+	txid: string;
 }
-export type Result = { Ok: null } | { Err: AddUserCredentialError };
-export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_2 = { Ok: MigrationReport } | { Err: string };
-export type Result_3 = { Ok: null } | { Err: string };
-export interface SignRequest {
-	to: string;
-	gas: bigint;
+export interface SignWithEcdsaArgument {
+	key_id: EcdsaKeyId;
+	derivation_path: Array<Uint8Array | number[]>;
+	message_hash: Uint8Array | number[];
+}
+export interface SignWithEcdsaResponse {
+	signature: Uint8Array | number[];
+}
+export type TransferFromError =
+	| {
+			GenericError: { message: string; error_code: bigint };
+	  }
+	| { TemporarilyUnavailable: null }
+	| { InsufficientAllowance: { allowance: bigint } }
+	| { BadBurn: { min_burn_amount: bigint } }
+	| { Duplicate: { duplicate_of: bigint } }
+	| { BadFee: { expected_fee: bigint } }
+	| { CreatedInFuture: { ledger_time: bigint } }
+	| { TooOld: null }
+	| { InsufficientFunds: { balance: bigint } };
+export interface Utxo {
+	height: number;
 	value: bigint;
-	max_priority_fee_per_gas: bigint;
-	data: [] | [string];
-	max_fee_per_gas: bigint;
-	chain_id: bigint;
-	nonce: bigint;
+	outpoint: Outpoint;
 }
-export interface Stats {
-	user_profile_count: bigint;
-	custom_token_count: bigint;
-	user_timestamps_count: bigint;
-	user_token_count: bigint;
-}
-export interface SupportedCredential {
-	ii_canister_id: Principal;
-	issuer_origin: string;
-	issuer_canister_id: Principal;
-	ii_origin: string;
-	credential_type: CredentialType;
-}
-export type Token = { Icrc: IcrcToken };
-export interface UserCredential {
-	issuer: string;
-	verified_date_timestamp: [] | [bigint];
-	credential_type: CredentialType;
-}
-export interface UserProfile {
-	credentials: Array<UserCredential>;
-	version: [] | [bigint];
-	created_timestamp: bigint;
-	updated_timestamp: bigint;
-}
-export interface UserToken {
-	decimals: [] | [number];
-	version: [] | [bigint];
-	enabled: [] | [boolean];
-	chain_id: bigint;
-	contract_address: string;
-	symbol: [] | [string];
-}
-export interface UserTokenId {
-	chain_id: bigint;
-	contract_address: string;
-}
+export type WithdrawFromError =
+	| {
+			GenericError: { message: string; error_code: bigint };
+	  }
+	| { TemporarilyUnavailable: null }
+	| { InsufficientAllowance: { allowance: bigint } }
+	| { Duplicate: { duplicate_of: bigint } }
+	| { InvalidReceiver: { receiver: Principal } }
+	| { CreatedInFuture: { ledger_time: bigint } }
+	| { TooOld: null }
+	| {
+			FailedToWithdrawFrom: {
+				withdraw_from_block: [] | [bigint];
+				rejection_code: RejectionCode_1;
+				refund_block: [] | [bigint];
+				approval_refund_block: [] | [bigint];
+				rejection_reason: string;
+			};
+	  }
+	| { InsufficientFunds: { balance: bigint } };
 export interface _SERVICE {
-	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
-	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
-	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
-	caller_eth_address: ActorMethod<[], string>;
+	btc_caller_address: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result>;
+	btc_caller_balance: ActorMethod<[GetBalanceRequest, [] | [PaymentType]], Result_1>;
+	btc_caller_send: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_2>;
 	config: ActorMethod<[], Config>;
-	create_user_profile: ActorMethod<[], UserProfile>;
-	eth_address_of: ActorMethod<[Principal], string>;
+	eth_address: ActorMethod<[EthAddressRequest, [] | [PaymentType]], Result_3>;
+	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result_3>;
+	eth_personal_sign: ActorMethod<[EthPersonalSignRequest, [] | [PaymentType]], Result_4>;
+	eth_sign_prehash: ActorMethod<[EthSignPrehashRequest, [] | [PaymentType]], Result_5>;
+	eth_sign_transaction: ActorMethod<[EthSignTransactionRequest, [] | [PaymentType]], Result_5>;
+	generic_caller_ecdsa_public_key: ActorMethod<
+		[EcdsaPublicKeyArgument, [] | [PaymentType]],
+		Result_6
+	>;
+	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_7>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_user_profile: ActorMethod<[], Result_1>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
-	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
-	list_user_tokens: ActorMethod<[], Array<UserToken>>;
-	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_2>;
-	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_3>;
-	personal_sign: ActorMethod<[string], string>;
-	remove_user_token: ActorMethod<[UserTokenId], undefined>;
-	set_custom_token: ActorMethod<[CustomToken], undefined>;
-	set_guards: ActorMethod<[Guards], undefined>;
-	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
-	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
-	set_user_token: ActorMethod<[UserToken], undefined>;
-	sign_prehash: ActorMethod<[string], string>;
-	sign_transaction: ActorMethod<[SignRequest], string>;
-	stats: ActorMethod<[], Stats>;
-	step_migration: ActorMethod<[], undefined>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

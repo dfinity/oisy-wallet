@@ -7,4 +7,6 @@ disallowed-macros = [
 ]
 disallowed-methods = [
     { path = "dfn_core::api::print", reason = "Use ic_cdk::print or ic_cdk::println instead" },
+    { path = "ic_cdk::api::management_canister::ecdsa::sign_with_ecdsa", reason = "Threshold signatures may be made by the chain fusion signer only." },
+    { path = "ic_cdk::api::management_canister::schnorr::sign_with_schnorr", reason = "Threshold signatures may be made by the chain fusion signer only." },
 ]

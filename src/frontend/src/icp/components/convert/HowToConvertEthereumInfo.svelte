@@ -1,19 +1,24 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { ETHEREUM_NETWORK } from '$env/networks.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
 		ckEthereumNativeTokenBalance,
 		ckEthereumTwinToken
 	} from '$icp-eth/derived/cketh.derived';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -27,7 +32,7 @@
 	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<div>
 		<p>
 			{replacePlaceholders(
@@ -41,7 +46,7 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="bg-light-blue p-4 mt-2 mb-4 rounded-lg">
+		<div class="mb-4 mt-2 rounded-lg bg-brand-subtle p-4">
 			<p class="break-normal font-bold">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
@@ -66,10 +71,10 @@
 		</div>
 	{/if}
 
-	<div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
-		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+	<div class="mt-4 grid grid-cols-[1fr_auto] gap-x-4">
+		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
 				>1</span
 			>
 
@@ -79,7 +84,11 @@
 		<ReceiveAddress
 			labelRef="eth-wallet-address"
 			address={$ethAddress ?? ''}
-			qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+			network={ETHEREUM_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+			}}
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}
 		>
@@ -90,9 +99,9 @@
 			>
 		</ReceiveAddress>
 
-		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
 				>2</span
 			>
 
@@ -120,7 +129,7 @@
 
 		<div class="flex justify-center">
 			<span
-				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
 				>3</span
 			>
 		</div>
@@ -134,24 +143,23 @@
 					})}</svelte:fragment
 				>
 
-				<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
+				<Button
+					colorStyle="secondary"
+					fullWidth
+					styleClass="mb-4 mt-3"
+					on:click={() => dispatch('icConvert')}
+				>
 					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
-				</button>
+				</Button>
 			</Value>
 		</div>
 	</div>
-</div>
 
-<div>
-	{#if formCancelAction === 'back'}
-		<button
-			type="button"
-			class="primary full center text-center"
-			on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button
-		>
-	{:else}
-		<button type="button" class="primary full center text-center" on:click={modalStore.close}
-			>{$i18n.core.text.done}</button
-		>
-	{/if}
-</div>
+	<svelte:fragment slot="toolbar">
+		{#if formCancelAction === 'back'}
+			<ButtonBack fullWidth on:click={() => dispatch('icBack')} />
+		{:else}
+			<ButtonDone on:click={modalStore.close} />
+		{/if}
+	</svelte:fragment>
+</ContentWithToolbar>

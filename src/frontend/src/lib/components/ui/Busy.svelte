@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { Spinner } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { busy } from '$lib/stores/busy.store';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { Spinner } from '@dfinity/gix-components';
 
 	const close = () => {
 		if (isNullish($busy) || !$busy.close) {
@@ -40,7 +40,7 @@
 			{/if}
 
 			{#if nonNullish($busy.msg)}
-				<p class="text-off-white text-sm text-center">{$busy.msg}</p>
+				<p class="text-center text-sm text-off-white">{$busy.msg}</p>
 			{/if}
 
 			{#if $busy.close}

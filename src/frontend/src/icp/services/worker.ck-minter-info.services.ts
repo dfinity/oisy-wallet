@@ -10,7 +10,7 @@ import {
 } from '$icp/services/cketh-listener.services';
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
-import type { IcCkMetadata } from '$icp/types/ic';
+import type { IcCkMetadata } from '$icp/types/ic-token';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
@@ -25,7 +25,7 @@ export const initCkBTCMinterInfoWorker: IcCkWorker = async (
 	const CkBTCMinterInfoWorker = await import('$icp/workers/ckbtc-minter-info.worker?worker');
 	const worker: Worker = new CkBTCMinterInfoWorker.default();
 
-	return await initCkMinterInfoWorker({
+	return initCkMinterInfoWorker({
 		worker,
 		onSyncSuccess: syncCkBtcMinterInfo,
 		onSyncError: syncCkBtcMinterError,
@@ -40,7 +40,7 @@ export const initCkETHMinterInfoWorker: IcCkWorker = async (
 	const CkETHMinterInfoWorker = await import('$icp/workers/cketh-minter-info.worker?worker');
 	const worker: Worker = new CkETHMinterInfoWorker.default();
 
-	return await initCkMinterInfoWorker({
+	return initCkMinterInfoWorker({
 		worker,
 		onSyncSuccess: syncCkEthMinterInfo,
 		onSyncError: syncCkEthMinterError,
@@ -49,7 +49,7 @@ export const initCkETHMinterInfoWorker: IcCkWorker = async (
 	});
 };
 
-const initCkMinterInfoWorker = async ({
+const initCkMinterInfoWorker = ({
 	minterCanisterId,
 	token: { id: tokenId },
 	worker,
@@ -62,8 +62,8 @@ const initCkMinterInfoWorker = async ({
 		onSyncSuccess: (params: SyncCkMinterInfoSuccess) => void;
 		onSyncError: (params: SyncCkMinterInfoError) => void;
 		onSyncStatus: (state: SyncState) => void;
-	}): Promise<IcCkWorkerInitResult> => {
-	worker.onmessage = async ({
+	}): IcCkWorkerInitResult => {
+	worker.onmessage = ({
 		data
 	}: MessageEvent<
 		PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState>

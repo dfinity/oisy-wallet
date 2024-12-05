@@ -3,8 +3,9 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$eth/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Option } from '$lib/types/utils';
 
-	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	export let proposal: Option<Web3WalletTypes.SessionProposal>;
 
 	let context: Verify.Context | undefined = undefined;
 	$: context = proposal?.verifyContext;
@@ -26,7 +27,7 @@
 			{$i18n.wallet_connect.domain.unknown}
 		{/if}</label
 	>
-	<div id="verification" class="font-normal mb-4 break-all">
+	<div id="verification" class="mb-4 break-all font-normal">
 		{#if validation === 'VALID'}
 			{$i18n.wallet_connect.domain.valid_description}
 		{:else if validation === 'INVALID'}

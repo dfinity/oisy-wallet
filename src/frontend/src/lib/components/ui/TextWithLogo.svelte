@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let name: string;
 	export let icon: string | undefined;
@@ -20,7 +20,7 @@
 	<span class="flex flex-col gap-0.5">
 		<span class="leading-5">{name}</span>
 		{#if nonNullish(description)}
-			<span class="leading-none text-xs text-misty-rose text-left">{description}</span>
+			<span class="text-left text-xs leading-none text-misty-rose">{description}</span>
 		{/if}
 	</span>
 	<Logo src={icon} alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })} />

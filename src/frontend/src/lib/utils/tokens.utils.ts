@@ -3,9 +3,10 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
-import { usdValue } from '$lib/utils/exchange.utils';
-import { nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
+import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
+import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -14,15 +15,15 @@ import type { BigNumber } from '@ethersproject/bignumber';
  * @param $tokensToPin - The list of tokens to pin at the top of the list.
  * @param $exchanges - The exchange rates for the tokens.
  */
-export const sortTokens = ({
+export const sortTokens = <T extends Token>({
 	$tokens,
 	$exchanges,
 	$tokensToPin
 }: {
-	$tokens: Token[];
+	$tokens: T[];
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
-}): Token[] => {
+}): T[] => {
 	const pinnedTokens = $tokensToPin
 		.map(({ id: pinnedId, network: { id: pinnedNetworkId } }) =>
 			$tokens.find(
@@ -73,34 +74,22 @@ export const pinTokensWithBalanceAtTop = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }): TokenUi[] => {
+	// If balances data are nullish, there is no need to sort.
+	if (isNullish($balances)) {
+		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
+	}
+
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => {
-			const balance: BigNumber | undefined = $balances?.[token.id]?.data;
-			const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
+			const tokenUI: TokenUi = mapTokenUi({
+				token,
+				$balances,
+				$exchanges
+			});
 
-			const usdBalance: number | undefined = nonNullish(exchangeRate)
-				? usdValue({
-						token,
-						balance,
-						exchangeRate
-					})
-				: undefined;
-
-			const tokenUI: TokenUi = {
-				...token,
-				balance,
-				usdBalance
-			};
-
-			if ((usdBalance ?? 0) > 0 || (balance ?? ZERO).gt(0)) {
-				acc[0] = [...acc[0], tokenUI];
-
-				return acc;
-			}
-
-			acc[1] = [...acc[1], tokenUI];
-
-			return acc;
+			return (tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO).gt(0)
+				? [[...acc[0], tokenUI], acc[1]]
+				: [acc[0], [...acc[1], tokenUI]];
 		},
 		[[], []]
 	);
@@ -118,13 +107,46 @@ export const pinTokensWithBalanceAtTop = ({
 };
 
 /**
- * Calculates total USD balance of the provided tokens list.
+ * Calculates total USD balance of the provided UI tokens list.
  *
- * @param tokens - The list of tokens for total USD balance calculation.
- * @returns The sum of tokens USD balance.
+ * @param tokens - The list of UI tokens for total USD balance calculation.
+ * @returns The sum of UI tokens USD balance.
  */
-export const sumTokensUsdBalance = (tokens: TokenUi[]): number =>
+export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
+
+/**
+ * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
+ *
+ * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
+ *
+ */
+export const sumMainnetTokensUsdBalancesPerNetwork = ({
+	$tokens,
+	$balances,
+	$exchanges
+}: {
+	$tokens: Token[];
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
+}): TokensTotalUsdBalancePerNetwork =>
+	nonNullish($exchanges) && nonNullish($balances)
+		? $tokens.reduce<TokensTotalUsdBalancePerNetwork>(
+				(acc, token) =>
+					token.network.env === 'mainnet'
+						? {
+								...acc,
+								[token.network.id]:
+									(acc[token.network.id] ?? 0) +
+									(calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0)
+							}
+						: acc,
+				{}
+			)
+		: {};
 
 /**
  * Filters and returns a list of "enabled" by user tokens
@@ -134,3 +156,12 @@ export const sumTokensUsdBalance = (tokens: TokenUi[]): number =>
  */
 export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
 	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
+
+/** Pins enabled tokens at the top of the list, preserving the order of the parts.
+ *
+ * @param $tokens - The list of tokens.
+ * @returns The list of tokens with enabled tokens at the top.
+ * */
+export const pinEnabledTokensAtTop = <T extends Token>(
+	$tokens: TokenToggleable<T>[]
+): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));

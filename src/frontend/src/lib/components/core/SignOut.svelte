@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { signOut } from '$lib/services/auth.services';
 	import { createEventDispatcher } from 'svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
+	import { signOut } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const dispatch = createEventDispatcher();
 
 	const logout = async () => {
 		dispatch('icLogoutTriggered');
-		await signOut();
+		await signOut({ resetUrl: true });
 	};
 </script>
 

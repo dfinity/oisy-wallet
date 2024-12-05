@@ -20,7 +20,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 	const ExchangeWorker = await import('$lib/workers/exchange.worker?worker');
 	const exchangeWorker: Worker = new ExchangeWorker.default();
 
-	exchangeWorker.onmessage = async ({
+	exchangeWorker.onmessage = ({
 		data
 	}: MessageEvent<
 		PostMessage<PostMessageDataResponseExchange | PostMessageDataResponseExchangeError>

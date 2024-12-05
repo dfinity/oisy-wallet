@@ -1,39 +1,81 @@
 <script lang="ts">
-	import Hero from '$lib/components/hero/Hero.svelte';
-	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
+	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
+	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
+	import Footer from '$lib/components/core/Footer.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
+	import Header from '$lib/components/hero/Header.svelte';
+	import Hero from '$lib/components/hero/Hero.svelte';
+	import Loaders from '$lib/components/loaders/Loaders.svelte';
+	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
+	import SplitPane from '$lib/components/ui/SplitPane.svelte';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import type { ComponentType } from 'svelte';
-	import { authSignedIn } from '$lib/derived/auth.derived';
-	import Loaders from '$lib/components/core/Loaders.svelte';
-	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
+	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
 
-	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
-	$: route = isRouteSettings($page)
-		? 'settings'
-		: isRouteTransactions($page)
-			? 'transactions'
-			: 'tokens';
+	let tokensRoute: boolean;
+	$: tokensRoute = isRouteTokens($page);
+
+	let transactionsRoute: boolean;
+	$: transactionsRoute = isRouteTransactions($page);
+
+	let showHero: boolean;
+	$: showHero = tokensRoute || transactionsRoute;
 
 	$: token.set($pageToken);
 
-	let cmpLoaders: ComponentType;
-	$: cmpLoaders = $authSignedIn ? Loaders : NoLoaders;
+	// Source: https://svelte.dev/blog/view-transitions
+	onNavigate((navigation) => {
+		if (isNullish(document.startViewTransition)) {
+			return;
+		}
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 </script>
 
-<Hero
-	usdTotal={route === 'tokens'}
-	summary={route === 'transactions'}
-	more={route === 'transactions'}
-	actions={route !== 'settings'}
-/>
+<div
+	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
+	class:overflow-hidden={$authNotSignedIn}
+	class:flex={$authSignedIn}
+	class:h-full={$authSignedIn}
+	class:flex-col={$authSignedIn}
+	class:md:flex={$authNotSignedIn}
+	class:md:flex-col={$authNotSignedIn}
+	class:md:h-full={$authNotSignedIn}
+>
+	<Header />
 
-<main class="pt-12">
-	<svelte:component this={cmpLoaders}>
-		<slot />
-	</svelte:component>
-</main>
+	<AuthGuard>
+		<SplitPane>
+			<NavigationMenu slot="menu">
+				{#if tokensRoute}
+					<div transition:fade class="hidden xl:block">
+						<DappsCarousel />
+					</div>
+				{/if}
+			</NavigationMenu>
 
-<Modals />
+			{#if showHero}
+				<Hero />
+			{/if}
+
+			<Loaders>
+				<slot />
+			</Loaders>
+		</SplitPane>
+
+		<Modals />
+	</AuthGuard>
+
+	<Footer />
+</div>
