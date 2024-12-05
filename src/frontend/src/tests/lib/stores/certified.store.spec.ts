@@ -1,5 +1,5 @@
-import { BTC_REGTEST_TOKEN_ID } from '$env/tokens.btc.env';
-import { SEPOLIA_TOKEN_ID } from '$env/tokens.env';
+import { BTC_REGTEST_TOKEN_ID } from '$env/tokens/tokens.btc.env';
+import { SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import {
 	initCertifiedStore,
 	type CertifiedStore,

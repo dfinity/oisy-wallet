@@ -1,4 +1,4 @@
-import { SEPOLIA_TOKEN_ID } from '$env/tokens.env';
+import { SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import {
 	initCertifiedSetterStore,
 	type CertifiedSetterStoreStore
