@@ -14,6 +14,9 @@ describe('ConvertAmountSource', () => {
 	const defaultBalance = BigNumber.from(5000000n);
 	const insufficientFunds = false;
 	const insufficientFundsForFee = false;
+	// balance - total fee
+	const maxButtonValue = 0.0499;
+	const maxButtonText = `Max: ${maxButtonValue} BTC`;
 
 	const props = {
 		sendAmount,
@@ -44,7 +47,7 @@ describe('ConvertAmountSource', () => {
 		});
 
 		expect(getByTestId(amountInfoTestId)).toHaveTextContent('$0.20');
-		expect(getByTestId(balanceTestId)).toHaveTextContent('0.05 BTC');
+		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
 	});
 
 	it('should display values correctly without error if insufficientFundsForFee is true', async () => {
@@ -59,7 +62,7 @@ describe('ConvertAmountSource', () => {
 		});
 
 		expect(getByTestId(amountInfoTestId)).toHaveTextContent('$0.20');
-		expect(getByTestId(balanceTestId)).toHaveTextContent('0.05 BTC');
+		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
 	});
 
 	it('should display values correctly with error', async () => {
@@ -76,7 +79,57 @@ describe('ConvertAmountSource', () => {
 		expect(getByTestId(amountInfoTestId)).toHaveTextContent(
 			en.convert.assertion.insufficient_funds
 		);
-		expect(getByTestId(balanceTestId)).toHaveTextContent('0.05 BTC');
+		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
+	});
+
+	it('should display loading text if total fee is not available yet', () => {
+		const { getByTestId } = render(ConvertAmountSource, {
+			props: {
+				...props,
+				totalFee: undefined
+			},
+			context: mockContext()
+		});
+
+		expect(getByTestId(balanceTestId)).toHaveTextContent(en.convert.text.calculating_max_amount);
+	});
+
+	it('should update sendAmount value if max button was clicked and total fee got updated', async () => {
+		const { getByTestId, component, rerender } = render(ConvertAmountSource, {
+			props: props,
+			context: mockContext()
+		});
+
+		await fireEvent.click(getByTestId(balanceTestId));
+
+		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(maxButtonValue);
+
+		await rerender({
+			totalFee: 9000n
+		});
+
+		// wait for debounced setMax to be completed
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(0.04991);
+	});
+
+	it('should not update sendAmount value if max button was not clicked and total fee got updated', async () => {
+		const { component, rerender } = render(ConvertAmountSource, {
+			props: props,
+			context: mockContext()
+		});
+
+		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(props.sendAmount);
+
+		await rerender({
+			totalFee: 9000n
+		});
+
+		// wait for debounced setMax to be completed
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+
+		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(props.sendAmount);
 	});
 
 	it('should set sendAmount correctly on max button click', async () => {
@@ -87,7 +140,7 @@ describe('ConvertAmountSource', () => {
 
 		await fireEvent.click(getByTestId(balanceTestId));
 
-		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(0.05);
+		expect(component.$$.ctx[component.$$.props['sendAmount']]).toBe(maxButtonValue);
 	});
 
 	it('should not change sendAmount on max button click if balance is zero', async () => {
@@ -107,6 +160,7 @@ describe('ConvertAmountSource', () => {
 			context: mockContext(BigNumber.from(50000438709n))
 		});
 
-		expect(getByTestId(balanceTestId)).toHaveTextContent('Max: 500.00438709 BTC');
+		// balance - total fee
+		expect(getByTestId(balanceTestId)).toHaveTextContent('Max: 500.00428709 BTC');
 	});
 });
