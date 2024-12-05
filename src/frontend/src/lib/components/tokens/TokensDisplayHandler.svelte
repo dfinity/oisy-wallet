@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
+	import { onDestroy } from 'svelte';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { groupTokensByTwin } from '$lib/utils/token-group.utils';
-	import { onDestroy } from 'svelte';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
 	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
