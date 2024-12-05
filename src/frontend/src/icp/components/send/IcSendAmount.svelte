@@ -9,8 +9,8 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import type { OptionIcToken } from '$icp/types/ic';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import type { OptionIcToken } from '$icp/types/ic-token';
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import {
 		assertCkETHBalanceEstimatedFee,
@@ -26,10 +26,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 

@@ -5,6 +5,7 @@ on:
     types: [closed]
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   release:
@@ -28,12 +29,5 @@ jobs:
   
     - name: Create Git tag
       run: |
-        git tag "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
+        git tag "v${{ steps.get_version.outputs.version }}"
         git push origin "v${{ steps.get_version.outputs.version }}"
-
-    - name: Draft Release Notes
-      id: draft_release
-      uses: release-drafter/release-drafter@v6
-      with:
-        version: "v${{ steps.get_version.outputs.version }}"
-        token: ${{ secrets.GIX_CREATE_PR_PAT }}

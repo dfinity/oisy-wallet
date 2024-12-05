@@ -13,6 +13,7 @@
 				"id": {
 					"ic": "grghe-syaaa-aaaar-qabyq-cai",
 					"beta": "grghe-syaaa-aaaar-qabyq-cai",
+					"test_be_1": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_1": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_2": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_3": "tdxud-2yaaa-aaaad-aadiq-cai",
@@ -43,7 +44,12 @@
 			},
 			"source": ["build/"],
 			"type": "assets",
-			"gzip": true
+			"gzip": true,
+			"remote": {
+				"id": {
+					"test_be_1": "tewsx-xaaaa-aaaad-aadia-cai"
+				}
+			}
 		},
 		"orbit": {
 			"type": "custom",
@@ -65,6 +71,7 @@
 			"remote": {
 				"candid": "internet_identity.did",
 				"id": {
+					"test_be_1": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"test_fe_1": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"test_fe_2": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"test_fe_3": "rdmx6-jaaaa-aaaaa-aaadq-cai",
@@ -83,6 +90,7 @@
 			"specified_id": "um5iw-rqaaa-aaaaq-qaaba-cai",
 			"remote": {
 				"id": {
+					"test_be_1": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"test_fe_1": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"test_fe_2": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"test_fe_3": "um5iw-rqaaa-aaaaq-qaaba-cai",
@@ -101,6 +109,7 @@
 			"candid": "out/cycles_depositor.did",
 			"remote": {
 				"id": {
+					"test_be_1": "2vxsx-fae",
 					"test_fe_1": "2vxsx-fae",
 					"test_fe_2": "2vxsx-fae",
 					"test_fe_3": "2vxsx-fae",
@@ -118,6 +127,7 @@
 			"shrink": false,
 			"remote": {
 				"id": {
+					"test_be_1": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"test_fe_1": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"test_fe_2": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"test_fe_3": "qbw6f-caaaa-aaaah-qdcwa-cai",
@@ -134,6 +144,7 @@
 			"wasm": "target/ic/icp_ledger.wasm",
 			"remote": {
 				"id": {
+					"test_be_1": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"test_fe_1": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"test_fe_2": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"test_fe_3": "ryjl3-tyaaa-aaaaa-aaaba-cai",
@@ -150,6 +161,7 @@
 			"wasm": "target/ic/icp_index.wasm",
 			"remote": {
 				"id": {
+					"test_be_1": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"test_fe_1": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"test_fe_2": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"test_fe_3": "qhbym-qaaaa-aaaaa-aaafq-cai",
@@ -167,6 +179,7 @@
 			"remote": {
 				"id": {
 					"ic": "mqygn-kiaaa-aaaar-qaadq-cai",
+					"test_be_1": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_1": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_2": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_3": "ml52i-qqaaa-aaaar-qaaba-cai",
@@ -182,6 +195,7 @@
 			"remote": {
 				"id": {
 					"ic": "mxzaz-hqaaa-aaaar-qaada-cai",
+					"test_be_1": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_1": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_2": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_3": "mc6ru-gyaaa-aaaar-qaaaq-cai",
@@ -197,6 +211,7 @@
 			"remote": {
 				"id": {
 					"ic": "n5wcd-faaaa-aaaar-qaaea-cai",
+					"test_be_1": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_1": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_2": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_3": "mm444-5iaaa-aaaar-qaabq-cai",
@@ -212,6 +227,7 @@
 			"remote": {
 				"id": {
 					"ic": "pjihx-aaaaa-aaaar-qaaka-cai",
+					"test_be_1": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_1": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_2": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_3": "pvm5g-xaaaa-aaaar-qaaia-cai",
@@ -227,6 +243,7 @@
 			"remote": {
 				"id": {
 					"ic": "sv3dd-oaaaa-aaaar-qacoa-cai",
+					"test_be_1": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_1": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_2": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_3": "jzenf-aiaaa-aaaar-qaa7q-cai",
@@ -242,6 +259,7 @@
 			"remote": {
 				"id": {
 					"ic": "ss2fx-dyaaa-aaaar-qacoq-cai",
+					"test_be_1": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_1": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_2": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_3": "apia6-jaaaa-aaaar-qabma-cai",
@@ -257,6 +275,7 @@
 			"remote": {
 				"id": {
 					"ic": "s3zol-vqaaa-aaaar-qacpa-cai",
+					"test_be_1": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_1": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_2": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_3": "sh5u2-cqaaa-aaaar-qacna-cai",
@@ -301,6 +320,10 @@
 			"type": "persistent"
 		},
 		"test_fe_4": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_be_1": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

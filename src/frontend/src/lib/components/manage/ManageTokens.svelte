@@ -6,7 +6,7 @@
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import { ICP_TOKEN } from '$env/tokens.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
@@ -15,7 +15,7 @@
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
@@ -276,12 +276,8 @@
 {/if}
 
 <style lang="scss">
-	@use '../../styles/mixins/modal';
-
 	.tokens {
 		padding: var(--padding-1_5x) 0;
-
-		@include modal.content;
 	}
 
 	.tokens-scroll {

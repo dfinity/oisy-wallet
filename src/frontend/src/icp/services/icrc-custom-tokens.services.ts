@@ -1,7 +1,8 @@
 import { SNS_EXPLORER_URL } from '$env/explorers.env';
 import { ICP_NETWORK } from '$env/networks.env';
-import snsTokens from '$env/tokens.sns.json';
-import { envIcrcToken, envIcrcTokens, type EnvIcrcToken } from '$env/types/env-icrc-token';
+import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
+import snsTokens from '$env/tokens/tokens.sns.json';
+import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import { i18n } from '$lib/stores/i18n.store';
@@ -23,28 +24,29 @@ export const buildIndexedIcrcCustomTokens = (): Record<
 		{}
 	);
 
+/**
+ * @todo Add missing document and test for this function.
+ */
 export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 	try {
-		const tokens = envIcrcTokens
-			.parse(
-				snsTokens.map(
-					({
+		const tokens = EnvSnsTokensSchema.parse(
+			snsTokens.map(
+				({
+					metadata: {
+						fee: { __bigint__ },
+						...rest
+					},
+					...ids
+				}) =>
+					EnvSnsTokenSchema.parse({
+						...ids,
 						metadata: {
-							fee: { __bigint__ },
-							...rest
-						},
-						...ids
-					}) =>
-						envIcrcToken.parse({
-							...ids,
-							metadata: {
-								...rest,
-								fee: BigInt(__bigint__)
-							}
-						})
-				)
+							...rest,
+							fee: BigInt(__bigint__)
+						}
+					})
 			)
-			.map(mapIcrcCustomToken);
+		).map(mapIcrcCustomToken);
 
 		return tokens;
 	} catch (err: unknown) {
@@ -61,10 +63,9 @@ export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 const mapIcrcCustomToken = ({
 	ledgerCanisterId,
 	indexCanisterId,
-	indexCanisterVersion,
 	rootCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName }
-}: EnvIcrcToken): IcTokenWithoutIdExtended => ({
+}: EnvSnsToken): IcTokenWithoutIdExtended => ({
 	ledgerCanisterId,
 	indexCanisterId,
 	network: ICP_NETWORK,
@@ -78,6 +79,5 @@ const mapIcrcCustomToken = ({
 	icon: `/icons/sns/${ledgerCanisterId}.png`,
 	fee,
 	alternativeName,
-	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
-	indexCanisterVersion
+	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`
 });

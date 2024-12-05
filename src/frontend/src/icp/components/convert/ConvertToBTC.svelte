@@ -2,10 +2,10 @@
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
-	import { BTC_MAINNET_SYMBOL } from '$env/tokens.btc.env';
+	import { BTC_MAINNET_SYMBOL } from '$env/tokens/tokens.btc.env';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';

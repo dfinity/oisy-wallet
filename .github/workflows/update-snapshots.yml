@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types: [ opened, synchronize, labeled ]
   workflow_dispatch:
 
 concurrency:
@@ -13,17 +15,35 @@ concurrency:
 jobs:
 
   oisy-backend-wasm:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     steps:
       - name: Checkout
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
+
+      - name: Checkout for pull request
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
   update_snapshots:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     needs: oisy-backend-wasm
+    
     steps:
 
       - name: Fail if branch is main
@@ -32,8 +52,31 @@ jobs:
           echo "This workflow should not be triggered with workflow_dispatch on main"
           exit 1
 
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
       - name: Checkout
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
+
+      - name: Checkout for pull request
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Prepare macOS
+        if: runner.os == 'macOS'
+        uses: ./.github/actions/prepare-macos
+        
+      - name: Set Environment Variables
+        run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
@@ -50,7 +93,7 @@ jobs:
         with:
           add: e2e
           default_author: github_actions
-          message: "🤖 update E2E snapshots"
+          message: "🤖 Update E2E snapshots"
 
       - name: Stage Changes
         if: github.ref == 'refs/heads/main'

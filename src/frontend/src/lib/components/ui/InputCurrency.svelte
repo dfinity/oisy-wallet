@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 
-	export let value: number | undefined = undefined;
+	export let value: string | number | undefined = undefined;
+	export let disabled: boolean | undefined = undefined;
 	export let name: string;
 	export let placeholder: string;
 	export let required = true;
@@ -19,6 +20,7 @@
 	spellcheck={false}
 	autocomplete="off"
 	{testId}
+	{disabled}
 	on:nnsInput
 >
 	<slot name="inner-end" slot="inner-end" />

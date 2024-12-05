@@ -1,6 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
+use crate::user_profile::add_hidden_dapp_id;
 use bitcoin_utils::estimate_fee;
 use candid::Principal;
 use config::find_credential_config;
@@ -10,7 +11,7 @@ use heap_state::state::with_btc_pending_transactions;
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::{clear_timer, set_timer_interval};
+use ic_cdk_timers::{clear_timer, set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -27,6 +28,8 @@ use shared::types::bitcoin::{
     SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
 };
 use shared::types::custom_token::{CustomToken, CustomTokenId};
+use shared::types::dapp::{AddDappSettingsError, AddHiddenDappIdRequest};
+use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
@@ -54,7 +57,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
-mod signer;
+pub mod signer;
 mod state;
 mod token;
 mod types;
@@ -87,11 +90,11 @@ thread_local! {
     );
 }
 
-pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(&cell.borrow()))
 }
 
-pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
+fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
     STATE.with(|cell| f(&mut cell.borrow_mut()))
 }
 
@@ -99,7 +102,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 ///
 /// # Panics
 /// - If the `STATE.config` is not initialized.
-pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
+fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
             .config
@@ -146,16 +149,46 @@ fn set_config(arg: InitArg) {
     });
 }
 
+/// Runs housekeeping tasks immediately, then periodically:
+/// - `hourly_housekeeping_tasks`
+fn start_periodic_housekeeping_timers() {
+    // Run housekeeping tasks once, immediately but asynchronously.
+    let immediate = Duration::ZERO;
+    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+
+    // Then periodically:
+    let hour = Duration::from_secs(60 * 60);
+    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+}
+
+/// Runs hourly housekeeping tasks:
+/// - Top up the cycles ledger.
+async fn hourly_housekeeping_tasks() {
+    // Tops up the account on the cycles ledger
+    {
+        let result = top_up_cycles_ledger(None).await;
+        if let Err(err) = result {
+            eprintln!("Failed to top up cycles ledger: {err:?}");
+        }
+        // TODO: Add monitoring for how many cycles have been topped up and whether topping up is failing.
+    }
+}
+
 #[init]
-fn init(arg: Arg) {
+pub fn init(arg: Arg) {
     match arg {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+    start_periodic_housekeeping_timers();
 }
 
+/// Post-upgrade handler.
+///
+/// # Panics
+/// - If the config is not initialized, which should not happen during an upgrade.  Maybe this is a new installation?
 #[post_upgrade]
-fn post_upgrade(arg: Option<Arg>) {
+pub fn post_upgrade(arg: Option<Arg>) {
     match arg {
         Some(Arg::Init(arg)) => set_config(arg),
         _ => {
@@ -166,13 +199,25 @@ fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    start_periodic_housekeeping_timers();
 }
 
-/// Show the canister configuration.
+/// Gets the canister configuration.
 #[query(guard = "caller_is_allowed")]
 #[must_use]
-fn config() -> Config {
+pub fn config() -> Config {
     read_config(std::clone::Clone::clone)
+}
+
+/// Adds cycles to the cycles ledger, if it is below a certain threshold.
+///
+/// # Errors
+/// Error conditions are enumerated by: `TopUpCyclesLedgerError`
+#[update(guard = "caller_is_allowed")]
+pub async fn top_up_cycles_ledger(
+    request: Option<TopUpCyclesLedgerRequest>,
+) -> TopUpCyclesLedgerResult {
+    signer::top_up_cycles_ledger(request.unwrap_or_default()).await
 }
 
 /// Processes external HTTP requests.
@@ -206,7 +251,7 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
 
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn set_user_token(token: UserToken) {
+pub fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
     assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
 
@@ -222,7 +267,7 @@ fn set_user_token(token: UserToken) {
 }
 
 #[update(guard = "may_write_user_data")]
-fn set_many_user_tokens(tokens: Vec<UserToken>) {
+pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -242,7 +287,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
 
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn remove_user_token(token_id: UserTokenId) {
+pub fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -254,7 +299,8 @@ fn remove_user_token(token_id: UserTokenId) {
 }
 
 #[query(guard = "may_read_user_data")]
-fn list_user_tokens() -> Vec<UserToken> {
+#[must_use]
+pub fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
@@ -262,7 +308,7 @@ fn list_user_tokens() -> Vec<UserToken> {
 /// Add, remove or update custom token for the user.
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn set_custom_token(token: CustomToken) {
+pub fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &CustomToken| -> bool {
@@ -273,7 +319,7 @@ fn set_custom_token(token: CustomToken) {
 }
 
 #[update(guard = "may_write_user_data")]
-fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
+pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -288,15 +334,20 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 }
 
 #[query(guard = "may_read_user_data")]
-fn list_custom_tokens() -> Vec<CustomToken> {
+#[must_use]
+pub fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 
+/// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+///
+/// # Errors
+/// Errors are enumerated by: `SelectedUtxosFeeError`.
 #[update(guard = "may_read_user_data")]
-async fn btc_select_user_utxos_fee(
+pub async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
     let principal = ic_cdk::caller();
@@ -358,8 +409,12 @@ async fn btc_select_user_utxos_fee(
     })
 }
 
+/// Adds a pending Bitcoin transaction for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcAddPendingTransactionError`.
 #[update(guard = "may_write_user_data")]
-async fn btc_add_pending_transaction(
+pub async fn btc_add_pending_transaction(
     params: BtcAddPendingTransactionRequest,
 ) -> Result<(), BtcAddPendingTransactionError> {
     let principal = ic_cdk::caller();
@@ -385,8 +440,12 @@ async fn btc_add_pending_transaction(
     })
 }
 
+/// Returns the pending Bitcoin transactions for the caller.
+///
+/// # Errors
+/// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 #[update(guard = "may_read_user_data")]
-async fn btc_get_pending_transactions(
+pub async fn btc_get_pending_transactions(
     params: BtcGetPendingTransactionsRequest,
 ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
     let principal = ic_cdk::caller();
@@ -420,20 +479,27 @@ async fn btc_get_pending_transactions(
     })
 }
 
+/// Adds a verifiable credential to the user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `AddUserCredentialError`.
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
+pub fn add_user_credential(
+    request: AddUserCredentialRequest,
+) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
 
-    let (vc_flow_signers, root_pk_raw, credential_type) =
+    let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
         read_config(|config| find_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
         user_principal,
+        derivation_origin,
         &vc_flow_signers,
         &request.credential_spec,
         &root_pk_raw,
@@ -454,10 +520,41 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
     }
 }
 
+/// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
+///
+/// # Arguments
+/// * `request` - The request to add a hidden dApp ID.
+///
+/// # Returns
+/// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn add_user_hidden_dapp_id(
+    request: AddHiddenDappIdRequest,
+) -> Result<(), AddDappSettingsError> {
+    request.check()?;
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        add_hidden_dapp_id(
+            stored_principal,
+            request.current_user_version,
+            request.dapp_id,
+            &mut user_profile_model,
+        )
+    })
+}
+
 /// It create a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
 #[update(guard = "may_write_user_data")]
-fn create_user_profile() -> UserProfile {
+#[must_use]
+pub fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -468,8 +565,15 @@ fn create_user_profile() -> UserProfile {
     })
 }
 
+/// Returns the caller's user profile.
+///
+/// # Errors
+/// Errors are enumerated by: `GetUserProfileError`.
+///
+/// # Panics
+/// - If the caller is anonymous.  See: `may_read_user_data`.
 #[query(guard = "may_read_user_data")]
-fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -489,14 +593,18 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 /// - The chain fusion signer performs threshold key operations including providing
 ///   public keys, creating signatures and assisting with performing signed Bitcoin
 ///   and Ethereum transactions.
+///
+/// # Errors
+/// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "may_read_user_data")]
-async fn allow_signing() -> Result<(), AllowSigningError> {
+pub async fn allow_signing() -> Result<(), AllowSigningError> {
     signer::allow_signing().await
 }
 
 #[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
-fn list_users(request: ListUsersRequest) -> ListUsersResponse {
+#[must_use]
+pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
     // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
     let (users, matches_max_length): (Vec<OisyUser>, u64) =
@@ -510,19 +618,20 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 
 /// API method to get cycle balance and burn rate.
 #[update]
-async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+pub async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }
 
 /// Gets the state of any migration currently in progress.
 #[query(guard = "caller_is_allowed")]
-fn migration() -> Option<MigrationReport> {
+#[must_use]
+pub fn migration() -> Option<MigrationReport> {
     read_state(|s| s.migration.as_ref().map(MigrationReport::from))
 }
 
 /// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.
 #[update(guard = "caller_is_allowed")]
-fn set_guards(guards: Guards) {
+pub fn set_guards(guards: Guards) {
     mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
 }
 
@@ -530,7 +639,8 @@ fn set_guards(guards: Guards) {
 ///
 /// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
 #[query(guard = "caller_is_allowed")]
-fn stats() -> Stats {
+#[must_use]
+pub fn stats() -> Stats {
     read_state(|s| Stats::from(s))
 }
 
@@ -539,7 +649,7 @@ fn stats() -> Stats {
 /// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
 #[update(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
-fn bulk_up(data: Vec<u8>) {
+pub fn bulk_up(data: Vec<u8>) {
     migrate::bulk_up(&data);
 }
 
@@ -548,7 +658,7 @@ fn bulk_up(data: Vec<u8>) {
 /// # Errors
 /// - There is a current migration in progress to a different canister.
 #[update(guard = "caller_is_allowed")]
-fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
+pub fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
             if migration.to == to {
@@ -572,8 +682,11 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 }
 
 /// Switch off the migration timer; migrate with manual API calls instead.
+///
+/// # Errors
+/// - There is no migration in progress.
 #[update(guard = "caller_is_allowed")]
-fn migration_stop_timer() -> Result<(), String> {
+pub fn migration_stop_timer() -> Result<(), String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
             clear_timer(migration.timer_id);
@@ -588,7 +701,7 @@ fn migration_stop_timer() -> Result<(), String> {
 ///
 /// On error, the migration is marked as failed and the timer is cleared.
 #[update(guard = "caller_is_allowed")]
-async fn step_migration() {
+pub async fn step_migration() {
     let result = migrate::step_migration().await;
     eprintln!("Stepped migration: {:?}", result);
     if let Err(err) = result {

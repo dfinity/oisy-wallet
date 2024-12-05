@@ -1,24 +1,32 @@
 <script lang="ts">
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let amount: BigNumber;
+	export let decimals: number;
+	export let symbol: string;
+	export let formatPositiveAmount = false;
 
 	let detailedValue: string;
 	$: detailedValue = formatToken({
 		value: amount,
-		unitName: $tokenWithFallback.decimals,
-		displayDecimals: $tokenWithFallback.decimals
+		unitName: decimals,
+		displayDecimals: decimals
 	});
 
 	let displayValue: string;
 	$: displayValue = formatToken({
 		value: amount,
-		unitName: $tokenWithFallback.decimals,
-		displayDecimals: EIGHT_DECIMALS
+		unitName: decimals,
+		displayDecimals: EIGHT_DECIMALS,
+		showPlusSign: formatPositiveAmount
 	});
 </script>
 
-<data value={detailedValue}>{displayValue}</data>
+<span class:text-success={formatPositiveAmount && amount.gt(0)}>
+	<data value={detailedValue}>
+		{displayValue}
+	</data>
+	{symbol}
+</span>

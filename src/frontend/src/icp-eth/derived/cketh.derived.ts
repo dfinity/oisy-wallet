@@ -1,5 +1,5 @@
-import { ETHEREUM_TOKEN } from '$env/tokens.env';
-import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
+import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens/tokens.erc20.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -9,7 +9,7 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';

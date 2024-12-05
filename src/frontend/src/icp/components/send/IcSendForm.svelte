@@ -12,12 +12,14 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
+	export let simplifiedForm = false;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -36,15 +38,17 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
-		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{#if !simplifiedForm}
+			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{/if}
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 
-		<SendSource token={$sendToken} balance={$balance} {source} />
+		<SendSource token={$sendToken} balance={$balance} {source} hideSource={simplifiedForm} />
 
 		<IcFeeDisplay {networkId} />
 
-		<ButtonGroup slot="toolbar">
+		<ButtonGroup slot="toolbar" testId="toolbar">
 			<slot name="cancel" />
 			<ButtonNext disabled={invalid} />
 		</ButtonGroup>

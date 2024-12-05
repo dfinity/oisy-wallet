@@ -14,13 +14,15 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
-	export let amount: number | undefined = undefined;
+	export let simplifiedForm = false;
+	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
@@ -53,13 +55,18 @@
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
+		<SendSource
+			token={$sendToken}
+			balance={$sendBalance}
+			source={$ethAddress ?? ''}
+			hideSource={simplifiedForm}
+		/>
 
 		<FeeDisplay />
 
 		<SendInfo />
 
-		<ButtonGroup slot="toolbar">
+		<ButtonGroup slot="toolbar" testId="toolbar">
 			<slot name="cancel" />
 			<ButtonNext disabled={invalid} />
 		</ButtonGroup>

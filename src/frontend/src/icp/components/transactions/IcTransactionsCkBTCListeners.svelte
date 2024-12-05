@@ -5,7 +5,7 @@
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 	import { initCkBTCUpdateBalanceWorker } from '$icp/services/worker.ckbtc-update-balance.services';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { Token } from '$lib/types/token';

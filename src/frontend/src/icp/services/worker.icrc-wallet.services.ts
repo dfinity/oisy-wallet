@@ -3,7 +3,7 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -11,7 +11,6 @@ import type {
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
-import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
 
 export const initIcrcWalletWorker = async ({
 	indexCanisterId,
@@ -22,11 +21,20 @@ export const initIcrcWalletWorker = async ({
 	const WalletWorker = await import('$icp/workers/icrc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
+	const restartWorkerWithLedgerOnly = () =>
+		worker.postMessage({
+			msg: 'startIcrcWalletTimer',
+			data: {
+				ledgerCanisterId,
+				env
+			}
+		});
+
 	worker.onmessage = ({
 		data
 	}: MessageEvent<
 		PostMessage<
-			| PostMessageDataResponseWallet<Omit<IcrcGetTransactions, 'transactions'>>
+			| PostMessageDataResponseWallet
 			| PostMessageDataResponseError
 			| PostMessageDataResponseWalletCleanUp
 		>
@@ -37,16 +45,20 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseWallet<
-						Omit<IcrcGetTransactions, 'transactions'>
-					>
+					data: data.data as PostMessageDataResponseWallet
 				});
 				return;
 			case 'syncIcrcWalletError':
 				onLoadTransactionsError({
 					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
+					error: (data.data as PostMessageDataResponseError).error,
+					silent: true
 				});
+
+				// In case of error, we start the listener again, but only with the ledgerCanisterId,
+				// to make it request only the balance and not the transactions
+				restartWorkerWithLedgerOnly();
+
 				return;
 			case 'syncIcrcWalletCleanUp':
 				onTransactionsCleanUp({

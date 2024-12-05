@@ -86,10 +86,14 @@
 				{token.token.ledgerCanisterId}
 			</Value>
 
-			<Value ref="ledgerId" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.import.text.index_canister_id}</svelte:fragment>
-				{token.token.indexCanisterId}
-			</Value>
+			{#if nonNullish(indexCanisterId)}
+				<Value ref="indexId" element="div">
+					<svelte:fragment slot="label"
+						>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
+					>
+					{token.token.indexCanisterId}
+				</Value>
+			{/if}
 
 			<AddTokenWarning />
 		</div>

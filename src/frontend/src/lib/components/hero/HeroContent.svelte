@@ -14,19 +14,19 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { balance, balanceZero } from '$lib/derived/balances.derived';
+	import {
+		balance,
+		balanceZero,
+		noPositiveBalanceAndNotAllBalancesZero
+	} from '$lib/derived/balances.derived';
 	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { networkBitcoin, networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { type HeroContext, initHeroContext } from '$lib/stores/hero.store';
-	import { HERO_CONTEXT_KEY } from '$lib/stores/hero.store.js';
+	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
-
-	export let usdTotal = false;
-	export let summary = false;
 
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
@@ -45,7 +45,9 @@
 	});
 
 	$: loading.set(
-		isRouteTransactions($page) ? isNullish(pageTokenUi?.balance) : !$exchangeInitialized
+		isRouteTransactions($page)
+			? isNullish(pageTokenUi?.balance)
+			: !$exchangeInitialized || $noPositiveBalanceAndNotAllBalancesZero
 	);
 
 	let isTransactionsPage = false;
@@ -64,7 +66,7 @@
 	class:via-united-nations-blue={$networkEthereum}
 	class:to-bright-lilac={$networkEthereum}
 >
-	{#if summary}
+	{#if isTransactionsPage}
 		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
@@ -90,9 +92,7 @@
 
 			<Balance token={pageTokenUi} />
 		</div>
-	{/if}
-
-	{#if usdTotal}
+	{:else}
 		<div in:slide={SLIDE_PARAMS}>
 			<ExchangeBalance />
 		</div>

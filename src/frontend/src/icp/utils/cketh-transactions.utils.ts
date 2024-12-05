@@ -9,7 +9,8 @@ import {
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks.icrc.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic-token';
+import type { IcTransactionUi, IcrcTransaction } from '$icp/types/ic-transaction';
 import {
 	MINT_MEMO_REIMBURSE_TRANSACTION,
 	MINT_MEMO_REIMBURSE_WITHDRAWAL,
@@ -17,6 +18,7 @@ import {
 	decodeMintMemo
 } from '$icp/utils/cketh-memo.utils';
 import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
+import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
@@ -42,7 +44,8 @@ export const mapCkEthereumTransaction = ({
 
 	const ckETHExplorerUrl = nonNullish(env)
 		? `${
-				env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)
+				(env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)) ||
+				isTokenIcrcTestnet({ ledgerCanisterId })
 					? CKETH_SEPOLIA_EXPLORER_URL
 					: CKETH_EXPLORER_URL
 			}${isTokenCkErc20Ledger({ ledgerCanisterId }) ? `/${ledgerCanisterId}` : ''}`

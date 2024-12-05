@@ -2,7 +2,7 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
-	Result_1,
+	Result_2,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
@@ -10,10 +10,9 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockedAgent } from '$tests/mocks/agents.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -32,7 +31,7 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	return {
 		...actual,
 		// eslint-disable-next-line require-await
-		getAgent: async () => mockedAgent
+		getAgent: async () => mock<HttpAgent>()
 	};
 });
 
@@ -691,7 +690,7 @@ describe('backend.canister', () => {
 		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
 			const response = { Err: { UnrecognizedError: 'Some unknown error' } };
 
-			service.allow_signing.mockResolvedValue(response as unknown as Result_1);
+			service.allow_signing.mockResolvedValue(response as unknown as Result_2);
 
 			const { allowSigning } = await createBackendCanister({
 				serviceOverride: service
@@ -700,6 +699,41 @@ describe('backend.canister', () => {
 			await expect(allowSigning()).rejects.toThrow(
 				new CanisterInternalError('Unknown AllowSigningError')
 			);
+		});
+	});
+
+	describe('addUserHiddenDappId', () => {
+		it('should add user hidden dapp id', async () => {
+			const response = { Ok: null };
+
+			service.add_user_hidden_dapp_id.mockResolvedValue(response);
+
+			const { addUserHiddenDappId } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await addUserHiddenDappId({ dappId: 'test-dapp-id' });
+
+			expect(service.add_user_hidden_dapp_id).toHaveBeenCalledWith({
+				dapp_id: 'test-dapp-id',
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if add_user_hidden_dapp_id throws', async () => {
+			service.add_user_hidden_dapp_id.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { addUserHiddenDappId } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = addUserHiddenDappId({ dappId: 'test-dapp-id' });
+
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 });

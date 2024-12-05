@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { IconUser, Popover } from '@dfinity/gix-components';
-	import { goto } from '$app/navigation';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
-	import AboutWhyOisy from '$lib/components/hero/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
@@ -15,24 +18,50 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteDappExplorer, isRouteSettings, networkParam } from '$lib/utils/nav.utils';
+	import {
+		isRouteActivity,
+		isRouteDappExplorer,
+		isRouteSettings,
+		isRouteTokens,
+		isRouteTransactions,
+		networkUrl
+	} from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	let fromRoute: NavigationTarget | null;
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
+
+	let isTransactionsRoute = false;
+	$: isTransactionsRoute = isRouteTransactions($page);
+
 	const hidePopover = () => (visible = false);
 
-	const gotoSettings = async () => {
+	const navigateTo = async (path: AppPath) => {
 		hidePopover();
-		await goto(`/settings?${networkParam($networkId)}`);
+		await goto(
+			networkUrl({ path, networkId: $networkId, usePreviousRoute: isTransactionsRoute, fromRoute })
+		);
 	};
-	const goToDappExplorer = async () => {
-		hidePopover();
-		await goto(`/explore`);
-	};
+
+	const goToTokens = async () => await navigateTo(AppPath.Tokens);
+
+	const gotoSettings = async () => await navigateTo(AppPath.Settings);
+
+	const goToDappExplorer = async () => await navigateTo(AppPath.Explore);
+
+	const goToActivity = async () => await navigateTo(AppPath.Activity);
+
+	let assetsRoute = false;
+	$: assetsRoute = isRouteTokens($page);
 
 	let settingsRoute = false;
 	$: settingsRoute = isRouteSettings($page);
@@ -40,8 +69,11 @@
 	let dAppExplorerRoute = false;
 	$: dAppExplorerRoute = isRouteDappExplorer($page);
 
+	let activityRoute = false;
+	$: activityRoute = isRouteActivity($page);
+
 	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute;
 </script>
 
 <ButtonIcon
@@ -58,6 +90,20 @@
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
+		{/if}
+
+		{#if !assetsRoute && !settingsRoute}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.tokens} on:click={goToTokens}>
+				<IconWallet size="20" />
+				{$i18n.navigation.text.tokens}
+			</ButtonMenu>
+		{/if}
+
+		{#if !activityRoute && !settingsRoute}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.activity} on:click={goToActivity}>
+				<IconActivity size="20" />
+				{$i18n.navigation.text.activity}
+			</ButtonMenu>
 		{/if}
 
 		{#if !dAppExplorerRoute && !settingsRoute}
@@ -106,7 +152,7 @@
 
 		<Hr />
 
-		<span class="text-center text-sm text-aurometalsaurus">
+		<span class="text-center text-sm text-tertiary">
 			<LicenseLink noUnderline />
 		</span>
 	</div>

@@ -62,7 +62,10 @@ export default defineConfig(
 			watch: false,
 			silent: false,
 			setupFiles: ['./vitest.setup.ts'],
-			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)']
+			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+			coverage: {
+				exclude: ['build', '.dfx', '**/.svelte-kit']
+			}
 		}
 	})
 );

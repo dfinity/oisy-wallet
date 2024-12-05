@@ -10,7 +10,7 @@ import {
 } from '$icp/services/cketh-listener.services';
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
-import type { IcCkMetadata } from '$icp/types/ic';
+import type { IcCkMetadata } from '$icp/types/ic-token';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,

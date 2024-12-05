@@ -6,7 +6,7 @@ export interface Erc20AddTokenData {
 
 export interface IcAddTokenData {
 	ledgerCanisterId: string;
-	indexCanisterId: string;
+	indexCanisterId: string | undefined;
 }
 
 export type AddTokenData = Either<Erc20AddTokenData, IcAddTokenData>;

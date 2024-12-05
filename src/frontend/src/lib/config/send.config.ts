@@ -1,8 +1,8 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
+import type { WizardStepsParams } from '$lib/types/steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-interface SendWizardStepsParams {
-	i18n: I18n;
+interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;
 }
 
