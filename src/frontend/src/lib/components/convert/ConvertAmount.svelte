@@ -24,4 +24,4 @@
 	</div>
 </div>
 
-<ConvertAmountDestination bind:receiveAmount {sendAmount} {totalFee} {insufficientFunds} />
+<ConvertAmountDestination bind:receiveAmount {sendAmount} {insufficientFunds} />

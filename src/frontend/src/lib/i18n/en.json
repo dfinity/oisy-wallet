@@ -384,7 +384,6 @@
 			"input_reset_button": "Reset input value",
 			"swap_to_token": "Convert $sourceToken → $destinationToken",
 			"review": "Review transaction",
-			"available_balance": "Available",
 			"max_balance": "Max",
 			"review_tokens_info_title": "You're converting",
 			"amount_to_convert": "Amount to convert",
