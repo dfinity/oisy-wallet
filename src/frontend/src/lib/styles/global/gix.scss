@@ -150,6 +150,9 @@ div.modal {
 		h2 {
 			font-size: var(--font-size-h3);
 		}
+		button {
+			@apply p-1.5;
+		}
 	}
 
 	div.wrapper.dialog > div.container-wrapper {
