@@ -24,7 +24,6 @@ declare namespace svelteHTML {
 		'on:oisyCkEthMinterInfoStatus'?: (event: CustomEvent<any>) => void;
 		'on:oisyCkEthereumPendingTransactions'?: (event: CustomEvent<any>) => void;
 		'on:oisyValidateAddresses'?: (event: CustomEvent<any>) => void;
-		'on:oisyRefreshUserProfile'?: (event: CustomEvent<any>) => void;
 	}
 }
 
