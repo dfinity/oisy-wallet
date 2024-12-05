@@ -1,3 +1,5 @@
+import type { IcToken } from '$icp/types/ic';
+import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
@@ -37,6 +39,12 @@ export const initSendContext = ({
 		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
 	);
 
+	const sendTokenAsIcToken = derived(sendToken, ($sendToken) => $sendToken as IcToken);
+	const sendTokenWithFallbackAsIcToken = derived(
+		sendToken,
+		($sendToken) => ($sendToken ?? DEFAULT_ETHEREUM_TOKEN) as IcToken
+	);
+
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -44,6 +52,8 @@ export const initSendContext = ({
 		sendTokenStandard,
 		sendTokenSymbol,
 		sendBalance,
+		sendTokenAsIcToken,
+		sendTokenWithFallbackAsIcToken,
 		...staticContext
 	};
 };
@@ -61,6 +71,8 @@ export interface SendContext {
 	sendTokenStandard: Readable<TokenStandard>;
 	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
+	sendTokenAsIcToken: Readable<IcToken>;
+	sendTokenWithFallbackAsIcToken: Readable<IcToken>;
 	sendPurpose: SendContextPurpose;
 }
 
