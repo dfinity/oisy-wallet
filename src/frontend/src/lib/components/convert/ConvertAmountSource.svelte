@@ -103,7 +103,7 @@
 
 	<button
 		slot="balance"
-		class={`rounded px-2 py-0.5 ${isZeroBalance ? 'bg-error-subtle-alt text-error' : isNullish(maxAmount) ? 'animate-pulse bg-disabled text-tertiary' : 'bg-brand-subtle text-brand-primary'}`}
+		class={`rounded px-2 py-0.5 transition-all ${isZeroBalance ? 'bg-error-subtle-alt text-error' : isNullish(maxAmount) ? 'animate-pulse bg-disabled text-tertiary' : 'bg-brand-subtle text-brand-primary'}`}
 		on:click|preventDefault={setMax}
 		data-tid="convert-amount-source-balance"
 	>
