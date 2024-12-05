@@ -14,7 +14,7 @@
 <div class="group flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8">
 	<a
 		class="flex-1 no-underline"
-	href={disabled ? undefined : url}
+		href={disabled ? undefined : url}
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol
 		})}

@@ -5,6 +5,7 @@
 	import type { TokenUi } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { groupTokensByTwin } from '$lib/utils/token-group.utils';
+	import { onDestroy } from 'svelte';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
 	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
@@ -31,7 +32,6 @@
 	const interval = setInterval(reshuffleTokens, 5000);
 
 	// Clean up the interval when the component is destroyed
-	import { onDestroy } from 'svelte';
 	onDestroy(() => {
 		clearInterval(interval);
 	});

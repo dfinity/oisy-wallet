@@ -40,7 +40,6 @@
 	}, 250);
 
 	const onClick = () => {
-		console.log('Clicked', animating, shake);
 		if (animating) {
 			shake = true;
 		}
@@ -64,7 +63,7 @@
 						<TokenGroupCard tokenGroup={token} />
 					{:else}
 						<Listener {token}>
-							<TokenCardWithUrl {token}  disabled={animating} on:click={onClick}>
+							<TokenCardWithUrl {token} disabled={animating} on:click={onClick}>
 								<TokenCardContent data={token} />
 							</TokenCardWithUrl>
 						</Listener>
@@ -85,30 +84,30 @@
 
 <style>
 	@keyframes shake {
-      0% {
-          transform: translateX(0px);
-      }
-      20% {
-          transform: translateX(10px);
-      }
-      40% {
-          transform: translateX(-10px);
-      }
-      60% {
-          transform: translateX(5px);
-      }
-      80% {
-          transform: translateX(-5px);
-      }
-      90% {
-          transform: translateX(1px);
-      }
-      95% {
-          transform: translateX(-1px);
-      }
-      100% {
-          transform: translateX(0px);
-      }
+		0% {
+			transform: translateX(0px);
+		}
+		20% {
+			transform: translateX(10px);
+		}
+		40% {
+			transform: translateX(-10px);
+		}
+		60% {
+			transform: translateX(5px);
+		}
+		80% {
+			transform: translateX(-5px);
+		}
+		90% {
+			transform: translateX(1px);
+		}
+		95% {
+			transform: translateX(-1px);
+		}
+		100% {
+			transform: translateX(0px);
+		}
 	}
 
 	.shake {
