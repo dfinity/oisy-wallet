@@ -7,8 +7,13 @@
 		ETHEREUM_NETWORK,
 		ICP_NETWORK
 	} from '$env/networks.env';
-	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
-	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+	import {
+		BTC_MAINNET_TOKEN,
+		BTC_REGTEST_TOKEN,
+		BTC_TESTNET_TOKEN
+	} from '$env/tokens/tokens.btc.env';
+	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -141,7 +146,7 @@
 		>
 			<svelte:fragment slot="title">{$i18n.receive.ethereum.text.ethereum}</svelte:fragment>
 
-			<span slot="text" class="text-secondary text-sm"
+			<span slot="text" class="text-sm text-black"
 				>{$i18n.receive.icp.text.your_private_eth_address}</span
 			>
 		</ReceiveAddress>
@@ -167,7 +172,7 @@
 		>
 			<svelte:fragment slot="title">{$i18n.receive.icp.text.principal}</svelte:fragment>
 
-			<span slot="text" class="text-secondary text-sm"
+			<span slot="text" class="text-sm text-black"
 				>{$i18n.receive.icp.text.use_for_icrc_deposit}</span
 			>
 		</ReceiveAddress>

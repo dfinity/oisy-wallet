@@ -2,23 +2,37 @@
 	import { IconClose } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let token: Token;
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
+	export let amountSetToMax = false;
 	export let name = 'convert-amount';
 	export let disabled: boolean | undefined = undefined;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
 	export let errorType: ConvertAmountErrorType = undefined;
 	export let placeholder = '0';
 
+	const dispatch = createEventDispatcher();
+
+	const onInput = () => {
+		amountSetToMax = false;
+
+		// Bubble nnsInput as consumers might require the event as well (which is the case in Oisy).
+		dispatch('nnsInput');
+	};
+
 	const onReset = () => {
+		amountSetToMax = false;
+
 		amount = undefined;
 	};
 
@@ -52,6 +66,7 @@
 		decimals={token.decimals}
 		{placeholder}
 		{disabled}
+		on:nnsInput={onInput}
 	>
 		<svelte:fragment slot="inner-end">
 			{#if nonNullish(amount) && !disabled}
@@ -60,7 +75,7 @@
 					data-tid="convert-amount-reset"
 					aria-label={$i18n.convert.text.input_reset_button}
 					on:click|preventDefault={onReset}
-					class={errorState ? 'text-error' : 'text-aurometalsaurus'}
+					class={errorState ? 'text-error' : 'text-tertiary'}
 				>
 					<IconClose />
 				</button>
@@ -83,8 +98,8 @@
 		@apply h-14;
 
 		&:disabled {
-			--disable: var(--color-bright-gray);
-			--input-background: var(--color-ghost-white);
+			--disable: var(--colors-neutrals-200);
+			--input-background: var(--colors-neutrals-100);
 		}
 	}
 </style>

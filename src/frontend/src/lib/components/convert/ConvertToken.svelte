@@ -10,8 +10,7 @@
 <div class="flex items-center">
 	<TokenLogo data={token} logoSize={size} />
 
-	<!-- TODO: Update colors with values from theme-variables when they are available there -->
-	<span class={`${size === 'md' ? 'text-3xl font-bold' : 'text-aurometalsaurus'} ml-2 `}
+	<span class={`${size === 'md' ? 'text-3xl font-bold' : 'text-tertiary'} ml-2 `}
 		>{token.symbol}</span
 	>
 </div>

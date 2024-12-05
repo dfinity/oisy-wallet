@@ -13,7 +13,6 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More",
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
@@ -36,6 +35,7 @@
 			"tokens": "Assets",
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
+			"activity": "Activity",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -46,6 +46,7 @@
 			"tokens": "Go to the assets view",
 			"settings": "Open your settings",
 			"dapp_explorer": "Open dapp explorer",
+			"activity": "Open the activity view",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -64,7 +65,6 @@
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
 		"alt": {
-			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"warning": {
@@ -109,7 +109,9 @@
 	},
 	"footer": {
 		"text": {
-			"developed_with": "© 2024 Developed with ❤\uFE0F at DFINITY"
+			"incubated_with": "Incubated with ❤\uFE0F by",
+			"dfinity_foundation": "DFINITY Foundation",
+			"copyright": "© 2024"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
@@ -150,7 +152,6 @@
 			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
-			"no_infura_ckerc20_provider": "No Infura CkErc20 provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
@@ -175,12 +176,14 @@
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
-			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support."
+			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
+			"btc_wallet_error": "Error while loading BTC wallet information."
 		}
 	},
 	"hero": {
 		"text": {
 			"available_balance": "Available balance",
+			"unavailable_balance": "$ value is not available",
 			"top_up": "Top up your wallet to start using it!",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
@@ -200,8 +203,7 @@
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅",
-			"sign_in": "Sign in to start using $oisy_name."
+			"pouh_credential_verified": "Verified ✅"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -214,7 +216,6 @@
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
-		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
 		"chain_fusion": "Chain Fusion (all networks)"
 	},
@@ -378,10 +379,31 @@
 			"check_balance_for_fees": "Check $token balance for conversion fees",
 			"fees_explanation": "You need enough $token to cover the smart contract execution fees.",
 			"current_balance": "👉 Current balance:",
-			"input_reset_button": "Reset input value"
+			"review_button": "Review",
+			"convert_button": "Convert",
+			"input_reset_button": "Reset input value",
+			"swap_to_token": "Convert $sourceToken → $destinationToken",
+			"review": "Review transaction",
+			"max_balance": "Max",
+			"review_tokens_info_title": "You're converting",
+			"amount_to_convert": "Amount to convert",
+			"amount_to_receive": "Amount to receive",
+			"source_network": "Source network",
+			"destination_network": "Destination network",
+			"conversion_may_take": "Conversion may take up to 1 hour",
+			"executing_transaction": "Executing transaction...",
+			"initializing": "Initializing transaction...",
+			"refreshing_ui": "Refreshing UI",
+			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
+			"calculating_max_amount": "Calculating..."
+		},
+		"assertion": {
+			"insufficient_funds": "Insufficient balance"
 		},
 		"error": {
-			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
+			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
+			"unexpected": "Something went wrong while converting tokens.",
+			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
 		}
 	},
 	"buy": {
@@ -415,11 +437,17 @@
 			"twin_token": "Twin token",
 			"standard": "Standard"
 		},
+		"balance": {
+			"error": {
+				"not_applicable": "n/a"
+			}
+		},
 		"import": {
 			"text": {
 				"title": "Import token",
 				"review": "Review",
 				"saving": "Saving...",
+				"updating": "Updating token list",
 				"ledger_canister_id": "Ledger Canister ID",
 				"index_canister_id": "Index Canister ID",
 				"minter_canister_id": "Minter Canister ID",
@@ -428,9 +456,8 @@
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
 				"add_the_token": "Add the token",
-				"info": "To display custom token information correctly, $oisy_name requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
-				"github_howto": "Read how ICRC token Integration works",
-				"open_github_howto": "Open information about ICRC token integration on GitHub",
+				"info": "Ledger and Index canister IDs are usually available on the project’s website. ",
+				"info_index": "The Index canister ID is optional, but without it, $oisy_short can’t display transaction history.",
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
@@ -441,9 +468,11 @@
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
-				"missing_index_id": "The Index ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
 			}
 		},
 		"manage": {
@@ -460,7 +489,6 @@
 				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with $oisy_name. Contact the project team to propose an upgrade.",
 				"no_changes": "No changes need to be saved."
 			},
 			"error": {
@@ -492,7 +520,6 @@
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
-			"invalid_index": "The selected token is not linked with an Icrc Index canister.",
 			"no_metadata": "No metadata were fetched for the contract address.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
@@ -510,7 +537,15 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
-			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:"
+			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:",
+			"convert_fee": "Conversion fee",
+			"convert_inter_network_fee": "Inter-network fee",
+			"convert_btc_network_fee": "Bitcoin network fee",
+			"zero_fee": "Free",
+			"total_fee": "Total fee"
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
@@ -629,7 +664,8 @@
 			"sending_twin_token_failed": "Sending $twinToken failed",
 			"converting_twin_token": "Converting $twinToken to $ckToken",
 			"converting_ck_token": "Converting $ckToken to $twinToken",
-			"twin_network": "$twinNetwork network"
+			"twin_network": "$twinNetwork network",
+			"no_date_available": "No Date Available"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",
@@ -648,7 +684,10 @@
 			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
 			"transaction_history": "Your transaction history will appear here",
 			"open_transactions": "Open the list of $token transactions",
-			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified."
+			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
+			"transaction_history_unavailable": "Transaction history unavailable",
+			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
@@ -661,19 +700,34 @@
 		}
 	},
 	"about": {
-		"text": {
-			"title": "About $oisy_name"
-		},
 		"why_oisy": {
 			"text": {
 				"label": "Why $oisy_short",
 				"title": "Why $oisy_short",
-				"hold_crypto": "<strong>Unified Management of All Your Digital Assets</strong><br>$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms.",
-				"network_custody": "<strong>No more private key anxiety with Network Custody</strong><br>$oisy_name implements <strong>network custody</strong>, an innovative approach that leverages the Internet Computer’s advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online” movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network.",
-				"fully_on_chain": "<strong>Tamper-Proof Security with a Fully On-Chain Wallet</strong><br>Not only are your keys secured, but the entire wallet application is stored <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a></strong> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure.",
-				"cross_device": "<strong>Access your wallet anytime from anywhere</strong><br>Using <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a></strong>, $oisy_short can easily be used across all devices you have linked to your private decentralized identity. This ensures seamless and secure access to your wallet whether you're on a smartphone, tablet, or desktop.",
-				"verifiable_credentials": "<strong>Unlock Extra Features with Verifiable Credentials</strong><br>$oisy_short integrates with the Internet Computer’s <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a></strong> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience.",
-				"open_source": "<strong>Trust in Transparency with Open Source</strong><br>$oisy_short is an <strong><a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source</a></strong> project led by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
+				"hold_crypto": {
+					"title": "Unified Management of All Your Digital Assets",
+					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+				},
+				"network_custody": {
+					"title": "No more private key anxiety with Network Custody",
+					"description": "$oisy_name implements network custody, an innovative approach that leverages the Internet Computer's advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online“ movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network."
+				},
+				"fully_on_chain": {
+					"title": "Tamper-Proof Security with a Fully On-Chain Wallet",
+					"description": "Not only are your keys secured, but the entire wallet application is stored <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">fully on-chain</a> and served directly into your browser from the Internet Computer. This means the entire wallet benefits from a decentralized trust model, making it tamper-proof and highly secure."
+				},
+				"cross_device": {
+					"title": "Access your wallet anytime from anywhere",
+					"description": "Using <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a>, $oisy_short can easily be used across all devices you have linked to your private decentralized identity. This ensures seamless and secure access to your wallet whether you're on a smartphone, tablet, or desktop."
+				},
+				"verifiable_credentials": {
+					"title": "Unlock Extra Features with Verifiable Credentials",
+					"description": "$oisy_short integrates with the Internet Computer's <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials</a> platform. Access additional features like airdrops and exclusive functionalities by acquiring certain types of credentials, enhancing your overall experience."
+				},
+				"open_source": {
+					"title": "Trust in Transparency with Open Source",
+					"description": "$oisy_short is an <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">open-source</a> project led by a dedicated team within the <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
+				}
 			}
 		}
 	},
@@ -772,6 +826,12 @@
 	"activity": {
 		"text": {
 			"title": "Recent Activity"
+		},
+		"info": {
+			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
+		},
+		"warning": {
+			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister."
 		}
 	}
 }

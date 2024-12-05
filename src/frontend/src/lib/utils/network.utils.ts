@@ -5,6 +5,7 @@ import {
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID,
 	ICP_NETWORK_ID,
+	SEPOLIA_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
 } from '$env/networks.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
@@ -32,6 +33,9 @@ export const isNetworkIdBTCTestnet = (networkId: NetworkId | undefined): boolean
 
 export const isNetworkIdBTCRegtest = (networkId: NetworkId | undefined): boolean =>
 	BTC_REGTEST_NETWORK_ID === networkId;
+
+export const isNetworkIdSepolia = (networkId: NetworkId | undefined): boolean =>
+	SEPOLIA_NETWORK_ID === networkId;
 
 const mapper: Record<symbol, BitcoinNetwork> = {
 	[BTC_MAINNET_NETWORK_ID]: 'mainnet',

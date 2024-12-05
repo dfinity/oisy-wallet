@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
+	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
 	export let autoplay = 5000;
@@ -114,6 +115,10 @@
 	 * Start autoplay timer
 	 */
 	const initialiseAutoplayTimer = () => {
+		if (slides.length <= 1) {
+			return;
+		}
+
 		autoplayTimer = setInterval(() => {
 			goToNextSlide();
 		}, autoplay);
@@ -245,17 +250,21 @@
 <svelte:window on:resize={onResize} />
 
 <div
+	data-tid={CAROUSEL_CONTAINER}
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
+	class:pb-3={nonNullish(slides) && slides.length <= 1}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
-		<div class="flex" bind:this={sliderFrame}>
+		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>
-	<div
-		class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
-	>
-		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
-		<Controls {onNext} {onPrevious} />
-	</div>
+	{#if nonNullish(slides) && slides.length > 1}
+		<div
+			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+		>
+			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
+			<Controls {onNext} {onPrevious} />
+		</div>
+	{/if}
 </div>

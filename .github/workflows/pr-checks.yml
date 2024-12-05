@@ -29,3 +29,17 @@ jobs:
               exit 1
           fi
 
+  check-pr-description:
+    name: 'check-pr-description:required'
+    runs-on: ubuntu-24.04
+    env:
+      DESCRIPTION: ${{ github.event.pull_request.body }}
+    steps:
+      - name: 'Check PR Description for Jira/Atlassian Links'
+        run: |
+          if [[ "$DESCRIPTION" =~ https:\/\/[a-zA-Z0-9]*\.(atlassian|jira)\.[a-z]{2,3} ]]; then
+              echo "PR Description contains a link to Jira or Atlassian, which is not allowed."
+              exit 1
+          else
+              echo "PR Description passes"
+          fi

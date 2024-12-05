@@ -10,6 +10,7 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 	await expect(page).toHaveScreenshot({ fullPage: true });
 });
 
+// TODO: resolve the below test flakiness
 testWithII('should display ETH transactions page', async ({ page, iiPage }) => {
 	const transactionsPage = new TransactionsPage({ page, iiPage, tokenSymbol: 'ETH' });
 

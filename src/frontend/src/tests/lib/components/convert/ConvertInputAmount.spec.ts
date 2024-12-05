@@ -1,4 +1,4 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertInputAmount from '$lib/components/convert/ConvertInputAmount.svelte';
 import { parseToken } from '$lib/utils/parse.utils';
 import { assertNonNullish } from '@dfinity/utils';
