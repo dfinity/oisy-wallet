@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE } from '$btc/constants/btc.constants';
 	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -21,17 +22,26 @@
 			return;
 		}
 
-		const parsedAmount = nonNullish(amount) ? Number(amount) : undefined;
-
-		// we need to make the value is not 0 because the utxos call fails if amount = 0
-		if (amountError || isNullish(networkId) || isNullish(parsedAmount) || parsedAmount === 0) {
-			store.reset();
+		// If utxos are already known and the new amount is nullish or zero, we keep using the previous fee value
+		if (nonNullish($store?.utxosFee) && (isNullish(amount) || Number(amount) === 0)) {
 			return;
 		}
 
+		// UTXOs API call is very time-consuming operation, even though the fees do not change often (no matter what amount is provided)
+		// Therefore, to improve UX, we start fetching the fee directly on modal open event
+		// Initially, we fetch fees with default value and then re-fetch it in the background on value change
+		const parsedAmount =
+			nonNullish(amount) && Number(amount) !== 0
+				? Number(amount)
+				: Number(DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE);
+
 		// WizardModal re-renders content on step change (e.g. when switching between Convert to Review steps)
 		// To avoid re-fetching the fees, we need to check if amount hasn't changed since the last request
-		if (nonNullish($store) && $store.amountForFee === parsedAmount) {
+		if (
+			amountError ||
+			isNullish(networkId) ||
+			(nonNullish($store) && $store.amountForFee === parsedAmount)
+		) {
 			return;
 		}
 
