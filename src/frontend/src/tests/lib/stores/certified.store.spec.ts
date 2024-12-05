@@ -21,7 +21,7 @@ describe('certified.store', () => {
 			mockStore = initCertifiedStore<MockData>();
 		});
 
-		it('initialises with undefined state', () => {
+		it('should initialise with undefined state', () => {
 			expect(get(mockStore)).toBeUndefined();
 		});
 

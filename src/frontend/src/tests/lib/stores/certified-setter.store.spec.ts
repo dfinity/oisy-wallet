@@ -20,7 +20,7 @@ describe('certified-setter.store', () => {
 			mockStore = initCertifiedSetterStore<MockData>();
 		});
 
-		it('initialises with undefined state', () => {
+		it('should initialise with undefined state', () => {
 			expect(get(mockStore)).toBeUndefined();
 		});
 
