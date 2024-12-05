@@ -156,6 +156,7 @@ interface I18nInit {
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
+		btc_wallet_error: string;
 	};
 }
 
@@ -352,7 +353,6 @@ interface I18nConvert {
 		input_reset_button: string;
 		swap_to_token: string;
 		review: string;
-		available_balance: string;
 		max_balance: string;
 		review_tokens_info_title: string;
 		amount_to_convert: string;
@@ -364,6 +364,7 @@ interface I18nConvert {
 		initializing: string;
 		refreshing_ui: string;
 		unsupported_token_conversion: string;
+		calculating_max_amount: string;
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
@@ -630,12 +631,12 @@ interface I18nAbout {
 		text: {
 			label: string;
 			title: string;
-			hold_crypto: string;
-			network_custody: string;
-			fully_on_chain: string;
-			cross_device: string;
-			verifiable_credentials: string;
-			open_source: string;
+			hold_crypto: { title: string; description: string };
+			network_custody: { title: string; description: string };
+			fully_on_chain: { title: string; description: string };
+			cross_device: { title: string; description: string };
+			verifiable_credentials: { title: string; description: string };
+			open_source: { title: string; description: string };
 		};
 	};
 }
@@ -702,6 +703,7 @@ interface I18nLicense_agreement {
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string };
+	warning: { no_index_canister: string };
 }
 
 interface I18n {
