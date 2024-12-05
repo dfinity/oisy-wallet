@@ -13,6 +13,7 @@
 	class:hover:bg-brand-subtle-alt={selected}
 	aria-label={ariaLabel}
 	data-tid={testId}
+	on:click
 >
 	<slot />
 </a>
