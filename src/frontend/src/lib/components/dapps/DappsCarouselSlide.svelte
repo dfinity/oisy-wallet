@@ -4,16 +4,37 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import { fromNullable, isNullish } from '@dfinity/utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
+	import { addUserHiddenDappId } from '$lib/api/backend.api';
+	import { emit } from '$lib/utils/events.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	$: ({
+		id: dappId,
 		carousel: { text, callToAction },
 		logo,
 		name: dAppName
 	} = dappsCarouselSlide);
+
+	const close = async () => {
+		if (isNullish($authIdentity) || isNullish($userProfileStore)) {
+			return;
+		}
+
+		await addUserHiddenDappId({
+			dappId,
+			identity : $authIdentity,
+			currentUserVersion: fromNullable($userProfileStore.profile.version)
+		});
+
+		emit({ message: 'oisyRefreshUserProfile' });
+	};
 </script>
 
-<div class="flex h-full items-center">
+<div class="flex h-full items-center justify-between">
 	<div class="mr-4 shrink-0">
 		<Img
 			height="64"
@@ -23,7 +44,7 @@
 			alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dAppName })}
 		/>
 	</div>
-	<div>
+	<div class="w-full justify-start">
 		<div class="mb-1">{text}</div>
 		<button
 			on:click={() => {
@@ -35,4 +56,11 @@
 			{callToAction} →
 		</button>
 	</div>
+	<button
+		class="h-full items-start p-1 text-tertiary"
+		on:click={close}
+		aria-label={$i18n.core.text.close}
+	>
+		<IconClose size="20" />
+	</button>
 </div>
