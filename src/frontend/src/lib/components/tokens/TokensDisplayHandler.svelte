@@ -10,6 +10,35 @@
 	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
 
 	let sortedTokens: TokenUi[];
+	let shuffledTokens: TokenUiOrGroupUi[] = [];
+
+	// Shuffle the sorted tokens
+	const shuffleArray = (array: TokenUiOrGroupUi[]): TokenUiOrGroupUi[] => {
+		let shuffled = [...array];
+		for (let i = shuffled.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+		}
+		return shuffled;
+	};
+
+	// Function to reshuffle the tokens
+	const reshuffleTokens = () => {
+		shuffledTokens = shuffleArray(groupedTokens);
+	};
+
+	// Set interval to reshuffle the tokens every 5 seconds
+	const interval = setInterval(reshuffleTokens, 5000);
+
+	// Clean up the interval when the component is destroyed
+	import { onDestroy } from 'svelte';
+	onDestroy(() => {
+		clearInterval(interval);
+	});
+
+	// Initialize the first shuffle
+	$: sortedTokens, reshuffleTokens();
+
 	$: sortedTokens = $combinedDerivedSortedNetworkTokensUi.filter(
 		({ balance, usdBalance }) => Number(balance ?? 0n) || (usdBalance ?? 0) || $showZeroBalances
 	);
@@ -17,11 +46,11 @@
 	let groupedTokens: TokenUiOrGroupUi[];
 	$: groupedTokens = groupTokensByTwin(sortedTokens);
 
-	const updateTokensToDisplay = () => (tokens = [...groupedTokens]);
+	const updateTokensToDisplay = () => (tokens = [...shuffledTokens]);
 
 	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
 
-	$: sortedTokens, debounceUpdateTokensToDisplay();
+	$: shuffledTokens, debounceUpdateTokensToDisplay();
 </script>
 
 <slot />
