@@ -1,6 +1,8 @@
 import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
 import {
+	hasIndexCanister,
+	hasNoIndexCanister,
 	isIcCkToken,
 	isIcToken,
 	isIcTokenCanistersStrict,
@@ -90,6 +92,34 @@ describe('ic-token.validation', () => {
 
 		it('should return true for an invalid IcToken', () => {
 			expect(isNotIcCkToken(mockValidToken)).toBe(true);
+		});
+	});
+
+	describe('hasIndexCanister', () => {
+		it('should return false for an IcToken without Index canister', () => {
+			expect(hasIndexCanister(mockValidIcToken)).toBe(false);
+		});
+
+		it('should return true for an IcToken with Index canister', () => {
+			expect(hasIndexCanister(mockValidIcTokenWithIndex)).toBe(true);
+		});
+
+		it('should return false for a token type casted to IcToken', () => {
+			expect(hasIndexCanister(mockValidToken as IcToken)).toBe(false);
+		});
+	});
+
+	describe('hasNoIndexCanister', () => {
+		it('should return true for an IcToken without Index canister', () => {
+			expect(hasNoIndexCanister(mockValidIcToken)).toBe(true);
+		});
+
+		it('should return false for an IcToken with Index canister', () => {
+			expect(hasNoIndexCanister(mockValidIcTokenWithIndex)).toBe(false);
+		});
+
+		it('should return true for a token type casted to IcToken', () => {
+			expect(hasNoIndexCanister(mockValidToken as IcToken)).toBe(true);
 		});
 	});
 });

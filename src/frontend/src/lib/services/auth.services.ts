@@ -11,6 +11,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
+import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import type { Principal } from '@dfinity/principal';
@@ -58,7 +59,8 @@ export const signIn = async (
 	}
 };
 
-export const signOut = (): Promise<void> => logout({});
+export const signOut = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
+	logout({ resetUrl });
 
 export const errorSignOut = (text: string): Promise<void> =>
 	logout({
@@ -115,10 +117,12 @@ const clearTestnetsOption = async () => {
 
 const logout = async ({
 	msg = undefined,
-	clearStorages = true
+	clearStorages = true,
+	resetUrl = false
 }: {
 	msg?: ToastMsg;
 	clearStorages?: boolean;
+	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
@@ -131,6 +135,10 @@ const logout = async ({
 
 	if (msg) {
 		appendMsgToUrl(msg);
+	}
+
+	if (resetUrl) {
+		await gotoReplaceRoot();
 	}
 
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these
