@@ -7,16 +7,39 @@
 		dAppDescriptions
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
+	import { onDestroy } from 'svelte';
 
 	export let styleClass: string | undefined = undefined;
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = filterCarouselDapps(dAppDescriptions);
+
+	let carousel: Carousel;
+
+	let dapp: CarouselSlideOisyDappDescription | undefined
+
+	// every 5 seconds remove a dapp from the carousel, then 5 seconds later, add it again
+	const interval = setInterval(() => {
+		if (nonNullish(carousel)) {
+			if (nonNullish(dapp)) {
+				dappsCarouselSlides.push(dapp);
+				dapp = undefined;
+			} else {
+				dapp = dappsCarouselSlides.shift();
+			}
+			console.log('dapp', dapp);
+			carousel.refreshSlides();
+		}
+	}, 5000);
+
+	onDestroy(() => {
+		clearInterval(interval);
+	});
 </script>
 
 {#if nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
-	<Carousel controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
+	<Carousel bind:this={carousel} controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
 		{#each dappsCarouselSlides as dappsCarouselSlide}
 			<DappsCarouselSlide {dappsCarouselSlide} />
 		{/each}

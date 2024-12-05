@@ -27,6 +27,7 @@
 	 * Variables related to the slides
 	 */
 	let slides: Node[];
+	let originalSlides: Node[];
 	let currentSlide = 0;
 	let totalSlides: number;
 	$: totalSlides = slides?.length ?? 0;
@@ -63,6 +64,7 @@
 		}
 
 		slides = [...sliderFrame.children];
+		originalSlides = [...slides];
 	};
 
 	/**
@@ -244,6 +246,25 @@
 		const offset = (currentSlide + 1) * containerWidth;
 		moveSlider({ sliderFrame, animateTo: -offset, withTransition, duration, easing });
 	};
+
+	export const removeSlide = (idx:number) => {
+		if (isNullish(sliderFrame)) {
+			return;
+		}
+
+		slides = slides.filter((_, i) => i !== idx);
+
+		initializeCarousel()
+	}
+
+	// $: console.log(slides)
+	//
+	// // every 5 seconds print slides
+	// setInterval(() => {
+	// 	console.log(slides)
+	// }, 5000)
+
+
 </script>
 
 <!-- Resize listener to re-calculate slide frame width -->
