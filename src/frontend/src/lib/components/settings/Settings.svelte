@@ -19,7 +19,6 @@
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import type { OptionIdentity } from '$lib/types/identity';
 	import type { Option } from '$lib/types/utils';
-	import { emit } from '$lib/utils/events.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
