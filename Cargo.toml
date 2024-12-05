@@ -2,6 +2,7 @@
 members = [
     "src/backend",
     "src/cycles_ledger/client",
+    "src/cycles_ledger/types",
     "src/shared"
 ]
 resolver = "2"
