@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { createEventDispatcher } from 'svelte';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	$: ({
@@ -17,7 +17,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const close =  () => {
+	const close = () => {
 		dispatch('icCloseCarouselSlide', { dappId });
 	};
 </script>

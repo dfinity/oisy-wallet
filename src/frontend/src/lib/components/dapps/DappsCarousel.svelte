@@ -1,23 +1,25 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
 		dAppDescriptions
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
-	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import { emit } from '$lib/utils/events.utils';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
 
 	export let styleClass: string | undefined = undefined;
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = filterCarouselDapps(dAppDescriptions);
 
-	const closeSlide = async ({ detail:  dappId   }: CustomEvent<CarouselSlideOisyDappDescription['id'] >) => {
+	const closeSlide = async ({
+		detail: dappId
+	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
 		if (isNullish($authIdentity) || isNullish($userProfileStore)) {
 			return;
 		}
