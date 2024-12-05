@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { goto } from '$app/navigation';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { signOut } from '$lib/services/auth.services';
