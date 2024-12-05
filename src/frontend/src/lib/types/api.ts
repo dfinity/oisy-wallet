@@ -46,3 +46,8 @@ export interface SendBtcParams {
 	utxosToSpend: SignerUtxo[];
 	outputs: BtcTxOutput[];
 }
+
+export interface AddUserHiddenDappIdParams {
+	dappId: string;
+	currentUserVersion?: bigint;
+}

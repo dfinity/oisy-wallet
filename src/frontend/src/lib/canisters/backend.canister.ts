@@ -17,6 +17,7 @@ import {
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
+	AddUserHiddenDappIdParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
@@ -177,5 +178,17 @@ export class BackendCanister extends Canister<BackendService> {
 		if ('Err' in response) {
 			throw mapAllowSigningError(response.Err);
 		}
+	};
+
+	addUserHiddenDappId = async ({
+		dappId,
+		currentUserVersion
+	}: AddUserHiddenDappIdParams): Promise<void> => {
+		const { add_user_hidden_dapp_id } = this.caller({ certified: true });
+
+		await add_user_hidden_dapp_id({
+			dapp_id: dappId,
+			current_user_version: toNullable(currentUserVersion)
+		});
 	};
 }
