@@ -266,11 +266,6 @@ export const idlFactory = ({ IDL }) => {
 		topped_up: IDL.Nat
 	});
 	const TopUpCyclesLedgerError = IDL.Variant({
-		InvalidArgPercentageOutOfRange: IDL.Record({
-			max: IDL.Nat8,
-			min: IDL.Nat8,
-			percentage: IDL.Nat8
-		}),
 		CouldNotGetBalanceFromCyclesLedger: IDL.Null,
 		CouldNotTopUpCyclesLedger: IDL.Record({
 			tried_to_send: IDL.Nat,

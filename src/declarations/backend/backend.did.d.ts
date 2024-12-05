@@ -203,13 +203,8 @@ export interface SupportedCredential {
 export type Token = { Icrc: IcrcToken };
 export type TopUpCyclesLedgerError =
 	| {
-			InvalidArgPercentageOutOfRange: {
-				max: number;
-				min: number;
-				percentage: number;
-			};
+			CouldNotGetBalanceFromCyclesLedger: null;
 	  }
-	| { CouldNotGetBalanceFromCyclesLedger: null }
 	| {
 			CouldNotTopUpCyclesLedger: {
 				tried_to_send: bigint;

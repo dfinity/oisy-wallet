@@ -26,30 +26,30 @@ else
 fi
 
 for canister in "${canisters[@]}"; do
-for binding in types client pic ; do
-  # Paths:
-  canister_binding_config="./scripts/bind/rust/${canister}.${binding}.toml"
-  candid_file=".dfx/local/canisters/$canister/${canister}.did"
-  generated_file="src/$canister/$binding/src/lib.rs"
-  # Generate:
-  if test -f "$canister_binding_config"; then
-    echo "INFO: Creating rust $binding for $canister..."
-    test -f "$candid_file" || {
-      echo "ERROR: Candid file missing from: '$candid_file'"
-      echo "       You may need to run: dfx deploy $canister"
-      exit 1
-    } >&2
-    mkdir -p "src/backend/src/bind"
-    didc bind -t rs "$candid_file" --config "$canister_binding_config" >"$generated_file" || {
-      echo "ERROR: Failed to generate $binding for $canister."
-      echo "       Candid:        $candid_file"
-      echo "       Configuration: $canister_binding_config"
-      exit 1
-    } >&2
-  else
-    echo "INFO: No rust binding script for $canister at $canister_binding_config"
-  fi
-done
+  for binding in types client pic; do
+    # Paths:
+    canister_binding_config="./scripts/bind/rust/${canister}.${binding}.toml"
+    candid_file=".dfx/local/canisters/$canister/${canister}.did"
+    generated_file="src/$canister/$binding/src/lib.rs"
+    # Generate:
+    if test -f "$canister_binding_config"; then
+      echo "INFO: Creating rust $binding for $canister..."
+      test -f "$candid_file" || {
+        echo "ERROR: Candid file missing from: '$candid_file'"
+        echo "       You may need to run: dfx deploy $canister"
+        exit 1
+      } >&2
+      mkdir -p "src/backend/src/bind"
+      didc bind -t rs "$candid_file" --config "$canister_binding_config" >"$generated_file" || {
+        echo "ERROR: Failed to generate $binding for $canister."
+        echo "       Candid:        $candid_file"
+        echo "       Configuration: $canister_binding_config"
+        exit 1
+      } >&2
+    else
+      echo "INFO: No rust binding script for $canister at $canister_binding_config"
+    fi
+  done
 done
 
 # Format
