@@ -6,7 +6,6 @@
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
-	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
@@ -19,6 +18,7 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import Dirty from '$lib/components/ui/Dirty.svelte';
 
 	/**
 	 * Init dApp
@@ -98,4 +98,4 @@
 <Banner />
 <Toasts maxVisible={3} />
 <Busy />
-<ModalExitHandler />
+<Dirty />

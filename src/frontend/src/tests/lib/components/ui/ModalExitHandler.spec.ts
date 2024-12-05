@@ -1,4 +1,4 @@
-import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
+import ModalExitHandler from '$lib/components/ui/Dirty.svelte';
 import { modalStore } from '$lib/stores/modal.store';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
