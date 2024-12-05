@@ -59,7 +59,8 @@ export const signIn = async (
 	}
 };
 
-export const signOut = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> => logout({ resetUrl });
+export const signOut = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
+	logout({ resetUrl });
 
 export const errorSignOut = (text: string): Promise<void> =>
 	logout({
