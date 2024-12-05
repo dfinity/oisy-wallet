@@ -115,6 +115,10 @@
 	 * Start autoplay timer
 	 */
 	const initialiseAutoplayTimer = () => {
+		if (slides.length <= 1) {
+			return;
+		}
+
 		autoplayTimer = setInterval(() => {
 			goToNextSlide();
 		}, autoplay);
@@ -248,16 +252,19 @@
 <div
 	data-tid={CAROUSEL_CONTAINER}
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
+	class:pb-3={nonNullish(slides) && slides.length <= 1}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>
-	<div
-		class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
-	>
-		<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
-		<Controls {onNext} {onPrevious} />
-	</div>
+	{#if nonNullish(slides) && slides.length > 1}
+		<div
+			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+		>
+			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
+			<Controls {onNext} {onPrevious} />
+		</div>
+	{/if}
 </div>

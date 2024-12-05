@@ -10,6 +10,7 @@
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
+	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -30,6 +31,9 @@
 
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+
+	let utxosFee: UtxosFee | undefined;
+	$: utxosFee = nonNullish(sendAmount) ? $storeUtxosFeeData?.utxosFee : undefined;
 
 	let invalid: boolean;
 	$: invalid =
@@ -57,16 +61,13 @@
 			<InsufficientFundsForFee testId="btc-convert-form-insufficient-funds-for-fee" />
 		{:else if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
-				<BtcSendWarnings
-					utxosFee={$storeUtxosFeeData?.utxosFee}
-					pendingTransactionsStatus={$hasPendingTransactionsStore}
-				/>
+				<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
 			</div>
 		{/if}
 	</svelte:fragment>
 
 	<svelte:fragment slot="fee">
-		<BtcConvertFees {sendAmount} />
+		<BtcConvertFees />
 
 		<Hr spacing="md" />
 

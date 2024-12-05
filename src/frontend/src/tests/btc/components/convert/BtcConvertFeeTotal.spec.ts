@@ -44,31 +44,27 @@ describe('BtcConvertFeeTotal', () => {
 		store.reset();
 	});
 
-	it('should calculate totalFee correctly if only default fee is available', () => {
+	it('should not update totalFee if only default fee is available', () => {
 		const { component } = render(BtcConvertFeeTotal, {
 			context: mockContext({ utxosFeeStore: store })
 		});
-		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(BTC_CONVERT_FEE);
+		expect(component.$$.ctx[component.$$.props['totalFee']]).toBeUndefined();
 	});
 
-	it('should calculate totalFee correctly if default and utxos fees are available', () => {
+	it('should not update totalFee if only default and utxos fees are available', () => {
 		store.setUtxosFee({ utxosFee: mockUtxosFee });
 		const { component } = render(BtcConvertFeeTotal, {
 			context: mockContext({ utxosFeeStore: store })
 		});
-		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(
-			BTC_CONVERT_FEE + mockUtxosFee.feeSatoshis
-		);
+		expect(component.$$.ctx[component.$$.props['totalFee']]).toBeUndefined();
 	});
 
-	it('should calculate totalFee correctly if default and ckBTC minter fees are available', () => {
+	it('should not update totalFee if only default and ckBTC minter fees are available', () => {
 		const tokenId = setupCkBTCStores();
 		const { component } = render(BtcConvertFeeTotal, {
 			context: mockContext({ utxosFeeStore: store, destinationTokenId: tokenId })
 		});
-		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(
-			BTC_CONVERT_FEE + mockCkBtcMinterInfo.kyt_fee
-		);
+		expect(component.$$.ctx[component.$$.props['totalFee']]).toBeUndefined();
 	});
 
 	it('should calculate totalFee correctly if all fees are available', () => {
