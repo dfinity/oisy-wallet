@@ -1,15 +1,15 @@
 <script lang="ts">
+	import { fromNullable, isNullish } from '@dfinity/utils';
+	import { addUserHiddenDappId } from '$lib/api/backend.api';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
-	import { fromNullable, isNullish } from '@dfinity/utils';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
-	import { addUserHiddenDappId } from '$lib/api/backend.api';
+	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
 	import { emit } from '$lib/utils/events.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	$: ({
@@ -26,7 +26,7 @@
 
 		await addUserHiddenDappId({
 			dappId,
-			identity : $authIdentity,
+			identity: $authIdentity,
 			currentUserVersion: fromNullable($userProfileStore.profile.version)
 		});
 
