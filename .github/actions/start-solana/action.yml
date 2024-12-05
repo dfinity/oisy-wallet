@@ -8,7 +8,7 @@ runs:
       - name: Install solana cli
         shell: bash
         run: |
-          ./scripts/setup solana
+          ./scripts/setup.sh solana
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
       - name: Verifies that Solana is installed
         shell: bash
