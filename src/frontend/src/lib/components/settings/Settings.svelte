@@ -42,10 +42,6 @@
 			}
 		}
 	};
-
-	$: {
-		emit({ message: 'oisyRefreshUserProfile' });
-	}
 </script>
 
 <KeyValuePairInfo>
