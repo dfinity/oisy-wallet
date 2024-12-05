@@ -116,7 +116,7 @@
 		);
 
 		if (!addressSuccess) {
-			await signOut();
+			await signOut({});
 			return;
 		}
 
