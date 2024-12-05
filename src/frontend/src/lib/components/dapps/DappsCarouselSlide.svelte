@@ -17,7 +17,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const close = async () => {
+	const close =  () => {
 		dispatch('icCloseCarouselSlide', { dappId });
 	};
 </script>
