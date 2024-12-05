@@ -14,13 +14,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
 	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
-		.filter((token: TokenUi) => $icTransactionsStore?.[token.id] === null)
+		.filter((token) => $icTransactionsStore?.[token.id] === null)
 		.map((token: TokenUi) => token as IcToken);
 
 	let enabledTokensWithoutCanister: Token[];
-	$: enabledTokensWithoutCanister = enabledTokensWithoutTransaction.filter((token: IcToken) =>
-		hasNoIndexCanister(token)
-	);
+	$: enabledTokensWithoutCanister = enabledTokensWithoutTransaction.filter(hasNoIndexCanister);
 
 	let tokenListWithoutCanister: string;
 	$: tokenListWithoutCanister = enabledTokensWithoutCanister
