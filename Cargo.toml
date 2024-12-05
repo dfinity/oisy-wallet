@@ -2,6 +2,8 @@
 members = [
     "src/backend",
     "src/cycles_ledger/client",
+    "src/cycles_ledger/pic",
+    "src/cycles_ledger/types",
     "src/shared"
 ]
 resolver = "2"
@@ -11,6 +13,8 @@ ic-cdk = "0.16.0"
 ic-cdk-macros = "0.16.0"
 ic-cdk-timers = "0.9.0"
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
+ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
+ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
 ic-ledger-types = "0.13.0"
 ic-stable-structures = "0.6.7"
 ic-metrics-encoder = "1.1.1"
