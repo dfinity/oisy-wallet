@@ -27,6 +27,27 @@ describe('Activity', () => {
 		expect(title.textContent).toBe(en.activity.text.title);
 	});
 
+	it('renders the no Index canister warning box', () => {
+		const tokenWithoutIndexCanister: IcrcCustomToken = {
+			...customIcrcToken,
+			symbol: 'UWT'
+		};
+
+		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
+
+		const store = get(icrcCustomTokensStore);
+		const tokenId = store!.at(0)!.data.id;
+		icTransactionsStore.nullify(tokenId);
+
+		const { getByText } = render(AllTransactions);
+
+		const exceptedText = replacePlaceholders(en.activity.warning.no_index_canister, {
+			$token_list: '$UWT'
+		});
+
+		expect(getByText(exceptedText)).toBeInTheDocument();
+	});
+
 	it('renders the broken Index canister warning box', () => {
 		const tokenWithBrokenIndexCanister: IcrcCustomToken = {
 			...customIcrcToken,
@@ -44,27 +65,6 @@ describe('Activity', () => {
 
 		const exceptedText = replacePlaceholders(en.activity.warning.broken_index_canister, {
 			$token_list: '$UTC'
-		});
-
-		expect(getByText(exceptedText)).toBeInTheDocument();
-	});
-
-	it('renders the no Index canister warning box', () => {
-		const tokenWithoutIndexCanister: IcrcCustomToken = {
-			...customIcrcToken,
-			symbol: 'UWT'
-		};
-
-		icrcCustomTokensStore.set({ data: tokenWithoutIndexCanister, certified: true });
-
-		const store = get(icrcCustomTokensStore);
-		const tokenId = store!.at(0)!.data.id;
-		icTransactionsStore.nullify(tokenId);
-
-		const { getByText } = render(AllTransactions);
-
-		const exceptedText = replacePlaceholders(en.activity.warning.no_index_canister, {
-			$token_list: '$UWT'
 		});
 
 		expect(getByText(exceptedText)).toBeInTheDocument();

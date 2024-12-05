@@ -13,17 +13,14 @@
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 
+	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
+		.filter((token) => $icTransactionsStore?.[token.id] === null)
+		.map((token: TokenUi) => token as IcToken);
+
 	let enabledTokensWithoutCanister: Token[];
 	let enabledTokensWithBrokenCanister: Token[];
-	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
-		.filter((token: TokenUi) => $icTransactionsStore?.[token.id] === null)
-		.map((token: TokenUi) => token as IcToken);
-	$: enabledTokensWithoutCanister = enabledTokensWithoutTransaction.filter((token: IcToken) =>
-		hasNoIndexCanister(token)
-	);
-	$: enabledTokensWithBrokenCanister = enabledTokensWithoutTransaction.filter((token: IcToken) =>
-		hasIndexCanister(token)
-	);
+	$: enabledTokensWithoutCanister = enabledTokensWithoutTransaction.filter(hasNoIndexCanister);
+	$: enabledTokensWithBrokenCanister = enabledTokensWithoutTransaction.filter(hasIndexCanister);
 
 	let tokenListWithoutCanister: string;
 	let tokenListWithBrokenCanister: string;
