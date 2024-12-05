@@ -43,7 +43,7 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openIcTransaction(transaction)}
+	on:click={() => modalStore.openIcTransaction({ transaction, token })}
 	styleClass="block w-full border-0"
 	amount={BigNumber.from(amount)}
 	{type}
@@ -52,5 +52,5 @@
 	{token}
 	{iconType}
 >
-	<IcTransactionLabel label={transactionTypeLabel} fallback={type} />
+	<IcTransactionLabel label={transactionTypeLabel} fallback={type} {token} />
 </Transaction>

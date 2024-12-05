@@ -1,6 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
+use crate::user_profile::add_hidden_dapp_id;
 use bitcoin_utils::estimate_fee;
 use candid::Principal;
 use config::find_credential_config;
@@ -27,6 +28,7 @@ use shared::types::bitcoin::{
     SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
 };
 use shared::types::custom_token::{CustomToken, CustomTokenId};
+use shared::types::dapp::{AddDappSettingsError, AddHiddenDappIdRequest};
 use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
@@ -490,13 +492,14 @@ pub fn add_user_credential(
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
 
-    let (vc_flow_signers, root_pk_raw, credential_type) =
+    let (vc_flow_signers, root_pk_raw, credential_type, derivation_origin) =
         read_config(|config| find_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
         &request.credential_jwt,
         user_principal,
+        derivation_origin,
         &vc_flow_signers,
         &request.credential_spec,
         &root_pk_raw,
@@ -515,6 +518,36 @@ pub fn add_user_credential(
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
     }
+}
+
+/// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
+///
+/// # Arguments
+/// * `request` - The request to add a hidden dApp ID.
+///
+/// # Returns
+/// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn add_user_hidden_dapp_id(
+    request: AddHiddenDappIdRequest,
+) -> Result<(), AddDappSettingsError> {
+    request.check()?;
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        add_hidden_dapp_id(
+            stored_principal,
+            request.current_user_version,
+            request.dapp_id,
+            &mut user_profile_model,
+        )
+    })
 }
 
 /// It create a new user profile for the caller.

@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { Readable } from 'svelte/store';
-	import { slide } from 'svelte/transition';
 	import BtcConvertFeeTotal from '$btc/components/convert/BtcConvertFeeTotal.svelte';
 	import BtcConvertFees from '$btc/components/convert/BtcConvertFees.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
@@ -11,25 +10,30 @@
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
+	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
+	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let source: string;
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
+	export let amountError = false;
 
 	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
 	let insufficientFunds: boolean;
 	let insufficientFundsForFee: boolean;
 
+	$: amountError = insufficientFunds || insufficientFundsForFee;
+
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+
+	let utxosFee: UtxosFee | undefined;
+	$: utxosFee = nonNullish(sendAmount) ? $storeUtxosFeeData?.utxosFee : undefined;
 
 	let invalid: boolean;
 	$: invalid =
@@ -54,18 +58,10 @@
 >
 	<svelte:fragment slot="message">
 		{#if insufficientFundsForFee}
-			<div transition:slide={SLIDE_DURATION} data-tid="btc-convert-form-insufficient-funds-for-fee">
-				<MessageBox level="error"
-					><span class="text-error">{$i18n.convert.assertion.insufficient_funds_for_fee}</span
-					></MessageBox
-				>
-			</div>
+			<InsufficientFundsForFee testId="btc-convert-form-insufficient-funds-for-fee" />
 		{:else if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
-				<BtcSendWarnings
-					utxosFee={$storeUtxosFeeData?.utxosFee}
-					pendingTransactionsStatus={$hasPendingTransactionsStore}
-				/>
+				<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
 			</div>
 		{/if}
 	</svelte:fragment>

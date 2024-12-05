@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';

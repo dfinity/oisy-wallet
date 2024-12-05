@@ -24,7 +24,7 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openBtcTransaction(transaction)}
+	on:click={() => modalStore.openBtcTransaction({ transaction, token })}
 	amount={nonNullish(value) ? BigNumber.from(value) : undefined}
 	{type}
 	timestamp={Number(timestamp)}

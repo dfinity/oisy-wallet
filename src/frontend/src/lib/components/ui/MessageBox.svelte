@@ -1,17 +1,30 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$lib/utils/info.utils';
 
 	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
-	export let closable = false;
+	export let closableKey: HideInfoKey | undefined = undefined;
+	export let testId: string | undefined = undefined;
+
+	let closable = false;
+	$: closable = nonNullish(closableKey);
 
 	let visible = true;
+	$: visible = isNullish(closableKey) || !shouldHideInfo(closableKey);
 
 	const close = () => {
 		visible = false;
+
+		if (isNullish(closableKey)) {
+			return;
+		}
+
+		saveHideInfo(closableKey);
 	};
 </script>
 
@@ -23,6 +36,7 @@
 		class:bg-warning-subtle={level === 'light-warning'}
 		class:bg-error-subtle-alt={level === 'error'}
 		transition:slide={SLIDE_EASING}
+		data-tid={testId}
 	>
 		<div
 			class="min-w-5 py-0 sm:py-0.5"

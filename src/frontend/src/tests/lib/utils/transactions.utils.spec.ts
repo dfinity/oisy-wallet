@@ -2,21 +2,20 @@ import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import * as networkEnv from '$env/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
-import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens-erc20/tokens.pepe.env';
+import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
 	BTC_TESTNET_TOKEN,
 	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens.btc.env';
+} from '$env/tokens/tokens.btc.env';
 import {
 	ETHEREUM_TOKEN,
 	ETHEREUM_TOKEN_ID,
-	ICP_TOKEN,
-	ICP_TOKEN_ID,
 	SEPOLIA_TOKEN,
 	SEPOLIA_TOKEN_ID
-} from '$env/tokens.env';
+} from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
@@ -316,11 +315,11 @@ describe('transactions.utils', () => {
 			expect(result).toEqual([transaction3, transaction2, transaction1]);
 		});
 
-		it('should sort transactions with nullish timestamps first', () => {
+		it('should sort transactions with nullish timestamps last', () => {
 			const result = [transaction1, transactionWithNullTimestamp, transaction2].sort((a, b) =>
 				sortTransactions({ transactionA: a, transactionB: b })
 			);
-			expect(result).toEqual([transactionWithNullTimestamp, transaction2, transaction1]);
+			expect(result).toEqual([transaction2, transaction1, transactionWithNullTimestamp]);
 		});
 	});
 });

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 II_CANISTER_ID="$(dfx canister id internet_identity --network "${ENV:-local}")"
+BACKEND_CANISTER_ID="$(dfx canister id backend --network "${ENV:-local}")"
 POUH_ISSUER_CANISTER_ID="$(dfx canister id pouh_issuer --network "${ENV:-local}")"
 SIGNER_CANISTER_ID="$(dfx canister id signer --network "${ENV:-local}")"
 
@@ -12,6 +13,7 @@ case $ENV in
   # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://${POUH_ISSUER_CANISTER_ID}.icp0.io/"
+  DERIVATION_ORIGIN="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io"
   ;;
 "ic")
   ECDSA_KEY_NAME="key_1"
@@ -20,6 +22,7 @@ case $ENV in
   # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://id.decideai.xyz/"
+  DERIVATION_ORIGIN="https://oisy.com"
   ;;
 *)
   ECDSA_KEY_NAME="dfx_test_key"
@@ -34,6 +37,7 @@ case $ENV in
   # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
   # We use the dummy issuer canister for local development
   POUH_ISSUER_VC_URL="https://dummy-issuer.vc/"
+  DERIVATION_ORIGIN="http://${BACKEND_CANISTER_ID}.localhost:4943"
   ;;
 esac
 
@@ -49,6 +53,7 @@ if [ -n "${ENV+1}" ]; then
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
          cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
+         derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };
@@ -68,6 +73,7 @@ else
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
          cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
+         derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };
