@@ -394,7 +394,8 @@
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"refreshing_ui": "Refreshing UI",
-			"unsupported_token_conversion": "Conversion for the selected token is not supported."
+			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
+			"calculating_max_amount": "Calculating..."
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"
