@@ -13,7 +13,7 @@ const mockLocation = (url: string) => {
 			reload: vi.fn()
 		}
 	});
-}
+};
 
 describe('auth.services', () => {
 	describe('signOut', () => {
@@ -25,7 +25,7 @@ describe('auth.services', () => {
 			await signOut(false);
 
 			expect(signOutSpy).toHaveBeenCalled();
-			expect(window.location.href).toEqual(activityLocation)
+			expect(window.location.href).toEqual(activityLocation);
 		});
 
 		it('should call the signOut function of the authStore and resetting the url', async () => {

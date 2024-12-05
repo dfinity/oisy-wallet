@@ -11,12 +11,12 @@ import { i18n } from '$lib/stores/i18n.store';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
+import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 export const signIn = async (
 	params: AuthSignInParams
@@ -59,7 +59,7 @@ export const signIn = async (
 	}
 };
 
-export const signOut = (resetUrl: boolean = false): Promise<void> => logout({resetUrl});
+export const signOut = (resetUrl: boolean = false): Promise<void> => logout({ resetUrl });
 
 export const errorSignOut = (text: string): Promise<void> =>
 	logout({
