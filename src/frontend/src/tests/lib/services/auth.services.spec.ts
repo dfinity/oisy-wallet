@@ -22,7 +22,7 @@ describe('auth.services', () => {
 
 			mockLocation(activityLocation);
 
-			await signOut(false);
+			await signOut({});
 
 			expect(signOutSpy).toHaveBeenCalled();
 			expect(window.location.href).toEqual(activityLocation);
@@ -38,7 +38,7 @@ describe('auth.services', () => {
 			mockLocation(activityLocation);
 
 			expect(window.location.href).toEqual(activityLocation);
-			await signOut(true);
+			await signOut({ resetUrl: true });
 
 			expect(signOutSpy).toHaveBeenCalled();
 			expect(window.location.href).toEqual(rootLocation);

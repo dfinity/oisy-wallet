@@ -9,7 +9,7 @@
 
 	const logout = async () => {
 		dispatch('icLogoutTriggered');
-		await signOut(true);
+		await signOut({resetUrl: true});
 	};
 </script>
 
