@@ -67,7 +67,7 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="fee">
-		<BtcConvertFees {sendAmount} />
+		<BtcConvertFees />
 
 		<Hr spacing="md" />
 
