@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
@@ -13,12 +11,6 @@
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 
 	export let styleClass: string | undefined = undefined;
-
-	$: {
-		if (isNullish($userProfileStore)) {
-			loadUserProfile({ identity: $authIdentity });
-		}
-	}
 
 	let hiddenDappsIds: OisyDappDescription['id'][];
 	$: hiddenDappsIds = $userProfileStore?.profile.settings.dapp.dapp_carousel.hidden_dapp_ids ?? [];

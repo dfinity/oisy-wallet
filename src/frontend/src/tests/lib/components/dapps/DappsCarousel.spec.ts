@@ -1,7 +1,6 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
-import * as loadUser from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import * as dapps from '$lib/types/dapp-description';
 import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
@@ -58,16 +57,6 @@ describe('DappsCarousel', () => {
 
 		const { container } = render(DappsCarousel);
 		expect(container.innerHTML).toBe('');
-	});
-
-	it('should load user profile if it is not loaded', () => {
-		const spy = vi.spyOn(loadUser, 'loadUserProfile');
-
-		userProfileStore.reset();
-
-		render(DappsCarousel);
-
-		expect(spy).toHaveBeenCalled();
 	});
 
 	it('should render the Carousel when data exist', () => {
