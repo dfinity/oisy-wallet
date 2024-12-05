@@ -1,7 +1,8 @@
 import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
 import {
-	hasIndexCanister, hasNoIndexCanister,
+	hasIndexCanister,
+	hasNoIndexCanister,
 	isIcCkToken,
 	isIcToken,
 	isIcTokenCanistersStrict,
@@ -120,5 +121,5 @@ describe('ic-token.validation', () => {
 		it('should return true for a token type casted to IcToken', () => {
 			expect(hasNoIndexCanister(mockValidToken as IcToken)).toBe(true);
 		});
-	})
+	});
 });
