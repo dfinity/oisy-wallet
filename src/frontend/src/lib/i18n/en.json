@@ -831,7 +831,7 @@
 		},
 		"warning": {
 			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister.",
-            "broken_index_canister": "Transaction for $token_list can not be displayed. Index canister is broken."
+			"broken_index_canister": "Transaction for $token_list can not be displayed. Index canister is broken."
 		}
 	}
 }
