@@ -2,6 +2,7 @@ import type { NetworkBuy } from '$lib/types/network';
 import type { OnramperNetworkId } from '$lib/types/onramper';
 import type { AtLeastOne } from '$lib/types/utils';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { notEmptyString } from '@dfinity/utils';
 import { z } from 'zod';
 
 export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
@@ -17,11 +18,16 @@ export const NetworkAppMetadataSchema = z.object({
 	explorerUrl: UrlSchema
 });
 
+const IconSchema = z
+	.string()
+	.refine((value) => notEmptyString(value), { message: 'Must not be empty' })
+	.refine((value) => /<svg[\s\S]*<\/svg>/i.test(value), { message: 'Must be a valid SVG string' });
+
 export const NetworkSchema = z.object({
 	id: NetworkIdSchema,
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
-	icon: z.string().optional(),
-	iconBW: z.string().optional(),
+	icon: IconSchema.optional(),
+	iconBW: IconSchema.optional(),
 	buy: z.custom<AtLeastOne<NetworkBuy>>().optional()
 });
