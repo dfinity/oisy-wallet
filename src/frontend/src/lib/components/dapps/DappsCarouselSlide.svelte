@@ -1,15 +1,11 @@
 <script lang="ts">
-	import { fromNullable, isNullish } from '@dfinity/utils';
-	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
-	import { emit } from '$lib/utils/events.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { createEventDispatcher } from 'svelte';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	$: ({
@@ -19,18 +15,10 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 
+	const dispatch = createEventDispatcher();
+
 	const close = async () => {
-		if (isNullish($authIdentity) || isNullish($userProfileStore)) {
-			return;
-		}
-
-		await addUserHiddenDappId({
-			dappId,
-			identity: $authIdentity,
-			currentUserVersion: fromNullable($userProfileStore.profile.version)
-		});
-
-		emit({ message: 'oisyRefreshUserProfile' });
+		dispatch('icCloseCarouselSlide', { dappId });
 	};
 </script>
 
