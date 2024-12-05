@@ -61,14 +61,14 @@
 	/**
 	 * Reevaluate max amount if user has used the "Max" button and totalFee is changing.
 	 */
-	$: totalFee,
-		(() => {
-			if (!amountSetToMax) {
-				return;
-			}
+	const debounceSetMax = () => {
+		if (!amountSetToMax) {
+			return;
+		}
 
-			debounce(() => setMax(), 500)();
-		})();
+		debounce(() => setMax(), 500)();
+	};
+	$: totalFee, debounceSetMax();
 
 	let convertAmountUSD: number;
 	$: convertAmountUSD =
