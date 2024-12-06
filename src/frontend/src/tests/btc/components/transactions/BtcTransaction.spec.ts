@@ -1,7 +1,7 @@
-import { render } from '@testing-library/svelte';
 import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
+import { render } from '@testing-library/svelte';
 
 describe('BtcTransaction', () => {
 	const mockTransaction: BtcTransactionUi = {
@@ -17,22 +17,22 @@ describe('BtcTransaction', () => {
 		const props = {
 			transaction: mockTransaction,
 			token: DEFAULT_BITCOIN_TOKEN
-		}
+		};
 
-		const { getByText } = render(BtcTransaction, {props});
+		const { getByText } = render(BtcTransaction, { props });
 
 		expect(getByText('Send')).toBeInTheDocument();
 		expect(getByText('-0.00040827')).toBeInTheDocument();
 	});
 	it('should calculate amount for receive transaction correctly', () => {
-		const btcTransaction: BtcTransactionUi = {...mockTransaction, type: 'receive'};
+		const btcTransaction: BtcTransactionUi = { ...mockTransaction, type: 'receive' };
 
 		const props = {
 			transaction: btcTransaction,
 			token: DEFAULT_BITCOIN_TOKEN
-		}
+		};
 
-		const { getByText } = render(BtcTransaction, {props});
+		const { getByText } = render(BtcTransaction, { props });
 
 		expect(getByText('Receive')).toBeInTheDocument();
 		expect(getByText('+0.00040827')).toBeInTheDocument();
