@@ -48,14 +48,14 @@ describe('Activity', () => {
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
 
-	it('renders the broken Index canister warning box', () => {
-		const tokenWithBrokenIndexCanister: IcrcCustomToken = {
+	it('renders the unavailable Index canister warning box', () => {
+		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
 			...customIcrcToken,
 			symbol: 'UTC',
 			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
 		};
 
-		icrcCustomTokensStore.set({ data: tokenWithBrokenIndexCanister, certified: true });
+		icrcCustomTokensStore.set({ data: tokenWithUnavailableIndexCanister, certified: true });
 
 		const store = get(icrcCustomTokensStore);
 		const tokenId = store!.at(0)!.data.id;
@@ -63,7 +63,7 @@ describe('Activity', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.broken_index_canister, {
+		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
 			$token_list: '$UTC'
 		});
 
