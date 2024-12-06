@@ -17,19 +17,28 @@
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
 		.map((token: TokenUi) => token as IcToken);
 
-	let enabledTokensWithoutCanister: Token[];
-	let enabledTokensWithBrokenCanister: Token[];
-	$: enabledTokensWithoutCanister = enabledTokensWithoutTransaction.filter(hasNoIndexCanister);
-	$: enabledTokensWithBrokenCanister = enabledTokensWithoutTransaction.filter(hasIndexCanister);
+	let enabledTokensWithoutCanister, enabledTokensWithBrokenCanister: string[];
+	$: {
+		let result = enabledTokensWithoutTransaction.reduce((acc, curr) => {
+			if (hasNoIndexCanister(curr)) {
+				acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`);
+			}
+			if (hasIndexCanister(curr)) {
+				acc.enabledTokensWithBrokenCanister.push(`$${curr.symbol}`);
+			}
+			return acc;
+		}, {
+			enabledTokensWithoutCanister: [],
+			enabledTokensWithBrokenCanister: []
+		});
+
+		({enabledTokensWithoutCanister, enabledTokensWithBrokenCanister} = result)
+	}
 
 	let tokenListWithoutCanister: string;
 	let tokenListWithBrokenCanister: string;
-	$: tokenListWithoutCanister = enabledTokensWithoutCanister
-		.map((token) => `$${token.symbol}`)
-		.join(', ');
-	$: tokenListWithBrokenCanister = enabledTokensWithBrokenCanister
-		.map((token) => `$${token.symbol}`)
-		.join(', ');
+	$: tokenListWithoutCanister = enabledTokensWithoutCanister.join(', ');
+	$: tokenListWithBrokenCanister = enabledTokensWithBrokenCanister.join(', ');
 </script>
 
 <div class="flex flex-col gap-5">
