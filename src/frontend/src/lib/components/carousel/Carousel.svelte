@@ -250,9 +250,13 @@
 	export const removeSlide = (idx: number) => {
 		slides = slides.filter((_, i) => i !== idx);
 
+		totalSlides = slides.length;
+
 		initializeCarousel();
 
-		if (slides.length === 1) {
+		goToNextSlide();
+
+		if (totalSlides <= 1) {
 			clearAutoplayTimer();
 		}
 	};
@@ -265,6 +269,7 @@
 	data-tid={CAROUSEL_CONTAINER}
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
+	out:slide={SLIDE_PARAMS}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
@@ -274,7 +279,7 @@
 	{#if nonNullish(slides) && slides.length > 1}
 		<div
 			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
-			transition:slide={SLIDE_PARAMS}
+			out:slide={SLIDE_PARAMS}
 		>
 			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 			<Controls {onNext} {onPrevious} />
