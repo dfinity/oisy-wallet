@@ -4,6 +4,7 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { dirty } from '$lib/stores/dirty.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
@@ -14,8 +15,14 @@
 	export let steps: ProgressSteps;
 	export let warningType: 'transaction' | 'manage' = 'transaction';
 
-	onMount(() => confirmToCloseBrowser(true));
-	onDestroy(() => confirmToCloseBrowser(false));
+	onMount(() => {
+		dirty.start();
+		confirmToCloseBrowser();
+	});
+	onDestroy(() => {
+		dirty.stop();
+		confirmToCloseBrowser();
+	});
 
 	// Workaround: SvelteKit does not consistently call `onDestroy`. Various issues are open regarding this on Svelte side.
 	// This is the simplest, least verbose solution to always disconnect before unload, given that this component is used in `<WizardModal />` only.
@@ -25,7 +32,8 @@
 				return;
 			}
 
-			confirmToCloseBrowser(false);
+			dirty.stop();
+			confirmToCloseBrowser();
 		})();
 </script>
 
