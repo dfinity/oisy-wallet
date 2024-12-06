@@ -17,15 +17,11 @@
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 		$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
-
-	let carousel: Carousel;
-
-	let dapp: CarouselSlideOisyDappDescription | undefined
 </script>
 
 {#if nonNullish($userSettings) && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
-	<Carousel bind:this={carousel} controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
+	<Carousel controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
 		{#each dappsCarouselSlides as dappsCarouselSlide}
 			<DappsCarouselSlide {dappsCarouselSlide} />
 		{/each}
