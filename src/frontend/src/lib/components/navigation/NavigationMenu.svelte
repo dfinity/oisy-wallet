@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { NavigationTarget, Page } from '@sveltejs/kit';
-	import { afterNavigate } from '$app/navigation';
 	import { isNullish } from '@dfinity/utils';
+	import type { NavigationTarget, Page } from '@sveltejs/kit';
+	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -26,7 +27,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { onMount } from 'svelte';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -60,7 +60,6 @@
 
 		slider.style.top = `${itemRect.top - menuRect.top}px`;
 		slider.style.height = `${itemRect.height}px`;
-
 	};
 
 	onMount(() => {
@@ -94,7 +93,9 @@
 
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
 	<div class="menu flex flex-col gap-3">
-		<div class="slider text-brand-primary rounded-xl bg-white hover:bg-brand-subtle-alt h-full"></div>
+		<div
+			class="slider h-full rounded-xl bg-white text-brand-primary hover:bg-brand-subtle-alt"
+		></div>
 
 		<NavigationItem
 			href={networkUrl({
@@ -166,14 +167,13 @@
 	</div>
 
 	<InfoMenu />
-
 </div>
 
 <style lang="scss">
-  .menu {
-    position: relative;
-    overflow: hidden;
-  }
+	.menu {
+		position: relative;
+		overflow: hidden;
+	}
 
 	.slider {
 		position: absolute;
