@@ -5,6 +5,7 @@
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userSettings } from '$lib/derived/user-profile.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
@@ -13,7 +14,6 @@
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
-	import { nullishSignOut } from '$lib/services/auth.services';
 
 	export let styleClass: string | undefined = undefined;
 
@@ -40,7 +40,7 @@
 
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
-			return
+			return;
 		}
 
 		if (isNullish($userProfileStore)) {
