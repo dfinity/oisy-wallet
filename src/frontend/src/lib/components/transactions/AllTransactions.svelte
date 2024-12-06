@@ -21,7 +21,13 @@
 	let enabledTokensWithUnavailableCanister: string[];
 	$: {
 		let result = enabledTokensWithoutTransaction.reduce(
-			(acc: {enabledTokensWithoutCanister: string[], enabledTokensWithUnavailableCanister: string[]}, curr) => {
+			(
+				acc: {
+					enabledTokensWithoutCanister: string[];
+					enabledTokensWithUnavailableCanister: string[];
+				},
+				curr
+			) => {
 				if (hasNoIndexCanister(curr)) {
 					acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`);
 				}
@@ -36,10 +42,7 @@
 			}
 		);
 
-		({
-			enabledTokensWithoutCanister,
-			enabledTokensWithUnavailableCanister
-		} = result);
+		({ enabledTokensWithoutCanister, enabledTokensWithUnavailableCanister } = result);
 	}
 
 	let tokenListWithoutCanister: string;
