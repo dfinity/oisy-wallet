@@ -20,10 +20,12 @@
 
 	let carousel: Carousel;
 
-	const closeSlide = async ({
-		detail: dappId
-	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+	const closeSlide = ({ detail: dappId }: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
 		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
+
+		hiddenDappsIds = [...hiddenDappsIds, dappId];
+
+		dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 
 		if (idx !== -1) {
 			carousel.removeSlide(idx);
@@ -38,7 +40,7 @@
 		controlsWidthStyleClass="w-[calc(100%-5rem)]"
 		styleClass={`w-full ${styleClass ?? ''}`}
 	>
-		{#each dappsCarouselSlides as dappsCarouselSlide}
+		{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
 			<DappsCarouselSlide {dappsCarouselSlide} on:icCloseCarouselSlide={closeSlide} />
 		{/each}
 	</Carousel>

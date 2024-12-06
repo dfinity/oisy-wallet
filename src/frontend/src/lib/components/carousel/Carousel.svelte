@@ -250,9 +250,13 @@
 	export const removeSlide = (idx: number) => {
 		slides = slides.filter((_, i) => i !== idx);
 
+		totalSlides = slides.length;
+
 		initializeCarousel();
 
-		if (slides.length === 1) {
+		goToNextSlide();
+
+		if (slides.length <= 1) {
 			clearAutoplayTimer();
 		}
 	};
