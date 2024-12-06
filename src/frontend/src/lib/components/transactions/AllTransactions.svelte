@@ -17,27 +17,28 @@
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
 		.map((token: TokenUi) => token as IcToken);
 
-	let enabledTokensWithoutCanister: string[], enabledTokensWithUnavailableCanister: string[];
+	let enabledTokensWithoutCanister: string[];
+	let enabledTokensWithUnavailableCanister: string[];
 	$: {
 		let result = enabledTokensWithoutTransaction.reduce(
-			(acc, curr) => {
+			(acc: {enabledTokensWithoutCanister: string[], enabledTokensWithUnavailableCanister: string[]}, curr) => {
 				if (hasNoIndexCanister(curr)) {
 					acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`);
 				}
 				if (hasIndexCanister(curr)) {
-					acc.enabledTokensWithBrokenCanister.push(`$${curr.symbol}`);
+					acc.enabledTokensWithUnavailableCanister.push(`$${curr.symbol}`);
 				}
 				return acc;
 			},
 			{
 				enabledTokensWithoutCanister: [],
-				enabledTokensWithBrokenCanister: []
+				enabledTokensWithUnavailableCanister: []
 			}
 		);
 
 		({
 			enabledTokensWithoutCanister,
-			enabledTokensWithBrokenCanister: enabledTokensWithUnavailableCanister
+			enabledTokensWithUnavailableCanister
 		} = result);
 	}
 
