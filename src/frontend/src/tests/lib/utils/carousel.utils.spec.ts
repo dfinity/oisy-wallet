@@ -10,6 +10,28 @@ const extendedSlides = [slides[slides.length - 1], ...slides, slides[0]];
 const slideWidth = 300;
 
 describe('extendCarouselSliderFrame', () => {
+	it('does nothing if sliderFrame is nullish', () => {
+		const sliderFrame = undefined;
+		extendCarouselSliderFrame({
+			sliderFrame,
+			slides,
+			slideWidth
+		});
+
+		expect(sliderFrame).toBeUndefined();
+	});
+
+	it('does nothing if slides array is empty', () => {
+		const sliderFrame = document.createElement('div');
+		extendCarouselSliderFrame({
+			sliderFrame,
+			slides: [],
+			slideWidth
+		});
+
+		expect(sliderFrame.children.length).toEqual(0);
+	});
+
 	it('puts correct amount of slides in the frame', () => {
 		const sliderFrame = document.createElement('div');
 		extendCarouselSliderFrame({
