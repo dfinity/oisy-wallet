@@ -2,6 +2,14 @@ import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
+export type AddDappSettingsError =
+	| { VersionMismatch: null }
+	| { DappIdTooLong: null }
+	| { UserNotFound: null };
+export interface AddHiddenDappIdRequest {
+	current_user_version: [] | [bigint];
+	dapp_id: string;
+}
 export type AddUserCredentialError =
 	| { InvalidCredential: null }
 	| { VersionMismatch: null }
@@ -173,16 +181,17 @@ export interface PendingTransaction {
 	utxos: Array<Utxo>;
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
-export type Result_1 = { Ok: null } | { Err: AllowSigningError };
-export type Result_2 = { Ok: null } | { Err: BtcAddPendingTransactionError };
-export type Result_3 =
+export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
+export type Result_2 = { Ok: null } | { Err: AllowSigningError };
+export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
+export type Result_4 =
 	| { Ok: BtcGetPendingTransactionsReponse }
 	| { Err: BtcAddPendingTransactionError };
-export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
-export type Result_5 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_6 = { Ok: MigrationReport } | { Err: string };
-export type Result_7 = { Ok: null } | { Err: string };
-export type Result_8 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
+export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
+export type Result_6 = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type Result_7 = { Ok: MigrationReport } | { Err: string };
+export type Result_8 = { Ok: null } | { Err: string };
+export type Result_9 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -267,22 +276,23 @@ export interface Utxo {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
-	allow_signing: ActorMethod<[], Result_1>;
-	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_2>;
-	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_3>;
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_4>;
+	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], Result_1>;
+	allow_signing: ActorMethod<[], Result_2>;
+	btc_add_pending_transaction: ActorMethod<[BtcAddPendingTransactionRequest], Result_3>;
+	btc_get_pending_transactions: ActorMethod<[BtcGetPendingTransactionsRequest], Result_4>;
+	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_5>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_user_profile: ActorMethod<[], Result_5>;
+	get_user_profile: ActorMethod<[], Result_6>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_6>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_7>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_7>;
+	migration_stop_timer: ActorMethod<[], Result_8>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
@@ -291,7 +301,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_8>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_9>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
