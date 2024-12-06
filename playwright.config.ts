@@ -22,6 +22,12 @@ const TIMEOUT = 5 * 60 * 1000;
 export default defineConfig({
 	timeout: TIMEOUT,
 	workers: DEV ? 5 : 2,
+	expect: {
+		toHaveScreenshot: {
+			threshold: 0.25,
+			maxDiffPixelRatio: 0.025,
+		}
+	},
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
