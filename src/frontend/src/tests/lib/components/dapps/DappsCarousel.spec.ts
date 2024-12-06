@@ -7,7 +7,6 @@ import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
 
 describe('DappsCarousel', () => {
 	beforeEach(() => {
