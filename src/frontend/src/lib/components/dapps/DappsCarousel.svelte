@@ -4,8 +4,8 @@
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import { userSettings } from '$lib/derived/user-profile.derived';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
 		dAppDescriptions,
