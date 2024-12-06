@@ -9,7 +9,7 @@ test('should display homepage in logged out state', async ({ page }) => {
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,
-		timeout: 1000 * 60,
+		timeout: 1000 * 60
 	});
 });
 
@@ -20,6 +20,6 @@ testWithII('should display homepage in logged in state', async ({ page, iiPage }
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,
-		timeout: 1000 * 60,
+		timeout: 1000 * 60
 	});
 });

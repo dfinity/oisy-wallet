@@ -9,6 +9,6 @@ testWithII('should display settings page', async ({ page, iiPage }) => {
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,
-		timeout: 1000 * 60,
+		timeout: 1000 * 60
 	});
 });

@@ -9,7 +9,7 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,
-		timeout: 1000 * 60,
+		timeout: 1000 * 60
 	});
 });
 
@@ -21,7 +21,7 @@ testWithII('should display ETH transactions page', async ({ page, iiPage }) => {
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,
-		timeout: 1000 * 60,
+		timeout: 1000 * 60
 	});
 });
 
@@ -32,6 +32,6 @@ testWithII('should display ICP transactions page', async ({ page, iiPage }) => {
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,
-		timeout: 1000 * 60,
+		timeout: 1000 * 60
 	});
 });

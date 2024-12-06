@@ -27,7 +27,7 @@ export default defineConfig({
 			threshold: 0.25,
 			maxDiffPixelRatio: 0.025,
 			animations: 'disabled',
-			caret: 'hide',
+			caret: 'hide'
 		}
 	},
 	webServer: {
