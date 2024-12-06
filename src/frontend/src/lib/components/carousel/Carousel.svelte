@@ -246,9 +246,7 @@
 	};
 
 	export const removeSlide = (idx: number) => {
-		if (isNullish(sliderFrame)) {
-			return;
-		}
+
 
 		slides = slides.filter((_, i) => i !== idx);
 
