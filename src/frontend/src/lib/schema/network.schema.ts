@@ -19,7 +19,9 @@ export const NetworkAppMetadataSchema = z.object({
 
 const IconSchema = z
 	.string()
-	.refine((value) => value.endsWith('.svg'), { message: 'Must be an SVG file' });
+	.refine((value) => value.endsWith('.svg') || value.startsWith('data:image/svg+xml'), {
+		message: 'Must be an SVG file'
+	});
 
 export const NetworkSchema = z.object({
 	id: NetworkIdSchema,
