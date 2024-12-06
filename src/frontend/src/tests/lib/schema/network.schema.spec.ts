@@ -1,3 +1,4 @@
+import icpBW from '$lib/assets/networks/icp-bw.svg';
 import {
 	NetworkAppMetadataSchema,
 	NetworkBuySchema,
@@ -87,7 +88,7 @@ describe('network.schema', () => {
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
 			icon: 'https://example.com/icon.svg',
-			iconBW: 'https://example.com/icon-bw.svg',
+			iconBW: icpBW,
 			buy: { onramperId: 'icp' }
 		};
 

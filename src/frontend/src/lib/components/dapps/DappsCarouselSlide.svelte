@@ -2,6 +2,7 @@
 	import { fromNullable } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
+	import { createEventDispatcher } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -23,25 +24,10 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 
-	let identity: OptionIdentity;
-	$: identity = $authIdentity;
-
 	const dispatch = createEventDispatcher();
 
-	const close = async () => {
-		dispatch('icHideCarouselDapp', {
-			dappId
-		});
-
-		emit({ message: 'oisyRefreshCarouselSlides' });
-
-		await addUserHiddenDappId({
-			dappId,
-			identity,
-			currentUserVersion: fromNullable($userProfileStore?.profile.version ?? [])
-		});
-
-		await loadUserProfile({ identity });
+	const close = () => {
+		dispatch('icCloseCarouselSlide', dappId);
 	};
 </script>
 
