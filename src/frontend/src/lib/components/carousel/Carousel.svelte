@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
 	export let autoplay = 5000;
@@ -244,6 +246,16 @@
 		const offset = (currentSlide + 1) * containerWidth;
 		moveSlider({ sliderFrame, animateTo: -offset, withTransition, duration, easing });
 	};
+
+	export const removeSlide = (idx: number) => {
+		slides = slides.filter((_, i) => i !== idx);
+
+		initializeCarousel();
+
+		if (slides.length === 1) {
+			clearAutoplayTimer();
+		}
+	};
 </script>
 
 <!-- Resize listener to re-calculate slide frame width -->
@@ -262,6 +274,7 @@
 	{#if nonNullish(slides) && slides.length > 1}
 		<div
 			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+			transition:slide={SLIDE_PARAMS}
 		>
 			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 			<Controls {onNext} {onPrevious} />
