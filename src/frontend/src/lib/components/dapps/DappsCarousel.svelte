@@ -22,9 +22,19 @@
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 
-	const closeSlide = async ({
-		detail: dappId
-	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+	let carousel: Carousel;
+
+	const closeSlide = ({ detail: dappId }: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
+
+		hiddenDappsIds = [...hiddenDappsIds, dappId];
+
+		dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
+
+		if (idx !== -1) {
+			carousel.removeSlide(idx);
+		}
+
 		if (isNullish($authIdentity) || isNullish($userProfileStore)) {
 			return;
 		}
@@ -41,8 +51,12 @@
 
 {#if nonNullish($userSettings) && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
-	<Carousel controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
-		{#each dappsCarouselSlides as dappsCarouselSlide}
+	<Carousel
+		bind:this={carousel}
+		controlsWidthStyleClass="w-[calc(100%-5rem)]"
+		styleClass={`w-full ${styleClass ?? ''}`}
+	>
+		{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
 			<DappsCarouselSlide {dappsCarouselSlide} on:icCloseCarouselSlide={closeSlide} />
 		{/each}
 	</Carousel>
