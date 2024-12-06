@@ -17,7 +17,7 @@
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
 		.map((token: TokenUi) => token as IcToken);
 
-	let enabledTokensWithoutCanister, enabledTokensWithBrokenCanister: string[];
+	let enabledTokensWithoutCanister: string[], enabledTokensWithUnavailableCanister: string[];
 	$: {
 		let result = enabledTokensWithoutTransaction.reduce(
 			(acc, curr) => {
@@ -35,13 +35,13 @@
 			}
 		);
 
-		({ enabledTokensWithoutCanister, enabledTokensWithBrokenCanister } = result);
+		({ enabledTokensWithoutCanister, enabledTokensWithBrokenCanister: enabledTokensWithUnavailableCanister } = result);
 	}
 
 	let tokenListWithoutCanister: string;
-	let tokenListWithBrokenCanister: string;
+	let tokenListWithUnavailableCanister: string;
 	$: tokenListWithoutCanister = enabledTokensWithoutCanister.join(', ');
-	$: tokenListWithBrokenCanister = enabledTokensWithBrokenCanister.join(', ');
+	$: tokenListWithUnavailableCanister = enabledTokensWithUnavailableCanister.join(', ');
 </script>
 
 <div class="flex flex-col gap-5">
@@ -61,10 +61,10 @@
 		</MessageBox>
 	{/if}
 
-	{#if notEmptyString(tokenListWithBrokenCanister)}
+	{#if notEmptyString(tokenListWithUnavailableCanister)}
 		<MessageBox level="light-warning" closableKey="oisy_ic_hide_transaction_unavailable_canister">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-				$token_list: tokenListWithBrokenCanister
+				$token_list: tokenListWithUnavailableCanister
 			})}
 		</MessageBox>
 	{/if}
