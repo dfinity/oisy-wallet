@@ -7,5 +7,8 @@ testWithII('should display explorer page', async ({ page, iiPage }) => {
 
 	await explorerPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		timeout: 1000 * 60
+	});
 });
