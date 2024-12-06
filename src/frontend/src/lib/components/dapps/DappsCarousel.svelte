@@ -5,46 +5,24 @@
 	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
+	import { userSettings } from '$lib/derived/user-profile.derived';
 	import {
 		type CarouselSlideOisyDappDescription,
-		dAppDescriptions
+		dAppDescriptions,
+		type OisyDappDescription
 	} from '$lib/types/dapp-description';
 	import type { OptionIdentity } from '$lib/types/identity';
 
 	export let styleClass: string | undefined = undefined;
 
-	let identity: OptionIdentity;
-	$: identity = $authIdentity;
-
-	$: {
-		if ($authSignedIn) {
-			loadUserProfile({ identity });
-		}
-	}
-
-	let temporaryHiddenDappIds: CarouselSlideOisyDappDescription['id'][] = [];
-
-	const hideCarouselDapp = (
-		event: CustomEvent<{ dappId: CarouselSlideOisyDappDescription['id'] }>
-	) => {
-		temporaryHiddenDappIds = [...temporaryHiddenDappIds, event.detail.dappId];
-	};
-
+	let hiddenDappsIds: OisyDappDescription['id'][];
+	$: hiddenDappsIds = $userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? [];
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
-	$: dappsCarouselSlides = isNullish($userProfileStore)
-		? []
-		: (dAppDescriptions.filter(
-				({ id, carousel }) =>
-					nonNullish(carousel) &&
-					!(
-						fromNullable($userProfileStore.profile.settings)?.dapp.dapp_carousel.hidden_dapp_ids?.includes(id) ||
-						temporaryHiddenDappIds.includes(id)
-					)
-			) as CarouselSlideOisyDappDescription[]);
+	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 </script>
 
-{#if nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
+{#if nonNullish($userSettings) && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
 	<Carousel controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
 		{#each dappsCarouselSlides as dappsCarouselSlide}
