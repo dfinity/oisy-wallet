@@ -17,8 +17,8 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
-const MATRIX_OS = process.env.MATRIX_OS || '';
-const isMac = MATRIX_OS.includes('macos') || process.platform === 'darwin';
+const MATRIX_OS = process.env.MATRIX_OS ?? '';
+const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
 
 const appleProjects = [
 	{
