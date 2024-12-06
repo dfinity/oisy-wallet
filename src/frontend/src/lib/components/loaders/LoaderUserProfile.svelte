@@ -14,6 +14,12 @@
 	};
 
 	$: $authIdentity, load({});
+
+	const reload = () => {
+		load({ reload: true });
+	};
 </script>
+
+<svelte:window on:oisyRefreshUserProfile={reload} />
 
 <slot />
