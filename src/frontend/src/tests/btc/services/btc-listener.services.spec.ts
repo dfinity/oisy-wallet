@@ -40,7 +40,7 @@ describe('btc-listener', () => {
 	});
 
 	// mock console.warn to avoid unnecessary logs
-	vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+	const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -103,6 +103,7 @@ describe('btc-listener', () => {
 			const balance = get(balancesStore);
 			const transactions = get(btcTransactionsStore);
 
+			expect(consoleWarnSpy).toHaveBeenCalledOnce();
 			expect(balance?.[tokenId]).toBeNull();
 			expect(transactions?.[tokenId]).toBeNull();
 		});
