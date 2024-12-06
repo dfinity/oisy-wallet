@@ -62,8 +62,8 @@
 	{/if}
 
 	{#if notEmptyString(tokenListWithBrokenCanister)}
-		<MessageBox level="light-warning" closableKey="oisy_ic_hide_transaction_broken_canister">
-			{replacePlaceholders($i18n.activity.warning.broken_index_canister, {
+		<MessageBox level="light-warning" closableKey="oisy_ic_hide_transaction_unavailable_canister">
+			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: tokenListWithBrokenCanister
 			})}
 		</MessageBox>
