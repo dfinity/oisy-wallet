@@ -246,8 +246,6 @@
 	};
 
 	export const removeSlide = (idx: number) => {
-
-
 		slides = slides.filter((_, i) => i !== idx);
 
 		initializeCarousel();
