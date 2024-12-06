@@ -24,7 +24,9 @@
 
 	let carousel: Carousel;
 
-	const closeSlide = async ({ detail: dappId }: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+	const closeSlide = async ({
+		detail: dappId
+	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
 		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
 
 		hiddenDappsIds = [...hiddenDappsIds, dappId];
