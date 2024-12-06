@@ -269,7 +269,7 @@
 	data-tid={CAROUSEL_CONTAINER}
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
-	out:slide={SLIDE_PARAMS}
+	transition:slide={SLIDE_PARAMS}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
