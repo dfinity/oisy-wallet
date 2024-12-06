@@ -48,7 +48,7 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="flex flex-col gap-4">
+		<div class="flex flex-col gap-6">
 			{#if nonNullish(screenshots) && screenshots.length > 0}
 				<div class="overflow-hidden rounded-3xl">
 					<ImgBanner
@@ -59,8 +59,10 @@
 				</div>
 			{/if}
 
-			<article class="py-5">
-				<div class="flex flex-wrap items-center justify-start gap-4 border-b border-tertiary pb-5">
+			<article>
+				<div
+					class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
+				>
 					<Logo
 						size="md"
 						src={logo}
@@ -123,7 +125,7 @@
 					</div>
 				</div>
 
-				<p class="m-0 my-5 text-sm [&_ul]:list-disc [&_ul]:pl-6">
+				<p class="m-0 my-4 text-sm [&_ul]:list-disc [&_ul]:pl-6">
 					<Html text={description} />
 				</p>
 				<DappTags {dAppName} {tags} />
