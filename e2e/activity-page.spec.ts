@@ -9,8 +9,6 @@ testWithII('should display activity page', async ({ page, iiPage }) => {
 
 	await expect(page).toHaveScreenshot({
 		fullPage: true,
-		animations: 'disabled',
-		caret: 'hide',
-		timeout: 1000 * 60
+		timeout: 1000 * 60,
 	});
 });

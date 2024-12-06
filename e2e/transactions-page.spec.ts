@@ -7,7 +7,10 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 
 	await transactionsPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		timeout: 1000 * 60,
+	});
 });
 
 // TODO: resolve the below test flakiness
@@ -16,7 +19,10 @@ testWithII('should display ETH transactions page', async ({ page, iiPage }) => {
 
 	await transactionsPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		timeout: 1000 * 60,
+	});
 });
 
 testWithII('should display ICP transactions page', async ({ page, iiPage }) => {
@@ -24,5 +30,8 @@ testWithII('should display ICP transactions page', async ({ page, iiPage }) => {
 
 	await transactionsPage.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await expect(page).toHaveScreenshot({
+		fullPage: true,
+		timeout: 1000 * 60,
+	});
 });
