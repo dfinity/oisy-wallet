@@ -14,6 +14,7 @@
 	};
 
 	$: $authIdentity, load({});
+
 	const reload = () => {
 		load({ reload: true });
 	};
