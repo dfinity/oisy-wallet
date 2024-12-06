@@ -7,7 +7,3 @@
 .clamp-4 {
 	@include text.clamp(2);
 }
-
-.text-secondary {
-	color: var(--color-secondary);
-}

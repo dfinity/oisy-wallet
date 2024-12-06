@@ -46,3 +46,6 @@ export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+
+export const CAROUSEL_CONTAINER = 'carousel-container';
+export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
