@@ -19,7 +19,7 @@
 				<BtcConvertFeeTotal />
 			</div>
 
-			<BtcConvertFees {sendAmount} />
+			<BtcConvertFees />
 		</Collapsible>
 	</div>
 

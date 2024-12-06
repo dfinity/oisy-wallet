@@ -364,6 +364,7 @@ interface I18nConvert {
 		initializing: string;
 		refreshing_ui: string;
 		unsupported_token_conversion: string;
+		calculating_max_amount: string;
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };

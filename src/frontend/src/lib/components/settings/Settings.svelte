@@ -10,9 +10,8 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
 	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
-	import { authSignedIn, authIdentity } from '$lib/derived/auth.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
-	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { busy } from '$lib/stores/busy.store';
@@ -42,12 +41,6 @@
 			}
 		}
 	};
-
-	$: {
-		if ($authSignedIn && POUH_ENABLED) {
-			loadUserProfile({ identity });
-		}
-	}
 </script>
 
 <KeyValuePairInfo>
