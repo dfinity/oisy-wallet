@@ -17,6 +17,35 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
+const MATRIX_OS = process.env.MATRIX_OS || '';
+const isMac = MATRIX_OS.includes('macos') || process.platform === 'darwin';
+
+const appleProjects = [
+	{
+		name: 'Safari',
+		use: devices['Desktop Safari'],
+	},
+	{
+		name: 'iPhone SE',
+		use: devices ['iPhone SE'],
+	},
+];
+
+const nonAppleProjects = [
+	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome'],
+	},
+	{
+    name: 'Firefox',
+    use: devices['Desktop Firefox'],
+  },
+  {
+    name: 'Pixel 5',
+    use: devices['Pixel 5'],
+  },
+]
+
 const TIMEOUT = 5 * 60 * 1000;
 
 export default defineConfig({
@@ -37,10 +66,5 @@ export default defineConfig({
 		navigationTimeout: TIMEOUT,
 		...(DEV && { headless: false })
 	},
-	projects: [
-		{
-			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
-		}
-	]
+	projects: isMac ? appleProjects : nonAppleProjects,
 });
