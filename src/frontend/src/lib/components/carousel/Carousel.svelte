@@ -245,18 +245,15 @@
 		moveSlider({ sliderFrame, animateTo: -offset, withTransition, duration, easing });
 	};
 
-	export const removeSlide = (idx:number) => {
+	export const removeSlide = (idx: number) => {
 		if (isNullish(sliderFrame)) {
 			return;
 		}
 
 		slides = slides.filter((_, i) => i !== idx);
 
-		initializeCarousel()
-	}
-
-
-
+		initializeCarousel();
+	};
 </script>
 
 <!-- Resize listener to re-calculate slide frame width -->

@@ -16,7 +16,7 @@
 	$: hiddenDappsIds = $userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? [];
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
-		$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
+	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 </script>
 
 {#if nonNullish($userSettings) && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
