@@ -5,6 +5,8 @@
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
+	import {slide} from 'svelte/transition';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 
 	export let autoplay = 5000;
 	export let duration = 300;
@@ -249,6 +251,10 @@
 		slides = slides.filter((_, i) => i !== idx);
 
 		initializeCarousel();
+
+		if (slides.length === 1) {
+			clearAutoplayTimer();
+		}
 	};
 </script>
 
@@ -268,6 +274,7 @@
 	{#if nonNullish(slides) && slides.length > 1}
 		<div
 			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+			transition:slide={SLIDE_PARAMS}
 		>
 			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 			<Controls {onNext} {onPrevious} />
