@@ -53,7 +53,7 @@
 			</p>
 			<p class="mb-0">{params.proposer.metadata.description}</p>
 			<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
-			>{params.proposer.metadata.url}</a
+				>{params.proposer.metadata.url}</a
 			>
 
 			<WalletConnectDomainVerification {proposal} />
