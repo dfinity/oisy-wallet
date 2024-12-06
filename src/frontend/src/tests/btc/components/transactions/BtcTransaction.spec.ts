@@ -24,6 +24,7 @@ describe('BtcTransaction', () => {
 		expect(getByText('Send')).toBeInTheDocument();
 		expect(getByText('-0.00040827')).toBeInTheDocument();
 	});
+
 	it('should calculate amount for receive transaction correctly', () => {
 		const btcTransaction: BtcTransactionUi = { ...mockTransaction, type: 'receive' };
 
