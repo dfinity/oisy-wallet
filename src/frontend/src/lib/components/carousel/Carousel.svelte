@@ -256,7 +256,7 @@
 
 		goToNextSlide();
 
-		if (slides.length <= 1) {
+		if (totalSlides <= 1) {
 			clearAutoplayTimer();
 		}
 	};
