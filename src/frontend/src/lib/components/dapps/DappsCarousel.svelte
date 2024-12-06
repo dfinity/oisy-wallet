@@ -13,6 +13,7 @@
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
+	import { nullishSignOut } from '$lib/services/auth.services';
 
 	export let styleClass: string | undefined = undefined;
 
@@ -37,7 +38,12 @@
 			carousel.removeSlide(idx);
 		}
 
-		if (isNullish($authIdentity) || isNullish($userProfileStore)) {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return
+		}
+
+		if (isNullish($userProfileStore)) {
 			return;
 		}
 
