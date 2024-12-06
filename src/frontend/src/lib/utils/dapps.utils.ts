@@ -4,9 +4,13 @@ import {
 } from '$lib/types/dapp-description';
 import { nonNullish } from '@dfinity/utils';
 
-export const filterCarouselDapps = (
-	dAppDescriptions: OisyDappDescription[]
-): CarouselSlideOisyDappDescription[] =>
-	dAppDescriptions.filter(({ carousel }) =>
-		nonNullish(carousel)
+export const filterCarouselDapps = ({
+	dAppDescriptions,
+	hiddenDappsIds
+}: {
+	dAppDescriptions: OisyDappDescription[];
+	hiddenDappsIds: OisyDappDescription['id'][];
+}): CarouselSlideOisyDappDescription[] =>
+	dAppDescriptions.filter(
+		({ id, carousel }) => nonNullish(carousel) && !hiddenDappsIds.includes(id)
 	) as CarouselSlideOisyDappDescription[];
