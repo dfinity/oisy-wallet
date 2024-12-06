@@ -26,6 +26,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { onMount } from 'svelte';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -42,8 +43,31 @@
 		fromRoute = from;
 	});
 
+	const positionSliderAtSelected = (): void => {
+		const slider = document.querySelector<HTMLDivElement>('.slider');
+		const selectedItem = document.querySelector<HTMLDivElement>('.menu a.selected');
+
+		if (isNullish(slider) || isNullish(selectedItem)) {
+			return;
+		}
+
+		const itemRect = selectedItem.getBoundingClientRect();
+		const menuRect = selectedItem.closest('.menu')?.getBoundingClientRect();
+
+		if (isNullish(menuRect)) {
+			return;
+		}
+
+		slider.style.top = `${itemRect.top - menuRect.top}px`;
+		slider.style.height = `${itemRect.height}px`;
+
+	};
+
+	onMount(() => {
+		positionSliderAtSelected();
+	});
+
 	const moveSlider = (event: MouseEvent | TouchEvent): void => {
-		const menuItems = document.querySelectorAll<HTMLDivElement>('.menu a');
 		const slider = document.querySelector<HTMLDivElement>('.slider');
 
 		if (isNullish(slider)) {
@@ -62,16 +86,16 @@
 			return;
 		}
 
+		slider.style.transition = 'top 0.3s ease';
 		slider.style.top = `${itemRect.top - menuRect.top}px`;
 		slider.style.height = `${itemRect.height}px`;
-
-		menuItems.forEach((item) => item.classList.remove('active'));
-		target.classList.add('active');
 	};
 </script>
 
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
-	<div class="flex flex-col gap-3">
+	<div class="menu flex flex-col gap-3">
+		<div class="slider text-brand-primary rounded-xl bg-white hover:bg-brand-subtle-alt h-full"></div>
+
 		<NavigationItem
 			href={networkUrl({
 				path: AppPath.Tokens,
@@ -146,52 +170,9 @@
 </div>
 
 <style lang="scss">
-
-  body {
-    background-color: #f0f0f0;
-  }
-
   .menu {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
-  }
-
-  .menu ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .menu li {
-    padding: 0;
-  }
-  .menu a {
-    display: block;
-    padding: 15px 30px;
-    text-decoration: none;
-    color: #333;
-    transition: color 0.3s ease;
-    position: relative;
-    z-index: 2;
-  }
-
-
-
-  .menu a {
-    display: block;
-    padding: 15px 30px;
-    text-decoration: none;
-    color: #333;
-    transition: color 0.3s ease;
-    position: relative;
-    z-index: 1;
-  }
-
-  .menu a:hover {
-    color: #fff;
   }
 
 	.slider {
@@ -200,14 +181,6 @@
 		top: 0;
 		width: 100%;
 		height: 0;
-		background-color: #007bff;
-		transition:
-			top 0.3s ease,
-			height 0.3s ease;
-		z-index: 0;
-	}
-
-	.menu a.active {
-		color: #fff;
+		z-index: -1;
 	}
 </style>
