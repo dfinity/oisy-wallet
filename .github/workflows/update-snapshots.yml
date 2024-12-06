@@ -15,10 +15,7 @@ concurrency:
 jobs:
 
   oisy-backend-wasm:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-14]
+    runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     steps:
       - name: Checkout
@@ -32,17 +29,17 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
-
+      
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
   update_snapshots:
     runs-on: ${{ matrix.os }}
+    needs: oisy-backend-wasm
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-14]
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
-    needs: oisy-backend-wasm
     
     steps:
 
@@ -70,6 +67,11 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+
+      - name: Download WASM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend.wasm.gz
 
       - name: Prepare macOS
         if: runner.os == 'macOS'

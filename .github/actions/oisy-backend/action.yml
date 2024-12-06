@@ -19,7 +19,7 @@ runs:
       if: steps.backend-wasm-cache.outputs.cache-hit == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ runner.os == 'macOS' && 'backend.wasm.gz-macOS' || 'backend.wasm.gz' }}
+        name: backend.wasm.gz
         path: ./backend.wasm.gz
 
     - name: Build base docker image
