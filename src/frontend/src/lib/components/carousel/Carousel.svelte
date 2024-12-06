@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
-	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
-	import {slide} from 'svelte/transition';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
 	export let autoplay = 5000;
 	export let duration = 300;

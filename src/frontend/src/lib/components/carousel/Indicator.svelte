@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { fade } from 'svelte/transition';
 
 	export let currentSlide: number;
 	export let index: number;
