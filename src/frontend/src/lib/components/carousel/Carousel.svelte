@@ -279,7 +279,7 @@
 	{#if nonNullish(slides) && slides.length > 1}
 		<div
 			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
-			transition:slide={SLIDE_PARAMS}
+			out:slide={SLIDE_PARAMS}
 		>
 			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 			<Controls {onNext} {onPrevious} />
