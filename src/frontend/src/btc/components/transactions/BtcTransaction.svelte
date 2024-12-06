@@ -21,11 +21,14 @@
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
+
+	let amount: bigint | undefined;
+	$: amount = nonNullish(value) ? (type === 'send' ? value * BigInt(-1) : value) : undefined;
 </script>
 
 <Transaction
 	on:click={() => modalStore.openBtcTransaction({ transaction, token })}
-	amount={nonNullish(value) ? BigNumber.from(value) : undefined}
+	amount={nonNullish(amount) ? BigNumber.from(amount) : undefined}
 	{type}
 	timestamp={Number(timestamp)}
 	{status}
