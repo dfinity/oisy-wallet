@@ -17,11 +17,15 @@ export const NetworkAppMetadataSchema = z.object({
 	explorerUrl: UrlSchema
 });
 
+const IconSchema = z
+	.string()
+	.refine((value) => value.endsWith('.svg'), { message: 'Must be an SVG file' });
+
 export const NetworkSchema = z.object({
 	id: NetworkIdSchema,
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
-	icon: z.string().optional(),
-	iconBW: z.string().optional(),
+	icon: IconSchema.optional(),
+	iconBW: IconSchema.optional(),
 	buy: z.custom<AtLeastOne<NetworkBuy>>().optional()
 });
