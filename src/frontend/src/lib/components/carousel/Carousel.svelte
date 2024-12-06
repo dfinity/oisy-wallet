@@ -27,7 +27,6 @@
 	 * Variables related to the slides
 	 */
 	let slides: Node[];
-	let originalSlides: Node[];
 	let currentSlide = 0;
 	let totalSlides: number;
 	$: totalSlides = slides?.length ?? 0;
@@ -64,7 +63,6 @@
 		}
 
 		slides = [...sliderFrame.children];
-		originalSlides = [...slides];
 	};
 
 	/**
@@ -257,12 +255,6 @@
 		initializeCarousel()
 	}
 
-	// $: console.log(slides)
-	//
-	// // every 5 seconds print slides
-	// setInterval(() => {
-	// 	console.log(slides)
-	// }, 5000)
 
 
 </script>
