@@ -17,13 +17,19 @@
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
+
+	const closeSlide = async ({
+		detail: dappId
+	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+		hiddenDappsIds = [...hiddenDappsIds, dappId];
+	};
 </script>
 
 {#if nonNullish($userSettings) && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
 	<Carousel controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
 		{#each dappsCarouselSlides as dappsCarouselSlide}
-			<DappsCarouselSlide {dappsCarouselSlide} />
+			<DappsCarouselSlide {dappsCarouselSlide} on:icCloseCarouselSlide={closeSlide} />
 		{/each}
 	</Carousel>
 {/if}
