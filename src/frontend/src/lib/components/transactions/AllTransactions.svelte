@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notEmptyString, type Token } from '@dfinity/utils';
+	import { notEmptyString } from '@dfinity/utils';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasIndexCanister, hasNoIndexCanister } from '$icp/validation/ic-token.validation';
@@ -19,20 +19,23 @@
 
 	let enabledTokensWithoutCanister, enabledTokensWithBrokenCanister: string[];
 	$: {
-		let result = enabledTokensWithoutTransaction.reduce((acc, curr) => {
-			if (hasNoIndexCanister(curr)) {
-				acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`);
+		let result = enabledTokensWithoutTransaction.reduce(
+			(acc, curr) => {
+				if (hasNoIndexCanister(curr)) {
+					acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`);
+				}
+				if (hasIndexCanister(curr)) {
+					acc.enabledTokensWithBrokenCanister.push(`$${curr.symbol}`);
+				}
+				return acc;
+			},
+			{
+				enabledTokensWithoutCanister: [],
+				enabledTokensWithBrokenCanister: []
 			}
-			if (hasIndexCanister(curr)) {
-				acc.enabledTokensWithBrokenCanister.push(`$${curr.symbol}`);
-			}
-			return acc;
-		}, {
-			enabledTokensWithoutCanister: [],
-			enabledTokensWithBrokenCanister: []
-		});
+		);
 
-		({enabledTokensWithoutCanister, enabledTokensWithBrokenCanister} = result)
+		({ enabledTokensWithoutCanister, enabledTokensWithBrokenCanister } = result);
 	}
 
 	let tokenListWithoutCanister: string;
