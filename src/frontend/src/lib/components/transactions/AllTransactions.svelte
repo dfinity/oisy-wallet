@@ -35,7 +35,10 @@
 			}
 		);
 
-		({ enabledTokensWithoutCanister, enabledTokensWithBrokenCanister: enabledTokensWithUnavailableCanister } = result);
+		({
+			enabledTokensWithoutCanister,
+			enabledTokensWithBrokenCanister: enabledTokensWithUnavailableCanister
+		} = result);
 	}
 
 	let tokenListWithoutCanister: string;
