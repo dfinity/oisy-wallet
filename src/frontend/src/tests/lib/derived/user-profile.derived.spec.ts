@@ -17,10 +17,10 @@ describe('user-profile.derived', () => {
 			expect(get(userSettings)).toEqual(mockUserSettings);
 		});
 
-		it('should return undefined if user settings are nullish', () => {
+		it('should return null if user settings are nullish', () => {
 			userProfileStore.set({ certified: true, profile: { ...mockUserProfile, settings: [] } });
 
-			expect(get(userSettings)).toBeUndefined();
+			expect(get(userSettings)).toBeNull();
 		});
 	});
 });
