@@ -7,7 +7,6 @@ import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
 
 describe('DappsCarousel', () => {
 	beforeEach(() => {
@@ -62,7 +61,7 @@ describe('DappsCarousel', () => {
 		expect(container.innerHTML).toBe('');
 	});
 
-	it('should render nothing if the user settings are nullish', () => {
+	it('should render the Carousel if the user settings are null', () => {
 		const userProfile: UserProfile = {
 			...mockUserProfile,
 			settings: []
@@ -70,8 +69,8 @@ describe('DappsCarousel', () => {
 
 		userProfileStore.set({ profile: userProfile, certified: false });
 
-		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		const { getByTestId } = render(DappsCarousel);
+		expect(getByTestId(CAROUSEL_CONTAINER)).toBeInTheDocument();
 	});
 
 	it('should render the Carousel when data exist', () => {
