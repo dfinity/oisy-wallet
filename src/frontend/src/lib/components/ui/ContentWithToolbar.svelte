@@ -8,6 +8,6 @@
 
 <slot name="outer-content" />
 
-<div class="flex w-full">
+<div class="toolbar">
 	<slot name="toolbar" />
 </div>
