@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
-	import { nullishSignOut } from '$lib/services/auth.services';
 
-	const load =async ({ reload = false }: { reload?: boolean }) => {
+	const load = async ({ reload = false }: { reload?: boolean }) => {
 		if (isNullish($authIdentity)) {
 			userProfileStore.reset();
 			await nullishSignOut();
@@ -16,7 +16,6 @@
 	};
 
 	$: $authIdentity, (async () => await load({}))();
-
 
 	const reload = () => {
 		load({ reload: true });
