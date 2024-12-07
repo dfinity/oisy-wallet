@@ -23,6 +23,8 @@
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 
+	$: console.log('dappsCarouselSlides', $userSettings, hiddenDappsIds, dappsCarouselSlides);
+
 	let carousel: Carousel;
 
 	const closeSlide = async ({
