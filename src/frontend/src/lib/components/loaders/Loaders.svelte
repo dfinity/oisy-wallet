@@ -13,9 +13,10 @@
 		<LoaderBalances>
 			<LoaderWallets>
 				<ExchangeWorker>
-					<LoaderMetamask><LoaderUserProfile>
+					<LoaderMetamask
+						><LoaderUserProfile>
 							<slot />
-					</LoaderUserProfile>
+						</LoaderUserProfile>
 					</LoaderMetamask>
 				</ExchangeWorker>
 			</LoaderWallets>
