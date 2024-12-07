@@ -1,21 +1,9 @@
-import { userProfileLoaded, userSettings } from '$lib/derived/user-profile.derived';
+import { userSettings, userSettingsLoaded } from '$lib/derived/user-profile.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { get } from 'svelte/store';
 
 describe('user-profile.derived', () => {
-	describe('userProfileLoaded', () => {
-		it('should return false when user profile is not set', () => {
-			userProfileStore.reset();
-			expect(get(userProfileLoaded)).toBe(false);
-		});
-
-		it('should return true when user profile is set', () => {
-			userProfileStore.set({ certified: true, profile: mockUserProfile });
-			expect(get(userProfileLoaded)).toBe(true);
-		});
-	});
-
 	describe('userSettings', () => {
 		it('should return undefined when user profile is not set', () => {
 			userProfileStore.reset();
@@ -30,6 +18,23 @@ describe('user-profile.derived', () => {
 		it('should return undefined if user settings are nullish', () => {
 			userProfileStore.set({ certified: true, profile: { ...mockUserProfile, settings: [] } });
 			expect(get(userSettings)).toBeUndefined();
+		});
+	});
+
+	describe('userSettingsLoaded', () => {
+		it('should return false when user profile is not set', () => {
+			userProfileStore.reset();
+			expect(get(userSettingsLoaded)).toBe(false);
+		});
+
+		it('should return true when user settings are not nullish', () => {
+			userProfileStore.set({ certified: true, profile: mockUserProfile });
+			expect(get(userSettingsLoaded)).toBe(true);
+		});
+
+		it('should return true when user settings are nullish but user profile is set', () => {
+			userProfileStore.set({ certified: true, profile: { ...mockUserProfile, settings: [] } });
+			expect(get(userSettingsLoaded)).toBe(true);
 		});
 	});
 });
