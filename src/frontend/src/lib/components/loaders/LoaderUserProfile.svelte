@@ -5,8 +5,7 @@
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 
 	const load = ({ reload = false }: { reload?: boolean }) => {
-		if (isNullish($authIdentity)) {
-			userProfileStore.reset();
+		if (isNullish($authIdentity)) {userProfileStore.reset();
 			return;
 		}
 
@@ -14,6 +13,8 @@
 	};
 
 	$: $authIdentity, load({});
+
+
 
 	const reload = () => {
 		load({ reload: true });
