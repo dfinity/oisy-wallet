@@ -17,7 +17,7 @@
 
 	$: $authIdentity, (async () => await load({}))();
 
-	const reload =async () => {
+	const reload = async () => {
 		await load({ reload: true });
 	};
 </script>
