@@ -87,7 +87,7 @@
 		"@types/node": "^20.14.9",
 		"@vitest/coverage-v8": "^2.1.8",
 		"autoprefixer": "^10.4.20",
-		"dotenv": "^16.4.5",
+		"dotenv": "^16.4.7",
 		"fake-indexeddb": "^6.0.0",
 		"jimp": "^1.6.0",
 		"jsdom": "^25.0.1",
