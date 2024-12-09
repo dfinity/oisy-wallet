@@ -4,7 +4,7 @@
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userSettings } from '$lib/derived/user-profile.derived';
+	import { userProfileLoaded, userSettings } from '$lib/derived/user-profile.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
@@ -57,7 +57,7 @@
 	};
 </script>
 
-{#if $userSettings !== undefined && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
+{#if $userProfileLoaded && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
 	<Carousel
 		bind:this={carousel}

@@ -4,11 +4,12 @@ import type { Option } from '$lib/types/utils';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
+export const userProfileLoaded: Readable<boolean> = derived([userProfileStore], ([$userProfile]) =>
+	nonNullish($userProfile)
+);
+
 export const userSettings: Readable<Option<Settings>> = derived(
 	[userProfileStore],
 	([$userProfile]) =>
-		// The user profile may or may not have the settings field.
-		// To distinguish between user profile not loaded and missing settings,
-		// we use `undefined` for the former and `null` for the latter.
-		nonNullish($userProfile) ? (fromNullable($userProfile.profile.settings) ?? null) : undefined
+		nonNullish($userProfile) ? fromNullable($userProfile.profile.settings) : undefined
 );
