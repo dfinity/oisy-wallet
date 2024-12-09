@@ -17,14 +17,18 @@
 
 	let dirty: boolean;
 
-	onMount(() => {
+	const startConfirmToClose = () => {
 		dirty = true;
 		confirmToCloseBrowser(dirty);
-	});
-	onDestroy(() => {
-		dirty = false;
+	}
+
+	const stopConfirmToClose = () => {
+		dirty = false
 		confirmToCloseBrowser(dirty);
-	});
+	}
+
+	onMount(startConfirmToClose);
+	onDestroy(stopConfirmToClose);
 
 	// Workaround: SvelteKit does not consistently call `onDestroy`. Various issues are open regarding this on Svelte side.
 	// This is the simplest, least verbose solution to always disconnect before unload, given that this component is used in `<WizardModal />` only.
@@ -34,13 +38,12 @@
 				return;
 			}
 
-			dirty = false;
-			confirmToCloseBrowser(dirty);
+			stopConfirmToClose();
 		})();
 
 	beforeNavigate(({ cancel }) => {
 		if (dirty) {
-			let userConfirmed = window.confirm('Are you sure you want to navigate away?');
+			let userConfirmed = window.confirm($i18n.navigation.text.confirm_navigate);
 			if (userConfirmed) {
 				modalStore.close();
 			} else {
