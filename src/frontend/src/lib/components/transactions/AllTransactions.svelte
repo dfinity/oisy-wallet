@@ -2,7 +2,7 @@
 	import { notEmptyString } from '@dfinity/utils';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { hasIndexCanister, hasNoIndexCanister } from '$icp/validation/ic-token.validation';
+	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -28,12 +28,9 @@
 				},
 				curr
 			) => {
-				if (hasNoIndexCanister(curr)) {
-					acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`);
-				}
-				if (hasIndexCanister(curr)) {
-					acc.enabledTokensWithUnavailableCanister.push(`$${curr.symbol}`);
-				}
+				hasNoIndexCanister(curr)
+					? acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`)
+					: acc.enabledTokensWithUnavailableCanister.push(`$${curr.symbol}`);
 				return acc;
 			},
 			{
