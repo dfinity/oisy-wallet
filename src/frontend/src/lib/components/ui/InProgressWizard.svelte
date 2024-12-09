@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
-	import { beforeNavigate } from '$app/navigation';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -16,17 +15,13 @@
 	export let steps: ProgressSteps;
 	export let warningType: 'transaction' | 'manage' = 'transaction';
 
-	let isComponentMounted = true;
-
 	const startConfirmToClose = () => {
 		dirtyWizardState.set(true);
-		isComponentMounted = true;
 		confirmToCloseBrowser(true);
 	};
 
 	const stopConfirmToClose = () => {
 		dirtyWizardState.set(false);
-		isComponentMounted = false;
 		confirmToCloseBrowser(false);
 	};
 
@@ -43,21 +38,6 @@
 
 			stopConfirmToClose();
 		})();
-
-	beforeNavigate(({ cancel }) => {
-		if (!isComponentMounted) {
-			return;
-		}
-
-		if ($dirtyWizardState) {
-			let userConfirmed = window.confirm($i18n.navigation.text.confirm_navigate);
-			if (userConfirmed) {
-				modalStore.close();
-			} else {
-				cancel();
-			}
-		}
-	});
 </script>
 
 <div class="stretch">
