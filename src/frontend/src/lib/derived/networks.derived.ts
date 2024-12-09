@@ -2,14 +2,16 @@ import { enabledBitcoinNetworks } from '$btc/derived/networks.derived';
 import { ICP_NETWORK } from '$env/networks.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import type { Network } from '$lib/types/network';
+import { enabledSolanaNetworks } from '$sol/schema/network.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const networks: Readable<Network[]> = derived(
-	[enabledBitcoinNetworks, enabledEthereumNetworks],
-	([$enabledBitcoinNetworks, $enabledEthereumNetworks]) => [
+	[enabledBitcoinNetworks, enabledEthereumNetworks, enabledSolanaNetworks],
+	([$enabledBitcoinNetworks, $enabledEthereumNetworks, $enabledSolanaNetworks]) => [
 		...$enabledBitcoinNetworks,
 		...$enabledEthereumNetworks,
-		ICP_NETWORK
+		ICP_NETWORK,
+		...$enabledSolanaNetworks
 	]
 );
 
