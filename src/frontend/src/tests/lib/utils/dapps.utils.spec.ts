@@ -15,16 +15,44 @@ describe('dapps.utils', () => {
 				...mockDapps.slice(1)
 			];
 
-			expect(filterCarouselDapps(dAppDescriptions)).toStrictEqual(mockDapps.slice(1));
+			expect(filterCarouselDapps({ dAppDescriptions, hiddenDappsIds: [] })).toStrictEqual(
+				mockDapps.slice(1)
+			);
+		});
+
+		it('should filter out dApps whose ids are in hiddenDappsIds', () => {
+			expect(
+				filterCarouselDapps({
+					dAppDescriptions: mockDapps,
+					hiddenDappsIds: [mockDapps[0].id]
+				})
+			).toEqual(mockDapps.slice(1));
+		});
+
+		it('should return an empty array if all dApps are filtered out', () => {
+			expect(
+				filterCarouselDapps({
+					dAppDescriptions: mockDapps,
+					hiddenDappsIds: mockDapps.map(({ id }) => id)
+				})
+			).toEqual([]);
 		});
 
 		it('should return the same array if no dApps are filtered out', () => {
-			expect(filterCarouselDapps(mockDapps)).toEqual(mockDapps);
+			expect(
+				filterCarouselDapps({
+					dAppDescriptions: mockDapps,
+					hiddenDappsIds: []
+				})
+			).toEqual(mockDapps);
 		});
 
 		it('should return an empty array if all dApps have nullish carousel property', () => {
 			expect(
-				filterCarouselDapps(mockDapps.map((dapps) => ({ ...dapps, carousel: undefined })))
+				filterCarouselDapps({
+					dAppDescriptions: mockDapps.map((dapps) => ({ ...dapps, carousel: undefined })),
+					hiddenDappsIds: []
+				})
 			).toEqual([]);
 		});
 	});
