@@ -7,7 +7,7 @@ import { loadLamportsBalance, loadSolBalance } from '$sol/services/sol-balance.s
 import type { SolNetwork } from '$sol/types/network';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
-describe('sol-balance-services', () => {
+describe('sol-balance.services', () => {
 	const solanaNetworks: SolNetwork[] = [
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK,
