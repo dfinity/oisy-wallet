@@ -24,10 +24,6 @@ const appleProjects = [
 	{
 		name: 'Safari',
 		use: devices['Desktop Safari']
-	},
-	{
-		name: 'iPhone SE',
-		use: devices['iPhone SE']
 	}
 ];
 
@@ -39,10 +35,6 @@ const nonAppleProjects = [
 	{
 		name: 'Firefox',
 		use: devices['Desktop Firefox']
-	},
-	{
-		name: 'Pixel 5',
-		use: devices['Pixel 5']
 	}
 ];
 
