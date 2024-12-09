@@ -20,12 +20,12 @@
 	const startConfirmToClose = () => {
 		dirty = true;
 		confirmToCloseBrowser(dirty);
-	}
+	};
 
 	const stopConfirmToClose = () => {
-		dirty = false
+		dirty = false;
 		confirmToCloseBrowser(dirty);
-	}
+	};
 
 	onMount(startConfirmToClose);
 	onDestroy(stopConfirmToClose);
