@@ -82,7 +82,7 @@
 		"@sveltejs/kit": "^2.8.3",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@testing-library/jest-dom": "^6.6.3",
-		"@testing-library/svelte": "^5.2.4",
+		"@testing-library/svelte": "^5.2.6",
 		"@types/dom-view-transitions": "^1.0.5",
 		"@types/node": "^20.14.9",
 		"@vitest/coverage-v8": "^2.1.8",
