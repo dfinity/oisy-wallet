@@ -3,7 +3,7 @@ import { LAMPORTS_PER_SOL } from '$sol/constants/sol.constants';
 import type { SolNetwork } from '$sol/types/network';
 import { createSolanaRpc, address as solAddress, type Lamports } from '@solana/web3.js';
 
-export const getLamportsBalance = async ({
+export const loadLamportsBalance = async ({
 	address,
 	network: { rpcUrl }
 }: {
@@ -18,14 +18,14 @@ export const getLamportsBalance = async ({
 	return balance;
 };
 
-export const getSolBalance = async ({
+export const loadSolBalance = async ({
 	address,
 	network
 }: {
 	address: SolAddress;
 	network: SolNetwork;
 }): Promise<number> => {
-	const balance = await getLamportsBalance({ address, network });
+	const balance = await loadLamportsBalance({ address, network });
 
 	return Number(balance) / LAMPORTS_PER_SOL;
 };

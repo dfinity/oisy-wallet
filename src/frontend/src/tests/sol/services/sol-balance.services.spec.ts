@@ -3,7 +3,7 @@ import {
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks.sol.env';
-import { getLamportsBalance, getSolBalance } from '$sol/services/sol-balance.services';
+import { loadLamportsBalance, loadSolBalance } from '$sol/services/sol-balance.services';
 import type { SolNetwork } from '$sol/types/network';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
@@ -14,22 +14,22 @@ describe('sol-balance-services', () => {
 		SOLANA_DEVNET_NETWORK
 	];
 
-	describe('getLamportsBalance', () => {
+	describe('loadLamportsBalance', () => {
 		it.each(solanaNetworks)(
 			'should return the balance in lamports for the address on the $name network',
 			async (network) => {
-				const balance = await getLamportsBalance({ address: mockSolAddress, network });
+				const balance = await loadLamportsBalance({ address: mockSolAddress, network });
 
 				expect(balance).toBeGreaterThanOrEqual(0);
 			}
 		);
 	}, 60000);
 
-	describe('getSolBalance', () => {
+	describe('loadSolBalance', () => {
 		it.each(solanaNetworks)(
 			'should return the balance in SOL for the address on the $name network',
 			async (network) => {
-				const balance = await getSolBalance({ address: mockSolAddress, network });
+				const balance = await loadSolBalance({ address: mockSolAddress, network });
 
 				expect(balance).toBeGreaterThanOrEqual(0);
 			}
