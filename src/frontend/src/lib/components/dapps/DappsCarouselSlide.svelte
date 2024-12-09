@@ -44,11 +44,9 @@
 			{callToAction} →
 		</button>
 	</div>
-	<button
-		class="h-full items-start p-1 text-tertiary"
-		on:click={close}
-		aria-label={$i18n.core.text.close}
-	>
-		<IconClose size="20" />
-	</button>
+	<div class="h-full items-start">
+		<button class="p-1 text-tertiary" on:click={close} aria-label={$i18n.core.text.close}>
+			<IconClose size="20" />
+		</button>
+	</div>
 </div>
