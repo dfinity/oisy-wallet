@@ -51,12 +51,18 @@ COPY Cargo.lock .
 COPY Cargo.toml .
 COPY src/backend/Cargo.toml src/backend/Cargo.toml
 COPY src/cycles_ledger/client/Cargo.toml src/cycles_ledger/client/Cargo.toml
+COPY src/cycles_ledger/pic/Cargo.toml src/cycles_ledger/pic/Cargo.toml
+COPY src/cycles_ledger/types/Cargo.toml src/cycles_ledger/types/Cargo.toml
 COPY src/shared/Cargo.toml src/shared/Cargo.toml
 ENV CARGO_TARGET_DIR=/cargo_target
 RUN mkdir -p src/backend/src \
     && touch src/backend/src/lib.rs \
     && mkdir -p src/cycles_ledger/client/src \
     && touch src/cycles_ledger/client/src/lib.rs \
+    && mkdir -p src/cycles_ledger/pic/src \
+    && touch src/cycles_ledger/pic/src/lib.rs \
+    && mkdir -p src/cycles_ledger/types/src \
+    && touch src/cycles_ledger/types/src/lib.rs \
     && mkdir -p src/shared/src \
     && touch src/shared/src/lib.rs \
     && ./docker/build --only-dependencies \
