@@ -30,7 +30,7 @@ const appleProjects = [
 const nonAppleProjects = [
 	{
 		name: 'Google Chrome',
-		use: devices['Desktop Chrome']
+		use: { ...devices['Desktop Chrome'], channel: 'chrome' }
 	},
 	{
 		name: 'Firefox',
