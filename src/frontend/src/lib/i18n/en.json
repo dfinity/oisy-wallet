@@ -395,7 +395,8 @@
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"refreshing_ui": "Refreshing UI",
-			"unsupported_token_conversion": "Conversion for the selected token is not supported."
+			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
+			"calculating_max_amount": "Calculating..."
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"
@@ -829,6 +830,9 @@
 		},
 		"info": {
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
+		},
+		"warning": {
+			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister."
 		}
 	}
 }
