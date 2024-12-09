@@ -10,21 +10,24 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
 	export let steps: ProgressSteps;
 	export let warningType: 'transaction' | 'manage' = 'transaction';
 
-	let dirty: boolean;
+	let isComponentMounted = true;
 
 	const startConfirmToClose = () => {
-		dirty = true;
-		confirmToCloseBrowser(dirty);
+		dirtyWizardState.set(true)
+		isComponentMounted = true;
+		confirmToCloseBrowser(true);
 	};
 
 	const stopConfirmToClose = () => {
-		dirty = false;
-		confirmToCloseBrowser(dirty);
+		dirtyWizardState.set(false)
+		isComponentMounted = false;
+		confirmToCloseBrowser(false);
 	};
 
 	onMount(startConfirmToClose);
@@ -42,15 +45,15 @@
 		})();
 
 	beforeNavigate(({ cancel }) => {
-		if (dirty) {
+		if (!isComponentMounted) return;
+
+		if ($dirtyWizardState) {
 			let userConfirmed = window.confirm($i18n.navigation.text.confirm_navigate);
 			if (userConfirmed) {
 				modalStore.close();
 			} else {
 				cancel();
 			}
-		} else {
-			modalStore.close();
 		}
 	});
 </script>

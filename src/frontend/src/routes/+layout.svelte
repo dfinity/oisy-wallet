@@ -18,6 +18,7 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 
 	/**
 	 * Init dApp
@@ -97,3 +98,4 @@
 <Banner />
 <Toasts maxVisible={3} />
 <Busy />
+<ModalExitHandler />
