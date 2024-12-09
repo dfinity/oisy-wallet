@@ -34,10 +34,7 @@ jobs:
         continue-on-error: false
 
   oisy-backend-wasm:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-14]
+    runs-on: ubuntu-24.04
     if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
     needs: check-e2e-changes
     steps:
@@ -57,6 +54,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download WASM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend.wasm.gz
 
       - name: Prepare macOS
         if: runner.os == 'macOS'
