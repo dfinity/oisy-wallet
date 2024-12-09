@@ -65,3 +65,7 @@ export const SOLANA_LOCAL_NETWORK: SolNetwork = {
 	iconBW: solDevnetIconBW,
 	rpcUrl: 'http://localhost:8899'
 };
+
+// TODO: to be removed when the feature is fully implemented
+export const SOLANA_NETWORK_ENABLED =
+	JSON.parse(import.meta.env.VITE_SOLANA_NETWORK_ENABLED ?? false) === true;
