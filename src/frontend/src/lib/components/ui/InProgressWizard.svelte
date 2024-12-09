@@ -45,7 +45,9 @@
 		})();
 
 	beforeNavigate(({ cancel }) => {
-		if (!isComponentMounted) {return;}
+		if (!isComponentMounted) {
+			return;
+		}
 
 		if ($dirtyWizardState) {
 			let userConfirmed = window.confirm($i18n.navigation.text.confirm_navigate);
