@@ -1,6 +1,4 @@
 import { browser } from '$app/environment';
-import { dirty } from '$lib/stores/dirty.store';
-import { get } from 'svelte/store';
 
 const onBeforeUnload = ($event: BeforeUnloadEvent) => {
 	$event.preventDefault();
@@ -15,12 +13,12 @@ const removeBeforeUnload = () => {
 	window.removeEventListener('beforeunload', onBeforeUnload, { capture: true });
 };
 
-export const confirmToCloseBrowser = () => {
+export const confirmToCloseBrowser = (dirty: boolean) => {
 	if (!browser) {
 		return;
 	}
 
-	if (get(dirty)?.dirty) {
+	if (dirty) {
 		addBeforeUnload();
 		return;
 	}

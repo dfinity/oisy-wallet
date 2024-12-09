@@ -4,24 +4,26 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { dirty } from '$lib/stores/dirty.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { beforeNavigate } from '$app/navigation';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
 	export let steps: ProgressSteps;
 	export let warningType: 'transaction' | 'manage' = 'transaction';
 
+	let dirty: boolean;
+
 	onMount(() => {
-		dirty.start();
-		confirmToCloseBrowser();
+		dirty = true;
+		confirmToCloseBrowser(dirty);
 	});
 	onDestroy(() => {
-		dirty.stop();
-		confirmToCloseBrowser();
+		dirty = false
+		confirmToCloseBrowser(dirty);
 	});
 
 	// Workaround: SvelteKit does not consistently call `onDestroy`. Various issues are open regarding this on Svelte side.
@@ -32,9 +34,22 @@
 				return;
 			}
 
-			dirty.stop();
-			confirmToCloseBrowser();
+			dirty = false
+			confirmToCloseBrowser(dirty);
 		})();
+
+	beforeNavigate(({ cancel }) => {
+		if (dirty) {
+			let userConfirmed = window.confirm('Are you sure you want to navigate away?');
+			if (userConfirmed) {
+				modalStore.close();
+			} else {
+				cancel();
+			}
+		} else {
+			modalStore.close();
+		}
+	});
 </script>
 
 <div class="stretch">

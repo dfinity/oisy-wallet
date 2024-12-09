@@ -6,7 +6,6 @@
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
-	import Dirty from '$lib/components/ui/Dirty.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
@@ -98,4 +97,3 @@
 <Banner />
 <Toasts maxVisible={3} />
 <Busy />
-<Dirty />
