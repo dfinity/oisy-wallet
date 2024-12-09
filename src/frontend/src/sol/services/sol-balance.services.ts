@@ -10,10 +10,10 @@ export const loadLamportsBalance = async ({
 	address: SolAddress;
 	network: SolNetwork;
 }): Promise<Lamports> => {
-	const rpc = createSolanaRpc(rpcUrl);
+	const { getBalance } = createSolanaRpc(rpcUrl);
 
 	const wallet = solAddress(address);
-	const { value: balance } = await rpc.getBalance(wallet).send();
+	const { value: balance } = await getBalance(wallet).send();
 
 	return balance;
 };
