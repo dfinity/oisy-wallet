@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import { beforeNavigate } from '$app/navigation';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -9,7 +10,6 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { beforeNavigate } from '$app/navigation';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
 	export let steps: ProgressSteps;
@@ -22,7 +22,7 @@
 		confirmToCloseBrowser(dirty);
 	});
 	onDestroy(() => {
-		dirty = false
+		dirty = false;
 		confirmToCloseBrowser(dirty);
 	});
 
@@ -34,7 +34,7 @@
 				return;
 			}
 
-			dirty = false
+			dirty = false;
 			confirmToCloseBrowser(dirty);
 		})();
 
