@@ -1,5 +1,5 @@
-import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 import { NAVIGATION_ITEM_ACTIVITY } from '$lib/constants/test-ids.constants';
+import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 export type ActivityPageParams = HomepageLoggedInParams;
 

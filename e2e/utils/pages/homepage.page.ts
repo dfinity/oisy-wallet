@@ -228,10 +228,10 @@ abstract class Homepage {
 			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
 				await this.clickByTestId(NAVIGATION_MENU_BUTTON);
 			}
-				if (await this.isVisibleByTestId(testId)) {
-					await this.clickByTestId(testId);
-				}
+			if (await this.isVisibleByTestId(testId)) {
+				await this.clickByTestId(testId);
 			}
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
