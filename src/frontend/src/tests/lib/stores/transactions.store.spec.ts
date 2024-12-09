@@ -228,4 +228,21 @@ describe('transactions.store', () => {
 				})();
 			}));
 	});
+
+	describe('resetAll', () => {
+		it('should clear all transactions and keys', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				const transactions = [createCertifiedIcTransactionUiMock('tx1')];
+				store.append({ tokenId, transactions });
+				store.resetAll();
+
+				store.subscribe((state) => {
+					expect(state).toEqual({});
+
+					done();
+				})();
+			}));
+	});
 });
