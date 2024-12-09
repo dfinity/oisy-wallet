@@ -17,8 +17,8 @@
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
 		.map((token: TokenUi) => token as IcToken);
 
-	let enabledTokensWithoutCanister: string[];
-	let enabledTokensWithUnavailableCanister: string[];
+	let tokenListWithoutCanister: string;
+	let tokenListWithUnavailableCanister: string;
 	$: {
 		let result = enabledTokensWithoutTransaction.reduce(
 			(
@@ -42,13 +42,9 @@
 			}
 		);
 
-		({ enabledTokensWithoutCanister, enabledTokensWithUnavailableCanister } = result);
+		tokenListWithoutCanister = result.enabledTokensWithoutCanister.join(', ');
+		tokenListWithUnavailableCanister = result.enabledTokensWithUnavailableCanister.join(', ');
 	}
-
-	let tokenListWithoutCanister: string;
-	let tokenListWithUnavailableCanister: string;
-	$: tokenListWithoutCanister = enabledTokensWithoutCanister.join(', ');
-	$: tokenListWithUnavailableCanister = enabledTokensWithUnavailableCanister.join(', ');
 </script>
 
 <div class="flex flex-col gap-5">
