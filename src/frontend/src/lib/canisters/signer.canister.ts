@@ -15,6 +15,7 @@ import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { Canister, createServices, toNullable } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
@@ -194,5 +195,59 @@ export class SignerCanister extends Canister<SignerService> {
 		}
 
 		throw mapSignerCanisterSendBtcError(response.Err);
+	};
+
+	getSchnorrPublicKey = async (derivationPath: string[]): Promise<number[]> => {
+		const { schnorr_public_key } = this.caller({
+			certified: true
+		});
+
+		const response = await schnorr_public_key(
+			{
+				// TODO: set the key_id in the signer repo, as done for the ecdsa key
+				key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+				canister_id: [],
+				derivation_path: mapDerivationPath(derivationPath)
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { public_key } = response.Ok[0];
+			return Array.from(public_key);
+		}
+
+		// TODO: map error like the other methods when SchnorrPublicKeyError is exposed in the Signer repo
+		throw response.Err;
+	};
+
+	signWithSchnorr = async ({
+		message,
+		derivationPath
+	}: {
+		message: number[];
+		derivationPath: string[];
+	}): Promise<Uint8Array | number[]> => {
+		const { schnorr_sign } = this.caller({
+			certified: true
+		});
+
+		const response = await schnorr_sign(
+			{
+				// TODO: set the key_id in the signer repo, as done for the ecdsa key
+				key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+				derivation_path: mapDerivationPath(derivationPath),
+				message
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { signature } = response.Ok[0];
+			return signature;
+		}
+
+		// TODO: map error like the other methods when SchnorrSignError is exposed in the Signer repo
+		throw response.Err;
 	};
 }
