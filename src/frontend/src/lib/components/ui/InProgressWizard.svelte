@@ -7,10 +7,10 @@
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
 	export let steps: ProgressSteps;
@@ -19,13 +19,13 @@
 	let isComponentMounted = true;
 
 	const startConfirmToClose = () => {
-		dirtyWizardState.set(true)
+		dirtyWizardState.set(true);
 		isComponentMounted = true;
 		confirmToCloseBrowser(true);
 	};
 
 	const stopConfirmToClose = () => {
-		dirtyWizardState.set(false)
+		dirtyWizardState.set(false);
 		isComponentMounted = false;
 		confirmToCloseBrowser(false);
 	};
@@ -45,7 +45,7 @@
 		})();
 
 	beforeNavigate(({ cancel }) => {
-		if (!isComponentMounted) return;
+		if (!isComponentMounted) {return;}
 
 		if ($dirtyWizardState) {
 			let userConfirmed = window.confirm($i18n.navigation.text.confirm_navigate);
