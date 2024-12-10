@@ -115,6 +115,7 @@ const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
 };
 
+// eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
 };
