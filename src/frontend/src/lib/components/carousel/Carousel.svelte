@@ -7,6 +7,12 @@
 	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		TRACK_COUNT_CAROUSEL_NEXT,
+		TRACK_COUNT_CAROUSEL_OPEN,
+		TRACK_COUNT_CAROUSEL_PREVIOUS
+	} from '$lib/constants/analytics.contants';
 
 	export let autoplay = 5000;
 	export let duration = 300;
@@ -178,7 +184,11 @@
 	/**
 	 * Reset the autoplay timer and call goToNextSlide
 	 */
-	const onNext = () => {
+	const onNext = async () => {
+		await trackEvent({
+			name: TRACK_COUNT_CAROUSEL_NEXT
+		});
+
 		// Do not do anything if last-to-first element transition is on
 		if (currentSlide > totalSlides + 1) {
 			return;
@@ -212,7 +222,11 @@
 	/**
 	 * Reset the autoplay timer and call goToPreviousSlide
 	 */
-	const onPrevious = () => {
+	const onPrevious = async () => {
+		await trackEvent({
+			name: TRACK_COUNT_CAROUSEL_PREVIOUS
+		});
+
 		// Do not do anything if first-to-last element transition is on
 		if (currentSlide < -1) {
 			return;
