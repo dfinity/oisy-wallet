@@ -8,39 +8,17 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { formatToken, formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
 	export let sendAmount: OptionAmount = undefined;
 	export let receiveAmount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
-	export let totalFee: bigint | undefined = undefined;
 
 	const { destinationToken, destinationTokenBalance, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	let sendAmountAfterFee: bigint | undefined;
-	$: sendAmountAfterFee =
-		nonNullish(totalFee) && nonNullish(sendAmount)
-			? parseToken({
-					value: `${sendAmount}`,
-					unitName: $destinationToken.decimals
-				}).toBigInt() - totalFee
-			: undefined;
-
-	let parsedSendAmountAfterFee: number | undefined;
-	$: parsedSendAmountAfterFee = nonNullish(sendAmountAfterFee)
-		? formatTokenBigintToNumber({
-				value: sendAmountAfterFee,
-				unitName: $destinationToken.decimals,
-				displayDecimals: $destinationToken.decimals
-			})
-		: undefined;
-
-	$: receiveAmount =
-		insufficientFunds || isNullish(parsedSendAmountAfterFee)
-			? undefined
-			: Math.max(parsedSendAmountAfterFee, 0);
+	// receiveAmount will always be equal to sendAmount unless there are some fees on the receiver end (future case)
+	$: receiveAmount = insufficientFunds || isNullish(sendAmount) ? undefined : Number(sendAmount);
 
 	let receiveAmountUSD: number;
 	$: receiveAmountUSD =
@@ -58,7 +36,7 @@
 	</span>
 
 	<span slot="balance" data-tid="convert-amount-destination-balance">
-		{$i18n.convert.text.available_balance}:
+		{$i18n.send.text.balance}:
 		{formatToken({
 			value: $destinationTokenBalance ?? ZERO,
 			unitName: $destinationToken.decimals

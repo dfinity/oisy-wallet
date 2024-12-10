@@ -353,7 +353,6 @@ interface I18nConvert {
 		input_reset_button: string;
 		swap_to_token: string;
 		review: string;
-		available_balance: string;
 		max_balance: string;
 		review_tokens_info_title: string;
 		amount_to_convert: string;
@@ -365,6 +364,7 @@ interface I18nConvert {
 		initializing: string;
 		refreshing_ui: string;
 		unsupported_token_conversion: string;
+		calculating_max_amount: string;
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
@@ -703,6 +703,7 @@ interface I18nLicense_agreement {
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string };
+	warning: { no_index_canister: string };
 }
 
 interface I18n {
