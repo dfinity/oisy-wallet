@@ -7,7 +7,7 @@ import {
 } from '$env/networks.sol.env';
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
-import { enabledSolanaNetworks } from '$sol/schema/network.derived';
+import { enabledSolanaNetworks } from '$sol/derived/network.derived';
 import { get } from 'svelte/store';
 
 describe('network.derived', () => {
