@@ -5,6 +5,7 @@ import {
 } from '$icp/schema/ic-token.schema';
 import type { IcCanistersStrict, IcCkToken, IcToken } from '$icp/types/ic-token';
 import type { Token } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 
 export const isIcToken = (token: Token): token is IcToken => {
 	const { success } = IcTokenSchema.safeParse(token);
@@ -29,3 +30,8 @@ export const isIcCkToken = (token: Token): token is IcCkToken => {
 
 export const isNotIcCkToken = (token: Token): token is Exclude<Token, IcCkToken> =>
 	!isIcCkToken(token);
+
+export const hasIndexCanister = (token: IcToken): boolean =>
+	nonNullish(token) && isIcTokenCanistersStrict(token);
+
+export const hasNoIndexCanister = (token: IcToken): boolean => !hasIndexCanister(token);
