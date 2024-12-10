@@ -1,6 +1,6 @@
-import { get } from 'svelte/store';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { get } from 'svelte/store';
 
 export const doPreNavigation = (cancel: () => void, busy: boolean) => {
 	if (busy) {
@@ -13,4 +13,4 @@ export const doPreNavigation = (cancel: () => void, busy: boolean) => {
 	} else {
 		modalStore.close();
 	}
-}
+};
