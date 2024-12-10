@@ -39,6 +39,7 @@
 		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
 
 		temporaryHiddenDappsIds = [...temporaryHiddenDappsIds, dappId];
+		hiddenDappsIds = [...hiddenDappsIds, dappId]
 
 		dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
 
