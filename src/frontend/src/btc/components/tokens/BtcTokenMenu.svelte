@@ -18,6 +18,7 @@
 				href={explorerUrl}
 				ariaLabel={$i18n.tokens.alt.open_blockstream}
 				iconVisible={false}
+				testId="btc-explorer-link"
 			>
 				{$i18n.navigation.text.view_on_explorer}
 			</ExternalLink>

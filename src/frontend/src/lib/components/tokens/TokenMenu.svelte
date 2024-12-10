@@ -36,7 +36,7 @@
 </script>
 
 <button
-	data-tid={testId}
+	data-tid={`${testId}-button`}
 	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	bind:this={button}
 	on:click={() => (visible = true)}

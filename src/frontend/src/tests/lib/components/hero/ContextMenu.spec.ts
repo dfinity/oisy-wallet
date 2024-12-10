@@ -5,9 +5,13 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 
 describe('ContextMenu', () => {
-	const ethTokenMenuButtonSelector = 'button[data-tid="eth-token-menu"]';
-	const btcTokenMenuButtonSelector = 'button[data-tid="btc-token-menu"]';
-	const icTokenMenuButtonSelector = 'button[data-tid="ic-token-menu"]';
+	const icTokenMenuButtonSelector = 'button[data-tid="ic-token-menu-button"]';
+	const ethTokenMenuButtonSelector = 'button[data-tid="eth-token-menu-button"]';
+	const btcTokenMenuButtonSelector = 'button[data-tid="btc-token-menu-button"]';
+
+	beforeEach(() => {
+		mockPage.reset();
+	});
 
 	it('renders the ic token menu', () => {
 		mockPage.mock({ network: ICP_NETWORK.id.description });
