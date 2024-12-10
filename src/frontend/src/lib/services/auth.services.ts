@@ -115,6 +115,11 @@ const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
 };
 
+// eslint-disable-next-line require-await
+const clearSessionStorage = async () => {
+	sessionStorage.clear();
+};
+
 const logout = async ({
 	msg = undefined,
 	clearStorages = true,
@@ -128,7 +133,12 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption()]);
+		await Promise.all([
+			emptyIdbBtcAddressMainnet(),
+			emptyIdbEthAddress(),
+			clearTestnetsOption(),
+			clearSessionStorage()
+		]);
 	}
 
 	await authStore.signOut();
