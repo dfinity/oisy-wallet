@@ -20,6 +20,7 @@
 
 	export let dAppDescription: OisyDappDescription;
 	$: ({
+		id: dappId,
 		website,
 		screenshots,
 		twitter,
@@ -141,7 +142,7 @@
 					})}
 					styleClass="as-button primary padding-sm flex-1 flex-row-reverse"
 					href={websiteURL.toString()}
-					trackEventName={TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK}
+					trackEventParams={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
 					>{callToAction ??
 						replacePlaceholders($i18n.dapps.text.open_dapp, {
 							$dAppName: dAppName

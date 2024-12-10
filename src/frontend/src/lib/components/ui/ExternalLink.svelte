@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import type { TrackEventParams } from '$lib/types/analytics';
 
 	export let href: string;
 	export let ariaLabel: string;
@@ -11,14 +12,14 @@
 	export let color: 'blue' | 'inherit' = 'inherit';
 	export let fullWidth = false;
 	export let styleClass = '';
-	export let trackEventName: string | undefined = undefined;
+	export let trackEventParams: TrackEventParams | undefined = undefined;
 
 	const onClick = async () => {
-		if (isNullish(trackEventName)) {
+		if (isNullish(trackEventParams)) {
 			return;
 		}
 
-		await trackEvent({ name: trackEventName, metadata: { url: href } });
+		await trackEvent(trackEventParams);
 	};
 </script>
 
