@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { explorerUrl as explorerUrlStore } from '$btc/derived/network.derived';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
-	import { explorerUrl as explorerUrlStore } from '$btc/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString($btcAddressMainnet)
