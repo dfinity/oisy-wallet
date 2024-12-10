@@ -10,7 +10,6 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_CAROUSEL_NEXT,
-		TRACK_COUNT_CAROUSEL_OPEN,
 		TRACK_COUNT_CAROUSEL_PREVIOUS
 	} from '$lib/constants/analytics.contants';
 
