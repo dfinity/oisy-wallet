@@ -236,8 +236,8 @@
 		>
 	</button>
 {:else}
-	<div class="tokens flex flex-col overflow-y-hidden md:max-h-[26rem]">
-		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain pl-4 pr-2 pt-1">
+	<div class="tokens flex flex-col overflow-y-hidden sm:max-h-[26rem]">
+		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain">
 			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 				<Card>
 					<TokenName data={token} />
