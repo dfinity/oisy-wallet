@@ -624,6 +624,7 @@ interface I18nTransactions {
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
 		unexpected_transaction_for_hash: string;
+		auto_enable_token: string;
 	};
 }
 
