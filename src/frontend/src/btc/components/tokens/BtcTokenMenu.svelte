@@ -13,7 +13,7 @@
 		: undefined;
 </script>
 
-<TokenMenu>
+<TokenMenu testId="btc-token-menu">
 	{#if nonNullish(explorerUrl)}
 		<div in:fade>
 			<ExternalLink

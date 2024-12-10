@@ -14,7 +14,7 @@
 	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;
 </script>
 
-<TokenMenu>
+<TokenMenu testId="ic-token-menu">
 	{#if nonNullish(transactionsExplorerUrl)}
 		<div in:fade>
 			<ExternalLink
