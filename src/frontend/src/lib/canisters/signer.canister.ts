@@ -197,7 +197,7 @@ export class SignerCanister extends Canister<SignerService> {
 		throw mapSignerCanisterSendBtcError(response.Err);
 	};
 
-	getSchnorrPublicKey = async (derivationPath: string[]): Promise<number[]> => {
+	getSchnorrPublicKey = async (derivationPath: string[]): Promise<Uint8Array | number[]> => {
 		const { schnorr_public_key } = this.caller({
 			certified: true
 		});
@@ -214,7 +214,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		if ('Ok' in response) {
 			const { public_key } = response.Ok[0];
-			return Array.from(public_key);
+			return public_key;
 		}
 
 		// TODO: map error like the other methods when SchnorrPublicKeyError is exposed in the Signer repo
