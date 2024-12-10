@@ -37,6 +37,7 @@ interface I18nNavigation {
 		source_code: string;
 		changelog: string;
 		submit_ticket: string;
+		confirm_navigate: string;
 	};
 	alt: {
 		tokens: string;
