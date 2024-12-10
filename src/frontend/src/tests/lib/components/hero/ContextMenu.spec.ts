@@ -1,8 +1,8 @@
-import { render } from '@testing-library/svelte';
-import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
-import { mockPage } from '$tests/mocks/page.store.mock';
-import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { BTC_MAINNET_NETWORK, ICP_NETWORK } from '$env/networks.env';
+import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+import { mockPage } from '$tests/mocks/page.store.mock';
+import { render } from '@testing-library/svelte';
 
 describe('ContextMenu', () => {
 	const ethTokenMenuButtonSelector = 'button[data-tid="eth-token-menu"]';
