@@ -9,7 +9,7 @@ describe('ModalExitHandler', () => {
 
 		expect(get(modalStore)).toEqual({ type: 'icp-receive', id });
 
-		doPreNavigation(() => {}, false);
+		doPreNavigation({cancel: () => {}, busy: false});
 
 		expect(get(modalStore)).toBeNull();
 	});
@@ -22,7 +22,7 @@ describe('ModalExitHandler', () => {
 
 		const confirmMessageSpy = vi.spyOn(window, 'confirm').mockImplementation(() => true);
 
-		doPreNavigation(() => {}, true);
+		doPreNavigation({cancel: () => {}, busy: true});
 
 		expect(confirmMessageSpy).toHaveBeenCalled();
 		expect(get(modalStore)).toBeNull();
@@ -36,7 +36,7 @@ describe('ModalExitHandler', () => {
 
 		const confirmMessageSpy = vi.spyOn(window, 'confirm').mockImplementation(() => false);
 		const cancelSpy = vi.fn();
-		doPreNavigation(cancelSpy, true);
+		doPreNavigation({cancel: cancelSpy, busy: true});
 
 		expect(confirmMessageSpy).toHaveBeenCalled();
 		expect(cancelSpy).toHaveBeenCalled();
