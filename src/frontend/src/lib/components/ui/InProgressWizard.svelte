@@ -15,15 +15,10 @@
 	export let steps: ProgressSteps;
 	export let warningType: 'transaction' | 'manage' = 'transaction';
 
-	const startConfirmToClose = () => {
-		dirtyWizardState.set(true);
-		confirmToCloseBrowser(true);
-	};
+	const startConfirmToClose = () => dirtyWizardState.set(true);
+	const stopConfirmToClose = () => dirtyWizardState.set(false);
 
-	const stopConfirmToClose = () => {
-		dirtyWizardState.set(false);
-		confirmToCloseBrowser(false);
-	};
+	$: confirmToCloseBrowser($dirtyWizardState);
 
 	onMount(startConfirmToClose);
 	onDestroy(stopConfirmToClose);

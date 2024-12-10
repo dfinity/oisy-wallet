@@ -5,12 +5,10 @@ import { get } from 'svelte/store';
 export const doPreNavigation = ({ cancel, busy }: { cancel: () => void; busy: boolean }) => {
 	if (busy) {
 		const userConfirmed = window.confirm(get(i18n).navigation.text.confirm_navigate);
-		if (userConfirmed) {
-			modalStore.close();
-		} else {
+		if (!userConfirmed) {
 			cancel();
+			return;
 		}
-	} else {
-		modalStore.close();
 	}
+	modalStore.close();
 };
