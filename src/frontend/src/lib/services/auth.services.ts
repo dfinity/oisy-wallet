@@ -117,7 +117,7 @@ const clearTestnetsOption = async () => {
 
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
-}
+};
 
 const logout = async ({
 	msg = undefined,
@@ -132,7 +132,12 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption(), clearSessionStorage()]);
+		await Promise.all([
+			emptyIdbBtcAddressMainnet(),
+			emptyIdbEthAddress(),
+			clearTestnetsOption(),
+			clearSessionStorage()
+		]);
 	}
 
 	await authStore.signOut();
