@@ -249,6 +249,32 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
+	const SchnorrAlgorithm = IDL.Variant({
+		ed25519: IDL.Null,
+		bip340secp256k1: IDL.Null
+	});
+	const SchnorrKeyId = IDL.Record({
+		algorithm: SchnorrAlgorithm,
+		name: IDL.Text
+	});
+	const SchnorrPublicKeyArgument = IDL.Record({
+		key_id: SchnorrKeyId,
+		canister_id: IDL.Opt(IDL.Principal),
+		derivation_path: IDL.Vec(IDL.Vec(IDL.Nat8))
+	});
+	const Result_8 = IDL.Variant({
+		Ok: IDL.Tuple(EcdsaPublicKeyResponse),
+		Err: EthAddressError
+	});
+	const SignWithSchnorrArgument = IDL.Record({
+		key_id: SchnorrKeyId,
+		derivation_path: IDL.Vec(IDL.Vec(IDL.Nat8)),
+		message: IDL.Vec(IDL.Nat8)
+	});
+	const Result_9 = IDL.Variant({
+		Ok: IDL.Tuple(SignWithEcdsaResponse),
+		Err: EthAddressError
+	});
 	return IDL.Service({
 		btc_caller_address: IDL.Func([GetAddressRequest, IDL.Opt(PaymentType)], [Result], []),
 		btc_caller_balance: IDL.Func([GetBalanceRequest, IDL.Opt(PaymentType)], [Result_1], []),
@@ -274,7 +300,9 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		http_request: IDL.Func([HttpRequest], [HttpResponse])
+		http_request: IDL.Func([HttpRequest], [HttpResponse]),
+		schnorr_public_key: IDL.Func([SchnorrPublicKeyArgument, IDL.Opt(PaymentType)], [Result_8], []),
+		schnorr_sign: IDL.Func([SignWithSchnorrArgument, IDL.Opt(PaymentType)], [Result_9], [])
 	});
 };
 // @ts-ignore
