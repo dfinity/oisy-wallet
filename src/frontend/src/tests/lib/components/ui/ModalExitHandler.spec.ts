@@ -1,13 +1,9 @@
-import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 import { modalStore } from '$lib/stores/modal.store';
 import { doPreNavigation } from '$lib/utils/before-navigate.utils';
-import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('ModalExitHandler', () => {
 	it('closes modal on navigation', () => {
-		render(ModalExitHandler);
-
 		const id = Symbol('modalId');
 		modalStore.openIcpReceive(id);
 
@@ -19,8 +15,6 @@ describe('ModalExitHandler', () => {
 	});
 
 	it('closes busy modal on navigation', () => {
-		render(ModalExitHandler);
-
 		const id = Symbol('modalId');
 		modalStore.openIcpReceive(id);
 
@@ -35,8 +29,6 @@ describe('ModalExitHandler', () => {
 	});
 
 	it('cancels navigation while navigating away from busy modal', () => {
-		render(ModalExitHandler);
-
 		const id = Symbol('modalId');
 		modalStore.openIcpReceive(id);
 
