@@ -27,6 +27,9 @@ export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open_co
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code_count';
 export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect_count';
 
+// dApps
+export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink_count';
+
 // Carousel
 export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next_count';
 export const TRACK_COUNT_CAROUSEL_PREVIOUS = 'carousel_previous_count';
