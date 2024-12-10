@@ -143,7 +143,7 @@ div.modal {
 		--padding: 0;
 		--dialog-padding-y: 0;
 
-		@apply border-b border-secondary sm:!pt-6 sm:!px-4 !pb-4 !px-2 !pt-4;
+		@apply border-b border-secondary sm:!pt-6 sm:!px-4 !pb-4 !px-2 !pt-4 items-center;
 
 		--color-grey: rgba(0, 0, 0, 0.05);
 
