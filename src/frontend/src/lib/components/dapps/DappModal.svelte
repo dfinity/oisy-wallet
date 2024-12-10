@@ -142,7 +142,7 @@
 					})}
 					styleClass="as-button primary padding-sm flex-1 flex-row-reverse"
 					href={websiteURL.toString()}
-					trackEventParams={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
+					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
 					>{callToAction ??
 						replacePlaceholders($i18n.dapps.text.open_dapp, {
 							$dAppName: dAppName
