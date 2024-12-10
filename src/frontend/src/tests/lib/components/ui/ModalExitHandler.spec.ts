@@ -4,7 +4,7 @@ import { doPreNavigation } from '$lib/utils/before-navigate.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-describe('ModalExitHandler', async () => {
+describe('ModalExitHandler', () => {
 	it('closes modal on navigation', () => {
 		render(ModalExitHandler);
 
