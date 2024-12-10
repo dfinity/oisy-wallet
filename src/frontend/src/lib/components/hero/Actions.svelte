@@ -16,7 +16,6 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
-	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -42,9 +41,6 @@
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
-
-	let sendAction = true;
-	$: sendAction = !$allBalancesZero || isTransactionsPage;
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
@@ -59,9 +55,7 @@
 			<Receive />
 		{/if}
 
-		{#if sendAction}
-			<Send {isTransactionsPage} />
-		{/if}
+		<Send {isTransactionsPage} />
 
 		{#if isTransactionsPage}
 			{#if convertEth}
