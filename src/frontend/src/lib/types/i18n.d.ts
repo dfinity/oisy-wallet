@@ -448,6 +448,7 @@ interface I18nTokens {
 	alt: {
 		context_menu: string;
 		open_etherscan: string;
+		open_blockstream: string;
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
 		token_group_number: string;

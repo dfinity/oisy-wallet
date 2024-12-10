@@ -20,7 +20,7 @@
 				: undefined;
 </script>
 
-<TokenMenu>
+<TokenMenu testId="eth-token-menu">
 	{#if nonNullish(explorerUrl) && $erc20UserTokensInitialized}
 		<div in:fade>
 			<ExternalLink
