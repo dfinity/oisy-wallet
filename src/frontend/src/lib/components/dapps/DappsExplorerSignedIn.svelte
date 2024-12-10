@@ -32,7 +32,7 @@
 <PageTitle>{$i18n.dapps.text.title}</PageTitle>
 
 {#if nonNullish(featuredDapp) && nonNullish(featuredDapp.screenshots)}
-	<div class="mb-10">
+	<div class="mb-6 md:mb-10">
 		<DappPromoBanner
 			on:click={() => modalStore.openDappDetails(featuredDapp)}
 			dAppDescription={featuredDapp}
@@ -40,7 +40,7 @@
 	</div>
 {/if}
 
-<div class="flex flex-wrap gap-4">
+<div class="no-scrollbar flex gap-4 overflow-x-auto p-1 md:flex-wrap md:p-0">
 	<Button
 		paddingSmall
 		ariaLabel={$i18n.dapps.alt.show_all}
@@ -60,7 +60,7 @@
 	{/each}
 </div>
 
-<ul class="mt-10 grid list-none grid-cols-1 gap-x-4 gap-y-10 md:grid-cols-3">
+<ul class="mt-10 grid list-none grid-cols-2 flex-row gap-x-4 gap-y-10 md:grid-cols-3">
 	{#each filteredDapps as dApp}
 		<li class="flex" in:fade>
 			<DappCard
@@ -74,3 +74,11 @@
 </ul>
 
 <SubmitDappButton />
+
+<style lang="postcss">
+	@media (max-width: 360px) {
+		ul {
+			@apply grid-cols-1;
+		}
+	}
+</style>
