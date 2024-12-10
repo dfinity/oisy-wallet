@@ -5,6 +5,55 @@ on:
   workflow_dispatch:
 
 jobs:
+  format:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+      - name: Check if commits can be added
+        id: check_can_add_commit
+        run: |
+          echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
+      - name: Checkout
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Checkout
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
+        uses: actions/checkout@v4
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Format
+        run: npm run format
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Commit format
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: .
+          default_author: github_actions
+          message: '🤖 Apply formatting changes'
+      - name: Fail for formatting issues without personal access token
+        if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
+        run: |
+          echo "Formatting changes are needed but couldn't be committed because the personal access token isn't available or this isn't a pull request."
+          exit 1
+
   lint:
     runs-on: ubuntu-24.04
 
@@ -24,7 +73,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Prepare
         uses: ./.github/actions/prepare
-      - name: Lint
+      - name: Check
         run: npm run check
 
   test:
@@ -40,12 +89,12 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['lint', 'check', 'test']
+    needs: ['format', 'lint', 'check', 'test']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
         run: |
-          if [ "${{ needs.lint.result }}" == "success" ] && [ "${{ needs.check.result }}" == "success" ] && [ "${{ needs.test.result }}" == "success" ]; then
+          if [ "${{ needs.format.result }}" == "success" ] && [ "${{ needs.lint.result }}" == "success" ] && [ "${{ needs.check.result }}" == "success" ] && [ "${{ needs.test.result }}" == "success" ]; then
             echo "This PR is cleared for merging"
           else
             echo "This PR is not cleared for merging"
