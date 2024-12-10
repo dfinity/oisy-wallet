@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
+	import { trackEvent } from '$lib/services/analytics.services';
 
 	export let href: string;
 	export let ariaLabel: string;
@@ -9,6 +11,15 @@
 	export let color: 'blue' | 'inherit' = 'inherit';
 	export let fullWidth = false;
 	export let styleClass = '';
+	export let trackEventName: string | undefined = undefined;
+
+	const onClick = async () => {
+		if (isNullish(trackEventName)) {
+			return;
+		}
+
+		await trackEvent({ name: trackEventName, metadata: { url: href } });
+	};
 </script>
 
 <a
@@ -24,6 +35,7 @@
 	class:hover:text-brand-primary={color === 'inherit'}
 	class:active:text-brand-primary={color === 'inherit'}
 	class:w-full={fullWidth}
+	on:click={onClick}
 >
 	{#if iconVisible}
 		<IconExternalLink size={iconSize} />

@@ -26,3 +26,6 @@ export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
 export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open_count';
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code_count';
 export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect_count';
+
+// dApps
+export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink_count';
