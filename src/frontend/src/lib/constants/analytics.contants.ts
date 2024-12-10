@@ -26,3 +26,9 @@ export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
 export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open_count';
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code_count';
 export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect_count';
+
+// Carousel
+export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next_count';
+export const TRACK_COUNT_CAROUSEL_PREVIOUS = 'carousel_previous_count';
+export const TRACK_COUNT_CAROUSEL_CLOSE = 'carousel_close_count';
+export const TRACK_COUNT_CAROUSEL_OPEN = 'carousel_open_count';
