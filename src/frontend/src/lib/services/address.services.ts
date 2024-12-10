@@ -40,14 +40,14 @@ import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-interface LoadTokenAddressParams<T extends Address> {
+export interface LoadTokenAddressParams<T extends Address> {
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	setIdbAddress: ((params: SetIdbAddressParams<T>) => Promise<void>) | null;
 	addressStore: AddressStore<T>;
 }
 
-const loadTokenAddress = async <T extends Address>({
+export const loadTokenAddress = async <T extends Address>({
 	tokenId,
 	getAddress,
 	setIdbAddress,
