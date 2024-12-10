@@ -4,14 +4,14 @@
 	import { slide } from 'svelte/transition';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
-	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
-	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
-	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_CAROUSEL_NEXT,
 		TRACK_COUNT_CAROUSEL_PREVIOUS
 	} from '$lib/constants/analytics.contants';
+	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
 	export let autoplay = 5000;
 	export let duration = 300;

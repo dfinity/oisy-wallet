@@ -2,15 +2,15 @@
 	import { createEventDispatcher } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_CAROUSEL_CLOSE,
 		TRACK_COUNT_CAROUSEL_OPEN
 	} from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
 	$: ({
