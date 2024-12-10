@@ -86,6 +86,15 @@ export const sendBtc = async ({
 	return sendBtc(params);
 };
 
+export const getSchnorrPublicKey = async ({
+	identity,
+	derivationPath
+}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array | number[]> => {
+	const { getSchnorrPublicKey } = await signerCanister({ identity });
+
+	return await getSchnorrPublicKey(derivationPath);
+};
+
 const signerCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
