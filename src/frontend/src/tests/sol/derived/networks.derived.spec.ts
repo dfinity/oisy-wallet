@@ -7,10 +7,10 @@ import {
 } from '$env/networks.sol.env';
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
-import { enabledSolanaNetworks } from '$sol/derived/network.derived';
+import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 import { get } from 'svelte/store';
 
-describe('network.derived', () => {
+describe('networks.derived', () => {
 	describe('enabledSolanaNetworks', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
