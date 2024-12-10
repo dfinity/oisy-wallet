@@ -40,7 +40,8 @@
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"submit_ticket": "Submit a ticket"
+			"submit_ticket": "Submit a ticket",
+			"confirm_navigate": "Are you sure you want to navigate away?"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",

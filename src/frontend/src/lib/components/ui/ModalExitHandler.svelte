@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-</script>
+	import { beforeNavigate } from '$app/navigation';
+	import { dirtyWizardState } from '$lib/stores/progressWizardState.store';
+	import { doPreNavigation } from '$lib/utils/before-navigate.utils';
 
-<svelte:window on:popstate={modalStore.close} />
+	beforeNavigate(({ cancel }) => doPreNavigation({ cancel, busy: $dirtyWizardState }));
+</script>
