@@ -17,7 +17,7 @@ export const SOLANA_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_MAINNE
 export const SOLANA_MAINNET_NETWORK: SolNetwork = {
 	id: SOLANA_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Solana Mainnet Beta',
+	name: 'Solana',
 	// TODO: Add the correct icons
 	icon: sol,
 	iconBW: solMainnetIconBW,

@@ -1,5 +1,6 @@
 import {
 	SOLANA_DEVNET_NETWORK,
+	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks.sol.env';
@@ -63,7 +64,7 @@ export const SOLANA_LOCAL_TOKEN_ID: TokenId = parseTokenId(SOLANA_LOCAL_SYMBOL);
 
 export const SOLANA_LOCAL_TOKEN: Token = {
 	id: SOLANA_LOCAL_TOKEN_ID,
-	network: SOLANA_DEVNET_NETWORK,
+	network: SOLANA_LOCAL_NETWORK,
 	standard: 'solana',
 	category: 'default',
 	name: 'Solana (Local)',
