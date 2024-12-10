@@ -17,8 +17,16 @@
 
 	export let styleClass: string | undefined = undefined;
 
+	// It may happen that the user's settings are refreshed before having been updated.
+	// But for that small instant of time, we could still show the dApp.
+	// To avoid this glitch we store the dApp id in a temporary array, and we add it to the hidden dApps ids.
+	let temporaryHiddenDappsIds: OisyDappDescription['id'][] = [];
+
 	let hiddenDappsIds: OisyDappDescription['id'][];
-	$: hiddenDappsIds = $userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? [];
+	$: hiddenDappsIds = [
+		...($userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? []),
+		...temporaryHiddenDappsIds
+	];
 
 	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
 	$: dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
@@ -30,6 +38,7 @@
 	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
 		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
 
+		temporaryHiddenDappsIds = [...temporaryHiddenDappsIds, dappId];
 		hiddenDappsIds = [...hiddenDappsIds, dappId];
 
 		dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
