@@ -1,3 +1,4 @@
+import type { SchnorrKeyId } from '$declarations/signer/signer.did';
 import { BETA, PROD, STAGING } from '$lib/constants/app.constants';
 
 // According to:
@@ -5,7 +6,7 @@ import { BETA, PROD, STAGING } from '$lib/constants/app.constants';
 // https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/signing-messages-t-schnorr#signing-messages
 const SIGNER_ROOT_KEY_NAME = PROD || BETA ? 'key_1' : STAGING ? 'test_key_1' : 'dfx_test_key';
 
-export const SCHNORR_KEY_ID = {
+export const SCHNORR_KEY_ID: SchnorrKeyId = {
 	algorithm: { ed25519: null },
 	name: SIGNER_ROOT_KEY_NAME
 };
