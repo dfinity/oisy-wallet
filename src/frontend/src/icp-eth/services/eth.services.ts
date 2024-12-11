@@ -1,7 +1,7 @@
 import {
 	CKERC20_HELPER_CONTRACT_SIGNATURE,
 	CKETH_HELPER_CONTRACT_SIGNATURE
-} from '$env/networks.cketh.env';
+} from '$env/networks/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';

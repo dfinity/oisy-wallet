@@ -29,6 +29,7 @@ const config = {
 			$btc: './src/frontend/src/btc',
 			$eth: './src/frontend/src/eth',
 			$icp: './src/frontend/src/icp',
+			$sol: './src/frontend/src/sol',
 			'$icp-eth': './src/frontend/src/icp-eth',
 			$env: './src/frontend/src/env'
 		},
