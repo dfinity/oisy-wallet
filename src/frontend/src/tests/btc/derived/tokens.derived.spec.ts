@@ -1,5 +1,5 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-import * as btcEnv from '$env/networks.btc.env';
+import * as btcEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,

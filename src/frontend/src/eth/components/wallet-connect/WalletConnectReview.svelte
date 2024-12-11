@@ -11,6 +11,7 @@
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -45,65 +46,71 @@
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
-	<div class="stretch" in:fade>
-		<p class="mb-0 font-bold">
-			{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}
-		</p>
-		<p class="mb-0">{params.proposer.metadata.description}</p>
-		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
-			>{params.proposer.metadata.url}</a
-		>
+	<ContentWithToolbar>
+		<div class="stretch" in:fade>
+			<p class="mb-0 font-bold">
+				{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}
+			</p>
+			<p class="mb-0">{params.proposer.metadata.description}</p>
+			<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
+				>{params.proposer.metadata.url}</a
+			>
 
-		<WalletConnectDomainVerification {proposal} />
+			<WalletConnectDomainVerification {proposal} />
 
-		{#each Object.entries(params.requiredNamespaces) as [key, value]}
-			{@const allMethods = value.methods}
-			{@const allEvents = value.events}
+			{#each Object.entries(params.requiredNamespaces) as [key, value]}
+				{@const allMethods = value.methods}
+				{@const allEvents = value.events}
 
-			{#each value.chains ?? [] as chainId}
-				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
+				{#each value.chains ?? [] as chainId}
+					{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
-				<p class="mt-6 font-bold">
-					{replacePlaceholders($i18n.wallet_connect.text.review, {
-						$chain_name: chainName,
-						$key: key
-					})}:
-				</p>
+					<p class="mt-6 font-bold">
+						{replacePlaceholders($i18n.wallet_connect.text.review, {
+							$chain_name: chainName,
+							$key: key
+						})}:
+					</p>
 
-				<article class="mt-4 rounded-sm bg-dust p-4">
-					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
+					<article class="mt-4 rounded-sm bg-dust p-4">
+						<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
-					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
+						<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
 
-					<p class="mt-4 font-bold">{$i18n.wallet_connect.text.events}:</p>
+						<p class="mt-4 font-bold">{$i18n.wallet_connect.text.events}:</p>
 
-					<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
-				</article>
+						<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
+					</article>
+				{/each}
 			{/each}
-		{/each}
-	</div>
+		</div>
 
-	<div in:fade>
-		<WalletConnectActions {approve} on:icApprove on:icReject />
-	</div>
+		<div in:fade slot="toolbar">
+			<WalletConnectActions {approve} on:icApprove on:icReject />
+		</div>
+	</ContentWithToolbar>
 {:else}
-	<div class="stretch">
-		<div class="flex h-[100%] min-h-[30vh] flex-col items-center justify-center gap-2 pt-8">
-			<div>
-				<Spinner inline />
+	<ContentWithToolbar>
+		<div class="stretch">
+			<div class="flex h-[100%] min-h-[30vh] flex-col items-center justify-center gap-2 pt-8">
+				<div>
+					<Spinner inline />
+				</div>
+				<p>{$i18n.wallet_connect.text.connecting}</p>
 			</div>
-			<p>{$i18n.wallet_connect.text.connecting}</p>
 		</div>
-	</div>
 
-	{#if displayCancel}
-		<div class="mt-8" in:fade>
-			<ButtonGroup>
-				<ButtonCancel
-					on:click={() => dispatch('icCancel')}
-					disabled={$isBusy || $ethAddressNotCertified}
-				/>
-			</ButtonGroup>
-		</div>
-	{/if}
+		<svelte:fragment slot="toolbar">
+			{#if displayCancel}
+				<div in:fade>
+					<ButtonGroup>
+						<ButtonCancel
+							on:click={() => dispatch('icCancel')}
+							disabled={$isBusy || $ethAddressNotCertified}
+						/>
+					</ButtonGroup>
+				</div>
+			{/if}
+		</svelte:fragment>
+	</ContentWithToolbar>
 {/if}
