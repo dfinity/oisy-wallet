@@ -2,7 +2,7 @@ import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
-} from '$env/networks.sol.env';
+} from '$env/networks/networks.sol.env';
 import { loadLamportsBalance, loadSolBalance } from '$sol/services/sol-balance.services';
 import type { SolNetwork } from '$sol/types/network';
 import { mockSolAddress } from '$tests/mocks/sol.mock';

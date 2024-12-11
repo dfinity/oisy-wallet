@@ -4,7 +4,7 @@ import {
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_NETWORK_ENABLED,
 	SOLANA_TESTNET_NETWORK
-} from '$env/networks.sol.env';
+} from '$env/networks/networks.sol.env';
 import { LOCAL } from '$lib/constants/app.constants';
 import { testnets } from '$lib/derived/testnets.derived';
 import type { SolNetwork } from '$sol/types/network';

@@ -1,4 +1,4 @@
-import { SOLANA_NETWORK_ENABLED } from '$env/networks.sol.env';
+import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_TOKEN,
 	SOLANA_LOCAL_TOKEN,

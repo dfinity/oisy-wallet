@@ -2,7 +2,7 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
-} from '$env/networks.sol.env';
+} from '$env/networks/networks.sol.env';
 import {
 	setIdbSolAddressDevnet,
 	setIdbSolAddressLocal,

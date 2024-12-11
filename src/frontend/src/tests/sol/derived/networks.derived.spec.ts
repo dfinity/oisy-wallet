@@ -1,10 +1,10 @@
-import * as solEnv from '$env/networks.sol.env';
+import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
-} from '$env/networks.sol.env';
+} from '$env/networks/networks.sol.env';
 import * as appContants from '$lib/constants/app.constants';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
