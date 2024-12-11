@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import type { IcCanisters, IcToken } from '$icp/types/ic-token';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';

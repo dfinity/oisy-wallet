@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import {
 	ETHERSCAN_API_URL_HOMESTEAD,
 	ETHERSCAN_API_URL_SEPOLIA

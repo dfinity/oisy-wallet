@@ -1,5 +1,5 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICP_NETWORK } from '$env/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.env';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import * as agent from '$lib/actors/agents.ic';

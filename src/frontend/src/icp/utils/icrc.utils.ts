@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
 import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';

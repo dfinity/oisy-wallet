@@ -5,7 +5,7 @@ import {
 	ICP_NETWORK,
 	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK
-} from '$env/networks.env';
+} from '$env/networks/networks.env';
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
 import type { OnramperNetworkWallet, OnramperWalletAddress } from '$lib/types/onramper';
 import type { Option } from '$lib/types/utils';

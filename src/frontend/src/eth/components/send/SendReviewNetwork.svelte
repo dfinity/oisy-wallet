@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens/tokens.erc20.env';
 	import icpDark from '$eth/assets/icp_dark.svg';
 	import type { Erc20Token } from '$eth/types/erc20';

@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';

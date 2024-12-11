@@ -6,7 +6,7 @@
 		BTC_TESTNET_NETWORK,
 		ETHEREUM_NETWORK,
 		ICP_NETWORK
-	} from '$env/networks.env';
+	} from '$env/networks/networks.env';
 	import {
 		BTC_MAINNET_TOKEN,
 		BTC_REGTEST_TOKEN,

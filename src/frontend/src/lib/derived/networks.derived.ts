@@ -1,5 +1,5 @@
 import { enabledBitcoinNetworks } from '$btc/derived/networks.derived';
-import { ICP_NETWORK } from '$env/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import type { Network } from '$lib/types/network';
 import { derived, type Readable } from 'svelte/store';

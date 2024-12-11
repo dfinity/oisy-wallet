@@ -1,4 +1,8 @@
-import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	ETHEREUM_NETWORK_ID,
+	ICP_NETWORK_ID
+} from '$env/networks/networks.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';

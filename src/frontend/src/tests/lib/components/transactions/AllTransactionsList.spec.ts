@@ -1,7 +1,7 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-import * as networkEnv from '$env/networks.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
+import * as networkEnv from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';

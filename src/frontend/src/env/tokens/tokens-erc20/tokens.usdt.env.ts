@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK } from '$env/networks.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
 import usdt from '$eth/assets/usdt.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';

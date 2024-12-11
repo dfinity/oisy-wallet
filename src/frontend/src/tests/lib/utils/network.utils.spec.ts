@@ -1,4 +1,4 @@
-import * as networkEnv from '$env/networks.env';
+import * as networkEnv from '$env/networks/networks.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -8,7 +8,7 @@ import {
 	ICP_NETWORK,
 	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks.env';
+} from '$env/networks/networks.env';
 import type { NetworkId } from '$lib/types/network';
 import {
 	isNetworkICP,

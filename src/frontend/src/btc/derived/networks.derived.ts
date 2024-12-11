@@ -1,5 +1,9 @@
-import { BTC_MAINNET_NETWORK, BTC_REGTEST_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks.env';
 import { BTC_MAINNET_ENABLED } from '$env/networks/networks.btc.env';
+import {
+	BTC_MAINNET_NETWORK,
+	BTC_REGTEST_NETWORK,
+	BTC_TESTNET_NETWORK
+} from '$env/networks/networks.env';
 import { LOCAL } from '$lib/constants/app.constants';
 import { testnets } from '$lib/derived/testnets.derived';
 import type { Network } from '$lib/types/network';

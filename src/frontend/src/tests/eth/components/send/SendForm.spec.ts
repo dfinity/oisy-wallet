@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK } from '$env/networks.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import SendForm from '$eth/components/send/SendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
