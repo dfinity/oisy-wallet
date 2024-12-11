@@ -30,25 +30,109 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Token } from '$lib/types/token';
 	import { parseTokenId } from '$lib/validation/token.validation';
+	import type { Token } from '$lib/types/token';
 
 	let icrcEnvTokens: IcrcCustomToken[] = [];
 	let isLoading = false;
-	let tokenAutoEnabled = false;
+	let attemptedAutoEnableToken = false;
 
 	onMount(() => {
-		icrcEnvTokens = (buildIcrcCustomTokens()?.map((token) => ({
-			...token,
-			id: parseTokenId(token.symbol),
-			enabled: false
-		})) ?? []);
+		const tokens = buildIcrcCustomTokens();
+		icrcEnvTokens =
+			tokens?.map((token) => ({
+				...token,
+				id: parseTokenId(token.symbol),
+				enabled: false
+			})) ?? [];
 	});
 
-	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
+	let tokensLoaded = false;
+	$: tokensLoaded = [
+		$erc20Tokens,
+		$icrcTokens,
+		icrcEnvTokens,
+		$enabledBitcoinTokens,
+		$enabledEthereumTokens
+	].every((tokens) => tokens.length > 0);
+
+	let shouldEnableToken = false;
+	$: shouldEnableToken =
+		isNullish($pageToken) && nonNullish($routeToken) && nonNullish($routeNetwork);
+
+	const enableToken = async (token: Token, identity: Identity) => {
+		try {
+			if (icTokenErc20UserToken(token)) {
+				await setManyUserTokens({
+					identity,
+					tokens: [toUserToken({ ...token, enabled: true })],
+					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+				});
+				await loadUserTokens({ identity });
+			} else if (icTokenIcrcCustomToken(token)) {
+				await setManyCustomTokens({
+					identity,
+					tokens: [toCustomToken({ ...token, enabled: true })],
+					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+				});
+				await loadCustomTokens({ identity });
+			} else {
+				throw new Error('Unknown token type. Token cannot be enabled.');
+			}
+		} catch (error) {
+			console.error('Error enabling token:', error);
+			throw error;
+		}
+	};
+
+	const findAndEnableToken = async () => {
+		if (!shouldEnableToken) return;
+
+		const allTokens = [
+			ICP_TOKEN,
+			...$enabledBitcoinTokens,
+			...$enabledEthereumTokens,
+			...$erc20Tokens,
+			...allIcrcTokens
+		];
+
+		const foundToken = allTokens.find(
+			(token) =>
+				(token.symbol === $routeToken || token.name === $routeToken) &&
+				token.network.id.description === $routeNetwork
+		);
+
+		if (nonNullish(foundToken)) {
+			const { identity } = $authStore;
+			if (nonNullish(identity)) {
+				await enableToken(foundToken, identity);
+			}
+		}
+	};
+
+	const autoEnableToken = async () => {
+		if (attemptedAutoEnableToken || !tokensLoaded) return;
+
+		try {
+			isLoading = true;
+
+			if (shouldEnableToken) {
+				await findAndEnableToken();
+			}
+		} catch (error) {
+			console.error('Initialization error:', error);
+			toastsError({
+				msg: { text: $i18n.transactions.error.auto_enable_token }
+			});
+			goto('/');
+		} finally {
+			isLoading = false;
+			attemptedAutoEnableToken = true;
+		}
+	};
+
 	$: knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
 
-	let allIcrcTokens: IcrcCustomToken[] = [];
 	$: allIcrcTokens = [
 		...$icrcTokens,
 		...icrcEnvTokens.filter(
@@ -56,81 +140,7 @@
 		)
 	];
 
-	const enableToken = async (token: Token, identity: Identity) => {
-		if (icTokenErc20UserToken(token)) {
-			await setManyUserTokens({
-				identity,
-				tokens: [toUserToken({ ...token, enabled: true })],
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			});
-			await loadUserTokens({ identity });
-		} else if (icTokenIcrcCustomToken(token)) {
-			await setManyCustomTokens({
-				identity,
-				tokens: [toCustomToken({ ...token, enabled: true })],
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			});
-			await loadCustomTokens({ identity });
-		} else {
-			throw new Error('Unknown token type. Token cannot be enabled.');
-		}
-	};
-
-	const autoEnableToken = async () => {
-		if (tokenAutoEnabled) {
-			return;
-		}
-		tokenAutoEnabled = true;
-
-		isLoading = true;
-
-		try {
-			const allTokens = [
-				ICP_TOKEN,
-				...$enabledBitcoinTokens,
-				...$enabledEthereumTokens,
-				...$erc20Tokens,
-				...allIcrcTokens
-			];
-
-			const foundToken = allTokens.find((token) => (
-					(token.symbol === $routeToken || token.name === $routeToken) &&
-					token.network.id.description === $routeNetwork
-				));
-
-			if (nonNullish(foundToken)) {
-				const { identity } = $authStore;
-				if (nonNullish(identity)) {
-					await enableToken(foundToken, identity);
-				} else {
-					throw new Error('No Identity available. Cannot enable token.');
-				}
-			} else {
-				throw new Error('Token not found in user’s token list.');
-			}
-		} catch (error) {
-			console.error('Error while auto-enabling token:', error);
-			toastsError({
-				msg: { text: $i18n.transactions.error.auto_enable_token }
-			});
-			goto('/');
-		} finally {
-			isLoading = false;
-		}
-	};
-
-	/**
-	 * Reactive condition:
-	 * If we have a route network and route token but no $pageToken (meaning it's disabled),
-	 * try to auto-enable it. Run only when not already loading or not previously attempted.
-	 */
-	$: if (
-		isNullish($pageToken) &&
-		nonNullish($routeNetwork) &&
-		nonNullish($routeToken) &&
-		!isLoading &&
-		!tokenAutoEnabled
-	) {
+	$: if (tokensLoaded && !attemptedAutoEnableToken) {
 		autoEnableToken();
 	}
 </script>
