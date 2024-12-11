@@ -78,7 +78,7 @@
 <div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>
 		<option disabled selected value={undefined} class="hidden"
-			><span class="description">{$i18n.send.placeholder.select_network}</span></option
+			>{$i18n.send.placeholder.select_network}</option
 		>
 		<DropdownItem value={ETHEREUM_NETWORK.name}>{ETHEREUM_NETWORK.name}</DropdownItem>
 
