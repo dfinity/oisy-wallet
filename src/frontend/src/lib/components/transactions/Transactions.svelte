@@ -61,7 +61,7 @@
 
 	const enableToken = async (token: Token, identity: Identity) => {
 
-		console.debug(`Auto enabling token: ${token}`)
+		console.debug(`Auto enabling token`, token);
 		try {
 			if (icTokenErc20UserToken(token)) {
 				await setUserToken({
