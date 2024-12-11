@@ -5,17 +5,21 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { btcAddressMainnet } from '$lib/derived/address.derived';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = $token?.network.explorerUrl ?? undefined;
+
+	let explorerAddressUrl: string | undefined;
+	$: explorerAddressUrl = nonNullish(explorerUrl) ? `${explorerUrl}/address/${$btcAddressMainnet}` : undefined;
 </script>
 
 <TokenMenu testId="btc-token-menu">
-	{#if nonNullish(explorerUrl)}
+	{#if nonNullish(explorerAddressUrl)}
 		<div in:fade>
 			<ExternalLink
 				fullWidth
-				href={explorerUrl}
+				href={explorerAddressUrl}
 				ariaLabel={$i18n.tokens.alt.open_blockstream}
 				iconVisible={false}
 				testId="btc-explorer-link"
