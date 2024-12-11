@@ -1,7 +1,7 @@
-import { render } from '@testing-library/svelte';
 import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
-import { token } from '$lib/stores/token.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { token } from '$lib/stores/token.store';
+import { render } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
 import { get } from 'svelte/store';
 
