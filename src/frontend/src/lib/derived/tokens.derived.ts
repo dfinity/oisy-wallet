@@ -2,6 +2,7 @@ import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -42,6 +43,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
+		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens
 	]
 );
