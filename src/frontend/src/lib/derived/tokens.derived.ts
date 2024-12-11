@@ -15,16 +15,24 @@ import {
 	filterEnabledTokens,
 	sumMainnetTokensUsdBalancesPerNetwork
 } from '$lib/utils/tokens.utils';
+import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
-	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens, enabledBitcoinTokens],
-	([$erc20Tokens, $icrcTokens, $enabledEthereumTokens, $enabledBitcoinTokens]) => [
+	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens, enabledBitcoinTokens, enabledSolanaTokens],
+	([
+		$erc20Tokens,
+		$icrcTokens,
+		$enabledEthereumTokens,
+		$enabledBitcoinTokens,
+		$enabledSolanaTokens
+	]) => [
 		ICP_TOKEN,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$erc20Tokens,
-		...$icrcTokens
+		...$icrcTokens,
+		...$enabledSolanaTokens
 	]
 );
 
