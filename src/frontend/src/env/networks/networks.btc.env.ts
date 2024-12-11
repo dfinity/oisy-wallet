@@ -1,7 +1,7 @@
 import {
 	IC_CKBTC_MINTER_CANISTER_ID,
 	STAGING_CKBTC_MINTER_CANISTER_ID
-} from '$env/networks.icrc.env';
+} from '$env/networks/networks.icrc.env';
 import type { MinterCanisterIdText } from '$icp/types/canister';
 import type { CanisterIdText } from '$lib/types/canister';
 import { nonNullish } from '@dfinity/utils';
