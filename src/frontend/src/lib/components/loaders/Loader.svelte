@@ -14,18 +14,14 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import {
-		loadAddresses,
-		loadBtcAddressRegtest,
-		loadBtcAddressTestnet,
-		loadIdbAddresses
-	} from '$lib/services/address.services';
 	import { signOut } from '$lib/services/auth.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
+	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
