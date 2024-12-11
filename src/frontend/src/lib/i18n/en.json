@@ -832,7 +832,8 @@
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},
 		"warning": {
-			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister."
+			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister.",
+			"unavailable_index_canister": "Transaction for $token_list can not be displayed. Index canister is currently not available."
 		}
 	}
 }
