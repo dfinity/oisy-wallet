@@ -10,6 +10,7 @@ import type {
 } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
+import { SCHNORR_KEY_ID } from '$env/signer.env';
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
@@ -204,8 +205,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const response = await schnorr_public_key(
 			{
-				// TODO: set the key_id in the signer repo, as done for the ecdsa key
-				key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+				key_id: SCHNORR_KEY_ID,
 				canister_id: [],
 				derivation_path: mapDerivationPath(derivationPath)
 			},

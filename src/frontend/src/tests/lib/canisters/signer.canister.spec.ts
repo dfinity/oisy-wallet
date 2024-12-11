@@ -4,6 +4,7 @@ import type {
 	RejectionCode_1,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
+import { SCHNORR_KEY_ID } from '$env/signer.env';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
@@ -598,7 +599,7 @@ describe('signer.canister', () => {
 			expect(res).toEqual(publicKey);
 			expect(service.schnorr_public_key).toHaveBeenCalledWith(
 				{
-					key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+					key_id: SCHNORR_KEY_ID,
 					canister_id: [],
 					derivation_path: mapDerivationPath(['test'])
 				},
