@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { notEmptyString, type Token } from '@dfinity/utils';
+	import { notEmptyString } from '@dfinity/utils';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
@@ -17,13 +17,31 @@
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
 		.map((token: TokenUi) => token as IcToken);
 
-	let enabledTokensWithoutCanister: Token[];
-	$: enabledTokensWithoutCanister = enabledTokensWithoutTransaction.filter(hasNoIndexCanister);
-
 	let tokenListWithoutCanister: string;
-	$: tokenListWithoutCanister = enabledTokensWithoutCanister
-		.map((token) => `$${token.symbol}`)
-		.join(', ');
+	let tokenListWithUnavailableCanister: string;
+	$: {
+		let result = enabledTokensWithoutTransaction.reduce(
+			(
+				acc: {
+					enabledTokensWithoutCanister: string[];
+					enabledTokensWithUnavailableCanister: string[];
+				},
+				curr
+			) => {
+				hasNoIndexCanister(curr)
+					? acc.enabledTokensWithoutCanister.push(`$${curr.symbol}`)
+					: acc.enabledTokensWithUnavailableCanister.push(`$${curr.symbol}`);
+				return acc;
+			},
+			{
+				enabledTokensWithoutCanister: [],
+				enabledTokensWithUnavailableCanister: []
+			}
+		);
+
+		tokenListWithoutCanister = result.enabledTokensWithoutCanister.join(', ');
+		tokenListWithUnavailableCanister = result.enabledTokensWithUnavailableCanister.join(', ');
+	}
 </script>
 
 <div class="flex flex-col gap-5">
@@ -39,6 +57,14 @@
 		<MessageBox level="light-warning" closableKey="oisy_ic_hide_transaction_no_canister">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
 				$token_list: tokenListWithoutCanister
+			})}
+		</MessageBox>
+	{/if}
+
+	{#if notEmptyString(tokenListWithUnavailableCanister)}
+		<MessageBox level="light-warning" closableKey="oisy_ic_hide_transaction_unavailable_canister">
+			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
+				$token_list: tokenListWithUnavailableCanister
 			})}
 		</MessageBox>
 	{/if}

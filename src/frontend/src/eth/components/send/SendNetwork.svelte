@@ -2,7 +2,7 @@
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
+	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks/networks.env';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isDestinationContractAddress } from '$eth/utils/send.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
