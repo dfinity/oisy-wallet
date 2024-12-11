@@ -4,7 +4,6 @@
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
-	import { goto } from '$app/navigation';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -124,7 +123,6 @@
 			toastsError({
 				msg: { text: $i18n.transactions.error.auto_enable_token }
 			});
-			goto('/');
 		} finally {
 			isLoading = false;
 			attemptedAutoEnableToken = true;
