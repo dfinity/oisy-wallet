@@ -14,3 +14,28 @@
 	{$i18n.auth.text.authenticate}
 	<IconAstronautArrow />
 </button>
+
+<style lang="scss">
+	button:hover {
+		:global(.svg-arrow-go path),
+		:global(.svg-arrow-go line) {
+			stroke-dashoffset: 20;
+			transition-delay: 0s;
+		}
+
+		:global(.svg-arrow-go line) {
+			transition-delay: 0.15s;
+		}
+
+		:global(.svg-vizor path) {
+			transform: translateY(0);
+		}
+
+		:global(.svg-infinity path) {
+			stroke-dasharray: 20px;
+			stroke-dashoffset: 0;
+			transition-delay: 0.6s;
+			transition-duration: 1s;
+		}
+	}
+</style>
