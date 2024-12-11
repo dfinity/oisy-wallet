@@ -1,11 +1,11 @@
 import { browser } from '$app/environment';
-import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks.env';
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.env';
 import {
 	SOLANA_DEVNET_NETWORK_SYMBOL,
 	SOLANA_LOCAL_NETWORK_SYMBOL,
 	SOLANA_MAINNET_NETWORK_SYMBOL,
 	SOLANA_TESTNET_NETWORK_SYMBOL
-} from '$env/networks.sol.env';
+} from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_SYMBOL, BTC_TESTNET_SYMBOL } from '$env/tokens/tokens.btc.env';
 import type { BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
 import type { IdbBtcAddress, IdbEthAddress, SetIdbAddressParams } from '$lib/types/idb';
