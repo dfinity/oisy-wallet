@@ -99,10 +99,10 @@ jobs:
 
       - name: Check if snapshots changed
         run: |
-          if git diff --quiet -- e2e; then
-            echo "NO_CHANGES=true" >> $GITHUB_ENV
-          else
+          if [ -n "$(git status --porcelain e2e)" ]; then
             echo "NO_CHANGES=false" >> $GITHUB_ENV
+          else
+            echo "NO_CHANGES=true" >> $GITHUB_ENV
           fi
 
       - name: Upload Snapshots Artifact
