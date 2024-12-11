@@ -22,7 +22,8 @@
           "prettier-plugin-organize-imports",
           "prettier-plugin-tailwindcss"
         ],
-        "parser": "svelte"
+        "parser": "svelte",
+        "htmlWhitespaceSensitivity": "strict"
       }
     }
   ]
