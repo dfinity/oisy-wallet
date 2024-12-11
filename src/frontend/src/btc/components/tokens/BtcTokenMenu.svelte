@@ -6,13 +6,26 @@
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { isNetworkIdBTCMainnet, isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
+	import { networkId } from '$lib/derived/network.derived';
+	import { mapAddress } from '$lib/utils/address.utils';
+	import type { BtcAddress } from '$lib/types/address';
+	import { btcAddressMainnetStore, btcAddressRegtestStore, btcAddressTestnetStore } from '$lib/stores/address.store';
+	import { networks } from '$lib/derived/networks.derived';
+
+	let btcAddress: string | undefined;
+	$: btcAddress = isNetworkIdBTCMainnet($networkId)
+		? mapAddress<BtcAddress>($btcAddressMainnetStore)
+		: isNetworkIdBTCTestnet($networkId)
+			? mapAddress<BtcAddress>($btcAddressTestnetStore)
+			: mapAddress<BtcAddress>($btcAddressRegtestStore);
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = $token?.network.explorerUrl ?? undefined;
 
 	let explorerAddressUrl: string | undefined;
-	$: explorerAddressUrl = nonNullish(explorerUrl)
-		? `${explorerUrl}/address/${$btcAddressMainnet}`
+	$: explorerAddressUrl = nonNullish(explorerUrl) && nonNullish(btcAddress)
+		? `${explorerUrl}/address/${btcAddress}`
 		: undefined;
 </script>
 
