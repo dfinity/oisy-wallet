@@ -1,4 +1,5 @@
 import solDevnetIconBW from '$lib/assets/networks/sol-devnet-bw.svg';
+import solLocalnetIconBW from '$lib/assets/networks/sol-localnet-bw.svg';
 import solMainnetIconBW from '$lib/assets/networks/sol-mainnet-bw.svg';
 import solTestnetIconBW from '$lib/assets/networks/sol-testnet-bw.svg';
 import sol from '$lib/assets/networks/sol.svg';
@@ -58,8 +59,7 @@ export const SOLANA_LOCAL_NETWORK: Network = {
 	name: 'Solana Local',
 	// TODO: Add the correct icon
 	icon: sol,
-	// TODO: Add the correct icon
-	iconBW: solTestnetIconBW
+	iconBW: solLocalnetIconBW
 };
 
 // TODO: to be removed when the feature is fully implemented
