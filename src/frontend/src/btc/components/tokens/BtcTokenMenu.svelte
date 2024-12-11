@@ -16,6 +16,7 @@
 	import { mapAddress } from '$lib/utils/address.utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 	import type { BitcoinNetwork } from '$btc/types/network';
+	import { TOKEN_MENU_BTC } from '$lib/constants/test-ids.constants';
 
 	let btcAddress: Option<string>;
 	$: btcAddress = isNetworkIdBTCMainnet($networkId)
@@ -34,7 +35,7 @@
 			: undefined;
 </script>
 
-<TokenMenu testId="btc-token-menu">
+<TokenMenu testId={TOKEN_MENU_BTC}>
 	{#if nonNullish(explorerAddressUrl)}
 		<div in:fade>
 			<ExternalLink

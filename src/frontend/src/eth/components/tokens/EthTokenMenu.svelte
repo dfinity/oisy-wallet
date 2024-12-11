@@ -10,6 +10,7 @@
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { TOKEN_MENU_ETH } from '$lib/constants/test-ids.constants';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl =
@@ -20,7 +21,7 @@
 				: undefined;
 </script>
 
-<TokenMenu testId="eth-token-menu">
+<TokenMenu testId={TOKEN_MENU_ETH}>
 	{#if nonNullish(explorerUrl) && $erc20UserTokensInitialized}
 		<div in:fade>
 			<ExternalLink

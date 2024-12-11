@@ -20,13 +20,14 @@ import {
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
+import { TOKEN_MENU_BTC_BUTTON } from '$lib/constants/test-ids.constants';
 
 describe('BtcTokenMenu', () => {
 	const mockAddressMainnet = 'mainnet-address';
 	const mockAddressTestnet = 'testnet-address';
 	const mockAddressRegtest = 'regtest-address';
 
-	const tokenMenuButtonSelector = 'button[data-tid="btc-token-menu-button"]';
+	const tokenMenuButtonSelector = `button[data-tid="${TOKEN_MENU_BTC_BUTTON}"]`;
 	const explorerLinkSelector = 'a[data-tid="btc-explorer-link"]';
 
 	beforeEach(() => {

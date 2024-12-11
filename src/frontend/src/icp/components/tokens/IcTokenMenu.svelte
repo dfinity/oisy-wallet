@@ -6,6 +6,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { TOKEN_MENU_IC } from '$lib/constants/test-ids.constants';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = ($token as OptionIcCkToken)?.explorerUrl;
@@ -14,7 +15,7 @@
 	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;
 </script>
 
-<TokenMenu testId="ic-token-menu">
+<TokenMenu testId={TOKEN_MENU_IC}>
 	{#if nonNullish(transactionsExplorerUrl)}
 		<div in:fade>
 			<ExternalLink
