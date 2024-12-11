@@ -27,18 +27,28 @@
 		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
 		RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
-		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
+		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION,
+		RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
+		RECEIVE_TOKENS_MODAL_SOL_LOCALNET_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
-		ethAddress
+		ethAddress, solAddressDevnet, solAddressLocal, solAddressMainnet, solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
+	import { SOLANA_DEVNET_TOKEN, SOLANA_TESTNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env.js';
+	import {
+		SOLANA_DEVNET_NETWORK,
+		SOLANA_MAINNET_NETWORK,
+		SOLANA_TESTNET_NETWORK
+	} from '$env/networks/networks.sol.env';
 
 	const dispatch = createEventDispatcher();
 
@@ -199,6 +209,109 @@
 		>
 			<svelte:fragment slot="title">{$i18n.receive.icp.text.icp_account}</svelte:fragment>
 		</ReceiveAddress>
+
+		<ReceiveAddress
+			labelRef="solAddressMainnet"
+			on:click={() =>
+				displayQRCode({
+					address: $solAddressMainnet ?? '',
+					addressLabel: SOLANA_TOKEN.name,
+					addressToken: SOLANA_TOKEN,
+					copyAriaLabel: $i18n.receive.solana.text.solana_address_copied
+				})}
+			address={$solAddressMainnet}
+			network={SOLANA_MAINNET_NETWORK}
+			qrCodeAction={{
+				enabled: true,
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: $i18n.receive.solana.text.display_solana_address_qr
+			}}
+			copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
+			testId={RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION}
+		>
+			<svelte:fragment slot="title">
+				{SOLANA_TOKEN.name}
+			</svelte:fragment>
+		</ReceiveAddress>
+
+
+		{#if $testnets}
+			<ReceiveAddress
+				labelRef="solAddressTestnet"
+				on:click={() =>
+					displayQRCode({
+						address: $solAddressTestnet ?? '',
+						addressLabel: SOLANA_TESTNET_TOKEN.name,
+						addressToken: SOLANA_TESTNET_TOKEN,
+						copyAriaLabel: $i18n.receive.solana.text.display_solana_address_qr
+					})}
+				address={$solAddressTestnet}
+				network={SOLANA_TESTNET_NETWORK}
+				qrCodeAction={{
+					enabled: true,
+					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+					ariaLabel: $i18n.receive.solana.text.display_solana_address_qr
+				}}
+				copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
+				testId={RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION}
+			>
+				<svelte:fragment slot="title">
+					{SOLANA_TESTNET_TOKEN.name}
+				</svelte:fragment>
+			</ReceiveAddress>
+
+
+			<ReceiveAddress
+				labelRef="solAddressTestnet"
+				on:click={() =>
+					displayQRCode({
+						address: $solAddressDevnet ?? '',
+						addressLabel: SOLANA_DEVNET_TOKEN.name,
+						addressToken: SOLANA_DEVNET_TOKEN,
+						copyAriaLabel: $i18n.receive.solana.text.display_solana_address_qr
+					})}
+				address={$solAddressDevnet}
+				network={SOLANA_DEVNET_NETWORK}
+				qrCodeAction={{
+					enabled: true,
+					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+					ariaLabel: $i18n.receive.solana.text.display_solana_address_qr
+				}}
+				copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
+				testId={RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION}
+			>
+				<svelte:fragment slot="title">
+					{SOLANA_DEVNET_TOKEN.name}
+				</svelte:fragment>
+			</ReceiveAddress>
+
+
+			{#if LOCAL}
+				<ReceiveAddress
+					labelRef="solAddressTestnet"
+					on:click={() =>
+					displayQRCode({
+						address: $solAddressLocal ?? '',
+						addressLabel: SOLANA_TESTNET_TOKEN.name,
+						addressToken: SOLANA_TESTNET_TOKEN,
+						copyAriaLabel: $i18n.receive.solana.text.display_solana_address_qr
+					})}
+					address={$solAddressLocal}
+					network={SOLANA_TESTNET_NETWORK}
+					qrCodeAction={{
+					enabled: true,
+					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+					ariaLabel: $i18n.receive.solana.text.display_solana_address_qr
+				}}
+					copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
+					testId={RECEIVE_TOKENS_MODAL_SOL_LOCALNET_SECTION}
+				>
+					<svelte:fragment slot="title">
+						{SOLANA_TESTNET_TOKEN.name}
+					</svelte:fragment>
+				</ReceiveAddress>
+			{/if}
+		{/if}
 	</div>
 
 	<ButtonDone
