@@ -131,8 +131,10 @@
 		}
 	};
 
+	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
 	$: knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
 
+	let allIcrcTokens: IcrcCustomToken[] = [];
 	$: allIcrcTokens = [
 		...$icrcTokens,
 		...icrcEnvTokens.filter(
