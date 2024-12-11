@@ -18,7 +18,7 @@ export const SOLANA_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_MAINNE
 export const SOLANA_MAINNET_NETWORK: SolNetwork = {
 	id: SOLANA_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Solana Mainnet Beta',
+	name: 'Solana',
 	icon: sol,
 	iconBW: solMainnetIconBW,
 	rpcUrl: 'https://api.mainnet-beta.solana.com'
