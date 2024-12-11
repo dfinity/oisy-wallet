@@ -126,11 +126,11 @@
 
 {#if $loading}
 	{#if progressModal}
-		<div in:fade={{ delay: 0, duration: 250 }}>
+		<div in:fade={{ delay: 0, duration: 250 }} class="login-modal">
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
-					<div class="relative mb-8 block md:h-40">
-						<ImgBanner src={banner} styleClass="h-full md:absolute aspect-auto" />
+					<div class="mb-8 block">
+						<ImgBanner src={banner} styleClass="aspect-auto" />
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
@@ -145,3 +145,11 @@
 		<slot />
 	</div>
 {/if}
+
+<style>
+	:root:has(.login-modal) {
+		--alert-max-width: 90vw;
+		--alert-max-height: initial;
+		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	}
+</style>
