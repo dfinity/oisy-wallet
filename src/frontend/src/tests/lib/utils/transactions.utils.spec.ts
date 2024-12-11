@@ -1,7 +1,7 @@
 import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
-import * as networkEnv from '$env/networks.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
+import * as networkEnv from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import {
 	BTC_MAINNET_TOKEN,

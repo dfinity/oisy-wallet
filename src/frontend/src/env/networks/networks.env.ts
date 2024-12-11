@@ -1,11 +1,12 @@
 import type { BitcoinNetwork } from '$btc/types/network';
 import {
 	BTC_MAINNET_EXPLORER_URL,
+	BTC_REGTEST_EXPLORER_URL,
 	BTC_TESTNET_EXPLORER_URL,
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
+import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
@@ -127,7 +128,8 @@ export const BTC_REGTEST_NETWORK_ID: NetworkId = parseNetworkId(BTC_REGTEST_NETW
 export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	id: BTC_REGTEST_NETWORK_ID,
 	env: 'testnet',
-	name: 'Bitcoin (Regtest)'
+	name: 'Bitcoin (Regtest)',
+	explorerUrl: BTC_REGTEST_EXPLORER_URL
 };
 
 export const BITCOIN_NETWORKS: BitcoinNetwork[] = [
