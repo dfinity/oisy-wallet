@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
-import { ETHERSCAN_API_URL_HOMESTEAD } from '$env/networks.eth.env';
+import { ETHERSCAN_API_URL_HOMESTEAD } from '$env/networks/networks.eth.env';
 import { EtherscanRest, etherscanRests } from '$eth/rest/etherscan.rest';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
