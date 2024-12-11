@@ -107,7 +107,7 @@
 
 			if (LOCAL) {
 				debounceLoadBtcAddressRegtest();
-				
+
 				if (isNullish($solAddressLocal)) {
 					debounceLoadSolAddressLocal();
 				}
