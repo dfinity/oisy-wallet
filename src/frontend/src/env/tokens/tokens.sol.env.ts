@@ -22,7 +22,6 @@ export const SOLANA_TOKEN: Token = {
 	name: 'Solana',
 	symbol: SOLANA_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	// TODO: Add the correct icons
 	icon: sol
 };
 
@@ -38,7 +37,6 @@ export const SOLANA_TESTNET_TOKEN: Token = {
 	name: 'Solana (Testnet)',
 	symbol: SOLANA_TESTNET_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	// TODO: Add the correct icons
 	icon: sol
 };
 
@@ -54,7 +52,6 @@ export const SOLANA_DEVNET_TOKEN: Token = {
 	name: 'Solana (Devnet)',
 	symbol: SOLANA_DEVNET_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	// TODO: Add the correct icons
 	icon: sol
 };
 
@@ -70,6 +67,5 @@ export const SOLANA_LOCAL_TOKEN: Token = {
 	name: 'Solana (Local)',
 	symbol: SOLANA_LOCAL_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	// TODO: Add the correct icons
 	icon: sol
 };
