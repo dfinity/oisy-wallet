@@ -50,6 +50,11 @@ describe('token.schema', () => {
 			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
 		});
 
+		it('should validate "solana" as a supported token standard', () => {
+			const validStandard = 'solana';
+			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
 		it('should fail validation with an unsupported token standard', () => {
 			const invalidStandard = 'unsupported-standard';
 			expect(() => TokenStandardSchema.parse(invalidStandard)).toThrow();
