@@ -18,7 +18,6 @@ export const SOLANA_MAINNET_NETWORK: Network = {
 	id: SOLANA_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Solana Mainnet Beta',
-	// TODO: Add the correct icon
 	icon: sol,
 	iconBW: solMainnetIconBW
 };
@@ -31,7 +30,6 @@ export const SOLANA_TESTNET_NETWORK: Network = {
 	id: SOLANA_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Testnet',
-	// TODO: Add the correct icon
 	icon: sol,
 	iconBW: solTestnetIconBW
 };
@@ -44,7 +42,6 @@ export const SOLANA_DEVNET_NETWORK: Network = {
 	id: SOLANA_DEVNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Devnet',
-	// TODO: Add the correct icon
 	icon: sol,
 	iconBW: solDevnetIconBW
 };
@@ -57,7 +54,6 @@ export const SOLANA_LOCAL_NETWORK: Network = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',
-	// TODO: Add the correct icon
 	icon: sol,
 	iconBW: solLocalnetIconBW
 };
