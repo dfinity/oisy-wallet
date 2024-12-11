@@ -48,6 +48,28 @@ describe('Activity', () => {
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
 
+	it('renders the unavailable Index canister warning box', () => {
+		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
+			...customIcrcToken,
+			symbol: 'UTC',
+			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
+		};
+
+		icrcCustomTokensStore.set({ data: tokenWithUnavailableIndexCanister, certified: true });
+
+		const store = get(icrcCustomTokensStore);
+		const tokenId = store!.at(0)!.data.id;
+		icTransactionsStore.nullify(tokenId);
+
+		const { getByText } = render(AllTransactions);
+
+		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
+			$token_list: '$UTC'
+		});
+
+		expect(getByText(exceptedText)).toBeInTheDocument();
+	});
+
 	it('renders the info box list', () => {
 		const { getByText } = render(AllTransactions);
 
