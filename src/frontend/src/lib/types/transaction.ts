@@ -1,5 +1,8 @@
+import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
+import EthTransactionCmp from '$eth/components/transactions/EthTransaction.svelte';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type {
 	TransactionStatusSchema,
@@ -10,7 +13,6 @@ import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { FeeData } from '@ethersproject/providers';
 import type { Transaction as EthTransaction } from '@ethersproject/transactions';
-import type { Component } from 'svelte';
 import { z } from 'zod';
 
 export type Transaction = Omit<EthTransaction, 'data'> &
@@ -38,7 +40,7 @@ export type AnyTransactionUi = BtcTransactionUi | EthTransactionUi | IcTransacti
 
 export type AllTransactionUi = AnyTransactionUi & {
 	token: Token;
-	component: Component;
+	component: typeof BtcTransaction | typeof EthTransactionCmp | typeof IcTransaction;
 };
 
 export type AllTransactionUiNonEmptyList = [AllTransactionUi, ...AllTransactionUi[]];
