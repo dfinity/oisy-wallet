@@ -19,7 +19,9 @@ describe('BtcTokenMenu', () => {
 
 		await waitFor(() => {
 			const a: HTMLAnchorElement | null = container.querySelector(explorerLinkSelector);
-			if (a == null) throw new Error('anchor not yet loaded');
+			if (a == null) {
+				throw new Error('anchor not yet loaded');
+			}
 
 			expect(a.href).toEqual(`${BTC_MAINNET_EXPLORER_URL}/`);
 		});
