@@ -126,13 +126,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: snapshots-ubuntu-24.04
-          path: .
+          path: e2e
 
       - name: Download macOS Snapshots
         uses: actions/download-artifact@v4
         with:
           name: snapshots-macos-14
-          path: .
+          path: e2e
 
       - name: Check for Final Changes
         run: |
