@@ -5,7 +5,7 @@ import {
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
+import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
