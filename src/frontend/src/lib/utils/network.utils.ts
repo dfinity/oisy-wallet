@@ -7,7 +7,7 @@ import {
 	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
-} from '$env/networks.env';
+} from '$env/networks/networks.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
