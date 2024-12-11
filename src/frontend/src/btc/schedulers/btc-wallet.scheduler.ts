@@ -2,7 +2,7 @@ import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
-import { BITCOIN_CANISTER_IDS } from '$env/networks.btc.env';
+import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.btc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { getBtcBalance } from '$lib/api/signer.api';
@@ -13,7 +13,10 @@ import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/sche
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionCanisterIdText } from '$lib/types/canister';
-import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequestBtc,
+	PostMessageDataResponseError
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { type BitcoinNetwork } from '@dfinity/ckbtc';
@@ -159,7 +162,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
-		// TODO: implement "onCertifiedError" to handle errors in update calls
 		await queryAndUpdate<BtcWalletData>({
 			request: ({ identity: _, certified }) =>
 				this.loadWalletData({
@@ -172,6 +174,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				}),
 			onLoad: ({ certified: _, ...rest }) => this.syncWalletData(rest),
 			identity,
+			onCertifiedError: ({ error }) => this.postMessageWalletError({ error }),
 			resolution: 'all_settled'
 		});
 	};
@@ -220,6 +223,15 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		this.timer.postMsg<BtcPostMessageDataResponseWallet>({
 			msg: 'syncBtcWallet',
 			data
+		});
+	}
+
+	protected postMessageWalletError({ error }: { error: unknown }) {
+		this.timer.postMsg<PostMessageDataResponseError>({
+			msg: 'syncBtcWalletError',
+			data: {
+				error
+			}
 		});
 	}
 }

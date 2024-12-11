@@ -313,6 +313,7 @@ pub mod signer {
 }
 
 pub mod dapp {
+    use crate::types::Version;
     use candid::{CandidType, Deserialize};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
@@ -323,6 +324,33 @@ pub mod dapp {
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct DappSettings {
         pub dapp_carousel: DappCarouselSettings,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AddDappSettingsError {
+        DappIdTooLong,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AddHiddenDappIdRequest {
+        pub dapp_id: String,
+        pub current_user_version: Option<Version>,
+    }
+
+    impl AddHiddenDappIdRequest {
+        /// The maximum supported dApp ID length.
+        pub const MAX_LEN: usize = 32;
+        /// Checks whether the request is syntactically valid
+        ///
+        /// # Errors
+        /// - If the dApp ID is too long.
+        pub fn check(&self) -> Result<(), AddDappSettingsError> {
+            (self.dapp_id.len() < Self::MAX_LEN)
+                .then_some(())
+                .ok_or(AddDappSettingsError::DappIdTooLong)
+        }
     }
 }
 
@@ -353,20 +381,18 @@ pub mod user_profile {
     }
 
     // Used in the endpoint
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
-        #[serde(default)]
-        pub settings: Settings,
+        pub settings: Option<Settings>,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
         pub version: Option<Version>,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
-        #[serde(default)]
-        pub settings: Settings,
+        pub settings: Option<Settings>,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,

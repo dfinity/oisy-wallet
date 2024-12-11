@@ -7,16 +7,14 @@ import { readable } from 'svelte/store';
 
 describe('ConvertAmountDestination', () => {
 	const sendAmount = 20;
-	const totalFee = 10000n;
-	const receiveAmount = 19.9999;
+	const receiveAmount = sendAmount;
 	const exchangeRate = 0.01;
 	const balance = BigNumber.from(10000n);
 	const insufficientFunds = false;
 
 	const props = {
 		sendAmount,
-		insufficientFunds,
-		totalFee
+		insufficientFunds
 	};
 
 	const mockContext = new Map([
@@ -62,16 +60,6 @@ describe('ConvertAmountDestination', () => {
 		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBeUndefined();
 	});
 
-	it('should calculate receiveAmount correctly if totalFee is not provided', () => {
-		const { totalFee: _, ...newProps } = props;
-		const { component } = render(ConvertAmountDestination, {
-			props: newProps,
-			context: mockContext
-		});
-
-		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBeUndefined();
-	});
-
 	it('should calculate receiveAmount correctly if insufficientFunds is true', () => {
 		const { component } = render(ConvertAmountDestination, {
 			props: { ...props, insufficientFunds: true },
@@ -79,14 +67,5 @@ describe('ConvertAmountDestination', () => {
 		});
 
 		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBeUndefined();
-	});
-
-	it('should calculate receiveAmount correctly if parsedSendAmountAfterFee is less than zero', () => {
-		const { component } = render(ConvertAmountDestination, {
-			props: { ...props, sendAmount: 0.000001 },
-			context: mockContext
-		});
-
-		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBe(0);
 	});
 });
