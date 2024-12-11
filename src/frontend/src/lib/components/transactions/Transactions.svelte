@@ -20,8 +20,8 @@
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import { toCustomToken } from '$icp-eth/services/custom-token.services';
-	import { toUserToken } from '$icp-eth/services/user-token.services';
-	import { setManyCustomTokens, setManyUserTokens } from '$lib/api/backend.api';
+	import { setUserToken } from '$icp-eth/services/user-token.services';
+	import { setCustomToken } from '$lib/api/backend.api';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 	import { networkBitcoin, networkICP } from '$lib/derived/network.derived';
@@ -29,8 +29,8 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { parseTokenId } from '$lib/validation/token.validation';
 	import type { Token } from '$lib/types/token';
+	import { parseTokenId } from '$lib/validation/token.validation';
 
 	let icrcEnvTokens: IcrcCustomToken[] = [];
 	let isLoading = false;
@@ -62,17 +62,16 @@
 	const enableToken = async (token: Token, identity: Identity) => {
 		try {
 			if (icTokenErc20UserToken(token)) {
-				await setManyUserTokens({
+				await setUserToken({
 					identity,
-					tokens: [toUserToken({ ...token, enabled: true })],
-					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+					token: token,
+					enabled: true
 				});
 				await loadUserTokens({ identity });
 			} else if (icTokenIcrcCustomToken(token)) {
-				await setManyCustomTokens({
+				await setCustomToken({
 					identity,
-					tokens: [toCustomToken({ ...token, enabled: true })],
-					nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+					token: toCustomToken({ ...token, enabled: true }),
 				});
 				await loadCustomTokens({ identity });
 			} else {
@@ -85,7 +84,9 @@
 	};
 
 	const findAndEnableToken = async () => {
-		if (!shouldEnableToken) return;
+		if (!shouldEnableToken) {
+			return;
+		}
 
 		const allTokens = [
 			ICP_TOKEN,
@@ -110,7 +111,9 @@
 	};
 
 	const autoEnableToken = async () => {
-		if (attemptedAutoEnableToken || !tokensLoaded) return;
+		if (attemptedAutoEnableToken || !tokensLoaded) {
+			return;
+		}
 
 		try {
 			isLoading = true;
