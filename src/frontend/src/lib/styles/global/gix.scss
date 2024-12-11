@@ -148,7 +148,6 @@ div.modal {
 			--padding-3x: 1rem;
 		}
 
-
 		@apply border-b border-secondary items-center;
 
 		--color-grey: rgba(0, 0, 0, 0.05);
@@ -193,7 +192,6 @@ div.modal {
 				--dialog-padding-y: 24px;
 			}
 		}
-
 	}
 
 	div.content:not(:has(+ div.transition)),

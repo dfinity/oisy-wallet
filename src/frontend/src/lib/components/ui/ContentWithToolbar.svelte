@@ -8,6 +8,8 @@
 
 <slot name="outer-content" />
 
-<div class="sticky bottom-0 left-0 w-full px-3 md:px-6 pb-4 md:pb-6 pt-4 md:pt-5 bg-white border-t border-secondary">
+<div
+	class="sticky bottom-0 left-0 w-full border-t border-secondary bg-white px-3 pb-4 pt-4 md:px-6 md:pb-6 md:pt-5"
+>
 	<slot name="toolbar" />
 </div>
