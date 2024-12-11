@@ -136,10 +136,11 @@ jobs:
 
       - name: Check for Final Changes
         run: |
-          if git diff --quiet -- e2e; then
-            echo "FINAL_NO_CHANGES=true" >> $GITHUB_ENV
-          else
+          if [ -n "$(git status --porcelain e2e)" ]; then
             echo "FINAL_NO_CHANGES=false" >> $GITHUB_ENV
+          else
+            echo "FINAL_NO_CHANGES=true" >> $GITHUB_ENV
+          fi
 
       - name: Commit and push updates
         if: env.FINAL_NO_CHANGES == 'false' && github.ref != 'refs/heads/main'
