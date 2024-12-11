@@ -19,7 +19,7 @@
 		<slot />
 	</NoListener>
 {:else if isNetworkIdBitcoin(token.network.id)}
-	<BitcoinListener>
+	<BitcoinListener {token}>
 		<slot />
 	</BitcoinListener>
 {:else}
