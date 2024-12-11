@@ -130,7 +130,7 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						<ImgBanner src={banner} styleClass="!aspect-auto" />
+						<ImgBanner src={banner} styleClass="aspect-auto" />
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
