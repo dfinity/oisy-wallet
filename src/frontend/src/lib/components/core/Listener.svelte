@@ -11,11 +11,19 @@
 </script>
 
 {#if isNullish(token) || $authNotSignedIn}
-	<NoListener />
+	<NoListener>
+		<slot />
+	</NoListener>
 {:else if isNetworkIdICP(token.network.id)}
-	<NoListener />
+	<NoListener>
+		<slot />
+	</NoListener>
 {:else if isNetworkIdBitcoin(token.network.id)}
-	<BitcoinListener />
+	<BitcoinListener>
+		<slot />
+	</BitcoinListener>
 {:else}
-	<EthListener {token} />
+	<EthListener {token}>
+		<slot />
+	</EthListener>
 {/if}
