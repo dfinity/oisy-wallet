@@ -4,8 +4,12 @@ import {
 	BTC_REGTEST_EXPLORER_URL,
 	BTC_TESTNET_EXPLORER_URL
 } from '$env/explorers.env';
-import { BTC_MAINNET_NETWORK, BTC_REGTEST_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks/networks.env';
 import * as btcEnv from '$env/networks/networks.btc.env';
+import {
+	BTC_MAINNET_NETWORK,
+	BTC_REGTEST_NETWORK,
+	BTC_TESTNET_NETWORK
+} from '$env/networks/networks.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,

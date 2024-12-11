@@ -1,12 +1,12 @@
 <script lang="ts">
-import { modalStore } from '$lib/stores/modal.store';
-import { Modal } from '@dfinity/gix-components';
-import { i18n } from '$lib/stores/i18n.store';
-import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
-import { nonNullish } from '@dfinity/utils';
-import { token } from '$lib/stores/token.store';
-import Token from '$lib/components/tokens/Token.svelte';
+	import { Modal } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import Token from '$lib/components/tokens/Token.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { token } from '$lib/stores/token.store';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

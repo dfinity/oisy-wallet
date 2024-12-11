@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import BtcTransactionsHeader from '$btc/components/transactions/BtcTransactionsHeader.svelte';
@@ -18,7 +19,6 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
 
 	let selectedTransaction: BtcTransactionUi | undefined;
 	let selectedToken: OptionToken;
