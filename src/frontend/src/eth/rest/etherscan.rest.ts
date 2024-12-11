@@ -1,5 +1,8 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
-import { ETHERSCAN_API_URL_HOMESTEAD, ETHERSCAN_API_URL_SEPOLIA } from '$env/networks.eth.env';
+import {
+	ETHERSCAN_API_URL_HOMESTEAD,
+	ETHERSCAN_API_URL_SEPOLIA
+} from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
