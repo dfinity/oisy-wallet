@@ -1,4 +1,4 @@
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { balance } from '$icp/api/icrc-ledger.api';
 import * as agent from '$lib/actors/agents.ic';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';

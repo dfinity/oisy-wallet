@@ -1,5 +1,5 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS } from '$env/networks.icrc.env';
+import { ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';

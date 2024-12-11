@@ -1,7 +1,7 @@
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CK_TOKENS_LEDGER_CANISTER_IDS
-} from '$env/networks.icrc.env';
+} from '$env/networks/networks.icrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';

@@ -1,5 +1,5 @@
-import { CKETH_HELPER_CONTRACT_ADDRESS_MAINNET } from '$env/networks.cketh.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
+import { CKETH_HELPER_CONTRACT_ADDRESS_MAINNET } from '$env/networks/networks.cketh.env';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
