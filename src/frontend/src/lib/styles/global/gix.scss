@@ -1,5 +1,4 @@
 @use '../mixins/media';
-@use '../mixins/modal';
 
 :root {
 	--positive-emphasis: var(--color-green-crayola);
@@ -59,18 +58,18 @@
 	// Modal
 
 	--alert-width: calc(100% - var(--padding-8x));
-	--alert-max-width: calc(100vw - var(--padding-4x));
-	--alert-max-height: calc(100dvh - var(--padding-4x));
+	--alert-max-width: 100vw;
+	--alert-max-height: 100dvh;
 	--alert-border-radius: var(--border-radius-xs);
 	--alert-padding-y: 0;
 	--alert-padding-x: 0;
 
-	--dialog-width: 560px;
+	--dialog-width: 100vw;
 	--dialog-max-width: var(--alert-max-width);
 	--dialog-max-height: var(--alert-max-height);
 	--dialog-min-height: var(--alert-max-height);
 	--dialog-height: initial;
-	--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	--dialog-border-radius: 0px;
 	--dialog-padding-y: 0;
 	--dialog-padding-x: 0;
 
@@ -79,6 +78,13 @@
 
 	--backdrop-contrast: var(--color-secondary);
 	--backdrop-filter: blur(4px);
+
+	@screen sm {
+		--dialog-width: 560px;
+		--alert-max-width: calc(100vw - var(--padding-4x));
+		--alert-max-height: initial;
+		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	}
 
 	@supports (-webkit-touch-callout: none) {
 		--dialog-height: -webkit-fill-available;
@@ -116,32 +122,41 @@ div.input-field input[id]::placeholder {
 }
 
 div.modal {
-	--overlay-background: var(--color-ghost-white);
+	--overlay-background: var(--colors-neutrals-white);
 	--overlay-background-contrast: var(--color-secondary);
-	--overlay-content-background: var(--color-ghost-white);
+	--overlay-content-background: var(--colors-neutrals-white);
 	--overlay-content-background-contrast: var(--color-secondary);
 
 	color: var(--color-secondary);
+
+	--toolbar-height: 78px;
+
 	font-weight: var(--font-weight-normal);
 
-	div.wrapper.dialog {
-		color: var(--color-secondary);
-		padding-block: var(--padding-3x);
-		padding-inline: var(--padding);
+	@screen sm {
+		--toolbar-height: 90px;
 	}
 
 	div.wrapper.dialog > div.header {
 		// TODO: Improve padding definition when the Modal of GIX Components has an updated way of setting it and not being hard-coded (https://github.com/dfinity/gix-components/blob/1c4ab390f9cab1d0e3ec73a23384e045679eb6b8/src/lib/components/Modal.svelte#L195)
-		--padding-3x: 0;
-		--padding: var(--padding-2x);
-		--dialog-padding-y: 0;
+		--dialog-padding-y: 1rem;
+		--padding-3x: 0.5rem;
+		--padding: 1rem;
 
-		margin-inline: calc(3 / 2 * var(--padding));
+		@screen sm {
+			--dialog-padding-y: 1.5rem;
+			--padding-3x: 1rem;
+		}
+
+		@apply border-b border-secondary items-center;
 
 		--color-grey: rgba(0, 0, 0, 0.05);
 
 		h2 {
 			font-size: var(--font-size-h3);
+		}
+		button {
+			@apply p-1.5;
 		}
 	}
 
@@ -150,24 +165,32 @@ div.modal {
 
 		& > div.container {
 			border-radius: 0;
-
-			& > div.content {
-				padding-inline: var(--padding-1_5x);
-
-				@include media.min-width(medium) {
-					padding-inline: var(--padding-2_5x);
-				}
-			}
 		}
 	}
 
 	div.container {
-		max-width: 100%;
+		// If using ContentWithToolbar, we need to set some padding manually
+		& > div.content div.stretch {
+			--dialog-padding-x: 12px;
+			--dialog-padding-y: 16px;
 
-		& > div.content {
-			border-radius: var(--padding-0_75x);
+			@screen sm {
+				--dialog-padding-x: 24px;
+				--dialog-padding-y: 24px;
+			}
 
-			overscroll-behavior: contain;
+			@apply px-[var(--dialog-padding-x)] py-[var(--dialog-padding-y)] flex-1;
+		}
+
+		// If not using ContentWithToolbar, we need to set some decent padding via modal variables
+		& > div.content:not(:has(div.stretch)) {
+			--dialog-padding-x: 12px;
+			--dialog-padding-y: 16px;
+
+			@screen sm {
+				--dialog-padding-x: 24px;
+				--dialog-padding-y: 24px;
+			}
 		}
 	}
 
@@ -183,20 +206,6 @@ div.modal {
 
 		&.min-h-auto {
 			min-height: auto;
-		}
-
-		> div.stretch {
-			flex: 1;
-
-			@include modal.content;
-
-			padding: var(--padding-3x) var(--padding-2_5x) var(--stretch-padding-bottom);
-
-			margin: 0 0 var(--padding-0_5x);
-
-			&:has(+ *) {
-				margin: 0 0 var(--padding-3x);
-			}
 		}
 	}
 }
