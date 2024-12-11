@@ -3,7 +3,7 @@ import {
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK
-} from '$env/networks.sol.env';
+} from '$env/networks/networks.sol.env';
 import sol from '$lib/assets/networks/sol.svg';
 import type { Token, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
