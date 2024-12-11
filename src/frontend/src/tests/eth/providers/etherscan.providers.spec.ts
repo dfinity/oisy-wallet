@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
-import { ETHERSCAN_NETWORK_HOMESTEAD } from '$env/networks.eth.env';
+import { ETHERSCAN_NETWORK_HOMESTEAD } from '$env/networks/networks.eth.env';
 import { EtherscanProvider, etherscanProviders } from '$eth/providers/etherscan.providers';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
