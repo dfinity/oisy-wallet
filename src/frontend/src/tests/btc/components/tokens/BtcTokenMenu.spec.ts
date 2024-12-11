@@ -2,9 +2,9 @@ import BtcTokenMenu from '$btc/components/tokens/BtcTokenMenu.svelte';
 import { BTC_MAINNET_EXPLORER_URL } from '$env/explorers.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { btcAddressMainnetStore } from '$lib/stores/address.store';
 import { token } from '$lib/stores/token.store';
 import { render, waitFor } from '@testing-library/svelte';
-import { btcAddressMainnetStore } from '$lib/stores/address.store';
 
 describe('BtcTokenMenu', () => {
 	const mockAddressMainnet = 'mainnet-address';
