@@ -15,7 +15,7 @@
 	import { mapAddress } from '$lib/utils/address.utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
-	let btcAddress: string | undefined | null;
+	let btcAddress: Option<string>;
 	$: btcAddress = isNetworkIdBTCMainnet($networkId)
 		? mapAddress<BtcAddress>($btcAddressMainnetStore)
 		: isNetworkIdBTCTestnet($networkId)
