@@ -15,6 +15,7 @@
 	import type { Option } from '$lib/types/utils';
 	import { mapAddress } from '$lib/utils/address.utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
+	import type { BitcoinNetwork } from '$btc/types/network';
 
 	let btcAddress: Option<string>;
 	$: btcAddress = isNetworkIdBTCMainnet($networkId)
@@ -24,7 +25,7 @@
 			: mapAddress<BtcAddress>($btcAddressRegtestStore);
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl = $token?.network.explorerUrl ?? undefined;
+	$: explorerUrl = ($token?.network as BitcoinNetwork).explorerUrl ?? undefined;
 
 	let explorerAddressUrl: string | undefined;
 	$: explorerAddressUrl =
