@@ -42,7 +42,6 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     
     steps:
-
       - name: Fail if branch is main
         if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
         run: |
@@ -86,31 +85,81 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
+      - name: Determine OS Suffix
+        id: os_suffix
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            echo "os_suffix=linux" >> $GITHUB_OUTPUT
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            echo "os_suffix=darwin" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run Playwright tests
         run: npm run e2e:snapshots
 
-      - name: Commit Playwright updated snapshots
-        uses: EndBug/add-and-commit@v9
-        if: ${{ github.ref != 'refs/heads/main' }}
-        with:
-          add: e2e
-          default_author: github_actions
-          message: "🤖 Update E2E snapshots"
-
-      - name: Stage Changes
-        if: github.ref == 'refs/heads/main'
-        run: git add .
-
-      - name: Check for Changes
-        if: github.ref == 'refs/heads/main'
+      - name: Check if snapshots changed
         run: |
-          if ! git diff --cached --quiet; then
-            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
-            MODIFIED_FILES=$(git diff --cached --name-only)
-            echo "MODIFIED_FILES<<EOF" >> $GITHUB_ENV
-            echo "$MODIFIED_FILES" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
+          if git diff --quiet -- e2e; then
+            echo "NO_CHANGES=true" >> $GITHUB_ENV
+          else
+            echo "NO_CHANGES=false" >> $GITHUB_ENV
           fi
+
+      - name: Upload Snapshots Artifact
+        if: env.NO_CHANGES == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots-${{ matrix.os }}
+          path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.os_suffix.outputs.os_suffix }}.png
+          retention-days: 30
+
+  finalize_snapshots_update:
+    name: Finalize Snapshots Update
+    runs-on: ubuntu-24.04
+    needs: [update_snapshots]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Ubuntu Snapshots
+        uses: actions/download-artifact@v4
+        with:
+          name: snapshots-ubuntu-24.04
+          path: .
+
+      - name: Download macOS Snapshots
+        uses: actions/download-artifact@v4
+        with:
+          name: snapshots-macos-14
+          path: .
+
+      - name: Check for Final Changes
+        run: |
+          if git diff --quiet -- e2e; then
+            echo "FINAL_NO_CHANGES=true" >> $GITHUB_ENV
+          else
+            echo "FINAL_NO_CHANGES=false" >> $GITHUB_ENV
+
+      - name: Commit and push updates
+        if: env.FINAL_NO_CHANGES == 'false' && github.ref != 'refs/heads/main'
+        run: |
+          git add e2e
+          git commit -m "🤖 Update E2E snapshots"
+          git push
+
+      - name: Stage Changes on main
+        if: env.FINAL_NO_CHANGES == 'false' && github.ref == 'refs/heads/main'
+        run: git add e2e
+
+      - name: Set CHANGES_DETECTED env var
+        if: env.FINAL_NO_CHANGES == 'false' && github.ref == 'refs/heads/main'
+        run: |
+          MODIFIED_FILES=$(git diff --cached --name-only)
+          echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+          echo "MODIFIED_FILES<<EOF" >> $GITHUB_ENV
+          echo "$MODIFIED_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create Pull Request (if changes and on main)
         if: github.ref == 'refs/heads/main' && env.CHANGES_DETECTED == 'true'
@@ -123,3 +172,4 @@ jobs:
             The following E2E snapshots have been updated:
             ```
             ${{ env.MODIFIED_FILES }}
+            ```
