@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import type { BitcoinNetwork } from '$btc/types/network';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { TOKEN_MENU_BTC } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import {
 		btcAddressMainnetStore,
@@ -15,8 +17,6 @@
 	import type { Option } from '$lib/types/utils';
 	import { mapAddress } from '$lib/utils/address.utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
-	import type { BitcoinNetwork } from '$btc/types/network';
-	import { TOKEN_MENU_BTC } from '$lib/constants/test-ids.constants';
 
 	let btcAddress: Option<string>;
 	$: btcAddress = isNetworkIdBTCMainnet($networkId)

@@ -12,6 +12,7 @@ import {
 	BTC_TESTNET_TOKEN
 } from '$env/tokens/tokens.btc.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { TOKEN_MENU_BTC_BUTTON } from '$lib/constants/test-ids.constants';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -20,7 +21,6 @@ import {
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { TOKEN_MENU_BTC_BUTTON } from '$lib/constants/test-ids.constants';
 
 describe('BtcTokenMenu', () => {
 	const mockAddressMainnet = 'mainnet-address';
