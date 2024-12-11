@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let infoList: { label: string; icon: ComponentType }[];
+	let infoList: { label: string; icon: Component }[];
 	$: infoList = [
 		{
 			label: $i18n.auth.text.asset_types,
