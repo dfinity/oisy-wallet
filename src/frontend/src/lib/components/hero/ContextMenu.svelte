@@ -1,11 +1,14 @@
 <script lang="ts">
-	import TokenMenu from '$eth/components/tokens/TokenMenu.svelte';
+	import BtcTokenMenu from '$btc/components/tokens/BtcTokenMenu.svelte';
+	import EthTokenMenu from '$eth/components/tokens/EthTokenMenu.svelte';
 	import IcTokenMenu from '$icp/components/tokens/IcTokenMenu.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
+	import { networkEthereum, networkICP } from '$lib/derived/network.derived';
 </script>
 
 {#if $networkICP}
 	<IcTokenMenu />
+{:else if $networkEthereum}
+	<EthTokenMenu />
 {:else}
-	<TokenMenu />
+	<BtcTokenMenu />
 {/if}

@@ -13,6 +13,7 @@
 	export let fullWidth = false;
 	export let styleClass = '';
 	export let trackEvent: TrackEventParams | undefined = undefined;
+	export let testId: string | undefined = undefined;
 
 	const onClick = async () => {
 		if (isNullish(trackEvent)) {
@@ -30,6 +31,7 @@
 	class="inline-flex items-center gap-2 no-underline {styleClass}"
 	aria-label={ariaLabel}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
+	data-tid={testId}
 	class:text-brand-primary={color === 'blue'}
 	class:hover:text-inherit={color === 'blue'}
 	class:active:text-inherit={color === 'blue'}

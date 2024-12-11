@@ -6,6 +6,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { TOKEN_MENU_ETH } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,7 +21,7 @@
 				: undefined;
 </script>
 
-<TokenMenu>
+<TokenMenu testId={TOKEN_MENU_ETH}>
 	{#if nonNullish(explorerUrl) && $erc20UserTokensInitialized}
 		<div in:fade>
 			<ExternalLink
