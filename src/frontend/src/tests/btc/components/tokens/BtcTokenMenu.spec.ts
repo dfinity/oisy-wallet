@@ -1,15 +1,25 @@
 import BtcTokenMenu from '$btc/components/tokens/BtcTokenMenu.svelte';
-import { BTC_MAINNET_EXPLORER_URL, BTC_REGTEST_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
-import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
-import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-import { btcAddressMainnetStore, btcAddressRegtestStore, btcAddressTestnetStore } from '$lib/stores/address.store';
-import { token } from '$lib/stores/token.store';
-import { render, waitFor } from '@testing-library/svelte';
-import { testnetsStore } from '$lib/stores/settings.store';
-import { mockPage } from '$tests/mocks/page.store.mock';
-import { BTC_MAINNET_NETWORK, BTC_REGTEST_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks.env';
-import { networks } from '$lib/derived/networks.derived';
+import {
+	BTC_MAINNET_EXPLORER_URL,
+	BTC_REGTEST_EXPLORER_URL,
+	BTC_TESTNET_EXPLORER_URL
+} from '$env/explorers.env';
 import * as btcEnv from '$env/networks.btc.env';
+import { BTC_MAINNET_NETWORK, BTC_REGTEST_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
+import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import {
+	btcAddressMainnetStore,
+	btcAddressRegtestStore,
+	btcAddressTestnetStore
+} from '$lib/stores/address.store';
+import { token } from '$lib/stores/token.store';
+import { mockPage } from '$tests/mocks/page.store.mock';
+import { render, waitFor } from '@testing-library/svelte';
 
 describe('BtcTokenMenu', () => {
 	const mockAddressMainnet = 'mainnet-address';
