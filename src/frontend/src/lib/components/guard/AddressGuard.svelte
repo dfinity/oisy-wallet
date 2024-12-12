@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { validateBtcAddressMainnet, validateEthAddress } from '$lib/services/address.services';
+	import { validateBtcAddressMainnet } from '$btc/services/btc-address.services';
+	import { validateEthAddress } from '$eth/services/eth-address.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
 
