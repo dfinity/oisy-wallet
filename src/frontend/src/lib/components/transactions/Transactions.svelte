@@ -21,9 +21,9 @@
 		showTokenModal = true;
 	}
 
-	const handleClose = () => {
+	const handleClose = async () => {
 		if (isNullish($pageToken)) {
-			goto('/');
+			await goto('/');
 		}
 	};
 </script>
@@ -34,9 +34,7 @@
 			{$i18n.transactions.text.token_needs_enabling}
 		</MessageBox>
 	</ManageTokensModal>
-{/if}
-
-{#if nonNullish($routeNetwork)}
+{:else if nonNullish($routeNetwork)}
 	{#if $networkICP}
 		<IcTransactions />
 	{:else if $networkBitcoin}
