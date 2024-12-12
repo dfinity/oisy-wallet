@@ -3,6 +3,7 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
@@ -14,12 +15,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import {
-		loadAddresses,
-		loadBtcAddressRegtest,
-		loadBtcAddressTestnet,
-		loadIdbAddresses
-	} from '$lib/services/address.services';
+	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 	import { signOut } from '$lib/services/auth.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -126,11 +122,11 @@
 
 {#if $loading}
 	{#if progressModal}
-		<div in:fade={{ delay: 0, duration: 250 }}>
+		<div in:fade={{ delay: 0, duration: 250 }} class="login-modal">
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
-					<div class="relative mb-8 block md:h-40">
-						<ImgBanner src={banner} styleClass="h-full md:absolute aspect-auto" />
+					<div class="mb-8 block">
+						<ImgBanner src={banner} styleClass="aspect-auto" />
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
@@ -145,3 +141,11 @@
 		<slot />
 	</div>
 {/if}
+
+<style>
+	:root:has(.login-modal) {
+		--alert-max-width: 90vw;
+		--alert-max-height: initial;
+		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	}
+</style>

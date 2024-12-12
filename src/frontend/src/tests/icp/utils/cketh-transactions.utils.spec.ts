@@ -2,7 +2,7 @@ import { CKETH_EXPLORER_URL, CKETH_SEPOLIA_EXPLORER_URL } from '$env/explorers.e
 import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks.icrc.env';
+} from '$env/networks/networks.icrc.env';
 import type { IcrcTransaction } from '$icp/types/ic-transaction';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
 import { Principal } from '@dfinity/principal';
