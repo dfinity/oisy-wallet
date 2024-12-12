@@ -24,18 +24,23 @@
 	let autoEnabledToken = false;
 	let isLoading = false;
 	let token: OptionToken;
-	$: token = $allTokens.find(token => token.name === $routeToken);
+	$: token = $allTokens.find((token) => token.name === $routeToken);
 
-	const isValidVersion = (token: { version?: bigint }): boolean => nonNullish(token.version) && token.version >= 0n;
+	const isValidVersion = (token: { version?: bigint }): boolean =>
+		nonNullish(token.version) && token.version >= 0n;
 
 	const tryEnableToken = async (token: Token) => {
-		if (autoEnabledToken) {return;}
+		if (autoEnabledToken) {
+			return;
+		}
 
 		isLoading = true;
 
 		try {
 			const identity = $authIdentity;
-			if (!identity) {throw new Error('No identity found');}
+			if (!identity) {
+				throw new Error('No identity found');
+			}
 
 			if (icTokenErc20UserToken(token) || icTokenIcrcCustomToken(token)) {
 				if (!isValidVersion(token)) {
@@ -55,7 +60,7 @@
 		}
 	};
 
-	const enableToken = async ({ token, identity }: { token: Token, identity: Identity }) => {
+	const enableToken = async ({ token, identity }: { token: Token; identity: Identity }) => {
 		if (icTokenErc20UserToken(token)) {
 			autoEnabledToken = true;
 			await setUserToken({ identity, token, enabled: true });
@@ -67,7 +72,12 @@
 		}
 	};
 
-	$: if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token) && !autoEnabledToken) {
+	$: if (
+		isNullish($pageToken) &&
+		nonNullish($routeToken) &&
+		nonNullish(token) &&
+		!autoEnabledToken
+	) {
 		tryEnableToken(token);
 	}
 </script>
