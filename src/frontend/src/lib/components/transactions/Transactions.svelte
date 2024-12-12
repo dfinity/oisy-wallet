@@ -20,10 +20,16 @@
 	$: if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
 		showTokenModal = true;
 	}
+
+	const handleClose = () => {
+		if (isNullish($pageToken)) {
+			goto('/');
+		}
+	};
 </script>
 
 {#if showTokenModal && nonNullish(token)}
-	<ManageTokensModal onClose={() => goto('/')} initialSearch={token.name}>
+	<ManageTokensModal onClose={handleClose} initialSearch={token.name}>
 		<MessageBox slot="info-element" level="info">
 			{$i18n.transactions.text.token_needs_enabling}
 		</MessageBox>
