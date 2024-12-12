@@ -1,3 +1,4 @@
+import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 import {
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
@@ -35,6 +36,10 @@ import type { ResultSuccess, ResultSuccessReduced } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { reduceResults } from '$lib/utils/results.utils';
+import {
+	loadIdbSolAddressMainnet,
+	loadSolAddressMainnet
+} from '$sol/services/sol-address.services';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
@@ -158,7 +163,8 @@ export const loadAddresses = async (tokenIds: TokenId[]): Promise<ResultSuccess>
 		tokenIds.includes(BTC_MAINNET_TOKEN_ID)
 			? loadBtcAddressMainnet()
 			: Promise.resolve({ success: true }),
-		tokenIds.includes(ETHEREUM_TOKEN_ID) ? loadEthAddress() : Promise.resolve({ success: true })
+		tokenIds.includes(ETHEREUM_TOKEN_ID) ? loadEthAddress() : Promise.resolve({ success: true }),
+		SOLANA_NETWORK_ENABLED ? loadSolAddressMainnet() : Promise.resolve({ success: true })
 	]);
 
 	return { success: results.every(({ success }) => success) };
@@ -188,7 +194,7 @@ const saveTokenAddressForFutureSignIn = async <T extends Address>({
 	});
 };
 
-const loadIdbTokenAddress = async <T extends Address>({
+export const loadIdbTokenAddress = async <T extends Address>({
 	tokenId,
 	getIdbAddress,
 	updateIdbAddressLastUsage,
@@ -248,7 +254,11 @@ const loadIdbEthAddress = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	});
 
 export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
-	const results = await Promise.all([loadIdbBtcAddressMainnet(), loadIdbEthAddress()]);
+	const results = await Promise.all([
+		loadIdbBtcAddressMainnet(),
+		loadIdbEthAddress(),
+		loadIdbSolAddressMainnet()
+	]);
 
 	const { success, err } = reduceResults<LoadIdbAddressError>(results);
 

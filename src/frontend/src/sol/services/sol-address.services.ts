@@ -3,14 +3,21 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import {
+	getIdbSolAddressMainnet,
 	setIdbSolAddressDevnet,
 	setIdbSolAddressLocal,
 	setIdbSolAddressMainnet,
-	setIdbSolAddressTestnet
+	setIdbSolAddressTestnet,
+	updateIdbSolAddressMainnetLastUsage
 } from '$lib/api/idb.api';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
-import { loadTokenAddress, type LoadTokenAddressParams } from '$lib/services/address.services';
+import {
+	loadIdbTokenAddress,
+	loadTokenAddress,
+	type LoadTokenAddressParams
+} from '$lib/services/address.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
@@ -18,6 +25,7 @@ import {
 	solAddressTestnetStore
 } from '$lib/stores/address.store';
 import type { SolAddress } from '$lib/types/address';
+import { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -107,4 +115,12 @@ export const loadSolAddressLocal = (): Promise<ResultSuccess> =>
 	loadSolAddress({
 		tokenId: SOLANA_LOCAL_NETWORK_ID as unknown as TokenId,
 		network: 'local'
+	});
+
+export const loadIdbSolAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddressError>> =>
+	loadIdbTokenAddress<SolAddress>({
+		tokenId: SOLANA_TOKEN_ID,
+		getIdbAddress: getIdbSolAddressMainnet,
+		updateIdbAddressLastUsage: updateIdbSolAddressMainnetLastUsage,
+		addressStore: solAddressMainnetStore
 	});
