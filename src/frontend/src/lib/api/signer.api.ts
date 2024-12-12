@@ -1,6 +1,7 @@
 import type {
 	BitcoinNetwork,
 	EthSignTransactionRequest,
+	SchnorrKeyId,
 	SendBtcResponse
 } from '$declarations/signer/signer.did';
 import { SignerCanister } from '$lib/canisters/signer.canister';
@@ -88,11 +89,13 @@ export const sendBtc = async ({
 
 export const getSchnorrPublicKey = async ({
 	identity,
-	derivationPath
-}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array | number[]> => {
+	...rest
+}: CanisterApiFunctionParams<{ derivationPath: string[]; keyId: SchnorrKeyId }>): Promise<
+	Uint8Array | number[]
+> => {
 	const { getSchnorrPublicKey } = await signerCanister({ identity });
 
-	return await getSchnorrPublicKey(derivationPath);
+	return await getSchnorrPublicKey(rest);
 };
 
 const signerCanister = async ({

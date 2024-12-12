@@ -5,12 +5,12 @@ import type {
 	EthSignPrehashRequest,
 	EthSignTransactionRequest,
 	GetBalanceRequest,
+	SchnorrKeyId,
 	SendBtcResponse,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
-import { SCHNORR_KEY_ID } from '$env/signer.env';
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
@@ -198,14 +198,20 @@ export class SignerCanister extends Canister<SignerService> {
 		throw mapSignerCanisterSendBtcError(response.Err);
 	};
 
-	getSchnorrPublicKey = async (derivationPath: string[]): Promise<Uint8Array | number[]> => {
+	getSchnorrPublicKey = async ({
+		derivationPath,
+		keyId
+	}: {
+		derivationPath: string[];
+		keyId: SchnorrKeyId;
+	}): Promise<Uint8Array | number[]> => {
 		const { schnorr_public_key } = this.caller({
 			certified: true
 		});
 
 		const response = await schnorr_public_key(
 			{
-				key_id: SCHNORR_KEY_ID,
+				key_id: keyId,
 				canister_id: [],
 				derivation_path: mapDerivationPath(derivationPath)
 			},
