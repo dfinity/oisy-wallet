@@ -1,6 +1,9 @@
+import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
-import { LAMPORTS_PER_SOL } from '$sol/constants/sol.constants';
+import type { Token } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import type { SolNetwork } from '$sol/types/network';
+import { BigNumber } from '@ethersproject/bignumber';
 import { createSolanaRpc, address as solAddress, type Lamports } from '@solana/web3.js';
 
 export const loadLamportsBalance = async ({
@@ -20,12 +23,14 @@ export const loadLamportsBalance = async ({
 
 export const loadSolBalance = async ({
 	address,
-	network
+	token: { network, id: tokenId }
 }: {
 	address: SolAddress;
-	network: SolNetwork;
-}): Promise<number> => {
-	const balance = await loadLamportsBalance({ address, network });
+	token: Token;
+}): Promise<ResultSuccess> => {
+	const balance = await loadLamportsBalance({ address, network: network as SolNetwork });
 
-	return Number(balance) / LAMPORTS_PER_SOL;
+	balancesStore.set({ tokenId, data: { data: BigNumber.from(balance), certified: true } });
+
+	return { success: true };
 };
