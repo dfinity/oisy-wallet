@@ -14,15 +14,18 @@ import {
 } from '$lib/api/idb.api';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
 import {
+	certifyAddress,
 	loadIdbTokenAddress,
 	loadTokenAddress,
+	validateAddress,
 	type LoadTokenAddressParams
 } from '$lib/services/address.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressTestnetStore,
+	type StorageAddressData
 } from '$lib/stores/address.store';
 import type { SolAddress } from '$lib/types/address';
 import { LoadIdbAddressError } from '$lib/types/errors';
@@ -123,4 +126,19 @@ export const loadIdbSolAddressMainnet = (): Promise<ResultSuccess<LoadIdbAddress
 		getIdbAddress: getIdbSolAddressMainnet,
 		updateIdbAddressLastUsage: updateIdbSolAddressMainnetLastUsage,
 		addressStore: solAddressMainnetStore
+	});
+
+const certifySolAddressMainnet = (address: SolAddress): Promise<ResultSuccess<string>> =>
+	certifyAddress<SolAddress>({
+		tokenId: SOLANA_TOKEN_ID,
+		address,
+		getAddress: (identity: OptionIdentity) => getSolAddressMainnet(identity),
+		updateIdbAddressLastUsage: updateIdbSolAddressMainnetLastUsage,
+		addressStore: solAddressMainnetStore
+	});
+
+export const validateSolAddressMainnet = async ($addressStore: StorageAddressData<SolAddress>) =>
+	await validateAddress<SolAddress>({
+		$addressStore,
+		certifyAddress: certifySolAddressMainnet
 	});

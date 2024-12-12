@@ -2,7 +2,8 @@
 	import { validateBtcAddressMainnet } from '$btc/services/btc-address.services';
 	import { validateEthAddress } from '$eth/services/eth-address.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
-	import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
+	import { btcAddressMainnetStore, ethAddressStore, solAddressMainnetStore } from '$lib/stores/address.store';
+	import { validateSolAddressMainnet } from '$sol/services/sol-address.services';
 
 	let signerAllowanceLoaded = false;
 
@@ -26,11 +27,12 @@
 
 		await Promise.allSettled([
 			validateEthAddress($ethAddressStore),
-			validateBtcAddressMainnet($btcAddressMainnetStore)
+			validateBtcAddressMainnet($btcAddressMainnetStore),
+			validateSolAddressMainnet($solAddressMainnetStore),
 		]);
 	};
 
-	$: $btcAddressMainnetStore, $ethAddressStore, (async () => await validateAddresses())();
+	$: $btcAddressMainnetStore, $ethAddressStore,$solAddressMainnetStore, (async () => await validateAddresses())();
 </script>
 
 <svelte:window on:oisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />
