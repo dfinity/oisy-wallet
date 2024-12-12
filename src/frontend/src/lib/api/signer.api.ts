@@ -95,6 +95,17 @@ export const getSchnorrPublicKey = async ({
 	return await getSchnorrPublicKey(derivationPath);
 };
 
+export const signSchnorrPublicKey = async ({
+	identity,
+	...rest
+}: CanisterApiFunctionParams<{ derivationPath: string[]; message: number[] }>): Promise<
+	Uint8Array | number[]
+> => {
+	const { signWithSchnorr } = await signerCanister({ identity });
+
+	return await signWithSchnorr(rest);
+};
+
 const signerCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
