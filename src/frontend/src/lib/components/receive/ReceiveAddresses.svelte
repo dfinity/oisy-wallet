@@ -8,7 +8,8 @@
 		ICP_NETWORK
 	} from '$env/networks/networks.env';
 	import {
-		SOLANA_DEVNET_NETWORK, SOLANA_LOCAL_NETWORK,
+		SOLANA_DEVNET_NETWORK,
+		SOLANA_LOCAL_NETWORK,
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK
 	} from '$env/networks/networks.sol.env';
@@ -20,7 +21,8 @@
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
-		SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN,
+		SOLANA_DEVNET_TOKEN,
+		SOLANA_LOCAL_TOKEN,
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env.js';
