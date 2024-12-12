@@ -49,6 +49,7 @@
 	];
 
 	export let initialSearch: string | undefined = undefined;
+	export let onClose: () => void = () => {};
 	let saveProgressStep: ProgressStepsAddToken = ProgressStepsAddToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
@@ -141,6 +142,7 @@
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
+		onClose();
 	};
 
 	let ledgerCanisterId: string | undefined;
