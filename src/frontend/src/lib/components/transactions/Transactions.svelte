@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
@@ -22,7 +23,7 @@
 </script>
 
 {#if showTokenModal && nonNullish(token)}
-	<ManageTokensModal initialSearch={token.name}>
+	<ManageTokensModal onClose={() => goto('/')} initialSearch={token.name}>
 		<MessageBox slot="info-element" level="info">
 			{$i18n.transactions.text.token_needs_enabling}
 		</MessageBox>
