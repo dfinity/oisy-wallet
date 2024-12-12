@@ -4,6 +4,7 @@
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { btcAddressMainnetStore, ethAddressStore, solAddressMainnetStore } from '$lib/stores/address.store';
 	import { validateSolAddressMainnet } from '$sol/services/sol-address.services';
+	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 
 	let signerAllowanceLoaded = false;
 
@@ -28,7 +29,7 @@
 		await Promise.allSettled([
 			validateEthAddress($ethAddressStore),
 			validateBtcAddressMainnet($btcAddressMainnetStore),
-			validateSolAddressMainnet($solAddressMainnetStore),
+			SOLANA_NETWORK_ENABLED ?  validateSolAddressMainnet($solAddressMainnetStore) : Promise.resolve({ success: true }),
 		]);
 	};
 

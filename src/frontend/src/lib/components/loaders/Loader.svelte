@@ -32,6 +32,7 @@
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
+	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -93,18 +94,20 @@
 				debounceLoadBtcAddressTestnet();
 			}
 
-			if (isNullish($solAddressTestnet)) {
-				debounceLoadSolAddressTestnet();
-			}
+			if (SOLANA_NETWORK_ENABLED) {
+				if (isNullish($solAddressTestnet)) {
+					debounceLoadSolAddressTestnet();
+				}
 
-			if (isNullish($solAddressDevnet)) {
-				debounceLoadSolAddressDevnet();
+				if (isNullish($solAddressDevnet)) {
+					debounceLoadSolAddressDevnet();
+				}
 			}
 
 			if (LOCAL) {
 				debounceLoadBtcAddressRegtest();
 
-				if (isNullish($solAddressLocal)) {
+				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
 					debounceLoadSolAddressLocal();
 				}
 			}
