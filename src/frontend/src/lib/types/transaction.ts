@@ -1,8 +1,5 @@
-import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
-import EthTransactionCmp from '$eth/components/transactions/EthTransaction.svelte';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
-import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type {
 	TransactionStatusSchema,
@@ -38,11 +35,21 @@ export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to
 
 export type AnyTransactionUi = BtcTransactionUi | EthTransactionUi | IcTransactionUi;
 
-export type AllTransactionUi = AnyTransactionUi & {
+export type AnyTransactionUiWithCmp =
+	| { component: 'bitcoin'; transaction: BtcTransactionUi }
+	| { component: 'ethereum'; transaction: EthTransactionUi }
+	| { component: 'ic'; transaction: IcTransactionUi };
+
+export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;
-	component: typeof BtcTransaction | typeof EthTransactionCmp | typeof IcTransaction;
 };
 
-export type AllTransactionUiNonEmptyList = [AllTransactionUi, ...AllTransactionUi[]];
+export type AllTransactionUiWithCmpNonEmptyList = [
+	AllTransactionUiWithCmp,
+	...AllTransactionUiWithCmp[]
+];
 
-export type TransactionsUiDateGroup<T extends AnyTransactionUi> = Record<string, [T, ...T[]]>;
+export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
+	string,
+	[T, ...T[]]
+>;
