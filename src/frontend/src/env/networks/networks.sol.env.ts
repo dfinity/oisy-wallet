@@ -22,7 +22,8 @@ export const SOLANA_MAINNET_NETWORK: SolNetwork = {
 	name: 'Solana',
 	icon: sol,
 	iconBW: solMainnetIconBW,
-	rpcUrl: 'https://api.mainnet-beta.solana.com'
+	rpcUrl: 'https://api.mainnet-beta.solana.com',
+	buy: { onramperId: 'solana' }
 };
 
 export const SOLANA_TESTNET_NETWORK_SYMBOL = 'SOL (Testnet)';
