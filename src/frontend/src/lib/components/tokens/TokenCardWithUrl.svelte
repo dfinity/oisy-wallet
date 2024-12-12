@@ -5,7 +5,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 
 	export let token: Token;
-	export let disableTabSelector = false;
+	export let disabled = false;
 
 	let url: string;
 	$: url = transactionsUrl({ token });
@@ -14,11 +14,12 @@
 <div class="group flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8">
 	<a
 		class="flex-1 no-underline"
-		href={url}
+		href={disabled ? undefined : url}
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol
 		})}
-		tabindex={disableTabSelector ? -1 : 0}
+		tabindex={disabled ? -1 : 0}
+		on:click
 	>
 		<slot />
 	</a>
