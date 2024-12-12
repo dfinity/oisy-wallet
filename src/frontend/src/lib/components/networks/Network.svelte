@@ -8,7 +8,7 @@
 	let id: NetworkId;
 	let name: string;
 	let icon: string | undefined;
-	$: ({ id, name, icon } = network);
+	$: ({ id, name, iconBW: icon } = network);
 </script>
 
 <NetworkButton {id} {name} {usdBalance} {icon} on:icSelected />
