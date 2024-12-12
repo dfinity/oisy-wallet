@@ -1,7 +1,8 @@
+import * as btcAddressServices from '$btc/services/btc-address.services';
+import * as ethAddressServices from '$eth/services/eth-address.services';
 import * as api from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
-import * as addressServices from '$lib/services/address.services';
 import * as authServices from '$lib/services/auth.services';
 import * as loaderServices from '$lib/services/loader.services';
 import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
@@ -76,7 +77,7 @@ describe('AddressGuard', () => {
 			it('should not call validate eth address if signer allowance is not loaded', () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateEthAddress');
+				const spy = vi.spyOn(ethAddressServices, 'validateEthAddress');
 
 				ethAddressStore.set({
 					data: mockEthAddress,
@@ -89,7 +90,7 @@ describe('AddressGuard', () => {
 			it('should not call validate btc address if signer allowance is not loaded', () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateBtcAddressMainnet');
+				const spy = vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet');
 
 				btcAddressMainnetStore.set({
 					data: mockBtcAddress,
@@ -108,7 +109,7 @@ describe('AddressGuard', () => {
 			it('should call validate eth address if signer allowance is loaded after eth address store', async () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateEthAddress');
+				const spy = vi.spyOn(ethAddressServices, 'validateEthAddress');
 
 				ethAddressStore.set({
 					data: mockEthAddress,
@@ -125,7 +126,7 @@ describe('AddressGuard', () => {
 			it('should call validate eth address if signer allowance is loaded before eth address store', async () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateEthAddress');
+				const spy = vi.spyOn(ethAddressServices, 'validateEthAddress');
 
 				emit({ message: 'oisyValidateAddresses' });
 
@@ -142,7 +143,7 @@ describe('AddressGuard', () => {
 			it('should call validate eth address twice', async () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateEthAddress');
+				const spy = vi.spyOn(ethAddressServices, 'validateEthAddress');
 
 				emit({ message: 'oisyValidateAddresses' });
 
@@ -165,7 +166,7 @@ describe('AddressGuard', () => {
 			it('should call validate btc address if signer allowance is loaded after eth address store', async () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateBtcAddressMainnet');
+				const spy = vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet');
 
 				btcAddressMainnetStore.set({
 					data: mockBtcAddress,
@@ -182,7 +183,7 @@ describe('AddressGuard', () => {
 			it('should call validate btc address if signer allowance is loaded before eth address store', async () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateBtcAddressMainnet');
+				const spy = vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet');
 
 				btcAddressMainnetStore.set({
 					data: mockBtcAddress,
@@ -199,7 +200,7 @@ describe('AddressGuard', () => {
 			it('should call validate btc address twice', async () => {
 				render(AddressGuard);
 
-				const spy = vi.spyOn(addressServices, 'validateBtcAddressMainnet');
+				const spy = vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet');
 
 				emit({ message: 'oisyValidateAddresses' });
 
