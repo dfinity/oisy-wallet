@@ -65,6 +65,7 @@
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@junobuild/analytics": "^0.0.28",
 		"@metamask/detect-provider": "^2.0.0",
+		"@solana-program/system": "^0.6.2",
 		"@solana/web3.js": "^2.0.0",
 		"@walletconnect/web3wallet": "1.14.0",
 		"alchemy-sdk": "3.4.1",
