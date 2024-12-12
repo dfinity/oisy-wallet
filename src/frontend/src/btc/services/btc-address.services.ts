@@ -1,4 +1,3 @@
-// We use the Testnet address for Regtest.
 import {
 	BTC_MAINNET_TOKEN_ID,
 	BTC_REGTEST_TOKEN_ID,
