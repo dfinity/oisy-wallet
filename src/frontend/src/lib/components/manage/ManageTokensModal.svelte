@@ -48,10 +48,9 @@
 		}
 	];
 
-
 	export let initialSearch: string | undefined = undefined;
 	export let disablePointerEvents = false;
-	
+
 	let saveProgressStep: ProgressStepsAddToken = ProgressStepsAddToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
@@ -194,9 +193,14 @@
 	{:else if currentStep?.name === 'Import'}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
-		<ManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} initialSearch={initialSearch} >
+		<ManageTokens
+			on:icClose={close}
+			on:icAddToken={modal.next}
+			on:icSave={saveTokens}
+			{initialSearch}
+		>
 			<svelte:fragment slot="info-element">
-				<slot name="info-element"/>
+				<slot name="info-element" />
 			</svelte:fragment>
 		</ManageTokens>
 	{/if}
