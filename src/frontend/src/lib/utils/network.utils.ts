@@ -8,6 +8,7 @@ import {
 	SEPOLIA_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
 } from '$env/networks/networks.env';
+import { SOLANA_NETWORKS_IDS } from '$env/networks/networks.sol.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -36,6 +37,9 @@ export const isNetworkIdBTCRegtest = (networkId: NetworkId | undefined): boolean
 
 export const isNetworkIdSepolia = (networkId: NetworkId | undefined): boolean =>
 	SEPOLIA_NETWORK_ID === networkId;
+
+export const isNetworkIdSolana = (networkId: NetworkId | undefined): boolean =>
+	nonNullish(networkId) && SOLANA_NETWORKS_IDS.includes(networkId);
 
 const mapper: Record<symbol, BitcoinNetwork> = {
 	[BTC_MAINNET_NETWORK_ID]: 'mainnet',

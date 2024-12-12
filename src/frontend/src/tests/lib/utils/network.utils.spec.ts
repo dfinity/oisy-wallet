@@ -9,6 +9,7 @@ import {
 	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.env';
+import { SOLANA_NETWORKS_IDS } from '$env/networks/networks.sol.env';
 import type { NetworkId } from '$lib/types/network';
 import {
 	isNetworkICP,
@@ -19,6 +20,7 @@ import {
 	isNetworkIdEthereum,
 	isNetworkIdICP,
 	isNetworkIdSepolia,
+	isNetworkIdSolana,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 
@@ -151,6 +153,16 @@ describe('network utils', () => {
 			expect(mapNetworkIdToBitcoinNetwork(ETHEREUM_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(SEPOLIA_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(ICP_NETWORK_ID)).toBeUndefined();
+		});
+	});
+
+	describe('isNetworkIdSolana', () => {
+		it.each(SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
+			expect(isNetworkIdSolana(id as NetworkId)).toBe(true);
+		});
+
+		it('should return false for non-Solana network IDs', () => {
+			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBe(false);
 		});
 	});
 });
