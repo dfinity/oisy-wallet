@@ -17,7 +17,11 @@ jobs:
   oisy-backend-wasm:
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    permissions:
+      contents: write
+      packages: write
     steps:
+
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
@@ -28,8 +32,7 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
-      
+
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
@@ -116,7 +119,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && env.CHANGES_DETECTED == 'true'
         uses: ./.github/actions/create-pr
         with:
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           branch: bot-e2e-update-snapshots
           title: 'chore(e2e): Update Playwright E2E Snapshots'
           body: |
