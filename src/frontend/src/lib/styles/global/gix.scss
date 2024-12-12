@@ -143,14 +143,14 @@ div.modal {
 		--padding-3x: 0.5rem;
 		--padding: 1rem;
 
+		--color-grey: rgba(0, 0, 0, 0.05);
+
 		@screen sm {
 			--dialog-padding-y: 1.5rem;
 			--padding-3x: 1rem;
 		}
 
 		@apply border-b border-secondary items-center;
-
-		--color-grey: rgba(0, 0, 0, 0.05);
 
 		h2 {
 			font-size: var(--font-size-h3);
