@@ -54,12 +54,12 @@
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
 		? pinEnabledTokensAtTop(
-			sortTokens({
-				$tokens: allTokensForSelectedNetwork,
-				$exchanges: exchangesStaticData,
-				$tokensToPin: $tokensToPin
-			})
-		)
+				sortTokens({
+					$tokens: allTokensForSelectedNetwork,
+					$exchanges: exchangesStaticData,
+					$tokensToPin: $tokensToPin
+				})
+			)
 		: [];
 
 	let filterTokens = '';
