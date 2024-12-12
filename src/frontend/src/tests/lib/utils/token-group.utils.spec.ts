@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,

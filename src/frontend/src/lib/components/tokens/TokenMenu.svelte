@@ -10,6 +10,8 @@
 	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	export let testId: string | undefined = undefined;
+
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
@@ -34,6 +36,7 @@
 </script>
 
 <button
+	data-tid={`${testId}-button`}
 	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	bind:this={button}
 	on:click={() => (visible = true)}
