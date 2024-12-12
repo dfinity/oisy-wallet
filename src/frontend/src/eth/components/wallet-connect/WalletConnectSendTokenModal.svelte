@@ -4,7 +4,7 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
 	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';

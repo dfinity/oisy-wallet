@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+	import {
+		BTC_MAINNET_NETWORK_ID,
+		ETHEREUM_NETWORK_ID,
+		ICP_NETWORK_ID
+	} from '$env/networks/networks.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { ethereumToken } from '$eth/derived/token.derived';
@@ -71,4 +75,4 @@
 	width="100%"
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
 	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-/>
+></iframe>
