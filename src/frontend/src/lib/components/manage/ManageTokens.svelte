@@ -35,7 +35,6 @@
 
 	const dispatch = createEventDispatcher();
 
-
 	export let initialSearch: string | undefined = undefined;
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
