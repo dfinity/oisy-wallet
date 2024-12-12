@@ -35,6 +35,9 @@
 
 	const dispatch = createEventDispatcher();
 
+
+	export let initialSearch: string | undefined = undefined
+
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
@@ -62,11 +65,11 @@
 			)
 		: [];
 
-	let filterTokens = '';
+	let filterTokens = initialSearch ?? '';
 	const updateFilter = () => (filterTokens = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
-	let filter = '';
+	let filter = initialSearch ?? '';
 	$: filter, debounceUpdateFilter();
 
 	const matchingToken = (token: Token): boolean =>
@@ -168,6 +171,8 @@
 		})}
 	</p>
 {/if}
+
+<slot name="info-element"/>
 
 {#if noTokensMatch}
 	<button
