@@ -36,7 +36,7 @@
 	const dispatch = createEventDispatcher();
 
 
-	export let initialSearch: string | undefined = undefined
+	export let initialSearch: string | undefined = undefined;
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
@@ -172,7 +172,7 @@
 	</p>
 {/if}
 
-<slot name="info-element"/>
+<slot name="info-element" />
 
 {#if noTokensMatch}
 	<button
