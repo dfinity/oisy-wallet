@@ -8,7 +8,7 @@
 		ICP_NETWORK
 	} from '$env/networks/networks.env';
 	import {
-		SOLANA_DEVNET_NETWORK,
+		SOLANA_DEVNET_NETWORK, SOLANA_LOCAL_NETWORK,
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK
 	} from '$env/networks/networks.sol.env';
@@ -20,7 +20,7 @@
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
-		SOLANA_DEVNET_TOKEN,
+		SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN,
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env.js';
@@ -297,12 +297,12 @@
 					on:click={() =>
 						displayQRCode({
 							address: $solAddressLocal ?? '',
-							addressLabel: SOLANA_TESTNET_TOKEN.name,
-							addressToken: SOLANA_TESTNET_TOKEN,
+							addressLabel: SOLANA_LOCAL_TOKEN.name,
+							addressToken: SOLANA_LOCAL_TOKEN,
 							copyAriaLabel: $i18n.receive.solana.text.display_solana_address_qr
 						})}
 					address={$solAddressLocal}
-					network={SOLANA_TESTNET_NETWORK}
+					network={SOLANA_LOCAL_NETWORK}
 					qrCodeAction={{
 						enabled: true,
 						testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
@@ -312,7 +312,7 @@
 					testId={RECEIVE_TOKENS_MODAL_SOL_LOCALNET_SECTION}
 				>
 					<svelte:fragment slot="title">
-						{SOLANA_TESTNET_TOKEN.name}
+						{SOLANA_LOCAL_TOKEN.name}
 					</svelte:fragment>
 				</ReceiveAddress>
 			{/if}
