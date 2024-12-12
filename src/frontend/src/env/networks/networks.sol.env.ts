@@ -22,7 +22,10 @@ export const SOLANA_MAINNET_NETWORK: SolNetwork = {
 	name: 'Solana',
 	icon: sol,
 	iconBW: solMainnetIconBW,
-	rpcUrl: 'https://api.mainnet-beta.solana.com',
+	rpc: {
+		httpUrl: 'https://api.mainnet-beta.solana.com',
+		wssUrl: 'wss://api.mainnet-beta.solana.com'
+	},
 	buy: { onramperId: 'solana' }
 };
 
@@ -36,7 +39,10 @@ export const SOLANA_TESTNET_NETWORK: SolNetwork = {
 	name: 'Solana Testnet',
 	icon: sol,
 	iconBW: solTestnetIconBW,
-	rpcUrl: 'https://api.testnet.solana.com'
+	rpc: {
+		httpUrl: 'https://api.testnet.solana.com',
+		wssUrl: 'wss://api.testnet.solana.com'
+	}
 };
 
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
@@ -49,7 +55,10 @@ export const SOLANA_DEVNET_NETWORK: SolNetwork = {
 	name: 'Solana Devnet',
 	icon: sol,
 	iconBW: solDevnetIconBW,
-	rpcUrl: 'https://api.devnet.solana.com'
+	rpc: {
+		httpUrl: 'https://api.devnet.solana.com',
+		wssUrl: 'wss://api.devnet.solana.com'
+	}
 };
 
 export const SOLANA_LOCAL_NETWORK_SYMBOL = 'SOL (Local)';
@@ -62,7 +71,10 @@ export const SOLANA_LOCAL_NETWORK: SolNetwork = {
 	name: 'Solana Local',
 	icon: sol,
 	iconBW: solLocalnetIconBW,
-	rpcUrl: 'http://localhost:8899'
+	rpc: {
+		httpUrl: 'http://localhost:8899',
+		wssUrl: 'ws://localhost:8900'
+	}
 };
 
 export const SOLANA_NETWORKS: SolNetwork[] = [

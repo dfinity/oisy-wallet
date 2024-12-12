@@ -2,18 +2,26 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import type { SolNetwork } from '$sol/types/network';
+import { isSolNetwork } from '$sol/validation/sol-network.validation';
 import { BigNumber } from '@ethersproject/bignumber';
-import { createSolanaRpc, address as solAddress, type Lamports } from '@solana/web3.js';
+import { createSolanaRpc, lamports, address as solAddress, type Lamports } from '@solana/web3.js';
 
 export const loadLamportsBalance = async ({
 	address,
-	network: { rpcUrl }
+	token: { network }
 }: {
 	address: SolAddress;
-	network: SolNetwork;
+	token: Token;
 }): Promise<Lamports> => {
-	const { getBalance } = createSolanaRpc(rpcUrl);
+	if (!isSolNetwork(network)) {
+		return lamports(0n);
+	}
+
+	const {
+		rpc: { httpUrl }
+	} = network;
+
+	const { getBalance } = createSolanaRpc(httpUrl);
 
 	const wallet = solAddress(address);
 	const { value: balance } = await getBalance(wallet).send();
@@ -23,12 +31,14 @@ export const loadLamportsBalance = async ({
 
 export const loadSolBalance = async ({
 	address,
-	token: { network, id: tokenId }
+	token
 }: {
 	address: SolAddress;
 	token: Token;
 }): Promise<ResultSuccess> => {
-	const balance = await loadLamportsBalance({ address, network: network as SolNetwork });
+	const { id: tokenId } = token;
+
+	const balance = await loadLamportsBalance({ address, token });
 
 	balancesStore.set({ tokenId, data: { data: BigNumber.from(balance), certified: true } });
 

@@ -1,24 +1,20 @@
 import {
-	SOLANA_DEVNET_NETWORK,
-	SOLANA_MAINNET_NETWORK,
-	SOLANA_TESTNET_NETWORK
-} from '$env/networks/networks.sol.env';
+	SOLANA_DEVNET_TOKEN,
+	SOLANA_TESTNET_TOKEN,
+	SOLANA_TOKEN
+} from '$env/tokens/tokens.sol.env';
+import type { Token } from '$lib/types/token';
 import { loadLamportsBalance, loadSolBalance } from '$sol/services/sol-balance.services';
-import type { SolNetwork } from '$sol/types/network';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
 describe('sol-balance.services', () => {
-	const solanaNetworks: SolNetwork[] = [
-		SOLANA_MAINNET_NETWORK,
-		SOLANA_TESTNET_NETWORK,
-		SOLANA_DEVNET_NETWORK
-	];
+	const solanaTokens: Token[] = [SOLANA_TOKEN, SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN];
 
 	describe('loadLamportsBalance', () => {
-		it.each(solanaNetworks)(
-			'should return the balance in lamports for the address on the $name network',
-			async (network) => {
-				const balance = await loadLamportsBalance({ address: mockSolAddress, network });
+		it.each(solanaTokens)(
+			'should return the balance of the $name native token in lamports for the address',
+			async (token) => {
+				const balance = await loadLamportsBalance({ address: mockSolAddress, token });
 
 				expect(balance).toBeGreaterThanOrEqual(0);
 			}
@@ -26,10 +22,10 @@ describe('sol-balance.services', () => {
 	}, 60000);
 
 	describe('loadSolBalance', () => {
-		it.each(solanaNetworks)(
-			'should return the balance in SOL for the address on the $name network',
-			async (network) => {
-				const balance = await loadSolBalance({ address: mockSolAddress, network });
+		it.each(solanaTokens)(
+			'should return the balance in SOL of the $name native token for the address',
+			async (token) => {
+				const balance = await loadSolBalance({ address: mockSolAddress, token });
 
 				expect(balance).toBeGreaterThanOrEqual(0);
 			}

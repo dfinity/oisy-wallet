@@ -32,7 +32,11 @@ export const loadSolTransactions = async ({
 		return;
 	}
 
-	const { getSignaturesForAddress, getTransaction } = createSolanaRpc(network.rpcUrl);
+	const {
+		rpc: { httpUrl }
+	} = network;
+
+	const { getSignaturesForAddress, getTransaction } = createSolanaRpc(httpUrl);
 
 	const wallet = solAddress(address);
 
