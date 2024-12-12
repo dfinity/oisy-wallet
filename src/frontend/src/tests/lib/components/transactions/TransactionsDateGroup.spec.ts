@@ -1,7 +1,5 @@
-import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 import type {
 	AllTransactionUiWithCmp,
@@ -20,21 +18,23 @@ describe('TransactionsDateGroup', () => {
 	const mockBtcTransactionsUi: AllTransactionUiWithCmp[] = createMockBtcTransactionsUi(
 		btcTransactionsNumber
 	).map((transaction) => ({
-		...transaction,
+		transaction,
 		timestamp: BigInt(todayTimestamp),
 		token: BTC_MAINNET_TOKEN,
-		component: BtcTransaction
+		component: 'bitcoin'
 	}));
 
 	const mockEthTransactionsUi: AllTransactionUiWithCmp[] = createMockEthTransactions(
 		ethTransactionsNumber
 	).map((transaction) => ({
-		...transaction,
+		transaction: {
+			...transaction,
+			id: transaction.hash,
+			uiType: 'send'
+		},
 		timestamp: todayTimestamp,
-		id: transaction.hash,
-		uiType: 'send',
 		token: ETHEREUM_TOKEN,
-		component: EthTransaction
+		component: 'ethereum'
 	}));
 
 	const mockTransactions = [
