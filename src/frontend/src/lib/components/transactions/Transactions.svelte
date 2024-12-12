@@ -1,159 +1,85 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
-	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
-	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { loadUserTokens } from '$eth/services/erc20.services';
-	import { icTokenErc20UserToken } from '$eth/utils/erc20.utils';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
-	import { loadCustomTokens } from '$icp/services/icrc.services';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
-	import { toCustomToken } from '$icp-eth/services/custom-token.services';
-	import { setUserToken } from '$icp-eth/services/user-token.services';
-	import { setCustomToken } from '$lib/api/backend.api';
-	import Header from '$lib/components/ui/Header.svelte';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 	import { networkBitcoin, networkICP } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
-	import { authStore } from '$lib/stores/auth.store';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
+	import { icTokenErc20UserToken } from '$eth/utils/erc20.utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { setUserToken } from '$icp-eth/services/user-token.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { loadUserTokens } from '$eth/services/erc20.services';
+	import type { OptionToken, Token } from '$lib/types/token';
+	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+	import { setCustomToken } from '$icp-eth/services/custom-token.services';
+	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import { onMount } from 'svelte';
+	import Header from '../ui/Header.svelte';
+	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Token } from '$lib/types/token';
-	import { parseTokenId } from '$lib/validation/token.validation';
+	import type { Identity } from '@dfinity/agent';
 
-	let icrcEnvTokens: IcrcCustomToken[] = [];
+	let availableTokenIds: string[] = [];
+	$: availableTokenIds = $allTokens.map(token => token.name);
+	let autoEnabledToken = false;
 	let isLoading = false;
-	let attemptedAutoEnableToken = false;
+	let token: OptionToken;
+	$: token = $allTokens.find(token => token.name === $routeToken);
 
-	onMount(() => {
-		const tokens = buildIcrcCustomTokens();
-		icrcEnvTokens =
-			tokens?.map((token) => ({
-				...token,
-				id: parseTokenId(token.symbol),
-				enabled: false
-			})) ?? [];
-	});
+	const isValidVersion = (token: { version?: bigint }): boolean => {
+		return nonNullish(token.version) && token.version >= 0n;
+	};
 
-	let tokensLoaded = false;
-	$: tokensLoaded = [
-		$erc20Tokens,
-		$icrcTokens,
-		icrcEnvTokens,
-		$enabledBitcoinTokens,
-		$enabledEthereumTokens
-	].every((tokens) => tokens.length > 0);
+	const tryEnableToken = async (token: Token) => {
+		if (autoEnabledToken) return;
 
-	let shouldEnableToken = false;
-	$: shouldEnableToken =
-		isNullish($pageToken) && nonNullish($routeToken) && nonNullish($routeNetwork);
+		isLoading = true;
+		console.log(`Enabling token: ${token.name}`);
 
-	const enableToken = async (token: Token, identity: Identity) => {
-
-		console.debug(`Auto enabling token`, token);
 		try {
-			if (icTokenErc20UserToken(token)) {
-				await setUserToken({
-					identity,
-					token: token,
-					enabled: true
-				});
-				await loadUserTokens({ identity });
-			} else if (icTokenIcrcCustomToken(token)) {
-				await setCustomToken({
-					identity,
-					token: toCustomToken({ ...token, enabled: true }),
-				});
-				await loadCustomTokens({ identity });
+			const identity = $authIdentity;
+			if (!identity) throw new Error('No identity found');
+
+			if (icTokenErc20UserToken(token) || icTokenIcrcCustomToken(token)) {
+				if (!isValidVersion(token)) {
+					return;
+				}
+
+				await enableToken(token, identity);
 			} else {
-				throw new Error('Unknown token type. Token cannot be enabled.');
+				console.error(`Unknown token type: ${token.name}`);
+				throw new Error(`Unknown token type ${token.name}`);
 			}
 		} catch (error) {
 			console.error('Error enabling token:', error);
-			throw error;
-		}
-	};
-
-	const findAndEnableToken = async () => {
-		if (!shouldEnableToken) {
-			return;
-		}
-
-		const allTokens = [
-			ICP_TOKEN,
-			...$enabledBitcoinTokens,
-			...$enabledEthereumTokens,
-			...$erc20Tokens,
-			...allIcrcTokens
-		];
-
-		const foundToken = allTokens.find(
-			(token) =>
-				(token.symbol === $routeToken || token.name === $routeToken) &&
-				token.network.id.description === $routeNetwork
-		);
-
-		if (nonNullish(foundToken)) {
-			const { identity } = $authStore;
-			if (nonNullish(identity)) {
-				await enableToken(foundToken, identity);
-			}
-		}
-	};
-
-	const autoEnableToken = async () => {
-		if (attemptedAutoEnableToken || !tokensLoaded) {
-			return;
-		}
-
-		try {
-			isLoading = true;
-
-			if (shouldEnableToken) {
-				await findAndEnableToken();
-			}
-		} catch (error) {
-			console.error('Initialization error:', error);
-			toastsError({
-				msg: { text: $i18n.transactions.error.auto_enable_token }
-			});
+			toastsError({ msg: { text: $i18n.transactions.error.auto_enable_token } });
 		} finally {
 			isLoading = false;
-			attemptedAutoEnableToken = true;
 		}
 	};
 
-	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
-	$: knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
+	const enableToken = async (token: Token, identity: Identity) => {
+		if (icTokenErc20UserToken(token)) {
+			autoEnabledToken = true;
+			await setUserToken({ identity, token, enabled: true });
+			await loadUserTokens({ identity });
+		} else if (icTokenIcrcCustomToken(token)) {
+			autoEnabledToken = true;
+			await setCustomToken({ identity, token, enabled: true });
+			await loadCustomTokens({ identity });
+		}
+	};
 
-	let allIcrcTokens: IcrcCustomToken[] = [];
-	$: allIcrcTokens = [
-		...$icrcTokens,
-		...icrcEnvTokens.filter(
-			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
-		)
-	];
-
-	$: if (tokensLoaded && !attemptedAutoEnableToken) {
-		autoEnableToken();
+	$: if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token) && !autoEnabledToken) {
+		tryEnableToken(token);
 	}
 </script>
 
 {#if isLoading}
-	<Header>
-		{$i18n.transactions.text.title}
-	</Header>
+	<Header>{$i18n.transactions.text.title}</Header>
 	<TransactionsSkeletons loading={isLoading} />
 {:else if nonNullish($routeNetwork)}
 	{#if $networkICP}

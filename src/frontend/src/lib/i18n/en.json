@@ -507,6 +507,7 @@
 		"alt": {
 			"context_menu": "Context menu for to the selected token",
 			"open_etherscan": "Open the details of the token on Etherscan",
+			"open_blockstream": "Open the details of the token on Blockstream",
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
 			"token_group_number": "Total number of tokens in the group for native token $token"
@@ -698,7 +699,7 @@
 			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
 			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
 			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash.",
-			"auto_enable_token": "Error while auto-enabling the requested token."
+			"auto_enable_token": "Error while enabling the token."
 		}
 	},
 	"about": {
@@ -833,7 +834,8 @@
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},
 		"warning": {
-			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister."
+			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister.",
+			"unavailable_index_canister": "Transaction for $token_list can not be displayed. Index canister is currently not available."
 		}
 	}
 }
