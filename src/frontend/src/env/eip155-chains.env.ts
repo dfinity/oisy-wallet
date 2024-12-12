@@ -3,7 +3,7 @@ import {
 	ETHEREUM_NETWORK_CHAIN_ID,
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_CHAIN_ID
-} from '$env/networks.env';
+} from '$env/networks/networks.env';
 
 export const EIP155_CHAINS: Record<string, { chainId: number; name: string }> = {
 	[`eip155:${ETHEREUM_NETWORK_CHAIN_ID}`]: {

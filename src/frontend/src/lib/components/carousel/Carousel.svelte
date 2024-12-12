@@ -1,9 +1,16 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
+	import {
+		TRACK_COUNT_CAROUSEL_NEXT,
+		TRACK_COUNT_CAROUSEL_PREVIOUS
+	} from '$lib/constants/analytics.contants';
 	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
 	export let autoplay = 5000;
@@ -176,7 +183,11 @@
 	/**
 	 * Reset the autoplay timer and call goToNextSlide
 	 */
-	const onNext = () => {
+	const onNext = async () => {
+		await trackEvent({
+			name: TRACK_COUNT_CAROUSEL_NEXT
+		});
+
 		// Do not do anything if last-to-first element transition is on
 		if (currentSlide > totalSlides + 1) {
 			return;
@@ -210,7 +221,11 @@
 	/**
 	 * Reset the autoplay timer and call goToPreviousSlide
 	 */
-	const onPrevious = () => {
+	const onPrevious = async () => {
+		await trackEvent({
+			name: TRACK_COUNT_CAROUSEL_PREVIOUS
+		});
+
 		// Do not do anything if first-to-last element transition is on
 		if (currentSlide < -1) {
 			return;
@@ -244,6 +259,20 @@
 		const offset = (currentSlide + 1) * containerWidth;
 		moveSlider({ sliderFrame, animateTo: -offset, withTransition, duration, easing });
 	};
+
+	export const removeSlide = (idx: number) => {
+		slides = slides.filter((_, i) => i !== idx);
+
+		totalSlides = slides.length;
+
+		initializeCarousel();
+
+		goToNextSlide();
+
+		if (totalSlides <= 1) {
+			clearAutoplayTimer();
+		}
+	};
 </script>
 
 <!-- Resize listener to re-calculate slide frame width -->
@@ -253,6 +282,7 @@
 	data-tid={CAROUSEL_CONTAINER}
 	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-white px-3 pb-10 pt-3 shadow`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
+	out:slide={SLIDE_PARAMS}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
 		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
@@ -262,6 +292,7 @@
 	{#if nonNullish(slides) && slides.length > 1}
 		<div
 			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+			out:slide={SLIDE_PARAMS}
 		>
 			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
 			<Controls {onNext} {onPrevious} />
