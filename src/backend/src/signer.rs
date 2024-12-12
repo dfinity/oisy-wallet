@@ -12,10 +12,10 @@ use ic_cdk::api::{
         ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
     },
 };
+use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, CyclesLedgerService};
 use ic_cycles_ledger_client::{
     Account, ApproveArgs, ApproveError, CyclesLedgerService, DepositArgs, DepositResult,
 };
-use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, CyclesLedgerService};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
 use shared::types::signer::topup::{
