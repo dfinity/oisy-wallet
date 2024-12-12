@@ -58,49 +58,12 @@
 	let exchangesStaticData: ExchangesData | undefined;
 
 	onMount(() => {
-		const tokens = buildIcrcCustomTokens();
-		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
-
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
-	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
-	$: knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
-
-	// The entire list of ICRC tokens to display to the user:
-	// This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled), and the environment tokens that have never been used.
-	let allIcrcTokens: IcrcCustomToken[] = [];
-	$: allIcrcTokens = [
-		...$icrcTokens,
-		...icrcEnvTokens.filter(
-			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
-		)
-	].sort(sortIcTokens);
-
-	// The entire list of Erc20 tokens to display to the user.
-	let allErc20Tokens: EthereumUserToken[] = [];
-	$: allErc20Tokens = $erc20Tokens;
-
-	let manageIcTokens = false;
-	$: manageIcTokens = $pseudoNetworkChainFusion || $networkICP;
-
-	let manageEthereumTokens = false;
-	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
-
-	let allTokens: TokenToggleable<Token>[] = [];
-	$: allTokens = filterTokensForSelectedNetwork([
-		[
-			{
-				...ICP_TOKEN,
-				enabled: true
-			},
-			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-			...(manageEthereumTokens ? allErc20Tokens : []),
-			...(manageIcTokens ? allIcrcTokens : [])
-		],
+	let allTokensForSelectedNetwork: TokenToggleable<Token>[] = [];
+	$: allTokensForSelectedNetwork = filterTokensForSelectedNetwork([
+		$allTokens,
 		$selectedNetwork,
 		$pseudoNetworkChainFusion
 	]);
@@ -108,12 +71,12 @@
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
 		? pinEnabledTokensAtTop(
-				sortTokens({
-					$tokens: allTokens,
-					$exchanges: exchangesStaticData,
-					$tokensToPin: $tokensToPin
-				})
-			)
+			sortTokens({
+				$tokens: allTokensForSelectedNetwork,
+				$exchanges: exchangesStaticData,
+				$tokensToPin: $tokensToPin
+			})
+		)
 		: [];
 
 	let filterTokens = '';
