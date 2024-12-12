@@ -9,7 +9,13 @@ import {
 	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.env';
-import { SOLANA_NETWORKS_IDS } from '$env/networks/networks.sol.env';
+import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_NETWORKS_IDS,
+	SOLANA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
 import type { NetworkId } from '$lib/types/network';
 import {
 	isNetworkICP,
@@ -19,6 +25,10 @@ import {
 	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
+	isNetworkIdSOLDevnet,
+	isNetworkIdSOLLocal,
+	isNetworkIdSOLMainnet,
+	isNetworkIdSOLTestnet,
 	isNetworkIdSepolia,
 	isNetworkIdSolana,
 	mapNetworkIdToBitcoinNetwork
@@ -163,6 +173,46 @@ describe('network utils', () => {
 
 		it('should return false for non-Solana network IDs', () => {
 			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLMainnet', () => {
+		it('should return true for SOL mainnet ID', () => {
+			expect(isNetworkIdSOLMainnet(SOLANA_MAINNET_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL mainnet ID', () => {
+			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLTestnet', () => {
+		it('should return true for SOL testnet ID', () => {
+			expect(isNetworkIdSOLTestnet(SOLANA_TESTNET_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL testnet ID', () => {
+			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLDevnet', () => {
+		it('should return true for SOL devnet ID', () => {
+			expect(isNetworkIdSOLDevnet(SOLANA_DEVNET_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL devnet ID', () => {
+			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLLocal', () => {
+		it('should return true for SOL local ID', () => {
+			expect(isNetworkIdSOLLocal(SOLANA_LOCAL_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL local ID', () => {
+			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
 		});
 	});
 });
