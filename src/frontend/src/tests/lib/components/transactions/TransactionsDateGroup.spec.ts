@@ -3,7 +3,10 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
-import type { AllTransactionUi, AllTransactionUiNonEmptyList } from '$lib/types/transaction';
+import type {
+	AllTransactionUiWithCmp,
+	AllTransactionUiWithCmpNonEmptyList
+} from '$lib/types/transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { render } from '@testing-library/svelte';
@@ -14,7 +17,7 @@ describe('TransactionsDateGroup', () => {
 
 	const todayTimestamp = new Date().getTime();
 
-	const mockBtcTransactionsUi: AllTransactionUi[] = createMockBtcTransactionsUi(
+	const mockBtcTransactionsUi: AllTransactionUiWithCmp[] = createMockBtcTransactionsUi(
 		btcTransactionsNumber
 	).map((transaction) => ({
 		...transaction,
@@ -23,7 +26,7 @@ describe('TransactionsDateGroup', () => {
 		component: BtcTransaction
 	}));
 
-	const mockEthTransactionsUi: AllTransactionUi[] = createMockEthTransactions(
+	const mockEthTransactionsUi: AllTransactionUiWithCmp[] = createMockEthTransactions(
 		ethTransactionsNumber
 	).map((transaction) => ({
 		...transaction,
@@ -37,7 +40,7 @@ describe('TransactionsDateGroup', () => {
 	const mockTransactions = [
 		...mockBtcTransactionsUi,
 		...mockEthTransactionsUi
-	] as AllTransactionUiNonEmptyList;
+	] as AllTransactionUiWithCmpNonEmptyList;
 
 	it('should render the date', () => {
 		const { getByText } = render(TransactionsDateGroup, {
