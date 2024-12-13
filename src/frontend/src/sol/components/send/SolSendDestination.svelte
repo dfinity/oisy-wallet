@@ -4,7 +4,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdSolana } from '$lib/utils/network.utils';
-	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;

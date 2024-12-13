@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
@@ -13,38 +13,28 @@
 
 	let type: SolTransactionType;
 	let value: bigint | undefined;
-	let timestampNanoseconds: bigint | undefined;
-	let incoming: boolean | undefined;
+	let timestamp: bigint | undefined;
 
-	$: ({
-		type,
-		typeLabel: transactionTypeLabel,
-		value,
-		timestamp: timestampNanoseconds,
-		incoming
-	} = transaction);
+	$: ({ type, value, timestamp } = transaction);
+
+	let label: string;
+	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
 	let pending = false;
-	$: pending = transaction?.status === 'pending';
 
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
 	let amount: bigint | undefined;
-	$: amount = !incoming && nonNullish(value) ? value * -1n : value;
-
-	let timestamp: number | undefined;
-	$: timestamp = nonNullish(timestampNanoseconds)
-		? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
-		: undefined;
+	$: amount = nonNullish(value) ? value * -1n : value;
 </script>
 
 <!--TODO: add transaction modal opening-->
 <Transaction
 	styleClass="block w-full border-0"
-	amount={BigNumber.from(amount)}
+	amount={nonNullish(amount) ? BigNumber.from(amount) : amount}
 	{type}
-	{timestamp}
+	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
 	{status}
 	{token}
 	{iconType}

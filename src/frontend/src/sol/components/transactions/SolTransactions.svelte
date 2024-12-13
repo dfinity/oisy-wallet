@@ -32,8 +32,6 @@
 				: $solAddressMainnet;
 
 	$: address, $token, loadSolTransactions({ address, token: $token });
-
-	$: console.log($solTransactions);
 </script>
 
 <Header>

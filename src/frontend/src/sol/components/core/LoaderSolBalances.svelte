@@ -6,15 +6,12 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
-	import { loadBalances, loadErc20Balances } from '$eth/services/balance.services';
 	import {
-		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
-	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 	import { loadSolBalance } from '$sol/services/sol-balance.services';
 
 	const load = async () => {
