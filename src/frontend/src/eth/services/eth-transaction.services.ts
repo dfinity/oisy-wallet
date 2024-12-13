@@ -1,5 +1,5 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
-import { reloadBalance } from '$eth/services/balance.services';
+import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -142,5 +142,5 @@ const processMinedTransaction = async ({
 	});
 
 	// Reload balance as a transaction has been mined
-	await reloadBalance(token);
+	await reloadEthereumBalance(token);
 };

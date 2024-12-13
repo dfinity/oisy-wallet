@@ -15,15 +15,15 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const reloadBalance = (token: Token): Promise<ResultSuccess> => {
+export const reloadEthereumBalance = (token: Token): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(token.id)) {
-		return loadBalance({ networkId: token.network.id, tokenId: token.id });
+		return loadEthBalance({ networkId: token.network.id, tokenId: token.id });
 	}
 
 	return loadErc20Balance({ token: token as Erc20Token });
 };
 
-export const loadBalance = async ({
+export const loadEthBalance = async ({
 	networkId,
 	tokenId
 }: {
@@ -110,10 +110,10 @@ const loadErc20Balance = async ({
 	return { success: true };
 };
 
-export const loadBalances = async (): Promise<ResultSuccess> => {
+export const loadEthBalances = async (): Promise<ResultSuccess> => {
 	const results = await Promise.all([
 		...SUPPORTED_ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
-			loadBalance({ networkId, tokenId })
+			loadEthBalance({ networkId, tokenId })
 		)
 	]);
 
