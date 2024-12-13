@@ -13,11 +13,11 @@
 	<Confetti
 		x={[-5, 5]}
 		y={[0, 0.1]}
-		delay={[500, 2000]}
+		delay={[0, 250]}
 		infinite
 		duration={5000}
-		amount={200}
-		fallDistance="100vh"
+		amount={125}
+		fallDistance="300px"
 		{colorArray}
 	/>
 </div>
