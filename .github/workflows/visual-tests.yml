@@ -57,7 +57,13 @@ jobs:
     needs: [check-e2e-changes]
     if: ${{ inputs.update-snapshots == 'true' || (github.event_name == 'pull_request' && needs.check-e2e-changes.outputs.e2e-changed == 'true') }}
     steps:
+
       - name: Checkout
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/checkout@v4
+
+      - name: Checkout
+        if: ${{ github.event_name == 'pull_request' }}
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
