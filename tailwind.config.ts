@@ -72,7 +72,23 @@ export default {
 				'1.5lg': '1152px',
 				'1.5xl': '1408px',
 				'2.5xl': '1728px',
-				'h-md': { raw: '(max-height: 1090px)' }
+				'h-md': { raw: '(max-height: 1090px)' },
+				tall: { raw: '(min-height: 800px)' }
+			},
+			animation: {
+				fade: 'fadeIn .25s ease-in-out',
+				snowfall: 'snowfall linear infinite'
+			},
+
+			keyframes: {
+				fadeIn: {
+					from: { opacity: '0' },
+					to: { opacity: '1' }
+				},
+				snowfall: {
+					'0%': { transform: 'translateY(-100vh)' },
+					'100%': { transform: 'translateY(100vh)' }
+				}
 			}
 		}
 	},

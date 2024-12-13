@@ -1,21 +1,28 @@
 <script lang="ts">
-	import Confetti from 'svelte-confetti';
-	import snow1 from '$lib/assets/snow-1.svg';
-	import snow2 from '$lib/assets/snow-2.svg';
-	import snow3 from '$lib/assets/snow-3.svg';
+	interface Snowflake {
+		left: string;
+		opacity: string;
+		duration: string;
+		delay: string;
+		symbol: string;
+	}
 
-	const colorArray = [`url(${snow1})`, `url(${snow2})`, `url(${snow3})`];
+	const snowflakes: Snowflake[] = Array.from({ length: 50 }, () => ({
+		left: `${Math.random() * 100}%`,
+		opacity: `${Math.random()}`,
+		duration: `${Math.random() * 7 + 3}s`,
+		delay: `${Math.random() * 2}s`,
+		symbol: Math.random() > 0.5 ? '❅' : '❄️'
+	}));
 </script>
 
-<div class="absolute -top-12 left-0 flex h-screen w-screen justify-center overflow-hidden text-white">
-	<Confetti
-		x={[-5, 5]}
-		y={[0, 0.1]}
-		delay={[500, 2000]}
-		infinite
-		duration={5000}
-		amount={200}
-		fallDistance="100vh"
-		{colorArray}
-	/>
+<div class="pointer-events-none fixed inset-0 z-10 flex size-full">
+	{#each snowflakes as { left, opacity, duration, delay, symbol }}
+		<div
+			class="absolute size-2 animate-snowfall rounded-full text-white"
+			style="left: {left}; opacity: {opacity}; animation-duration: {duration}; animation-delay: -{delay};"
+		>
+			{symbol}
+		</div>
+	{/each}
 </div>
