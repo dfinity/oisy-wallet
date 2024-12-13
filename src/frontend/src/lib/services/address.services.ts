@@ -1,20 +1,3 @@
-import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
-import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens/tokens.btc.env';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import {
-	getIdbBtcAddressMainnet,
-	getIdbEthAddress,
-	setIdbBtcAddressMainnet,
-	setIdbBtcAddressTestnet,
-	setIdbEthAddress,
-	updateIdbBtcAddressMainnetLastUsage,
-	updateIdbEthAddressLastUsage
-} from '$lib/api/idb.api';
-import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
 import { warnSignOut } from '$lib/services/auth.services';
 import { type AddressStore, type StorageAddressData } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
@@ -27,13 +10,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import { reduceResults } from '$lib/utils/results.utils';
-import {
-	loadIdbSolAddressMainnet,
-	loadSolAddressMainnet
-} from '$sol/services/sol-address.services';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';

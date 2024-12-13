@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
+	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
@@ -32,7 +33,6 @@
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
