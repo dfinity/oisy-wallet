@@ -56,6 +56,9 @@ jobs:
     timeout-minutes: 15
     needs: [check-e2e-changes]
     if: ${{ inputs.update-snapshots == 'true' || (github.event_name == 'pull_request' && needs.check-e2e-changes.outputs.e2e-changed == 'true') }}
+    permissions:
+      contents: write
+      packages: write
     steps:
 
       - name: Checkout
@@ -68,7 +71,6 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
@@ -112,7 +114,7 @@ jobs:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
           # Use GitHub App token if PR, otherwise a PAT for push
-          token: ${{ github.event_name == 'pull_request' && steps.app-token.outputs.token || secrets.GIX_CREATE_PR_PAT }}
+          token: ${{ github.event_name == 'pull_request' && steps.app-token.outputs.token }}
       
       - name: Download WASM artifact
         uses: actions/download-artifact@v4
