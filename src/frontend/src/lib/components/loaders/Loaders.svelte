@@ -7,12 +7,12 @@
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import LoaderSolBalances from '$sol/components/core/LoaderSolBalances.svelte';
+	import LoaderBalances from '$lib/components/loaders/LoaderBalances.svelte';
 </script>
 
 <AddressGuard>
 	<Loader>
-		<LoaderEthBalances>
-			<LoaderSolBalances>
+		<LoaderBalances>
 				<LoaderWallets>
 					<ExchangeWorker>
 						<LoaderMetamask
@@ -22,7 +22,6 @@
 						</LoaderMetamask>
 					</ExchangeWorker>
 				</LoaderWallets>
-			</LoaderSolBalances>
-		</LoaderEthBalances>
+		</LoaderBalances>
 	</Loader>
 </AddressGuard>
