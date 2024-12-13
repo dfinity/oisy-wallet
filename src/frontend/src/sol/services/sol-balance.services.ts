@@ -38,9 +38,18 @@ export const loadSolBalance = async ({
 }): Promise<ResultSuccess> => {
 	const { id: tokenId } = token;
 
-	const balance = await loadLamportsBalance({ address, token });
+	try {
+		const balance = await loadLamportsBalance({ address, token });
 
-	balancesStore.set({ tokenId, data: { data: BigNumber.from(balance), certified: true } });
+		balancesStore.set({ tokenId, data: { data: BigNumber.from(balance), certified: false } });
 
-	return { success: true };
+		return { success: true };
+	} catch (err: unknown) {
+		balancesStore.reset(tokenId);
+
+		// We don't want to disrupt the user experience if we can't load the balance.
+		console.error(`Error fetching ${tokenId.description} balance data:`, err);
+
+		return { success: false };
+	}
 };
