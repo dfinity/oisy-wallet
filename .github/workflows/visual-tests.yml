@@ -56,15 +56,12 @@ jobs:
     timeout-minutes: 15
     needs: [check-e2e-changes]
     if: ${{ inputs.update-snapshots == 'true' || (github.event_name == 'pull_request' && needs.check-e2e-changes.outputs.e2e-changed == 'true') }}
-    permissions:
-      contents: write
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
 
       - name: Build oisy-backend WASM
