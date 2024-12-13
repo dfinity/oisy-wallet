@@ -177,7 +177,6 @@ jobs:
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
         
       - name: Download Ubuntu Snapshots
         uses: actions/download-artifact@v4
