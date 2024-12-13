@@ -345,6 +345,7 @@ describe('post-message.schema', () => {
 			'syncBtcWallet',
 			'syncIcpWalletError',
 			'syncIcrcWalletError',
+			'syncBtcWalletError',
 			'syncIcpWalletCleanUp',
 			'syncIcrcWalletCleanUp',
 			'syncBtcStatuses',
