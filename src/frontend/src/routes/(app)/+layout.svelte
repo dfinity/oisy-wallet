@@ -11,6 +11,7 @@
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import Loaders from '$lib/components/loaders/Loaders.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
+	import SnowBackground from '$lib/components/ui/SnowBackground.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -42,6 +43,8 @@
 		});
 	});
 </script>
+
+<SnowBackground />
 
 <div
 	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
