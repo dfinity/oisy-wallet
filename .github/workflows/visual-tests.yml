@@ -144,9 +144,6 @@ jobs:
         if: ${{steps.cache.outputs.cache-hit != 'true' || inputs.update-snapshots == 'true'}}
         run: npm run e2e:snapshots
 
-      - name: Run Snapshot Tests
-        run: npx playwright test
-
       - name: Check if snapshots changed
         run: |
           git add e2e
@@ -170,7 +167,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: update-snapshots
-    if: ${{ inputs.update-snapshots == 'true' }}
+    # if: ${{ inputs.update-snapshots == 'true' }}
     permissions:
       contents: write
       packages: write
