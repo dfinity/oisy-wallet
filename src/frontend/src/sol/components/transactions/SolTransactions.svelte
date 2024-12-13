@@ -26,6 +26,7 @@
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadSolTransactions } from '$sol/services/sol-transactions.services';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -54,16 +55,17 @@
 	{$i18n.transactions.text.title}
 </Header>
 
-<!--TODO: add skeleton-->
-<!--TODO: add listener-->
-{#if $solTransactions.length > 0}
-	<!--	TODO: make it paginated to load more on scroll since we have a limit of calls-->
-	{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
-		<div in:slide={SLIDE_DURATION}>
-			<SolTransaction {transaction} token={$token ?? SOLANA_TOKEN} />
-		</div>
-	{/each}
-{/if}
+<SolTransactionsSkeletons>
+	<!--TODO: add listener-->
+	{#if $solTransactions.length > 0}
+		<!--	TODO: make it paginated to load more on scroll since we have a limit of calls-->
+		{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
+			<div in:slide={SLIDE_DURATION}>
+				<SolTransaction {transaction} token={$token ?? SOLANA_TOKEN} />
+			</div>
+		{/each}
+	{/if}
+</SolTransactionsSkeletons>
 
 {#if $solTransactions.length === 0}
 	<TransactionsPlaceholder />
