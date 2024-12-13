@@ -137,7 +137,7 @@ jobs:
         id: cache
         uses: actions/cache@v4
         with:
-          key: snapshots-${{ matrix.os }}-${{ github.ref }}-${{ needs.check-e2e-changes.outputs.e2e-changed }}
+          key: snapshots-${{ matrix.os }}-${{ github.ref }}-${{ github.sha }}
           path: e2e
 
       - name: Update snapshots if cache missed
