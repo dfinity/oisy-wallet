@@ -20,7 +20,12 @@
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
 	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
-	import { networkBitcoin, networkEthereum, networkICP, networkSolana } from '$lib/derived/network.derived';
+	import {
+		networkBitcoin,
+		networkEthereum,
+		networkICP,
+		networkSolana
+	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
