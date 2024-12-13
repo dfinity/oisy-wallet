@@ -5,6 +5,7 @@ import type {
 	EthSignPrehashRequest,
 	EthSignTransactionRequest,
 	GetBalanceRequest,
+	SchnorrKeyId,
 	SendBtcResponse,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
@@ -197,15 +198,20 @@ export class SignerCanister extends Canister<SignerService> {
 		throw mapSignerCanisterSendBtcError(response.Err);
 	};
 
-	getSchnorrPublicKey = async (derivationPath: string[]): Promise<Uint8Array | number[]> => {
+	getSchnorrPublicKey = async ({
+		derivationPath,
+		keyId
+	}: {
+		derivationPath: string[];
+		keyId: SchnorrKeyId;
+	}): Promise<Uint8Array | number[]> => {
 		const { schnorr_public_key } = this.caller({
 			certified: true
 		});
 
 		const response = await schnorr_public_key(
 			{
-				// TODO: set the key_id in the signer repo, as done for the ecdsa key
-				key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+				key_id: keyId,
 				canister_id: [],
 				derivation_path: mapDerivationPath(derivationPath)
 			},

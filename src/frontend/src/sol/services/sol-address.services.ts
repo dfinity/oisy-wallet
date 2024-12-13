@@ -1,5 +1,6 @@
 import {
 	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_KEY_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
@@ -28,11 +29,20 @@ import {
 	type StorageAddressData
 } from '$lib/stores/address.store';
 import type { SolAddress } from '$lib/types/address';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { getAddressDecoder } from '@solana/web3.js';
+
+const getSolanaPublicKey = async (
+	params: CanisterApiFunctionParams<{ derivationPath: string[] }>
+): Promise<Uint8Array | number[]> =>
+	await getSchnorrPublicKey({
+		...params,
+		keyId: SOLANA_KEY_ID
+	});
 
 const getSolAddress = async ({
 	identity,
@@ -41,7 +51,7 @@ const getSolAddress = async ({
 	identity: OptionIdentity;
 	derivationPath: string[];
 }): Promise<SolAddress> => {
-	const publicKey = await getSchnorrPublicKey({ identity, derivationPath });
+	const publicKey = await getSolanaPublicKey({ identity, derivationPath });
 	const decoder = getAddressDecoder();
 	return decoder.decode(Uint8Array.from(publicKey));
 };

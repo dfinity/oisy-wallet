@@ -4,6 +4,7 @@ import type {
 	RejectionCode_1,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
+import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
@@ -593,12 +594,12 @@ describe('signer.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = await getSchnorrPublicKey(['test']);
+			const res = await getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
 
 			expect(res).toEqual(publicKey);
 			expect(service.schnorr_public_key).toHaveBeenCalledWith(
 				{
-					key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+					key_id: SOLANA_KEY_ID,
 					canister_id: [],
 					derivation_path: mapDerivationPath(['test'])
 				},
@@ -615,7 +616,7 @@ describe('signer.canister', () => {
 				serviceOverride: service
 			});
 
-			const res = getSchnorrPublicKey(['test']);
+			const res = getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
