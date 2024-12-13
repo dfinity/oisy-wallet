@@ -44,8 +44,6 @@
 	});
 </script>
 
-
-
 <div
 	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
 	class:overflow-hidden={$authNotSignedIn}

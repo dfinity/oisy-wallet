@@ -7,7 +7,9 @@
 	const colorArray = [`url(${snow1})`, `url(${snow2})`, `url(${snow3})`];
 </script>
 
-<div class="absolute -top-12 left-0 flex h-screen w-screen justify-center overflow-hidden text-white">
+<div
+	class="absolute -top-12 left-0 flex h-screen w-screen justify-center overflow-hidden text-white"
+>
 	<Confetti
 		x={[-5, 5]}
 		y={[0, 0.1]}
