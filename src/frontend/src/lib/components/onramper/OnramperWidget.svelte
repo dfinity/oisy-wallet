@@ -9,14 +9,16 @@
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
-	import { networkBitcoin, networkEthereum } from '$lib/derived/network.derived';
+	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
+	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+	import { SOLANA_MAINNET_NETWORK, SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
@@ -25,6 +27,7 @@
 			? $ethereumToken.buy?.onramperId
 			: $networkBitcoin
 				? BTC_MAINNET_TOKEN.buy?.onramperId
+				: $networkSolana ? SOLANA_TOKEN.buy?.onramperId
 				: ICP_TOKEN.buy?.onramperId) ??
 		ICP_TOKEN.buy?.onramperId ??
 		undefined;
@@ -43,7 +46,8 @@
 		walletMap: new Map([
 			[BTC_MAINNET_NETWORK_ID, $btcAddressMainnet],
 			[ETHEREUM_NETWORK_ID, $ethAddress],
-			[ICP_NETWORK_ID, $icpAccountIdentifierText]
+			[ICP_NETWORK_ID, $icpAccountIdentifierText],
+			[SOLANA_MAINNET_NETWORK_ID, $solAddressMainnet]
 		])
 	});
 
