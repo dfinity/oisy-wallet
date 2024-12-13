@@ -17,6 +17,7 @@ export type SolTransactionType = Extract<
 >;
 
 export interface SolRpcTransaction {
+	id: string;
 	blockTime: UnixTimestamp | null;
 	confirmationStatus: Commitment | null;
 	meta: {
@@ -48,4 +49,5 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	type: SolTransactionType;
 	status: Commitment | null;
 	value?: bigint;
+	fee?: bigint;
 }

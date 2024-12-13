@@ -52,7 +52,7 @@ export const loadSolTransactions = async ({
 					return null;
 				}
 
-				return { ...rpcTransaction, confirmationStatus };
+				return { ...rpcTransaction, confirmationStatus, id: signature.toString() };
 			})
 		);
 
@@ -72,11 +72,15 @@ export const loadSolTransactions = async ({
 			[]
 		);
 
+		solTransactionsStore.reset(tokenId);
+
 		solTransactionsStore.append({
 			tokenId,
 			transactions: transactions.filter(nonNullish)
 		});
 	} catch (error: unknown) {
-		console.error(error);
+		solTransactionsStore.reset(tokenId);
+
+		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
 	}
 };

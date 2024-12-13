@@ -5,6 +5,7 @@ import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transac
  */
 export const mapSolTransactionUi = (transaction: SolRpcTransaction): SolTransactionUi => {
 	const {
+		id,
 		blockTime,
 		confirmationStatus: status,
 		transaction: {
@@ -23,12 +24,13 @@ export const mapSolTransactionUi = (transaction: SolRpcTransaction): SolTransact
 	const type = amount > 0n ? 'send' : 'receive';
 
 	return {
-		id: blockTime?.toString() ?? crypto.randomUUID(),
+		id,
 		timestamp: blockTime ?? 0n,
 		from,
 		to,
 		type,
 		status,
-		value: amount
+		value: amount,
+		fee
 	};
 };
