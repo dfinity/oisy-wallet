@@ -120,8 +120,8 @@
 	});
 </script>
 
-{#if true}
-	{#if true}
+{#if $loading}
+	{#if progressModal}
 		<div in:fade={{ delay: 0, duration: 250 }} class="login-modal">
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
