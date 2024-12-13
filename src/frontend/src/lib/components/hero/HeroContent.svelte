@@ -27,6 +27,7 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
+	import SnowBackground from '$lib/components/ui/SnowBackground.svelte';
 
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
@@ -66,6 +67,8 @@
 	class:via-united-nations-blue={$networkEthereum}
 	class:to-bright-lilac={$networkEthereum}
 >
+	<SnowBackground />
+	<div class="z-10 flex size-full flex-col">
 	{#if isTransactionsPage}
 		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
@@ -105,4 +108,6 @@
 	{#if isErc20Icp($pageToken)}
 		<Erc20Icp />
 	{/if}
+
+	</div>
 </div>
