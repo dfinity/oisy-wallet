@@ -1,5 +1,5 @@
 <script lang="ts">
-	import LoaderBalances from '$icp-eth/components/core/LoaderBalances.svelte';
+	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
@@ -11,7 +11,7 @@
 
 <AddressGuard>
 	<Loader>
-		<LoaderBalances>
+		<LoaderEthBalances>
 			<LoaderSolBalances>
 				<LoaderWallets>
 					<ExchangeWorker>
@@ -23,6 +23,6 @@
 					</ExchangeWorker>
 				</LoaderWallets>
 			</LoaderSolBalances>
-		</LoaderBalances>
+		</LoaderEthBalances>
 	</Loader>
 </AddressGuard>
