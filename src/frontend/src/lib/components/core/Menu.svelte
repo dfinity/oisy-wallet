@@ -14,6 +14,7 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
+	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -21,9 +22,11 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
+	import { modalVipQrCode } from '$lib/derived/modal.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { userSettings } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
@@ -32,9 +35,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { modalVipQrCode } from '$lib/derived/modal.derived';
-	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;

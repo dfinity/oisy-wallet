@@ -1,27 +1,27 @@
 <script lang="ts">
 	import { Modal, QRCode } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
+	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { onMount } from 'svelte';
 
-	function generateRandomString() { // TODO remove this function
+	function generateRandomString() {
+		// TODO remove this function
 		var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 		var result = '';
-		for (var i = 0; i < 11; i++ ) {
+		for (var i = 0; i < 11; i++) {
 			result += chars.charAt(Math.floor(Math.random() * chars.length));
 		}
 		return result;
 	}
-
 
 	const secondsToRegenerate = 45;
 	let counter = secondsToRegenerate;
@@ -29,15 +29,15 @@
 
 	let code;
 	const generateCode = () => {
-		code = generateRandomString() // TODO load Code from backend
-	}
+		code = generateRandomString(); // TODO load Code from backend
+	};
 
 	const regenerateCode = () => {
 		clearInterval(countdown);
 		generateCode();
 		counter = secondsToRegenerate;
 		countdown = setInterval(intervalFunction, 1000);
-	}
+	};
 
 	const intervalFunction = () => {
 		counter--;
@@ -45,7 +45,7 @@
 		if (counter === 0) {
 			regenerateCode();
 		}
-	}
+	};
 
 	onMount(() => {
 		countdown = setInterval(intervalFunction, 1000);
@@ -65,7 +65,7 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] p-4 mb-4">
+		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-[100%] p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
 					<svelte:fragment slot="logo">
@@ -80,10 +80,13 @@
 		{#if nonNullish(code)}
 			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2">
 				<output>{qrCodeUrl}</output>
-				<ReceiveCopy address={qrCodeUrl} copyAriaLabel={$i18n.vip.invitation.text.invitation_link_copied} />
+				<ReceiveCopy
+					address={qrCodeUrl}
+					copyAriaLabel={$i18n.vip.invitation.text.invitation_link_copied}
+				/>
 			</div>
 
-			<span class="block w-full text-center text-sm text-tertiary pt-3 mb-4">
+			<span class="mb-4 block w-full pt-3 text-center text-sm text-tertiary">
 				{replacePlaceholders($i18n.vip.invitation.text.regenerate_countdown_text, {
 					$counter: counter
 				})}
