@@ -11,19 +11,20 @@ import { render } from '@testing-library/svelte';
 describe('DappsCarousel', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.restoreAllMocks();
 
 		userProfileStore.set({ profile: mockUserProfile, certified: false });
 	});
 
 	it('should render nothing if there is no dApps', () => {
-		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValueOnce([]);
+		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 
 		const { container } = render(DappsCarousel);
 		expect(container.innerHTML).toBe('');
 	});
 
 	it('should render nothing if no dApps has the carousel prop', () => {
-		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValueOnce(
+		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue(
 			mockDappsDescriptions.map((dapp) => ({ ...dapp, carousel: undefined }))
 		);
 
