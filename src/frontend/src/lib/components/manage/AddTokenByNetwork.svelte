@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
@@ -50,8 +49,6 @@
 			tokenData = {};
 		}
 	}
-
-	const dispatch = createEventDispatcher();
 
 	let invalidErc20 = true;
 	$: invalidErc20 = isNullishOrEmpty(erc20ContractAddress);
