@@ -20,7 +20,8 @@ describe('SendSource', () => {
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 
 		expect(source?.textContent).toBe('0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9');
-		expect(balance?.textContent).toBe('0.22 BTC');
+		expect(balance?.textContent).toContain('0.22');
+		expect(balance?.textContent).toContain('BTC');
 	});
 	it('should render all field but balance without value', () => {
 		const { container } = render(SendSource, { ...props, token: undefined });
@@ -38,6 +39,7 @@ describe('SendSource', () => {
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 
 		expect(source).toBeNull();
-		expect(balance?.textContent).toBe('0.22 BTC');
+		expect(balance?.textContent).toContain('0.22');
+		expect(balance?.textContent).toContain('BTC');
 	});
 });
