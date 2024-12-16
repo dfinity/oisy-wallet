@@ -24,7 +24,7 @@ describe('Listener', () => {
 			props: { token: null }
 		});
 
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if user is not connected', () => {
@@ -34,7 +34,7 @@ describe('Listener', () => {
 			props: { token: ETHEREUM_TOKEN }
 		});
 
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if the token has an unknown network', () => {
@@ -46,7 +46,7 @@ describe('Listener', () => {
 			props: { token: ICP_TOKEN }
 		});
 
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if it is an IC token', () => {
@@ -54,7 +54,7 @@ describe('Listener', () => {
 			props: { token: ICP_TOKEN }
 		});
 
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	// TODO: add tests for rendered listeners, when it is possible to dynamically pass children to the components
