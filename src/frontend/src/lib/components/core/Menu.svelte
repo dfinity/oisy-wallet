@@ -31,7 +31,6 @@
 		networkUrl
 	} from '$lib/utils/nav.utils';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { userSettings } from '$lib/derived/user-profile.derived';
 
 	let visible = false;
