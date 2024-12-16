@@ -133,11 +133,7 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([
-			emptyIdbBtcAddressMainnet(),
-			emptyIdbEthAddress(),
-			clearTestnetsOption()
-		]);
+		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption()]);
 	}
 
 	await clearSessionStorage();
