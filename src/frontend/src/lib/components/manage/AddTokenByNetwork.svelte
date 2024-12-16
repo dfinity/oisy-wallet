@@ -90,7 +90,7 @@
 		</Value>
 	{/if}
 
-	<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+	<form in:fade class="min-h-auto">
 		{#if isNetworkIdICP(network?.id)}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isNetworkIdEthereum(network?.id)}
@@ -100,7 +100,7 @@
 		{/if}
 	</form>
 
-	<AddTokenByNetworkToolbar slot="toolbar" {invalid} on:icBack />
+	<AddTokenByNetworkToolbar slot="toolbar" {invalid} on:icBack on:icNext />
 </ContentWithToolbar>
 
 <style lang="scss">
