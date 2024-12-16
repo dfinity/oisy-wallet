@@ -23,7 +23,7 @@
 	};
 
 	const openToken = () => {
-		const fn = $networkICP ? modalStore.openIcToken : modalStore.openToken;
+		const fn = $networkICP ? modalStore.openIcToken : modalStore.openEthToken;
 		fn();
 
 		visible = false;

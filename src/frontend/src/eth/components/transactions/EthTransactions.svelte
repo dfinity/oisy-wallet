@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
-	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
+	import EthTokenModal from '$eth/components/tokens/EthTokenModal.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
@@ -16,7 +16,7 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { modalToken, modalEthTransaction } from '$lib/derived/modal.derived';
+	import { modalEthTransaction, modalEthToken } from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -67,6 +67,6 @@
 
 {#if $modalEthTransaction && nonNullish(selectedTransaction)}
 	<EthTransactionModal transaction={selectedTransaction} token={selectedToken} />
-{:else if $modalToken}
-	<TokenModal />
+{:else if $modalEthToken}
+	<EthTokenModal />
 {/if}
