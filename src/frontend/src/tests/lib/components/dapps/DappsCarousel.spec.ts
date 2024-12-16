@@ -20,7 +20,7 @@ describe('DappsCarousel', () => {
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if no dApps has the carousel prop', () => {
@@ -29,7 +29,7 @@ describe('DappsCarousel', () => {
 		);
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if all dApps were hidden', () => {
@@ -52,14 +52,14 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: userProfile, certified: false });
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if the user profile is nullish', () => {
 		userProfileStore.reset();
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render the Carousel if the user settings are null', () => {
