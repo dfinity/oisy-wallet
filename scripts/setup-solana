@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: Installation guide: https://solana.com/docs/intro/installation
+
+: "Gets the Solana version from the environment variable '$version', defaulting to 'stable'."
+version="${version:-stable}"
+
+: "If the version starts with a numeral, e.g. '1.2.3', prefixes with 'v', e.g. 'v1.2.3'."
+if [[ "$version" = [0-9]* ]]; then
+  version="v$version"
+fi
+
+: "Installs the Solana command line tools."
+sh -c "$(curl -sSfL "https://release.anza.xyz/${version}/install")"

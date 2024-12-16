@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import type { NetworkId } from '$lib/types/network';
 
