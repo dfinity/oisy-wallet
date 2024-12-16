@@ -94,9 +94,6 @@ export interface DappCarouselSettings {
 export interface DappSettings {
 	dapp_carousel: DappCarouselSettings;
 }
-export interface VipSettings {
-	isVip: boolean;
-}
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -209,7 +206,6 @@ export interface SelectedUtxosFeeResponse {
 }
 export interface Settings {
 	dapp: DappSettings;
-	vip?: VipSettings;
 }
 export interface Stats {
 	user_profile_count: bigint;
