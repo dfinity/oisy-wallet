@@ -63,7 +63,7 @@
 		"@dfinity/principal": "^2.1.2",
 		"@dfinity/utils": "^2.5.1",
 		"@dfinity/verifiable-credentials": "^0.0.4",
-		"@junobuild/analytics": "^0.0.28",
+		"@junobuild/analytics": "^0.0.31",
 		"@metamask/detect-provider": "^2.0.0",
 		"@sveltejs/adapter-static": "^3.0.6",
 		"@sveltejs/package": "^2.3.7",
