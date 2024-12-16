@@ -652,8 +652,8 @@ interface I18nVip {
 			invitation_link_copied: string;
 			generate_new_link: string;
 			regenerate_countdown_text: string;
-		}
-	}
+		};
+	};
 }
 
 interface I18nSigner {
