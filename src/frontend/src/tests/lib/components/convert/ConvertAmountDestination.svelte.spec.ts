@@ -42,30 +42,47 @@ describe('ConvertAmountDestination', () => {
 	});
 
 	it('should calculate receiveAmount correctly', () => {
-		const { component } = render(ConvertAmountDestination, {
-			props,
+		const testProps = $state({
+			...props,
+			receiveAmount: undefined
+		});
+
+		render(ConvertAmountDestination, {
+			props: testProps,
 			context: mockContext
 		});
 
-		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBe(receiveAmount);
+		expect(testProps.receiveAmount).toBe(receiveAmount);
 	});
 
 	it('should calculate receiveAmount correctly if sendAmount is not provided', () => {
 		const { sendAmount: _, ...newProps } = props;
-		const { component } = render(ConvertAmountDestination, {
-			props: newProps,
+
+		const testProps = $state({
+			...newProps,
+			receiveAmount: undefined
+		});
+
+		render(ConvertAmountDestination, {
+			props: testProps,
 			context: mockContext
 		});
 
-		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBeUndefined();
+		expect(testProps.receiveAmount).toBeUndefined();
 	});
 
 	it('should calculate receiveAmount correctly if insufficientFunds is true', () => {
-		const { component } = render(ConvertAmountDestination, {
-			props: { ...props, insufficientFunds: true },
+		const testProps = $state({
+			...props,
+			insufficientFunds: true,
+			receiveAmount: undefined
+		});
+
+		render(ConvertAmountDestination, {
+			props: testProps,
 			context: mockContext
 		});
 
-		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBeUndefined();
+		expect(testProps.receiveAmount).toBeUndefined();
 	});
 });
