@@ -158,8 +158,7 @@ export const idlFactory = ({ IDL }) => {
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
 	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
-	const VipSettings = IDL.Record({ isVip: IDL.Bool });
-	const Settings = IDL.Record({ dapp: DappSettings, vip: VipSettings });
+	const Settings = IDL.Record({ dapp: DappSettings });
 	const UserProfile = IDL.Record({
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
