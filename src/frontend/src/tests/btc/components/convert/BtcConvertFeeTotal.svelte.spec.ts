@@ -45,35 +45,63 @@ describe('BtcConvertFeeTotal', () => {
 	});
 
 	it('should not update totalFee if only default fee is available', () => {
-		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ utxosFeeStore: store })
+		const props = $state({
+			totalFee: undefined
 		});
-		expect(component.$$.ctx[component.$$.props['totalFee']]).toBeUndefined();
+
+		render(BtcConvertFeeTotal, {
+			context: mockContext({ utxosFeeStore: store }),
+			props
+		});
+
+		expect(props.totalFee).toBeUndefined();
 	});
 
 	it('should not update totalFee if only default and utxos fees are available', () => {
-		store.setUtxosFee({ utxosFee: mockUtxosFee });
-		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ utxosFeeStore: store })
+		const props = $state({
+			totalFee: undefined
 		});
-		expect(component.$$.ctx[component.$$.props['totalFee']]).toBeUndefined();
+
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
+
+		render(BtcConvertFeeTotal, {
+			context: mockContext({ utxosFeeStore: store }),
+			props
+		});
+
+		expect(props.totalFee).toBeUndefined();
 	});
 
 	it('should not update totalFee if only default and ckBTC minter fees are available', () => {
-		const tokenId = setupCkBTCStores();
-		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ utxosFeeStore: store, destinationTokenId: tokenId })
+		const props = $state({
+			totalFee: undefined
 		});
-		expect(component.$$.ctx[component.$$.props['totalFee']]).toBeUndefined();
+
+		const tokenId = setupCkBTCStores();
+
+		render(BtcConvertFeeTotal, {
+			context: mockContext({ utxosFeeStore: store, destinationTokenId: tokenId }),
+			props
+		});
+
+		expect(props.totalFee).toBeUndefined();
 	});
 
 	it('should calculate totalFee correctly if all fees are available', () => {
-		store.setUtxosFee({ utxosFee: mockUtxosFee });
-		const tokenId = setupCkBTCStores();
-		const { component } = render(BtcConvertFeeTotal, {
-			context: mockContext({ utxosFeeStore: store, destinationTokenId: tokenId })
+		const props = $state({
+			totalFee: undefined
 		});
-		expect(component.$$.ctx[component.$$.props['totalFee']]).toBe(
+
+		store.setUtxosFee({ utxosFee: mockUtxosFee });
+
+		const tokenId = setupCkBTCStores();
+
+		render(BtcConvertFeeTotal, {
+			context: mockContext({ utxosFeeStore: store, destinationTokenId: tokenId }),
+			props
+		});
+
+		expect(props.totalFee).toBe(
 			BTC_CONVERT_FEE + mockCkBtcMinterInfo.kyt_fee + mockUtxosFee.feeSatoshis
 		);
 	});
