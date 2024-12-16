@@ -11,24 +11,25 @@ import { render } from '@testing-library/svelte';
 describe('DappsCarousel', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.restoreAllMocks();
 
 		userProfileStore.set({ profile: mockUserProfile, certified: false });
 	});
 
 	it('should render nothing if there is no dApps', () => {
-		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValueOnce([]);
+		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if no dApps has the carousel prop', () => {
-		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValueOnce(
+		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue(
 			mockDappsDescriptions.map((dapp) => ({ ...dapp, carousel: undefined }))
 		);
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if all dApps were hidden', () => {
@@ -51,14 +52,14 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: userProfile, certified: false });
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render nothing if the user profile is nullish', () => {
 		userProfileStore.reset();
 
 		const { container } = render(DappsCarousel);
-		expect(container.innerHTML).toBe('');
+		expect(container.textContent).toBe('');
 	});
 
 	it('should render the Carousel if the user settings are null', () => {

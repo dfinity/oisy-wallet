@@ -3,6 +3,7 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
@@ -14,12 +15,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import {
-		loadAddresses,
-		loadBtcAddressRegtest,
-		loadBtcAddressTestnet,
-		loadIdbAddresses
-	} from '$lib/services/address.services';
+	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 	import { signOut } from '$lib/services/auth.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';

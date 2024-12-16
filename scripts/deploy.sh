@@ -24,4 +24,4 @@ dfx deploy pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 
-scripts/top-up-cycles-ledger-account.sh --cycles 10T
+scripts/top-up-cycles-ledger-account.sh --cycles 50T
