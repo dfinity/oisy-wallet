@@ -4,7 +4,7 @@ import * as exchanges from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initConvertContext } from '$lib/stores/convert.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { testDerivedUpdates } from '$tests/utils/derived.utils';
+import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { BigNumber } from 'alchemy-sdk';
 import { get, readable } from 'svelte/store';
 
