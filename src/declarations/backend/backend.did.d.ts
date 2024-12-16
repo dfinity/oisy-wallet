@@ -209,7 +209,7 @@ export interface SelectedUtxosFeeResponse {
 }
 export interface Settings {
 	dapp: DappSettings;
-	vip: VipSettings;
+	vip?: VipSettings;
 }
 export interface Stats {
 	user_profile_count: bigint;
