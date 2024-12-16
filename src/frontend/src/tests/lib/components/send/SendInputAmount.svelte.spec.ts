@@ -57,7 +57,7 @@ describe('SendInputAmount', () => {
 	it('should imperatively trigger max value', async () => {
 		const { container, component } = render(SendInputAmount, { props });
 
-		component.$$.ctx[component.$$.props['triggerCalculateMax']]();
+		component.triggerCalculateMax();
 
 		await waitFor(() => {
 			const input: HTMLInputElement | null = container.querySelector(inputSelector);
@@ -79,7 +79,7 @@ describe('SendInputAmount', () => {
 			expect(customValidate).toHaveBeenCalledTimes(1);
 		});
 
-		component.$$.ctx[component.$$.props['triggerValidate']]();
+		component.triggerValidate();
 
 		await waitFor(() => {
 			expect(customValidate).toHaveBeenCalledTimes(2);
@@ -104,19 +104,25 @@ describe('SendInputAmount', () => {
 		const renderSetAndAssertMax = async (): Promise<{
 			container: HTMLElement;
 			component: SendInputAmount;
+			testProps: { amountSetToMax: boolean };
 		}> => {
-			const { container, component } = render(SendInputAmount, { props });
+			const testProps = $state({
+				...props,
+				amountSetToMax: false
+			});
 
-			expect(component.$$.ctx[component.$$.props['amountSetToMax']]).toBeFalsy();
+			const { container, component } = render(SendInputAmount, { props: testProps });
+
+			expect(testProps.amountSetToMax).toBeFalsy();
 
 			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
 			assertNonNullish(button, 'Max button not found');
 
 			await fireEvent.click(button);
 
-			expect(component.$$.ctx[component.$$.props['amountSetToMax']]).toBeTruthy();
+			expect(testProps.amountSetToMax).toBeTruthy();
 
-			return { component, container };
+			return { component, container, testProps };
 		};
 
 		it('should expose a truthy amountSetToMax property when max value was triggered', async () => {
@@ -124,13 +130,13 @@ describe('SendInputAmount', () => {
 		});
 
 		it('should reset amountSetToMax when max value was triggered but amount was manually updated afterwards', async () => {
-			const { container, component } = await renderSetAndAssertMax();
+			const { container, testProps } = await renderSetAndAssertMax();
 
 			const input: HTMLInputElement | null = container.querySelector(inputSelector);
 			assertNonNullish(input, 'Input not found');
 			await fireEvent.input(input, { target: { value: '0.1' } });
 
-			expect(component.$$.ctx[component.$$.props['amountSetToMax']]).toBeFalsy();
+			expect(testProps.amountSetToMax).toBeFalsy();
 		});
 	});
 });
