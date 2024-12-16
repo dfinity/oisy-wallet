@@ -733,6 +733,13 @@
 			}
 		}
 	},
+	"vip": {
+		"qr": {
+			"text": {
+				"title": "Generate invitation link"
+			}
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
