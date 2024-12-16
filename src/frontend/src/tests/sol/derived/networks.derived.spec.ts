@@ -27,7 +27,6 @@ describe('networks.derived', () => {
 		});
 
 		it('should return empty array if feature flag is turned off', () => {
-
 			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
 			expect(get(enabledSolanaNetworks)).toEqual([]);
 		});
