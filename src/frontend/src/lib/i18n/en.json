@@ -737,7 +737,8 @@
 		"invitation": {
 			"text": {
 				"title": "Generate invitation link",
-				"invitation_link_copied": "Invitation link copied to clipboard."
+				"invitation_link_copied": "Invitation link copied to clipboard.",
+				"new_link": "Generate new link"
 			}
 		}
 	},

@@ -9,17 +9,35 @@
 	import { nonNullish } from '@dfinity/utils';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+
+	function generateRandomString() { // TODO remove this function
+		var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		var result = '';
+		for (var i = 0; i < 11; i++ ) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
+	}
+
+
 
 	let code;
-	$: code = '02vn3uCMKZG' // TODO generate Code
+	const generateCode = () => {
+		code = generateRandomString() // TODO load Code from backend
+	}
+
+	const regenerateCode = () => {
+		generateCode();
+	}
+
+	generateCode();
 
 	let oisyCodeBaseUrl = 'https://oisy.com/?code=';
 
 	let qrCodeUrl;
 	$: qrCodeUrl = `${oisyCodeBaseUrl}${code}`;
-
-	$: console.log(qrCodeUrl)
-
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -28,7 +46,7 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] px-4 pb-4">
+		<div class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] p-4 mb-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
 					<svelte:fragment slot="logo">
@@ -45,10 +63,17 @@
 				<output>{qrCodeUrl}</output>
 				<ReceiveCopy address={qrCodeUrl} copyAriaLabel={$i18n.vip.invitation.text.invitation_link_copied} />
 			</div>
+
+			<span class="block w-full text-center text-sm text-tertiary pt-3 mb-4">New link will be generated in 45 sec</span>
 		{:else}
 			<span class="w-full"><SkeletonText /></span>
 		{/if}
 
-		<ButtonCloseModal slot="toolbar" />
+		<ButtonGroup slot="toolbar">
+			<ButtonCloseModal />
+			<Button paddingSmall colorStyle="primary" type="button" fullWidth on:click={regenerateCode}>
+				{$i18n.vip.invitation.text.new_link}
+			</Button>
+		</ButtonGroup>
 	</ContentWithToolbar>
 </Modal>

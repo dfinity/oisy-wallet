@@ -648,6 +648,7 @@ interface I18nVip {
 		text: {
 			title: string;
 			invitation_link_copied: string;
+			new_link: string;
 		}
 	}
 }
