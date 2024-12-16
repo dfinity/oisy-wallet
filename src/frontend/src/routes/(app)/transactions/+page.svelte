@@ -8,7 +8,7 @@
 
 	onMount(async () => {
 		// We load the network parameters imperatively because the Svelte $page store might still be uninitialized and undefined at this point.
-        const urlParams = new URLSearchParams(window.location.search);
+		const urlParams = new URLSearchParams(window.location.search);
 		const routeNetwork = urlParams.get(NETWORK_PARAM);
 
 		// We need to know the network on which the transactions should be loaded.
