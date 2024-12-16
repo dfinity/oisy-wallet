@@ -136,10 +136,11 @@ const logout = async ({
 		await Promise.all([
 			emptyIdbBtcAddressMainnet(),
 			emptyIdbEthAddress(),
-			clearTestnetsOption(),
-			clearSessionStorage()
+			clearTestnetsOption()
 		]);
 	}
+
+	await clearSessionStorage();
 
 	await authStore.signOut();
 
