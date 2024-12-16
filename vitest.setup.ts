@@ -18,6 +18,10 @@ global.ResizeObserver = class ResizeObserver {
 	}
 };
 
+Element.prototype.animate = vi
+	.fn()
+	.mockImplementation(() => ({ cancel: vi.fn(), finished: Promise.resolve() }));
+
 vi.mock('$app/stores', () => ({
 	page: mockPage
 }));
