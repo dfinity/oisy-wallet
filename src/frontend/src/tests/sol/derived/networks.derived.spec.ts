@@ -26,6 +26,12 @@ describe('networks.derived', () => {
 			expect(get(enabledSolanaNetworks)).toEqual([SOLANA_MAINNET_NETWORK]);
 		});
 
+		it('should return empty array if feature flag is turned off', () => {
+
+			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
+			expect(get(enabledSolanaNetworks)).toEqual([]);
+		});
+
 		it('should return testnets when they are enabled', () => {
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
