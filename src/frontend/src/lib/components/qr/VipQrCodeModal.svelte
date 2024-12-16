@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal, QRCode } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -11,6 +11,7 @@
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { onMount } from 'svelte';
 
 	function generateRandomString() { // TODO remove this function
 		var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -22,14 +23,31 @@
 	}
 
 
+	const secondsToRegenerate = 45;
+	let counter = secondsToRegenerate;
+	let countdown;
+	onMount(() => {
+		countdown = setInterval(intervalFunction, 1000);
+	});
+
+	const intervalFunction = () => {
+		counter--;
+
+		if (counter === 0) {
+			regenerateCode();
+		}
+	}
+
+	const regenerateCode = () => {
+		clearInterval(countdown);
+		generateCode();
+		counter = secondsToRegenerate;
+		countdown = setInterval(intervalFunction, 1000);
+	}
 
 	let code;
 	const generateCode = () => {
 		code = generateRandomString() // TODO load Code from backend
-	}
-
-	const regenerateCode = () => {
-		generateCode();
 	}
 
 	generateCode();
@@ -42,7 +60,7 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
-		><span class="text-xl">{replaceOisyPlaceholders($i18n.vip.invitation.text.title)}</span>
+		><span class="text-xl">{$i18n.vip.invitation.text.title}</span>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
@@ -64,7 +82,11 @@
 				<ReceiveCopy address={qrCodeUrl} copyAriaLabel={$i18n.vip.invitation.text.invitation_link_copied} />
 			</div>
 
-			<span class="block w-full text-center text-sm text-tertiary pt-3 mb-4">New link will be generated in 45 sec</span>
+			<span class="block w-full text-center text-sm text-tertiary pt-3 mb-4">
+				{replacePlaceholders($i18n.vip.invitation.text.regenerate_countdown_text, {
+					$counter: counter
+				})}
+			</span>
 		{:else}
 			<span class="w-full"><SkeletonText /></span>
 		{/if}
@@ -72,7 +94,7 @@
 		<ButtonGroup slot="toolbar">
 			<ButtonCloseModal />
 			<Button paddingSmall colorStyle="primary" type="button" fullWidth on:click={regenerateCode}>
-				{$i18n.vip.invitation.text.new_link}
+				{$i18n.vip.invitation.text.generate_new_link}
 			</Button>
 		</ButtonGroup>
 	</ContentWithToolbar>

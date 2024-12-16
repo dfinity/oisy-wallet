@@ -648,7 +648,8 @@ interface I18nVip {
 		text: {
 			title: string;
 			invitation_link_copied: string;
-			new_link: string;
+			generate_new_link: string;
+			regenerate_countdown_text: string;
 		}
 	}
 }
