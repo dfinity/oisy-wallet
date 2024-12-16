@@ -1,4 +1,3 @@
-import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import * as networkEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
@@ -16,14 +15,16 @@ import {
 	SEPOLIA_TOKEN_ID
 } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { EthTransactionType } from '$eth/types/eth-transaction';
-import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
-import type { AllTransactionUi, AnyTransactionUi, Transaction } from '$lib/types/transaction';
+import type {
+	AllTransactionUiWithCmp,
+	AnyTransactionUi,
+	Transaction
+} from '$lib/types/transaction';
 import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
@@ -65,61 +66,67 @@ describe('transactions.utils', () => {
 			[ICP_TOKEN_ID]: mockIcTransactionsUi.map((data) => ({ data, certified }))
 		};
 
-		const expectedBtcMainnetTransactions: AllTransactionUi[] = [
+		const expectedBtcMainnetTransactions: AllTransactionUiWithCmp[] = [
 			...mockBtcMainnetTransactions.map((transaction) => ({
-				...transaction,
+				transaction,
 				token: BTC_MAINNET_TOKEN,
-				component: BtcTransaction
+				component: 'bitcoin' as const
 			}))
 		];
 
 		const uiType = 'receive' as EthTransactionType;
 
-		const expectedEthMainnetTransactions: AllTransactionUi[] = [
+		const expectedEthMainnetTransactions: AllTransactionUiWithCmp[] = [
 			...mockEthMainnetTransactions.map((transaction) => ({
-				...transaction,
-				id: transaction.hash,
-				uiType,
+				transaction: {
+					...transaction,
+					id: transaction.hash,
+					uiType
+				},
 				token: ETHEREUM_TOKEN,
-				component: EthTransaction
+				component: 'ethereum' as const
 			}))
 		];
 
-		const expectedSepoliaTransactions: AllTransactionUi[] = [
+		const expectedSepoliaTransactions: AllTransactionUiWithCmp[] = [
 			...mockSepoliaTransactions.map((transaction) => ({
-				...transaction,
-				id: transaction.hash,
-				uiType,
+				transaction: {
+					...transaction,
+					id: transaction.hash,
+					uiType
+				},
 				token: SEPOLIA_TOKEN,
-				component: EthTransaction
+				component: 'ethereum' as const
 			}))
 		];
 
-		const expectedErc20Transactions: AllTransactionUi[] = [
+		const expectedErc20Transactions: AllTransactionUiWithCmp[] = [
 			...mockErc20Transactions.map((transaction) => ({
-				...transaction,
-				id: transaction.hash,
-				uiType,
+				transaction: {
+					...transaction,
+					id: transaction.hash,
+					uiType
+				},
 				token: PEPE_TOKEN,
-				component: EthTransaction
+				component: 'ethereum' as const
 			}))
 		];
 
-		const expectedEthTransactions: AllTransactionUi[] = [
+		const expectedEthTransactions: AllTransactionUiWithCmp[] = [
 			...expectedEthMainnetTransactions,
 			...expectedSepoliaTransactions,
 			...expectedErc20Transactions
 		];
 
-		const expectedIcTransactions: AllTransactionUi[] = [
+		const expectedIcTransactions: AllTransactionUiWithCmp[] = [
 			...mockIcTransactionsUi.map((transaction) => ({
-				...transaction,
+				transaction,
 				token: ICP_TOKEN,
-				component: IcTransaction
+				component: 'ic' as const
 			}))
 		];
 
-		const expectedTransactions: AllTransactionUi[] = [
+		const expectedTransactions: AllTransactionUiWithCmp[] = [
 			...expectedBtcMainnetTransactions,
 			...expectedEthTransactions,
 			...expectedIcTransactions
