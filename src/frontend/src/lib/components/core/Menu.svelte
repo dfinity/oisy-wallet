@@ -128,7 +128,7 @@
 		{/if}
 
 		{#if isVip}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={openVipQrCode}>
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={() => console.log("openModal")}>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
