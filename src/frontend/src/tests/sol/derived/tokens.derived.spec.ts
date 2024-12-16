@@ -26,6 +26,11 @@ describe('tokens.derived', () => {
 			expect(get(enabledSolanaTokens)).toEqual([SOLANA_TOKEN]);
 		});
 
+		it('should return emtpy array if feature flag false', () => {
+			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
+			expect(get(enabledSolanaTokens)).toEqual([]);
+		});
+
 		it('should return testnet tokens when they are enabled', () => {
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
