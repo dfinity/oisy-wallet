@@ -32,6 +32,9 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { modalVipQrCode } from '$lib/derived/modal.derived';
+	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -64,6 +67,8 @@
 	const goToDappExplorer = async () => await navigateTo(AppPath.Explore);
 
 	const goToActivity = async () => await navigateTo(AppPath.Activity);
+
+	const openVipQrCode = () => modalStore.openVipQrCode();
 
 	let assetsRoute = false;
 	$: assetsRoute = isRouteTokens($page);
@@ -128,7 +133,7 @@
 		{/if}
 
 		{#if isVip}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={() => {}}>
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={openVipQrCode}>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
@@ -169,3 +174,7 @@
 		</span>
 	</div>
 </Popover>
+
+{#if $modalVipQrCode}
+	<VipQrCodeModal />
+{/if}
