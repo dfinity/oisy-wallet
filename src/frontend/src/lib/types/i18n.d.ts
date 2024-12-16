@@ -644,9 +644,10 @@ interface I18nAbout {
 }
 
 interface I18nVip {
-	qr: {
+	invitation: {
 		text: {
 			title: string;
+			invitation_link_copied: string;
 		}
 	}
 }

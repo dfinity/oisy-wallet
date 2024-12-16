@@ -734,9 +734,10 @@
 		}
 	},
 	"vip": {
-		"qr": {
+		"invitation": {
 			"text": {
-				"title": "Generate invitation link"
+				"title": "Generate invitation link",
+				"invitation_link_copied": "Invitation link copied to clipboard."
 			}
 		}
 	},
