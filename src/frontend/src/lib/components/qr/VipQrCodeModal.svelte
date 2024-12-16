@@ -26,16 +26,10 @@
 	const secondsToRegenerate = 45;
 	let counter = secondsToRegenerate;
 	let countdown;
-	onMount(() => {
-		countdown = setInterval(intervalFunction, 1000);
-	});
 
-	const intervalFunction = () => {
-		counter--;
-
-		if (counter === 0) {
-			regenerateCode();
-		}
+	let code;
+	const generateCode = () => {
+		code = generateRandomString() // TODO load Code from backend
 	}
 
 	const regenerateCode = () => {
@@ -45,10 +39,17 @@
 		countdown = setInterval(intervalFunction, 1000);
 	}
 
-	let code;
-	const generateCode = () => {
-		code = generateRandomString() // TODO load Code from backend
+	const intervalFunction = () => {
+		counter--;
+
+		if (counter === 0) {
+			regenerateCode();
+		}
 	}
+
+	onMount(() => {
+		countdown = setInterval(intervalFunction, 1000);
+	});
 
 	generateCode();
 
