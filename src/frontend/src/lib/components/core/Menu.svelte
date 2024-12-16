@@ -30,11 +30,17 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { userSettings } from '$lib/derived/user-profile.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
 	let fromRoute: NavigationTarget | null;
+
+	let isVip;
+	isVip = $userSettings?.vip.isVip;
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
@@ -120,6 +126,13 @@
 			</ButtonMenu>
 
 			<Hr />
+		{/if}
+
+		{#if isVip}
+			<ButtonMenu on:click={() => console.log("openModal")}>
+				<IconVipQr size="20" />
+				{$i18n.navigation.text.vip_qr_code}
+			</ButtonMenu>
 		{/if}
 
 		<AboutWhyOisy asMenuItem on:icOpenAboutModal={hidePopover} />

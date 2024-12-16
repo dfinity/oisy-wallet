@@ -41,7 +41,8 @@
 			"source_code": "Source code",
 			"changelog": "Changelog",
 			"submit_ticket": "Submit a ticket",
-			"confirm_navigate": "Are you sure you want to navigate away?"
+			"confirm_navigate": "Are you sure you want to navigate away?",
+			"vip_qr_code": "VIP QR codes"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",

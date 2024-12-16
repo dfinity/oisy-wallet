@@ -38,6 +38,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		confirm_navigate: string;
+		vip_qr_code: string;
 	};
 	alt: {
 		tokens: string;
