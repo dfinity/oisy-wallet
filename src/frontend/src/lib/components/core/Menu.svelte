@@ -7,6 +7,7 @@
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -21,6 +22,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
+	import { userSettings } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
@@ -35,6 +37,9 @@
 	let button: HTMLButtonElement | undefined;
 
 	let fromRoute: NavigationTarget | null;
+
+	let isVip;
+	isVip = $userSettings?.vip.isVip;
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
@@ -120,6 +125,13 @@
 			</ButtonMenu>
 
 			<Hr />
+		{/if}
+
+		{#if isVip}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={() => {}}>
+				<IconVipQr size="20" />
+				{$i18n.navigation.text.vip_qr_code}
+			</ButtonMenu>
 		{/if}
 
 		<AboutWhyOisy asMenuItem on:icOpenAboutModal={hidePopover} />
