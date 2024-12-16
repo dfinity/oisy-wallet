@@ -18,7 +18,7 @@ testWithII(
 		// We should be redirected to the home screen.
 		const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
 
-		await homepageLoggedIn.waitForReady();
+		await homepageLoggedIn.waitForContentReady();
 
 		await expect(page).toHaveScreenshot({ fullPage: true });
 	}
