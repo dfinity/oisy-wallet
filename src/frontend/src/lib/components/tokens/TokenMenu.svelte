@@ -23,11 +23,7 @@
 	};
 
 	const openToken = () => {
-		const fn = $networkICP
-			? modalStore.openIcToken
-			: $networkEthereum
-				? modalStore.openEthToken
-				: modalStore.openBtcToken;
+		const fn = $networkICP ? modalStore.openIcToken : modalStore.openEthToken;
 		fn();
 
 		visible = false;
