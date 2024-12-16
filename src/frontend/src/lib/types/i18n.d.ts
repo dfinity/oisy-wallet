@@ -50,6 +50,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		open_twitter: string;
+		vip_qr_code: string;
 	};
 }
 

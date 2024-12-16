@@ -53,7 +53,8 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"submit_ticket": "Report an issue or request a feature on GitHub",
-			"open_twitter": "Open the DFINITY X/Twitter feed"
+			"open_twitter": "Open the DFINITY X/Twitter feed",
+			"vip_qr_code": "Generate an invitation link"
 		}
 	},
 	"auth": {
