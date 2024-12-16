@@ -49,3 +49,10 @@ export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
+
+export const TOKEN_MENU_IC = 'token-menu-ic';
+export const TOKEN_MENU_IC_BUTTON = 'token-menu-ic-button';
+export const TOKEN_MENU_ETH = 'token-menu-eth';
+export const TOKEN_MENU_ETH_BUTTON = 'token-menu-eth-button';
+export const TOKEN_MENU_BTC = 'token-menu-btc';
+export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
