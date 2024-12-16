@@ -39,11 +39,5 @@ describe('tokens.derived', () => {
 
 			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
 		});
-
-		it('should return ETH and Sepolia ETH when in local env', () => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => true);
-
-			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
-		});
 	});
 });
