@@ -1,26 +1,30 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import type { ComponentType } from 'svelte';
 	import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
 	import EthListener from '$eth/components/core/EthListener.svelte';
-	import NoListener from '$lib/components/core/NoListener.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import type { OptionToken } from '$lib/types/token';
-	import { isNetworkIdBitcoin, isNetworkIdICP } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdEthereum,
+		isNetworkIdICP
+	} from '$lib/utils/network.utils';
 
 	export let token: OptionToken;
-
-	let cmp: ComponentType;
-	$: cmp =
-		isNullish(token) || $authNotSignedIn
-			? NoListener
-			: isNetworkIdICP(token.network.id)
-				? NoListener
-				: isNetworkIdBitcoin(token.network.id)
-					? BitcoinListener
-					: EthListener;
 </script>
 
-<svelte:component this={cmp} {token}>
+{#if isNullish(token) || $authNotSignedIn}
 	<slot />
-</svelte:component>
+{:else if isNetworkIdICP(token.network.id)}
+	<slot />
+{:else if isNetworkIdBitcoin(token.network.id)}
+	<BitcoinListener>
+		<slot />
+	</BitcoinListener>
+{:else if isNetworkIdEthereum(token.network.id)}
+	<EthListener {token}>
+		<slot />
+	</EthListener>
+{:else}
+	<slot />
+{/if}
