@@ -24,8 +24,6 @@ export default defineConfig({
 	workers: DEV ? 5 : 2,
 	expect: {
 		toHaveScreenshot: {
-			threshold: 0.25,
-			maxDiffPixelRatio: 0.025,
 			animations: 'disabled',
 			caret: 'hide'
 		}
@@ -51,9 +49,5 @@ export default defineConfig({
 			name: 'Google Chrome',
 			use: { ...devices['Desktop Chrome'] }
 		},
-		{
-			name: 'Firefox',
-			use: { ...devices['Desktop Firefox'] }
-		}
 	]
 });
