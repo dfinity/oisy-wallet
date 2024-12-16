@@ -48,7 +48,9 @@ describe('ConvertInputAmount', () => {
 	});
 
 	it('should reset input value', async () => {
-		const { container, component } = render(ConvertInputAmount, { props });
+		const testProps = $state(props);
+
+		const { container } = render(ConvertInputAmount, { props: testProps });
 
 		const resetButton: HTMLButtonElement | null = container.querySelector(resetButtonSelector);
 		assertNonNullish(resetButton, 'Reset button not found');
@@ -58,7 +60,7 @@ describe('ConvertInputAmount', () => {
 		const input: HTMLInputElement | null = container.querySelector(inputSelector);
 
 		expect(input?.value).toBe('');
-		expect(component.$$.ctx[component.$$.props['amount']]).toBeUndefined();
+		expect(testProps.amount).toBeUndefined();
 	});
 
 	it('should trigger validation', async () => {
