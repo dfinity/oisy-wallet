@@ -22,11 +22,11 @@
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AllTransactionUi, TransactionsUiDateGroup } from '$lib/types/transaction';
+	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 
-	let transactions: AllTransactionUi[];
+	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledNetworkTokens,
 		$btcTransactions: $btcTransactionsStore,
@@ -37,12 +37,12 @@
 		$btcStatuses: $btcStatusesStore
 	});
 
-	let sortedTransactions: AllTransactionUi[];
-	$: sortedTransactions = transactions.sort((a, b) =>
+	let sortedTransactions: AllTransactionUiWithCmp[];
+	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
 		sortTransactions({ transactionA: a, transactionB: b })
 	);
 
-	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUi> | undefined;
+	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
 	$: groupedTransactions = nonNullish(sortedTransactions)
 		? groupTransactionsByDate(sortedTransactions)
 		: undefined;
