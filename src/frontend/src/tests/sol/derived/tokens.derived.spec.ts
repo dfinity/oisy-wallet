@@ -18,8 +18,6 @@ describe('tokens.derived', () => {
 			testnetsStore.reset({ key: 'testnets' });
 
 			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
-
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
 		});
 
 		it('should return only mainnet token by default', () => {
@@ -33,6 +31,7 @@ describe('tokens.derived', () => {
 
 		it('should return testnet tokens when they are enabled', () => {
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => false);
 
 			expect(get(enabledSolanaTokens)).toEqual([
 				SOLANA_TOKEN,
