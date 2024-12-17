@@ -10,12 +10,11 @@
 </script>
 
 <div
-	class="absolute -top-12 left-0 flex h-screen w-screen justify-center overflow-hidden text-white pointer-events-none"
+	class="pointer-events-none absolute -top-12 left-0 flex h-screen w-screen justify-center overflow-hidden text-white"
 >
 	<Confetti
 		x={[-5, 5]}
 		y={[0, 0.1]}
-		delay={[0, 250]}
 		infinite
 		duration={5000}
 		amount={100}
