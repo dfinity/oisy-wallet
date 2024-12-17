@@ -1,13 +1,12 @@
-import type { CreateCanisterOptions } from '$lib/types/canister';
-import { RewardCanister } from '$lib/canisters/reward.canister';
-import { Principal } from '@dfinity/principal';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mock } from 'vitest-mock-extended';
-import type { ActorSubclass } from '@dfinity/agent';
 import type { _SERVICE as BackendService } from '$declarations/backend/backend.did';
+import { RewardCanister } from '$lib/canisters/reward.canister';
+import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { ActorSubclass } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
+import { mock } from 'vitest-mock-extended';
 
 describe('reward.canister', () => {
-
 	// TODO replace BackendService with RewardService
 	const createRewardCanister = ({
 		serviceOverride
@@ -34,7 +33,7 @@ describe('reward.canister', () => {
 	it('should throw an error if get_reward_code throws', async () => {
 		service.get_reward_code.mockImplementation(async () => {
 			await Promise.resolve();
-			throw mockResponseError
+			throw mockResponseError;
 		});
 
 		const { getRewardCode } = await createRewardCanister({
@@ -61,7 +60,7 @@ describe('reward.canister', () => {
 	it('should throw an error if use_reward_code throws', async () => {
 		service.use_reward_code.mockImplementation(async () => {
 			await Promise.resolve();
-			throw mockResponseError
+			throw mockResponseError;
 		});
 
 		const { useRewardCode } = await createRewardCanister({
