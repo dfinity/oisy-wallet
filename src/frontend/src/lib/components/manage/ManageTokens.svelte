@@ -4,20 +4,13 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
+	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
+	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -27,13 +20,9 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import {
-		networkEthereum,
-		networkICP,
-		pseudoNetworkChainFusion,
-		selectedNetwork
-	} from '$lib/derived/network.derived';
+	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ExchangesData } from '$lib/types/exchange';
@@ -44,13 +33,7 @@
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
-	import { parseTokenId } from '$lib/validation/token.validation';
-
 	const dispatch = createEventDispatcher();
-
-	// The list of ICRC tokens (SNSes) is defined as environment variables.
-	// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
-	let icrcEnvTokens: IcrcCustomToken[] = [];
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
@@ -58,49 +41,12 @@
 	let exchangesStaticData: ExchangesData | undefined;
 
 	onMount(() => {
-		const tokens = buildIcrcCustomTokens();
-		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
-
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
-	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
-	$: knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
-
-	// The entire list of ICRC tokens to display to the user:
-	// This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled), and the environment tokens that have never been used.
-	let allIcrcTokens: IcrcCustomToken[] = [];
-	$: allIcrcTokens = [
-		...$icrcTokens,
-		...icrcEnvTokens.filter(
-			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
-		)
-	].sort(sortIcTokens);
-
-	// The entire list of Erc20 tokens to display to the user.
-	let allErc20Tokens: EthereumUserToken[] = [];
-	$: allErc20Tokens = $erc20Tokens;
-
-	let manageIcTokens = false;
-	$: manageIcTokens = $pseudoNetworkChainFusion || $networkICP;
-
-	let manageEthereumTokens = false;
-	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
-
-	let allTokens: TokenToggleable<Token>[] = [];
-	$: allTokens = filterTokensForSelectedNetwork([
-		[
-			{
-				...ICP_TOKEN,
-				enabled: true
-			},
-			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-			...(manageEthereumTokens ? allErc20Tokens : []),
-			...(manageIcTokens ? allIcrcTokens : [])
-		],
+	let allTokensForSelectedNetwork: TokenToggleable<Token>[] = [];
+	$: allTokensForSelectedNetwork = filterTokensForSelectedNetwork([
+		$allTokens,
 		$selectedNetwork,
 		$pseudoNetworkChainFusion
 	]);
@@ -109,7 +55,7 @@
 	$: allTokensSorted = nonNullish(exchangesStaticData)
 		? pinEnabledTokensAtTop(
 				sortTokens({
-					$tokens: allTokens,
+					$tokens: allTokensForSelectedNetwork,
 					$exchanges: exchangesStaticData,
 					$tokensToPin: $tokensToPin
 				})
