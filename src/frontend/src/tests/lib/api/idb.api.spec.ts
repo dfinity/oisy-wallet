@@ -12,9 +12,9 @@ import {
 	updateIdbEthAddressLastUsage,
 	updateIdbSolAddressMainnetLastUsage
 } from '$lib/api/idb.api';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockPrincipal } from '$tests/mocks/identity.mock';
 
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({
