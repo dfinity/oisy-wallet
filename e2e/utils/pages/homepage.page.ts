@@ -2,6 +2,7 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	RECEIVE_TOKENS_MODAL,
@@ -232,6 +233,13 @@ abstract class Homepage {
 				await this.clickByTestId(testId);
 			}
 		}
+	}
+
+	async activateTestnetSettings(testId: string): Promise<void> {
+		await this.clickByTestId(NAVIGATION_MENU_BUTTON);
+		await this.clickByTestId(NAVIGATION_ITEM_SETTINGS);
+		await this.clickByTestId(toggle);
+
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
