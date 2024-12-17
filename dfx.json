@@ -296,8 +296,8 @@
 		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/oisy_rewards_canister.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/oisy_rewards_canister.wasm.gz"
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.wasm.gz"
 		}
 	},
 	"defaults": {
