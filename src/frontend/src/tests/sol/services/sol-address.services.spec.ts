@@ -70,9 +70,9 @@ describe('sol-address.services', () => {
 		});
 
 		const networkCases = [
-			['mainnet', getSolAddressMainnet, SolanaNetworks.MAIN_NET],
-			['testnet', getSolAddressTestnet, SolanaNetworks.TEST_NET],
-			['devnet', getSolAddressDevnet, SolanaNetworks.DEV_NET],
+			['mainnet', getSolAddressMainnet, SolanaNetworks.MAINNET],
+			['testnet', getSolAddressTestnet, SolanaNetworks.TESTNET],
+			['devnet', getSolAddressDevnet, SolanaNetworks.DEVNET],
 			['local', getSolAddressLocal, SolanaNetworks.LOCAL]
 		] as const;
 
