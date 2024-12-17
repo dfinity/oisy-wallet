@@ -72,9 +72,11 @@ describe('idb.api', () => {
 		});
 
 		it('should update BTC address last usage', async () => {
-			vi.mocked(idbKeyval.update).mockImplementation(async (_, updater) => {
+			// eslint-disable-next-line local-rules/prefer-object-params
+			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const updated = updater(mockAddress) as typeof mockAddress;
 				expect(updated.lastUsedTimestamp).toBeGreaterThan(mockAddress.lastUsedTimestamp);
+				return Promise.resolve();
 			});
 
 			await updateIdbBtcAddressMainnetLastUsage(mockPrincipal);
@@ -113,9 +115,11 @@ describe('idb.api', () => {
 		});
 
 		it('should update ETH address last usage', async () => {
-			vi.mocked(idbKeyval.update).mockImplementation(async (_, updater) => {
+			// eslint-disable-next-line local-rules/prefer-object-params
+			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const updated = updater(mockAddress) as typeof mockAddress;
 				expect(updated.lastUsedTimestamp).toBeGreaterThan(mockAddress.lastUsedTimestamp);
+				return Promise.resolve();
 			});
 
 			await updateIdbEthAddressLastUsage(mockPrincipal);
@@ -154,9 +158,11 @@ describe('idb.api', () => {
 		});
 
 		it('should update SOL address last usage', async () => {
-			vi.mocked(idbKeyval.update).mockImplementation(async (_, updater) => {
+			// eslint-disable-next-line local-rules/prefer-object-params
+			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const updated = updater(mockAddress) as typeof mockAddress;
 				expect(updated.lastUsedTimestamp).toBeGreaterThan(mockAddress.lastUsedTimestamp);
+				return Promise.resolve();
 			});
 
 			await updateIdbSolAddressMainnetLastUsage(mockPrincipal);
@@ -167,9 +173,11 @@ describe('idb.api', () => {
 
 	describe('Edge cases', () => {
 		it('should handle undefined address when updating last usage', async () => {
-			vi.mocked(idbKeyval.update).mockImplementation(async (_, updater) => {
+			// eslint-disable-next-line local-rules/prefer-object-params
+			vi.mocked(idbKeyval.update).mockImplementation((_, updater) => {
 				const result = updater(undefined);
 				expect(result).toBeUndefined();
+				return Promise.resolve();
 			});
 
 			await updateIdbBtcAddressMainnetLastUsage(mockPrincipal);
