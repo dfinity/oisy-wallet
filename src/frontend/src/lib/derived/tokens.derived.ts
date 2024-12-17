@@ -34,7 +34,8 @@ export const tokens: Readable<Token[]> = derived(
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
 		...$erc20Tokens,
-		...$icrcTokens
+		...$icrcTokens,
+		...$enabledSolanaTokens
 	]
 );
 

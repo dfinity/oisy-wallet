@@ -101,9 +101,9 @@ export const modalSolTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'sol-transaction'
 );
-export const modalToken: Readable<boolean> = derived(
+export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'token'
+	($modalStore) => $modalStore?.type === 'eth-token'
 );
 export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
