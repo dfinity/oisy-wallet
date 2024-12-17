@@ -141,3 +141,5 @@ npm run dev
 
 Some Iconly icons are used in the project, **not included**. You must obtain a license separately.  
 The license for this project is bought and owned by the DFINITY Foundation, please see terms and conditions [here](https://iconly.pro/pages/terms).
+
+
