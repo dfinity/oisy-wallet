@@ -4,6 +4,8 @@
 	import snow2 from '$lib/assets/snow-2.svg';
 	import snow3 from '$lib/assets/snow-3.svg';
 
+	// svelte-confetti passes the colorArray to the CSS background property. That's why, it can be used for images with CSS url().
+	// See: https://github.com/Mitcheljager/svelte-confetti/blob/1fa67c70aad7fcd4fa1aa71bb3fe32791ceeab4f/src/lib/Confetti.svelte#L135C5-L135C15
 	const colorArray = [`url(${snow1})`, `url(${snow2})`, `url(${snow3})`];
 </script>
 
