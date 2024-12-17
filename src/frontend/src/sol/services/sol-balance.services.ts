@@ -1,3 +1,4 @@
+
 import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { getSchnorrPublicKey } from '$lib/api/signer.api';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -11,15 +12,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { address as solAddress } from '@solana/addresses';
 import { createSolanaRpc } from '@solana/rpc';
 import { lamports, type Lamports } from '@solana/rpc-types';
-
-export const getSolanaPublicKey = async (
-	params: CanisterApiFunctionParams<{ derivationPath: string[] }>
-): Promise<Uint8Array | number[]> =>
-	await getSchnorrPublicKey({
-		...params,
-		keyId: SOLANA_KEY_ID,
-		derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, ...params.derivationPath]
-	});
 
 export const loadLamportsBalance = async ({
 	address,

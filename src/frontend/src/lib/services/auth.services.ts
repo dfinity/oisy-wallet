@@ -114,7 +114,7 @@ const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbAddress(deleteIdb
 
 const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddress);
 
-const emptyIdbSolAddressMainnet = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
+const emptyIdbSolAddress = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
 
 // eslint-disable-next-line require-await
 const clearTestnetsOption = async () => {
@@ -137,7 +137,7 @@ const logout = async ({
 		await Promise.all([
 			emptyIdbBtcAddressMainnet(),
 			emptyIdbEthAddress(),
-			emptyIdbSolAddressMainnet(),
+			emptyIdbSolAddress(),
 			clearTestnetsOption()
 		]);
 	}
