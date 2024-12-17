@@ -20,7 +20,11 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
+	import {
+		NAVIGATION_MENU_BUTTON,
+		NAVIGATION_MENU,
+		NAVIGATION_MENU_VIP_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { userSettings } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -128,7 +132,7 @@
 		{/if}
 
 		{#if isVip}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={() => {}}>
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} testId={NAVIGATION_MENU_VIP_BUTTON} on:click={() => {}}>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
