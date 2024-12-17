@@ -8,7 +8,7 @@ let canister: RewardCanister | undefined = undefined;
 
 export const getRewardCode = async ({
 	identity
-}: CanisterApiFunctionParams<{}>): Promise<string> => {
+}: CanisterApiFunctionParams): Promise<string> => {
 	const { getRewardCode } = await rewardCanister({ identity });
 
 	return getRewardCode();
