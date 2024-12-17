@@ -1,8 +1,10 @@
 import {
+	BTC_TESTNET_TOGGLE,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
 	NAVIGATION_ITEM_SETTINGS,
+	NAVIGATION_ITEM_TOKENS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	RECEIVE_TOKENS_MODAL,
@@ -235,10 +237,10 @@ abstract class Homepage {
 		}
 	}
 
-	async activateTestnetSettings(testId: string): Promise<void> {
-		await this.clickByTestId(NAVIGATION_MENU_BUTTON);
-		await this.clickByTestId(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId(toggle);
+	async activateTestnetSettings(): Promise<void> {
+		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.clickByTestId(BTC_TESTNET_TOGGLE);
+		await this.clickByTestId(NAVIGATION_ITEM_TOKENS);
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
