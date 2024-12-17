@@ -1,14 +1,14 @@
+import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
+import { getSchnorrPublicKey } from '$lib/api/signer.api';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { isSolNetwork } from '$sol/validation/sol-network.validation';
 import { BigNumber } from '@ethersproject/bignumber';
 import { createSolanaRpc, lamports, address as solAddress, type Lamports } from '@solana/web3.js';
-import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
-import { getSchnorrPublicKey } from '$lib/api/signer.api';
-import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 
 export const getSolanaPublicKey = async (
 	params: CanisterApiFunctionParams<{ derivationPath: string[] }>
