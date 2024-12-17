@@ -12,9 +12,9 @@ import {
 	updateIdbEthAddressLastUsage,
 	updateIdbSolAddressMainnetLastUsage
 } from '$lib/api/idb.api';
-import { Principal } from '@dfinity/principal';
 import * as idbKeyval from 'idb-keyval';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 
 vi.mock('idb-keyval', () => ({
 	createStore: vi.fn(() => ({
@@ -31,7 +31,6 @@ vi.mock('$app/environment', () => ({
 }));
 
 describe('idb.api', () => {
-	const mockPrincipal = Principal.fromText('2vxsx-fae');
 	const mockAddress = {
 		address: '0x123',
 		lastUsedTimestamp: Date.now(),
