@@ -68,7 +68,7 @@
 	class:to-bright-lilac={$networkEthereum}
 >
 	<SnowBackground />
-	<div class="z-10 flex size-full flex-col">
+	<div class="z-10 flex size-full flex-col items-center">
 		{#if isTransactionsPage}
 			<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 				<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
