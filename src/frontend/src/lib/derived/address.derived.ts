@@ -13,7 +13,8 @@ import type {
 	EthAddress,
 	OptionBtcAddress,
 	OptionEthAddress,
-	OptionSolAddress, SolAddress
+	OptionSolAddress,
+	SolAddress
 } from '$lib/types/address';
 import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
