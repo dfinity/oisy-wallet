@@ -6,6 +6,7 @@
 
 <button
 	class="w-full text-left no-underline hover:text-brand-primary active:text-brand-primary"
+	data-tid={testId}
 	aria-label={ariaLabel}
 	on:click
 	data-tid={testId}
