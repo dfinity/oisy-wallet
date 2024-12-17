@@ -27,10 +27,10 @@ import {
 } from '$sol/services/sol-address.services';
 import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { getAddressDecoder } from '@solana/addresses';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 
 vi.mock('@solana/addresses', () => ({
 	getAddressDecoder: vi.fn()
