@@ -22,13 +22,11 @@
 		networkICP,
 		networkBitcoin,
 		pseudoNetworkChainFusion,
-		networkId,
-		networkSolana
+		networkId
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
-	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -57,8 +55,6 @@
 			<EthReceive token={$tokenWithFallback} />
 		{:else if $networkBitcoin}
 			<BtcReceive />
-		{:else if $networkSolana}
-			<SolReceive />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
