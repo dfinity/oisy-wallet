@@ -215,7 +215,7 @@ service: (opt Config) -> {
     set_sprinkle_timestamp: (SetSprinkleTimestampArg) -> ();
 
     /// Gets a VIP reward token.
-    new_vip_reward: () -> (NewVipRewardResponse) query;
+    new_vip_reward: () -> (NewVipRewardResponse);
 
     /// Requests rewards from a VIP token.
     claim_vip_reward: (VipReward) -> (ClaimVipRewardResponse);
