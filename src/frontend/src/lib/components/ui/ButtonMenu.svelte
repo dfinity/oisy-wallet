@@ -9,7 +9,6 @@
 	data-tid={testId}
 	aria-label={ariaLabel}
 	on:click
-	data-tid={testId}
 	{disabled}
 	class:opacity-50={disabled}
 >
