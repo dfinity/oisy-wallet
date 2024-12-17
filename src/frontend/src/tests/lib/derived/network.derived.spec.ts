@@ -7,25 +7,22 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
 import { get } from 'svelte/store';
-import { describe, expect, test, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 describe('network.derived', () => {
-
-    beforeEach(() => {
-        vi.clearAllMocks();
+	beforeEach(() => {
+		vi.clearAllMocks();
 		ethAddressStore.reset();
 		mockPage.reset();
 		authStore.setForTesting(mockIdentity);
-    })
+	});
 
 	const mockEthAddressWithCertified = {
 		data: mockEthAddress,
 		certified: true
 	};
 
-	const expectedIcrcAddress = encodeIcrcAccount(
-		getIcrcAccount(mockIdentity.getPrincipal())
-	);
+	const expectedIcrcAddress = encodeIcrcAccount(getIcrcAccount(mockIdentity.getPrincipal()));
 
 	test.each([
 		{
@@ -37,8 +34,6 @@ describe('network.derived', () => {
 			expectedAddress: mockEthAddress
 		}
 	])('returns $network address when network is $network', ({ network, expectedAddress }) => {
-	
-
 		mockPage.mock({ network });
 		ethAddressStore.set(mockEthAddressWithCertified);
 
