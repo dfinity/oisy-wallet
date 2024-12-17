@@ -19,7 +19,13 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
+	import {
+		NAVIGATION_MENU_BUTTON,
+		NAVIGATION_MENU,
+		NAVIGATION_ITEM_ACTIVITY,
+		NAVIGATION_ITEM_EXPLORER,
+		NAVIGATION_ITEM_SETTINGS
+	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -100,21 +106,33 @@
 		{/if}
 
 		{#if !activityRoute && !settingsRoute}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.activity} on:click={goToActivity}>
+			<ButtonMenu
+				testId={NAVIGATION_ITEM_ACTIVITY}
+				ariaLabel={$i18n.navigation.alt.activity}
+				on:click={goToActivity}
+			>
 				<IconActivity size="20" />
 				{$i18n.navigation.text.activity}
 			</ButtonMenu>
 		{/if}
 
 		{#if !dAppExplorerRoute && !settingsRoute}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.dapp_explorer} on:click={goToDappExplorer}>
+			<ButtonMenu
+				testId={NAVIGATION_ITEM_EXPLORER}
+				ariaLabel={$i18n.navigation.alt.dapp_explorer}
+				on:click={goToDappExplorer}
+			>
 				<IconlyUfo size="20" />
 				{$i18n.navigation.text.dapp_explorer}
 			</ButtonMenu>
 		{/if}
 
 		{#if !settingsRoute}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
+			<ButtonMenu
+				testId={NAVIGATION_ITEM_SETTINGS}
+				ariaLabel={$i18n.navigation.alt.more_settings}
+				on:click={gotoSettings}
+			>
 				<IconlySettings size="20" />
 				{$i18n.settings.text.title}
 			</ButtonMenu>

@@ -67,6 +67,11 @@ abstract class Homepage {
 		await this.#page.getByTestId(testId).click();
 	}
 
+	protected async isVisibleByTestId(testId: string): Promise<boolean> {
+		const element = this.#page.locator(`[data-tid="${testId}"]`);
+		return await element.isVisible();
+	}
+
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
 		return await this.#page.isVisible(selector);
 	}
@@ -214,6 +219,19 @@ abstract class Homepage {
 
 	async waitForLoadState() {
 		await this.#page.waitForLoadState('networkidle');
+	}
+
+	async navigateTo(testId: string): Promise<void> {
+		if (await this.isVisibleByTestId(testId)) {
+			await this.clickByTestId(testId);
+		} else {
+			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
+				await this.clickByTestId(NAVIGATION_MENU_BUTTON);
+			}
+			if (await this.isVisibleByTestId(testId)) {
+				await this.clickByTestId(testId);
+			}
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
