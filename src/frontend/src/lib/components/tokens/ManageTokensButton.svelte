@@ -10,7 +10,12 @@
 	$: disabled = $erc20UserTokensNotInitialized || $authNotSignedIn;
 </script>
 
-<button data-tid={MANAGE_TOKENS_BUTTON} class="tertiary" on:click={modalStore.openManageTokens} {disabled}>
+<button
+	data-tid={MANAGE_TOKENS_BUTTON}
+	class="tertiary"
+	on:click={modalStore.openManageTokens}
+	{disabled}
+>
 	<IconManage />
 	{$i18n.tokens.manage.text.manage_list}
 </button>
