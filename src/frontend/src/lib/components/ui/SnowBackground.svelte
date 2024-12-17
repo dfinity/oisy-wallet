@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { Confetti } from 'svelte-confetti';
-	import snow1 from '$lib/assets/snow-1.svg';
-	import snow2 from '$lib/assets/snow-2.svg';
-	import snow3 from '$lib/assets/snow-3.svg';
 
 	// svelte-confetti passes the colorArray to the CSS background property. That's why, it can be used for images with CSS url().
 	// See: https://github.com/Mitcheljager/svelte-confetti/blob/1fa67c70aad7fcd4fa1aa71bb3fe32791ceeab4f/src/lib/Confetti.svelte#L135C5-L135C15
-	const colorArray = [`url(${snow1})`, `url(${snow2})`, `url(${snow3})`];
+	const colorArray = ['snow-1.svg', 'snow-2.svg', 'snow-3.svg'].map(
+		(snow) => `url(/icons/${snow})`
+	);
 
 	// This component is intended for short-term use, so we do not want to reimplement our E2E test suite for it. Instead, we skip it in headless E2E tests, as it is neither critical nor particularly meaningful for users.
 	const headless = navigator.webdriver;
