@@ -1,4 +1,8 @@
-import { deleteIdbBtcAddressMainnet, deleteIdbEthAddress } from '$lib/api/idb.api';
+import {
+	deleteIdbBtcAddressMainnet,
+	deleteIdbEthAddress,
+	deleteIdbSolAddressMainnet
+} from '$lib/api/idb.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -110,6 +114,8 @@ const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbAddress(deleteIdb
 
 const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddress);
 
+const emptyIdbSolAddress = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
+
 // eslint-disable-next-line require-await
 const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
@@ -128,7 +134,12 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption()]);
+		await Promise.all([
+			emptyIdbBtcAddressMainnet(),
+			emptyIdbEthAddress(),
+			emptyIdbSolAddress(),
+			clearTestnetsOption()
+		]);
 	}
 
 	await authStore.signOut();
