@@ -95,7 +95,7 @@
 			<span class="w-full"><SkeletonText /></span>
 		{/if}
 
-		<ButtonGroup slot="toolbar">
+		<ButtonGroup styleClass="flex-col sm:flex-row" slot="toolbar">
 			<ButtonCloseModal />
 			<Button paddingSmall colorStyle="primary" type="button" fullWidth on:click={regenerateCode}>
 				{$i18n.vip.invitation.text.generate_new_link}
