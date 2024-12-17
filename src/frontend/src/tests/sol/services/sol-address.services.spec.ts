@@ -27,7 +27,7 @@ import {
 } from '$sol/services/sol-address.services';
 import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { getAddressDecoder } from '@solana/addresses';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -38,7 +38,6 @@ vi.mock('@solana/addresses', () => ({
 
 describe('sol-address.services', () => {
 	const mockSolAddress = 'solana123';
-	const mockIdentity = Ed25519KeyIdentity.generate();
 	const mockPublicKey = new Uint8Array([1, 2, 3]);
 
 	let spyGetSchnorrPublicKey: MockInstance;
@@ -70,9 +69,9 @@ describe('sol-address.services', () => {
 		});
 
 		const networkCases = [
-			['mainnet', getSolAddressMainnet, SolanaNetworks.MAIN_NET],
-			['testnet', getSolAddressTestnet, SolanaNetworks.TEST_NET],
-			['devnet', getSolAddressDevnet, SolanaNetworks.DEV_NET],
+			['mainnet', getSolAddressMainnet, SolanaNetworks.MAINNET],
+			['testnet', getSolAddressTestnet, SolanaNetworks.TESTNET],
+			['devnet', getSolAddressDevnet, SolanaNetworks.DEVNET],
 			['local', getSolAddressLocal, SolanaNetworks.LOCAL]
 		] as const;
 
