@@ -1,13 +1,10 @@
-import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
-import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
@@ -16,7 +13,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionUi, AnyTransactionUi } from '$lib/types/transaction';
+import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
@@ -53,7 +50,7 @@ export const mapAllTransactionsUi = ({
 	$ethAddress: OptionEthAddress;
 	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-}): AllTransactionUi[] => {
+}): AllTransactionUiWithCmp[] => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
 		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
 		networkId: ETHEREUM_NETWORK_ID
@@ -64,7 +61,7 @@ export const mapAllTransactionsUi = ({
 		networkId: SEPOLIA_NETWORK_ID
 	});
 
-	return tokens.reduce<AllTransactionUi[]>((acc, token) => {
+	return tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
 		const {
 			id: tokenId,
 			network: { id: networkId }
@@ -78,9 +75,9 @@ export const mapAllTransactionsUi = ({
 			return [
 				...acc,
 				...($btcTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
-					...transaction,
+					transaction,
 					token,
-					component: BtcTransaction
+					component: 'bitcoin' as const
 				}))
 			];
 		}
@@ -92,7 +89,7 @@ export const mapAllTransactionsUi = ({
 			return [
 				...acc,
 				...($ethTransactions[tokenId] ?? []).map((transaction) => ({
-					...mapEthTransactionUi({
+					transaction: mapEthTransactionUi({
 						transaction,
 						ckMinterInfoAddresses: isSepoliaNetwork
 							? ckEthMinterInfoAddressesSepolia
@@ -100,7 +97,7 @@ export const mapAllTransactionsUi = ({
 						$ethAddress: $ethAddress
 					}),
 					token,
-					component: EthTransaction
+					component: 'ethereum' as const
 				}))
 			];
 		}
@@ -115,13 +112,13 @@ export const mapAllTransactionsUi = ({
 			return [
 				...acc,
 				...($icTransactions[tokenId] ?? []).map((transaction) => ({
-					...extendIcTransaction({
+					transaction: extendIcTransaction({
 						transaction,
 						token,
 						btcStatuses: $btcStatuses?.[tokenId] ?? undefined
 					}).data,
 					token,
-					component: IcTransaction
+					component: 'ic' as const
 				}))
 			];
 		}
