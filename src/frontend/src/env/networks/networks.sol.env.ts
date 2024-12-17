@@ -1,3 +1,5 @@
+import type { SchnorrKeyId } from '$declarations/signer/signer.did';
+import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import solDevnetIconBW from '$lib/assets/networks/sol-devnet-bw.svg';
 import solLocalnetIconBW from '$lib/assets/networks/sol-localnet-bw.svg';
 import solMainnetIconBW from '$lib/assets/networks/sol-mainnet-bw.svg';
@@ -61,3 +63,8 @@ export const SOLANA_LOCAL_NETWORK: Network = {
 // TODO: to be removed when the feature is fully implemented
 export const SOLANA_NETWORK_ENABLED =
 	JSON.parse(import.meta.env.VITE_SOLANA_NETWORK_ENABLED ?? false) === true;
+
+export const SOLANA_KEY_ID: SchnorrKeyId = {
+	algorithm: { ed25519: null },
+	name: SIGNER_ROOT_KEY_NAME
+};
