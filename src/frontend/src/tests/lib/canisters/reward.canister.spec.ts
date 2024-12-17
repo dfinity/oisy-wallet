@@ -18,6 +18,33 @@ describe('reward.canister', () => {
 	const service = mock<ActorSubclass<BackendService>>(); // TODO replace BackendService with RewardService
 	const mockResponseError = new Error('Test response error');
 
+	it('returns true if user is vip', async () => {
+		service.is_vip.mockResolvedValue(true);
+
+		const { isVip } = await createRewardCanister({
+			serviceOverride: service
+		});
+
+		const result = await isVip();
+
+		expect(result).toBeTruthy();
+	});
+
+	it('should throw an error if is_vip throws', async () => {
+		service.is_vip.mockImplementation(async () => {
+			await Promise.resolve();
+			throw mockResponseError;
+		});
+
+		const { isVip } = await createRewardCanister({
+			serviceOverride: service
+		});
+
+		const result = isVip();
+
+		await expect(result).rejects.toThrow(mockResponseError);
+	});
+
 	it('returns reward code', async () => {
 		service.get_reward_code.mockResolvedValue('1234567890');
 
@@ -40,9 +67,9 @@ describe('reward.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = getRewardCode();
+		const result = getRewardCode();
 
-		await expect(res).rejects.toThrow(mockResponseError);
+		await expect(result).rejects.toThrow(mockResponseError);
 	});
 
 	it('should be possible to use a reward code', async () => {

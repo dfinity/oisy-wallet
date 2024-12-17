@@ -6,6 +6,12 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 let canister: RewardCanister | undefined = undefined;
 
+export const isVip = async ({ identity }: CanisterApiFunctionParams): Promise<boolean> => {
+	const { isVip } = await rewardCanister({ identity });
+
+	return isVip();
+}
+
 export const getRewardCode = async ({ identity }: CanisterApiFunctionParams): Promise<string> => {
 	const { getRewardCode } = await rewardCanister({ identity });
 

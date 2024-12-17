@@ -27,6 +27,12 @@ export class RewardCanister extends Canister<BackendService> {
 		return new RewardCanister(canisterId, service, certifiedService);
 	}
 
+	isVip = (): Promise<boolean> => {
+		const { set_user_token } = this.caller({ certified: true }); // TODO replace with isVip function
+
+		return Promise.resolve(true);
+	}
+
 	getRewardCode = (): Promise<string> => {
 		const { set_user_token } = this.caller({ certified: true }); // TODO replace with getRewardCode function
 
