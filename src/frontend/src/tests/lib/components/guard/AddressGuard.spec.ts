@@ -11,11 +11,11 @@ import { emit } from '$lib/utils/events.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 import * as solAddressServices from '$sol/services/sol-address.services';
 import * as solEnv from '$env/networks/networks.sol.env';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 
 describe('AddressGuard', () => {
 	let apiMock: MockInstance;
@@ -24,14 +24,11 @@ describe('AddressGuard', () => {
 		vi.restoreAllMocks();
 
 		vi.clearAllMocks();
-		
 		vi.resetAllMocks();
 
 		apiMock = vi.spyOn(api, 'allowSigning');
 
-		const identity = Ed25519KeyIdentity.generate();
-		
-		authStore.setForTesting(identity);
+		authStore.setForTesting(mockIdentity);
 
 		Object.defineProperty(window, 'location', {
 			writable: true,
