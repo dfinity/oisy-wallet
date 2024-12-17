@@ -18,8 +18,8 @@ import {
 	certifyAddress,
 	loadIdbTokenAddress,
 	loadTokenAddress,
-	type LoadTokenAddressParams,
-	validateAddress
+	validateAddress,
+	type LoadTokenAddressParams
 } from '$lib/services/address.services';
 import {
 	solAddressDevnetStore,
@@ -34,9 +34,9 @@ import { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { getAddressDecoder } from '@solana/addresses';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SolanaNetworks } from '$sol/types/network';
+import { getAddressDecoder } from '@solana/addresses';
 
 const getSolanaPublicKey = async (
 	params: CanisterApiFunctionParams<{ derivationPath: string[] }>
@@ -71,7 +71,8 @@ export const getSolAddressDevnet = async (identity: OptionIdentity): Promise<Sol
 export const getSolAddressLocal = async (identity: OptionIdentity): Promise<SolAddress> =>
 	await getSolAddress({ identity, derivationPath: [SolanaNetworks.LOCAL] });
 
-const solanaMapper: Record<SolanaNetworks,
+const solanaMapper: Record<
+	SolanaNetworks,
 	Pick<LoadTokenAddressParams<SolAddress>, 'addressStore' | 'setIdbAddress' | 'getAddress'>
 > = {
 	mainnet: {

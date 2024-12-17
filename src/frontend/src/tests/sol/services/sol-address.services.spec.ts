@@ -104,17 +104,14 @@ describe('sol-address.services', () => {
 			['local', loadSolAddressLocal, solAddressLocalnetStore]
 		] as const;
 
-		it.each(loadCases)(
-			'should load %s address into store',
-			async (network, loadAddress, store) => {
-				const result = await loadAddress();
-				expect(result).toEqual({ success: true });
-				expect(get(store)).toEqual({
-					data: mockSolAddress,
-					certified: true
-				});
-			}
-		);
+		it.each(loadCases)('should load %s address into store', async (network, loadAddress, store) => {
+			const result = await loadAddress();
+			expect(result).toEqual({ success: true });
+			expect(get(store)).toEqual({
+				data: mockSolAddress,
+				certified: true
+			});
+		});
 
 		it('should handle errors during address loading', async () => {
 			const error = new Error('Failed to load address');
