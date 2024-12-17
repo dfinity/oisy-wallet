@@ -13,6 +13,7 @@
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
+	import SnowBackground from '$lib/components/ui/SnowBackground.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import {
 		balance,
@@ -27,7 +28,6 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
-	import SnowBackground from '$lib/components/ui/SnowBackground.svelte';
 
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
