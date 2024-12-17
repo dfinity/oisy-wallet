@@ -13,7 +13,6 @@
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
-	import SnowBackground from '$lib/components/ui/SnowBackground.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import {
 		balance,
@@ -28,6 +27,7 @@
 	import type { OptionTokenUi } from '$lib/types/token';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
+	import SnowBackground from '$lib/components/ui/SnowBackground.svelte';
 
 	let pageTokenUi: OptionTokenUi;
 	$: pageTokenUi = nonNullish($pageToken)
@@ -68,45 +68,44 @@
 	class:to-bright-lilac={$networkEthereum}
 >
 	<SnowBackground />
-	<div class="z-10 flex size-full flex-col items-center">
-		{#if isTransactionsPage}
-			<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
-				<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
-					<Back color="current" onlyArrow />
 
-					<div>
-						<div class="my-0.5 flex items-center justify-center">
-							{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
-								<div in:fade>
-									<TokenLogo
-										data={$pageToken}
-										ring
-										badge={{ type: 'network', blackAndWhite: true }}
-									/>
-								</div>
-							{:else}
-								<SkeletonLogo size="small" />
-							{/if}
-						</div>
+	{#if isTransactionsPage}
+		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
+			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
+				<Back color="current" onlyArrow />
+
+				<div>
+					<div class="my-0.5 flex items-center justify-center">
+						{#if $erc20UserTokensInitialized && nonNullish($pageToken)}
+							<div in:fade>
+								<TokenLogo
+									data={$pageToken}
+									ring
+									badge={{ type: 'network', blackAndWhite: true }}
+								/>
+							</div>
+						{:else}
+							<SkeletonLogo size="small" />
+						{/if}
 					</div>
-
-					<ContextMenu />
 				</div>
 
-				<Balance token={pageTokenUi} />
+				<ContextMenu />
 			</div>
-		{:else}
-			<div in:slide={SLIDE_PARAMS}>
-				<ExchangeBalance />
-			</div>
-		{/if}
 
-		<div in:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
-			<Actions />
+			<Balance token={pageTokenUi} />
 		</div>
+	{:else}
+		<div in:slide={SLIDE_PARAMS}>
+			<ExchangeBalance />
+		</div>
+	{/if}
 
-		{#if isErc20Icp($pageToken)}
-			<Erc20Icp />
-		{/if}
+	<div in:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
+		<Actions />
 	</div>
+
+	{#if isErc20Icp($pageToken)}
+		<Erc20Icp />
+	{/if}
 </div>
