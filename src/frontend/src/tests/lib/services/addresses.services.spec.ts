@@ -1,4 +1,7 @@
-import { loadBtcAddressMainnet, loadIdbBtcAddressMainnet } from '$btc/services/btc-address.services';
+import {
+	loadBtcAddressMainnet,
+	loadIdbBtcAddressMainnet
+} from '$btc/services/btc-address.services';
 import * as solEnv from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
@@ -6,7 +9,10 @@ import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { loadEthAddress, loadIdbEthAddress } from '$eth/services/eth-address.services';
 import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 import { LoadIdbAddressError } from '$lib/types/errors';
-import { loadIdbSolAddressMainnet, loadSolAddressMainnet } from '$sol/services/sol-address.services';
+import {
+	loadIdbSolAddressMainnet,
+	loadSolAddressMainnet
+} from '$sol/services/sol-address.services';
 
 vi.mock('$btc/services/btc-address.services');
 vi.mock('$eth/services/eth-address.services');
@@ -102,4 +108,4 @@ describe('addresses.services', () => {
 			expect(loadIdbSolAddressMainnet).toHaveBeenCalledOnce();
 		});
 	});
-}); 
+});

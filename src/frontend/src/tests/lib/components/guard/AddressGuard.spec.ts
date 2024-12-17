@@ -1,20 +1,24 @@
 import * as btcAddressServices from '$btc/services/btc-address.services';
+import * as solEnv from '$env/networks/networks.sol.env';
 import * as ethAddressServices from '$eth/services/eth-address.services';
 import * as api from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 import * as authServices from '$lib/services/auth.services';
 import * as loaderServices from '$lib/services/loader.services';
-import { btcAddressMainnetStore, ethAddressStore, solAddressMainnetStore } from '$lib/stores/address.store';
+import {
+	btcAddressMainnetStore,
+	ethAddressStore,
+	solAddressMainnetStore
+} from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { emit } from '$lib/utils/events.utils';
+import * as solAddressServices from '$sol/services/sol-address.services';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-import * as solAddressServices from '$sol/services/sol-address.services';
-import * as solEnv from '$env/networks/networks.sol.env';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
 describe('AddressGuard', () => {
@@ -24,6 +28,7 @@ describe('AddressGuard', () => {
 		vi.restoreAllMocks();
 
 		vi.clearAllMocks();
+
 		vi.resetAllMocks();
 
 		apiMock = vi.spyOn(api, 'allowSigning');
@@ -108,7 +113,7 @@ describe('AddressGuard', () => {
 					render(AddressGuard);
 
 					const spy = vi.spyOn({ validateFn }, 'validateFn');
-					
+
 					store.set({
 						data: mockAddress,
 						certified: true
@@ -129,19 +134,19 @@ describe('AddressGuard', () => {
 					name: 'eth',
 					store: ethAddressStore,
 					mockAddress: mockEthAddress,
-					spy: () => vi.spyOn(ethAddressServices, 'validateEthAddress'),
+					spy: () => vi.spyOn(ethAddressServices, 'validateEthAddress')
 				},
 				{
 					name: 'btc',
 					store: btcAddressMainnetStore,
 					mockAddress: mockBtcAddress,
-					spy: () => vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet'),
+					spy: () => vi.spyOn(btcAddressServices, 'validateBtcAddressMainnet')
 				},
 				{
 					name: 'sol',
 					store: solAddressMainnetStore,
 					mockAddress: mockSolAddress,
-					spy: () => vi.spyOn(solAddressServices, 'validateSolAddressMainnet'),
+					spy: () => vi.spyOn(solAddressServices, 'validateSolAddressMainnet')
 				}
 			] as const;
 
@@ -150,7 +155,7 @@ describe('AddressGuard', () => {
 				async ({ store, mockAddress, spy }) => {
 					render(AddressGuard);
 
-					const validateSpy = spy()
+					const validateSpy = spy();
 
 					store.set({
 						data: mockAddress,
@@ -170,7 +175,7 @@ describe('AddressGuard', () => {
 				async ({ store, mockAddress, spy }) => {
 					render(AddressGuard);
 
-					const validateSpy = spy()
+					const validateSpy = spy();
 
 					emit({ message: 'oisyValidateAddresses' });
 
@@ -190,7 +195,7 @@ describe('AddressGuard', () => {
 				async ({ store, mockAddress, spy }) => {
 					render(AddressGuard);
 
-					const validateSpy = spy()
+					const validateSpy = spy();
 
 					emit({ message: 'oisyValidateAddresses' });
 
