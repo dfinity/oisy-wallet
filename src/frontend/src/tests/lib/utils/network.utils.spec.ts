@@ -19,18 +19,18 @@ import {
 import type { NetworkId } from '$lib/types/network';
 import {
 	isNetworkICP,
-	isNetworkIdBitcoin,
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCRegtest,
 	isNetworkIdBTCTestnet,
+	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
-	isNetworkIdSepolia,
-	isNetworkIdSolana,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
 	isNetworkIdSOLMainnet,
 	isNetworkIdSOLTestnet,
+	isNetworkIdSepolia,
+	isNetworkIdSolana,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 
