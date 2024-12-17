@@ -43,7 +43,6 @@ describe('sol-address.services', () => {
 
 	let spyGetSchnorrPublicKey: MockInstance;
 	let spyGetIdbAddress: MockInstance;
-	let spySetIdbAddress: MockInstance;
 	let spyUpdateIdbAddressLastUsage: MockInstance;
 	let spyToastsError: MockInstance;
 	let mockDecoder: { decode: MockInstance; read: MockInstance };
@@ -61,7 +60,6 @@ describe('sol-address.services', () => {
 
 		spyGetSchnorrPublicKey = vi.spyOn(signerApi, 'getSchnorrPublicKey');
 		spyGetIdbAddress = vi.spyOn(idbApi, 'getIdbSolAddressMainnet');
-		spySetIdbAddress = vi.spyOn(idbApi, 'setIdbSolAddressMainnet');
 		spyUpdateIdbAddressLastUsage = vi.spyOn(idbApi, 'updateIdbSolAddressMainnetLastUsage');
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 	});
@@ -80,7 +78,8 @@ describe('sol-address.services', () => {
 
 		it.each(networkCases)(
 			'should generate valid %s address',
-			async (network, getAddress, networkType) => {
+			// eslint-disable-next-line local-rules/prefer-object-params
+			async (_, getAddress, networkType) => {
 				const result = await getAddress(mockIdentity);
 				expect(result).toBe(mockSolAddress);
 				expect(spyGetSchnorrPublicKey).toHaveBeenCalledWith({
@@ -104,7 +103,8 @@ describe('sol-address.services', () => {
 			['local', loadSolAddressLocal, solAddressLocalnetStore]
 		] as const;
 
-		it.each(loadCases)('should load %s address into store', async (network, loadAddress, store) => {
+		// eslint-disable-next-line local-rules/prefer-object-params
+		it.each(loadCases)('should load %s address into store', async (_, loadAddress, store) => {
 			const result = await loadAddress();
 			expect(result).toEqual({ success: true });
 			expect(get(store)).toEqual({
