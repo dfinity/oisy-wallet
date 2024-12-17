@@ -16,7 +16,7 @@
 		delay={[0, 250]}
 		infinite
 		duration={5000}
-		amount={125}
+		amount={75}
 		fallDistance="300px"
 		{colorArray}
 	/>
