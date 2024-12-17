@@ -4,12 +4,14 @@ import type {
 	RejectionCode_1,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
+import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
@@ -579,6 +581,44 @@ describe('signer.canister', () => {
 			const res = sendBtc(sendBtcParams);
 
 			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('getSchnorrPublicKey', () => {
+		it('returns correct schnorr public key', async () => {
+			const publicKey = [1, 2, 3];
+			const response = { public_key: publicKey, chain_code: [4, 5, 6] };
+			service.schnorr_public_key.mockResolvedValue({ Ok: [response] });
+
+			const { getSchnorrPublicKey } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
+
+			expect(res).toEqual(publicKey);
+			expect(service.schnorr_public_key).toHaveBeenCalledWith(
+				{
+					key_id: SOLANA_KEY_ID,
+					canister_id: [],
+					derivation_path: mapDerivationPath(['test'])
+				},
+				[SIGNER_PAYMENT_TYPE]
+			);
+		});
+
+		it('should throw an error if schnorr_public_key throws', async () => {
+			service.schnorr_public_key.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { getSchnorrPublicKey } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
+
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 });
