@@ -239,7 +239,6 @@ abstract class Homepage {
 		await this.clickByTestId(NAVIGATION_MENU_BUTTON);
 		await this.clickByTestId(NAVIGATION_ITEM_SETTINGS);
 		await this.clickByTestId(toggle);
-
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
