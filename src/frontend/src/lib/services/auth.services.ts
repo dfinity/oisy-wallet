@@ -1,4 +1,8 @@
-import { deleteIdbBtcAddressMainnet, deleteIdbEthAddress, deleteIdbSolAddressMainnet } from '$lib/api/idb.api';
+import {
+	deleteIdbBtcAddressMainnet,
+	deleteIdbEthAddress,
+	deleteIdbSolAddressMainnet
+} from '$lib/api/idb.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -130,7 +134,12 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), emptyIdbSolAddress(), clearTestnetsOption()]);
+		await Promise.all([
+			emptyIdbBtcAddressMainnet(),
+			emptyIdbEthAddress(),
+			emptyIdbSolAddress(),
+			clearTestnetsOption()
+		]);
 	}
 
 	await authStore.signOut();
