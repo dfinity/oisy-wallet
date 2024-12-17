@@ -50,6 +50,4 @@ backend-v*.wasm.gz
 /playwright/.cache/
 pocket-ic
 
-e2e/*-snapshots/*-darwin.png
-
 coverage/
