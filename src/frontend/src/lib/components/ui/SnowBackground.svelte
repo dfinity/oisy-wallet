@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Confetti from 'svelte-confetti';
+	import { Confetti } from 'svelte-confetti';
 	import snow1 from '$lib/assets/snow-1.svg';
 	import snow2 from '$lib/assets/snow-2.svg';
 	import snow3 from '$lib/assets/snow-3.svg';
