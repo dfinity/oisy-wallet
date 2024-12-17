@@ -1,11 +1,14 @@
-import { render, waitFor } from '@testing-library/svelte';
-import Menu from '$lib/components/core/Menu.svelte';
 import type { Settings, UserProfile } from '$declarations/backend/backend.did';
+import Menu from '$lib/components/core/Menu.svelte';
+import {
+	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_VIP_BUTTON
+} from '$lib/constants/test-ids.constants';
+import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
-import { userProfileStore } from '$lib/stores/user-profile.store';
+import { render, waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
-import { NAVIGATION_MENU_BUTTON, NAVIGATION_MENU_VIP_BUTTON } from '$lib/constants/test-ids.constants';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
@@ -38,7 +41,8 @@ describe('Menu', () => {
 		menuButton?.click();
 
 		await waitFor(() => {
-			const menuItemVipButton: HTMLButtonElement | null = container.querySelector(menuItemVipButtonSelector);
+			const menuItemVipButton: HTMLButtonElement | null =
+				container.querySelector(menuItemVipButtonSelector);
 			if (menuItemVipButton == null) {
 				throw new Error('menu item not yet loaded');
 			}
@@ -70,7 +74,8 @@ describe('Menu', () => {
 		menuButton?.click();
 
 		await waitFor(() => {
-			const menuItemVipButton: HTMLButtonElement | null = container.querySelector(menuItemVipButtonSelector);
+			const menuItemVipButton: HTMLButtonElement | null =
+				container.querySelector(menuItemVipButtonSelector);
 			if (menuItemVipButton == null) {
 				expect(menuItemVipButton).toBeNull();
 			} else {
