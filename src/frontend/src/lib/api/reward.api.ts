@@ -10,7 +10,7 @@ export const isVip = async ({ identity }: CanisterApiFunctionParams): Promise<bo
 	const { isVip } = await rewardCanister({ identity });
 
 	return isVip();
-}
+};
 
 export const getRewardCode = async ({ identity }: CanisterApiFunctionParams): Promise<string> => {
 	const { getRewardCode } = await rewardCanister({ identity });

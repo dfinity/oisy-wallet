@@ -1,7 +1,7 @@
 import {
 	getRewardCode as getRewardCodeApi,
-	useRewardCode as useRewardCodeApi,
-	isVip as isVipApi
+	isVip as isVipApi,
+	useRewardCode as useRewardCodeApi
 } from '$lib/api/reward.api';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
@@ -12,7 +12,7 @@ export const isVip = async (identity: Identity) => {
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
-}
+};
 
 export const getRewardCode = async (identity: Identity) => {
 	return await getRewardCodeApi({
