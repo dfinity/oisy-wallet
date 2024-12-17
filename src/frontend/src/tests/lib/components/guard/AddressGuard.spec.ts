@@ -16,10 +16,10 @@ import { emit } from '$lib/utils/events.utils';
 import * as solAddressServices from '$sol/services/sol-address.services';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 
 describe('AddressGuard', () => {
 	let apiMock: MockInstance;
