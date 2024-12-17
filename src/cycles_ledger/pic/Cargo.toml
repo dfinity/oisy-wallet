@@ -1,0 +1,12 @@
+[package]
+name = "ic-cycles-ledger-pic"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+candid = { workspace = true }
+ic-cdk = { workspace = true }
+ic-cycles-ledger-types = { workspace = true }
+pocket-ic = { workspace = true }
+serde = { workspace = true }
+serde_bytes = { workspace = true }
