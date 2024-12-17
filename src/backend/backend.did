@@ -88,6 +88,7 @@ type CustomToken = record {
 };
 type DappCarouselSettings = record { hidden_dapp_ids : vec text };
 type DappSettings = record { dapp_carousel : DappCarouselSettings };
+type VipSettings = record { isVip: bool };
 type DefiniteCanisterSettingsArgs = record {
   controller : principal;
   freezing_threshold : nat;
@@ -191,7 +192,7 @@ type SelectedUtxosFeeResponse = record {
   fee_satoshis : nat64;
   utxos : vec Utxo;
 };
-type Settings = record { dapp : DappSettings };
+type Settings = record { dapp : DappSettings, vip: VipSettings };
 type Stats = record {
   user_profile_count : nat64;
   custom_token_count : nat64;
