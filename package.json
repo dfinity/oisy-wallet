@@ -71,6 +71,7 @@
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
 		"idb-keyval": "^6.2.1",
+		"svelte-confetti": "^1.4.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
