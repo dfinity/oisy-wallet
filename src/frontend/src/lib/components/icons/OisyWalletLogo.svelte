@@ -1,7 +1,10 @@
 <script lang="ts">
-	import oisyLogoLarge from '$lib/assets/oisy-logo-large.svg';
-	import oisyLogoSmall from '$lib/assets/oisy-logo-small.svg';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
+	// TO REVERT BACK after New Year Holidays
+	// import oisyLogoLarge from '$lib/assets/oisy-logo-large.svg';
+	// import oisyLogoSmall from '$lib/assets/oisy-logo-small.svg';
+	import oisyLogoLargeNewYear from '$lib/assets/oisy-logo-large-new-year.svg';
+	import oisyLogoSmallNewYear from '$lib/assets/oisy-logo-small-new-year.svg';
+	import IconAstronautHelmetNewYear from '$lib/components/icons/IconAstronautHelmetNewYear.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,10 +15,10 @@
 </script>
 
 <div class="mr-3">
-	<IconAstronautHelmet />
+	<IconAstronautHelmetNewYear />
 </div>
 
 <picture aria-label={ariaLabel} class="w-24">
-	<source srcset={oisyLogoSmall} media="(max-width: 639px)" />
-	<Img src={oisyLogoLarge} alt={ariaLabel} />
+	<source srcset={oisyLogoSmallNewYear} media="(max-width: 639px)" />
+	<Img src={oisyLogoLargeNewYear} alt={ariaLabel} />
 </picture>
