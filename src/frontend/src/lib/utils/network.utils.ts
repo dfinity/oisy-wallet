@@ -59,21 +59,6 @@ export const isNetworkIdSOLDevnet: IsNetworkIdUtil = (networkId) =>
 export const isNetworkIdSOLLocal: IsNetworkIdUtil = (networkId) =>
 	SOLANA_LOCAL_NETWORK_ID === networkId;
 
-export const isNetworkIdSolana = (networkId: NetworkId | undefined): boolean =>
-	nonNullish(networkId) && SOLANA_NETWORKS_IDS.includes(networkId);
-
-export const isNetworkIdSOLMainnet = (networkId: NetworkId | undefined): boolean =>
-	SOLANA_MAINNET_NETWORK_ID === networkId;
-
-export const isNetworkIdSOLTestnet = (networkId: NetworkId | undefined): boolean =>
-	SOLANA_TESTNET_NETWORK_ID === networkId;
-
-export const isNetworkIdSOLDevnet = (networkId: NetworkId | undefined): boolean =>
-	SOLANA_DEVNET_NETWORK_ID === networkId;
-
-export const isNetworkIdSOLLocal = (networkId: NetworkId | undefined): boolean =>
-	SOLANA_LOCAL_NETWORK_ID === networkId;
-
 const mapper: Record<symbol, BitcoinNetwork> = {
 	[BTC_MAINNET_NETWORK_ID]: 'mainnet',
 	[BTC_TESTNET_NETWORK_ID]: 'testnet',
