@@ -41,7 +41,8 @@
 			"source_code": "Source code",
 			"changelog": "Changelog",
 			"submit_ticket": "Submit a ticket",
-			"confirm_navigate": "Are you sure you want to navigate away?"
+			"confirm_navigate": "Are you sure you want to navigate away?",
+			"vip_qr_code": "VIP QR codes"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -52,7 +53,8 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"submit_ticket": "Report an issue or request a feature on GitHub",
-			"open_twitter": "Open the DFINITY X/Twitter feed"
+			"open_twitter": "Open the DFINITY X/Twitter feed",
+			"vip_qr_code": "Generate an invitation link"
 		}
 	},
 	"auth": {
@@ -735,6 +737,16 @@
 					"title": "Trust in Transparency with Open Source",
 					"description": "$oisy_short is an <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">open-source</a> project led by a dedicated team within the <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
 				}
+			}
+		}
+	},
+	"vip": {
+		"invitation": {
+			"text": {
+				"title": "Generate invitation link",
+				"invitation_link_copied": "Invitation link copied to clipboard.",
+				"generate_new_link": "Generate new link",
+				"regenerate_countdown_text": "New link will be generated in $counter sec"
 			}
 		}
 	},
