@@ -24,7 +24,9 @@ export default defineConfig({
 	workers: DEV ? 5 : 2,
 	expect: {
 		toHaveScreenshot: {
+			// disable any animations caught by playwright for better screenshots and less flaky tests.
 			animations: 'disabled',
+			// hide caret for cleaner snapshots.
 			caret: 'hide'
 		}
 	},
