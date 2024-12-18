@@ -12,7 +12,10 @@ import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
 let canister: RewardCanister | undefined = undefined;
 
-export const getUserInfo = async ({ identity, certified }: CanisterApiFunctionParams<QueryParams>): Promise<UserData> => {
+export const getUserInfo = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<UserData> => {
 	const { getUserInfo } = await rewardCanister({ identity });
 
 	return getUserInfo({ certified });
