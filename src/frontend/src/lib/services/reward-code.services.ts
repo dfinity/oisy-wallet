@@ -7,6 +7,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
 import { get } from 'svelte/store';
+import { fromNullable } from '@dfinity/utils';
 
 export const getVipStatus = async ({
 	identity,
@@ -21,11 +22,7 @@ export const getVipStatus = async ({
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	let vipStatus = false;
-	if (userData.is_vip.length > 0) {
-		vipStatus = userData.is_vip[0]!;
-	}
-	return vipStatus;
+	return fromNullable(userData.is_vip) === true;
 };
 
 export const getNewReward = async (identity: Identity): Promise<VipReward> => {
