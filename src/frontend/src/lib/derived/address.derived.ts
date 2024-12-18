@@ -1,4 +1,10 @@
 import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
+import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
@@ -16,6 +22,7 @@ import type {
 	OptionSolAddress,
 	SolAddress
 } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -74,3 +81,10 @@ export const solAddressLocal: Readable<OptionSolAddress> = derived(
 	[solAddressLocalnetStore],
 	([$solAddressLocalnetStore]) => mapAddress<SolAddress>($solAddressLocalnetStore)
 );
+
+export const solanaNetworkAddressLookup: Record<NetworkId, Readable<OptionSolAddress>> = {
+	[SOLANA_MAINNET_NETWORK_ID]: solAddressMainnet,
+	[SOLANA_TESTNET_NETWORK_ID]: solAddressTestnet,
+	[SOLANA_DEVNET_NETWORK_ID]: solAddressTestnet,
+	[SOLANA_LOCAL_NETWORK_ID]: solAddressLocal
+};
