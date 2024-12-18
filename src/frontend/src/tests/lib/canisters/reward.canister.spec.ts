@@ -9,6 +9,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { mock } from 'vitest-mock-extended';
+import { fromNullable } from '@dfinity/utils';
 
 vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -51,7 +52,7 @@ describe('reward.canister', () => {
 			const userData = await getUserInfo(queryParams);
 			expect(service.user_info).toHaveBeenCalledWith();
 			expect(userData.is_vip.length).toBe(1);
-			expect(userData.is_vip[0]!).toBeTruthy();
+			expect(fromNullable(userData.is_vip) === true).toBeTruthy();
 		});
 
 		it('returns false if user is not vip', async () => {
@@ -68,7 +69,7 @@ describe('reward.canister', () => {
 
 			const userData = await getUserInfo(queryParams);
 			expect(userData.is_vip.length).toBe(1);
-			expect(userData.is_vip[0]!).toBeFalsy();
+			expect(fromNullable(userData.is_vip) === true).toBeFalsy();
 		});
 
 		it('should throw an error if user_info throws', async () => {
