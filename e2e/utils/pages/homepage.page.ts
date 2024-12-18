@@ -228,12 +228,11 @@ abstract class Homepage {
 		if (await this.isVisibleByTestId(testId)) {
 			await this.clickByTestId(testId);
 		} else {
-			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
-				const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU_BUTTON)
-				await navigationMenu.click();
+				const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON)
+				await navigationMenuButton.click();
+				const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU)
 				await navigationMenu.getByTestId(testId).click();		
 			}
-		}
 	}
 
 	async activateTestnetSettings(): Promise<void> {
