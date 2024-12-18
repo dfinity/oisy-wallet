@@ -1,6 +1,7 @@
 import type {
-	_SERVICE as RewardService, ClaimVipRewardResponse,
+	ClaimVipRewardResponse,
 	NewVipRewardResponse,
+	_SERVICE as RewardService,
 	UserData,
 	VipReward
 } from '$declarations/rewards/rewards.did';

@@ -1,14 +1,14 @@
-import { RewardCanister } from '$lib/canisters/reward.canister';
-import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
-import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type {
 	ClaimVipRewardResponse,
 	NewVipRewardResponse,
 	UserData,
 	VipReward
 } from '$declarations/rewards/rewards.did';
+import { RewardCanister } from '$lib/canisters/reward.canister';
+import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import { Principal } from '@dfinity/principal';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 let canister: RewardCanister | undefined = undefined;
 
@@ -18,7 +18,9 @@ export const getUserInfo = async ({ identity }: CanisterApiFunctionParams): Prom
 	return getUserInfo();
 };
 
-export const getNewVipReward = async ({ identity }: CanisterApiFunctionParams): Promise<NewVipRewardResponse> => {
+export const getNewVipReward = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<NewVipRewardResponse> => {
 	const { getNewVipReward } = await rewardCanister({ identity });
 
 	return getNewVipReward();

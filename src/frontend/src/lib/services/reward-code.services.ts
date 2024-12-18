@@ -26,15 +26,15 @@ export const getNewReward = async (identity: Identity) => {
 		return response.VipReward;
 	}
 	if ('NotImportantPerson' in response) {
-		throw new Error('User is not VIP')
+		throw new Error('User is not VIP');
 	}
-	throw new Error('Unknown error')
+	throw new Error('Unknown error');
 };
 
 export const claimVipReward = async (identity: Identity, code: string) => {
 	const response = await claimVipRewardApi({
 		identity,
-		vipReward: {code},
+		vipReward: { code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
@@ -47,5 +47,5 @@ export const claimVipReward = async (identity: Identity, code: string) => {
 	if ('AlreadyClaimed' in response) {
 		return false;
 	}
-	throw new Error('Unknown error')
+	throw new Error('Unknown error');
 };
