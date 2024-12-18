@@ -9,11 +9,11 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { getNewReward } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getNewReward } from '$lib/services/reward-code.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
 	const secondsToRegenerate = 45;
 	let counter = secondsToRegenerate;
@@ -23,7 +23,7 @@
 	const generateCode = async () => {
 		const identity = $authIdentity;
 		if (nonNullish(identity)) {
-			code = (await getNewReward(identity)).code
+			code = (await getNewReward(identity)).code;
 		}
 	};
 
