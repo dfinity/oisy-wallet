@@ -1,7 +1,10 @@
 import {
+	BTC_TESTNET_TOGGLE,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	NAVIGATION_ITEM_SETTINGS,
+	NAVIGATION_ITEM_TOKENS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	RECEIVE_TOKENS_MODAL,
@@ -65,6 +68,11 @@ abstract class Homepage {
 
 	protected async clickByTestId(testId: string): Promise<void> {
 		await this.#page.getByTestId(testId).click();
+	}
+
+	protected async isVisibleByTestId(testId: string): Promise<boolean> {
+		const element = this.#page.locator(`[data-tid="${testId}"]`);
+		return await element.isVisible();
 	}
 
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
@@ -214,6 +222,25 @@ abstract class Homepage {
 
 	async waitForLoadState() {
 		await this.#page.waitForLoadState('networkidle');
+	}
+
+	async navigateTo(testId: string): Promise<void> {
+		if (await this.isVisibleByTestId(testId)) {
+			await this.clickByTestId(testId);
+		} else {
+			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
+				await this.clickByTestId(NAVIGATION_MENU_BUTTON);
+			}
+			if (await this.isVisibleByTestId(testId)) {
+				await this.clickByTestId(testId);
+			}
+		}
+	}
+
+	async activateTestnetSettings(): Promise<void> {
+		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.clickByTestId(BTC_TESTNET_TOGGLE);
+		await this.clickByTestId(NAVIGATION_ITEM_TOKENS);
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
