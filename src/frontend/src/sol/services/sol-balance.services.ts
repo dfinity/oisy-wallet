@@ -1,15 +1,4 @@
-import {
-	SOLANA_DEVNET_NETWORK_ID,
-	SOLANA_LOCAL_NETWORK_ID,
-	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID
-} from '$env/networks/networks.sol.env';
-import {
-	solAddressDevnet,
-	solAddressLocal,
-	solAddressMainnet,
-	solAddressTestnet
-} from '$lib/derived/address.derived';
+import { solAddress } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -20,9 +9,9 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { address as solAddress } from '@solana/addresses';
+import { address as solanaAddress } from '@solana/addresses';
 import { type Lamports } from '@solana/rpc-types';
-import { get, type Readable } from 'svelte/store';
+import { get } from 'svelte/store';
 
 const loadLamportsBalance = async ({
 	address,
@@ -33,17 +22,10 @@ const loadLamportsBalance = async ({
 }): Promise<Lamports> => {
 	const { getBalance } = solanaHttpRpc(networkId);
 
-	const wallet = solAddress(address);
+	const wallet = solanaAddress(address);
 	const { value: balance } = await getBalance(wallet).send();
 
 	return balance;
-};
-
-const solanaAddressMapper: Record<NetworkId, Readable<OptionSolAddress>> = {
-	[SOLANA_MAINNET_NETWORK_ID]: solAddressMainnet,
-	[SOLANA_TESTNET_NETWORK_ID]: solAddressTestnet,
-	[SOLANA_DEVNET_NETWORK_ID]: solAddressDevnet,
-	[SOLANA_LOCAL_NETWORK_ID]: solAddressLocal
 };
 
 export const loadSolBalance = async ({
@@ -53,7 +35,7 @@ export const loadSolBalance = async ({
 	networkId: NetworkId;
 	tokenId: TokenId;
 }): Promise<ResultSuccess> => {
-	const addressOption = solanaAddressMapper[networkId];
+	const address: OptionSolAddress = get(solAddress);
 
 	const {
 		init: {
@@ -61,16 +43,13 @@ export const loadSolBalance = async ({
 		}
 	} = get(i18n);
 
-	if (isNullish(addressOption) || isNullish(get(addressOption))) {
+	if (isNullish(address)) {
 		toastsError({
 			msg: { text: sol_address_unknown }
 		});
 
 		return { success: false };
 	}
-
-	// we arleady asserted that the address is not nullish
-	const address = get(addressOption)!;
 
 	try {
 		const balance = await loadLamportsBalance({ address, networkId });

@@ -19,6 +19,14 @@ import type {
 import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+import { networkId } from '$lib/derived/network.derived';
+import {
+	SOLANA_DEVNET_NETWORK_ID, SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
+import type { NetworkId } from '$lib/types/network';
+
 
 export const ethAddressNotLoaded: Readable<boolean> = derived(
 	[ethAddressStore],
@@ -73,4 +81,22 @@ export const solAddressDevnet: Readable<OptionSolAddress> = derived(
 export const solAddressLocal: Readable<OptionSolAddress> = derived(
 	[solAddressLocalnetStore],
 	([$solAddressLocalnetStore]) => mapAddress<SolAddress>($solAddressLocalnetStore)
+);
+
+export const solAddress: Readable<OptionSolAddress> = derived(
+	[networkId, solAddressMainnet, solAddressTestnet, solAddressDevnet, solAddressLocal],
+	([$networkId, $solAddressMainnet, $solAddressTestnet, $solAddressDevnet, $solAddressLocal]) => {
+		if (isNullish($networkId)) {
+			return undefined;
+		}
+
+		const solanaAddressMapper: Record<NetworkId, OptionSolAddress> = {
+			[SOLANA_MAINNET_NETWORK_ID]: $solAddressMainnet,
+			[SOLANA_TESTNET_NETWORK_ID]: $solAddressTestnet,
+			[SOLANA_DEVNET_NETWORK_ID]: $solAddressDevnet,
+			[SOLANA_LOCAL_NETWORK_ID]: $solAddressLocal
+		};
+
+		return solanaAddressMapper[$networkId] ?? null;
+	}
 );
