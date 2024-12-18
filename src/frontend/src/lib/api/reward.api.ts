@@ -5,7 +5,7 @@ import type {
 	VipReward
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
-import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
+import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
@@ -43,7 +43,7 @@ export const claimVipReward = async ({
 const rewardCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
-	canisterId = BACKEND_CANISTER_ID // TODO replace with REWARD_CANISTER_ID
+	canisterId = REWARDS_CANISTER_ID
 }: CanisterApiFunctionParams): Promise<RewardCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
