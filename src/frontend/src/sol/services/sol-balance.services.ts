@@ -1,15 +1,15 @@
-import { solAddress } from '$lib/derived/address.derived';
+import { solanaNetworkAddressLookup } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
+import type { SolAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { address as solanaAddress } from '@solana/addresses';
+import { address as solAddress } from '@solana/addresses';
 import { type Lamports } from '@solana/rpc-types';
 import { get } from 'svelte/store';
 
@@ -22,7 +22,7 @@ const loadLamportsBalance = async ({
 }): Promise<Lamports> => {
 	const { getBalance } = solanaHttpRpc(networkId);
 
-	const wallet = solanaAddress(address);
+	const wallet = solAddress(address);
 	const { value: balance } = await getBalance(wallet).send();
 
 	return balance;
@@ -35,7 +35,7 @@ export const loadSolBalance = async ({
 	networkId: NetworkId;
 	tokenId: TokenId;
 }): Promise<ResultSuccess> => {
-	const address: OptionSolAddress = get(solAddress);
+	const maybeSolanaNetworkAddress = solanaNetworkAddressLookup[networkId];
 
 	const {
 		init: {
@@ -43,13 +43,16 @@ export const loadSolBalance = async ({
 		}
 	} = get(i18n);
 
-	if (isNullish(address)) {
+	if (isNullish(maybeSolanaNetworkAddress) || isNullish(get(maybeSolanaNetworkAddress))) {
 		toastsError({
 			msg: { text: sol_address_unknown }
 		});
 
 		return { success: false };
 	}
+
+	// we arleady asserted that the address is not nullish
+	const address = get(maybeSolanaNetworkAddress)!;
 
 	try {
 		const balance = await loadLamportsBalance({ address, networkId });
