@@ -1,3 +1,4 @@
+import type { VipReward } from '$declarations/rewards/rewards.did';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
@@ -6,7 +7,6 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
 import { get } from 'svelte/store';
-import type { VipReward } from '$declarations/rewards/rewards.did';
 
 export const getUserInfo = async (identity: Identity): Promise<boolean> => {
 	const userData = await getUserInfoApi({
@@ -36,7 +36,13 @@ export const getNewReward = async (identity: Identity): Promise<VipReward> => {
 	throw new Error('Unknown error');
 };
 
-export const claimVipReward = async ({identity, code}: {identity: Identity, code: string}): Promise<boolean> => {
+export const claimVipReward = async ({
+	identity,
+	code
+}: {
+	identity: Identity;
+	code: string;
+}): Promise<boolean> => {
 	const response = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
