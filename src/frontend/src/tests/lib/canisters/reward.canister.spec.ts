@@ -46,6 +46,7 @@ describe('reward.canister', () => {
 			});
 
 			const userData = await getUserInfo();
+			expect(service.user_info).toHaveBeenCalledWith();
 			expect(userData.is_vip.length).toBe(1);
 			expect(userData.is_vip[0]!).toBeTruthy();
 		});
@@ -96,6 +97,7 @@ describe('reward.canister', () => {
 			});
 
 			const vipRewardResponse = await getNewVipReward();
+			expect(service.new_vip_reward).toHaveBeenCalledWith();
 			expect(vipRewardResponse).toEqual(mockedRewardResponse);
 		});
 
@@ -123,7 +125,9 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const claimResponse = await claimVipReward({ code: '1234567890' });
+			const vipReward = { code: '1234567890' };
+			const claimResponse = await claimVipReward(vipReward);
+			expect(service.claim_vip_reward).toHaveBeenCalledWith(vipReward);
 			expect(claimResponse).toEqual(mockedClaimResponse);
 		});
 
