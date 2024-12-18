@@ -9,7 +9,7 @@ import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/r
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices } from '@dfinity/utils';
+import { Canister, createServices, type QueryParams } from '@dfinity/utils';
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({
@@ -30,8 +30,8 @@ export class RewardCanister extends Canister<RewardService> {
 		return new RewardCanister(canisterId, service, certifiedService);
 	}
 
-	getUserInfo = (): Promise<UserData> => {
-		const { user_info } = this.caller({ certified: true });
+	getUserInfo = ({ certified = true }: QueryParams): Promise<UserData> => {
+		const { user_info } = this.caller({ certified });
 
 		return user_info();
 	};

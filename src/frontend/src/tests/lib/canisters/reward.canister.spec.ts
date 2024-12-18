@@ -31,6 +31,9 @@ describe('reward.canister', () => {
 		});
 	const service = mock<ActorSubclass<RewardService>>();
 	const mockResponseError = new Error('Test response error');
+	const queryParams = {
+		certified: false
+	};
 
 	describe('getUserInfo', () => {
 		it('returns true if user is vip', async () => {
@@ -45,7 +48,7 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const userData = await getUserInfo();
+			const userData = await getUserInfo(queryParams);
 			expect(service.user_info).toHaveBeenCalledWith();
 			expect(userData.is_vip.length).toBe(1);
 			expect(userData.is_vip[0]!).toBeTruthy();
@@ -63,7 +66,7 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const userData = await getUserInfo();
+			const userData = await getUserInfo(queryParams);
 			expect(userData.is_vip.length).toBe(1);
 			expect(userData.is_vip[0]!).toBeFalsy();
 		});
@@ -78,7 +81,7 @@ describe('reward.canister', () => {
 				serviceOverride: service
 			});
 
-			const result = getUserInfo();
+			const result = getUserInfo(queryParams);
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});
