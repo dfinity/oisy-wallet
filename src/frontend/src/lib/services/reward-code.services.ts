@@ -33,7 +33,8 @@ export const getNewReward = async (identity: Identity): Promise<VipReward> => {
 
 	if ('VipReward' in response) {
 		return response.VipReward;
-	} else if ('NotImportantPerson' in response) {
+	}
+	if ('NotImportantPerson' in response) {
 		throw new Error('User is not VIP');
 	}
 	throw new Error('Unknown error');
@@ -54,7 +55,8 @@ export const claimVipReward = async ({
 
 	if ('Success' in response) {
 		return true;
-	} else if ('InvalidCode' in response || 'AlreadyClaimed' in response) {
+	}
+	if ('InvalidCode' in response || 'AlreadyClaimed' in response) {
 		return false;
 	}
 	throw new Error('Unknown error');
