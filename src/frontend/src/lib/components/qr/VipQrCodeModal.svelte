@@ -13,16 +13,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	function generateRandomString() {
-		// TODO remove this function
-		var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-		var result = '';
-		for (var i = 0; i < 11; i++) {
-			result += chars.charAt(Math.floor(Math.random() * chars.length));
-		}
-		return result;
-	}
-
 	const secondsToRegenerate = 45;
 	let counter = secondsToRegenerate;
 	let countdown: NodeJS.Timeout;
