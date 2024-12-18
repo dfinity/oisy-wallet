@@ -1,101 +1,116 @@
-import type { _SERVICE as BackendService } from '$declarations/backend/backend.did';
+import type { _SERVICE as RewardService, NewVipRewardResponse, UserData } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { ActorSubclass } from '@dfinity/agent';
+import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { mock } from 'vitest-mock-extended';
 
+vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		// eslint-disable-next-line require-await
+		getAgent: async () => mock<HttpAgent>()
+	};
+});
+
 describe('reward.canister', () => {
-	// TODO replace BackendService with RewardService
 	const createRewardCanister = ({
 		serviceOverride
-	}: Pick<CreateCanisterOptions<BackendService>, 'serviceOverride'>): Promise<RewardCanister> =>
+	}: Pick<CreateCanisterOptions<RewardService>, 'serviceOverride'>): Promise<RewardCanister> =>
 		RewardCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
-			identity: mockIdentity
+			identity: mockIdentity,
+			certifiedServiceOverride: serviceOverride,
+			serviceOverride
 		});
-	const service = mock<ActorSubclass<BackendService>>(); // TODO replace BackendService with RewardService
+	const service = mock<ActorSubclass<RewardService>>();
 	const mockResponseError = new Error('Test response error');
 
 	it('returns true if user is vip', async () => {
-		service.is_vip.mockResolvedValue(true);
+		const mockedUserData: UserData = {
+			is_vip: [true],
+			airdrops: [],
+			sprinkles: []
+		}
+		service.user_info.mockResolvedValue(mockedUserData);
 
-		const { isVip } = await createRewardCanister({
+		const { getUserInfo } = await createRewardCanister({
 			serviceOverride: service
 		});
 
-		const result = await isVip();
-
-		expect(result).toBeTruthy();
+		const userData = await getUserInfo();
+		expect(userData.is_vip).toBeTruthy();
 	});
 
-	it('should throw an error if is_vip throws', async () => {
-		service.is_vip.mockImplementation(async () => {
+	it('should throw an error if user_info throws', async () => {
+		service.user_info.mockImplementation(async () => {
 			await Promise.resolve();
 			throw mockResponseError;
 		});
 
-		const { isVip } = await createRewardCanister({
+		const { getUserInfo } = await createRewardCanister({
 			serviceOverride: service
 		});
 
-		const result = isVip();
-
+		const result = getUserInfo();
 		await expect(result).rejects.toThrow(mockResponseError);
 	});
 
-	it('returns reward code', async () => {
-		service.get_reward_code.mockResolvedValue('1234567890');
+	it('returns new vip reward response', async () => {
+		const mockedRewardResponse: NewVipRewardResponse = {
+			VipReward: {
+				code: '1234567890'
+			}
+		}
+		service.new_vip_reward.mockResolvedValue(mockedRewardResponse);
 
-		const { getRewardCode } = await createRewardCanister({
+		const { getNewVipReward } = await createRewardCanister({
 			serviceOverride: service
 		});
 
-		const rewardCode = await getRewardCode();
-
-		expect(rewardCode).toEqual('1234567890');
+		const vipRewardResponse = await getNewVipReward();
+		expect(vipRewardResponse).toEqual(mockedRewardResponse);
 	});
 
-	it('should throw an error if get_reward_code throws', async () => {
-		service.get_reward_code.mockImplementation(async () => {
+	it('should throw an error if new_vip_reward throws', async () => {
+		service.new_vip_reward.mockImplementation(async () => {
 			await Promise.resolve();
 			throw mockResponseError;
 		});
 
-		const { getRewardCode } = await createRewardCanister({
+		const { getNewVipReward } = await createRewardCanister({
 			serviceOverride: service
 		});
 
-		const result = getRewardCode();
-
+		const result = getNewVipReward();
 		await expect(result).rejects.toThrow(mockResponseError);
 	});
 
-	it('should be possible to use a reward code', async () => {
-		service.use_reward_code.mockResolvedValue(true);
+	it('should be possible to claim a vip reward', async () => {
+		const mockedClaimResponse = { Success: null }
+		service.claim_vip_reward.mockResolvedValue(mockedClaimResponse);
 
-		const { useRewardCode } = await createRewardCanister({
+		const { claimVipReward } = await createRewardCanister({
 			serviceOverride: service
 		});
 
-		const result = await useRewardCode('1234567890');
-
-		expect(result).toBeTruthy();
+		const claimResponse = await claimVipReward({code:'1234567890'});
+		expect(claimResponse).toEqual(mockedClaimResponse);
 	});
 
-	it('should throw an error if use_reward_code throws', async () => {
-		service.use_reward_code.mockImplementation(async () => {
+	it('should throw an error if claim_vip_reward throws', async () => {
+		service.claim_vip_reward.mockImplementation(async () => {
 			await Promise.resolve();
 			throw mockResponseError;
 		});
 
-		const { useRewardCode } = await createRewardCanister({
+		const { claimVipReward } = await createRewardCanister({
 			serviceOverride: service
 		});
 
-		const result = useRewardCode('1234567890');
-
+		const result = claimVipReward({code:'1234567890'});
 		await expect(result).rejects.toThrow(mockResponseError);
 	});
 });
