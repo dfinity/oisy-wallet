@@ -15,6 +15,7 @@ describe('network.derived', () => {
 		ethAddressStore.reset();
 		mockPage.reset();
 		authStore.setForTesting(mockIdentity);
+		ethAddressStore.set(mockEthAddressWithCertified);
 	});
 
 	const mockEthAddressWithCertified = {
@@ -35,7 +36,6 @@ describe('network.derived', () => {
 		}
 	])('returns $network address when network is $network', ({ network, expectedAddress }) => {
 		mockPage.mock({ network });
-		ethAddressStore.set(mockEthAddressWithCertified);
 
 		const actualAddress = get(networkAddress);
 
