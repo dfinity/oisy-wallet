@@ -1,6 +1,6 @@
-import { render } from '@testing-library/svelte';
 import SuccessfulRewardModal from '$lib/components/qr/SuccessfulRewardModal.svelte';
 import { i18n } from '$lib/stores/i18n.store';
+import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('SuccessfulRewardModal', () => {
