@@ -282,6 +282,11 @@
 			"error": {
 				"unexpected_btc": "Something went wrong while checking for incoming BTC."
 			}
+		},
+		"solana": {
+			"text": {
+				"solana_address_copied": "Solana Address copied to clipboard."
+			}
 		}
 	},
 	"send": {

@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
+	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
@@ -11,7 +12,13 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
-	import { btcAddressTestnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressRegtest,
+		btcAddressTestnet,
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
@@ -27,6 +34,11 @@
 	import { modalFailedRewardModal, modalSuccessfulRewardModal } from '$lib/derived/modal.derived';
 	import SuccessfulRewardModal from '$lib/components/qr/SuccessfulRewardModal.svelte';
 	import FailedRewardModal from '$lib/components/qr/FailedRewardModal.svelte';
+	import {
+		loadSolAddressDevnet,
+		loadSolAddressLocal,
+		loadSolAddressTestnet
+	} from '$sol/services/sol-address.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -90,11 +102,34 @@
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
+	const debounceLoadSolAddressTestnet = debounce(loadSolAddressTestnet);
+	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
+	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
+
 	$: {
-		if ($testnets && isNullish($btcAddressTestnet)) {
-			debounceLoadBtcAddressTestnet();
+		if ($testnets) {
+			if (isNullish($btcAddressTestnet)) {
+				debounceLoadBtcAddressTestnet();
+			}
+
+			if (SOLANA_NETWORK_ENABLED) {
+				if (isNullish($solAddressTestnet)) {
+					debounceLoadSolAddressTestnet();
+				}
+
+				if (isNullish($solAddressDevnet)) {
+					debounceLoadSolAddressDevnet();
+				}
+			}
+
 			if (LOCAL) {
-				debounceLoadBtcAddressRegtest();
+				if (isNullish($btcAddressRegtest)) {
+					debounceLoadBtcAddressRegtest();
+				}
+
+				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
+					debounceLoadSolAddressLocal();
+				}
 			}
 		}
 	}
