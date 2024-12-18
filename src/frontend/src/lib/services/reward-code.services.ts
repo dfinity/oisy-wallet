@@ -14,7 +14,7 @@ export const getUserInfo = async (identity: Identity): Promise<boolean> => {
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	let vipStatus: boolean = false;
+	let vipStatus = false;
 	if (userData.is_vip.length > 0) {
 		vipStatus = userData.is_vip[0]!;
 	}
