@@ -1,7 +1,7 @@
-import { render } from '@testing-library/svelte';
 import FailedRewardModal from '$lib/components/qr/FailedRewardModal.svelte';
-import { get } from 'svelte/store';
 import { i18n } from '$lib/stores/i18n.store';
+import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('FailedRewardModal', () => {
 	it('should render expected texts', () => {
