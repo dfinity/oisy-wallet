@@ -1,4 +1,10 @@
 import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
+import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
@@ -16,15 +22,10 @@ import type {
 	OptionSolAddress,
 	SolAddress
 } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-import type { NetworkId } from '$lib/types/network';
-import {
-	SOLANA_DEVNET_NETWORK_ID, SOLANA_LOCAL_NETWORK_ID,
-	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_TESTNET_NETWORK_ID
-} from '$env/networks/networks.sol.env';
 
 export const ethAddressNotLoaded: Readable<boolean> = derived(
 	[ethAddressStore],
