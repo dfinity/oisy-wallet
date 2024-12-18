@@ -8,14 +8,14 @@ import { RewardCanister } from '$lib/canisters/reward.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
 let canister: RewardCanister | undefined = undefined;
 
-export const getUserInfo = async ({ identity }: CanisterApiFunctionParams): Promise<UserData> => {
+export const getUserInfo = async ({ identity, certified }: CanisterApiFunctionParams<QueryParams>): Promise<UserData> => {
 	const { getUserInfo } = await rewardCanister({ identity });
 
-	return getUserInfo();
+	return getUserInfo({ certified });
 };
 
 export const getNewVipReward = async ({

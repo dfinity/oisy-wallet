@@ -8,9 +8,10 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
 import { get } from 'svelte/store';
 
-export const getVipStatus = async (identity: Identity): Promise<boolean> => {
+export const getVipStatus = async ({identity, certified}: {identity: Identity; certified: boolean;}): Promise<boolean> => {
 	const userData = await getUserInfoApi({
 		identity,
+		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
