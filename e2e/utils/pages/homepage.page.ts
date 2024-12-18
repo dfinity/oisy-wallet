@@ -229,9 +229,9 @@ abstract class Homepage {
 			await this.clickByTestId(testId);
 		} else {
 			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
-				const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU_BUTTON)
+				const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
 				await navigationMenu.click();
-				await navigationMenu.getByTestId(testId).click();		
+				await navigationMenu.getByTestId(testId).click();
 			}
 		}
 	}
