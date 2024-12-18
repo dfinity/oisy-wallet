@@ -39,7 +39,7 @@ for canister in "${canisters[@]}"; do
         echo "       You may need to run: dfx deploy $canister"
         exit 1
       } >&2
-      mkdir -p "src/backend/src/bind"
+      mkdir -p "$(dirname "$generated_file")"
       didc bind -t rs "$candid_file" --config "$canister_binding_config" >"$generated_file" || {
         echo "ERROR: Failed to generate $binding for $canister."
         echo "       Candid:        $candid_file"
