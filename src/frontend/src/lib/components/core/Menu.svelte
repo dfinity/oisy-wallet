@@ -29,7 +29,6 @@
 		NAVIGATION_ITEM_SETTINGS
 	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
-	import { userSettings } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -40,6 +39,10 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { onMount } from 'svelte';
+	import { getUserInfo } from '$lib/services/reward-code.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalVipQrCode } from '$lib/derived/modal.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -47,7 +50,9 @@
 	let fromRoute: NavigationTarget | null;
 
 	let isVip;
-	isVip = $userSettings?.vip.isVip;
+	onMount(async () => {
+		isVip = await getUserInfo($authIdentity);
+	});
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
@@ -72,8 +77,6 @@
 	const goToDappExplorer = async () => await navigateTo(AppPath.Explore);
 
 	const goToActivity = async () => await navigateTo(AppPath.Activity);
-
-	const openVipQrCode = () => modalStore.openVipQrCode();
 
 	let assetsRoute = false;
 	$: assetsRoute = isRouteTokens($page);
@@ -150,7 +153,7 @@
 		{/if}
 
 		{#if isVip}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={openVipQrCode}>
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={modalStore.openVipQrCode}>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
