@@ -13,7 +13,11 @@ export const getUserInfo = async (identity: Identity): Promise<boolean> => {
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return !!userData.is_vip;
+	let vipStatus: boolean = false;
+	if (userData.is_vip.length > 0) {
+		vipStatus = userData.is_vip[0]!;
+	}
+	return vipStatus;
 };
 
 export const getNewReward = async (identity: Identity) => {
