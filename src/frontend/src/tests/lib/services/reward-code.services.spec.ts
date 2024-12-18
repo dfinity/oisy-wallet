@@ -4,7 +4,7 @@ import type {
 	UserData
 } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { claimVipReward, getNewReward, getUserInfo } from '$lib/services/reward-code.services';
+import { claimVipReward, getNewReward, getVipStatus } from '$lib/services/reward-code.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { vi } from 'vitest';
@@ -31,7 +31,7 @@ describe('reward-code', () => {
 	it('should return true if user is vip', async () => {
 		const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		const isVip = await getUserInfo(mockIdentity);
+		const isVip = await getVipStatus(mockIdentity);
 
 		expect(getUserInfoSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
@@ -44,7 +44,7 @@ describe('reward-code', () => {
 		const userData: UserData = { ...mockedUserData, is_vip: [false] };
 		const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(userData);
 
-		const isVip = await getUserInfo(mockIdentity);
+		const isVip = await getVipStatus(mockIdentity);
 
 		expect(getUserInfoSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
