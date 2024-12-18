@@ -12,28 +12,33 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getNewReward } from '$lib/services/reward-code.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	const secondsToRegenerate = 45;
 	let counter = secondsToRegenerate;
 	let countdown: NodeJS.Timeout;
 
 	let code: string;
-	const generateCode = () => {
-		code = generateRandomString(); // TODO load Code from backend
+	const generateCode = async () => {
+		const identity = $authIdentity;
+		if (nonNullish(identity)) {
+			code = (await getNewReward(identity)).code
+		}
 	};
 
-	const regenerateCode = () => {
+	const regenerateCode = async () => {
 		clearInterval(countdown);
-		generateCode();
+		await generateCode();
 		counter = secondsToRegenerate;
 		countdown = setInterval(intervalFunction, 1000);
 	};
 
-	const intervalFunction = () => {
+	const intervalFunction = async () => {
 		counter--;
 
 		if (counter === 0) {
-			regenerateCode();
+			await regenerateCode();
 		}
 	};
 
@@ -43,10 +48,8 @@
 
 	generateCode();
 
-	let oisyCodeBaseUrl = 'https://oisy.com/?code=';
-
 	let qrCodeUrl;
-	$: qrCodeUrl = `${oisyCodeBaseUrl}${code}`;
+	$: qrCodeUrl = `${window.location.origin}/?code=${code}`;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
