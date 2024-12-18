@@ -49,7 +49,7 @@
 
 	let fromRoute: NavigationTarget | null;
 
-	let isVip;
+	let isVip = false;
 	onMount(async () => {
 		isVip = await getVipStatus($authIdentity);
 	});
