@@ -22,6 +22,12 @@ const TIMEOUT = 5 * 60 * 1000;
 export default defineConfig({
 	timeout: TIMEOUT,
 	workers: DEV ? 5 : 2,
+	expect: {
+		toHaveScreenshot: {
+			animations: 'disabled',
+			caret: 'hide'
+		}
+	},
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
@@ -38,9 +44,10 @@ export default defineConfig({
 		...(DEV && { headless: false })
 	},
 	projects: [
+		/* Test against desktop browsers. */
 		{
 			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+			use: { ...devices['Desktop Chrome'] }
 		}
 	]
 });

@@ -15,7 +15,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
+import { expect, type Locator, type Page, type PageScreenshotOptions, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
@@ -243,6 +243,13 @@ abstract class Homepage {
 		await this.clickByTestId(NAVIGATION_ITEM_TOKENS);
 	}
 
+	async takeScreenshot(): Promise<void> {
+		await expect(this.#page).toHaveScreenshot({
+			fullPage: true,
+			timeout: 1000 * 60 * 2,
+		});
+	}
+
 	abstract extendWaitForReady(): Promise<void>;
 
 	abstract waitForReady(): Promise<void>;
@@ -345,6 +352,8 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForLoadState();
 
 		await this.setCarouselFirstSlide();
+
+		await this.takeScreenshot();
 
 		await this.extendWaitForReady();
 	}
