@@ -7,7 +7,7 @@ import {
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
-	SOLANA_DEVNET_TOKEN_ID,
+	SOLANA_DEVNET_TOKEN_ID, SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
@@ -45,7 +45,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[SOLANA_TOKEN_ID]: solPrice,
 			[SOLANA_TESTNET_TOKEN_ID]: solPrice,
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
-			[SOLANA_TESTNET_TOKEN_ID]: solPrice,
+			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token = $erc20Tokens.find(
 					({ address }) => address.toLowerCase() === key.toLowerCase()
