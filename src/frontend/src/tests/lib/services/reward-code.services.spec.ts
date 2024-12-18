@@ -4,7 +4,7 @@ import type {
 	UserData
 } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { claimVipReward, getNewReward, getVipStatus } from '$lib/services/reward-code.services';
+import { claimVipReward, getNewReward, isVipUser } from '$lib/services/reward-code.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { vi } from 'vitest';
@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('reward-code', () => {
-	describe('getVipStatus', () => {
+	describe('isVip', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
 			airdrops: [],
@@ -22,7 +22,7 @@ describe('reward-code', () => {
 		it('should return true if user is vip', async () => {
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-			const isVip = await getVipStatus({ identity: mockIdentity, certified: false });
+			const isVip = await isVipUser({ identity: mockIdentity, certified: false });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -36,7 +36,7 @@ describe('reward-code', () => {
 			const userData: UserData = { ...mockedUserData, is_vip: [false] };
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(userData);
 
-			const isVip = await getVipStatus({ identity: mockIdentity, certified: false });
+			const isVip = await isVipUser({ identity: mockIdentity, certified: false });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,

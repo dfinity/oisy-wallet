@@ -9,7 +9,7 @@ import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const getVipStatus = async ({
+export const isVipUser = async ({
 	identity,
 	certified
 }: {
