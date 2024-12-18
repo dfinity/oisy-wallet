@@ -1,18 +1,10 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
-import { balancesStore } from '$lib/stores/balances.store';
-import * as toastsStore from '$lib/stores/toasts.store';
-import type { TokenId } from '$lib/types/token';
-import { loadSolBalance } from '$sol/services/sol-balance.services';
-import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { BigNumber } from '@ethersproject/bignumber';
-import { lamports } from '@solana/rpc-types';
-import { get } from 'svelte/store';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import {
 	solAddressDevnetStore,
@@ -20,9 +12,17 @@ import {
 	solAddressMainnetStore,
 	solAddressTestnetStore
 } from '$lib/stores/address.store';
-import type { MockInstance } from 'vitest';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
+import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
+import type { TokenId } from '$lib/types/token';
+import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
+import { loadSolBalance } from '$sol/services/sol-balance.services';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { BigNumber } from '@ethersproject/bignumber';
+import { lamports } from '@solana/rpc-types';
+import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
 
@@ -30,7 +30,7 @@ describe('sol-balance.services', () => {
 	let spyToastsError: MockInstance;
 	const mockLamportsBalance = 500000n;
 	const mockTokenId: TokenId = SOLANA_TOKEN_ID;
-	let mockGetBalance: MockInstance
+	let mockGetBalance: MockInstance;
 
 	beforeEach(() => {
 		vi.clearAllMocks();

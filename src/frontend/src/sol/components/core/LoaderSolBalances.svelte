@@ -26,7 +26,8 @@
 	);
 
 	const loadTestnet = debounce(
-		() => loadSolBalance({ networkId: SOLANA_TESTNET_NETWORK_ID, tokenId: SOLANA_TESTNET_TOKEN.id }),
+		() =>
+			loadSolBalance({ networkId: SOLANA_TESTNET_NETWORK_ID, tokenId: SOLANA_TESTNET_TOKEN.id }),
 		500
 	);
 

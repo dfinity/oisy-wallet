@@ -17,8 +17,8 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolRpcConnectionConfig } from '$sol/types/network';
 import { assertNonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 import { createSolanaRpc } from '@solana/rpc';
+import { get } from 'svelte/store';
 
 const rpcs: Record<NetworkId, SolRpcConnectionConfig> = {
 	[SOLANA_MAINNET_NETWORK_ID]: {

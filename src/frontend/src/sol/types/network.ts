@@ -1,4 +1,4 @@
-import { type SolNetworkSchema, SolRpcConnectionConfigSchema } from '$sol/schema/network.schema';
+import { SolRpcConnectionConfigSchema, type SolNetworkSchema } from '$sol/schema/network.schema';
 import { z } from 'zod';
 
 export type SolNetwork = z.infer<typeof SolNetworkSchema>;

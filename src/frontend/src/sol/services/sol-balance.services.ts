@@ -17,7 +17,6 @@ import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
