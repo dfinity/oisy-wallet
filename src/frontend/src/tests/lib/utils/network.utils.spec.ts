@@ -168,11 +168,17 @@ describe('network utils', () => {
 
 	describe('isNetworkIdSolana', () => {
 		it.each(SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
-			expect(isNetworkIdSolana(id as NetworkId)).toBe(true);
+			expect(isNetworkIdSolana(id)).toBe(true);
 		});
 
 		it('should return false for non-Solana network IDs', () => {
 			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSolana(ETHEREUM_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSolana(BTC_MAINNET_NETWORK_ID)).toBe(false);
+		});
+
+		it('should return false for undefined network ID', () => {
+			expect(isNetworkIdSolana(undefined)).toBe(false);
 		});
 	});
 
@@ -183,6 +189,8 @@ describe('network utils', () => {
 
 		it('should return false for non-SOL mainnet ID', () => {
 			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
 		});
 	});
 
@@ -193,6 +201,8 @@ describe('network utils', () => {
 
 		it('should return false for non-SOL testnet ID', () => {
 			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLTestnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLTestnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
 		});
 	});
 
@@ -203,6 +213,8 @@ describe('network utils', () => {
 
 		it('should return false for non-SOL devnet ID', () => {
 			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLDevnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLDevnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
 		});
 	});
 
@@ -213,6 +225,8 @@ describe('network utils', () => {
 
 		it('should return false for non-SOL local ID', () => {
 			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
 		});
 	});
 });

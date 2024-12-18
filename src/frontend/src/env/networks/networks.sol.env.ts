@@ -6,9 +6,8 @@ import solMainnetIconBW from '$lib/assets/networks/sol-mainnet-bw.svg';
 import solTestnetIconBW from '$lib/assets/networks/sol-testnet-bw.svg';
 import sol from '$lib/assets/networks/sol.svg';
 import { LOCAL } from '$lib/constants/app.constants';
-import type { NetworkId } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import type { SolNetwork } from '$sol/types/network';
 
 /**
  * SOL
@@ -18,68 +17,51 @@ export const SOLANA_MAINNET_NETWORK_SYMBOL = 'SOL';
 
 export const SOLANA_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_MAINNET_NETWORK_SYMBOL);
 
-export const SOLANA_MAINNET_NETWORK: SolNetwork = {
+export const SOLANA_MAINNET_NETWORK: Network = {
 	id: SOLANA_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Solana',
+	name: 'Solana Mainnet Beta',
 	icon: sol,
-	iconBW: solMainnetIconBW,
-	rpc: {
-		httpUrl: 'https://api.mainnet-beta.solana.com',
-		wssUrl: 'wss://api.mainnet-beta.solana.com'
-	},
-	buy: { onramperId: 'solana' }
+	iconBW: solMainnetIconBW
 };
 
 export const SOLANA_TESTNET_NETWORK_SYMBOL = 'SOL (Testnet)';
 
 export const SOLANA_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_TESTNET_NETWORK_SYMBOL);
 
-export const SOLANA_TESTNET_NETWORK: SolNetwork = {
+export const SOLANA_TESTNET_NETWORK: Network = {
 	id: SOLANA_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Testnet',
 	icon: sol,
-	iconBW: solTestnetIconBW,
-	rpc: {
-		httpUrl: 'https://api.testnet.solana.com',
-		wssUrl: 'wss://api.testnet.solana.com'
-	}
+	iconBW: solTestnetIconBW
 };
 
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
 
 export const SOLANA_DEVNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_DEVNET_NETWORK_SYMBOL);
 
-export const SOLANA_DEVNET_NETWORK: SolNetwork = {
+export const SOLANA_DEVNET_NETWORK: Network = {
 	id: SOLANA_DEVNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Devnet',
 	icon: sol,
-	iconBW: solDevnetIconBW,
-	rpc: {
-		httpUrl: 'https://api.devnet.solana.com',
-		wssUrl: 'wss://api.devnet.solana.com'
-	}
+	iconBW: solDevnetIconBW
 };
 
 export const SOLANA_LOCAL_NETWORK_SYMBOL = 'SOL (Local)';
 
 export const SOLANA_LOCAL_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_LOCAL_NETWORK_SYMBOL);
 
-export const SOLANA_LOCAL_NETWORK: SolNetwork = {
+export const SOLANA_LOCAL_NETWORK: Network = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',
 	icon: sol,
-	iconBW: solLocalnetIconBW,
-	rpc: {
-		httpUrl: 'http://localhost:8899',
-		wssUrl: 'ws://localhost:8900'
-	}
+	iconBW: solLocalnetIconBW
 };
 
-export const SOLANA_NETWORKS: SolNetwork[] = [
+export const SOLANA_NETWORKS: Network[] = [
 	SOLANA_MAINNET_NETWORK,
 	SOLANA_TESTNET_NETWORK,
 	SOLANA_DEVNET_NETWORK,
