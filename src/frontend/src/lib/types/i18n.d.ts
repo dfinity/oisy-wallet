@@ -160,6 +160,7 @@ interface I18nInit {
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		btc_wallet_error: string;
+		sol_wallet_error: string;
 	};
 }
 
