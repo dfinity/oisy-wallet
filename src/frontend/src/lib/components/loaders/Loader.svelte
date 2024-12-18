@@ -22,6 +22,11 @@
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { page } from '$app/stores';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { modalFailedRewardModal, modalSuccessfulRewardModal } from '$lib/derived/modal.derived';
+	import SuccessfulRewardModal from '$lib/components/qr/SuccessfulRewardModal.svelte';
+	import FailedRewardModal from '$lib/components/qr/FailedRewardModal.svelte';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -46,6 +51,18 @@
 
 		// A small delay for display animation purpose.
 		setTimeout(() => loading.set(false), 1000);
+
+		if (!$loading && $page.url.searchParams.has('code')) {
+			const rewardCode = $page.url.searchParams.get('code');
+
+			$page.url.searchParams.delete('code')
+			window.history.pushState({}, '', $page.url)
+			if (false) { // TODO check if code is valid and if yes, display successful modal
+				modalStore.openSuccessfulReward();
+			} else {
+				modalStore.openFailedReward();
+			}
+		}
 	})();
 
 	const loadData = async () => {
@@ -140,6 +157,13 @@
 	<div in:fade>
 		<slot />
 	</div>
+{/if}
+
+{#if $modalSuccessfulRewardModal}
+	<SuccessfulRewardModal />
+{/if}
+{#if $modalFailedRewardModal}
+	<FailedRewardModal />
 {/if}
 
 <style>
