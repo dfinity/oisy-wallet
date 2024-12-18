@@ -6,8 +6,8 @@ import {
 } from '$lib/api/reward.api';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
-import { get } from 'svelte/store';
 import { fromNullable } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const getVipStatus = async ({
 	identity,
