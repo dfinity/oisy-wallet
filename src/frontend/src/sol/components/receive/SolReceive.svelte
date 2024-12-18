@@ -29,6 +29,7 @@
 	} from '$lib/utils/network.utils';
 
 	let addressData: StorageAddressData<SolAddress>;
+	//TODO consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
 	$: addressData = isNetworkIdSOLTestnet($networkId)
 		? $solAddressTestnetStore
 		: isNetworkIdSOLDevnet($networkId)
