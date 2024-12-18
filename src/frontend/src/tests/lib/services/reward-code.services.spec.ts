@@ -87,7 +87,7 @@ describe('reward-code', () => {
 			.spyOn(rewardApi, 'claimVipReward')
 			.mockResolvedValue(mockedClaimRewardResponse);
 
-		const result = await claimVipReward(mockIdentity, '1234567890');
+		const result = await claimVipReward({identity: mockIdentity, code: '1234567890'});
 
 		expect(claimRewardSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
@@ -103,7 +103,7 @@ describe('reward-code', () => {
 			.spyOn(rewardApi, 'claimVipReward')
 			.mockResolvedValue(claimRewardResponse);
 
-		const result = await claimVipReward(mockIdentity, '1234567890');
+		const result = await claimVipReward({identity: mockIdentity, code: '1234567890'});
 
 		expect(claimRewardSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
@@ -119,7 +119,7 @@ describe('reward-code', () => {
 			.spyOn(rewardApi, 'claimVipReward')
 			.mockResolvedValue(claimRewardResponse);
 
-		const result = await claimVipReward(mockIdentity, '1234567890');
+		const result = await claimVipReward({identity: mockIdentity, code: '1234567890'});
 
 		expect(claimRewardSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,

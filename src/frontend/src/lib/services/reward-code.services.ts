@@ -6,6 +6,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
 import { get } from 'svelte/store';
+import type { VipReward } from '$declarations/rewards/rewards.did';
 
 export const getUserInfo = async (identity: Identity): Promise<boolean> => {
 	const userData = await getUserInfoApi({
@@ -20,7 +21,7 @@ export const getUserInfo = async (identity: Identity): Promise<boolean> => {
 	return vipStatus;
 };
 
-export const getNewReward = async (identity: Identity) => {
+export const getNewReward = async (identity: Identity): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -35,7 +36,7 @@ export const getNewReward = async (identity: Identity) => {
 	throw new Error('Unknown error');
 };
 
-export const claimVipReward = async (identity: Identity, code: string) => {
+export const claimVipReward = async ({identity, code}: {identity: Identity, code: string}): Promise<boolean> => {
 	const response = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
