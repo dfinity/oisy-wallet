@@ -51,6 +51,14 @@ const TIMEOUT = 5 * 60 * 1000;
 export default defineConfig({
 	timeout: TIMEOUT,
 	workers: DEV ? 5 : 2,
+	expect: {
+		toHaveScreenshot: {
+			// disable any animations caught by playwright for better screenshots and less flaky tests.
+			animations: 'disabled',
+			// hide caret for cleaner snapshots.
+			caret: 'hide'
+		}
+	},
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
