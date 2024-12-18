@@ -7,7 +7,8 @@ import {
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import {
-	SOLANA_DEVNET_TOKEN_ID, SOLANA_LOCAL_TOKEN_ID,
+	SOLANA_DEVNET_TOKEN_ID,
+	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
