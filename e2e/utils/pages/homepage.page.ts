@@ -229,10 +229,9 @@ abstract class Homepage {
 			await this.clickByTestId(testId);
 		} else {
 			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
-				await this.clickByTestId(NAVIGATION_MENU_BUTTON);
-			}
-			if (await this.isVisibleByTestId(testId)) {
-				await this.clickByTestId(testId);
+				const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU_BUTTON)
+				await navigationMenu.click();
+				await navigationMenu.getByTestId(testId).click();		
 			}
 		}
 	}
