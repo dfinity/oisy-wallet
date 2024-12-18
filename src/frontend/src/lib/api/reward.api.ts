@@ -3,30 +3,36 @@ import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import type {
+	ClaimVipRewardResponse,
+	NewVipRewardResponse,
+	UserData,
+	VipReward
+} from '$declarations/rewards/rewards.did';
 
 let canister: RewardCanister | undefined = undefined;
 
-export const isVip = async ({ identity }: CanisterApiFunctionParams): Promise<boolean> => {
-	const { isVip } = await rewardCanister({ identity });
+export const getUserInfo = async ({ identity }: CanisterApiFunctionParams): Promise<UserData> => {
+	const { getUserInfo } = await rewardCanister({ identity });
 
-	return isVip();
+	return getUserInfo();
 };
 
-export const getRewardCode = async ({ identity }: CanisterApiFunctionParams): Promise<string> => {
-	const { getRewardCode } = await rewardCanister({ identity });
+export const getNewVipReward = async ({ identity }: CanisterApiFunctionParams): Promise<NewVipRewardResponse> => {
+	const { getNewVipReward } = await rewardCanister({ identity });
 
-	return getRewardCode();
+	return getNewVipReward();
 };
 
-export const useRewardCode = async ({
-	code,
+export const claimVipReward = async ({
+	vipReward,
 	identity
 }: CanisterApiFunctionParams<{
-	code: string;
-}>): Promise<boolean> => {
-	const { useRewardCode } = await rewardCanister({ identity });
+	vipReward: VipReward;
+}>): Promise<ClaimVipRewardResponse> => {
+	const { claimVipReward } = await rewardCanister({ identity });
 
-	return useRewardCode(code);
+	return claimVipReward(vipReward);
 };
 
 const rewardCanister = async ({
