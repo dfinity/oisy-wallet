@@ -654,8 +654,8 @@ interface I18nVip {
 			reward_received_description: string;
 			reward_failed: string;
 			reward_failed_description: string;
-		}
-	}
+		};
+	};
 }
 
 interface I18nSigner {
