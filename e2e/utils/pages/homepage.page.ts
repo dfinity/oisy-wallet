@@ -15,7 +15,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { expect, type Locator, type Page, type PageScreenshotOptions, type ViewportSize } from '@playwright/test';
+import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
@@ -246,7 +246,7 @@ abstract class Homepage {
 	async takeScreenshot(): Promise<void> {
 		await expect(this.#page).toHaveScreenshot({
 			fullPage: true,
-			timeout: 5 * 60 * 1000,
+			timeout: 5 * 60 * 1000
 		});
 	}
 
