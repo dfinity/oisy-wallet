@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { IconUser, Popover } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
@@ -43,7 +44,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { nonNullish } from '@dfinity/utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
