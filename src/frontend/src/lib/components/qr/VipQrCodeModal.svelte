@@ -25,9 +25,9 @@
 
 	const secondsToRegenerate = 45;
 	let counter = secondsToRegenerate;
-	let countdown;
+	let countdown: NodeJS.Timeout;
 
-	let code;
+	let code: string;
 	const generateCode = () => {
 		code = generateRandomString(); // TODO load Code from backend
 	};
@@ -88,7 +88,7 @@
 
 			<span class="mb-4 block w-full pt-3 text-center text-sm text-tertiary">
 				{replacePlaceholders($i18n.vip.invitation.text.regenerate_countdown_text, {
-					$counter: counter
+					$counter: counter.toString()
 				})}
 			</span>
 		{:else}

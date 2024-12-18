@@ -43,6 +43,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -51,7 +52,10 @@
 
 	let isVip = false;
 	onMount(async () => {
-		isVip = await getVipStatus($authIdentity);
+		const identity = $authIdentity;
+		if (nonNullish(identity)) {
+			isVip = await getVipStatus(identity);
+		}
 	});
 
 	afterNavigate(({ from }) => {
