@@ -13,6 +13,7 @@
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
+		btcAddressRegtest,
 		btcAddressTestnet,
 		solAddressDevnet,
 		solAddressLocal,
@@ -28,11 +29,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
-	import {
-		loadSolAddressDevnet,
-		loadSolAddressLocal,
-		loadSolAddressTestnet
-	} from '$sol/services/sol-address.services';
+	import { loadSolAddressDevnet, loadSolAddressLocal, loadSolAddressTestnet } from '$sol/services/sol-address.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -105,7 +102,9 @@
 			}
 
 			if (LOCAL) {
-				debounceLoadBtcAddressRegtest();
+				if (isNullish($btcAddressRegtest)) {
+					debounceLoadBtcAddressRegtest();
+				}
 
 				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
 					debounceLoadSolAddressLocal();
@@ -175,9 +174,9 @@
 {/if}
 
 <style>
-	:root:has(.login-modal) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
+    :root:has(.login-modal) {
+        --alert-max-width: 90vw;
+        --alert-max-height: initial;
+        --dialog-border-radius: calc(var(--border-radius-sm) * 3);
+    }
 </style>
