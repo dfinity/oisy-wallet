@@ -32,6 +32,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
 	import { networkId } from '$lib/derived/network.derived';
+		import { getVipStatus } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -42,11 +43,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { onMount } from 'svelte';
-	import { getVipStatus } from '$lib/services/reward-code.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalVipQrCode } from '$lib/derived/modal.derived';
-
+		
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
