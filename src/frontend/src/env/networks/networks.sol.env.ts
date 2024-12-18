@@ -12,9 +12,9 @@ import { parseNetworkId } from '$lib/validation/network.validation';
 /**
  * RPC URLs
  */
-export const SOLANA_RPC_HTTP_URL_MAINNET = `https://solana-mainnet.g.alchemy.com/v2/${process.env.VITE_ALCHEMY_API_KEY}`;
+export const SOLANA_RPC_HTTP_URL_MAINNET = `https://solana-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_API_KEY}`;
 export const SOLANA_RPC_HTTP_URL_TESTNET = 'https://api.testnet.solana.com';
-export const SOLANA_RPC_HTTP_URL_DEVNET = 'https://api.devnet.solana.com';
+export const SOLANA_RPC_HTTP_URL_DEVNET = `https://solana-devnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_API_KEY}`;
 export const SOLANA_RPC_HTTP_URL_LOCAL = 'http://localhost:8899';
 
 /**
