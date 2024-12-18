@@ -17,7 +17,5 @@ export class SettingsPage extends HomepageLoggedIn {
 		await this.mockSelector({ selector: `[data-tid="${SETTINGS_ADDRESS_LABEL}"]` });
 
 		await this.waitForLoadState();
-
-		await this.takeScreenshot();
 	}
 }

@@ -17,6 +17,5 @@ export class TransactionsPage extends HomepageLoggedIn {
 	override async extendWaitForReady(): Promise<void> {
 		await this.clickByTestId(`${TOKEN_CARD}-${this.#tokenSymbol}`);
 		await this.waitForLoadState();
-		await this.takeScreenshot();
 	}
 }

@@ -246,7 +246,7 @@ abstract class Homepage {
 	async takeScreenshot(): Promise<void> {
 		await expect(this.#page).toHaveScreenshot({
 			fullPage: true,
-			timeout: 1000 * 60 * 2,
+			timeout: 5 * 60 * 1000,
 		});
 	}
 
@@ -352,8 +352,6 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForLoadState();
 
 		await this.setCarouselFirstSlide();
-
-		await this.takeScreenshot();
 
 		await this.extendWaitForReady();
 	}

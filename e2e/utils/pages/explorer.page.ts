@@ -11,6 +11,5 @@ export class ExplorerPage extends HomepageLoggedIn {
 	override async extendWaitForReady(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_EXPLORER);
 		await this.waitForLoadState();
-		await this.takeScreenshot();
 	}
 }

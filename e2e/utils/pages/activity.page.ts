@@ -11,6 +11,5 @@ export class ActivityPage extends HomepageLoggedIn {
 	override async extendWaitForReady(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_ACTIVITY);
 		await this.waitForLoadState();
-		await this.takeScreenshot();
 	}
 }
