@@ -1,27 +1,36 @@
-import { syncWallet } from '$btc/services/btc-listener.services';
+import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore
 } from '$lib/stores/address.store';
+import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage } from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataResponseError } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCRegtest,
-	isNetworkIdBTCTestnet,
-	mapToSignerBitcoinNetwork
+	isNetworkIdBTCTestnet
 } from '$lib/utils/network.utils';
 import { get } from 'svelte/store';
 
 export const initBtcWalletWorker = async ({
-	id: tokenId,
-	network: { id: networkId }
-}: Token): Promise<WalletWorker> => {
+	token: {
+		id: tokenId,
+		network: { id: networkId }
+	},
+	minterCanisterId
+}: {
+	token: Token;
+	minterCanisterId?: OptionCanisterIdText;
+}): Promise<WalletWorker> => {
 	const WalletWorker = await import('$btc/workers/btc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
+
+	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
+	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
 
 	worker.onmessage = ({ data }: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
 		const { msg } = data;
@@ -33,11 +42,21 @@ export const initBtcWalletWorker = async ({
 					data: data.data as BtcPostMessageDataResponseWallet
 				});
 				return;
+
+			case 'syncBtcWalletError':
+				syncWalletError({
+					tokenId,
+					error: (data.data as PostMessageDataResponseError).error,
+					/**
+					 * TODOs:
+					 * 1. Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
+					 * 2. Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
+					 * **/
+					hideToast: isRegtestNetwork || isTestnetNetwork
+				});
+				return;
 		}
 	};
-
-	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
-	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
 
 	const data = {
 		// TODO: stop/start the worker on address change
@@ -48,11 +67,10 @@ export const initBtcWalletWorker = async ({
 					? btcAddressRegtestStore
 					: btcAddressMainnetStore
 		),
-		bitcoinNetwork: mapToSignerBitcoinNetwork({
-			network: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet'
-		}),
+		bitcoinNetwork: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet',
 		// only mainnet transactions can be fetched via Blockchain API
-		shouldFetchTransactions: isNetworkIdBTCMainnet(networkId)
+		shouldFetchTransactions: isNetworkIdBTCMainnet(networkId),
+		minterCanisterId
 	};
 
 	return {

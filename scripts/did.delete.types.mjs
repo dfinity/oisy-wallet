@@ -11,7 +11,7 @@ const deleteFolder = async (canister) => {
 };
 
 const promises = Object.keys(canisters)
-	.filter((canister) => !['backend', 'frontend', 'signer'].includes(canister))
+	.filter((canister) => !['backend', 'frontend', 'signer', 'rewards'].includes(canister))
 	.map(deleteFolder);
 
 await Promise.allSettled(promises);

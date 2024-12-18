@@ -1,7 +1,10 @@
 import {
+	BTC_TESTNET_TOGGLE,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	NAVIGATION_ITEM_SETTINGS,
+	NAVIGATION_ITEM_TOKENS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	RECEIVE_TOKENS_MODAL,
@@ -11,8 +14,9 @@ import {
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
+import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
@@ -55,6 +59,7 @@ interface WaitForLocatorOptions {
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
+	private promotionCarousel?: PromotionCarousel;
 
 	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
@@ -63,6 +68,11 @@ abstract class Homepage {
 
 	protected async clickByTestId(testId: string): Promise<void> {
 		await this.#page.getByTestId(testId).click();
+	}
+
+	protected async isVisibleByTestId(testId: string): Promise<boolean> {
+		const element = this.#page.locator(`[data-tid="${testId}"]`);
+		return await element.isVisible();
 	}
 
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
@@ -201,6 +211,47 @@ abstract class Homepage {
 		await expect(modal).toHaveScreenshot();
 	}
 
+	async setCarouselFirstSlide(): Promise<void> {
+		if (isNullish(this.promotionCarousel)) {
+			this.promotionCarousel = new PromotionCarousel(this.#page);
+		}
+
+		await this.promotionCarousel.navigateToSlide(1);
+		await this.promotionCarousel.freezeCarousel();
+	}
+
+	async waitForLoadState() {
+		await this.#page.waitForLoadState('networkidle');
+	}
+
+	async navigateTo(testId: string): Promise<void> {
+		if (await this.isVisibleByTestId(testId)) {
+			await this.clickByTestId(testId);
+		} else {
+			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
+				await this.clickByTestId(NAVIGATION_MENU_BUTTON);
+			}
+			if (await this.isVisibleByTestId(testId)) {
+				await this.clickByTestId(testId);
+			}
+		}
+	}
+
+	async activateTestnetSettings(): Promise<void> {
+		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.clickByTestId(BTC_TESTNET_TOGGLE);
+		await this.clickByTestId(NAVIGATION_ITEM_TOKENS);
+	}
+
+	async takeScreenshot(): Promise<void> {
+		await expect(this.#page).toHaveScreenshot({
+			// creates a snapshot as a fullPage and not just certain parts.
+			fullPage: true,
+			// playwright can retry flaky tests in the amount of time set below.
+			timeout: 5 * 60 * 1000
+		});
+	}
+
 	abstract extendWaitForReady(): Promise<void>;
 
 	abstract waitForReady(): Promise<void>;
@@ -218,6 +269,7 @@ export class HomepageLoggedOut extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
+		await this.waitForLoadState();
 	}
 }
 
@@ -298,6 +350,10 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
 		await this.waitForTokensInitialization();
+
+		await this.waitForLoadState();
+
+		await this.setCarouselFirstSlide();
 
 		await this.extendWaitForReady();
 	}

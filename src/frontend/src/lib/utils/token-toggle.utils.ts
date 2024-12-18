@@ -1,4 +1,4 @@
-import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { nonNullish } from '@dfinity/utils';

@@ -6,7 +6,14 @@ import { z } from 'zod';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
-export const TokenStandardSchema = z.enum(['ethereum', 'erc20', 'icp', 'icrc', 'bitcoin']);
+export const TokenStandardSchema = z.enum([
+	'ethereum',
+	'erc20',
+	'icp',
+	'icrc',
+	'bitcoin',
+	'solana'
+]);
 
 export const TokenCategorySchema = z.enum(['default', 'custom']);
 

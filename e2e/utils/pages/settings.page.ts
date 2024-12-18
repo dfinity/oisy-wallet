@@ -12,8 +12,10 @@ export class SettingsPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.clickByTestId(NAVIGATION_ITEM_SETTINGS);
+		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
 
 		await this.mockSelector({ selector: `[data-tid="${SETTINGS_ADDRESS_LABEL}"]` });
+
+		await this.waitForLoadState();
 	}
 }

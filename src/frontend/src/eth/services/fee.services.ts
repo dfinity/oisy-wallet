@@ -44,7 +44,7 @@ export const getErc20FeeData = async ({
 		const targetNetworkId: NetworkId | undefined = targetNetwork?.id;
 
 		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
-			? infuraErc20IcpProviders(targetNetworkId)
+			? infuraErc20IcpProviders(targetNetworkId as NetworkId)
 			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
 		const fee = await fn(rest);
 
