@@ -1,9 +1,13 @@
+import type {
+	ClaimVipRewardResponse,
+	NewVipRewardResponse,
+	UserData
+} from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import { claimVipReward, getNewReward, getUserInfo } from '$lib/services/reward-code.services';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { vi } from 'vitest';
-import type { ClaimVipRewardResponse, NewVipRewardResponse, UserData } from '$declarations/rewards/rewards.did';
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -37,7 +41,7 @@ describe('reward-code', () => {
 	});
 
 	it('should return false if user is not vip', async () => {
-		const userData: UserData = {...mockedUserData, is_vip: [false]};
+		const userData: UserData = { ...mockedUserData, is_vip: [false] };
 		const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(userData);
 
 		const isVip = await getUserInfo(mockIdentity);
@@ -50,7 +54,9 @@ describe('reward-code', () => {
 	});
 
 	it('should get a vip reward code for vip user', async () => {
-		const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward').mockResolvedValue(mockedNewRewardResponse);
+		const getNewVipRewardSpy = vi
+			.spyOn(rewardApi, 'getNewVipReward')
+			.mockResolvedValue(mockedNewRewardResponse);
 
 		const vipReward = await getNewReward(mockIdentity);
 
@@ -63,7 +69,9 @@ describe('reward-code', () => {
 
 	it('should throw an error for non vip user', async () => {
 		const newRewardResponse: NewVipRewardResponse = { NotImportantPerson: null };
-		const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward').mockResolvedValue(newRewardResponse);
+		const getNewVipRewardSpy = vi
+			.spyOn(rewardApi, 'getNewVipReward')
+			.mockResolvedValue(newRewardResponse);
 
 		const result = getNewReward(mockIdentity);
 
@@ -75,13 +83,15 @@ describe('reward-code', () => {
 	});
 
 	it('should return true if a valid vip reward code is used', async () => {
-		const claimRewardSpy = vi.spyOn(rewardApi, 'claimVipReward').mockResolvedValue(mockedClaimRewardResponse);
+		const claimRewardSpy = vi
+			.spyOn(rewardApi, 'claimVipReward')
+			.mockResolvedValue(mockedClaimRewardResponse);
 
 		const result = await claimVipReward(mockIdentity, '1234567890');
 
 		expect(claimRewardSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
-			vipReward: { code: '1234567890'},
+			vipReward: { code: '1234567890' },
 			nullishIdentityErrorMessage
 		});
 		expect(result).toBeTruthy();
@@ -89,13 +99,15 @@ describe('reward-code', () => {
 
 	it('should return false if an invalid vip reward code is used', async () => {
 		const claimRewardResponse: ClaimVipRewardResponse = { InvalidCode: null };
-		const claimRewardSpy = vi.spyOn(rewardApi, 'claimVipReward').mockResolvedValue(claimRewardResponse);
+		const claimRewardSpy = vi
+			.spyOn(rewardApi, 'claimVipReward')
+			.mockResolvedValue(claimRewardResponse);
 
 		const result = await claimVipReward(mockIdentity, '1234567890');
 
 		expect(claimRewardSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
-			vipReward: { code: '1234567890'},
+			vipReward: { code: '1234567890' },
 			nullishIdentityErrorMessage
 		});
 		expect(result).toBeFalsy();
@@ -103,13 +115,15 @@ describe('reward-code', () => {
 
 	it('should return false if an already used vip reward code is used', async () => {
 		const claimRewardResponse: ClaimVipRewardResponse = { AlreadyClaimed: null };
-		const claimRewardSpy = vi.spyOn(rewardApi, 'claimVipReward').mockResolvedValue(claimRewardResponse);
+		const claimRewardSpy = vi
+			.spyOn(rewardApi, 'claimVipReward')
+			.mockResolvedValue(claimRewardResponse);
 
 		const result = await claimVipReward(mockIdentity, '1234567890');
 
 		expect(claimRewardSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
-			vipReward: { code: '1234567890'},
+			vipReward: { code: '1234567890' },
 			nullishIdentityErrorMessage
 		});
 		expect(result).toBeFalsy();
