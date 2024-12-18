@@ -1,6 +1,8 @@
 import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
+	RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
+	RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
 	RECEIVE_TOKENS_MODAL_ETH_SECTION,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
 	RECEIVE_TOKENS_MODAL_ICRC_SECTION,
@@ -25,8 +27,8 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 				}
 			: undefined
 	});
-
 	await homepageLoggedIn.waitForReady();
+	await homepageLoggedIn.activateTestnetSettings();
 });
 
 testWithII('should display receive-tokens modal', async () => {
@@ -37,10 +39,9 @@ testWithII('should display receive-tokens modal', async () => {
 			RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 			RECEIVE_TOKENS_MODAL_ICP_SECTION,
 			RECEIVE_TOKENS_MODAL_ETH_SECTION,
-			RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION
-			// TODO: Adjust test to activate testnet setting first
-			//			RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
-			//			RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION
+			RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
+			RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
+			RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION
 		])
 	});
 });

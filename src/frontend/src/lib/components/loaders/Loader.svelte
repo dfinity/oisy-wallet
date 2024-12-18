@@ -13,6 +13,7 @@
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
+		btcAddressRegtest,
 		btcAddressTestnet,
 		solAddressDevnet,
 		solAddressLocal,
@@ -105,7 +106,9 @@
 			}
 
 			if (LOCAL) {
-				debounceLoadBtcAddressRegtest();
+				if (isNullish($btcAddressRegtest)) {
+					debounceLoadBtcAddressRegtest();
+				}
 
 				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
 					debounceLoadSolAddressLocal();
