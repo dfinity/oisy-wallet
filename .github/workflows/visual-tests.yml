@@ -154,7 +154,7 @@ jobs:
       - name: Check if snapshots changed
         run: |
           git add e2e
-          if git diff --cached --quiet; then
+          if git diff e2e --cached --quiet; then
             echo "SNAPSHOTS_CHANGED=false" >> $GITHUB_ENV
           else
             echo "SNAPSHOTS_CHANGED=true" >> $GITHUB_ENV
@@ -185,22 +185,22 @@ jobs:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
         
-      - name: Download Ubuntu Snapshots
+      - name: Download Ubuntu and macOS Snapshots
         uses: actions/download-artifact@v4
         with:
-          name: updated-snapshots-ubuntu-24.04
+          name: updated-snapshots-${{ matrix.os }}
           path: e2e
         
-      - name: Download macOS Snapshots
-        uses: actions/download-artifact@v4
-        with:
-          name: updated-snapshots-macos-14
-          path: e2e
+#      - name: Download macOS Snapshots
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: updated-snapshots-macos-14
+#          path: e2e
         
       - name: Check Final Changes
         run: |
           git add e2e
-          if git diff --cached --quiet; then
+          if git diff e2e --cached --quiet; then
             echo "FINAL_CHANGES=false" >> $GITHUB_ENV
           else
             echo "FINAL_CHANGES=true" >> $GITHUB_ENV
