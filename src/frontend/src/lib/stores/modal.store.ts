@@ -31,7 +31,8 @@ export interface Modal<T> {
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'btc-transaction'
-		| 'dapp-details';
+		| 'dapp-details'
+		| 'successful-reward';
 	data?: T;
 	id?: symbol;
 }
@@ -68,6 +69,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
+	openSuccessfulReward: () => void;
 	close: () => void;
 }
 
@@ -113,6 +115,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openDappDetails: setTypeWithData('dapp-details'),
+		openSuccessfulReward: setType('successful-reward'),
 		close: () => set(null),
 		subscribe
 	};
