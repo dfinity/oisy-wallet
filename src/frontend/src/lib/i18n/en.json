@@ -738,6 +738,16 @@
 			}
 		}
 	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "Take me to the wallet",
+				"title_failed": "Something went wrong",
+				"reward_failed": "Oops, the link has expired",
+				"reward_failed_description": "Request a new one and try again"
+			}
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -842,4 +852,4 @@
 			"unavailable_index_canister": "Transaction for $token_list can not be displayed. Index canister is currently not available."
 		}
 	}
-}
+},
