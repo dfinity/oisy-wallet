@@ -55,7 +55,7 @@
 		"@dfinity/candid": "^2.1.2",
 		"@dfinity/ckbtc": "^3.1.0",
 		"@dfinity/cketh": "^3.3.1",
-		"@dfinity/gix-components": "^4.8.0-next-2024-11-04",
+		"@dfinity/gix-components": "^5.0.0-next-2024-12-10",
 		"@dfinity/ic-management": "^5.2.1",
 		"@dfinity/ledger-icp": "^2.6.0",
 		"@dfinity/ledger-icrc": "^2.6.0",
@@ -65,11 +65,13 @@
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@junobuild/analytics": "^0.0.31",
 		"@metamask/detect-provider": "^2.0.0",
+		"@solana/addresses": "^2.0.0",
 		"@walletconnect/web3wallet": "1.14.0",
 		"alchemy-sdk": "3.4.1",
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
 		"idb-keyval": "^6.2.1",
+		"svelte-confetti": "^1.4.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
