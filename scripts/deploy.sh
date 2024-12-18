@@ -23,5 +23,6 @@ dfx deploy internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
 dfx deploy pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
+dfx deploy rewards
 
 scripts/top-up-cycles-ledger-account.sh --cycles 50T
