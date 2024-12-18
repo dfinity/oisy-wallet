@@ -1,8 +1,12 @@
-import type { _SERVICE as RewardService, NewVipRewardResponse, UserData } from '$declarations/rewards/rewards.did';
+import type {
+	NewVipRewardResponse,
+	_SERVICE as RewardService,
+	UserData
+} from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
+import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { mock } from 'vitest-mock-extended';
 
@@ -17,8 +21,8 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 
 describe('reward.canister', () => {
 	const createRewardCanister = ({
-																	serviceOverride
-																}: Pick<CreateCanisterOptions<RewardService>, 'serviceOverride'>): Promise<RewardCanister> =>
+		serviceOverride
+	}: Pick<CreateCanisterOptions<RewardService>, 'serviceOverride'>): Promise<RewardCanister> =>
 		RewardCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,
@@ -33,7 +37,7 @@ describe('reward.canister', () => {
 			is_vip: [true],
 			airdrops: [],
 			sprinkles: []
-		}
+		};
 		service.user_info.mockResolvedValue(mockedUserData);
 
 		const { getUserInfo } = await createRewardCanister({
@@ -63,7 +67,7 @@ describe('reward.canister', () => {
 			VipReward: {
 				code: '1234567890'
 			}
-		}
+		};
 		service.new_vip_reward.mockResolvedValue(mockedRewardResponse);
 
 		const { getNewVipReward } = await createRewardCanister({
@@ -89,14 +93,14 @@ describe('reward.canister', () => {
 	});
 
 	it('should be possible to claim a vip reward', async () => {
-		const mockedClaimResponse = { Success: null }
+		const mockedClaimResponse = { Success: null };
 		service.claim_vip_reward.mockResolvedValue(mockedClaimResponse);
 
 		const { claimVipReward } = await createRewardCanister({
 			serviceOverride: service
 		});
 
-		const claimResponse = await claimVipReward({code:'1234567890'});
+		const claimResponse = await claimVipReward({ code: '1234567890' });
 		expect(claimResponse).toEqual(mockedClaimResponse);
 	});
 
@@ -110,7 +114,7 @@ describe('reward.canister', () => {
 			serviceOverride: service
 		});
 
-		const result = claimVipReward({code:'1234567890'});
+		const result = claimVipReward({ code: '1234567890' });
 		await expect(result).rejects.toThrow(mockResponseError);
 	});
 });

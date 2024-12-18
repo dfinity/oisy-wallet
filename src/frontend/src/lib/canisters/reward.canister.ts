@@ -1,6 +1,7 @@
 import type {
-	_SERVICE as RewardService, ClaimVipRewardResponse,
+	ClaimVipRewardResponse,
 	NewVipRewardResponse,
+	_SERVICE as RewardService,
 	UserData,
 	VipReward
 } from '$declarations/rewards/rewards.did';
@@ -12,9 +13,9 @@ import { Canister, createServices } from '@dfinity/utils';
 
 export class RewardCanister extends Canister<RewardService> {
 	static async create({
-												identity,
-												...options
-											}: CreateCanisterOptions<RewardService>): Promise<RewardCanister> {
+		identity,
+		...options
+	}: CreateCanisterOptions<RewardService>): Promise<RewardCanister> {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<RewardService>({
