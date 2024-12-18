@@ -247,12 +247,8 @@ abstract class Homepage {
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
-<<<<<<< HEAD
 			// playwright can retry flaky tests in the amount of time set below.
 			timeout: 5 * 60 * 1000,
-=======
-			timeout: 5 * 60 * 1000
->>>>>>> c72befd56d68cf677fab8d6dd56abb367f3586b8
 		});
 	}
 
