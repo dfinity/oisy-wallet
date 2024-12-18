@@ -4,7 +4,6 @@ import { z } from 'zod';
 
 export const SolRpcConnectionConfigSchema = z.object({
 	httpUrl: UrlSchema,
-	wssUrl: UrlSchema
 });
 
 export const SolNetworkSchema = z
