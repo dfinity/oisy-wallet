@@ -26,7 +26,7 @@ else
 fi
 
 for canister in "${canisters[@]}"; do
-  for binding in types ; do # TODO: Bindings for client & pic
+  for binding in types; do # TODO: Bindings for client & pic
     # Paths:
     canister_binding_config="./scripts/bind/rust/${canister}.${binding}.toml"
     candid_file=".dfx/local/canisters/$canister/${canister}.did"
