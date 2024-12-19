@@ -4,8 +4,8 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 import { BigNumber } from '@ethersproject/bignumber';
+import { get } from 'svelte/store';
 
 export const syncWallet = ({
 	data,
