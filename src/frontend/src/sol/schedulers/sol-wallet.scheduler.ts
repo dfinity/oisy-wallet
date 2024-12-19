@@ -1,12 +1,15 @@
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { SolAddress } from '$lib/types/address';
-import type { PostMessageDataRequestSol, PostMessageDataResponseError } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequestSol,
+	PostMessageDataResponseError
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
 	solanaNetwork: SolanaNetworkType;

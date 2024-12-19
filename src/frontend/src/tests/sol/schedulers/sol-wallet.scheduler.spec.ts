@@ -1,11 +1,11 @@
-import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
-import * as solanaApi from '$sol/api/solana.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import { type MockInstance } from 'vitest';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
-import { SolanaNetworks } from '$sol/types/network';
 import * as authUtils from '$lib/utils/auth.utils';
+import * as solanaApi from '$sol/api/solana.api';
+import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
+import { SolanaNetworks } from '$sol/types/network';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;

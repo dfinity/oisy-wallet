@@ -18,14 +18,15 @@
 	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
 
 	let walletWorkerTokens: Token[];
-	$: walletWorkerTokens = $enabledSolanaTokens.filter(({ network: { id: networkId } }) =>
-		isNetworkIdSOLLocal(networkId) && nonNullish($solAddressLocal) ||
-		isNetworkIdSOLTestnet(networkId) && nonNullish($solAddressTestnet) ||
-		isNetworkIdSOLDevnet(networkId) && nonNullish($solAddressDevnet) ||
-		isNetworkIdSOLMainnet(networkId) && nonNullish($solAddressMainnet)
+	$: walletWorkerTokens = $enabledSolanaTokens.filter(
+		({ network: { id: networkId } }) =>
+			(isNetworkIdSOLLocal(networkId) && nonNullish($solAddressLocal)) ||
+			(isNetworkIdSOLTestnet(networkId) && nonNullish($solAddressTestnet)) ||
+			(isNetworkIdSOLDevnet(networkId) && nonNullish($solAddressDevnet)) ||
+			(isNetworkIdSOLMainnet(networkId) && nonNullish($solAddressMainnet))
 	);
 </script>
 
 <WalletWorkers tokens={walletWorkerTokens} {initWalletWorker}>
 	<slot />
-</WalletWorkers> 
+</WalletWorkers>
