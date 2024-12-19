@@ -56,12 +56,12 @@
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
 		? pinEnabledTokensAtTop(
-			sortTokens({
-				$tokens: allTokensForSelectedNetwork,
-				$exchanges: exchangesStaticData,
-				$tokensToPin: $tokensToPin
-			})
-		)
+				sortTokens({
+					$tokens: allTokensForSelectedNetwork,
+					$exchanges: exchangesStaticData,
+					$tokensToPin: $tokensToPin
+				})
+			)
 		: [];
 
 	let filterTokens = '';
@@ -81,9 +81,9 @@
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
 		? allTokensSorted
 		: allTokensSorted.filter((token) => {
-			const twinToken = (token as IcCkToken).twinToken;
-			return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
-		});
+				const twinToken = (token as IcCkToken).twinToken;
+				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
+			});
 
 	let tokens: Token[] = [];
 	$: tokens = filteredTokens.map((token) => {
@@ -93,8 +93,8 @@
 			...token,
 			...(icTokenIcrcCustomToken(token)
 				? {
-					enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
-				}
+						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
+					}
 				: {})
 		};
 	});
@@ -180,7 +180,7 @@
 		<span class="text-7xl">🤔</span>
 
 		<span class="py-4 text-center font-bold text-brand-primary no-underline"
-		>+ {$i18n.tokens.manage.text.do_not_see_import}</span
+			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
 {:else}
@@ -227,23 +227,23 @@
 {/if}
 
 <style lang="scss">
-  .tokens {
-    padding: var(--padding-1_5x) 0;
-  }
+	.tokens {
+		padding: var(--padding-1_5x) 0;
+	}
 
-  .tokens-scroll {
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(var(--color-black-rgb), 0.2);
-    }
+	.tokens-scroll {
+		&::-webkit-scrollbar-thumb {
+			background-color: rgba(var(--color-black-rgb), 0.2);
+		}
 
-    &::-webkit-scrollbar-track {
-      border-radius: var(--padding-2x);
-      -webkit-border-radius: var(--padding-2x);
-    }
+		&::-webkit-scrollbar-track {
+			border-radius: var(--padding-2x);
+			-webkit-border-radius: var(--padding-2x);
+		}
 
-    &::-webkit-scrollbar-thumb {
-      border-radius: var(--padding-2x);
-      -webkit-border-radius: var(--padding-2x);
-    }
-  }
+		&::-webkit-scrollbar-thumb {
+			border-radius: var(--padding-2x);
+			-webkit-border-radius: var(--padding-2x);
+		}
+	}
 </style>
