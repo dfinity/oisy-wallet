@@ -5,7 +5,11 @@ import {
 	solAddressTestnetStore
 } from '$lib/stores/address.store';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage, PostMessageDataRequestSol, PostMessageDataResponseError } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequestSol,
+	PostMessageDataResponseError
+} from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdSOLDevnet,
@@ -13,6 +17,7 @@ import {
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
+import { mapNetworkIdToNetwork } from '$sol/types/network';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -29,10 +34,6 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const isTestnetNetwork = isNetworkIdSOLTestnet(networkId);
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
-
-	worker.onerror = (error) => {
-		console.error('Worker error:', error);
-	};
 
 	worker.onmessage = ({ data }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
 		const { msg } = data;
@@ -65,10 +66,12 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 					? solAddressLocalnetStore
 					: solAddressMainnetStore
 	);
-
 	assertNonNullish(address, 'No Solana address provided to start Solana wallet worker.');
 
-	const data: PostMessageDataRequestSol = { address, networkId };
+	const network = mapNetworkIdToNetwork(token.network.id);
+	assertNonNullish(network, 'No Solana network provided to start Solana wallet worker.');
+
+	const data: PostMessageDataRequestSol = { address, solanaNetwork: network };
 
 	return {
 		start: () => {
