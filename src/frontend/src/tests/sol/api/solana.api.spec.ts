@@ -1,4 +1,4 @@
-import { loadSolBalance } from '$sol/api/solana.api';
+import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
@@ -23,7 +23,7 @@ describe('solana.api', () => {
 
 	describe('loadSolBalance', () => {
 		it('should load balance successfully', async () => {
-			const balance = await loadSolBalance({
+			const balance = await loadSolLamportsBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -35,7 +35,7 @@ describe('solana.api', () => {
 		it('should handle zero balance', async () => {
 			mockGetBalance.mockReturnValue({ send: () => Promise.resolve({ value: lamports(0n) }) });
 
-			const balance = await loadSolBalance({
+			const balance = await loadSolLamportsBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -48,7 +48,7 @@ describe('solana.api', () => {
 			mockGetBalance.mockReturnValue({ send: () => Promise.reject(mockError) });
 
 			await expect(
-				loadSolBalance({
+				loadSolLamportsBalance({
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet
 				})
@@ -57,7 +57,7 @@ describe('solana.api', () => {
 
 		it('should throw error when address is empty', async () => {
 			await expect(
-				loadSolBalance({
+				loadSolLamportsBalance({
 					address: '',
 					network: SolanaNetworks.mainnet
 				})
