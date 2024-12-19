@@ -19,13 +19,15 @@ export const SolanaNetworks = SolanaNetworkSchema.enum;
 export const mapNetworkIdToNetwork = (networkSymbol: NetworkId) => {
 	if (isNetworkIdSOLMainnet(networkSymbol)) {
 		return SolanaNetworks.mainnet;
-	} else if (isNetworkIdSOLTestnet(networkSymbol)) {
-		return SolanaNetworks.testnet;
-	} else if (isNetworkIdSOLDevnet(networkSymbol)) {
-		return SolanaNetworks.devnet;
-	} else if (isNetworkIdSOLLocal(networkSymbol)) {
-		return SolanaNetworks.local;
-	} else {
-		return undefined;
 	}
+	if (isNetworkIdSOLTestnet(networkSymbol)) {
+		return SolanaNetworks.testnet;
+	}
+	if (isNetworkIdSOLDevnet(networkSymbol)) {
+		return SolanaNetworks.devnet;
+	}
+	if (isNetworkIdSOLLocal(networkSymbol)) {
+		return SolanaNetworks.local;
+	}
+	return undefined;
 };
