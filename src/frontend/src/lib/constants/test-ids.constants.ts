@@ -24,6 +24,10 @@ export const RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION = 'receive-tokens-modal-bt
 export const RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION = 'receive-tokens-modal-btc-testnet-section';
 export const RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION = 'receive-tokens-modal-btc-regtest-section';
 export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-section';
+export const RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION = 'receive-tokens-modal-sol-mainnet-section';
+export const RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION = 'receive-tokens-modal-sol-testnet-section';
+export const RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION = 'receive-tokens-modal-sol-devnet-section';
+export const RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION = 'receive-tokens-modal-sol-local-section';
 
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
 
