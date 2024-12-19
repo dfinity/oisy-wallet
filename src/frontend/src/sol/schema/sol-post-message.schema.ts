@@ -1,4 +1,7 @@
-import { JsonTransactionsTextSchema, PostMessageDataResponseSchema } from '$lib/schema/post-message.schema';
+import {
+	JsonTransactionsTextSchema,
+	PostMessageDataResponseSchema
+} from '$lib/schema/post-message.schema';
 import type { CertifiedData } from '$lib/types/store';
 import { z } from 'zod';
 
