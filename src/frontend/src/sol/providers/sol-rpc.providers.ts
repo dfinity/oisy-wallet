@@ -8,8 +8,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	SolanaNetworks,
-	type SolanaNetworkType,
-	type SolRpcConnectionConfig
+	type SolRpcConnectionConfig,
+	type SolanaNetworkType
 } from '$sol/types/network';
 import { assertNonNullish } from '@dfinity/utils';
 import { createSolanaRpc } from '@solana/rpc';
