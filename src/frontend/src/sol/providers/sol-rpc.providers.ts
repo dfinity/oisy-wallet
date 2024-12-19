@@ -1,51 +1,50 @@
 import {
-	SOLANA_DEVNET_NETWORK_ID,
-	SOLANA_LOCAL_NETWORK_ID,
-	SOLANA_MAINNET_NETWORK_ID,
 	SOLANA_RPC_HTTP_URL_DEVNET,
 	SOLANA_RPC_HTTP_URL_LOCAL,
 	SOLANA_RPC_HTTP_URL_MAINNET,
-	SOLANA_RPC_HTTP_URL_TESTNET,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_RPC_HTTP_URL_TESTNET
 } from '$env/networks/networks.sol.env';
 import { i18n } from '$lib/stores/i18n.store';
-import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import type { SolRpcConnectionConfig } from '$sol/types/network';
+import {
+	SolanaNetworks,
+	type SolanaNetworkType,
+	type SolRpcConnectionConfig
+} from '$sol/types/network';
 import { assertNonNullish } from '@dfinity/utils';
 import { createSolanaRpc } from '@solana/rpc';
 import { get } from 'svelte/store';
 
-const rpcs: Record<NetworkId, SolRpcConnectionConfig> = {
-	[SOLANA_MAINNET_NETWORK_ID]: {
+const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
+	[SolanaNetworks.mainnet]: {
 		httpUrl: SOLANA_RPC_HTTP_URL_MAINNET
 	},
-	[SOLANA_TESTNET_NETWORK_ID]: {
+	[SolanaNetworks.testnet]: {
 		httpUrl: SOLANA_RPC_HTTP_URL_TESTNET
 	},
-	[SOLANA_DEVNET_NETWORK_ID]: {
+	[SolanaNetworks.devnet]: {
 		httpUrl: SOLANA_RPC_HTTP_URL_DEVNET
 	},
-	[SOLANA_LOCAL_NETWORK_ID]: {
+	[SolanaNetworks.local]: {
 		httpUrl: SOLANA_RPC_HTTP_URL_LOCAL
 	}
 };
 
-const solanaRpcConfig = (networkId: NetworkId): SolRpcConnectionConfig => {
-	const solRpc = rpcs[networkId];
+const solanaRpcConfig = (network: SolanaNetworkType): SolRpcConnectionConfig => {
+	const solRpc = rpcs[network];
 
 	assertNonNullish(
 		solRpc,
 		replacePlaceholders(get(i18n).init.error.no_solana_rpc, {
-			$network: networkId.toString()
+			$network: network.toString()
 		})
 	);
 
 	return solRpc;
 };
 
-export const solanaHttpRpc = (networkId: NetworkId): ReturnType<typeof createSolanaRpc> => {
-	const rpc = solanaRpcConfig(networkId);
+export const solanaHttpRpc = (network: SolanaNetworkType): ReturnType<typeof createSolanaRpc> => {
+	const rpc = solanaRpcConfig(network);
 
 	return createSolanaRpc(rpc.httpUrl);
 };
