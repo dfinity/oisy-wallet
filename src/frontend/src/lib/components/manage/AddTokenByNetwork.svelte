@@ -14,7 +14,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdBitcoin, isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdEthereum,
+		isNetworkIdICP
+	} from '$lib/utils/network.utils';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
@@ -77,7 +81,7 @@
 				<div id="network" class="network mt-1 pt-0.5">
 					<Dropdown name="network" bind:selectedValue={networkName}>
 						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
-						>{$i18n.tokens.manage.placeholder.select_network}</option
+							>{$i18n.tokens.manage.placeholder.select_network}</option
 						>
 						{#each availableNetworks as network}
 							<DropdownItem value={network.name}>{network.name}</DropdownItem>
@@ -100,11 +104,11 @@
 </form>
 
 <style lang="scss">
-  .hidden {
-    display: none;
-  }
+	.hidden {
+		display: none;
+	}
 
-  .network {
-    --disable-contrast: rgba(0, 0, 0, 0.5);
-  }
+	.network {
+		--disable-contrast: rgba(0, 0, 0, 0.5);
+	}
 </style>
