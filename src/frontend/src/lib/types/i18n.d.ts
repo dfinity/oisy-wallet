@@ -37,6 +37,7 @@ interface I18nNavigation {
 		source_code: string;
 		changelog: string;
 		submit_ticket: string;
+		confirm_navigate: string;
 	};
 	alt: {
 		tokens: string;
@@ -249,6 +250,7 @@ interface I18nReceive {
 		info: { no_new_btc: string; check_btc_progress: string };
 		error: { unexpected_btc: string };
 	};
+	solana: { text: { solana_address_copied: string } };
 }
 
 interface I18nSend {
@@ -447,6 +449,7 @@ interface I18nTokens {
 	alt: {
 		context_menu: string;
 		open_etherscan: string;
+		open_blockstream: string;
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
 		token_group_number: string;
@@ -703,7 +706,7 @@ interface I18nLicense_agreement {
 interface I18nActivity {
 	text: { title: string };
 	info: { btc_transactions: string };
-	warning: { no_index_canister: string };
+	warning: { no_index_canister: string; unavailable_index_canister: string };
 }
 
 interface I18n {

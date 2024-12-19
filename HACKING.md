@@ -158,7 +158,7 @@ VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
 There are some important notes related to the BTC development:
 
 1. Wallet workers:
-   - Locally, only the Regex network wallet worker is launched
+   - Locally, only the Regtest network wallet worker is launched
    - On all other ens (staging, beta, prod), we launch Testnet and Mainnet workers
 2. Transactions:
    - To test them locally, you need to hardcode a mainnet BTC address with some txs inside. In the future, we plan to create mocks and use them during the local development.

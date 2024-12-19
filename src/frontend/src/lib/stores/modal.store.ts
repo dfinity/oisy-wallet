@@ -9,6 +9,7 @@ export interface Modal<T> {
 		| 'ckbtc-receive'
 		| 'cketh-receive'
 		| 'btc-receive'
+		| 'sol-receive'
 		| 'receive'
 		| 'send'
 		| 'buy'
@@ -25,7 +26,7 @@ export interface Modal<T> {
 		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
-		| 'token'
+		| 'eth-token'
 		| 'ic-token'
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
@@ -44,6 +45,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkBTCReceive: (id: symbol) => void;
 	openCkETHReceive: (id: symbol) => void;
 	openBtcReceive: (id: symbol) => void;
+	openSolReceive: (id: symbol) => void;
 	openReceive: (id: symbol) => void;
 	openSend: (id: symbol) => void;
 	openBuy: (id: symbol) => void;
@@ -61,7 +63,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openManageTokens: () => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
-	openToken: () => void;
+	openEthToken: () => void;
 	openIcToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
@@ -88,6 +90,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkBTCReceive: setTypeWithId('ckbtc-receive'),
 		openCkETHReceive: setTypeWithId('cketh-receive'),
 		openBtcReceive: setTypeWithId('btc-receive'),
+		openSolReceive: setTypeWithId('sol-receive'),
 		openReceive: setTypeWithId('receive'),
 		openSend: setTypeWithId('send'),
 		openBuy: setTypeWithId('buy'),
@@ -105,7 +108,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openManageTokens: setType('manage-tokens'),
 		openHideToken: setType('hide-token'),
 		openIcHideToken: setType('ic-hide-token'),
-		openToken: setType('token'),
+		openEthToken: setType('eth-token'),
 		openIcToken: setType('ic-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),

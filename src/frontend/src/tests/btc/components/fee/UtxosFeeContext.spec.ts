@@ -6,7 +6,7 @@ import {
 	UTXOS_FEE_CONTEXT_KEY,
 	type UtxosFeeStore
 } from '$btc/stores/utxos-fee.store';
-import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
 import * as authStore from '$lib/derived/auth.derived';
 import * as authServices from '$lib/services/auth.services';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';

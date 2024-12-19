@@ -2,7 +2,7 @@ import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
-} from '$env/networks.icrc.env';
+} from '$env/networks/networks.icrc.env';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { IcCkToken } from '$icp/types/ic-token';
