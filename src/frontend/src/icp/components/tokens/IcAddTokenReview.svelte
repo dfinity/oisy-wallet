@@ -3,7 +3,10 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { blur, fade } from 'svelte/transition';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import { loadAndAssertAddCustomToken, type ValidateTokenData } from '$icp/services/ic-add-custom-tokens.service';
+	import {
+		loadAndAssertAddCustomToken,
+		type ValidateTokenData
+	} from '$icp/services/ic-add-custom-tokens.service';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -87,7 +90,7 @@
 			{#if nonNullish(indexCanisterId)}
 				<Value ref="indexId" element="div">
 					<svelte:fragment slot="label"
-					>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
+						>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
 					>
 					{token.token.indexCanisterId}
 				</Value>
@@ -107,5 +110,4 @@
 			</ButtonGroup>
 		{/if}
 	</div>
-
 </ContentWithToolbar>
