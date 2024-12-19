@@ -280,7 +280,7 @@
 			"fee": {
 				"__bigint__": "10000"
 			},
-			"alternativeName": "ICPanda DAO",
+			"alternativeName": "ICPanda",
 			"url": "https://panda.fans"
 		}
 	},
@@ -310,7 +310,7 @@
 			"fee": {
 				"__bigint__": "1000000"
 			},
-			"alternativeName": "Yuku DAO",
+			"alternativeName": "Yuku AI",
 			"url": "https://yuku.app/"
 		}
 	},
