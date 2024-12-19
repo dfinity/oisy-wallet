@@ -293,6 +293,11 @@
 			"type": "custom",
 			"candid": "target/ic/cketh_index.did",
 			"wasm": "target/ic/cketh_index.wasm"
+		},
+		"rewards": {
+			"type": "custom",
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.wasm.gz"
 		}
 	},
 	"defaults": {
