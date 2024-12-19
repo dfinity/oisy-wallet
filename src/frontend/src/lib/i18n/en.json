@@ -285,7 +285,6 @@
 		},
 		"solana": {
 			"text": {
-				"display_solana_address_qr": "Display Solana Address as a QR code",
 				"solana_address_copied": "Solana Address copied to clipboard."
 			}
 		}
