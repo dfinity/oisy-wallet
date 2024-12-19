@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { fade, blur } from 'svelte/transition';
+	import { blur, fade } from 'svelte/transition';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import {
-		loadAndAssertAddCustomToken,
-		type ValidateTokenData
-	} from '$icp/services/ic-add-custom-tokens.service';
+	import { loadAndAssertAddCustomToken, type ValidateTokenData } from '$icp/services/ic-add-custom-tokens.service';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
@@ -48,7 +46,7 @@
 	});
 </script>
 
-<div class="stretch min-h-[20vh]">
+<ContentWithToolbar>
 	<div class="mb-4 rounded-lg bg-brand-subtle p-4">
 		{#if isNullish(token)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
@@ -89,7 +87,7 @@
 			{#if nonNullish(indexCanisterId)}
 				<Value ref="indexId" element="div">
 					<svelte:fragment slot="label"
-						>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
+					>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
 					>
 					{token.token.indexCanisterId}
 				</Value>
@@ -98,15 +96,16 @@
 			<AddTokenWarning />
 		</div>
 	{/if}
-</div>
 
-{#if nonNullish(token)}
-	<div in:fade>
-		<ButtonGroup>
-			<ButtonBack on:click={back} />
-			<Button disabled={invalid} on:click={() => dispatch('icSave')}>
-				{$i18n.tokens.import.text.add_the_token}
-			</Button>
-		</ButtonGroup>
+	<div slot="toolbar" in:fade>
+		{#if nonNullish(token)}
+			<ButtonGroup>
+				<ButtonBack on:click={back} />
+				<Button disabled={invalid} on:click={() => dispatch('icSave')}>
+					{$i18n.tokens.import.text.add_the_token}
+				</Button>
+			</ButtonGroup>
+		{/if}
 	</div>
-{/if}
+
+</ContentWithToolbar>
