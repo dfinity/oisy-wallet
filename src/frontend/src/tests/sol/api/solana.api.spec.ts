@@ -1,13 +1,11 @@
-import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { BigNumber } from '@ethersproject/bignumber';
-import type { MockInstance } from 'vitest';
-import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { loadSolBalance } from '$sol/api/solana.api';
+import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
+import { SolanaNetworks } from '$sol/types/network';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { lamports } from '@solana/rpc-types';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
-
 
 describe('solana.api', () => {
 	let mockGetBalance: MockInstance;
@@ -27,10 +25,10 @@ describe('solana.api', () => {
 		it('should load balance successfully', async () => {
 			const balance = await loadSolBalance({
 				address: mockSolAddress,
-				networkId: SOLANA_MAINNET_NETWORK_ID
+				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(BigNumber.from(500000));
+			expect(balance).toEqual(500000n);
 			expect(mockGetBalance).toHaveBeenCalled();
 		});
 
@@ -39,10 +37,10 @@ describe('solana.api', () => {
 
 			const balance = await loadSolBalance({
 				address: mockSolAddress,
-				networkId: SOLANA_MAINNET_NETWORK_ID
+				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(BigNumber.from(0));
+			expect(balance).toEqual(0n);
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -52,25 +50,16 @@ describe('solana.api', () => {
 			await expect(
 				loadSolBalance({
 					address: mockSolAddress,
-					networkId: SOLANA_MAINNET_NETWORK_ID
+					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow('RPC Error');
 		});
 
-		it('should throw error when address is null', async () => {
+		it('should throw error when address is empty', async () => {
 			await expect(
 				loadSolBalance({
-					address: null as any,
-					networkId: SOLANA_MAINNET_NETWORK_ID
-				})
-			).rejects.toThrow();
-		});
-
-		it('should throw error when networkId is null', async () => {
-			await expect(
-				loadSolBalance({
-					address: mockSolAddress,
-					networkId: null as any
+					address: '',
+					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow();
 		});

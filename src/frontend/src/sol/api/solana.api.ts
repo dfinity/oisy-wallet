@@ -1,24 +1,23 @@
-import type { NetworkId } from '$lib/types/network';
-import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import { address as solAddress } from '@solana/addresses';
-import { BigNumber } from '@ethersproject/bignumber';
-import { assertNonNullish } from '@dfinity/utils';
 import type { SolAddress } from '$lib/types/address';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import type { SolanaNetworkType } from '$sol/types/network';
+import { assertNonNullish } from '@dfinity/utils';
+import { address as solAddress } from '@solana/addresses';
 
 export const loadSolBalance = async ({
 	address,
-	networkId
+	network
 }: {
 	address: SolAddress;
-	networkId: NetworkId;
-}): Promise<BigNumber> => {
+	network: SolanaNetworkType;
+}): Promise<bigint> => {
 	assertNonNullish(address);
-	assertNonNullish(networkId);
+	assertNonNullish(network);
 
-	const { getBalance } = solanaHttpRpc(networkId);
+	const { getBalance } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
 
 	const { value: balance } = await getBalance(wallet).send();
 
-	return BigNumber.from(balance);
+	return balance;
 };
