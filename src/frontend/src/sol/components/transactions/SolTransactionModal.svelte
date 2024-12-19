@@ -1,0 +1,82 @@
+<script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import type { Commitment } from '@solana/web3.js';
+	import {
+		SOL_DEVNET_EXPLORER_URL,
+		SOL_MAINNET_EXPLORER_URL,
+		SOL_TESTNET_EXPLORER_URL
+	} from '$env/explorers.env';
+	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionToken } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		isNetworkIdSOLTestnet,
+		isNetworkIdSOLDevnet,
+		isNetworkIdSOLLocal
+	} from '$lib/utils/network.utils';
+	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
+
+	export let transaction: SolTransactionUi;
+	export let token: OptionToken;
+
+	let from: string;
+	let to: string | undefined;
+	let type: SolTransactionType;
+	let value: bigint | undefined;
+	let timestamp: bigint | undefined;
+	let id: string;
+
+	let explorerUrl: string | undefined;
+	$: {
+		explorerUrl = isNetworkIdSOLTestnet(token?.network.id)
+			? SOL_TESTNET_EXPLORER_URL
+			: isNetworkIdSOLDevnet(token?.network.id)
+				? SOL_DEVNET_EXPLORER_URL
+				: isNetworkIdSOLLocal(token?.network.id)
+					? undefined
+					: SOL_MAINNET_EXPLORER_URL;
+	}
+
+	$: ({ from, value, timestamp, id, blockNumber, to, type } = transaction);
+
+	let txExplorerUrl: string | undefined;
+	$: txExplorerUrl = nonNullish(explorerUrl)
+		? replacePlaceholders(explorerUrl, { $args: `tx/${id}/` })
+		: undefined;
+
+	let toExplorerUrl: string | undefined;
+	$: toExplorerUrl = nonNullish(explorerUrl)
+		? replacePlaceholders(explorerUrl, { $args: `account/${to}/` })
+		: undefined;
+
+	let fromExplorerUrl: string | undefined;
+	$: fromExplorerUrl =
+		nonNullish(explorerUrl) && nonNullish(to)
+			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
+			: undefined;
+</script>
+
+<TransactionModal
+	commonData={{
+		to,
+		from,
+		timestamp,
+		blockNumber,
+		txExplorerUrl,
+		toExplorerUrl,
+		fromExplorerUrl
+	}}
+	hash={id}
+	value={nonNullish(value) ? BigNumber.from(value) : undefined}
+	{token}
+	sendToLabel={$i18n.transaction.text.to}
+	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}
+>
+	<Value ref="status" slot="transaction-status">
+		<svelte:fragment slot="label">{$i18n.transaction.text.status}</svelte:fragment>
+		{`${$i18n.transaction.text.confirmed}`}
+	</Value>
+</TransactionModal>

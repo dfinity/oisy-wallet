@@ -97,6 +97,10 @@ export const modalBtcTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-transaction'
 );
+export const modalSolTransaction: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'sol-transaction'
+);
 export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-token'

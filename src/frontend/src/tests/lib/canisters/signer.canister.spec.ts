@@ -621,4 +621,46 @@ describe('signer.canister', () => {
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
+
+	describe('signWithSchnorr', () => {
+		it('signs with schnorr', async () => {
+			service.schnorr_sign.mockResolvedValue({ Ok: [{ signature: [4, 5, 6] }] });
+
+			const { signWithSchnorr } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await signWithSchnorr({
+				message: [1, 2, 3],
+				derivationPath: ['test']
+			});
+
+			expect(res).toEqual([4, 5, 6]);
+			expect(service.schnorr_sign).toHaveBeenCalledWith(
+				{
+					key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+					derivation_path: mapDerivationPath(['test']),
+					message: [1, 2, 3]
+				},
+				[SIGNER_PAYMENT_TYPE]
+			);
+		});
+
+		it('should throw an error if schnorr_sign throws', async () => {
+			service.schnorr_sign.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { signWithSchnorr } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signWithSchnorr({
+				message: [1, 2, 3],
+				derivationPath: ['test']
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
 });

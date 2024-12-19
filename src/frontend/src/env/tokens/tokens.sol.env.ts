@@ -22,7 +22,10 @@ export const SOLANA_TOKEN: Token = {
 	name: 'Solana',
 	symbol: SOLANA_SYMBOL,
 	decimals: SOLANA_DEFAULT_DECIMALS,
-	icon: sol
+	icon: sol,
+	buy: {
+		onramperId: 'sol'
+	}
 };
 
 const SOLANA_TESTNET_SYMBOL = 'SOL (Testnet)';

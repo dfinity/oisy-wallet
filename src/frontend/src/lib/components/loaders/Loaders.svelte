@@ -3,14 +3,16 @@
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
+	import LoaderBalances from '$lib/components/loaders/LoaderBalances.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
+	import LoaderSolBalances from '$sol/components/core/LoaderSolBalances.svelte';
 </script>
 
 <AddressGuard>
 	<Loader>
-		<LoaderEthBalances>
+		<LoaderBalances>
 			<LoaderWallets>
 				<ExchangeWorker>
 					<LoaderMetamask
@@ -20,6 +22,6 @@
 					</LoaderMetamask>
 				</ExchangeWorker>
 			</LoaderWallets>
-		</LoaderEthBalances>
+		</LoaderBalances>
 	</Loader>
 </AddressGuard>
