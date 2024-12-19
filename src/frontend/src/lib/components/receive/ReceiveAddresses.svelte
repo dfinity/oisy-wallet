@@ -51,10 +51,11 @@
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet,
-		ethAddress, solAddressDevnet, solAddressLocal, solAddressMainnet,
-
+		ethAddress,
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressMainnet,
 		solAddressTestnet
-
 	} from '$lib/derived/address.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
