@@ -1,16 +1,23 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
-import { IcCanistersSchema, IcCanistersStrictSchema, IcCkMetadataSchema } from '$icp/schema/ic-token.schema';
+import {
+	IcCanistersSchema,
+	IcCanistersStrictSchema,
+	IcCkMetadataSchema
+} from '$icp/schema/ic-token.schema';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
 import type { BtcAddress, SolAddress } from '$lib/types/address';
 import { CanisterIdTextSchema, type OptionCanisterIdText } from '$lib/types/canister';
-import type { CoingeckoSimplePriceResponse, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
+import type { SolanaNetworkType } from '$sol/types/network';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { z } from 'zod';
-import type { NetworkId } from '$lib/types/network';
 
 export const PostMessageRequestSchema = z.enum([
 	'startIdleTimer',
@@ -81,7 +88,7 @@ export const PostMessageDataRequestBtcSchema = z.object({
 export const PostMessageDataRequestSolSchema = z.object({
 	// TODO: generate zod schema for CertifiedData
 	address: z.custom<CertifiedData<SolAddress>>(),
-	networkId: z.custom<NetworkId>()
+	solanaNetwork: z.custom<SolanaNetworkType>()
 });
 
 export const PostMessageResponseStatusSchema = z.enum([
