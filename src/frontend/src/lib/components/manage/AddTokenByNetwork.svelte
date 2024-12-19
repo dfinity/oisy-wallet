@@ -14,11 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import {
-		isNetworkIdBitcoin,
-		isNetworkIdEthereum,
-		isNetworkIdICP
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
@@ -72,25 +68,25 @@
 	).filter(({ id }) => !isNetworkIdBitcoin(id));
 </script>
 
-<ContentWithToolbar>
-	{#if enabledNetworkSelector}
-		<Value ref="network" element="div">
-			<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
+<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+	<ContentWithToolbar>
+		{#if enabledNetworkSelector}
+			<Value ref="network" element="div">
+				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
 
-			<div id="network" class="network mt-1 pt-0.5">
-				<Dropdown name="network" bind:selectedValue={networkName}>
-					<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
+				<div id="network" class="network mt-1 pt-0.5">
+					<Dropdown name="network" bind:selectedValue={networkName}>
+						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
 						>{$i18n.tokens.manage.placeholder.select_network}</option
-					>
-					{#each availableNetworks as network}
-						<DropdownItem value={network.name}>{network.name}</DropdownItem>
-					{/each}
-				</Dropdown>
-			</div>
-		</Value>
-	{/if}
+						>
+						{#each availableNetworks as network}
+							<DropdownItem value={network.name}>{network.name}</DropdownItem>
+						{/each}
+					</Dropdown>
+				</div>
+			</Value>
+		{/if}
 
-	<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
 		{#if isNetworkIdICP(network?.id)}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isNetworkIdEthereum(network?.id)}
@@ -98,17 +94,17 @@
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
-	</form>
 
-	<AddTokenByNetworkToolbar slot="toolbar" {invalid} on:icBack />
-</ContentWithToolbar>
+		<AddTokenByNetworkToolbar slot="toolbar" {invalid} on:icBack />
+	</ContentWithToolbar>
+</form>
 
 <style lang="scss">
-	.hidden {
-		display: none;
-	}
+  .hidden {
+    display: none;
+  }
 
-	.network {
-		--disable-contrast: rgba(0, 0, 0, 0.5);
-	}
+  .network {
+    --disable-contrast: rgba(0, 0, 0, 0.5);
+  }
 </style>
