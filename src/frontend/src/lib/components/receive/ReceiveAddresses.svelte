@@ -49,7 +49,7 @@
 	const displayQRCode = (details: Omit<Required<ReceiveQRCode>, 'qrCodeAriaLabel'>) =>
 		dispatch('icQRCode', details);
 
-	interface ReceiveAddress {
+	interface ReceiveAddressProps {
 		labelRef: string;
 		address: OptionBtcAddress | OptionEthAddress;
 		network: Network;
@@ -63,7 +63,7 @@
 		condition?: boolean;
 	}
 
-	let receiveAddressList: ReceiveAddress[];
+	let receiveAddressList: ReceiveAddressProps[];
 	$: receiveAddressList = [
 		{
 			labelRef: 'btcAddressMainnet',
