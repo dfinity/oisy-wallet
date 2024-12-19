@@ -241,10 +241,10 @@ abstract class Homepage {
 		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
 	}
 
-	async takeScreenshot(): Promise<void> {
+	async takeScreenshot(isMobile: boolean): Promise<void> {
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
-			fullPage: true,
+			fullPage: !isMobile,
 			// playwright can retry flaky tests in the amount of time set below.
 			timeout: 5 * 60 * 1000
 		});
