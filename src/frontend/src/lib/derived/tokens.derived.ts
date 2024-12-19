@@ -12,7 +12,6 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import { isNetworkIdSolana } from '$lib/utils/network.utils';
 import {
 	filterEnabledTokens,
 	sumMainnetTokensUsdBalancesPerNetwork
@@ -81,13 +80,6 @@ export const enabledIcTokens: Readable<IcToken[]> = derived(
 	[enabledTokens],
 	([$enabledTokens]) =>
 		$enabledTokens.filter(({ standard }) => standard === 'icp' || standard === 'icrc') as IcToken[]
-);
-
-/**
- * The following store is used as reference for the list of WalletWorkers that are started/stopped in the main token page.
- */
-export const enabledSplTokens: Readable<Token[]> = derived(tokens, ($tokens) =>
-	$tokens.filter((token) => isNetworkIdSolana(token.network.id))
 );
 
 /**
