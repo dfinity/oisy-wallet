@@ -11,5 +11,5 @@
 
 <ButtonGroup>
 	<ButtonBack on:click={() => dispatch('icBack')} />
-	<ButtonNext disabled={invalid} on:click={() => dispatch('icNext')} />
+	<ButtonNext disabled={invalid} />
 </ButtonGroup>

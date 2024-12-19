@@ -6,6 +6,6 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<Button {disabled} {testId} on:click>
+<Button {disabled} {testId}>
 	{$i18n.core.text.next}
 </Button>
