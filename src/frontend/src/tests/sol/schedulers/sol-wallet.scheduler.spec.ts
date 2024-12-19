@@ -1,7 +1,6 @@
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solanaApi from '$sol/api/solana.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import { jsonReplacer } from '@dfinity/utils';
 import { type MockInstance } from 'vitest';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import { SolanaNetworks } from '$sol/types/network';
@@ -61,7 +60,6 @@ describe('sol-wallet.scheduler', () => {
 		spyLoadBalance = vi.spyOn(solanaApi, 'loadSolLamportsBalance').mockResolvedValue(mockBalance);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
-
 	});
 
 	afterEach(() => {
