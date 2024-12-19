@@ -1,28 +1,24 @@
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
 import type { SolAddress } from '$lib/types/address';
-import type { Balance } from '$lib/types/balance';
-import type {
-	PostMessageDataRequestSol,
-	PostMessageDataResponseError
-} from '$lib/types/post-message';
+import type { PostMessageDataRequestSol, PostMessageDataResponseError } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { loadSolBalance } from '$sol/api/solana.api';
-import type { NetworkId } from '$lib/types/network';
+import type { SolanaNetworkType } from '$sol/types/network';
 
 interface LoadSolWalletParams {
-	networkId: NetworkId;
+	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
 }
 
 interface SolWalletStore {
-	balance: CertifiedData<Balance | null> | undefined;
+	balance: CertifiedData<bigint | null> | undefined;
 }
 
 interface SolWalletData {
-	balance: CertifiedData<Balance | null>;
+	balance: CertifiedData<bigint | null>;
 }
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
@@ -53,8 +49,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private loadBalance = async (
 		params: LoadSolWalletParams
-	): Promise<CertifiedData<Balance | null>> => ({
-		data: await loadSolBalance(params),
+	): Promise<CertifiedData<bigint | null>> => ({
+		data: await loadSolBalance({ network: params.solanaNetwork, address: params.address }),
 		certified: true
 	});
 
@@ -64,8 +60,10 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		try {
 			const balance = await this.loadBalance({
 				address: data.address.data,
-				networkId: data.networkId
+				solanaNetwork: data.solanaNetwork
 			});
+
+			//todo implement loading transactions
 
 			this.syncWalletData({ response: { balance } });
 		} catch (error: unknown) {
@@ -79,14 +77,14 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			this.store.balance.data !== balance.data ||
 			(!this.store.balance.certified && balance.certified);
 
-		this.store = {
-			...this.store,
-			...(newBalance && { balance })
-		};
-
 		if (!newBalance) {
 			return;
 		}
+
+		this.store = {
+			...this.store,
+			balance
+		};
 
 		this.postMessageWallet({
 			wallet: {
