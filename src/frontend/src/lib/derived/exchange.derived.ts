@@ -36,7 +36,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const solPrice = $exchangeStore?.solana;
 
 		return {
-			// TODO: improve feed price on BTC testnet, for now we assume that 1 BTC mainnet = 1 BTC testnet
+			// TODO: improve feed price on testnets, for now we assume that 1 token mainnet = 1 token testnet
 			[BTC_TESTNET_TOKEN_ID]: btcPrice,
 			[BTC_MAINNET_TOKEN_ID]: btcPrice,
 			[BTC_REGTEST_TOKEN_ID]: btcPrice,
