@@ -6,6 +6,12 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import {
+	SOLANA_DEVNET_TOKEN_ID,
+	SOLANA_LOCAL_TOKEN_ID,
+	SOLANA_TESTNET_TOKEN_ID,
+	SOLANA_TOKEN_ID
+} from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
@@ -27,15 +33,20 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
+		const solPrice = $exchangeStore?.solana;
 
 		return {
-			// TODO: improve feed price on BTC testnet, for now we assume that 1 BTC mainnet = 1 BTC testnet
+			// TODO: improve feed price on testnets, for now we assume that 1 token mainnet = 1 token testnet
 			[BTC_TESTNET_TOKEN_ID]: btcPrice,
 			[BTC_MAINNET_TOKEN_ID]: btcPrice,
 			[BTC_REGTEST_TOKEN_ID]: btcPrice,
 			[ETHEREUM_TOKEN_ID]: ethPrice,
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
+			[SOLANA_TOKEN_ID]: solPrice,
+			[SOLANA_TESTNET_TOKEN_ID]: solPrice,
+			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
+			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token = $erc20Tokens.find(
 					({ address }) => address.toLowerCase() === key.toLowerCase()

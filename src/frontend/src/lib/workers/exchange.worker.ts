@@ -6,7 +6,8 @@ import {
 	exchangeRateERC20ToUsd,
 	exchangeRateETHToUsd,
 	exchangeRateICPToUsd,
-	exchangeRateICRCToUsd
+	exchangeRateICRCToUsd,
+	exchangeRateSOLToUsd
 } from '$lib/services/exchange.services';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
@@ -76,13 +77,15 @@ const syncExchange = async ({
 			currentBtcPrice,
 			currentErc20Prices,
 			currentIcpPrice,
-			currentIcrcPrices
+			currentIcrcPrices,
+			currentSolPrice
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
 			exchangeRateERC20ToUsd(erc20ContractAddresses),
 			exchangeRateICPToUsd(),
-			exchangeRateICRCToUsd(icrcLedgerCanisterIds)
+			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+			exchangeRateSOLToUsd()
 		]);
 
 		postMessage({
@@ -92,7 +95,8 @@ const syncExchange = async ({
 				currentBtcPrice,
 				currentErc20Prices,
 				currentIcpPrice,
-				currentIcrcPrices
+				currentIcrcPrices,
+				currentSolPrice
 			}
 		});
 	} catch (err: unknown) {
