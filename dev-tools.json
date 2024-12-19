@@ -1,4 +1,9 @@
 {
+	"didc": {
+		"method": "curl",
+		"version": "0.4.0",
+		"url": "https://github.com/dfinity/candid/releases/download/2024-07-29/didc-linux64"
+	},
 	"solana": {
 		"method": "sh",
 		"version": "2.0.16"
