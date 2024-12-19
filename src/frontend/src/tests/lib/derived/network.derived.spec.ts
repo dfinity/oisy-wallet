@@ -41,6 +41,4 @@ describe('network.derived', () => {
 
 		expect(actualAddress).toBe(expectedAddress);
 	});
-
-	//TODO add test for solNetworkAdr
 });
