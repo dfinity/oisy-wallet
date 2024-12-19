@@ -1,8 +1,8 @@
 import type { NetworkId } from '$lib/types/network';
 import {
-	isNetworkIdSolana,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
+	isNetworkIdSOLMainnet,
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
 import { type SolNetworkSchema, SolRpcConnectionConfigSchema } from '$sol/schema/network.schema';
@@ -19,7 +19,7 @@ export type SolanaNetworkType = z.infer<typeof SolanaNetworkSchema>;
 export const SolanaNetworks = SolanaNetworkSchema.enum;
 
 export const mapNetworkIdToNetwork = (networkSymbol: NetworkId) => {
-	if (isNetworkIdSolana(networkSymbol)) {
+	if (isNetworkIdSOLMainnet(networkSymbol)) {
 		return SolanaNetworks.mainnet;
 	} else if (isNetworkIdSOLTestnet(networkSymbol)) {
 		return SolanaNetworks.testnet;
