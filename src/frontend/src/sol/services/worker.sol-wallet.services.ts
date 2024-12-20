@@ -18,9 +18,9 @@ import {
 } from '$lib/utils/network.utils';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 
 export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<WalletWorker> => {
 	const {
