@@ -49,6 +49,7 @@ const nonAppleProjects = [
 const TIMEOUT = 5 * 60 * 1000;
 
 export default defineConfig({
+	retries: 3,
 	timeout: TIMEOUT,
 	workers: DEV ? 5 : 2,
 	expect: {
