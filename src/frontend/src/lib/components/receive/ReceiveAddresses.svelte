@@ -44,7 +44,6 @@
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
-
 	const dispatch = createEventDispatcher();
 
 	const displayQRCode = (details: Omit<Required<ReceiveQRCode>, 'qrCodeAriaLabel'>) =>
