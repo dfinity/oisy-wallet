@@ -20,5 +20,4 @@ export const mapNetworkIdToNetwork = (networkSymbol: NetworkId): SolanaNetworkTy
 	if (isNetworkIdSOLLocal(networkSymbol)) {
 		return SolanaNetworks.local;
 	}
-	return undefined;
 };
