@@ -93,7 +93,9 @@ export const exchanges: Readable<ExchangesData> = derived(
 								? btcPrice
 								: exchangeCoinId === 'internet-computer'
 									? icpPrice
-									: undefined
+									: exchangeCoinId === 'solana'
+										? solPrice
+										: undefined
 				};
 			}, {})
 		};
