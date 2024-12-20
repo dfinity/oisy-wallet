@@ -32,6 +32,8 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import { isSplUserToken } from '$sol/utils/spl.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -195,12 +197,15 @@
 					</span>
 
 					<svelte:fragment slot="action">
+						<!--		TODO make an abstract toggle to reuse				-->
 						{#if icTokenIcrcCustomToken(token)}
 							<IcManageTokenToggle {token} on:icToken={onToggle} />
 						{:else if icTokenEthereumUserToken(token)}
 							<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 						{:else if isBitcoinToken(token)}
 							<BtcManageTokenToggle />
+						{:else if isSplUserToken(token)}
+							<SolManageTokenToggle {token} on:icToken={onToggle} />
 						{/if}
 					</svelte:fragment>
 				</Card>

@@ -5,8 +5,10 @@ import { token } from '$lib/stores/token.store';
 import type { OptionTokenId, OptionTokenStandard, Token } from '$lib/types/token';
 import {
 	isEthereumTokenToggleEnabled,
-	isIcrcTokenToggleEnabled
+	isIcrcTokenToggleEnabled,
+	isSplTokenToggleEnabled
 } from '$lib/utils/token-toggle.utils';
+import { isSplUserToken } from '$sol/utils/spl.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -41,7 +43,9 @@ export const tokenToggleable: Readable<boolean> = derived([token], ([$token]) =>
 			? isIcrcTokenToggleEnabled($token)
 			: icTokenEthereumUserToken($token)
 				? isEthereumTokenToggleEnabled($token)
-				: false;
+				: isSplUserToken($token)
+					? isSplTokenToggleEnabled($token)
+					: false;
 	}
 
 	return false;
