@@ -115,7 +115,6 @@ export const PostMessageResponseSchema = z.enum([
 	'syncSolWalletError',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
-	'syncSolWalletError',
 	'syncBtcStatuses',
 	'syncBtcStatusesError',
 	'syncCkMinterInfo',
