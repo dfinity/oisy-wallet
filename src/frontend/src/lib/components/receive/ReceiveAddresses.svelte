@@ -8,7 +8,11 @@
 		ETHEREUM_NETWORK,
 		ICP_NETWORK
 	} from '$env/networks/networks.env';
-	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import {
+		BTC_MAINNET_TOKEN,
+		BTC_REGTEST_TOKEN,
+		BTC_TESTNET_TOKEN
+	} from '$env/tokens/tokens.btc.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -26,7 +30,12 @@
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { btcAddressMainnet, btcAddressRegtest, btcAddressTestnet, ethAddress } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet,
+		ethAddress
+	} from '$lib/derived/address.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -131,19 +140,7 @@
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as {
-			labelRef,
-			address,
-			network,
-			token: addressToken,
-			testId,
-			title,
-			label: addressLabel,
-			copyAriaLabel,
-			qrCodeAriaLabel,
-			text,
-			condition
-		} (labelRef)}
+		{#each receiveAddressList as { labelRef, address, network, token: addressToken, testId, title, label: addressLabel, copyAriaLabel, qrCodeAriaLabel, text, condition } (labelRef)}
 			{#if condition !== false}
 				{@const commonProps = {
 					labelRef,
@@ -152,12 +149,13 @@
 					testId,
 					copyAriaLabel,
 					on: {
-						click: () => displayQRCode({
-							address: address ?? '',
-							addressLabel,
-							addressToken,
-							copyAriaLabel
-						})
+						click: () =>
+							displayQRCode({
+								address: address ?? '',
+								addressLabel,
+								addressToken,
+								copyAriaLabel
+							})
 					},
 					qrCodeAction: {
 						enabled: true,
