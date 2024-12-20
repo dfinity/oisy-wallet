@@ -61,10 +61,18 @@
 		qrCodeAriaLabel: string;
 		text?: string;
 		condition?: boolean;
+		on: {
+			click: () => void;
+		};
+		qrCodeAction: {
+			enabled: true;
+			testId: typeof RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON;
+			ariaLabel: string;
+		};
 	}
 
-	let receiveAddressList: ReceiveAddressProps[];
-	$: receiveAddressList = [
+	let receiveAddressCoreList: Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[];
+	$: receiveAddressCoreList = [
 		{
 			labelRef: 'btcAddressMainnet',
 			address: $btcAddressMainnet,
@@ -136,38 +144,78 @@
 			qrCodeAriaLabel: $i18n.receive.icp.text.display_icp_account_qr
 		}
 	];
+
+	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[];
+	$: receiveAddressList = receiveAddressCoreList.map(
+		({
+			address,
+			token: addressToken,
+			qrCodeAriaLabel,
+			label: addressLabel,
+			copyAriaLabel,
+			labelRef,
+			network,
+			testId,
+			title,
+			text,
+			condition
+		}) => ({
+			labelRef,
+			address,
+			network,
+			testId,
+			copyAriaLabel,
+			title,
+			text,
+			condition,
+			qrCodeAction: {
+				enabled: true,
+				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+				ariaLabel: qrCodeAriaLabel
+			},
+			on: {
+				click: () =>
+					displayQRCode({
+						address: address ?? '',
+						addressLabel,
+						addressToken,
+						copyAriaLabel
+					})
+			}
+		})
+	);
 </script>
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as { labelRef, address, network, token: addressToken, testId, title, label: addressLabel, copyAriaLabel, qrCodeAriaLabel, text, condition } (labelRef)}
+		{#each receiveAddressList as { title, text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
-				<ReceiveAddress
-					{labelRef}
-					on:click={() =>
-						displayQRCode({
-							address: address ?? '',
-							addressLabel,
-							addressToken,
-							copyAriaLabel
-						})}
-					{address}
-					{network}
-					qrCodeAction={{
-						enabled: true,
-						testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-						ariaLabel: qrCodeAriaLabel
-					}}
-					{copyAriaLabel}
-					{testId}
-				>
-					<svelte:fragment slot="title">{title}</svelte:fragment>
-					<svelte:fragment slot="text">
-						{#if nonNullish(text)}
-							<span class="text-sm text-black">{text}</span>
-						{/if}
-					</svelte:fragment>
-				</ReceiveAddress>
+				{#if nonNullish(text)}
+					<ReceiveAddress
+						on:click={on.click}
+						{labelRef}
+						{address}
+						{network}
+						{testId}
+						{copyAriaLabel}
+						{qrCodeAction}
+					>
+						<svelte:fragment slot="title">{title}</svelte:fragment>
+						<span slot="text" class="text-sm text-black">{text}</span>
+					</ReceiveAddress>
+				{:else}
+					<ReceiveAddress
+						on:click={on.click}
+						{labelRef}
+						{address}
+						{network}
+						{testId}
+						{copyAriaLabel}
+						{qrCodeAction}
+					>
+						<svelte:fragment slot="title">{title}</svelte:fragment>
+					</ReceiveAddress>
+				{/if}
 			{/if}
 		{/each}
 	</div>
