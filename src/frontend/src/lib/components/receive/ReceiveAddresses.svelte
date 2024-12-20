@@ -8,7 +8,11 @@
 		ETHEREUM_NETWORK,
 		ICP_NETWORK
 	} from '$env/networks/networks.env';
-	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import {
+		BTC_MAINNET_TOKEN,
+		BTC_REGTEST_TOKEN,
+		BTC_TESTNET_TOKEN
+	} from '$env/tokens/tokens.btc.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -17,16 +21,21 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
-		RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
-		RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
-		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
-		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
-		RECEIVE_TOKENS_MODAL_ETH_SECTION,
-		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
+		RECEIVE_TOKENS_MODAL_ICP_SECTION,
+		RECEIVE_TOKENS_MODAL_ETH_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
 		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
 	} from '$lib/constants/test-ids.constants';
-	import { btcAddressMainnet, btcAddressRegtest, btcAddressTestnet, ethAddress } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet,
+		ethAddress
+	} from '$lib/derived/address.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -34,6 +43,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+
 
 	const dispatch = createEventDispatcher();
 
