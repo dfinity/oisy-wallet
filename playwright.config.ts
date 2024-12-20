@@ -17,7 +17,7 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
-const TIMEOUT = 5 * 60 * 1000;
+const TIMEOUT = 6 * 60 * 1000;
 
 export default defineConfig({
 	timeout: TIMEOUT,
