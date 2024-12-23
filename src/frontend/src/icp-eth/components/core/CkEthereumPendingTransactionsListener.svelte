@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish, isEmptyString } from '@dfinity/utils';
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
@@ -85,7 +85,7 @@
 	}) => {
 		await listener?.disconnect();
 
-		if (isNullish(toAddress) || !notEmptyString(toAddress)) {
+		if (isNullish(toAddress) || isEmptyString(toAddress)) {
 			return;
 		}
 
