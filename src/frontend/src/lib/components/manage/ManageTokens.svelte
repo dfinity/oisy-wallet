@@ -204,7 +204,7 @@
 						{:else if isBitcoinToken(token)}
 							<BtcManageTokenToggle />
 						{:else if isSolanaToken(token)}
-							<SolManageTokenToggle/>
+							<SolManageTokenToggle />
 						{/if}
 					</svelte:fragment>
 				</Card>
