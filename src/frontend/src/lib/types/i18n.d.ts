@@ -252,7 +252,16 @@ interface I18nReceive {
 		info: { no_new_btc: string; check_btc_progress: string };
 		error: { unexpected_btc: string };
 	};
-	solana: { text: { solana_address_copied: string } };
+	solana: {
+		text: {
+			solana_address: string;
+			solana_testnet_address: string;
+			solana_devnet_address: string;
+			solana_local_address: string;
+			solana_address_copied: string;
+			display_solana_address_qr: string;
+		};
+	};
 }
 
 interface I18nSend {
