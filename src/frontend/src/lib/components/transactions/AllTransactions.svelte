@@ -11,7 +11,7 @@
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	$: enabledTokensWithoutTransaction = $enabledNetworkTokens
 		.filter((token) => $icTransactionsStore?.[token.id] === null)
