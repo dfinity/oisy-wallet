@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { Commitment } from '@solana/web3.js';
 	import {
 		SOL_DEVNET_EXPLORER_URL,
 		SOL_MAINNET_EXPLORER_URL,
