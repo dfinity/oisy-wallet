@@ -24,6 +24,10 @@ export const RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION = 'receive-tokens-modal-bt
 export const RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION = 'receive-tokens-modal-btc-testnet-section';
 export const RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION = 'receive-tokens-modal-btc-regtest-section';
 export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-section';
+export const RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION = 'receive-tokens-modal-sol-mainnet-section';
+export const RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION = 'receive-tokens-modal-sol-testnet-section';
+export const RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION = 'receive-tokens-modal-sol-devnet-section';
+export const RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION = 'receive-tokens-modal-sol-local-section';
 
 export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
 
@@ -47,5 +51,14 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 
+export const BTC_TESTNET_TOGGLE = 'btc-testnet-toggle';
+
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
+
+export const TOKEN_MENU_IC = 'token-menu-ic';
+export const TOKEN_MENU_IC_BUTTON = 'token-menu-ic-button';
+export const TOKEN_MENU_ETH = 'token-menu-eth';
+export const TOKEN_MENU_ETH_BUTTON = 'token-menu-eth-button';
+export const TOKEN_MENU_BTC = 'token-menu-btc';
+export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';

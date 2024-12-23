@@ -4,7 +4,12 @@ import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
-import { isNetworkIdBitcoin, isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+import {
+	isNetworkIdBitcoin,
+	isNetworkIdEthereum,
+	isNetworkIdICP,
+	isNetworkIdSolana
+} from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -31,6 +36,10 @@ export const networkBitcoin: Readable<boolean> = derived([networkId], ([$network
 
 export const networkEthereum: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdEthereum($networkId)
+);
+
+export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdSolana($networkId)
 );
 
 export const pseudoNetworkChainFusion: Readable<boolean> = derived(
