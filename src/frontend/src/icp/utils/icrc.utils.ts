@@ -6,6 +6,7 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import {
 	IcrcMetadataResponseEntries,
+	mapTokenMetadata,
 	type IcrcTokenMetadataResponse,
 	type IcrcValue
 } from '@dfinity/ledger-icrc';
@@ -52,42 +53,8 @@ export const mapIcrcToken = ({
 
 type IcrcTokenMetadata = TokenMetadata & IcFee;
 
-const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadata | undefined => {
-	const nullishToken: Partial<IcrcTokenMetadata> = response.reduce((acc, [key, value]) => {
-		switch (key) {
-			case IcrcMetadataResponseEntries.SYMBOL:
-				acc = { ...acc, ...('Text' in value && { symbol: value.Text }) };
-				break;
-			case IcrcMetadataResponseEntries.NAME:
-				acc = { ...acc, ...('Text' in value && { name: value.Text }) };
-				break;
-			case IcrcMetadataResponseEntries.FEE:
-				acc = { ...acc, ...('Nat' in value && { fee: value.Nat }) };
-				break;
-			case IcrcMetadataResponseEntries.DECIMALS:
-				acc = {
-					...acc,
-					...('Nat' in value && { decimals: Number(value.Nat) })
-				};
-				break;
-			case IcrcMetadataResponseEntries.LOGO:
-				acc = { ...acc, ...('Text' in value && { icon: value.Text }) };
-		}
-
-		return acc;
-	}, {});
-
-	if (
-		isNullish(nullishToken.symbol) ||
-		isNullish(nullishToken.name) ||
-		isNullish(nullishToken.fee) ||
-		isNullish(nullishToken.decimals)
-	) {
-		return undefined;
-	}
-
-	return nullishToken as IcrcTokenMetadata;
-};
+const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadata | undefined =>
+	mapTokenMetadata(response);
 
 // eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
 export const sortIcTokens = (
