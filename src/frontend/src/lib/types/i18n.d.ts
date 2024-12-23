@@ -134,6 +134,7 @@ interface I18nInit {
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
+		no_solana_rpc: string;
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
@@ -158,6 +159,7 @@ interface I18nInit {
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		btc_wallet_error: string;
+		sol_wallet_error: string;
 	};
 }
 
