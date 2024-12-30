@@ -49,7 +49,9 @@ function install_did_files() {
 DFX_NETWORK=ic ./scripts/build.signer.sh
 # Download .did files listed in dfx.json
 install_did_files
-# Generate bindings for canisters with directories in `declarations`:
+# Generate Rust bindings
+scripts/bind/rust.sh cycles_ledger
+# Generate javascript & typescript bindings for canisters with directories in `declarations`:
 for canister in $(ls src/declarations/); do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
