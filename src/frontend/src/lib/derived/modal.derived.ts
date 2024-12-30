@@ -25,6 +25,10 @@ export const modalBtcReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-receive'
 );
+export const modalSolReceive: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'sol-receive'
+);
 export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
@@ -93,9 +97,9 @@ export const modalBtcTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-transaction'
 );
-export const modalToken: Readable<boolean> = derived(
+export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'token'
+	($modalStore) => $modalStore?.type === 'eth-token'
 );
 export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
