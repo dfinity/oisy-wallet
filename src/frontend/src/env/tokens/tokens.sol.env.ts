@@ -5,7 +5,7 @@ import {
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks/networks.sol.env';
 import sol from '$lib/assets/networks/sol.svg';
-import type { Token, TokenId } from '$lib/types/token';
+import type { RequiredToken, TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 export const SOLANA_DEFAULT_DECIMALS = 9;
@@ -14,7 +14,7 @@ const SOLANA_SYMBOL = 'SOL';
 
 export const SOLANA_TOKEN_ID: TokenId = parseTokenId(SOLANA_SYMBOL);
 
-export const SOLANA_TOKEN: Token = {
+export const SOLANA_TOKEN: RequiredToken = {
 	id: SOLANA_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'solana',
@@ -32,7 +32,7 @@ const SOLANA_TESTNET_SYMBOL = 'SOL (Testnet)';
 
 export const SOLANA_TESTNET_TOKEN_ID: TokenId = parseTokenId(SOLANA_TESTNET_SYMBOL);
 
-export const SOLANA_TESTNET_TOKEN: Token = {
+export const SOLANA_TESTNET_TOKEN: RequiredToken = {
 	id: SOLANA_TESTNET_TOKEN_ID,
 	network: SOLANA_TESTNET_NETWORK,
 	standard: 'solana',
@@ -47,7 +47,7 @@ const SOLANA_DEVNET_SYMBOL = 'SOL (Devnet)';
 
 export const SOLANA_DEVNET_TOKEN_ID: TokenId = parseTokenId(SOLANA_DEVNET_SYMBOL);
 
-export const SOLANA_DEVNET_TOKEN: Token = {
+export const SOLANA_DEVNET_TOKEN: RequiredToken = {
 	id: SOLANA_DEVNET_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
 	standard: 'solana',
@@ -62,7 +62,7 @@ const SOLANA_LOCAL_SYMBOL = 'SOL (Local)';
 
 export const SOLANA_LOCAL_TOKEN_ID: TokenId = parseTokenId(SOLANA_LOCAL_SYMBOL);
 
-export const SOLANA_LOCAL_TOKEN: Token = {
+export const SOLANA_LOCAL_TOKEN: RequiredToken = {
 	id: SOLANA_LOCAL_TOKEN_ID,
 	network: SOLANA_LOCAL_NETWORK,
 	standard: 'solana',
