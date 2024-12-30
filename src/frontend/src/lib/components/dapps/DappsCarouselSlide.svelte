@@ -2,6 +2,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import {
+		TRACK_COUNT_CAROUSEL_CLOSE,
+		TRACK_COUNT_CAROUSEL_OPEN
+	} from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type CarouselSlideOisyDappDescription } from '$lib/types/dapp-description';
@@ -15,9 +20,27 @@
 		name: dAppName
 	} = dappsCarouselSlide);
 
+	const open = async () => {
+		await trackEvent({
+			name: TRACK_COUNT_CAROUSEL_OPEN,
+			metadata: {
+				dappId
+			}
+		});
+
+		modalStore.openDappDetails(dappsCarouselSlide);
+	};
+
 	const dispatch = createEventDispatcher();
 
-	const close = () => {
+	const close = async () => {
+		await trackEvent({
+			name: TRACK_COUNT_CAROUSEL_CLOSE,
+			metadata: {
+				dappId
+			}
+		});
+
 		dispatch('icCloseCarouselSlide', dappId);
 	};
 </script>
@@ -35,9 +58,7 @@
 	<div class="w-full justify-start">
 		<div class="mb-1">{text}</div>
 		<button
-			on:click={() => {
-				modalStore.openDappDetails(dappsCarouselSlide);
-			}}
+			on:click={open}
 			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
 			class="text-sm font-semibold text-brand-primary"
 		>

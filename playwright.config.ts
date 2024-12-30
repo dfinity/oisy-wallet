@@ -17,32 +17,19 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
-const MATRIX_OS = process.env.MATRIX_OS ?? '';
-const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
-
-const appleProjects = [
-	{
-		name: 'Safari',
-		use: devices['Desktop Safari']
-	}
-];
-
-const nonAppleProjects = [
-	{
-		name: 'Google Chrome',
-		use: { ...devices['Desktop Chrome'], channel: 'chrome' }
-	},
-	{
-		name: 'Firefox',
-		use: devices['Desktop Firefox']
-	}
-];
-
 const TIMEOUT = 5 * 60 * 1000;
 
 export default defineConfig({
 	timeout: TIMEOUT,
 	workers: DEV ? 5 : 2,
+	expect: {
+		toHaveScreenshot: {
+			// disable any animations caught by playwright for better screenshots and less flaky tests.
+			animations: 'disabled',
+			// hide caret for cleaner snapshots.
+			caret: 'hide'
+		}
+	},
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
@@ -58,5 +45,11 @@ export default defineConfig({
 		navigationTimeout: TIMEOUT,
 		...(DEV && { headless: false })
 	},
-	projects: isMac ? appleProjects : nonAppleProjects
+	projects: [
+		/* Test against desktop browsers. */
+		{
+			name: 'Google Chrome',
+			use: { ...devices['Desktop Chrome'] }
+		}
+	]
 });

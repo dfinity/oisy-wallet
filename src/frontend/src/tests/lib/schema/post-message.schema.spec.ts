@@ -3,7 +3,7 @@ import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
-} from '$env/networks.icrc.env';
+} from '$env/networks/networks.icrc.env';
 import {
 	JsonTransactionsTextSchema,
 	PostMessageDataRequestBtcSchema,
@@ -345,6 +345,7 @@ describe('post-message.schema', () => {
 			'syncBtcWallet',
 			'syncIcpWalletError',
 			'syncIcrcWalletError',
+			'syncBtcWalletError',
 			'syncIcpWalletCleanUp',
 			'syncIcrcWalletCleanUp',
 			'syncBtcStatuses',
