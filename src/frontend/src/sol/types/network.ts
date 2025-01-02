@@ -1,11 +1,10 @@
-import type { SolNetworkSchema } from '$sol/schema/network.schema';
+import { SolRpcConnectionConfigSchema } from '$sol/schema/network.schema';
 import { z } from 'zod';
 
-export type SolNetwork = z.infer<typeof SolNetworkSchema>;
+export type SolRpcConnectionConfig = z.infer<typeof SolRpcConnectionConfigSchema>;
 
-export enum SolanaNetworks {
-	MAINNET = 'mainnet',
-	TESTNET = 'testnet',
-	DEVNET = 'devnet',
-	LOCAL = 'local'
-}
+export const SolanaNetworkSchema = z.enum(['mainnet', 'testnet', 'devnet', 'local']);
+
+export type SolanaNetworkType = z.infer<typeof SolanaNetworkSchema>;
+
+export const SolanaNetworks = SolanaNetworkSchema.enum;
