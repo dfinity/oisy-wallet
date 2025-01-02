@@ -51,10 +51,10 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	private loadBalance = async (
-		params: LoadSolWalletParams
+		{address, solanaNetwork}: LoadSolWalletParams
 	): Promise<CertifiedData<bigint | null>> => ({
-		data: await loadSolLamportsBalance({ network: params.solanaNetwork, address: params.address }),
-		certified: true
+		data: await loadSolLamportsBalance({ network: solanaNetwork, address }),
+		certified: false
 	});
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {
@@ -75,10 +75,13 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	};
 
 	private syncWalletData = ({ response: { balance } }: { response: SolWalletData }) => {
+		if (!this.store.balance?.certified && balance.certified) {
+			throw new Error('Balance certification status cannot change from uncertified to certified');
+		}
+
 		const newBalance =
 			isNullish(this.store.balance) ||
-			this.store.balance.data !== balance.data ||
-			(!this.store.balance.certified && balance.certified);
+			this.store.balance.data !== balance.data;
 
 		if (!newBalance) {
 			return;
