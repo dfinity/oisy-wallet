@@ -132,7 +132,7 @@ describe('format.utils', () => {
 			});
 
 			it('should return day and month if within the same year', () => {
-				const currentDate = new Date(2024, 1, 25);
+				const currentDate = new Date(new Date().getFullYear(), 1, 25);
 				const earlierThisYear = new Date(currentDate);
 				earlierThisYear.setMonth(currentDate.getMonth() - 1);
 				const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
@@ -146,7 +146,7 @@ describe('format.utils', () => {
 			});
 
 			it('should return day, month, and year if from a different year', () => {
-				const currentDate = new Date(2024, 1, 25);
+				const currentDate = new Date(new Date().getFullYear(), 1, 25);
 				const lastYear = new Date(currentDate);
 				lastYear.setFullYear(currentDate.getFullYear() - 1);
 				const timestampLastYear = Math.floor(lastYear.getTime() / 1000);
@@ -161,7 +161,7 @@ describe('format.utils', () => {
 			});
 
 			it('should not give an error if the date is in the future', () => {
-				const currentDate = new Date(2024, 1, 25);
+				const currentDate = new Date(new Date().getFullYear(), 1, 25);
 				const futureDate = new Date(currentDate);
 				futureDate.setDate(currentDate.getDate() + 1);
 				const futureTimestamp = Math.floor(futureDate.getTime() / 1000);
@@ -170,9 +170,9 @@ describe('format.utils', () => {
 			});
 
 			it('should return "yesterday" even if the date was in the past year', () => {
-				vi.useFakeTimers().setSystemTime(new Date(2024, 0, 1));
+				vi.useFakeTimers().setSystemTime(new Date(new Date().getFullYear(), 0, 1));
 
-				const currentDate = new Date(2024, 0, 1);
+				const currentDate = new Date(new Date().getFullYear(), 0, 1);
 				const yesterday = new Date(currentDate);
 				yesterday.setDate(currentDate.getDate() - 1);
 				const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
@@ -183,9 +183,9 @@ describe('format.utils', () => {
 			});
 
 			it('should return "yesterday" even if the date was in the past month', () => {
-				vi.useFakeTimers().setSystemTime(new Date(2024, 1, 1));
+				vi.useFakeTimers().setSystemTime(new Date(new Date().getFullYear(), 1, 1));
 
-				const currentDate = new Date(2024, 1, 1);
+				const currentDate = new Date(new Date().getFullYear(), 1, 1);
 				const yesterday = new Date(currentDate);
 				yesterday.setDate(currentDate.getDate() - 1);
 				const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
