@@ -5,6 +5,6 @@
 
 <IcLoaderWallets>
 	<BtcLoaderWallets>
-			<slot />
+		<slot />
 	</BtcLoaderWallets>
 </IcLoaderWallets>
