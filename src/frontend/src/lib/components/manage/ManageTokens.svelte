@@ -32,6 +32,8 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -201,6 +203,8 @@
 							<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 						{:else if isBitcoinToken(token)}
 							<BtcManageTokenToggle />
+						{:else if isSolanaToken(token)}
+							<SolManageTokenToggle />
 						{/if}
 					</svelte:fragment>
 				</Card>
