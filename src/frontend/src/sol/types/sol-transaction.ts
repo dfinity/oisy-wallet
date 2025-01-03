@@ -1,7 +1,7 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
+import type { Address } from '@solana/addresses';
 import type {
-	Address,
 	Base58EncodedBytes,
 	Commitment,
 	Lamports,
@@ -9,7 +9,7 @@ import type {
 	TokenBalance,
 	TransactionError,
 	UnixTimestamp
-} from '@solana/web3.js';
+} from '@solana/rpc-types';
 
 export type SolTransactionType = Extract<
 	TransactionType,
