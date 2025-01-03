@@ -9,10 +9,10 @@
 		ICP_NETWORK
 	} from '$env/networks/networks.env';
 	import {
-		SOLANA_DEVNET_NETWORK,
-		SOLANA_LOCAL_NETWORK,
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK,
+		SOLANA_DEVNET_NETWORK,
+		SOLANA_LOCAL_NETWORK,
 		SOLANA_NETWORK_ENABLED
 	} from '$env/networks/networks.sol.env';
 	import {
