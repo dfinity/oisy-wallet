@@ -226,4 +226,34 @@ export class SignerCanister extends Canister<SignerService> {
 		// TODO: map error like the other methods when SchnorrPublicKeyError is exposed in the Signer repo
 		throw response.Err;
 	};
+
+	signWithSchnorr = async ({
+		message,
+		derivationPath
+	}: {
+		message: number[];
+		derivationPath: string[];
+	}): Promise<Uint8Array | number[]> => {
+		const { schnorr_sign } = this.caller({
+			certified: true
+		});
+
+		const response = await schnorr_sign(
+			{
+				// TODO: set the key_id in the signer repo, as done for the ecdsa key
+				key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+				derivation_path: mapDerivationPath(derivationPath),
+				message
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { signature } = response.Ok[0];
+			return signature;
+		}
+
+		// TODO: map error like the other methods when SchnorrSignError is exposed in the Signer repo
+		throw response.Err;
+	};
 }
