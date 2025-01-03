@@ -11,7 +11,7 @@ import type { SolRpcTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import { address as solAddress } from '@solana/web3.js';
+import { address as solAddress } from '@solana/addresses';
 import { get } from 'svelte/store';
 
 export const loadSolTransactions = async ({
