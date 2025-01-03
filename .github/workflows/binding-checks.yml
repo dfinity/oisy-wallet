@@ -78,6 +78,10 @@ jobs:
         if: steps.changes.outputs.src == 'true'
         run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
 
+      - name: Install didc
+        if: steps.changes.outputs.src == 'true'
+        run: ./scripts/setup didc
+
       - name: Generate bindings
         if: steps.changes.outputs.src == 'true'
         run: npm run generate
