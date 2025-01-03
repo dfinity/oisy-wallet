@@ -1,4 +1,5 @@
 import type { SchnorrKeyId } from '$declarations/signer/signer.did';
+import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import solDevnetIconBW from '$lib/assets/networks/sol-devnet-bw.svg';
 import solLocalnetIconBW from '$lib/assets/networks/sol-localnet-bw.svg';
@@ -12,9 +13,9 @@ import { parseNetworkId } from '$lib/validation/network.validation';
 /**
  * RPC URLs
  */
-export const SOLANA_RPC_HTTP_URL_MAINNET = `https://solana-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_API_KEY}`;
+export const SOLANA_RPC_HTTP_URL_MAINNET = `https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
 export const SOLANA_RPC_HTTP_URL_TESTNET = 'https://api.testnet.solana.com';
-export const SOLANA_RPC_HTTP_URL_DEVNET = `https://solana-devnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_API_KEY}`;
+export const SOLANA_RPC_HTTP_URL_DEVNET = `https://solana-devnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
 export const SOLANA_RPC_HTTP_URL_LOCAL = 'http://localhost:8899';
 
 /**
