@@ -5,10 +5,7 @@
 		ETHEREUM_NETWORK_ID,
 		ICP_NETWORK_ID
 	} from '$env/networks/networks.env';
-	import {
-		SOLANA_MAINNET_NETWORK,
-		SOLANA_MAINNET_NETWORK_ID
-	} from '$env/networks/networks.sol.env';
+	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
