@@ -64,7 +64,6 @@
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@junobuild/analytics": "^0.0.31",
 		"@metamask/detect-provider": "^2.0.0",
-		"@solana-program/system": "^0.6.2",
 		"@solana/addresses": "^2.0.0",
 		"@solana/rpc": "^2.0.0",
 		"@walletconnect/web3wallet": "1.14.0",
