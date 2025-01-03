@@ -7,10 +7,10 @@ import {
 } from '$env/networks/networks.sol.env';
 import { LOCAL } from '$lib/constants/app.constants';
 import { testnets } from '$lib/derived/testnets.derived';
-import type { SolNetwork } from '$sol/types/network';
+import type { Network } from '$lib/types/network';
 import { derived, type Readable } from 'svelte/store';
 
-export const enabledSolanaNetworks: Readable<SolNetwork[]> = derived([testnets], ([$testnets]) =>
+export const enabledSolanaNetworks: Readable<Network[]> = derived([testnets], ([$testnets]) =>
 	SOLANA_NETWORK_ENABLED
 		? [
 				SOLANA_MAINNET_NETWORK,

@@ -1,14 +1,18 @@
+import { i18n } from '$lib/stores/i18n.store';
 import type { OptionSolAddress } from '$lib/types/address';
 import type { OptionToken } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import type { SolRpcTransaction } from '$sol/types/sol-transaction';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
-import { isSolNetwork } from '$sol/validation/sol-network.validation';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { createSolanaRpc, address as solAddress } from '@solana/web3.js';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { address as solAddress } from '@solana/web3.js';
+import { get } from 'svelte/store';
 
 export const loadSolTransactions = async ({
 	address,
@@ -27,17 +31,21 @@ export const loadSolTransactions = async ({
 		return;
 	}
 
-	const { id: tokenId, network } = token;
-
-	if (!isSolNetwork(network)) {
-		return;
-	}
-
 	const {
-		rpc: { httpUrl }
-	} = network;
+		id: tokenId,
+		network: { id: networkId }
+	} = token;
 
-	const { getSignaturesForAddress, getTransaction } = createSolanaRpc(httpUrl);
+	const solNetwork = mapNetworkIdToNetwork(networkId);
+
+	assertNonNullish(
+		solNetwork,
+		replacePlaceholders(get(i18n).init.error.no_solana_network, {
+			$network: networkId.description ?? ''
+		})
+	);
+
+	const { getSignaturesForAddress, getTransaction } = solanaHttpRpc(solNetwork);
 
 	const wallet = solAddress(address);
 
