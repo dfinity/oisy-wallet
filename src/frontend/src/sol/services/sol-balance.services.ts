@@ -1,35 +1,14 @@
 import { balancesStore } from '$lib/stores/balances.store';
+import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isSolNetwork } from '$sol/validation/sol-network.validation';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { loadSolLamportsBalance } from '$sol/api/solana.api';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { assertNonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { address as solAddress } from '@solana/addresses';
-import { createSolanaRpc } from '@solana/rpc';
-import { lamports, type Lamports } from '@solana/rpc-types';
-
-export const loadLamportsBalance = async ({
-	address,
-	token: { network }
-}: {
-	address: SolAddress;
-	token: Token;
-}): Promise<Lamports> => {
-	if (!isSolNetwork(network)) {
-		return lamports(0n);
-	}
-
-	const {
-		rpc: { httpUrl }
-	} = network;
-
-	const { getBalance } = createSolanaRpc(httpUrl);
-
-	const wallet = solAddress(address);
-	const { value: balance } = await getBalance(wallet).send();
-
-	return balance;
-};
+import { get } from 'svelte/store';
 
 export const loadSolBalance = async ({
 	address,
@@ -38,10 +17,22 @@ export const loadSolBalance = async ({
 	address: SolAddress;
 	token: Token;
 }): Promise<ResultSuccess> => {
-	const { id: tokenId } = token;
+	const {
+		id: tokenId,
+		network: { id: networkId }
+	} = token;
+
+	const solNetwork = mapNetworkIdToNetwork(networkId);
+
+	assertNonNullish(
+		solNetwork,
+		replacePlaceholders(get(i18n).init.error.no_solana_network, {
+			$network: networkId.description ?? ''
+		})
+	);
 
 	try {
-		const balance = await loadLamportsBalance({ address, token });
+		const balance = await loadSolLamportsBalance({ address, network: solNetwork });
 
 		balancesStore.set({ tokenId, data: { data: BigNumber.from(balance), certified: false } });
 
