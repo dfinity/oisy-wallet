@@ -349,6 +349,10 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
+		await this.waitForContentReady();
+	}
+
+	async waitForContentReady(): Promise<void> {
 		await this.waitForTokensInitialization();
 
 		await this.waitForLoadState();
