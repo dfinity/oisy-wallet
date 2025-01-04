@@ -19,6 +19,7 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
+          echo steps.app-token.outputs.token ${{ steps.app-token.outputs.token}}
           echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
 
       - name: Checkout code
