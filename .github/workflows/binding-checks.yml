@@ -11,6 +11,7 @@ jobs:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
         id: app-token
+        continue-on-error: true
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
@@ -18,6 +19,8 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
+          echo steps.app-token.outputs.token null ${{ steps.app-token.outputs.token == null}}
+          echo steps.app-token.outputs.token empty ${{ steps.app-token.outputs.token == ''}}
           echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
 
       - name: Checkout code
