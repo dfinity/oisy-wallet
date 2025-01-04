@@ -82,7 +82,7 @@
 		"@rollup/plugin-inject": "^5.0.5",
 		"@solana/rpc-types": "^2.0.0",
 		"@sveltejs/adapter-static": "^3.0.8",
-		"@sveltejs/kit": "^2.11.1",
+		"@sveltejs/kit": "^2.15.1",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.6",
