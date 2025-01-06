@@ -48,10 +48,12 @@
 
 	let fromRoute: NavigationTarget | null;
 
-	let isVip;
+	let isVip = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
-			isVip = await isVipUser($authIdentity);
+			isVip = await isVipUser({
+				identity: $authIdentity
+			});
 		}
 	});
 
