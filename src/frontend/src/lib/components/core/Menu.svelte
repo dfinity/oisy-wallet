@@ -29,7 +29,6 @@
 		NAVIGATION_MENU_VIP_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
-	import { userSettings } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
@@ -39,6 +38,10 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { isVipUser } from '$lib/services/reward-code.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { onMount } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -46,7 +49,11 @@
 	let fromRoute: NavigationTarget | null;
 
 	let isVip;
-	isVip = $userSettings?.vip.isVip;
+	onMount(async () => {
+		if (nonNullish($authIdentity)) {
+			isVip = await isVipUser($authIdentity);
+		}
+	});
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;

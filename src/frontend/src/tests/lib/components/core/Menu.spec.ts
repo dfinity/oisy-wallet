@@ -1,14 +1,17 @@
-import type { Settings, UserProfile } from '$declarations/backend/backend.did';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
-import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
+import type { UserData } from '$declarations/rewards/rewards.did';
+import * as rewardApi from '$lib/api/reward.api';
+import { readable } from 'svelte/store';
+import type { Identity } from '@dfinity/agent';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import * as authStore from '$lib/derived/auth.derived';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
@@ -18,20 +21,17 @@ describe('Menu', () => {
 		userProfileStore.reset();
 	});
 
+	const mockAuthStore = (value: Identity | null = mockIdentity) =>
+		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
+
 	it('renders the vip menu item', async () => {
-		const settings: Settings = {
-			...mockUserSettings,
-			vip: {
-				isVip: true
-			}
+		const mockedUserData: UserData = {
+			is_vip: [true],
+			airdrops: [],
+			sprinkles: []
 		};
-
-		const userProfile: UserProfile = {
-			...mockUserProfile,
-			settings: toNullable(settings)
-		};
-
-		userProfileStore.set({ profile: userProfile, certified: false });
+		const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+		mockAuthStore();
 
 		const { container } = render(Menu);
 		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
@@ -52,19 +52,13 @@ describe('Menu', () => {
 	});
 
 	it('does not render the vip menu item', async () => {
-		const settings: Settings = {
-			...mockUserSettings,
-			vip: {
-				isVip: false
-			}
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			airdrops: [],
+			sprinkles: []
 		};
-
-		const userProfile: UserProfile = {
-			...mockUserProfile,
-			settings: toNullable(settings)
-		};
-
-		userProfileStore.set({ profile: userProfile, certified: false });
+		const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+		mockAuthStore();
 
 		const { container } = render(Menu);
 		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
