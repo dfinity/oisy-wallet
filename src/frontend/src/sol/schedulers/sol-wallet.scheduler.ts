@@ -93,8 +93,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 		this.postMessageWallet({
 			wallet: {
-				balance,
-				newTransactions: ''
+				balance
 			}
 		});
 	};

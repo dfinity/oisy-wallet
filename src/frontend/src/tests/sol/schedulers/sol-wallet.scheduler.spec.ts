@@ -33,8 +33,7 @@ describe('sol-wallet.scheduler', () => {
 				balance: {
 					certified,
 					data: mockBalance
-				},
-				newTransactions: ''
+				}
 			}
 		}
 	});
@@ -74,7 +73,7 @@ describe('sol-wallet.scheduler', () => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
 		const mockPostMessageCertified = mockPostMessage({
-			certified: true
+			certified: false
 		});
 
 		afterEach(() => {
@@ -167,7 +166,7 @@ describe('sol-wallet.scheduler', () => {
 	describe('sol-wallet worker should work', () => {
 		const startData = {
 			address: {
-				certified: true,
+				certified: false,
 				data: 'mock-sol-address'
 			},
 			solanaNetwork: SolanaNetworks.mainnet
