@@ -113,30 +113,9 @@
 		transition-delay: 0.6s;
 	}
 
-	button:hover .svg-arrow-go path,
-	button:hover .svg-arrow-go line {
-		stroke-dashoffset: 20;
-		transition-delay: 0s;
-	}
-
-	button:hover .svg-arrow-go line {
-		transition-delay: 0.15s;
-	}
-
 	.svg-vizor path {
 		transform: translateY(-5px);
 		transition: transform 0.5s cubic-bezier(0.3, 0.7, 0, 1);
 		transition-delay: 0.2s;
-	}
-
-	button:hover .svg-vizor path {
-		transform: translateY(0);
-	}
-
-	button:hover .svg-infinity path {
-		stroke-dasharray: 20px;
-		stroke-dashoffset: 0;
-		transition-delay: 0.6s;
-		transition-duration: 1s;
 	}
 </style>

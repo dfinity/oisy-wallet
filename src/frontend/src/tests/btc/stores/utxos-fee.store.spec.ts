@@ -1,7 +1,7 @@
 import { initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { testDerivedUpdates } from '$tests/utils/derived.utils';
+import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { get } from 'svelte/store';
 
 describe('utxosFeeStore', () => {

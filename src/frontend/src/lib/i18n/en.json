@@ -40,7 +40,8 @@
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"submit_ticket": "Submit a ticket"
+			"submit_ticket": "Submit a ticket",
+			"confirm_navigate": "Are you sure you want to navigate away?"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -154,6 +155,7 @@
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
+			"no_solana_rpc": "No Solana RPC for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading the ETH balance.",
@@ -177,7 +179,8 @@
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
-			"btc_wallet_error": "Error while loading BTC wallet information."
+			"btc_wallet_error": "Error while loading BTC wallet information.",
+			"sol_wallet_error": "Error while loading SOL wallet information."
 		}
 	},
 	"hero": {
@@ -280,6 +283,16 @@
 			},
 			"error": {
 				"unexpected_btc": "Something went wrong while checking for incoming BTC."
+			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "Solana Address",
+				"solana_testnet_address": "Solana Testnet Address",
+				"solana_devnet_address": "Solana Devnet Address",
+				"solana_local_address": "Solana Local Address",
+				"solana_address_copied": "Solana address copied to clipboard",
+				"display_solana_address_qr": "Display Solana address as QR code"
 			}
 		}
 	},
@@ -506,6 +519,7 @@
 		"alt": {
 			"context_menu": "Context menu for to the selected token",
 			"open_etherscan": "Open the details of the token on Etherscan",
+			"open_blockstream": "Open the details of the token on Blockstream",
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
 			"token_group_number": "Total number of tokens in the group for native token $token"
@@ -831,7 +845,8 @@
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},
 		"warning": {
-			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister."
+			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister.",
+			"unavailable_index_canister": "Transaction for $token_list can not be displayed. Index canister is currently not available."
 		}
 	}
 }
