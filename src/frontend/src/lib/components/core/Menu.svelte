@@ -43,6 +43,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { isVipUser } from '$lib/services/reward-code.services';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -53,7 +54,7 @@
 	onMount(async () => {
 		const identity = $authIdentity;
 		if (nonNullish(identity)) {
-			isVip = await isVip(identity);
+			isVip = await isVipUser(identity);
 		}
 	});
 
