@@ -25,7 +25,7 @@ describe('reward-code', () => {
 		it('should return true if user is vip', async () => {
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-			const isVip = await isVipUser({ identity: mockIdentity, certified: false });
+			const isVip = await isVipUser({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -39,7 +39,7 @@ describe('reward-code', () => {
 			const userData: UserData = { ...mockedUserData, is_vip: [false] };
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(userData);
 
-			const isVip = await isVipUser({ identity: mockIdentity, certified: false });
+			const isVip = await isVipUser({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
