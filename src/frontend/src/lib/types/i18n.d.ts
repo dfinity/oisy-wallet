@@ -135,6 +135,7 @@ interface I18nInit {
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_rpc: string;
+		no_solana_network: string;
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
@@ -659,8 +660,11 @@ interface I18nVip {
 	reward: {
 		text: {
 			open_wallet: string;
+			title_successful: string;
 			title_failed: string;
+			reward_received: string;
 			reward_failed: string;
+			reward_received_description: string;
 			reward_failed_description: string;
 		};
 	};
