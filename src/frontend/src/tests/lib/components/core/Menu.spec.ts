@@ -30,7 +30,7 @@ describe('Menu', () => {
 			airdrops: [],
 			sprinkles: []
 		};
-		const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 		mockAuthStore();
 
 		const { container } = render(Menu);
@@ -57,7 +57,7 @@ describe('Menu', () => {
 			airdrops: [],
 			sprinkles: []
 		};
-		const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 		mockAuthStore();
 
 		const { container } = render(Menu);
