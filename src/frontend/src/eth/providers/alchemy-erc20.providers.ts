@@ -3,6 +3,7 @@ import {
 	ALCHEMY_JSON_RPC_URL_MAINNET,
 	ALCHEMY_JSON_RPC_URL_SEPOLIA
 } from '$env/networks/networks.eth.env';
+import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20Transaction } from '$eth/types/erc20-transaction';
@@ -17,14 +18,12 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 import { get } from 'svelte/store';
 
-const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
-
 export class AlchemyErc20Provider {
 	private readonly provider: JsonRpcProvider;
 
 	// AlchemyProvider of ether.js does not support Sepolia
 	constructor(private readonly providerUrl: string) {
-		this.provider = new JsonRpcProvider(`${this.providerUrl}/${API_KEY}`);
+		this.provider = new JsonRpcProvider(`${this.providerUrl}/${ALCHEMY_API_KEY}`);
 	}
 
 	initMinedTransactionsListener = ({
