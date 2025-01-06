@@ -749,14 +749,21 @@
 		}
 	},
 	"vip": {
-		"invitation": {
-			"text": {
-				"title": "Generate invitation link",
-				"invitation_link_copied": "Invitation link copied to clipboard.",
-				"generate_new_link": "Generate new link",
-				"regenerate_countdown_text": "New link will be generated in $counter sec"
+		"reward": {
+			"error": {
+				"loading_reward": "Error while loading a new reward code.",
+				"loading_user_data": "Failed to load user data from reward canister.",
+				"claiming_reward": "Error while claiming reward."
 			}
-		}
+		},
+        "invitation": {
+            "text": {
+                "title": "Generate invitation link",
+                "invitation_link_copied": "Invitation link copied to clipboard.",
+                "generate_new_link": "Generate new link",
+                "regenerate_countdown_text": "New link will be generated in $counter sec"
+            }
+        }
 	},
 	"signer": {
 		"sign_in": {

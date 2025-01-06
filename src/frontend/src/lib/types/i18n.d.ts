@@ -659,6 +659,13 @@ interface I18nAbout {
 }
 
 interface I18nVip {
+	reward: {
+		error: {
+			loading_reward: string;
+			loading_user_data: string;
+			claiming_reward: string
+		}
+	};
 	invitation: {
 		text: {
 			title: string;
