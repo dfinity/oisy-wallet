@@ -21,9 +21,8 @@
 
 	let code: string;
 	const generateCode = async () => {
-		const identity = $authIdentity;
-		if (nonNullish(identity)) {
-			const vipReward = await getNewReward(identity);
+		if (nonNullish($authIdentity)) {
+			const vipReward = await getNewReward($authIdentity);
 			if (nonNullish(vipReward)) {
 				code = vipReward.code;
 			}
