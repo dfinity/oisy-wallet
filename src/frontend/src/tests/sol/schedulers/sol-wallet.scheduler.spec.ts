@@ -34,7 +34,6 @@ describe('sol-wallet.scheduler', () => {
 					certified,
 					data: mockBalance
 				},
-				newTransactions: ''
 			}
 		}
 	});

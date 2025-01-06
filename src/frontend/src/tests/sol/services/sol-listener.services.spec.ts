@@ -20,7 +20,6 @@ describe('sol-listener', () => {
 				certified: true,
 				data: balance
 			},
-			newTransactions: ''
 		}
 	});
 
