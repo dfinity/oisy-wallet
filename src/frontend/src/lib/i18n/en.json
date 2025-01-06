@@ -156,6 +156,7 @@
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"no_solana_rpc": "No Solana RPC for network $network",
+			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading the ETH balance.",
@@ -747,11 +748,17 @@
 	},
 	"vip": {
 		"reward": {
-			"error": {
-				"loading_reward": "Error while loading a new reward code.",
-				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward."
-			}
+			"text": {
+				"open_wallet": "Take me to the wallet",
+				"title_successful": "Congratulations!",
+				"reward_received": "You've received a welcome gift!",
+				"reward_received_description": "You've just received your welcome tokens from Oisy"
+			},
+            "error": {
+                "loading_reward": "Error while loading a new reward code.",
+                "loading_user_data": "Failed to load user data from reward canister.",
+                "claiming_reward": "Error while claiming reward."
+            }
 		}
 	},
 	"signer": {
