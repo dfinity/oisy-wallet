@@ -28,13 +28,14 @@
 		NAVIGATION_MENU,
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_EXPLORER,
-		NAVIGATION_ITEM_SETTINGS
+		NAVIGATION_ITEM_SETTINGS,
+		NAVIGATION_MENU_VIP_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
 	import { networkId } from '$lib/derived/network.derived';
+	import { isVipUser } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
@@ -43,7 +44,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { isVipUser } from '$lib/services/reward-code.services';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -52,9 +52,10 @@
 
 	let isVip = false;
 	onMount(async () => {
-		const identity = $authIdentity;
-		if (nonNullish(identity)) {
-			isVip = await isVipUser(identity);
+		if (nonNullish($authIdentity)) {
+			isVip = await isVipUser({
+				identity: $authIdentity
+			});
 		}
 	});
 
