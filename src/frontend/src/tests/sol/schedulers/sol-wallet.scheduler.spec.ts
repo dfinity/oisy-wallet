@@ -166,7 +166,7 @@ describe('sol-wallet.scheduler', () => {
 	describe('sol-wallet worker should work', () => {
 		const startData = {
 			address: {
-				certified: true,
+				certified: false,
 				data: 'mock-sol-address'
 			},
 			solanaNetwork: SolanaNetworks.mainnet
