@@ -8,7 +8,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -128,8 +127,6 @@
 		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />
-
-		<SignerConsentMessageWarning {consentInfo} />
 
 		<div class="msg mb-6 rounded-lg border border-dust px-8 py-4">
 			<Markdown text={content} />

@@ -671,7 +671,6 @@ interface I18nSigner {
 	origin: { text: { request_from: string; invalid_origin: string }; alt: { link_to_dapp: string } };
 	consent_message: {
 		text: { loading: string };
-		warning: { details_generated: string };
 		error: { no_approve_callback: string; no_reject_callback: string; retrieve: string };
 	};
 	call_canister: {
