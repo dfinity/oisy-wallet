@@ -8,6 +8,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { toastsError } from '$lib/stores/toasts.store';
 
 export const isVipUser = async ({
 	identity,
@@ -15,17 +16,22 @@ export const isVipUser = async ({
 }: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<boolean> => {
-	const userData = await getUserInfoApi({
-		identity,
-		certified,
-		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-	});
+}): Promise<boolean | undefined> => {
+	try {
+		const userData = await getUserInfoApi({
+			identity,
+			certified,
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
 
-	return fromNullable(userData.is_vip) === true;
+		return fromNullable(userData.is_vip) === true;
+	} catch (err) {
+		const { vip } = get(i18n);
+		console.log(vip.reward.error.loading_user_data, err);
+	}
 };
 
-export const getNewReward = async (identity: Identity): Promise<VipReward> => {
+const queryReward = async (identity: Identity): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -40,7 +46,19 @@ export const getNewReward = async (identity: Identity): Promise<VipReward> => {
 	throw new Error('Unknown error');
 };
 
-export const claimVipReward = async ({
+export const getNewReward = async (identity: Identity): Promise<VipReward | undefined> => {
+	try {
+		return await queryReward(identity);
+	} catch (err) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.loading_reward },
+			err
+		});
+	}
+}
+
+const queryVipReward = async ({
 	identity,
 	code
 }: {
@@ -61,3 +79,23 @@ export const claimVipReward = async ({
 	}
 	throw new Error('Unknown error');
 };
+
+export const claimVipReward = async ({
+																			 identity,
+																			 code
+																		 }: {
+	identity: Identity;
+	code: string;
+}): Promise<boolean | undefined> => {
+	try {
+		return await queryVipReward({
+			identity, code
+		});
+	} catch (err) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.claiming_reward },
+			err
+		});
+	}
+}

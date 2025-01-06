@@ -8,6 +8,9 @@ import { claimVipReward, getNewReward, isVipUser } from '$lib/services/reward-co
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { vi } from 'vitest';
+import { get } from 'svelte/store';
+import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -68,19 +71,22 @@ describe('reward-code', () => {
 			expect(vipReward).toEqual(mockedNewRewardResponse.VipReward);
 		});
 
-		it('should throw an error for non vip user', async () => {
-			const newRewardResponse: NewVipRewardResponse = { NotImportantPerson: null };
-			const getNewVipRewardSpy = vi
-				.spyOn(rewardApi, 'getNewVipReward')
-				.mockResolvedValue(newRewardResponse);
+		it('should display an error message for non vip user', async () => {
+			const err = new Error('test');
+			const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward')
+				.mockRejectedValue(err);
+			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
-			const result = getNewReward(mockIdentity);
+			await getNewReward(mockIdentity);
 
 			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
 			});
-			await expect(result).rejects.toThrow('User is not VIP');
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: get(i18n).vip.reward.error.loading_reward },
+				err
+			});
 		});
 	});
 
