@@ -4,6 +4,7 @@ import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transac
 /**
  * It maps a transaction to a Solana transaction UI object
  */
+// TODO: improve this function to decode/parse correctly the transaction instructions. Example https://github.com/solana-fm/explorer-kit/tree/main#-usage
 export const mapSolTransactionUi = ({
 	transaction,
 	address
@@ -22,7 +23,7 @@ export const mapSolTransactionUi = ({
 	} = transaction;
 
 	const from = accountKeys[0];
-	const to = accountKeys[1];
+	const to = accountKeys.length > 2 ? accountKeys[1] : from;
 
 	const isSender = from === address;
 
