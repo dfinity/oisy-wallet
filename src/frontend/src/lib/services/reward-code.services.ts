@@ -27,8 +27,8 @@ const queryVipUser = async ({
 };
 
 export const isVipUser = async ({
-																	identity,
-																}: {
+	identity
+}: {
 	identity: Identity;
 }): Promise<boolean | undefined> => {
 	try {
@@ -37,7 +37,7 @@ export const isVipUser = async ({
 		const { vip } = get(i18n);
 		console.log(vip.reward.error.loading_user_data, err);
 	}
-}
+};
 
 const queryReward = async (identity: Identity): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
