@@ -3,11 +3,14 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
+	import FailedRewardModal from '$lib/components/qr/FailedRewardModal.svelte';
+	import SuccessfulRewardModal from '$lib/components/qr/SuccessfulRewardModal.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -20,26 +23,23 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalFailedRewardModal, modalSuccessfulRewardModal } from '$lib/derived/modal.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 	import { signOut } from '$lib/services/auth.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
+	import { claimVipReward } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
-	import { page } from '$app/stores';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { modalFailedRewardModal, modalSuccessfulRewardModal } from '$lib/derived/modal.derived';
-	import SuccessfulRewardModal from '$lib/components/qr/SuccessfulRewardModal.svelte';
-	import FailedRewardModal from '$lib/components/qr/FailedRewardModal.svelte';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
-	import { claimVipReward } from '$lib/services/reward-code.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -69,8 +69,8 @@
 			const rewardCode = $page.url.searchParams.get('code');
 			const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
-			$page.url.searchParams.delete('code')
-			window.history.pushState({}, '', $page.url)
+			$page.url.searchParams.delete('code');
+			window.history.pushState({}, '', $page.url);
 			if (result.success) {
 				modalStore.openSuccessfulReward();
 			} else {
