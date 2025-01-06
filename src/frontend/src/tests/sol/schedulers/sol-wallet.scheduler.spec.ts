@@ -73,7 +73,7 @@ describe('sol-wallet.scheduler', () => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
 		const mockPostMessageCertified = mockPostMessage({
-			certified: true
+			certified: false
 		});
 
 		afterEach(() => {
