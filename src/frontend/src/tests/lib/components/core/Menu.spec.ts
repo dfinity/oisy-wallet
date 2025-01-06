@@ -1,17 +1,17 @@
+import type { UserData } from '$declarations/rewards/rewards.did';
+import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
+import * as authStore from '$lib/derived/auth.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
-import type { UserData } from '$declarations/rewards/rewards.did';
-import * as rewardApi from '$lib/api/reward.api';
 import { readable } from 'svelte/store';
-import type { Identity } from '@dfinity/agent';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import * as authStore from '$lib/derived/auth.derived';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;

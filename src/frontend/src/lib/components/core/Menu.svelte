@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { IconUser, Popover } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import { onMount } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
@@ -28,7 +30,9 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_MENU_VIP_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { networkId } from '$lib/derived/network.derived';
+	import { isVipUser } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
@@ -38,10 +42,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { isVipUser } from '$lib/services/reward-code.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { onMount } from 'svelte';
-	import { nonNullish } from '@dfinity/utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
