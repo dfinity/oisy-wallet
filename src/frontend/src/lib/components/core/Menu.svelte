@@ -33,7 +33,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
 	import { networkId } from '$lib/derived/network.derived';
-	import { getVipStatus } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -54,7 +53,7 @@
 	onMount(async () => {
 		const identity = $authIdentity;
 		if (nonNullish(identity)) {
-			isVip = await getVipStatus(identity);
+			isVip = await isVip(identity);
 		}
 	});
 
