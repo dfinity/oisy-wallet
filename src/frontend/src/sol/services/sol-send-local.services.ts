@@ -1,4 +1,3 @@
-import { SOLANA_LOCAL_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signSchnorrPublicKey } from '$lib/api/signer.api';
 import { solAddressLocal } from '$lib/derived/address.derived';
 import { i18n } from '$lib/stores/i18n.store';
@@ -491,9 +490,9 @@ export const sendSolTest = async ({
 	}
 };
 
-const sendTest = async () =>
-	await sendSolTest({
-		identity: $authIdentity,
-		token: SOLANA_LOCAL_TOKEN,
-		amount: 3_000_000_000
-	});
+// const sendTest = async () =>
+// 	await sendSolTest({
+// 		identity: $authIdentity,
+// 		token: SOLANA_LOCAL_TOKEN,
+// 		amount: 3_000_000_000
+// 	});
