@@ -24,10 +24,8 @@ describe('SolLoaderWallets', () => {
 		solAddressMainnetStore.reset();
 		testnetsStore.reset({ key: 'testnets' });
 
-		// Mock Solana network enabled
 		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 
-		// Mock LOCAL constant to false by default
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 	});
 
