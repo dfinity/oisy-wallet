@@ -135,7 +135,6 @@
 			dispatch('icBack');
 		}
 	};
-
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}

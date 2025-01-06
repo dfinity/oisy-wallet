@@ -75,7 +75,7 @@ export const loadSolTransactions = async ({
 					: [
 							...acc,
 							{
-								data: mapSolTransactionUi(transaction),
+								data: mapSolTransactionUi({ transaction, address }),
 								certified: true
 							}
 						],

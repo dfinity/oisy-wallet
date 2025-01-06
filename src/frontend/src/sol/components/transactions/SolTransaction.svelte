@@ -27,7 +27,7 @@
 	$: status = pending ? 'pending' : 'confirmed';
 
 	let amount: bigint | undefined;
-	$: amount = nonNullish(value) ? value * -1n : value;
+	$: amount = nonNullish(value) ? value : value;
 </script>
 
 <!--TODO: add transaction modal opening-->
