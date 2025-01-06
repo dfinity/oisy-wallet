@@ -40,7 +40,7 @@ export const isVipUser = async ({ identity }: { identity: Identity }): Promise<R
 	return { success: false };
 };
 
-const queryReward = async (identity: Identity): Promise<VipReward> => {
+const updateReward = async (identity: Identity): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -55,9 +55,10 @@ const queryReward = async (identity: Identity): Promise<VipReward> => {
 	throw new Error('Unknown error');
 };
 
+// The call to generate a new reward code will always be an update call and cannot be a query.
 export const getNewReward = async (identity: Identity): Promise<VipReward | undefined> => {
 	try {
-		return await queryReward(identity);
+		return await updateReward(identity);
 	} catch (err) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -67,7 +68,7 @@ export const getNewReward = async (identity: Identity): Promise<VipReward | unde
 	}
 };
 
-const queryVipReward = async ({
+const updateVipReward = async ({
 	identity,
 	code
 }: {
@@ -89,6 +90,7 @@ const queryVipReward = async ({
 	throw new Error('Unknown error');
 };
 
+// The call to claim a reward with a reward code will always be an update call and cannot be a query.
 export const claimVipReward = async ({
 	identity,
 	code
@@ -97,7 +99,7 @@ export const claimVipReward = async ({
 	code: string;
 }): Promise<ResultSuccess> => {
 	try {
-		return await queryVipReward({
+		return await updateVipReward({
 			identity,
 			code
 		});
