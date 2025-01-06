@@ -656,6 +656,17 @@ interface I18nAbout {
 	};
 }
 
+interface I18nVip {
+	reward: {
+		text: {
+			open_wallet: string;
+			title_successful: string;
+			reward_received: string;
+			reward_received_description: string;
+		};
+	};
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -744,6 +755,7 @@ interface I18n {
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
+	vip: I18nVip;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

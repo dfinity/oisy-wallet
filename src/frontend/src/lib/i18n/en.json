@@ -746,6 +746,16 @@
 			}
 		}
 	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "Take me to the wallet",
+				"title_successful": "Congratulations!",
+				"reward_received": "You've received a welcome gift!",
+				"reward_received_description": "You've just received your welcome tokens from Oisy"
+			}
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
