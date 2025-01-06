@@ -785,6 +785,9 @@
 			"text": {
 				"loading": "Loading consent message..."
 			},
+			"warning": {
+				"details_generated": "The transaction details below were read out of the requested transaction by OISY directly, and were not provided by the involved token."
+			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
 				"no_reject_callback": "No callback to reject the consent message, which is unexpected. Close the wallet and try again.",
