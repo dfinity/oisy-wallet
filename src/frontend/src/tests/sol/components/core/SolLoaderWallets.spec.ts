@@ -1,13 +1,22 @@
+import * as solEnv from '$env/networks/networks.sol.env';
+import {
+	SOLANA_DEVNET_TOKEN,
+	SOLANA_TESTNET_TOKEN,
+	SOLANA_TOKEN
+} from '$env/tokens/tokens.sol.env';
+import * as appConstants from '$lib/constants/app.constants';
+import {
+	solAddressDevnetStore,
+	solAddressLocalnetStore,
+	solAddressMainnetStore,
+	solAddressTestnetStore
+} from '$lib/stores/address.store';
+import { testnetsStore } from '$lib/stores/settings.store';
+import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { initSolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import { SOLANA_DEVNET_TOKEN, SOLANA_TESTNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
-import { solAddressDevnetStore, solAddressLocalnetStore, solAddressMainnetStore, solAddressTestnetStore } from '$lib/stores/address.store';
-import { testnetsStore } from '$lib/stores/settings.store';
-import * as solEnv from '$env/networks/networks.sol.env';
-import * as appConstants from '$lib/constants/app.constants';
 
 vi.mock('$sol/services/worker.sol-wallet.services', () => ({
 	initSolWalletWorker: vi.fn()
@@ -95,9 +104,9 @@ describe('SolLoaderWallets', () => {
 
 		const walletWorkerTokens = get(enabledSolanaTokens).filter(
 			({ network: { id: networkId } }) =>
-				(networkId === SOLANA_TESTNET_TOKEN.network.id) ||
-				(networkId === SOLANA_TOKEN.network.id) ||
-				(networkId === SOLANA_DEVNET_TOKEN.network.id)
+				networkId === SOLANA_TESTNET_TOKEN.network.id ||
+				networkId === SOLANA_TOKEN.network.id ||
+				networkId === SOLANA_DEVNET_TOKEN.network.id
 		);
 
 		expect(walletWorkerTokens.length).toBe(3);
