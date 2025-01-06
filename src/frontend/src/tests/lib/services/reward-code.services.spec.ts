@@ -16,7 +16,6 @@ import { expect, vi } from 'vitest';
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('reward-code', () => {
-
 	beforeEach(() => {
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 	});
