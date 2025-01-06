@@ -2,7 +2,7 @@
 	import type { ResultConsentInfo } from '@dfinity/oisy-wallet-signer';
 	import { nonNullish } from '@dfinity/utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let consentInfo: ResultConsentInfo | undefined;
 
@@ -12,7 +12,7 @@
 	let displayInfo: boolean | undefined;
 	$: displayInfo = nonNullish(consentInfo) && 'Warn' in consentInfo;
 </script>
-<MessageBox level="info">{$i18n.signer.consent_message.warning.details_generated}</MessageBox>
-{#if displayInfo}
 
+{#if displayInfo}
+	<MessageBox level="info">{$i18n.signer.consent_message.warning.details_generated}</MessageBox>
 {/if}
