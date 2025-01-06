@@ -66,15 +66,17 @@
 		setTimeout(() => loading.set(false), 1000);
 
 		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
-			const rewardCode: string = $page.url.searchParams.get('code');
-			const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
+			const rewardCode = $page.url.searchParams.get('code');
+			if (nonNullish(rewardCode)) {
+				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
-			$page.url.searchParams.delete('code');
-			window.history.pushState({}, '', $page.url);
-			if (result.success) {
-				modalStore.openSuccessfulReward();
-			} else {
-				modalStore.openFailedReward();
+				$page.url.searchParams.delete('code');
+				window.history.pushState({}, '', $page.url);
+				if (result.success) {
+					modalStore.openSuccessfulReward();
+				} else {
+					modalStore.openFailedReward();
+				}
 			}
 		}
 	})();
