@@ -135,15 +135,15 @@ describe('reward.canister', () => {
 			expect(claimResponse).toEqual(mockedClaimResponse);
 		});
 
-	it('should throw an error if claim_vip_reward throws', async () => {
-		service.claim_vip_reward.mockImplementation(async () => {
-			await Promise.resolve();
-			throw mockResponseError;
-		});
+		it('should throw an error if claim_vip_reward throws', async () => {
+			service.claim_vip_reward.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
 
-		const { claimVipReward } = await createRewardCanister({
-			serviceOverride: service
-		});
+			const { claimVipReward } = await createRewardCanister({
+				serviceOverride: service
+			});
 
 			const result = claimVipReward({ code: '1234567890' });
 			await expect(result).rejects.toThrow(mockResponseError);
