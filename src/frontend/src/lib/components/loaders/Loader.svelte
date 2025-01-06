@@ -39,6 +39,7 @@
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
+	import { claimVipReward } from '$lib/services/reward-code.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -56,7 +57,7 @@
 		} as ProgressStep
 	];
 
-	$: (() => {
+	$: (async () => {
 		if (progressStep !== ProgressStepsLoader.DONE) {
 			return;
 		}
@@ -66,10 +67,11 @@
 
 		if (!$loading && $page.url.searchParams.has('code')) {
 			const rewardCode = $page.url.searchParams.get('code');
+			const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
 			$page.url.searchParams.delete('code')
 			window.history.pushState({}, '', $page.url)
-			if (false) { // TODO check if code is valid and if yes, display successful modal
+			if (result.success) {
 				modalStore.openSuccessfulReward();
 			} else {
 				modalStore.openFailedReward();
