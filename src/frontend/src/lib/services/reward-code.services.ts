@@ -9,6 +9,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { ResultSuccess } from '$lib/types/utils';
 
 const queryVipUser = async ({
 	identity,
@@ -16,24 +17,27 @@ const queryVipUser = async ({
 }: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<boolean> => {
+}): Promise<ResultSuccess> => {
 	const userData = await getUserInfoApi({
 		identity,
 		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return fromNullable(userData.is_vip) === true;
+	return { success: fromNullable(userData.is_vip) === true };
 };
 
-export const isVipUser = async ({ identity }: { identity: Identity }): Promise<boolean> => {
+export const isVipUser = async ({ identity }: { identity: Identity }): Promise<ResultSuccess> => {
 	try {
 		return await queryVipUser({ identity, certified: false });
 	} catch (err) {
 		const { vip } = get(i18n);
-		console.error(vip.reward.error.loading_user_data, err);
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
 	}
-	return false;
+	return { success: false };
 };
 
 const queryReward = async (identity: Identity): Promise<VipReward> => {
@@ -69,7 +73,7 @@ const queryVipReward = async ({
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<boolean> => {
+}): Promise<ResultSuccess> => {
 	const response = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
@@ -77,10 +81,10 @@ const queryVipReward = async ({
 	});
 
 	if ('Success' in response) {
-		return true;
+		return { success: true };
 	}
 	if ('InvalidCode' in response || 'AlreadyClaimed' in response) {
-		return false;
+		return { success: false };
 	}
 	throw new Error('Unknown error');
 };
@@ -91,7 +95,7 @@ export const claimVipReward = async ({
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<boolean> => {
+}): Promise<ResultSuccess> => {
 	try {
 		return await queryVipReward({
 			identity,
@@ -104,5 +108,5 @@ export const claimVipReward = async ({
 			err
 		});
 	}
-	return false;
+	return { success: false };
 };
