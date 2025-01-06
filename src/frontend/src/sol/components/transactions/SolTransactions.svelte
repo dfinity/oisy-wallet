@@ -57,19 +57,17 @@
 
 <SolTransactionsSkeletons>
 	<!--TODO: add listener-->
-	{#if $solTransactions.length > 0}
-		<!--	TODO: make it paginated to load more on scroll since we have a limit of calls-->
-		{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
-			<div in:slide={SLIDE_DURATION}>
-				<SolTransaction {transaction} token={$token ?? SOLANA_TOKEN} />
-			</div>
-		{/each}
+	<!--	TODO: make it paginated to load more on scroll since we have a limit of calls-->
+	{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
+		<div in:slide={SLIDE_DURATION}>
+			<SolTransaction {transaction} token={$token ?? SOLANA_TOKEN} />
+		</div>
+	{/each}
+
+	{#if $solTransactions.length === 0}
+		<TransactionsPlaceholder />
 	{/if}
 </SolTransactionsSkeletons>
-
-{#if $solTransactions.length === 0}
-	<TransactionsPlaceholder />
-{/if}
 
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
 	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
