@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, type ProgressStep } from '@dfinity/gix-components';
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
@@ -65,7 +65,7 @@
 		// A small delay for display animation purpose.
 		setTimeout(() => loading.set(false), 1000);
 
-		if (!$loading && $page.url.searchParams.has('code')) {
+		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
 			const rewardCode = $page.url.searchParams.get('code');
 			const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
