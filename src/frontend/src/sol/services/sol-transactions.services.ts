@@ -54,7 +54,9 @@ export const loadSolTransactions = async ({
 
 		const rpcTransactions: (SolRpcTransaction | null)[] = await Promise.all(
 			signatures.map(async ({ signature, confirmationStatus }) => {
-				const rpcTransaction = await getTransaction(signature).send();
+				const rpcTransaction = await getTransaction(signature, {
+					maxSupportedTransactionVersion: 0
+				}).send();
 
 				if (isNullish(rpcTransaction)) {
 					return null;

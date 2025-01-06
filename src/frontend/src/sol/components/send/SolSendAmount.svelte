@@ -4,7 +4,6 @@
 	import { getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
-	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -14,7 +13,7 @@
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
 
-	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendBalance, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
@@ -32,7 +31,7 @@
 
 <SendInputAmount
 	bind:amount
-	tokenDecimals={$tokenDecimals}
-	bind:error={amountError}
+	tokenDecimals={$sendTokenDecimals}
 	{customValidate}
+	bind:error={amountError}
 />

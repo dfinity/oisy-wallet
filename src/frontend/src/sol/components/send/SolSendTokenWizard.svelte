@@ -12,7 +12,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendBtc, ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,10 +28,12 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
+	import { sendSol } from '$sol/services/sol-send.services';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -39,9 +41,9 @@
 	export let sendProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
+	const progress = (step: ProgressStepsSendSol) => (sendProgressStep = step);
 
 	let network: Network | undefined = undefined;
 	$: network = $sendToken.network;
@@ -102,8 +104,24 @@
 		dispatch('icNext');
 
 		try {
-			// TODO: add sendSol
 			// TODO: add tracking
+			await sendSol({
+				identity: $authIdentity,
+				token: $sendToken,
+				amount: parseToken({
+					value: `${amount}`,
+					unitName: $sendTokenDecimals
+				}),
+				destination,
+				source,
+				onProgress: () => {
+					if (sendProgressStep === ProgressStepsSendSol.INITIALIZATION) {
+						progress(ProgressStepsSendSol.SEND);
+					} else if (sendProgressStep === ProgressStepsSendSol.SEND) {
+						progress(ProgressStepsSendSol.DONE);
+					}
+				}
+			});
 
 			sendProgressStep = ProgressStepsSendBtc.DONE;
 
@@ -117,6 +135,7 @@
 			dispatch('icBack');
 		}
 	};
+
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}

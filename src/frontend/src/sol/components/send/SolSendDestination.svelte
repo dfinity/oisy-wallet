@@ -13,7 +13,7 @@
 
 	let isInvalidDestination: () => boolean;
 	// TODO: create check for invalid destination
-	$: isInvalidDestination = (): boolean => isNetworkIdSolana(networkId);
+	$: isInvalidDestination = (): boolean => !isNetworkIdSolana(networkId);
 </script>
 
 <SendInputDestination

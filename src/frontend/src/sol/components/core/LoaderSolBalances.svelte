@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import {
-		SOLANA_DEVNET_TOKEN,
-		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
-		SOLANA_TOKEN
-	} from '$env/tokens/tokens.sol.env';
+	import { SOLANA_DEVNET_TOKEN } from '$env/tokens/tokens.sol.env';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -16,22 +11,22 @@
 
 	const load = async () => {
 		await Promise.allSettled([
-			...(nonNullish($solAddressMainnet)
-				? [
-						await loadSolBalance({
-							address: $solAddressMainnet,
-							token: SOLANA_TOKEN
-						})
-					]
-				: []),
-			...(nonNullish($solAddressTestnet)
-				? [
-						await loadSolBalance({
-							address: $solAddressTestnet,
-							token: SOLANA_TESTNET_TOKEN
-						})
-					]
-				: []),
+			// ...(nonNullish($solAddressMainnet)
+			// 	? [
+			// 			await loadSolBalance({
+			// 				address: $solAddressMainnet,
+			// 				token: SOLANA_TOKEN
+			// 			})
+			// 		]
+			// 	: []),
+			// ...(nonNullish($solAddressTestnet)
+			// 	? [
+			// 			await loadSolBalance({
+			// 				address: $solAddressTestnet,
+			// 				token: SOLANA_TESTNET_TOKEN
+			// 			})
+			// 		]
+			// 	: []),
 			...(nonNullish($solAddressDevnet)
 				? [
 						await loadSolBalance({
@@ -39,15 +34,15 @@
 							token: SOLANA_DEVNET_TOKEN
 						})
 					]
-				: []),
-			...(nonNullish($solAddressLocal)
-				? [
-						await loadSolBalance({
-							address: $solAddressLocal,
-							token: SOLANA_LOCAL_TOKEN
-						})
-					]
 				: [])
+			// ...(nonNullish($solAddressLocal)
+			// 	? [
+			// 			await loadSolBalance({
+			// 				address: $solAddressLocal,
+			// 				token: SOLANA_LOCAL_TOKEN
+			// 			})
+			// 		]
+			// 	: [])
 		]);
 	};
 
