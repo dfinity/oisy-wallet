@@ -26,11 +26,7 @@ const queryVipUser = async ({
 	return fromNullable(userData.is_vip) === true;
 };
 
-export const isVipUser = async ({
-	identity
-}: {
-	identity: Identity;
-}): Promise<boolean> => {
+export const isVipUser = async ({ identity }: { identity: Identity }): Promise<boolean> => {
 	try {
 		return await queryVipUser({ identity, certified: false });
 	} catch (err) {
