@@ -16,7 +16,7 @@ const queryVipUser = async ({
 }: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<boolean | undefined> => {
+}): Promise<boolean> => {
 	const userData = await getUserInfoApi({
 		identity,
 		certified,
@@ -30,13 +30,14 @@ export const isVipUser = async ({
 	identity
 }: {
 	identity: Identity;
-}): Promise<boolean | undefined> => {
+}): Promise<boolean> => {
 	try {
 		return await queryVipUser({ identity, certified: false });
 	} catch (err) {
 		const { vip } = get(i18n);
 		console.error(vip.reward.error.loading_user_data, err);
 	}
+	return false;
 };
 
 const queryReward = async (identity: Identity): Promise<VipReward> => {
@@ -94,7 +95,7 @@ export const claimVipReward = async ({
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<boolean | undefined> => {
+}): Promise<boolean> => {
 	try {
 		return await queryVipReward({
 			identity,
@@ -107,4 +108,5 @@ export const claimVipReward = async ({
 			err
 		});
 	}
+	return false;
 };
