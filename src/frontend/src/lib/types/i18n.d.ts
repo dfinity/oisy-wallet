@@ -661,8 +661,11 @@ interface I18nVip {
 		text: {
 			open_wallet: string;
 			title_successful: string;
+			title_failed: string;
 			reward_received: string;
+			reward_failed: string;
 			reward_received_description: string;
+			reward_failed_description: string;
 		};
 	};
 }
