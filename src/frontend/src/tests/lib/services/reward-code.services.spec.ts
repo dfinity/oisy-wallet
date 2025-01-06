@@ -5,12 +5,12 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import { claimVipReward, getNewReward, isVipUser } from '$lib/services/reward-code.services';
-import en from '$tests/mocks/i18n.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { vi } from 'vitest';
-import { get } from 'svelte/store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { get } from 'svelte/store';
+import { vi } from 'vitest';
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -73,8 +73,7 @@ describe('reward-code', () => {
 
 		it('should display an error message for non vip user', async () => {
 			const err = new Error('test');
-			const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward')
-				.mockRejectedValue(err);
+			const getNewVipRewardSpy = vi.spyOn(rewardApi, 'getNewVipReward').mockRejectedValue(err);
 			const spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			await getNewReward(mockIdentity);

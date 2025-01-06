@@ -5,10 +5,10 @@ import {
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
 import { i18n } from '$lib/stores/i18n.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { toastsError } from '$lib/stores/toasts.store';
 
 export const isVipUser = async ({
 	identity,
@@ -56,7 +56,7 @@ export const getNewReward = async (identity: Identity): Promise<VipReward | unde
 			err
 		});
 	}
-}
+};
 
 const queryVipReward = async ({
 	identity,
@@ -81,15 +81,16 @@ const queryVipReward = async ({
 };
 
 export const claimVipReward = async ({
-																			 identity,
-																			 code
-																		 }: {
+	identity,
+	code
+}: {
 	identity: Identity;
 	code: string;
 }): Promise<boolean | undefined> => {
 	try {
 		return await queryVipReward({
-			identity, code
+			identity,
+			code
 		});
 	} catch (err) {
 		const { vip } = get(i18n);
@@ -98,4 +99,4 @@ export const claimVipReward = async ({
 			err
 		});
 	}
-}
+};
