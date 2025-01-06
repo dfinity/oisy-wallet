@@ -44,6 +44,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -158,7 +159,7 @@
 		{/if}
 
 		{#if isVip}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} on:click={modalStore.openVipQrCode}>
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.vip_qr_code} testId={NAVIGATION_MENU_VIP_BUTTON} on:click={modalStore.openVipQrCode}>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
 			</ButtonMenu>
