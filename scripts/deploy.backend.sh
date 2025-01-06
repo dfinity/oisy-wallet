@@ -44,9 +44,10 @@ case $ENV in
 esac
 
 # If the rewards canister is known, it may perform priviliged actions such as find which users are eligible for rewards.
-if [[ "${REWARDS_CANISTER_ID:-}" == "" ]]
-then ALLOWED_CALLERS="vec {}";
-else ALLOWED_CALLERS="vec{ principal \"$REWARDS_CANISTER_ID\" }";
+if [[ "${REWARDS_CANISTER_ID:-}" == "" ]]; then
+  ALLOWED_CALLERS="vec {}"
+else
+  ALLOWED_CALLERS="vec{ principal \"$REWARDS_CANISTER_ID\" }"
 fi
 
 # URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
