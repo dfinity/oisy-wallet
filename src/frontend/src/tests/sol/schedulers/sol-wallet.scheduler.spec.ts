@@ -33,7 +33,7 @@ describe('sol-wallet.scheduler', () => {
 				balance: {
 					certified,
 					data: mockBalance
-				},
+				}
 			}
 		}
 	});
