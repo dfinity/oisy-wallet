@@ -756,6 +756,11 @@
 				"reward_failed": "Oops, the link has expired",
 				"reward_received_description": "You've just received your welcome tokens from Oisy",
 				"reward_failed_description": "Request a new one and try again"
+			},
+			"error": {
+				"loading_reward": "Error while loading a new reward code.",
+				"loading_user_data": "Failed to load user data from reward canister.",
+				"claiming_reward": "Error while claiming reward."
 			}
 		}
 	},
