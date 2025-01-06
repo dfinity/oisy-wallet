@@ -287,7 +287,12 @@
 		},
 		"solana": {
 			"text": {
-				"solana_address_copied": "Solana Address copied to clipboard."
+				"solana_address": "Solana Address",
+				"solana_testnet_address": "Solana Testnet Address",
+				"solana_devnet_address": "Solana Devnet Address",
+				"solana_local_address": "Solana Local Address",
+				"solana_address_copied": "Solana address copied to clipboard",
+				"display_solana_address_qr": "Display Solana address as QR code"
 			}
 		}
 	},
