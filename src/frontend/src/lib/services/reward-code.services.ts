@@ -35,7 +35,7 @@ export const isVipUser = async ({
 		return await queryVipUser({ identity, certified: false });
 	} catch (err) {
 		const { vip } = get(i18n);
-		console.log(vip.reward.error.loading_user_data, err);
+		console.error(vip.reward.error.loading_user_data, err);
 	}
 };
 
