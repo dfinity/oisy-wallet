@@ -66,7 +66,7 @@
 		setTimeout(() => loading.set(false), 1000);
 
 		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
-			const rewardCode = $page.url.searchParams.get('code');
+			const rewardCode: string = $page.url.searchParams.get('code');
 			const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
 			$page.url.searchParams.delete('code');
