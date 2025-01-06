@@ -664,11 +664,7 @@ interface I18nVip {
 			reward_received: string;
 			reward_received_description: string;
 		};
-		error: {
-			loading_reward: string;
-			loading_user_data: string;
-			claiming_reward: string;
-		};
+		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
 	};
 }
 
