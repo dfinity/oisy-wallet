@@ -6,6 +6,7 @@ import { icrcTokens } from '$icp/derived/icrc.derived';
 import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { derived } from 'svelte/store';
 
 // The entire list of ICRC tokens to display to the user:
@@ -35,15 +36,23 @@ export const allTokens = derived(
 		erc20Tokens,
 		enabledBitcoinTokens,
 		enabledEthereumTokens,
-		allIcrcTokens
+		allIcrcTokens,
+		enabledSolanaTokens
 	],
-	([$erc20Tokens, $enabledBitcoinTokens, $enabledEthereumTokens, $allIcrcTokens]) => [
+	([
+		$erc20Tokens,
+		$enabledBitcoinTokens,
+		$enabledEthereumTokens,
+		$allIcrcTokens,
+		$enabledSolanaTokens
+	]) => [
 		{
 			...ICP_TOKEN,
 			enabled: true
 		},
 		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
 		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
+		...$enabledSolanaTokens.map((token) => ({ ...token, enabled: true })),
 		...$erc20Tokens,
 		...$allIcrcTokens
 	]
