@@ -23,7 +23,7 @@
 	const generateCode = async () => {
 		const identity = $authIdentity;
 		if (nonNullish(identity)) {
-			const vipReward = (await getNewReward(identity));
+			const vipReward = await getNewReward(identity);
 			if (nonNullish(vipReward)) {
 				code = vipReward.code;
 			}
