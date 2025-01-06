@@ -134,6 +134,8 @@ interface I18nInit {
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
+		no_solana_rpc: string;
+		no_solana_network: string;
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
@@ -158,6 +160,7 @@ interface I18nInit {
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		btc_wallet_error: string;
+		sol_wallet_error: string;
 	};
 }
 
@@ -250,7 +253,16 @@ interface I18nReceive {
 		info: { no_new_btc: string; check_btc_progress: string };
 		error: { unexpected_btc: string };
 	};
-	solana: { text: { solana_address_copied: string } };
+	solana: {
+		text: {
+			solana_address: string;
+			solana_testnet_address: string;
+			solana_devnet_address: string;
+			solana_local_address: string;
+			solana_address_copied: string;
+			display_solana_address_qr: string;
+		};
+	};
 }
 
 interface I18nSend {
@@ -651,8 +663,8 @@ interface I18nVip {
 			title_successful: string;
 			title_failed: string;
 			reward_received: string;
-			reward_received_description: string;
 			reward_failed: string;
+			reward_received_description: string;
 			reward_failed_description: string;
 		};
 	};

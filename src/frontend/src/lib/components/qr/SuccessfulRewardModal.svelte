@@ -1,11 +1,11 @@
 <script lang="ts">
-import { modalStore } from '$lib/stores/modal.store';
-import { Modal } from '@dfinity/gix-components';
-import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-import Button from '$lib/components/ui/Button.svelte';
-import successfulReward from '$lib/assets/successful-reward.svg';
-import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
-import { i18n } from '$lib/stores/i18n.store';
+	import { Modal } from '@dfinity/gix-components';
+	import successfulReward from '$lib/assets/successful-reward.svg';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -17,9 +17,17 @@ import { i18n } from '$lib/stores/i18n.store';
 		<ImgBanner src={successfulReward} styleClass="aspect-auto" />
 
 		<h3 class="my-3 text-center">{$i18n.vip.reward.text.reward_received}</h3>
-		<span class="block w-full text-center">{$i18n.vip.reward.text.reward_received_description}</span>
+		<span class="block w-full text-center">{$i18n.vip.reward.text.reward_received_description}</span
+		>
 
-		<Button paddingSmall colorStyle="secondary" type="button" fullWidth on:click={modalStore.close} slot="toolbar">
+		<Button
+			paddingSmall
+			colorStyle="secondary"
+			type="button"
+			fullWidth
+			on:click={modalStore.close}
+			slot="toolbar"
+		>
 			{$i18n.vip.reward.text.open_wallet}
 		</Button>
 	</ContentWithToolbar>
