@@ -33,6 +33,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
 	import { networkId } from '$lib/derived/network.derived';
+	import { isVipUser } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -43,7 +44,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import { isVipUser } from '$lib/services/reward-code.services';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
