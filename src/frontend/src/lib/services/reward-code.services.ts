@@ -6,10 +6,10 @@ import {
 } from '$lib/api/reward.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { ResultSuccess } from '$lib/types/utils';
 
 const queryVipUser = async ({
 	identity,
