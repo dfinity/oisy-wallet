@@ -32,7 +32,9 @@ export interface Modal<T> {
 		| 'about-why-oisy'
 		| 'vip-qr-code'
 		| 'btc-transaction'
-		| 'dapp-details';
+		| 'dapp-details'
+		| 'successful-reward'
+		| 'failed-reward';
 	data?: T;
 	id?: symbol;
 }
@@ -70,6 +72,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
+	openSuccessfulReward: () => void;
+	openFailedReward: () => void;
 	close: () => void;
 }
 
@@ -116,6 +120,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
 		openDappDetails: setTypeWithData('dapp-details'),
+		openSuccessfulReward: setType('successful-reward'),
+		openFailedReward: setType('failed-reward'),
 		close: () => set(null),
 		subscribe
 	};

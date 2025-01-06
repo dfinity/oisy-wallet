@@ -6,6 +6,7 @@ import {
 } from '$lib/api/reward.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -16,27 +17,30 @@ const queryVipUser = async ({
 }: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<boolean> => {
+}): Promise<ResultSuccess> => {
 	const userData = await getUserInfoApi({
 		identity,
 		certified,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return fromNullable(userData.is_vip) === true;
+	return { success: fromNullable(userData.is_vip) === true };
 };
 
-export const isVipUser = async ({ identity }: { identity: Identity }): Promise<boolean> => {
+export const isVipUser = async ({ identity }: { identity: Identity }): Promise<ResultSuccess> => {
 	try {
 		return await queryVipUser({ identity, certified: false });
 	} catch (err) {
 		const { vip } = get(i18n);
-		console.error(vip.reward.error.loading_user_data, err);
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
 	}
-	return false;
+	return { success: false };
 };
 
-const queryReward = async (identity: Identity): Promise<VipReward> => {
+const updateReward = async (identity: Identity): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -51,9 +55,10 @@ const queryReward = async (identity: Identity): Promise<VipReward> => {
 	throw new Error('Unknown error');
 };
 
+// The call to generate a new reward code will always be an update call and cannot be a query.
 export const getNewReward = async (identity: Identity): Promise<VipReward | undefined> => {
 	try {
-		return await queryReward(identity);
+		return await updateReward(identity);
 	} catch (err) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -63,13 +68,13 @@ export const getNewReward = async (identity: Identity): Promise<VipReward | unde
 	}
 };
 
-const queryVipReward = async ({
+const updateVipReward = async ({
 	identity,
 	code
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<boolean> => {
+}): Promise<ResultSuccess> => {
 	const response = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
@@ -77,23 +82,24 @@ const queryVipReward = async ({
 	});
 
 	if ('Success' in response) {
-		return true;
+		return { success: true };
 	}
 	if ('InvalidCode' in response || 'AlreadyClaimed' in response) {
-		return false;
+		return { success: false };
 	}
 	throw new Error('Unknown error');
 };
 
+// The call to claim a reward with a reward code will always be an update call and cannot be a query.
 export const claimVipReward = async ({
 	identity,
 	code
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<boolean> => {
+}): Promise<ResultSuccess> => {
 	try {
-		return await queryVipReward({
+		return await updateVipReward({
 			identity,
 			code
 		});
@@ -104,5 +110,5 @@ export const claimVipReward = async ({
 			err
 		});
 	}
-	return false;
+	return { success: false };
 };

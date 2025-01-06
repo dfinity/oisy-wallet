@@ -25,28 +25,28 @@ describe('reward-code', () => {
 		it('should return true if user is vip', async () => {
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-			const isVip = await isVipUser({ identity: mockIdentity });
+			const result = await isVipUser({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(isVip).toBeTruthy();
+			expect(result).toEqual({ success: true });
 		});
 
 		it('should return false if user is not vip', async () => {
 			const userData: UserData = { ...mockedUserData, is_vip: [false] };
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(userData);
 
-			const isVip = await isVipUser({ identity: mockIdentity });
+			const result = await isVipUser({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(isVip).toBeFalsy();
+			expect(result).toEqual({ success: false });
 		});
 	});
 
@@ -106,7 +106,7 @@ describe('reward-code', () => {
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
 			});
-			expect(result).toBeTruthy();
+			expect(result).toEqual({ success: true });
 		});
 
 		it('should return false if an invalid vip reward code is used', async () => {
@@ -122,7 +122,7 @@ describe('reward-code', () => {
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
 			});
-			expect(result).toBeFalsy();
+			expect(result).toEqual({ success: false });
 		});
 
 		it('should return false if an already used vip reward code is used', async () => {
@@ -138,7 +138,7 @@ describe('reward-code', () => {
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
 			});
-			expect(result).toBeFalsy();
+			expect(result).toEqual({ success: false });
 		});
 	});
 });
