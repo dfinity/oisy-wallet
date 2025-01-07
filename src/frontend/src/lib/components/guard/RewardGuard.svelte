@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { loading } from '$lib/stores/loader.store';
-	import { page } from '$app/stores';
 	import { nonNullish } from '@dfinity/utils';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { claimVipReward } from '$lib/services/reward-code.services';
-	import { removeSearchParam } from '$lib/utils/nav.utils';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { modalFailedRewardModal, modalSuccessfulRewardModal } from '$lib/derived/modal.derived';
-	import SuccessfulRewardModal from '$lib/components/qr/SuccessfulRewardModal.svelte';
+	import { page } from '$app/stores';
 	import FailedRewardModal from '$lib/components/qr/FailedRewardModal.svelte';
+	import SuccessfulRewardModal from '$lib/components/qr/SuccessfulRewardModal.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalFailedRewardModal, modalSuccessfulRewardModal } from '$lib/derived/modal.derived';
+	import { claimVipReward } from '$lib/services/reward-code.services';
+	import { loading } from '$lib/stores/loader.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	$: (async () => {
 		if (!$loading && $page.url.searchParams.has('code') && nonNullish($authIdentity)) {
@@ -25,7 +25,6 @@
 			}
 		}
 	})();
-
 </script>
 
 <slot />
