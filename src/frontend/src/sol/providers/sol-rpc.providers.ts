@@ -26,9 +26,7 @@ const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	}
 };
 
-const solanaRpcConfig = (network: SolanaNetworkType): SolRpcConnectionConfig => {
-	return rpcs[network];
-};
+const solanaRpcConfig = (network: SolanaNetworkType): SolRpcConnectionConfig => rpcs[network];
 
 export const solanaHttpRpc = (network: SolanaNetworkType): ReturnType<typeof createSolanaRpc> => {
 	const rpc = solanaRpcConfig(network);
