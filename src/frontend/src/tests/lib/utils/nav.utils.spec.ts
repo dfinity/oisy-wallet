@@ -17,7 +17,8 @@ import {
 	isRouteTransactions,
 	loadRouteParams,
 	networkParam,
-	networkUrl, removeSearchParam,
+	networkUrl,
+	removeSearchParam,
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';

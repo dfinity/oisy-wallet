@@ -82,7 +82,7 @@ export const gotoReplaceRoot = async () => {
 
 export const removeSearchParam = (url: URL, searchParam: string) => {
 	url.searchParams.delete(searchParam);
-	pushState(url, {})
+	pushState(url, {});
 };
 
 export interface RouteParams {
