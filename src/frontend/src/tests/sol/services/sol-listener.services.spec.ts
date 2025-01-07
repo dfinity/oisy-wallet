@@ -4,16 +4,17 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { BigNumber } from '@ethersproject/bignumber';
+import { lamports, type Lamports } from '@solana/rpc-types';
 import { get } from 'svelte/store';
 
 describe('sol-listener', () => {
 	const tokenId: TokenId = parseTokenId('testTokenId');
-	const mockBalance = 1000n;
+	const mockBalance = lamports(1000n);
 
 	const mockPostMessage = ({
 		balance = mockBalance
 	}: {
-		balance?: bigint | null;
+		balance?: Lamports | null;
 	}): SolPostMessageDataResponseWallet => ({
 		wallet: {
 			balance: {
