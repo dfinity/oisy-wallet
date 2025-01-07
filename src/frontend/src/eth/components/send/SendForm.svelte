@@ -2,8 +2,8 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
-	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
+	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
