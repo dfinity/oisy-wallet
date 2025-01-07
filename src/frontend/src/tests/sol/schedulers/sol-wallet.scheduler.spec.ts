@@ -5,13 +5,13 @@ import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { lamports, type Lamports } from '@solana/rpc-types';
+import { lamports } from '@solana/rpc-types';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
 
-	const mockBalance: Lamports = lamports(100n);
+	const mockBalance = lamports(100n);
 
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncSolWalletStatus',
