@@ -48,7 +48,7 @@ describe('sol-transactions.utils', () => {
 				},
 				meta,
 				blockTime
-			} = mockSolRpcReceiveTransaction;
+			} = mockSolRpcSendTransaction;
 
 			expect(result).toEqual({
 				id: signatures[0],
