@@ -23,7 +23,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { get } from 'svelte/store';
-import { beforeEach } from 'vitest';
 
 describe('all-tokens.derived', () => {
 	const mockIcrcToken: IcrcCustomToken = {
