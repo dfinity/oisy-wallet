@@ -10,8 +10,8 @@
 </script>
 
 <AddressGuard>
-	<RewardGuard>
-		<Loader>
+	<Loader>
+		<RewardGuard>
 			<LoaderEthBalances>
 				<LoaderWallets>
 					<ExchangeWorker>
@@ -23,6 +23,6 @@
 					</ExchangeWorker>
 				</LoaderWallets>
 			</LoaderEthBalances>
-		</Loader>
-	</RewardGuard>
+		</RewardGuard>
+	</Loader>
 </AddressGuard>
