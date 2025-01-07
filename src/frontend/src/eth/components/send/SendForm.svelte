@@ -3,7 +3,7 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
-	import SendDestination from '$eth/components/send/SendDestination.svelte';
+	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -42,7 +42,7 @@
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
 		{#if destinationEditable}
-			<SendDestination
+			<EthSendDestination
 				token={$sendToken}
 				{network}
 				bind:destination
