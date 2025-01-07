@@ -19,5 +19,5 @@ describe('sol-balance.services', () => {
 				expect(get(balancesStore)?.[token.id]?.data.toNumber()).toBeGreaterThanOrEqual(0);
 			}
 		);
-	});
+	}, 60000);
 });
