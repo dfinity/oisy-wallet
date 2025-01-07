@@ -9,8 +9,10 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
+
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
+
 	const { sendBalance, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
