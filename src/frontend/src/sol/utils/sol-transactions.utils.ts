@@ -1,14 +1,14 @@
-import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SolAddress } from '$lib/types/address';
+import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import { address as solAddress } from '@solana/addresses';
 
 /**
  * It maps a transaction to a Solana transaction UI object
  */
 export const mapSolTransactionUi = ({
-																			transaction,
-																			address
-																		}: {
+	transaction,
+	address
+}: {
 	transaction: SolRpcTransaction;
 	address: SolAddress;
 }): SolTransactionUi => {
@@ -29,7 +29,7 @@ export const mapSolTransactionUi = ({
 
 	const { preBalances, postBalances, fee } = meta ?? {};
 
-	const relevantFee = from === address ? fee ?? 0n : 0n;
+	const relevantFee = from === address ? (fee ?? 0n) : 0n;
 
 	const amount =
 		(postBalances?.[accountIndex] ?? 0n) - (preBalances?.[accountIndex] ?? 0n) + relevantFee;
