@@ -243,6 +243,15 @@ abstract class Homepage {
 		await this.clickByTestId(NAVIGATION_ITEM_TOKENS);
 	}
 
+	async takeScreenshot(): Promise<void> {
+		await expect(this.#page).toHaveScreenshot({
+			// creates a snapshot as a fullPage and not just certain parts.
+			fullPage: true,
+			// playwright can retry flaky tests in the amount of time set below.
+			timeout: 5 * 60 * 1000
+		});
+	}
+
 	abstract extendWaitForReady(): Promise<void>;
 
 	abstract waitForReady(): Promise<void>;
