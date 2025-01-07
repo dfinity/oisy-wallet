@@ -8,8 +8,6 @@ import {
 	SOLANA_RPC_WS_URL_MAINNET,
 	SOLANA_RPC_WS_URL_TESTNET
 } from '$env/networks/networks.sol.env';
-import { i18n } from '$lib/stores/i18n.store';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	SolanaNetworks,
 	type SolRpcConnectionConfig,
@@ -24,6 +22,7 @@ import {
 } from '@solana/rpc-subscriptions';
 import type { Rpc } from '@solana/web3.js';
 import { get } from 'svelte/store';
+import { createSolanaRpc } from '@solana/rpc';
 
 const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	[SolanaNetworks.mainnet]: {
@@ -44,18 +43,7 @@ const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	}
 };
 
-const solanaRpcConfig = (network: SolanaNetworkType): SolRpcConnectionConfig => {
-	const solRpc = rpcs[network];
-
-	assertNonNullish(
-		solRpc,
-		replacePlaceholders(get(i18n).init.error.no_solana_rpc, {
-			$network: network.toString()
-		})
-	);
-
-	return solRpc;
-};
+const solanaRpcConfig = (network: SolanaNetworkType): SolRpcConnectionConfig => rpcs[network];
 
 export const solanaHttpRpc = (network: SolanaNetworkType): Rpc<SolanaRpcApi> => {
 	const { httpUrl } = solanaRpcConfig(network);

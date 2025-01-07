@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
+	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderBalances from '$lib/components/loaders/LoaderBalances.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
@@ -10,16 +11,18 @@
 
 <AddressGuard>
 	<Loader>
-		<LoaderBalances>
-			<LoaderWallets>
-				<ExchangeWorker>
-					<LoaderMetamask
-						><LoaderUserProfile>
-							<slot />
-						</LoaderUserProfile>
-					</LoaderMetamask>
-				</ExchangeWorker>
-			</LoaderWallets>
-		</LoaderBalances>
+		<RewardGuard>
+			<LoaderBalances>
+				<LoaderWallets>
+					<ExchangeWorker>
+						<LoaderMetamask
+							><LoaderUserProfile>
+								<slot />
+							</LoaderUserProfile>
+						</LoaderMetamask>
+					</ExchangeWorker>
+				</LoaderWallets>
+			</LoaderBalances>
+		</RewardGuard>
 	</Loader>
 </AddressGuard>
