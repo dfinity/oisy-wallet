@@ -9,7 +9,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	let isInvalidDestination: () => boolean
+	let isInvalidDestination: () => boolean;
 	$: isInvalidDestination = (): boolean => isInvalidDestinationSol(destination);
 </script>
 
