@@ -22,7 +22,6 @@ import {
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
-import { describe, expect } from 'vitest';
 
 describe('nav.utils', () => {
 	const mockGoTo = vi.fn();
