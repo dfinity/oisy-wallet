@@ -1,6 +1,5 @@
 import { signOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
-import { vi } from 'vitest';
 
 const rootLocation = 'https://oisy.com/';
 const activityLocation = 'https://oisy.com/activity';

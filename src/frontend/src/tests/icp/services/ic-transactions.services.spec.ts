@@ -7,7 +7,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import { bn1 } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { get } from 'svelte/store';
-import { expect, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('ic-transactions.services', () => {
 	describe('onLoadTransactionsError', () => {

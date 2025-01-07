@@ -17,7 +17,6 @@ import {
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockAccountIdentifierText } from '$tests/mocks/identity.mock';
-import { describe } from 'vitest';
 
 describe('onramper.utils', () => {
 	describe('buildOnramperLink', () => {

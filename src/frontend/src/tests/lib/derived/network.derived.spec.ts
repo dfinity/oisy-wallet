@@ -7,7 +7,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
 import { get } from 'svelte/store';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 describe('network.derived', () => {
 	beforeEach(() => {

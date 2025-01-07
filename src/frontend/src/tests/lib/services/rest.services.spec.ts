@@ -1,5 +1,4 @@
 import { retry } from '$lib/services/rest.services';
-import { expect } from 'vitest';
 
 describe('rest.services', () => {
 	describe('retry', () => {
