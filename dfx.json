@@ -297,7 +297,18 @@
 		"rewards": {
 			"type": "custom",
 			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.wasm.gz"
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.wasm.gz",
+			"remote": {
+				"id": {
+					"ic": "nynz6-haaaa-aaaan-qzqda-cai",
+					"staging": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_be_1": "k2sla-fiaaa-aaaag-atvfa-cai",
+					"test_fe_1": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_fe_2": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_fe_3": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_fe_4": "vi6cu-aiaaa-aaaad-aad7q-cai"
+				}
+			}
 		}
 	},
 	"defaults": {
