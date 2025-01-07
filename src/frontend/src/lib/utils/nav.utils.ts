@@ -80,7 +80,7 @@ export const gotoReplaceRoot = async () => {
 	await goto('/', { replaceState: true });
 };
 
-export const removeSearchParam = (url: URL, searchParam: string) => {
+export const removeSearchParam = ({url, searchParam}:{url: URL, searchParam: string}) => {
 	url.searchParams.delete(searchParam);
 	pushState(url, {});
 };

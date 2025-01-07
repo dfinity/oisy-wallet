@@ -140,7 +140,7 @@ describe('nav.utils', () => {
 	});
 
 	describe('removeSearchParam', () => {
-		it('should remove search param from URL', async () => {
+		it('should remove search param from URL', () => {
 			const pushStateMock = vi.spyOn(appNavigation, 'pushState').mockImplementation(vi.fn());
 			const url = new URL(`https://example.com/`);
 			const searchParams = new URLSearchParams({
@@ -148,7 +148,7 @@ describe('nav.utils', () => {
 			});
 			url.search = searchParams.toString();
 
-			removeSearchParam(url, 'code');
+			removeSearchParam({url, searchParam: 'code'});
 
 			expect(pushStateMock).toHaveBeenCalledWith(url, {});
 		});
