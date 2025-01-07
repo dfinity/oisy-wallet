@@ -35,12 +35,12 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { removeSearchParam } from '$lib/utils/nav.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
-	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
