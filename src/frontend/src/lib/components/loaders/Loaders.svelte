@@ -6,20 +6,23 @@
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
+	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 </script>
 
 <AddressGuard>
-	<Loader>
-		<LoaderEthBalances>
-			<LoaderWallets>
-				<ExchangeWorker>
-					<LoaderMetamask
-						><LoaderUserProfile>
-							<slot />
-						</LoaderUserProfile>
-					</LoaderMetamask>
-				</ExchangeWorker>
-			</LoaderWallets>
-		</LoaderEthBalances>
-	</Loader>
+	<RewardGuard>
+		<Loader>
+			<LoaderEthBalances>
+				<LoaderWallets>
+					<ExchangeWorker>
+						<LoaderMetamask
+							><LoaderUserProfile>
+								<slot />
+							</LoaderUserProfile>
+						</LoaderMetamask>
+					</ExchangeWorker>
+				</LoaderWallets>
+			</LoaderEthBalances>
+		</Loader>
+	</RewardGuard>
 </AddressGuard>
