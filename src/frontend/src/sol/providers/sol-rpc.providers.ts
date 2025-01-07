@@ -13,7 +13,6 @@ import {
 	type SolRpcConnectionConfig,
 	type SolanaNetworkType
 } from '$sol/types/network';
-import { assertNonNullish } from '@dfinity/utils';
 import { createSolanaRpc, type SolanaRpcApi } from '@solana/rpc';
 import {
 	createSolanaRpcSubscriptions,
@@ -21,8 +20,6 @@ import {
 	type SolanaRpcSubscriptionsApi
 } from '@solana/rpc-subscriptions';
 import type { Rpc } from '@solana/web3.js';
-import { get } from 'svelte/store';
-import { createSolanaRpc } from '@solana/rpc';
 
 const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	[SolanaNetworks.mainnet]: {
