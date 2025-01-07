@@ -1,7 +1,7 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
-import type { Commitment } from '@solana/rpc-types';
 import type { GetTransactionApi } from '@solana/rpc';
+import type { Commitment } from '@solana/rpc-types';
 
 export type SolTransactionType = Extract<
 	TransactionType,
@@ -16,11 +16,7 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	fee?: bigint;
 }
 
-export type SolRpcTransaction = NonNullable<
-	ReturnType<
-		GetTransactionApi['getTransaction']
-	>
-> & {
-	id: string,
+export type SolRpcTransaction = NonNullable<ReturnType<GetTransactionApi['getTransaction']>> & {
+	id: string;
 	confirmationStatus: Commitment | null;
-}
+};
