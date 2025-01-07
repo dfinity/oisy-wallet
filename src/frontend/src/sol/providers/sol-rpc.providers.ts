@@ -6,8 +6,8 @@ import {
 } from '$env/networks/networks.sol.env';
 import {
 	SolanaNetworks,
-	type SolanaNetworkType,
-	type SolRpcConnectionConfig
+	type SolRpcConnectionConfig,
+	type SolanaNetworkType
 } from '$sol/types/network';
 import { createSolanaRpc } from '@solana/rpc';
 
