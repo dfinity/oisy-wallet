@@ -148,7 +148,7 @@ describe('nav.utils', () => {
 			});
 			url.search = searchParams.toString();
 
-			removeSearchParam({url, searchParam: 'code'});
+			removeSearchParam({ url, searchParam: 'code' });
 
 			expect(pushStateMock).toHaveBeenCalledWith(url, {});
 		});
