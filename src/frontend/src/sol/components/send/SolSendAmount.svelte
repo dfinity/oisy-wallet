@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
-	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -11,7 +10,7 @@
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
 	export let amount: OptionAmount = undefined;
-	export let amountError: BtcAmountAssertionError | undefined;
+	export let amountError: SolAmountAssertionError | undefined;
 
 	const { sendBalance, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
