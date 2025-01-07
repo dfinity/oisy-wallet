@@ -18,6 +18,7 @@ import {
 	loadRouteParams,
 	networkParam,
 	networkUrl,
+	removeSearchParam,
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';
@@ -135,6 +136,21 @@ describe('nav.utils', () => {
 		it('should navigate to "/" with replaceState', async () => {
 			await gotoReplaceRoot();
 			expect(mockGoTo).toHaveBeenCalledWith('/', { replaceState: true });
+		});
+	});
+
+	describe('removeSearchParam', () => {
+		it('should remove search param from URL', () => {
+			const pushStateMock = vi.spyOn(appNavigation, 'pushState').mockImplementation(vi.fn());
+			const url = new URL(`https://example.com/`);
+			const searchParams = new URLSearchParams({
+				code: '123'
+			});
+			url.search = searchParams.toString();
+
+			removeSearchParam({ url, searchParam: 'code' });
+
+			expect(pushStateMock).toHaveBeenCalledWith(url, {});
 		});
 	});
 

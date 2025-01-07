@@ -35,6 +35,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { removeSearchParam } from '$lib/utils/nav.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -70,8 +71,7 @@
 			if (nonNullish(rewardCode)) {
 				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
-				$page.url.searchParams.delete('code');
-				window.history.pushState({}, '', $page.url);
+				removeSearchParam({ url: $page.url, searchParam: 'code' });
 				if (result.success) {
 					modalStore.openSuccessfulReward();
 				} else {
@@ -200,8 +200,7 @@
 
 {#if $modalSuccessfulRewardModal}
 	<SuccessfulRewardModal />
-{/if}
-{#if $modalFailedRewardModal}
+{:else if $modalFailedRewardModal}
 	<FailedRewardModal />
 {/if}
 
