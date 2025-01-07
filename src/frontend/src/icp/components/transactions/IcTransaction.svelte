@@ -34,7 +34,7 @@
 	$: status = pending ? 'pending' : 'confirmed';
 
 	let amount: BigNumber | undefined;
-	$: amount =nonNullish(value) ? BigNumber.from(!incoming   ? value * -1n : value) : value;
+	$: amount =nonNullish(value) ? BigNumber.from(incoming ? value :   value * -1n) : value;
 
 	let timestamp: number | undefined;
 	$: timestamp = nonNullish(timestampNanoseconds)
