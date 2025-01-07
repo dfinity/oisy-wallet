@@ -40,6 +40,7 @@
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
+	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -70,8 +71,7 @@
 			if (nonNullish(rewardCode)) {
 				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
-				$page.url.searchParams.delete('code');
-				window.history.pushState({}, '', $page.url);
+				removeSearchParam('code');
 				if (result.success) {
 					modalStore.openSuccessfulReward();
 				} else {
@@ -200,8 +200,7 @@
 
 {#if $modalSuccessfulRewardModal}
 	<SuccessfulRewardModal />
-{/if}
-{#if $modalFailedRewardModal}
+{:else if $modalFailedRewardModal}
 	<FailedRewardModal />
 {/if}
 
