@@ -4,6 +4,8 @@ II_CANISTER_ID="$(dfx canister id internet_identity --network "${ENV:-local}")"
 BACKEND_CANISTER_ID="$(dfx canister id backend --network "${ENV:-local}")"
 POUH_ISSUER_CANISTER_ID="$(dfx canister id pouh_issuer --network "${ENV:-local}")"
 SIGNER_CANISTER_ID="$(dfx canister id signer --network "${ENV:-local}")"
+# Rewards canister is optional for local deployments:
+REWARDS_CANISTER_ID="$(dfx canister id rewards --network "${ENV:-local}" || [[ "${ENV:-local}" == "local" ]])"
 
 case $ENV in
 "staging")
@@ -41,6 +43,13 @@ case $ENV in
   ;;
 esac
 
+# If the rewards canister is known, it may perform priviliged actions such as find which users are eligible for rewards.
+if [[ "${REWARDS_CANISTER_ID:-}" == "" ]]; then
+  ALLOWED_CALLERS="vec {}"
+else
+  ALLOWED_CALLERS="vec{ principal \"$REWARDS_CANISTER_ID\" }"
+fi
+
 # URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
 # Represents more an ID than a URL
 II_VC_URL="https://identity.ic0.app"
@@ -51,7 +60,7 @@ if [ -n "${ENV+1}" ]; then
   dfx deploy backend --argument "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
-         allowed_callers = vec {};
+         allowed_callers = $ALLOWED_CALLERS;
          cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
          derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {
@@ -71,7 +80,7 @@ else
   dfx deploy backend --argument "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
-         allowed_callers = vec {};
+         allowed_callers = $ALLOWED_CALLERS;
          cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
          derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {

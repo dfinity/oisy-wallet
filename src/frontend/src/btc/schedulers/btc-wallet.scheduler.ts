@@ -187,6 +187,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const newBalance =
 			isNullish(this.store.balance) ||
 			this.store.balance.data !== balance.data ||
+			// TODO, align with sol-wallet.scheduler.ts, crash if certified changes
 			(!this.store.balance.certified && balance.certified);
 		const newTransactions = uncertifiedTransactions.length > 0;
 
