@@ -1,12 +1,12 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type {
 	TransactionStatusSchema,
 	TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { FeeData } from '@ethersproject/providers';
@@ -34,7 +34,11 @@ export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to
 	fromExplorerUrl?: string;
 };
 
-export type AnyTransactionUi = BtcTransactionUi | EthTransactionUi | IcTransactionUi | SolTransactionUi;
+export type AnyTransactionUi =
+	| BtcTransactionUi
+	| EthTransactionUi
+	| IcTransactionUi
+	| SolTransactionUi;
 
 export type AnyTransactionUiWithCmp =
 	| { component: 'bitcoin'; transaction: BtcTransactionUi }
