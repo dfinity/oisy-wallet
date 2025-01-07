@@ -27,7 +27,7 @@
 
 		<slot name="fee" />
 
-		<ButtonGroup slot="toolbar">
+		<ButtonGroup slot="toolbar" testId="toolbar">
 			<slot name="cancel" />
 
 			<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
