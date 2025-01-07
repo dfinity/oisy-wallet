@@ -1,12 +1,12 @@
-import type { Identity } from '@dfinity/agent';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import { readable } from 'svelte/store';
-import * as authStore from '$lib/derived/auth.derived';
-import { render, waitFor } from '@testing-library/svelte';
-import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 import type { NewVipRewardResponse } from '$declarations/rewards/rewards.did';
-import { vi } from 'vitest';
 import * as rewardApi from '$lib/api/reward.api';
+import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
+import * as authStore from '$lib/derived/auth.derived';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { Identity } from '@dfinity/agent';
+import { render, waitFor } from '@testing-library/svelte';
+import { readable } from 'svelte/store';
+import { vi } from 'vitest';
 
 describe('VipQrCodeModal', () => {
 	const qrCodeSelector = `div[data-tid="qr-code"]`;
@@ -33,9 +33,15 @@ describe('VipQrCodeModal', () => {
 			const qrCode: HTMLDivElement | null = container.querySelector(qrCodeSelector);
 			const qrCodeURL: HTMLOutputElement | null = container.querySelector(urlSelector);
 			const copyButton: HTMLButtonElement | null = container.querySelector(copyButtonSelector);
-			const regenerateButton: HTMLButtonElement | null = container.querySelector(regenerateButtonSelector);
+			const regenerateButton: HTMLButtonElement | null =
+				container.querySelector(regenerateButtonSelector);
 
-			if (qrCode === null || qrCodeURL === null || copyButton === null || regenerateButton === null) {
+			if (
+				qrCode === null ||
+				qrCodeURL === null ||
+				copyButton === null ||
+				regenerateButton === null
+			) {
 				throw new Error('one of the elements is not yet loaded.');
 			}
 
@@ -64,7 +70,8 @@ describe('VipQrCodeModal', () => {
 
 		await waitFor(() => {
 			const qrCodeURL: HTMLOutputElement | null = container.querySelector(urlSelector);
-			const regenerateButton: HTMLButtonElement | null = container.querySelector(regenerateButtonSelector);
+			const regenerateButton: HTMLButtonElement | null =
+				container.querySelector(regenerateButtonSelector);
 
 			if (qrCodeURL === null || regenerateButton === null) {
 				throw new Error('one of the elements is not yet loaded.');
@@ -82,7 +89,10 @@ describe('VipQrCodeModal', () => {
 		await waitFor(() => {
 			const reloadedQrCodeUrl: HTMLOutputElement | null = container.querySelector(urlSelector);
 
-			if (reloadedQrCodeUrl === null || !reloadedQrCodeUrl?.textContent?.includes(regeneratedNewRewardResponse.VipReward.code)) {
+			if (
+				reloadedQrCodeUrl === null ||
+				!reloadedQrCodeUrl?.textContent?.includes(regeneratedNewRewardResponse.VipReward.code)
+			) {
 				throw new Error('reward code not yet reloaded.');
 			}
 

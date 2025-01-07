@@ -93,7 +93,14 @@
 
 		<ButtonGroup styleClass="flex-col sm:flex-row" slot="toolbar">
 			<ButtonCloseModal />
-			<Button paddingSmall colorStyle="primary" type="button" fullWidth on:click={regenerateCode} testId="vip-code-regenerate-button">
+			<Button
+				paddingSmall
+				colorStyle="primary"
+				type="button"
+				fullWidth
+				on:click={regenerateCode}
+				testId="vip-code-regenerate-button"
+			>
 				{$i18n.vip.invitation.text.generate_new_link}
 			</Button>
 		</ButtonGroup>
