@@ -10,6 +10,7 @@ import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import type { Lamports } from '@solana/rpc-types';
 
 interface LoadSolWalletParams {
 	solanaNetwork: SolanaNetworkType;
@@ -17,11 +18,11 @@ interface LoadSolWalletParams {
 }
 
 interface SolWalletStore {
-	balance: CertifiedData<bigint | null> | undefined;
+	balance: CertifiedData<Lamports | null> | undefined;
 }
 
 interface SolWalletData {
-	balance: CertifiedData<bigint | null>;
+	balance: CertifiedData<Lamports | null>;
 }
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
@@ -53,7 +54,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	private loadBalance = async ({
 		address,
 		solanaNetwork
-	}: LoadSolWalletParams): Promise<CertifiedData<bigint | null>> => ({
+	}: LoadSolWalletParams): Promise<CertifiedData<Lamports | null>> => ({
 		data: await loadSolLamportsBalance({ network: solanaNetwork, address }),
 		certified: false
 	});
