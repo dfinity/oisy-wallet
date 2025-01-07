@@ -156,6 +156,7 @@
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"no_solana_rpc": "No Solana RPC for network $network",
+			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading the ETH balance.",
@@ -287,7 +288,12 @@
 		},
 		"solana": {
 			"text": {
-				"solana_address_copied": "Solana Address copied to clipboard."
+				"solana_address": "Solana Address",
+				"solana_testnet_address": "Solana Testnet Address",
+				"solana_devnet_address": "Solana Devnet Address",
+				"solana_local_address": "Solana Local Address",
+				"solana_address_copied": "Solana address copied to clipboard",
+				"display_solana_address_qr": "Display Solana address as QR code"
 			}
 		}
 	},
@@ -737,6 +743,24 @@
 					"title": "Trust in Transparency with Open Source",
 					"description": "$oisy_short is an <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">open-source</a> project led by a dedicated team within the <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a>, supported by over 200 world-leading cryptographers and engineers. Open sourcing ensures transparency, allowing the community to audit, contribute, and trust in the wallet's integrity."
 				}
+			}
+		}
+	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "Take me to the wallet",
+				"title_successful": "Congratulations!",
+				"title_failed": "Something went wrong",
+				"reward_received": "You've received a welcome gift!",
+				"reward_failed": "Oops, the link has expired",
+				"reward_received_description": "You've just received your welcome tokens from Oisy",
+				"reward_failed_description": "Request a new one and try again"
+			},
+			"error": {
+				"loading_reward": "Error while loading a new reward code.",
+				"loading_user_data": "Failed to load user data from reward canister.",
+				"claiming_reward": "Error while claiming reward."
 			}
 		}
 	},
