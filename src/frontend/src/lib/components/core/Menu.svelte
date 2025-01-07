@@ -158,6 +158,7 @@
 		{/if}
 
 		{#if isVip}
+			<!-- TODO: implements on:click function -->
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
