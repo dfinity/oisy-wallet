@@ -32,7 +32,7 @@
 </script>
 
 
-<SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid}>
+<SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource={simplifiedForm}>
 	{#if !simplifiedForm}
 		<IcSendDestination
 			slot="destination"

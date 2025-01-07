@@ -12,6 +12,7 @@
 	export let disabled: boolean | undefined = false;
 	export let token: OptionToken;
 	export let balance: OptionBalance;
+	export let hideSource = false;
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -22,7 +23,7 @@
 
 		<slot name="amount" />
 
-		<SendSource {token} {balance} {source} />
+		<SendSource {token} {balance} {source} {hideSource} />
 
 		<slot name="fee" />
 
