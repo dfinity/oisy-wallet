@@ -149,12 +149,12 @@ describe('nav.utils', () => {
 			});
 			url.search = searchParams.toString();
 
-			expect(url.toString()).toBe(`${urlString}?code=123`)
+			expect(url.toString()).toBe(`${urlString}?code=123`);
 
 			removeSearchParam({ url, searchParam: 'code' });
 
 			expect(pushStateMock).toHaveBeenCalledWith(url, {});
-			expect(url.toString()).toBe(urlString)
+			expect(url.toString()).toBe(urlString);
 		});
 	});
 
