@@ -7,6 +7,7 @@ import * as rewardApi from '$lib/api/reward.api';
 import { claimVipReward, getNewReward, isVipUser } from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
@@ -14,6 +15,10 @@ import { get } from 'svelte/store';
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('reward-code', () => {
+	beforeEach(() => {
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+	});
+
 	describe('isVip', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
@@ -121,7 +126,9 @@ describe('reward-code', () => {
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
 			});
-			expect(result).toEqual({ success: false });
+			expect(result.success).toBeFalsy();
+			expect(result.err).not.toBeUndefined();
+			expect(result.err).toBeInstanceOf(InvalidCodeError);
 		});
 
 		it('should return false if an already used vip reward code is used', async () => {
@@ -137,7 +144,9 @@ describe('reward-code', () => {
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
 			});
-			expect(result).toEqual({ success: false });
+			expect(result.success).toBeFalsy();
+			expect(result.err).not.toBeUndefined();
+			expect(result.err).toBeInstanceOf(AlreadyClaimedError);
 		});
 	});
 });
