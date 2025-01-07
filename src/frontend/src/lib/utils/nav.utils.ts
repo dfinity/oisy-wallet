@@ -1,6 +1,5 @@
 import { browser } from '$app/environment';
-import { goto } from '$app/navigation';
-import { page } from '$app/stores';
+import { goto, pushState } from '$app/navigation';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -14,7 +13,6 @@ import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
-import { get } from 'svelte/store';
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -82,9 +80,9 @@ export const gotoReplaceRoot = async () => {
 	await goto('/', { replaceState: true });
 };
 
-export const removeSearchParam = (searchParam: string) => {
-	get(page).url.searchParams.delete(searchParam);
-	history.pushState({}, '', get(page).url);
+export const removeSearchParam = (url: URL, searchParam: string) => {
+	url.searchParams.delete(searchParam);
+	pushState(url, {})
 };
 
 export interface RouteParams {

@@ -71,7 +71,7 @@
 			if (nonNullish(rewardCode)) {
 				const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
-				removeSearchParam('code');
+				removeSearchParam($page.url, 'code');
 				if (result.success) {
 					modalStore.openSuccessfulReward();
 				} else {
