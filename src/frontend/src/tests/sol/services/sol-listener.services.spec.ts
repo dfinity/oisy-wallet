@@ -5,15 +5,16 @@ import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
+import { type Lamports, lamports } from '@solana/rpc-types';
 
 describe('sol-listener', () => {
 	const tokenId: TokenId = parseTokenId('testTokenId');
-	const mockBalance = 1000n;
+	const mockBalance = lamports(1000n);
 
 	const mockPostMessage = ({
 		balance = mockBalance
 	}: {
-		balance?: bigint | null;
+		balance?: Lamports | null;
 	}): SolPostMessageDataResponseWallet => ({
 		wallet: {
 			balance: {
