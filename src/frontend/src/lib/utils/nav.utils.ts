@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { goto } from '$app/navigation';
+import { goto, pushState } from '$app/navigation';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -78,6 +78,11 @@ export const back = async ({ pop }: { pop: boolean }) => {
 
 export const gotoReplaceRoot = async () => {
 	await goto('/', { replaceState: true });
+};
+
+export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {
+	url.searchParams.delete(searchParam);
+	pushState(url, {});
 };
 
 export interface RouteParams {
