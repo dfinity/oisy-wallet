@@ -4,6 +4,7 @@ import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.s
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 export type CertifiedTransaction<T> = CertifiedData<T>;
 
@@ -19,7 +20,7 @@ export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>
 }
 
 export const initTransactionsStore = <
-	T extends IcTransactionUi | BtcTransactionUi
+	T extends IcTransactionUi | BtcTransactionUi | SolTransactionUi
 >(): TransactionsStore<T> => {
 	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
 
