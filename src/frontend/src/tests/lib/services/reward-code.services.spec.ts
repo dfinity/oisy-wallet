@@ -11,7 +11,6 @@ import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
-import { expect, vi } from 'vitest';
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
