@@ -20,7 +20,7 @@
 	$: disableSend = insufficientFundsForFee || invalid;
 
 	let invalid = true;
-	$: invalid =invalidSolAddress(destination) ||  invalidAmount(amount);
+	$: invalid = invalidSolAddress(destination) || invalidAmount(amount);
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>

@@ -28,8 +28,8 @@
 {#if nonNullish(sourceNetwork)}
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label"
-		>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
-			.network}{/if}</svelte:fragment
+			>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
+					.network}{/if}</svelte:fragment
 		>
 		<TextWithLogo name={sourceNetwork.name} icon={sourceNetwork.icon} />
 	</Value>
