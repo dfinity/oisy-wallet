@@ -3,7 +3,6 @@
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { token } from '$lib/stores/token.store';
-	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
