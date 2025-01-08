@@ -13,7 +13,7 @@ import {
 	type SolRpcConnectionConfig,
 	type SolanaNetworkType
 } from '$sol/types/network';
-import { createSolanaRpc, type SolanaRpcApi } from '@solana/rpc';
+import { createSolanaRpc, type Rpc, type SolanaRpcApi } from '@solana/rpc';
 import {
 	createSolanaRpcSubscriptions,
 	type RpcSubscriptions,
