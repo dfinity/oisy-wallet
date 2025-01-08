@@ -60,21 +60,21 @@
 
 	const onVisibilityChange = () => {
 		if (document.hidden) {
-			clearInterval(countdown)
+			clearInterval(countdown);
 		} else {
-			countdown = setInterval(intervalFunction, 1000)
+			countdown = setInterval(intervalFunction, 1000);
 		}
-	}
+	};
 
 	onMount(() => {
 		generateCode();
 		countdown = setInterval(intervalFunction, 1000);
-		document.addEventListener("visibilitychange", onVisibilityChange);
+		document.addEventListener('visibilitychange', onVisibilityChange);
 	});
 
 	onDestroy(() => {
 		clearInterval(countdown);
-		document.removeEventListener("visibilitychange", onVisibilityChange)
+		document.removeEventListener('visibilitychange', onVisibilityChange);
 	});
 
 	let qrCodeUrl;
