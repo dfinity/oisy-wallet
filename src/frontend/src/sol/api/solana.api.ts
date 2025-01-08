@@ -107,7 +107,7 @@ const getTransactionDetailForSignature = async ({
 	return {
 		...rpcTransaction,
 		version: rpcTransaction.version,
-		confirmationStatus: confirmationStatus,
+		confirmationStatus,
 		id: signature.toString()
 	};
 };
