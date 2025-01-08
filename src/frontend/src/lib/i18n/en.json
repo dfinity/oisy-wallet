@@ -659,16 +659,16 @@
 			"to_copied": "To address copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
-			"pending": "Pending...",
-			"unconfirmed": "Unconfirmed",
-			"confirmed": "Confirmed",
 			"status": "Status",
 			"confirmations": "Confirmations"
 		},
 		"status": {
+			"confirmed": "Confirmed",
 			"included": "Included",
+			"finalised": "Finalised",
+			"pending": "Pending...",
 			"safe": "Safe",
-			"finalised": "Finalised"
+			"unconfirmed": "Unconfirmed"
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
