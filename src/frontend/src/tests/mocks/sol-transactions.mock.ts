@@ -7,6 +7,8 @@ import {
 	type Base58EncodedBytes,
 	type UnixTimestamp
 } from '@solana/rpc-types';
+import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
+
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
@@ -17,6 +19,18 @@ export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	to: 'receiver',
 	status: 'finalized'
 });
+
+
+export const 	mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
+	{
+		data: createMockSolTransactionUi('tx1'),
+		certified: false
+	},
+	{
+		data: createMockSolTransactionUi('tx2'),
+		certified: false
+	}
+];
 
 export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 	blockTime: 1736257946n as UnixTimestamp,
