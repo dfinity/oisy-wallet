@@ -2,7 +2,7 @@
 set -euo pipefail
 
 print_help() {
-	cat <<-EOF
+  cat <<-EOF
 	Generates the backend arguments.
 
   # Prerequisites
@@ -14,8 +14,8 @@ print_help() {
 }
 
 [[ "${1:-}" != "--help" ]] || {
-	print_help
-	exit 0
+  print_help
+  exit 0
 }
 
 # We write the output to a file including the network name, then we symlink it to the generic name specified in dfx.json.
@@ -73,7 +73,7 @@ II_VC_URL="https://identity.ic0.app"
 
 echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
 
-  echo "(variant {
+echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = $ALLOWED_CALLERS;
@@ -90,4 +90,4 @@ echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })" > "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK"
+  })" >"$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK"
