@@ -7,12 +7,13 @@ import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 import { vi } from 'vitest';
+import { VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
 
 describe('VipQrCodeModal', () => {
 	const qrCodeSelector = `div[data-tid="qr-code"]`;
 	const urlSelector = `output`;
-	const copyButtonSelector = `button[data-tid="vip-qr-code-copy-button"]`;
-	const regenerateButtonSelector = `button[data-tid="vip-code-regenerate-button"]`;
+	const copyButtonSelector = `button[data-tid=${VIP_QR_CODE_COPY_BUTTON}]`;
+	const regenerateButtonSelector = `button[data-tid=${VIP_CODE_REGENERATE_BUTTON}]`;
 
 	const mockAuthStore = (value: Identity | null = mockIdentity) =>
 		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
@@ -23,7 +24,7 @@ describe('VipQrCodeModal', () => {
 		}
 	};
 
-	it('renders the vip qr code modal items', async () => {
+	it('should render the vip qr code modal items', async () => {
 		mockAuthStore();
 		vi.spyOn(rewardApi, 'getNewVipReward').mockResolvedValue(mockedNewRewardResponse);
 
@@ -56,7 +57,7 @@ describe('VipQrCodeModal', () => {
 		});
 	});
 
-	it('regenerates reward code', async () => {
+	it('should regenerate reward code', async () => {
 		const regeneratedNewRewardResponse: NewVipRewardResponse = {
 			VipReward: {
 				code: '0987654321'

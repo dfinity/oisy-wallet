@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
 
 	const secondsToRegenerate = 45;
 	let counter = secondsToRegenerate;
@@ -60,7 +61,7 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-[100%] p-4">
+		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-full p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
 					<svelte:fragment slot="logo">
@@ -78,7 +79,7 @@
 				<ReceiveCopy
 					address={qrCodeUrl}
 					copyAriaLabel={$i18n.vip.invitation.text.invitation_link_copied}
-					testId="vip-qr-code-copy-button"
+					testId={VIP_QR_CODE_COPY_BUTTON}
 				/>
 			</div>
 
@@ -99,7 +100,7 @@
 				type="button"
 				fullWidth
 				on:click={regenerateCode}
-				testId="vip-code-regenerate-button"
+				testId={VIP_CODE_REGENERATE_BUTTON}
 			>
 				{$i18n.vip.invitation.text.generate_new_link}
 			</Button>
