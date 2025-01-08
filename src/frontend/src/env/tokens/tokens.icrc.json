@@ -2,5 +2,9 @@
 	"BURN": {
 		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai",
 		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai"
+	},
+	"POPEYE": {
+		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai",
+		"ledgerCanisterId": "6fvyi-faaaa-aaaam-qbiga-cai"
 	}
 }
