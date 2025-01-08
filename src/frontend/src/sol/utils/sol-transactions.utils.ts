@@ -1,4 +1,5 @@
 import type { SolAddress } from '$lib/types/address';
+import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
 import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import { address as solAddress } from '@solana/addresses';
 
@@ -23,7 +24,13 @@ export const mapSolTransactionUi = ({
 	} = transaction;
 
 	const from = accountKeys[0];
-	const to = accountKeys[1];
+	let to = accountKeys[1];
+
+	const nonSystemAccountKeys = accountKeys.filter((key) => !SYSTEM_ACCOUNT_KEYS.includes(key));
+	if (nonSystemAccountKeys.length === 1) {
+		//edge-case: transaction from my wallet, to my wallet
+		to = accountKeys[0];
+	}
 
 	const accountIndex = accountKeys.indexOf(solAddress(address));
 
