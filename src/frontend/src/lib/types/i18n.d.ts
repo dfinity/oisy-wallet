@@ -676,6 +676,7 @@ interface I18nVip {
 			title: string;
 			invitation_link_copied: string;
 			generate_new_link: string;
+			generating_new_code: string;
 			regenerate_countdown_text: string;
 		};
 	};

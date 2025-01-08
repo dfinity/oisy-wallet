@@ -100,9 +100,13 @@
 			</div>
 
 			<span class="mb-4 block w-full pt-3 text-center text-sm text-tertiary">
-				{replacePlaceholders($i18n.vip.invitation.text.regenerate_countdown_text, {
-					$counter: counter.toString()
-				})}
+				{#if 0 >= counter}
+					<span class="animate-pulse">{$i18n.vip.invitation.text.generating_new_code}</span>
+				{:else}
+					{replacePlaceholders($i18n.vip.invitation.text.regenerate_countdown_text, {
+						$counter: counter.toString()
+					})}
+				{/if}
 			</span>
 		{:else}
 			<span class="w-full"><SkeletonText /></span>
