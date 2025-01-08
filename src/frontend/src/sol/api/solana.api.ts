@@ -4,7 +4,7 @@ import { last } from '$lib/utils/array.utils';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolSignature } from '$sol/types/sol-transaction';
+import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress } from '@solana/addresses';
@@ -93,7 +93,7 @@ const getTransactionDetailForSignature = async ({
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
-}) => {
+}): Promise<SolRpcTransaction | null> => {
 	const { getTransaction } = solanaHttpRpc(network);
 
 	const rpcTransaction = await getTransaction(signature, {
