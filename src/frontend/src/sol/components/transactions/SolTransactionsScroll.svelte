@@ -11,7 +11,11 @@
 	import type { OptionSolAddress } from '$lib/types/address';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
-	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal, isNetworkIdSOLTestnet } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdSOLDevnet,
+		isNetworkIdSOLLocal,
+		isNetworkIdSOLTestnet
+	} from '$lib/utils/network.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';

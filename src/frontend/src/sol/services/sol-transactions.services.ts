@@ -1,13 +1,16 @@
-import type { SolAddress } from '$lib/types/address';
-import { getSolTransactions } from '$sol/api/solana.api';
-import { type SolCertifiedTransaction, solTransactionsStore } from '$sol/stores/sol-transactions.store';
-import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import type { SolAddress } from '$lib/types/address';
+import { getSolTransactions } from '$sol/api/solana.api';
+import {
+	solTransactionsStore,
+	type SolCertifiedTransaction
+} from '$sol/stores/sol-transactions.store';
+import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 
 export const loadNextSolTransactions = async ({
 	address,
@@ -55,7 +58,6 @@ const loadSolTransactions = async ({
 	before?: string;
 	limit?: number;
 }): Promise<SolCertifiedTransaction[]> => {
-
 	const solTokenIdForNetwork = networkToSolTokenIdMap[network];
 
 	try {
@@ -75,10 +77,7 @@ const loadSolTransactions = async ({
 	} catch (error: unknown) {
 		solTransactionsStore.reset(solTokenIdForNetwork);
 
-		console.error(
-			`Failed to load transactions for ${solTokenIdForNetwork.description}:`,
-			error
-		);
+		console.error(`Failed to load transactions for ${solTokenIdForNetwork.description}:`, error);
 		return [];
 	}
 };
