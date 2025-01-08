@@ -38,11 +38,11 @@ export const getSolTransactions = async ({
 	network: SolanaNetworkType;
 	before?: string;
 	limit?: number;
-}): Promise<SolCertifiedTransaction[]> => {
+}): Promise<SolRpcTransaction[]> => {
 	const { getSignaturesForAddress } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
 
-	const transactions: SolCertifiedTransaction[] = [];
+	const transactions: SolRpcTransaction[] = [];
 	let lastSignature = nonNullish(before) ? signature(before) : undefined;
 
 	while (transactions.length < limit) {
@@ -63,18 +63,8 @@ export const getSolTransactions = async ({
 				.map(async (signature) => await getTransactionDetailForSignature({ signature, network }))
 		);
 
-		const uiTransactions: SolCertifiedTransaction[] = transactionDetails
-			.filter(nonNullish)
-
-			.map((transaction) => ({
-				data: mapSolTransactionUi({
-					transaction,
-					address
-				}),
-				certified: false
-			}));
-
-		transactions.push(...uiTransactions);
+		transactions.push(...transactionDetails
+			.filter(nonNullish));
 
 		const hasNoMoreSignaturesLeft = signatures.length < limit;
 		const hasLoadedEnoughTransactions = transactions.length >= limit;
