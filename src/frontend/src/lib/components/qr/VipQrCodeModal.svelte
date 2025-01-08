@@ -9,14 +9,17 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { VIP_CODE_REGENERATE_INTERVAL } from '$lib/constants/app.constants';
+	import {
+		VIP_CODE_REGENERATE_BUTTON,
+		VIP_QR_CODE_COPY_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getNewReward } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
-	import { VIP_CODE_REGENERATE_INTERVAL } from '$lib/constants/app.constants';
-	import { nullishSignOut } from '$lib/services/auth.services';
 
 	let counter = VIP_CODE_REGENERATE_INTERVAL;
 	let countdown: NodeJS.Timeout | undefined;
@@ -62,7 +65,7 @@
 
 	onDestroy(() => {
 		clearInterval(countdown);
-	})
+	});
 
 	let qrCodeUrl;
 	$: qrCodeUrl = `${window.location.origin}/?code=${code}`;

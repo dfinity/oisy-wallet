@@ -1,13 +1,16 @@
 import type { NewVipRewardResponse } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
+import {
+	VIP_CODE_REGENERATE_BUTTON,
+	VIP_QR_CODE_COPY_BUTTON
+} from '$lib/constants/test-ids.constants';
 import * as authStore from '$lib/derived/auth.derived';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 import { vi } from 'vitest';
-import { VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
 
 describe('VipQrCodeModal', () => {
 	const qrCodeSelector = `div[data-tid="qr-code"]`;
