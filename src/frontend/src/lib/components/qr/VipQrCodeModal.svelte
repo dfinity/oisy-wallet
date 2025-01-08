@@ -58,13 +58,23 @@
 		}
 	};
 
+	const onVisibilityChange = () => {
+		if (document.hidden) {
+			clearInterval(countdown)
+		} else {
+			countdown = setInterval(intervalFunction, 1000)
+		}
+	}
+
 	onMount(() => {
 		generateCode();
 		countdown = setInterval(intervalFunction, 1000);
+		document.addEventListener("visibilitychange", onVisibilityChange);
 	});
 
 	onDestroy(() => {
 		clearInterval(countdown);
+		document.removeEventListener("visibilitychange", onVisibilityChange)
 	});
 
 	let qrCodeUrl;
