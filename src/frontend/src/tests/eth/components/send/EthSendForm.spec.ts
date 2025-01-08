@@ -1,13 +1,13 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import SendForm from '$eth/components/send/SendForm.svelte';
+import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
 
-describe('SendForm', () => {
+describe('EthSendForm', () => {
 	const mockContext = new Map([]);
 	mockContext.set(
 		SEND_CONTEXT_KEY,
@@ -43,7 +43,7 @@ describe('SendForm', () => {
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
-		const { container } = render(SendForm, {
+		const { container } = render(EthSendForm, {
 			props,
 			context: mockContext
 		});
@@ -71,7 +71,7 @@ describe('SendForm', () => {
 		expect(toolbar).not.toBeNull();
 	});
 	it('should not render source field', () => {
-		const { container } = render(SendForm, {
+		const { container } = render(EthSendForm, {
 			props: { ...props, simplifiedForm: true },
 			context: mockContext
 		});
