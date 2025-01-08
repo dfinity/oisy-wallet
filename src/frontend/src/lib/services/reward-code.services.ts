@@ -11,6 +11,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { LOCAL } from '$lib/constants/app.constants';
 
 const queryVipUser = async (params: {
 	identity: Identity;
@@ -41,7 +42,15 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 		return await queryVipUser({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
-		console.error(vip.reward.error.loading_user_data, err);
+		// TODO Remove this temporary fix as soon as we do run the rewards canister locally
+		if (LOCAL) {
+			console.error(vip.reward.error.loading_user_data, err);
+		} else {
+			toastsError({
+				msg: { text: vip.reward.error.loading_user_data },
+				err
+			});
+		}
 
 		return { success: false, err };
 	}
