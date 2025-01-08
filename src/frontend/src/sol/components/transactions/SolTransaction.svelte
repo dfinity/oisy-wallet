@@ -35,7 +35,7 @@
 
 <Transaction
 	on:click={() => modalStore.openSolTransaction({ transaction, token })}
-	amount={amount}
+	{amount}
 	{type}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
 	status={transactionStatus}

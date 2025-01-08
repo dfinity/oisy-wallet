@@ -1,8 +1,8 @@
-import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
+import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { token } from '$lib/stores/token.store';
+import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { render } from '@testing-library/svelte';
-import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 
 describe('SolTransactionsSkeletons', () => {
 	beforeEach(() => {
