@@ -73,7 +73,6 @@ II_VC_URL="https://identity.ic0.app"
 
 echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
 
-if [ -n "${DFX_NETWORK+1}" ]; then
   echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
@@ -91,24 +90,4 @@ if [ -n "${DFX_NETWORK+1}" ]; then
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })"
-else
-  echo "(variant {
-    Init = record {
-         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
-         allowed_callers = $ALLOWED_CALLERS;
-         cfs_canister_id = opt principal \"$CANISTER_ID_SIGNER\";
-         derivation_origin = opt \"$DERIVATION_ORIGIN\";
-         supported_credentials = opt vec {
-            record {
-              credential_type = variant { ProofOfUniqueness };
-              ii_origin = \"$II_VC_URL\";
-              ii_canister_id = principal \"$CANISTER_ID_II\";
-              issuer_origin = \"$POUH_ISSUER_VC_URL\";
-              issuer_canister_id = principal \"$CANISTER_ID_POUH_ISSUER\";
-            }
-         };
-         ic_root_key_der = $ic_root_key_der;
-     }
-  })"
-fi > "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK"
+  })" > "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK"
