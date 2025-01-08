@@ -3,11 +3,11 @@ import * as solanaApi from '$sol/api/solana.api';
 import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks } from '$sol/types/network';
+import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 
 describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
@@ -114,4 +114,4 @@ describe('sol-transactions.services', () => {
 			});
 		});
 	});
-}); 
+});
