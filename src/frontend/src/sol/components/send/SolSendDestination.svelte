@@ -2,18 +2,15 @@
 	import { createEventDispatcher } from 'svelte';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdSolana } from '$lib/utils/network.utils';
+	import { isInvalidDestinationSol } from '$sol/utils/sol-send.utils';
 
 	export let destination = '';
-	export let networkId: NetworkId | undefined = undefined;
 	export let invalidDestination = false;
 
 	const dispatch = createEventDispatcher();
 
 	let isInvalidDestination: () => boolean;
-	// TODO: create check for invalid destination
-	$: isInvalidDestination = (): boolean => !isNetworkIdSolana(networkId);
+	$: isInvalidDestination = (): boolean => isInvalidDestinationSol(destination);
 </script>
 
 <SendInputDestination
