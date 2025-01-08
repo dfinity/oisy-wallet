@@ -1,9 +1,10 @@
-FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS deps
-# Note: The above is ubuntu 22.04
+#
+# Reproducible Builds
+#
 
+FROM ubuntu:22.04 AS base
 ENV TZ=UTC
-
-# Install required tools
+# Install basic tools
 RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     curl \
     ca-certificates \
@@ -15,33 +16,40 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     clang \
     cmake \
     jq \
+    xxd \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -L https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_amd64 | install -m 755 /dev/stdin /bin/yq && yq --version | grep yq
 
-# Install node
-RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-COPY .node-version .node-version
-RUN . "$NVM_DIR/nvm.sh" && nvm install "$(cat .node-version)"
-RUN . "$NVM_DIR/nvm.sh" && nvm use "v$(cat .node-version)"
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default "v$(cat .node-version)"
-RUN ln -s "$NVM_DIR/versions/node/v$(cat .node-version)" "$NVM_DIR/versions/node/default"
-ENV PATH="$NVM_DIR/versions/node/default/bin/:${PATH}"
-RUN node --version
-RUN npm --version
+# Gets dfx version
+#
+# Note: This can be done in the builder but is slow because unrelated changes to dfx.json can cause a rebuild.
+FROM base AS tool_versions
+SHELL ["bash", "-c"]
+RUN mkdir -p config
+COPY dfx.json dfx.json
+RUN jq -r .dfx dfx.json > config/dfx_version
 
-# Install Rust and Cargo in /opt
+
+# Install tools && warm up the build cache
+FROM base AS builder
+SHELL ["bash", "-c"]
+# Install dfx
+# Note: dfx is installed in `$HOME/.local/share/dfx/bin` but we can't reference `$HOME` here so we hardcode `/root`.
+COPY --from=tool_versions /config/*_version config/
+ENV PATH="/root/.local/share/dfx/bin:/root/.local/bin:${PATH}"
+RUN DFXVM_INIT_YES=true DFX_VERSION="$(cat config/dfx_version)" sh -c "$(curl -fsSL https://sdk.dfinity.org/install.sh)" && dfx --version
+# Install Rust
+COPY ./rust-toolchain.toml .
 ENV RUSTUP_HOME=/opt/rustup \
     CARGO_HOME=/cargo \
     PATH=/cargo/bin:$PATH
-
-# Copy resources
-COPY ./docker ./docker
-COPY ./rust-toolchain.toml ./rust-toolchain.toml
-
-# Setup toolchain and ic-wasm
-RUN ./docker/bootstrap
+COPY dev-tools.json dev-tools.json
+COPY scripts/setup scripts/setup-cargo-binstall scripts/setup-rust scripts/
+RUN scripts/setup rust
+RUN scripts/setup cargo-binstall
+RUN scripts/setup candid-extractor
+RUN scripts/setup ic-wasm
+RUN scripts/setup didc
 
 # Pre-build all cargo dependencies. Because cargo doesn't have a build option
 # to build only the dependencies, we pretend that our project is a simple, empty
@@ -68,15 +76,14 @@ RUN mkdir -p src/backend/src \
     && ./docker/build --only-dependencies \
     && rm -rf src
 
-FROM deps AS build_backend
+FROM builder AS build_backend
+COPY src src
+COPY dfx.json dfx.json
+COPY canister_ids.json canister_ids.json
+COPY scripts/build.backend.* build/report.sh scripts/
+COPY target/commit target/tags target/
+RUN touch src/*/src/*.rs
+RUN dfx build --ic backend
 
-COPY . .
-
-RUN touch src/*/src/lib.rs src/*/*/src/lib.rs
-
-RUN ./docker/build --backend
-
-RUN sha256sum /backend.wasm.gz
-
-FROM scratch AS scratch_backend
-COPY --from=build_backend /backend.wasm.gz /
+FROM scratch AS backend
+COPY --from=build_backend out/ /
