@@ -14,6 +14,8 @@ export const ethTransactionTypes = z.enum([...commonTypes, ...ethSpecificTypes])
 
 export const icpTransactionTypes = z.enum([...commonTypes, ...icpSpecificTypes]);
 
+export const solTransactionTypes = z.enum(commonTypes);
+
 export const TransactionTypeSchema = z.enum(allTypes);
 
 export const TransactionStatusSchema = z.enum(['confirmed', 'pending', 'unconfirmed']);
