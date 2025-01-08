@@ -1,6 +1,10 @@
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { token } from '$lib/stores/token.store';
-import { solTransactions, solTransactionsInitialized, solTransactionsNotInitialized } from '$sol/derived/sol-transactions.derived';
+import {
+	solTransactions,
+	solTransactionsInitialized,
+	solTransactionsNotInitialized
+} from '$sol/derived/sol-transactions.derived';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
 import { get } from 'svelte/store';
@@ -22,7 +26,6 @@ describe('sol-transactions.derived', () => {
 	});
 
 	describe('solTransactions', () => {
-
 		it('should return an empty array when transactions store is empty', () => {
 			const result = get(solTransactions);
 			expect(result).toEqual([]);
@@ -50,7 +53,7 @@ describe('sol-transactions.derived', () => {
 			const result = get(solTransactions);
 			expect(result).toEqual(transactions.map(({ data }) => data));
 		});
-	})
+	});
 
 	describe('solTransactionsInitialized', () => {
 		it('should return false when transactions store is empty', () => {
