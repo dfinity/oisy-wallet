@@ -91,9 +91,11 @@ export const exchanges: Readable<ExchangesData> = derived(
 							? ckEthereumPrice
 							: exchangeCoinId === 'bitcoin'
 								? btcPrice
-								: exchangeCoinId === 'internet-computer'
-									? icpPrice
-									: undefined
+								: exchangeCoinId === 'solana'
+									? solPrice
+									: exchangeCoinId === 'internet-computer'
+										? icpPrice
+										: undefined
 				};
 			}, {})
 		};
