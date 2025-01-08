@@ -4,7 +4,7 @@ import { findFiles } from './utils.mjs';
 export const findHtmlFiles = (dir = join(process.cwd(), 'build')) =>
 	findFiles({ dir, extensions: ['.html'] });
 
-const REQUESTED_ENV = process.env.ENV || process.env.DFX_NETWORK || '';
+const REQUESTED_ENV = process.env.ENV ?? process.env.DFX_NETWORK ?? '';
 
 export const ENV =
 	REQUESTED_ENV === 'ic'
