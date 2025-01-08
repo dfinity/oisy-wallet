@@ -41,10 +41,7 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 		return await queryVipUser({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
-		toastsError({
-			msg: { text: vip.reward.error.loading_user_data },
-			err
-		});
+		console.error(vip.reward.error.loading_user_data, err);
 
 		return { success: false, err };
 	}
