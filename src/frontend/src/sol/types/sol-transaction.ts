@@ -10,13 +10,11 @@ import type {
 	TransactionError,
 	UnixTimestamp
 } from '@solana/rpc-types';
-import type { GetTransactionApi } from '@solana/rpc';
 
 export type SolTransactionType = Extract<
 	TransactionType,
 	(typeof solTransactionTypes.options)[number]
 >;
-
 
 export interface SolRpcTransaction {
 	id: string;
