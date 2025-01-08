@@ -10,19 +10,19 @@ export type HideInfoKey =
 
 export const saveHideInfo = (key: HideInfoKey) => {
 	try {
-		localStorage.setItem(key, 'true');
+		sessionStorage.setItem(key, 'true');
 	} catch (err: unknown) {
-		// We use the local storage for the operational part of the app but, not crucial
+		// We use the session storage for the operational part of the app but, not crucial
 		console.error(err);
 	}
 };
 
 export const shouldHideInfo = (key: HideInfoKey): boolean => {
 	try {
-		const store: Storage = browser ? localStorage : ({ [key]: 'false' } as unknown as Storage);
+		const store: Storage = browser ? sessionStorage : ({ [key]: 'false' } as unknown as Storage);
 		return store[key] === 'true';
 	} catch (err: unknown) {
-		// We use the local storage for the operational part of the app but, not crucial
+		// We use the session storage for the operational part of the app but, not crucial
 		console.error(err);
 		return false;
 	}
