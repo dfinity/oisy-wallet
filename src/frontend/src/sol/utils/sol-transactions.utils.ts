@@ -23,14 +23,11 @@ export const mapSolTransactionUi = ({
 		meta
 	} = transaction;
 
-	const from = accountKeys[0];
-	let to = accountKeys[1];
-
 	const nonSystemAccountKeys = accountKeys.filter((key) => !SYSTEM_ACCOUNT_KEYS.includes(key));
-	if (nonSystemAccountKeys.length === 1) {
-		//edge-case: transaction from my wallet, to my wallet
-		to = accountKeys[0];
-	}
+
+	const from = accountKeys[0];
+	//edge-case: transaction from my wallet, to my wallet
+	const to = nonSystemAccountKeys.length === 1 ? accountKeys [0] : accountKeys[1];
 
 	const accountIndex = accountKeys.indexOf(solAddress(address));
 
