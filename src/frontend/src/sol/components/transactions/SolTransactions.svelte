@@ -1,4 +1,4 @@
-w<script lang="ts">
+<script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
