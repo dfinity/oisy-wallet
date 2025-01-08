@@ -28,7 +28,7 @@ export const mapSolTransactionUi = ({
 
 	const from = accountKeys[0];
 
-  //edge-case: transaction from my wallet, to my wallet
+	//edge-case: transaction from my wallet, to my wallet
 	const to = nonSystemAccountKeys.length === 1 ? nonSystemAccountKeys[0] : accountKeys[1];
 
 	const isSender = from === address;
