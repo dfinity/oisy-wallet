@@ -48,6 +48,7 @@
 			"type": "rust",
 			"optimize": "cycles",
 			"gzip": true,
+			"init_arg_file": "out/backend.args.did",
 			"remote": {
 				"id": {
 					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",

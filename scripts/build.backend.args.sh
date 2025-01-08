@@ -5,6 +5,9 @@ print_help() {
 	cat <<-EOF
 	Generates the backend arguments.
 
+  # Prerequisites
+  Canisters IDs must already be known to dfx.
+
 	This is intended to be run as part of a dfx command, so the dfx environment variables are assumed to be available:
 	  https://internetcomputer.org/docs/current/developer-docs/developer-tools/cli-tools/cli-reference/dfx-envars
 	EOF
@@ -14,6 +17,11 @@ print_help() {
 	print_help
 	exit 0
 }
+
+CANISTER_ARG_PATH_BACKEND="$(jq -re .canisters.backend.init_arg_file dfx.json)"
+CANISTER_ARG_PATH_BACKEND_FOR_NETWORK="${CANISTER_ARG_PATH_BACKEND%.did}.$ENV.did"
+mkdir -p "$(dirname "$CANISTER_ARG_PATH_BACKEND")"
+ln -s -f "$(basename "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK")" "$CANISTER_ARG_PATH_BACKEND"
 
 
 II_CANISTER_ID="$(dfx canister id internet_identity --network "${ENV:-local}")"
@@ -73,7 +81,7 @@ II_VC_URL="https://identity.ic0.app"
 echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
 
 if [ -n "${ENV+1}" ]; then
-  dfx deploy backend --argument "(variant {
+  echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = $ALLOWED_CALLERS;
@@ -90,10 +98,10 @@ if [ -n "${ENV+1}" ]; then
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })" --network "$ENV" "${@}"
+  })"
 else
   DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
-  dfx deploy backend --argument "(variant {
+  echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = $ALLOWED_CALLERS;
@@ -110,5 +118,5 @@ else
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })" --specified-id "$DEFAULT_CANISTER_ID" "${@}"
-fi
+  })"
+fi > "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK"
