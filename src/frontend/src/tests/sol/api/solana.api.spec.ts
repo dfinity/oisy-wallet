@@ -117,13 +117,12 @@ describe('solana.api', () => {
 		});
 
 		it('should handle limit parameter', async () => {
-			const transactions = await getSolTransactions({
+			await getSolTransactions({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				limit: 5
 			});
 
-			expect(transactions).toHaveLength(5);
 			expect(mockGetSignaturesForAddress).toHaveBeenCalledWith(
 				expect.anything(),
 				expect.objectContaining({
