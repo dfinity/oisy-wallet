@@ -2,12 +2,10 @@ import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store
 import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
-import {
-	blockhash,
-	lamports,
-	type Base58EncodedBytes,
-	type UnixTimestamp
-} from '@solana/rpc-types';
+import { type Base58EncodedBytes, blockhash, lamports, type UnixTimestamp } from '@solana/rpc-types';
+
+export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
+	Array.from({ length: n }, () => createMockSolTransactionUi(`txn-${n}`));
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
