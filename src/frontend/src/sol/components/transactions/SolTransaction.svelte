@@ -24,7 +24,7 @@
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
 	let pending: boolean;
-	$: pending = status === 'processed' || isNullish(pending);
+	$: pending = status === 'processed' || isNullish(status);
 
 	let transactionStatus: TransactionStatus;
 	$: transactionStatus = pending ? 'pending' : 'confirmed';
