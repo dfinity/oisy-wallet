@@ -20,11 +20,11 @@ print_help() {
 
 # We write the output to a file including the network name, then we symlink it to the generic name specified in dfx.json.
 CANISTER_ARG_PATH_BACKEND="$(jq -re .canisters.backend.init_arg_file dfx.json)"
-CANISTER_ARG_PATH_BACKEND_FOR_NETWORK="${CANISTER_ARG_PATH_BACKEND%.did}.$ENV.did"
+CANISTER_ARG_PATH_BACKEND_FOR_NETWORK="${CANISTER_ARG_PATH_BACKEND%.did}.$DFX_NETWORK.did"
 mkdir -p "$(dirname "$CANISTER_ARG_PATH_BACKEND")"
 ln -s -f "$(basename "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK")" "$CANISTER_ARG_PATH_BACKEND"
 
-case $ENV in
+case "$DFX_NETWORK" in
 "staging")
   ECDSA_KEY_NAME="test_key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
@@ -49,7 +49,7 @@ case $ENV in
   # to match what candid expects ({}), replace the commas between array entries to match
   # what candid expects (semicolon) and annotate the numbers with their type (otherwise dfx assumes 'nat'
   # instead of 'nat8').
-  rootkey_did=$(dfx ping "${ENV:-local}" |
+  rootkey_did=$(dfx ping "${DFX_NETWORK:-local}" |
     jq -r '.root_key | reduce .[] as $item ("{ "; "\(.) \($item):nat8;") + " }"')
   echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
   ic_root_key_der="opt vec $rootkey_did"
@@ -73,7 +73,7 @@ II_VC_URL="https://identity.ic0.app"
 
 echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
 
-if [ -n "${ENV+1}" ]; then
+if [ -n "${DFX_NETWORK+1}" ]; then
   echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
