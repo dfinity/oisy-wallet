@@ -1,4 +1,4 @@
-import type { SolRpcTransaction } from '$sol/types/sol-transaction';
+import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
 import {
@@ -7,6 +7,16 @@ import {
 	type Base58EncodedBytes,
 	type UnixTimestamp
 } from '@solana/rpc-types';
+
+export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
+	id,
+	timestamp: 0n,
+	type: 'send',
+	value: BigInt(100),
+	from: 'sender',
+	to: 'receiver',
+	status: 'finalized'
+});
 
 export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 	blockTime: 1736257946n as UnixTimestamp,
