@@ -18,11 +18,11 @@
 	const startConfirmToClose = () => {
 		dirtyWizardState.set(true);
 		confirmToCloseBrowser(true);
-	}
+	};
 	const stopConfirmToClose = () => {
 		dirtyWizardState.set(false);
 		confirmToCloseBrowser(false);
-	}
+	};
 
 	onMount(startConfirmToClose);
 	onDestroy(stopConfirmToClose);
