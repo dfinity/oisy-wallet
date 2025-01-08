@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, QRCode } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -16,6 +16,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
 	import { VIP_CODE_REGENERATE_INTERVAL } from '$lib/constants/app.constants';
+	import { nullishSignOut } from '$lib/services/auth.services';
 
 	let counter = VIP_CODE_REGENERATE_INTERVAL;
 	let countdown: NodeJS.Timeout | undefined;
@@ -24,7 +25,12 @@
 
 	let code: string;
 	const generateCode = async () => {
-		if (nonNullish($authIdentity) && retries !== maxRetries) {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		if (retries !== maxRetries) {
 			const vipReward = await getNewReward($authIdentity);
 			if (nonNullish(vipReward)) {
 				code = vipReward.code;
