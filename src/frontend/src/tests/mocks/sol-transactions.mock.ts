@@ -1,3 +1,4 @@
+import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
@@ -17,6 +18,17 @@ export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	to: 'receiver',
 	status: 'finalized'
 });
+
+export const mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
+	{
+		data: createMockSolTransactionUi('tx1'),
+		certified: false
+	},
+	{
+		data: createMockSolTransactionUi('tx2'),
+		certified: false
+	}
+];
 
 export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 	blockTime: 1736257946n as UnixTimestamp,
