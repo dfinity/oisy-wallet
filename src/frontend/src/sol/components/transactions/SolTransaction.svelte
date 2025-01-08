@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Commitment } from '@solana/rpc-types';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
@@ -24,7 +24,7 @@
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
 	let pending: boolean;
-	$: pending = status === 'processed';
+	$: pending = status === 'processed' || isNullish(pending);
 
 	let transactionStatus: TransactionStatus;
 	$: transactionStatus = pending ? 'pending' : 'confirmed';
