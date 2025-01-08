@@ -19,13 +19,17 @@
 
 	let counter = VIP_CODE_REGENERATE_INTERVAL;
 	let countdown: NodeJS.Timeout | undefined;
+	const maxRetries = 3;
+	let retries = 0;
 
 	let code: string;
 	const generateCode = async () => {
-		if (nonNullish($authIdentity)) {
+		if (nonNullish($authIdentity) && retries !== maxRetries) {
 			const vipReward = await getNewReward($authIdentity);
 			if (nonNullish(vipReward)) {
 				code = vipReward.code;
+			} else {
+				retries++;
 			}
 		}
 	};
