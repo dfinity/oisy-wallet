@@ -4,6 +4,7 @@ import {
 	getNewVipReward as getNewVipRewardApi,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
+import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
@@ -11,7 +12,6 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { LOCAL } from '$lib/constants/app.constants';
 
 const queryVipUser = async (params: {
 	identity: Identity;
