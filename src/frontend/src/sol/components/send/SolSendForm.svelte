@@ -26,12 +26,7 @@
 </script>
 
 <SendForm on:icNext {source} token={$token} balance={$balance} disabled={invalid}>
-	<SolSendDestination
-		slot="destination"
-		bind:destination
-		bind:invalidDestination
-		on:icQRCodeScan
-	/>
+	<SolSendDestination slot="destination" bind:destination bind:invalidDestination on:icQRCodeScan />
 
 	<SolSendAmount slot="amount" bind:amount bind:amountError />
 
