@@ -83,7 +83,7 @@ echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
             record {
               credential_type = variant { ProofOfUniqueness };
               ii_origin = \"$II_VC_URL\";
-              ii_canister_id = principal \"$CANISTER_ID_II\";
+              ii_canister_id = principal \"$CANISTER_ID_INTERNET_IDENTITY\";
               issuer_origin = \"$POUH_ISSUER_VC_URL\";
               issuer_canister_id = principal \"$CANISTER_ID_POUH_ISSUER\";
             }
