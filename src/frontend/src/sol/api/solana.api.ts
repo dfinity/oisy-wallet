@@ -2,10 +2,8 @@ import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress } from '@solana/addresses';
 import { signature } from '@solana/keys';
@@ -63,8 +61,7 @@ export const getSolTransactions = async ({
 				.map(async (signature) => await getTransactionDetailForSignature({ signature, network }))
 		);
 
-		transactions.push(...transactionDetails
-			.filter(nonNullish));
+		transactions.push(...transactionDetails.filter(nonNullish));
 
 		const hasNoMoreSignaturesLeft = signatures.length < limit;
 		const hasLoadedEnoughTransactions = transactions.length >= limit;
