@@ -9,7 +9,7 @@ import {
 	type SolRpcConnectionConfig,
 	type SolanaNetworkType
 } from '$sol/types/network';
-import { createSolanaRpc } from '@solana/rpc';
+import { createSolanaRpc, type Rpc, type SolanaRpcApi } from '@solana/rpc';
 
 const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	[SolanaNetworks.mainnet]: {
@@ -28,8 +28,8 @@ const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 
 const solanaRpcConfig = (network: SolanaNetworkType): SolRpcConnectionConfig => rpcs[network];
 
-export const solanaHttpRpc = (network: SolanaNetworkType): ReturnType<typeof createSolanaRpc> => {
-	const rpc = solanaRpcConfig(network);
+export const solanaHttpRpc = (network: SolanaNetworkType): Rpc<SolanaRpcApi> => {
+	const { httpUrl } = solanaRpcConfig(network);
 
-	return createSolanaRpc(rpc.httpUrl);
+	return createSolanaRpc(httpUrl);
 };
