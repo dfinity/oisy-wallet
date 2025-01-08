@@ -38,6 +38,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		confirm_navigate: string;
+		vip_qr_code: string;
 	};
 	alt: {
 		tokens: string;
@@ -49,6 +50,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		open_twitter: string;
+		vip_qr_code: string;
 	};
 }
 
@@ -134,6 +136,8 @@ interface I18nInit {
 		no_infura_cketh_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
+		no_solana_rpc: string;
+		no_solana_network: string;
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
@@ -158,6 +162,7 @@ interface I18nInit {
 		loading_wallet_timeout: string;
 		allow_signing: string;
 		btc_wallet_error: string;
+		sol_wallet_error: string;
 	};
 }
 
@@ -250,7 +255,16 @@ interface I18nReceive {
 		info: { no_new_btc: string; check_btc_progress: string };
 		error: { unexpected_btc: string };
 	};
-	solana: { text: { solana_address_copied: string } };
+	solana: {
+		text: {
+			solana_address: string;
+			solana_testnet_address: string;
+			solana_devnet_address: string;
+			solana_local_address: string;
+			solana_address_copied: string;
+			display_solana_address_qr: string;
+		};
+	};
 }
 
 interface I18nSend {
@@ -644,6 +658,21 @@ interface I18nAbout {
 	};
 }
 
+interface I18nVip {
+	reward: {
+		text: {
+			open_wallet: string;
+			title_successful: string;
+			title_failed: string;
+			reward_received: string;
+			reward_failed: string;
+			reward_received_description: string;
+			reward_failed_description: string;
+		};
+		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+	};
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -732,6 +761,7 @@ interface I18n {
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
+	vip: I18nVip;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;
