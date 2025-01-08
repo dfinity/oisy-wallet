@@ -10,7 +10,6 @@
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
 
-	export let networkId: NetworkId | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
 	export let source: string;
@@ -31,7 +30,6 @@
 		slot="destination"
 		bind:destination
 		bind:invalidDestination
-		{networkId}
 		on:icQRCodeScan
 	/>
 
