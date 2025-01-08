@@ -9,9 +9,11 @@ const REQUESTED_ENV = process.env.ENV ?? process.env.DFX_NETWORK ?? '';
 export const ENV =
 	REQUESTED_ENV === 'ic'
 		? 'production'
-		: ['staging', 'beta'].includes(REQUESTED_ENV)
-			? REQUESTED_ENV
-			: 'development';
+		: (REQUESTED_ENV ?? '').startsWith('test_fe_')
+			? 'staging'
+			: ['staging', 'beta'].includes(REQUESTED_ENV)
+				? REQUESTED_ENV
+				: 'development';
 
 export const replaceEnv = ({ content, pattern, value }) => {
 	const regex = new RegExp(pattern, 'g');
