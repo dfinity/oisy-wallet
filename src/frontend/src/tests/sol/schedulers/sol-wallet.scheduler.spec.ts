@@ -7,8 +7,8 @@ import { SolanaNetworks } from '$sol/types/network';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { lamports } from '@solana/rpc-types';
 import { jsonReplacer } from '@dfinity/utils';
+import { lamports } from '@solana/rpc-types';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
@@ -31,11 +31,7 @@ describe('sol-wallet.scheduler', () => {
 		}
 	};
 
-	const mockPostMessage = ({
-		withTransactions
-	}: {
-		withTransactions: boolean;
-	}) => ({
+	const mockPostMessage = ({ withTransactions }: { withTransactions: boolean }) => ({
 		msg: 'syncSolWallet',
 		data: {
 			wallet: {
@@ -69,7 +65,9 @@ describe('sol-wallet.scheduler', () => {
 		vi.useFakeTimers();
 
 		spyLoadBalance = vi.spyOn(solanaApi, 'loadSolLamportsBalance').mockResolvedValue(mockBalance);
-		spyLoadTransactions = vi.spyOn(solanaApi, 'getSolTransactions').mockResolvedValue(mockSolCertifiedTransactions);
+		spyLoadTransactions = vi
+			.spyOn(solanaApi, 'getSolTransactions')
+			.mockResolvedValue(mockSolCertifiedTransactions);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
@@ -100,7 +98,10 @@ describe('sol-wallet.scheduler', () => {
 
 			expect(postMessageMock).toHaveBeenCalledTimes(3);
 			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessage({ withTransactions: true }));
+			expect(postMessageMock).toHaveBeenNthCalledWith(
+				2,
+				mockPostMessage({ withTransactions: true })
+			);
 			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
@@ -197,7 +198,7 @@ describe('sol-wallet.scheduler', () => {
 
 			expect(scheduler['store'].transactions).toEqual(
 				mockSolCertifiedTransactions.reduce(
-					(acc: Record<string, typeof mockSolCertifiedTransactions[0]>, transaction) => ({
+					(acc: Record<string, (typeof mockSolCertifiedTransactions)[0]>, transaction) => ({
 						...acc,
 						[transaction.data.id]: transaction
 					}),

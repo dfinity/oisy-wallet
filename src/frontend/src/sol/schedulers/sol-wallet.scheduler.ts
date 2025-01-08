@@ -1,5 +1,5 @@
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import { type Scheduler, type SchedulerJobData, SchedulerTimer } from '$lib/schedulers/scheduler';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { SolAddress } from '$lib/types/address';
 import type {
 	PostMessageDataRequestSol,
