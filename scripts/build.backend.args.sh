@@ -18,6 +18,7 @@ print_help() {
 	exit 0
 }
 
+# We write the output to afile including teh network name, then we symlink it to the generic name specified in dfx.json.
 CANISTER_ARG_PATH_BACKEND="$(jq -re .canisters.backend.init_arg_file dfx.json)"
 CANISTER_ARG_PATH_BACKEND_FOR_NETWORK="${CANISTER_ARG_PATH_BACKEND%.did}.$ENV.did"
 mkdir -p "$(dirname "$CANISTER_ARG_PATH_BACKEND")"
