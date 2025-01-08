@@ -24,14 +24,6 @@ CANISTER_ARG_PATH_BACKEND_FOR_NETWORK="${CANISTER_ARG_PATH_BACKEND%.did}.$ENV.di
 mkdir -p "$(dirname "$CANISTER_ARG_PATH_BACKEND")"
 ln -s -f "$(basename "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK")" "$CANISTER_ARG_PATH_BACKEND"
 
-
-II_CANISTER_ID="$(dfx canister id internet_identity --network "${ENV:-local}")"
-BACKEND_CANISTER_ID="$(dfx canister id backend --network "${ENV:-local}")"
-POUH_ISSUER_CANISTER_ID="$(dfx canister id pouh_issuer --network "${ENV:-local}")"
-SIGNER_CANISTER_ID="$(dfx canister id signer --network "${ENV:-local}")"
-# Rewards canister is optional for local deployments:
-REWARDS_CANISTER_ID="$(dfx canister id rewards --network "${ENV:-local}" || [[ "${ENV:-local}" == "local" ]])"
-
 case $ENV in
 "staging")
   ECDSA_KEY_NAME="test_key_1"
@@ -39,7 +31,7 @@ case $ENV in
   ic_root_key_der="null"
   # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # Represents more an ID than a URL
-  POUH_ISSUER_VC_URL="https://${POUH_ISSUER_CANISTER_ID}.icp0.io/"
+  POUH_ISSUER_VC_URL="https://${CANISTER_ID_POUH_ISSUER}.icp0.io/"
   DERIVATION_ORIGIN="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io"
   ;;
 "ic")
@@ -64,15 +56,15 @@ case $ENV in
   # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
   # We use the dummy issuer canister for local development
   POUH_ISSUER_VC_URL="https://dummy-issuer.vc/"
-  DERIVATION_ORIGIN="http://${BACKEND_CANISTER_ID}.localhost:4943"
+  DERIVATION_ORIGIN="http://${CANISTER_ID_BACKEND}.localhost:4943"
   ;;
 esac
 
 # If the rewards canister is known, it may perform priviliged actions such as find which users are eligible for rewards.
-if [[ "${REWARDS_CANISTER_ID:-}" == "" ]]; then
+if [[ "${CANISTER_ID_REWARDS:-}" == "" ]]; then
   ALLOWED_CALLERS="vec {}"
 else
-  ALLOWED_CALLERS="vec{ principal \"$REWARDS_CANISTER_ID\" }"
+  ALLOWED_CALLERS="vec{ principal \"$CANISTER_ID_REWARDS\" }"
 fi
 
 # URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
@@ -86,35 +78,34 @@ if [ -n "${ENV+1}" ]; then
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = $ALLOWED_CALLERS;
-         cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
+         cfs_canister_id = opt principal \"$CANISTER_ID_SIGNER\";
          derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };
               ii_origin = \"$II_VC_URL\";
-              ii_canister_id = principal \"$II_CANISTER_ID\";
+              ii_canister_id = principal \"$CANISTER_ID_II\";
               issuer_origin = \"$POUH_ISSUER_VC_URL\";
-              issuer_canister_id = principal \"$POUH_ISSUER_CANISTER_ID\";
+              issuer_canister_id = principal \"$CANISTER_ID_POUH_ISSUER\";
             }
          };
          ic_root_key_der = $ic_root_key_der;
      }
   })"
 else
-  DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
   echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = $ALLOWED_CALLERS;
-         cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
+         cfs_canister_id = opt principal \"$CANISTER_ID_SIGNER\";
          derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };
               ii_origin = \"$II_VC_URL\";
-              ii_canister_id = principal \"$II_CANISTER_ID\";
+              ii_canister_id = principal \"$CANISTER_ID_II\";
               issuer_origin = \"$POUH_ISSUER_VC_URL\";
-              issuer_canister_id = principal \"$POUH_ISSUER_CANISTER_ID\";
+              issuer_canister_id = principal \"$CANISTER_ID_POUH_ISSUER\";
             }
          };
          ic_root_key_der = $ic_root_key_der;
