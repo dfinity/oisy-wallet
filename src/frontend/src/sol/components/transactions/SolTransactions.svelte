@@ -46,7 +46,6 @@
 	{/if}
 </SolTransactionsSkeletons>
 
-
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
 	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
 {/if}
