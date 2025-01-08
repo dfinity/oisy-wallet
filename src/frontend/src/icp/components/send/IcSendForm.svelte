@@ -39,15 +39,11 @@
 	disabled={invalid}
 	hideSource={simplifiedForm}
 >
-	{#if !simplifiedForm}
-		<IcSendDestination
-			slot="destination"
-			bind:destination
-			bind:invalidDestination
-			{networkId}
-			on:icQRCodeScan
-		/>
-	{/if}
+	<div slot="destination">
+		{#if !simplifiedForm}
+			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{/if}
+	</div>
 
 	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
 
