@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal, QRCode } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -15,10 +15,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { VIP_CODE_REGENERATE_BUTTON, VIP_QR_CODE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
+	import { VIP_CODE_REGENERATE_INTERVAL } from '$lib/constants/app.constants';
 
-	const secondsToRegenerate = 45;
-	let counter = secondsToRegenerate;
-	let countdown: NodeJS.Timeout;
+	let counter = VIP_CODE_REGENERATE_INTERVAL;
+	let countdown: NodeJS.Timeout | undefined;
 
 	let code: string;
 	const generateCode = async () => {
@@ -33,7 +33,7 @@
 	const regenerateCode = async () => {
 		clearInterval(countdown);
 		await generateCode();
-		counter = secondsToRegenerate;
+		counter = VIP_CODE_REGENERATE_INTERVAL;
 		countdown = setInterval(intervalFunction, 1000);
 	};
 
@@ -46,10 +46,13 @@
 	};
 
 	onMount(() => {
+		generateCode();
 		countdown = setInterval(intervalFunction, 1000);
 	});
 
-	generateCode();
+	onDestroy(() => {
+		clearInterval(countdown);
+	})
 
 	let qrCodeUrl;
 	$: qrCodeUrl = `${window.location.origin}/?code=${code}`;
