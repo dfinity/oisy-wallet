@@ -6,5 +6,9 @@
 	"POPEYE": {
 		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai",
 		"ledgerCanisterId": "6fvyi-faaaa-aaaam-qbiga-cai"
+	},
+	"CLOUD": {
+		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
+		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai"
 	}
 }
