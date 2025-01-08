@@ -90,11 +90,9 @@
 		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-full p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<svelte:fragment slot="logo">
-						<div class="flex items-center justify-center rounded-lg bg-white p-2">
-							<IconAstronautHelmet />
-						</div>
-					</svelte:fragment>
+					<div slot="logo" class="flex items-center justify-center rounded-lg bg-white p-2">
+						<IconAstronautHelmet />
+					</div>
 				</QRCode>
 			{/if}
 		</div>
