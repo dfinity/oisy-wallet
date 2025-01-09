@@ -91,9 +91,8 @@ export const getNewReward = async (identity: Identity): Promise<VipReward | unde
 			msg: { text: vip.reward.error.loading_reward },
 			err
 		});
+		return undefined;
 	}
-
-	// TODO: should return a ResultSuccess
 };
 
 const updateVipReward = async ({
