@@ -51,6 +51,7 @@ export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 
 export const BTC_TESTNET_TOGGLE = 'btc-testnet-toggle';
 
