@@ -5,8 +5,8 @@ import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address as solAddress } from '@solana/addresses';
-import { signature } from '@solana/keys';
+import { address as solAddress, type Address } from '@solana/addresses';
+import { signature, type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
 
@@ -26,6 +26,9 @@ export const loadSolLamportsBalance = async ({
 	return balance;
 };
 
+/**
+ * Fetches transactions without an error for a given wallet address.
+ */
 export const getSolTransactions = async ({
 	address,
 	network,
@@ -34,48 +37,77 @@ export const getSolTransactions = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-	before?: string;
+	before?: Signature;
 	limit?: number;
 }): Promise<SolRpcTransaction[]> => {
-	const { getSignaturesForAddress } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
+	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
+	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
 
-	const transactions: SolRpcTransaction[] = [];
-	let lastSignature = nonNullish(before) ? signature(before) : undefined;
-
-	while (transactions.length < limit) {
-		const signatures = await getSignaturesForAddress(wallet, {
-			before: lastSignature,
-			limit
-		}).send();
-
-		if (signatures.length === 0) {
-			break;
-		}
-
-		lastSignature = last(signatures as Writeable<typeof signatures>)?.signature;
-
-		const transactionDetails = await Promise.all(
-			signatures
-				.filter(({ err }) => isNullish(err))
-				.map(async (signature) => await getTransactionDetailForSignature({ signature, network }))
-		);
-
-		transactions.push(...transactionDetails.filter(nonNullish));
-
-		const hasNoMoreSignaturesLeft = signatures.length < limit;
-		const hasLoadedEnoughTransactions = transactions.length >= limit;
-
-		if (hasNoMoreSignaturesLeft || hasLoadedEnoughTransactions) {
-			break;
-		}
-	}
+	const transactions = await signatures.reduce(
+		async (accPromise, signature) => {
+			const acc = await accPromise;
+			const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
+			if (nonNullish(transactionDetail)) {
+				acc.push(transactionDetail);
+			}
+			return acc;
+		},
+		Promise.resolve([] as SolRpcTransaction[])
+	);
 
 	return transactions.slice(0, limit);
 };
 
-const getTransactionDetailForSignature = async ({
-	signature: { confirmationStatus, signature },
+/**
+ * Fetches signatures without an error for a given wallet address.
+ */
+const fetchSignatures = async ({
+	network,
+	wallet,
+	before,
+	limit
+}: {
+	network: SolanaNetworkType;
+	wallet: Address;
+	before?: Signature;
+	limit: number;
+}): Promise<SolSignature[]> => {
+	const { getSignaturesForAddress } = solanaHttpRpc(network);
+
+	let accumulatedSignatures: SolSignature[] = [];
+
+	const fetchSignaturesBatch = async (before: Signature | undefined): Promise<SolSignature[]> => {
+		const fetchedSignatures = await getSignaturesForAddress(wallet, {
+			before,
+			limit
+		}).send();
+
+		const successfulSignatures = fetchedSignatures.filter(({ err }) => isNullish(err));
+
+		accumulatedSignatures = successfulSignatures.reduce((acc, signature) => {
+			if (acc.length < limit) {
+				acc.push(signature);
+			}
+			return acc;
+		}, accumulatedSignatures);
+
+		const hasLoadedEnoughTransactions = accumulatedSignatures.length >= limit;
+		const hasNoMoreSignaturesLeft = fetchedSignatures.length < limit;
+
+		if (hasLoadedEnoughTransactions || hasNoMoreSignaturesLeft) {
+			return accumulatedSignatures.slice(0, limit);
+		}
+
+		const lastSignature = last(fetchedSignatures as Writeable<typeof fetchedSignatures>)?.signature;
+		return fetchSignaturesBatch(lastSignature);
+	};
+
+	return await fetchSignaturesBatch(before);
+};
+
+const fetchTransactionDetailForSignature = async ({
+	signature: { signature, confirmationStatus },
 	network
 }: {
 	signature: SolSignature;
