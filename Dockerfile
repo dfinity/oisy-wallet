@@ -86,7 +86,11 @@ RUN mkdir target
 COPY ./target/tags target/tags
 COPY ./target/commit target/commit
 RUN touch src/*/src/*.rs
-RUN dfx build --ic backend
+# The Wasm build is slow and typically cached
+RUN scripts/build.backend.wasm.sh
+# The network may be overridden with arguments to the docker call:  --env DFX_NETWORK=whatever 
+ENV DFX_NETWORK=ic
+RUN dfx build backend --network "$DFX_NETWORK"
 
 FROM scratch AS backend
 COPY --from=build_backend out/ /
