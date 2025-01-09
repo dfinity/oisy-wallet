@@ -85,7 +85,6 @@ RUN ls scripts
 RUN mkdir target
 COPY ./target/tags target/tags
 COPY ./target/commit target/commit
-RUN touch src/*/src/*.rs
 # The Wasm build is slow and typically cached
 RUN scripts/build.backend.wasm.sh
 # The network may be overridden with arguments to the docker call:  --env DFX_NETWORK=whatever 
