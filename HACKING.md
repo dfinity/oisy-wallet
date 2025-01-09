@@ -89,6 +89,7 @@ A list of useful faucets and ERC20 tokens on Sepolia:
   - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
+- SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com//)
 
 ## Testing
 
