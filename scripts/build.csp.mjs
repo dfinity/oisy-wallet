@@ -154,10 +154,13 @@ const updateCSP = (indexHtml) => {
 
 	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
 
+	const solanaRpcApiConnectSrc =
+		'https://api.mainnet-beta.solana.com wss://api.mainnet-beta.solana.com https://api.testnet.solana.com wss://api.testnet.solana.com https://api.devnet.solana.com wss://api.devnet.solana.com';
+
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaRpcApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
