@@ -9,7 +9,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { VIP_CODE_REGENERATE_INTERVAL } from '$lib/constants/app.constants';
+	import { VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
 		VIP_CODE_REGENERATE_BUTTON,
 		VIP_QR_CODE_COPY_BUTTON
@@ -21,10 +21,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let counter = VIP_CODE_REGENERATE_INTERVAL;
+	let counter = VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS;
 	let countdown: NodeJS.Timeout | undefined;
-	const maxRetries = 3;
-	let retries = 0;
+	const maxRetriesToGetRewardCode = 3;
+	let retriesToGetRewardCode = 0;
 
 	let code: string;
 	const generateCode = async () => {
@@ -33,20 +33,23 @@
 			return;
 		}
 
-		if (retries !== maxRetries) {
-			const vipReward = await getNewReward($authIdentity);
-			if (nonNullish(vipReward)) {
-				code = vipReward.code;
-			} else {
-				retries++;
-			}
+		const vipReward = await getNewReward($authIdentity);
+		if (nonNullish(vipReward)) {
+			code = vipReward.code;
+		} else {
+			retriesToGetRewardCode++;
 		}
 	};
 
 	const regenerateCode = async () => {
 		clearInterval(countdown);
+
+		if (retriesToGetRewardCode >= maxRetriesToGetRewardCode) {
+			return;
+		}
+
 		await generateCode();
-		counter = VIP_CODE_REGENERATE_INTERVAL;
+		counter = VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS;
 		countdown = setInterval(intervalFunction, 1000);
 	};
 
@@ -66,20 +69,14 @@
 		}
 	};
 
-	onMount(() => {
-		generateCode();
-		countdown = setInterval(intervalFunction, 1000);
-		document.addEventListener('visibilitychange', onVisibilityChange);
-	});
-
-	onDestroy(() => {
-		clearInterval(countdown);
-		document.removeEventListener('visibilitychange', onVisibilityChange);
-	});
+	onMount(regenerateCode);
+	onDestroy(clearInterval(countdown));
 
 	let qrCodeUrl;
 	$: qrCodeUrl = `${window.location.origin}/?code=${code}`;
 </script>
+
+<svelte:window on:visibilitychange={onVisibilityChange} />
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
