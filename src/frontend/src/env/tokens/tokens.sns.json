@@ -305,7 +305,7 @@
 		"indexCanisterId": "a5dir-yyaaa-aaaaq-aaczq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Yuku DAO",
+			"name": "Yuku AI",
 			"symbol": "YUKU",
 			"fee": {
 				"__bigint__": "1000000"
