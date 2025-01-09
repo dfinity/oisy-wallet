@@ -78,19 +78,19 @@
 					class:1.5md:h-md:block={$authNotSignedIn}
 					class="text-center md:text-left"
 				>
-					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
+					{$i18n.footer.text.incubated_with}
 					<IconHeart styleClass="inline-flex mb-1" />
-					{replaceOisyPlaceholders($i18n.footer.text.by)}
+					{$i18n.footer.text.by}
 					<ExternalLink
 						href="https://dfinity.org"
-						ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
+						ariaLabel={$i18n.footer.alt.dfinity}
 						iconVisible={false}
 						color="blue"
 					>
-						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
+						{$i18n.footer.text.dfinity_foundation}
 					</ExternalLink>
 					<span class="whitespace-nowrap"
-						>{replaceOisyPlaceholders($i18n.footer.text.copyright)}</span
+					>{$i18n.footer.text.copyright}</span
 					>
 				</span>
 			</div>
