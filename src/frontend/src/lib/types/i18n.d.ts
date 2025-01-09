@@ -105,7 +105,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
+	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 
@@ -588,13 +588,17 @@ interface I18nTransaction {
 		to_copied: string;
 		block: string;
 		interacted_with: string;
-		pending: string;
-		unconfirmed: string;
-		confirmed: string;
 		status: string;
 		confirmations: string;
 	};
-	status: { included: string; safe: string; finalised: string };
+	status: {
+		confirmed: string;
+		included: string;
+		finalised: string;
+		pending: string;
+		safe: string;
+		unconfirmed: string;
+	};
 	label: {
 		reimbursement: string;
 		twin_token_sent: string;
