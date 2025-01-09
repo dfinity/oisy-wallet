@@ -64,3 +64,6 @@ export const TOKEN_MENU_ETH = 'token-menu-eth';
 export const TOKEN_MENU_ETH_BUTTON = 'token-menu-eth-button';
 export const TOKEN_MENU_BTC = 'token-menu-btc';
 export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
+
+export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
+export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
