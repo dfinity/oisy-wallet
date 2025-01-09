@@ -121,6 +121,10 @@ export const modalAboutWhyOisy: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'about-why-oisy'
 );
+export const modalVipQrCode: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'vip-qr-code'
+);
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'
