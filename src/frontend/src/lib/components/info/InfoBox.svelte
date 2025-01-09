@@ -8,12 +8,9 @@
 </script>
 
 {#if !hideInfo}
-	<div
-		class="relative mb-12 rounded-lg bg-white px-6 py-4"
-		transition:slide={SLIDE_EASING}
-	>
-		<button class="text-tertiary absolute right-2 top-2" on:click aria-label={$i18n.core.text.close}
-			><IconClose/></button
+	<div class="relative mb-12 rounded-lg bg-white px-6 py-4" transition:slide={SLIDE_EASING}>
+		<button class="absolute right-2 top-2 text-tertiary" on:click aria-label={$i18n.core.text.close}
+			><IconClose /></button
 		>
 		<slot />
 	</div>
