@@ -1,14 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
-	import SendSource from '$lib/components/send/SendSource.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -32,25 +29,25 @@
 		nonNullish(amountError) ||
 		isNullishOrEmpty(destination) ||
 		isNullish(amount);
-
-	const dispatch = createEventDispatcher();
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
-	<ContentWithToolbar>
+<SendForm
+	on:icNext
+	{source}
+	token={$sendToken}
+	balance={$balance}
+	disabled={invalid}
+	hideSource={simplifiedForm}
+>
+	<div slot="destination">
 		{#if !simplifiedForm}
 			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 		{/if}
+	</div>
 
-		<IcSendAmount bind:amount bind:amountError {networkId} />
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
 
-		<SendSource token={$sendToken} balance={$balance} {source} hideSource={simplifiedForm} />
+	<IcFeeDisplay slot="fee" {networkId} />
 
-		<IcFeeDisplay {networkId} />
-
-		<ButtonGroup slot="toolbar" testId="toolbar">
-			<slot name="cancel" />
-			<ButtonNext disabled={invalid} />
-		</ButtonGroup>
-	</ContentWithToolbar>
-</form>
+	<slot name="cancel" slot="cancel" />
+</SendForm>
