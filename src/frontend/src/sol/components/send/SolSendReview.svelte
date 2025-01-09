@@ -5,13 +5,14 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let network: Network | undefined = undefined;
 	export let source: string;
 
-	// TODO: add checks for insufficient funds for fee
+	// TODO: add checks for insufficient funds for fee, when we calculate the fee
 	let insufficientFundsForFee: boolean;
 	$: insufficientFundsForFee = false;
 
@@ -19,8 +20,7 @@
 	$: disableSend = insufficientFundsForFee || invalid;
 
 	let invalid = true;
-	// TODO: check if destination is a good SOL address
-	$: invalid = invalidAmount(amount);
+	$: invalid = invalidSolAddress(destination) || invalidAmount(amount);
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>

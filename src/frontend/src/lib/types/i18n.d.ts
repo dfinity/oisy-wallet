@@ -676,6 +676,15 @@ interface I18nVip {
 		};
 		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
 	};
+	invitation: {
+		text: {
+			title: string;
+			invitation_link_copied: string;
+			generate_new_link: string;
+			generating_new_code: string;
+			regenerate_countdown_text: string;
+		};
+	};
 }
 
 interface I18nSigner {
@@ -694,6 +703,7 @@ interface I18nSigner {
 	origin: { text: { request_from: string; invalid_origin: string }; alt: { link_to_dapp: string } };
 	consent_message: {
 		text: { loading: string };
+		warning: { token_without_consent_message: string };
 		error: { no_approve_callback: string; no_reject_callback: string; retrieve: string };
 	};
 	call_canister: {
