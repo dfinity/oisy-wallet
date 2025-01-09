@@ -807,6 +807,9 @@
 			"text": {
 				"loading": "Loading consent message..."
 			},
+			"warning": {
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
+			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
 				"no_reject_callback": "No callback to reject the consent message, which is unexpected. Close the wallet and try again.",
