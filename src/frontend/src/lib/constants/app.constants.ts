@@ -63,6 +63,12 @@ export const SIGNER_CANISTER_ID = LOCAL
 		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
 		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
 
+export const KONG_BACKEND_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_KONG_BACKEND_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_KONG_BACKEND_CANISTER_ID
+		: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
+
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
