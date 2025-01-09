@@ -117,7 +117,7 @@
 			<span class="w-full"><SkeletonText /></span>
 		{/if}
 
-		<ButtonGroup styleClass="flex-col sm:flex-row" slot="toolbar">
+		<ButtonGroup slot="toolbar">
 			<ButtonCloseModal />
 			<Button
 				paddingSmall
