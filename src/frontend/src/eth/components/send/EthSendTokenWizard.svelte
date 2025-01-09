@@ -4,7 +4,7 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import SendForm from '$eth/components/send/SendForm.svelte';
+	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 	import SendReview from '$eth/components/send/SendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
@@ -263,7 +263,7 @@
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SendForm
+		<EthSendForm
 			on:icNext
 			on:icClose={close}
 			on:icQRCodeScan
@@ -282,7 +282,7 @@
 					<ButtonCancel on:click={close} />
 				{/if}
 			</svelte:fragment>
-		</SendForm>
+		</EthSendForm>
 	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 		<SendQRCodeScan
 			expectedToken={$sendToken}

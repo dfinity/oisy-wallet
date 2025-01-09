@@ -22,6 +22,26 @@
 				}
 			}
 		},
+		"kong_backend": {
+			"type": "custom",
+			"build": "scripts/build.kong_backend.sh",
+			"candid": "target/kong_backend.did",
+			"wasm": "target/kong_backend.wasm.gz",
+			"shrink": false,
+			"specified_id": "l4lgk-raaaa-aaaar-qahpq-cai",
+			"remote": {
+				"id": {
+					"ic": "2ipq2-uqaaa-aaaar-qailq-cai",
+					"beta": "2ipq2-uqaaa-aaaar-qailq-cai",
+					"test_be_1": "l4lgk-raaaa-aaaar-qahpq-cai",
+					"test_fe_1": "l4lgk-raaaa-aaaar-qahpq-cai",
+					"test_fe_2": "l4lgk-raaaa-aaaar-qahpq-cai",
+					"test_fe_3": "l4lgk-raaaa-aaaar-qahpq-cai",
+					"test_fe_4": "l4lgk-raaaa-aaaar-qahpq-cai",
+					"staging": "l4lgk-raaaa-aaaar-qahpq-cai"
+				}
+			}
+		},
 		"backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
