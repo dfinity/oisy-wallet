@@ -31,6 +31,26 @@ describe('UrlSchema', () => {
 		expect(() => UrlSchema.parse(invalidUrl)).toThrow('Invalid URL.');
 	});
 
+	it('should accept valid wss URLs', () => {
+		const validUrl = 'wss://example.com';
+		expect(() => UrlSchema.parse(validUrl)).not.toThrow();
+	});
+
+	it('should accept valid wss URLs with port', () => {
+		const validUrl = 'wss://example.com:666';
+		expect(() => UrlSchema.parse(validUrl)).not.toThrow();
+	});
+
+	it('should accept valid wss URLs with sub domain', () => {
+		const validUrl = 'wss://staging.oisy.com';
+		expect(() => UrlSchema.parse(validUrl)).not.toThrow();
+	});
+
+	it('should accept valid wss URLs with route', () => {
+		const validUrl = 'wss://staging.oisy.com/sign';
+		expect(() => UrlSchema.parse(validUrl)).not.toThrow();
+	});
+
 	it('should reject localhost with an invalid protocol', () => {
 		const invalidUrl = 'ftp://localhost:3000';
 		expect(() => UrlSchema.parse(invalidUrl)).toThrow('Invalid URL.');
