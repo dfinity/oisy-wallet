@@ -148,3 +148,76 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 	},
 	version: 'legacy'
 };
+
+export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
+	blockTime: 1736329927n as UnixTimestamp,
+	confirmationStatus: 'finalized',
+	id: '2cg1qDf4swkfKiZDJTDGxHaiN2LBLLeVM7E87yLjUTpAcCp2rq8mxR2mtvjMU97JcmkiTE8QkB8vNWN1mtrTT2bc',
+	meta: {
+		computeUnitsConsumed: 450n,
+		err: null,
+		fee: lamports(14900n),
+		innerInstructions: [],
+		loadedAddresses: {
+			readonly: [],
+			writable: []
+		},
+		logMessages: [
+			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
+			'Program ComputeBudget111111111111111111111111111111 success',
+			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
+			'Program ComputeBudget111111111111111111111111111111 success',
+			'Program 11111111111111111111111111111111 invoke [1]',
+			'Program 11111111111111111111111111111111 success'
+		],
+		postBalances: [lamports(4843782320n), lamports(1n), lamports(1n)],
+		postTokenBalances: [],
+		preBalances: [lamports(4843797220n), lamports(1n), lamports(1n)],
+		preTokenBalances: [],
+		rewards: [],
+		status: {
+			Ok: null
+		}
+	},
+	slot: 352647164n,
+	transaction: {
+		message: {
+			addressTableLookups: [],
+			accountKeys: [
+				address(mockSolAddress),
+				address('11111111111111111111111111111111'),
+				address('ComputeBudget111111111111111111111111111111')
+			],
+			header: {
+				numReadonlySignedAccounts: 0,
+				numReadonlyUnsignedAccounts: 2,
+				numRequiredSignatures: 1
+			},
+			instructions: [
+				{
+					accounts: [],
+					data: '3DVGviTXKAPH' as Base58EncodedBytes,
+					programIdIndex: 2,
+					stackHeight: undefined
+				},
+				{
+					accounts: [],
+					data: 'LCQ37u' as Base58EncodedBytes,
+					programIdIndex: 2,
+					stackHeight: undefined
+				},
+				{
+					accounts: [0, 1],
+					data: '3Bxs3zzLZLuLQEYX' as Base58EncodedBytes,
+					programIdIndex: 1,
+					stackHeight: undefined
+				}
+			],
+			recentBlockhash: blockhash('Cp5CeDEfmtwQKKenDaiewY2wNuZJmEAJvSMV5kpFoFm3')
+		},
+		signatures: [
+			'2cg1qDf4swkfKiZDJTDGxHaiN2LBLLeVM7E87yLjUTpAcCp2rq8mxR2mtvjMU97JcmkiTE8QkB8vNWN1mtrTT2bc'
+		] as Base58EncodedBytes[]
+	},
+	version: 'legacy'
+};
