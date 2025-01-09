@@ -675,6 +675,15 @@ interface I18nVip {
 		};
 		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
 	};
+	invitation: {
+		text: {
+			title: string;
+			invitation_link_copied: string;
+			generate_new_link: string;
+			generating_new_code: string;
+			regenerate_countdown_text: string;
+		};
+	};
 }
 
 interface I18nSigner {
