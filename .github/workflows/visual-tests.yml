@@ -133,15 +133,7 @@ jobs:
             echo "os_suffix=darwin" >> $GITHUB_OUTPUT
           fi
 
-#      - name: Initialize snapshots cache
-#        id: cache
-#        uses: actions/cache@v4
-#        with:
-#          key: snapshots-${{ matrix.os }}-${{ github.ref }}
-#          path: e2e
-
-      - name: Update snapshots # if cache missed
-#        if: ${{steps.cache.outputs.cache-hit != 'true' || inputs.update-snapshots == 'true'}}
+      - name: Update snapshots
         run: npm run e2e:snapshots
 
       - name: Upload Playwright Report if failing
@@ -191,12 +183,6 @@ jobs:
           name: updated-snapshots-${{ matrix.os }}
           path: e2e
         
-#      - name: Download macOS Snapshots
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: updated-snapshots-macos-14
-#          path: e2e
-        
       - name: Check Final Changes
         run: |
           git add e2e
@@ -239,51 +225,6 @@ jobs:
             ```
             ${{ env.MODIFIED_FILES }}
             ```
-
-  # Run E2E tests on PR if E2E files changed          
-  e2e-tests:
-    name: Run E2E Tests
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-14]
-    needs: [check-e2e-changes, build-backend, update-snapshots, finalize-snapshots]
-    if: ${{ github.event_name == 'pull_request' && needs.check-e2e-changes.outputs.e2e-changed == 'true' }}
-    permissions:
-      contents: write
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-          
-      - name: Download WASM artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend.wasm.gz
-          
-      - name: Prepare macOS
-        if: runner.os == 'macOS'
-        uses: ./.github/actions/prepare-macos
-          
-      - name: Set Environment Variables
-        run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
-          
-      - name: Deploy backend
-        uses: ./.github/actions/deploy-backend
-          
-      - name: Prepare env
-        uses: ./.github/actions/prepare
-          
-      - name: Run E2E tests
-        run: npm run e2e:ci
-          
-      - name: Upload Playwright Report if failing
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
   
   # Determine if PR can be merged based on E2E changes and test results
   may-merge-e2e:
