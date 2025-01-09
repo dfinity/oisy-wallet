@@ -112,9 +112,10 @@
 	},
 	"footer": {
 		"text": {
-			"incubated_with": "Incubated with ❤\uFE0F by",
+			"incubated_with": "Incubated with",
+			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2024"
+			"copyright": "© 2025"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
@@ -659,16 +660,16 @@
 			"to_copied": "To address copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
-			"pending": "Pending...",
-			"unconfirmed": "Unconfirmed",
-			"confirmed": "Confirmed",
 			"status": "Status",
 			"confirmations": "Confirmations"
 		},
 		"status": {
+			"confirmed": "Confirmed",
 			"included": "Included",
+			"finalised": "Finalised",
+			"pending": "Pending...",
 			"safe": "Safe",
-			"finalised": "Finalised"
+			"unconfirmed": "Unconfirmed"
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
