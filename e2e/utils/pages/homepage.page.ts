@@ -1,7 +1,10 @@
 import {
+	BTC_TESTNET_TOGGLE,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	NAVIGATION_ITEM_HOMEPAGE,
+	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	RECEIVE_TOKENS_MODAL,
@@ -225,13 +228,26 @@ abstract class Homepage {
 		if (await this.isVisibleByTestId(testId)) {
 			await this.clickByTestId(testId);
 		} else {
-			if (await this.isVisibleByTestId(NAVIGATION_MENU_BUTTON)) {
-				await this.clickByTestId(NAVIGATION_MENU_BUTTON);
-			}
-			if (await this.isVisibleByTestId(testId)) {
-				await this.clickByTestId(testId);
-			}
+			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
+			await navigationMenuButton.click();
+			const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU);
+			await navigationMenu.getByTestId(testId).click();
 		}
+	}
+
+	async activateTestnetSettings(): Promise<void> {
+		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.clickByTestId(BTC_TESTNET_TOGGLE);
+		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
+	}
+
+	async takeScreenshot(): Promise<void> {
+		await expect(this.#page).toHaveScreenshot({
+			// creates a snapshot as a fullPage and not just certain parts.
+			fullPage: true,
+			// playwright can retry flaky tests in the amount of time set below.
+			timeout: 5 * 60 * 1000
+		});
 	}
 
 	abstract extendWaitForReady(): Promise<void>;

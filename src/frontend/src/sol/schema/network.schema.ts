@@ -1,14 +1,9 @@
-import { NetworkSchema } from '$lib/schema/network.schema';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { z } from 'zod';
 
-const SolRpcSchema = z.object({
+export const SolRpcConnectionConfigSchema = z.object({
 	httpUrl: UrlSchema,
-	wssUrl: UrlSchema
+	websocketUrl: UrlSchema
 });
 
-export const SolNetworkSchema = z
-	.object({
-		rpc: SolRpcSchema
-	})
-	.merge(NetworkSchema);
+export const SolanaNetworkSchema = z.enum(['mainnet', 'testnet', 'devnet', 'local']);
