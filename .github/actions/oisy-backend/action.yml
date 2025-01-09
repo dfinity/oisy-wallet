@@ -5,7 +5,7 @@ description: An action that provides Oisy backend canister WASM as an artifact
 outputs: {}
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Cache backend canister WASM
       uses: actions/cache@v4
