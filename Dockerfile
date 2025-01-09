@@ -81,13 +81,13 @@ COPY dfx.json dfx.json
 COPY canister_ids.json canister_ids.json
 COPY scripts/build.backend.* scripts/
 COPY scripts/build.report.sh scripts/
-RUN ls scripts
-RUN mkdir target
+# The Wasm build is slow and typically cached:
+RUN scripts/build.backend.wasm.sh
+# Commit will change even with unrelated changes, so is afetr the rust build:
 COPY ./target/tags target/tags
 COPY ./target/commit target/commit
-# The Wasm build is slow and typically cached
-RUN scripts/build.backend.wasm.sh
 # The network may be overridden with arguments to the docker call:  --env DFX_NETWORK=whatever 
+# Note: The rust is re-built but that is fast.
 ENV DFX_NETWORK=ic
 RUN dfx build backend --network "$DFX_NETWORK"
 
