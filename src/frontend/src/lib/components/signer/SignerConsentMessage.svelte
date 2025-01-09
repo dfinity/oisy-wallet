@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { Markdown } from '@dfinity/gix-components';
 	import type {
-		icrc21_consent_info,
 		ConsentMessageApproval,
-		Rejection
+		Rejection,
+		ResultConsentInfo
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -22,7 +23,7 @@
 
 	let approve: ConsentMessageApproval | undefined;
 	let reject: Rejection | undefined;
-	let consentInfo: icrc21_consent_info | undefined;
+	let consentInfo: ResultConsentInfo | undefined;
 
 	$: ({ approve, reject, consentInfo } =
 		nonNullish($payload) && $payload.status === 'result'
@@ -54,9 +55,15 @@
 			return;
 		}
 
+		const consentInfoMsg = nonNullish(consentInfo)
+			? 'Warn' in consentInfo
+				? consentInfo.Warn.consentInfo
+				: consentInfo.Ok
+			: undefined;
+
 		displayMessage =
-			nonNullish(consentInfo) && 'GenericDisplayMessage' in consentInfo.consent_message
-				? consentInfo.consent_message.GenericDisplayMessage
+			nonNullish(consentInfoMsg) && 'GenericDisplayMessage' in consentInfoMsg.consent_message
+				? consentInfoMsg.consent_message.GenericDisplayMessage
 				: undefined;
 	};
 
@@ -121,6 +128,8 @@
 		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />
+
+		<SignerConsentMessageWarning {consentInfo} />
 
 		<div class="msg mb-6 rounded-lg border border-dust px-8 py-4">
 			<Markdown text={content} />
