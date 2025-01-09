@@ -85,12 +85,7 @@ const fetchSignatures = async ({
 
 		const successfulSignatures = fetchedSignatures.filter(({ err }) => isNullish(err));
 
-		accumulatedSignatures = successfulSignatures.reduce((acc, signature) => {
-			if (acc.length < limit) {
-				acc.push(signature);
-			}
-			return acc;
-		}, accumulatedSignatures);
+		accumulatedSignatures = [...accumulatedSignatures, ...successfulSignatures];
 
 		const hasLoadedEnoughTransactions = accumulatedSignatures.length >= limit;
 		const hasNoMoreSignaturesLeft = fetchedSignatures.length < limit;
