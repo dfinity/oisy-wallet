@@ -38,6 +38,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		confirm_navigate: string;
+		vip_qr_code: string;
 	};
 	alt: {
 		tokens: string;
@@ -49,6 +50,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		open_twitter: string;
+		vip_qr_code: string;
 	};
 }
 
@@ -103,7 +105,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
+	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 
@@ -586,13 +588,17 @@ interface I18nTransaction {
 		to_copied: string;
 		block: string;
 		interacted_with: string;
-		pending: string;
-		unconfirmed: string;
-		confirmed: string;
 		status: string;
 		confirmations: string;
 	};
-	status: { included: string; safe: string; finalised: string };
+	status: {
+		confirmed: string;
+		included: string;
+		finalised: string;
+		pending: string;
+		safe: string;
+		unconfirmed: string;
+	};
 	label: {
 		reimbursement: string;
 		twin_token_sent: string;
@@ -687,6 +693,7 @@ interface I18nSigner {
 	origin: { text: { request_from: string; invalid_origin: string }; alt: { link_to_dapp: string } };
 	consent_message: {
 		text: { loading: string };
+		warning: { token_without_consent_message: string };
 		error: { no_approve_callback: string; no_reject_callback: string; retrieve: string };
 	};
 	call_canister: {

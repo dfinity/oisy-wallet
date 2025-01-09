@@ -1,5 +1,6 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
+export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -50,6 +51,7 @@ export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
+export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 
 export const BTC_TESTNET_TOGGLE = 'btc-testnet-toggle';
 

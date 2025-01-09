@@ -41,7 +41,8 @@
 			"source_code": "Source code",
 			"changelog": "Changelog",
 			"submit_ticket": "Submit a ticket",
-			"confirm_navigate": "Are you sure you want to navigate away?"
+			"confirm_navigate": "Are you sure you want to navigate away?",
+			"vip_qr_code": "VIP QR codes"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -52,7 +53,8 @@
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"submit_ticket": "Report an issue or request a feature on GitHub",
-			"open_twitter": "Open the DFINITY X/Twitter feed"
+			"open_twitter": "Open the DFINITY X/Twitter feed",
+			"vip_qr_code": "Generate an invitation link"
 		}
 	},
 	"auth": {
@@ -110,9 +112,10 @@
 	},
 	"footer": {
 		"text": {
-			"incubated_with": "Incubated with ❤\uFE0F by",
+			"incubated_with": "Incubated with",
+			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2024"
+			"copyright": "© 2025"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
@@ -657,16 +660,16 @@
 			"to_copied": "To address copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
-			"pending": "Pending...",
-			"unconfirmed": "Unconfirmed",
-			"confirmed": "Confirmed",
 			"status": "Status",
 			"confirmations": "Confirmations"
 		},
 		"status": {
+			"confirmed": "Confirmed",
 			"included": "Included",
+			"finalised": "Finalised",
+			"pending": "Pending...",
 			"safe": "Safe",
-			"finalised": "Finalised"
+			"unconfirmed": "Unconfirmed"
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
@@ -803,6 +806,9 @@
 		"consent_message": {
 			"text": {
 				"loading": "Loading consent message..."
+			},
+			"warning": {
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
 			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",

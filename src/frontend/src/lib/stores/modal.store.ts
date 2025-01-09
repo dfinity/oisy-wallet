@@ -23,14 +23,16 @@ export interface Modal<T> {
 		| 'wallet-connect-send'
 		| 'eth-transaction'
 		| 'ic-transaction'
+		| 'btc-transaction'
+		| 'sol-transaction'
 		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
 		| 'eth-token'
+		| 'btc-token'
 		| 'ic-token'
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
-		| 'btc-transaction'
 		| 'dapp-details'
 		| 'successful-reward'
 		| 'failed-reward';
@@ -62,10 +64,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
 	openBtcTransaction: <D extends T>(data: D) => void;
+	openSolTransaction: <D extends T>(data: D) => void;
 	openManageTokens: () => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
 	openEthToken: () => void;
+	openBtcToken: () => void;
 	openIcToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
@@ -109,10 +113,12 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openEthTransaction: setTypeWithData('eth-transaction'),
 		openIcTransaction: setTypeWithData('ic-transaction'),
 		openBtcTransaction: setTypeWithData('btc-transaction'),
+		openSolTransaction: setTypeWithData('sol-transaction'),
 		openManageTokens: setType('manage-tokens'),
 		openHideToken: setType('hide-token'),
 		openIcHideToken: setType('ic-hide-token'),
 		openEthToken: setType('eth-token'),
+		openBtcToken: setType('btc-token'),
 		openIcToken: setType('ic-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
