@@ -17,5 +17,5 @@ export const solTransactionsInitialized: Readable<boolean> = derived(
 
 export const solTransactionsNotInitialized: Readable<boolean> = derived(
 	[solTransactionsInitialized],
-	([solTransactionsInitialized]) => !solTransactionsInitialized
+	([$solTransactionsInitialized]) => !$solTransactionsInitialized
 );
