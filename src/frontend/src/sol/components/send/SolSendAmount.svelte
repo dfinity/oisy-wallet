@@ -10,7 +10,6 @@
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
 	export let amount: OptionAmount = undefined;
-
 	export let amountError: SolAmountAssertionError | undefined;
 
 	const { sendBalance, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
