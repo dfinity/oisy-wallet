@@ -41,7 +41,6 @@
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-
 	let network: Network | undefined = undefined;
 	$: network = $sendToken.network;
 
@@ -122,14 +121,7 @@
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<SolSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<SolSendForm
-		on:icNext
-		on:icClose
-		bind:destination
-		bind:amount
-		on:icQRCodeScan
-		{source}
-	>
+	<SolSendForm on:icNext on:icClose bind:destination bind:amount on:icQRCodeScan {source}>
 		<svelte:fragment slot="cancel">
 			{#if formCancelAction === 'back'}
 				<ButtonBack on:click={back} />

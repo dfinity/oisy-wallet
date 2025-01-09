@@ -11,7 +11,8 @@
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdICP,
-		isNetworkIdBitcoin, isNetworkIdSolana
+		isNetworkIdBitcoin,
+		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
 
