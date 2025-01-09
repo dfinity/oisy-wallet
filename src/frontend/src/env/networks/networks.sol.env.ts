@@ -1,5 +1,9 @@
 import type { SchnorrKeyId } from '$declarations/signer/signer.did';
-import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL, SOL_TESTNET_EXPLORER_URL } from '$env/explorers.env';
+import {
+	SOL_DEVNET_EXPLORER_URL,
+	SOL_MAINNET_EXPLORER_URL,
+	SOL_TESTNET_EXPLORER_URL
+} from '$env/explorers.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import solDevnetIconBW from '$lib/assets/networks/sol-devnet-bw.svg';
