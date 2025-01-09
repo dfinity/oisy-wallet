@@ -37,7 +37,7 @@ export const getSolTransactions = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-	before?: Signature;
+	before?: string;
 	limit?: number;
 }): Promise<SolRpcTransaction[]> => {
 	const wallet = solAddress(address);
