@@ -86,7 +86,6 @@ RUN mkdir target
 COPY ./target/tags target/tags
 COPY ./target/commit target/commit
 RUN touch src/*/src/*.rs
-RUN cargo build --locked --target wasm32-unknown-unknown --release -p backend
 RUN dfx build --ic backend
 
 FROM scratch AS backend
