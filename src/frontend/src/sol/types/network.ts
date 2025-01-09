@@ -1,5 +1,5 @@
 import type { Network, NetworkAppMetadata } from '$lib/types/network';
-import { SolanaNetworkSchema, SolRpcConnectionConfigSchema } from '$sol/schema/network.schema';
+import { SolRpcConnectionConfigSchema, SolanaNetworkSchema } from '$sol/schema/network.schema';
 import { z } from 'zod';
 
 export type SolRpcConnectionConfig = z.infer<typeof SolRpcConnectionConfigSchema>;
