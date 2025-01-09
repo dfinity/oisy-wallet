@@ -62,7 +62,6 @@ COPY src/cycles_ledger/client/Cargo.toml src/cycles_ledger/client/Cargo.toml
 COPY src/cycles_ledger/pic/Cargo.toml src/cycles_ledger/pic/Cargo.toml
 COPY src/cycles_ledger/types/Cargo.toml src/cycles_ledger/types/Cargo.toml
 COPY src/shared/Cargo.toml src/shared/Cargo.toml
-ENV CARGO_TARGET_DIR=/cargo_target
 RUN mkdir -p src/backend/src \
     && touch src/backend/src/lib.rs \
     && mkdir -p src/cycles_ledger/client/src \
@@ -73,16 +72,21 @@ RUN mkdir -p src/backend/src \
     && touch src/cycles_ledger/types/src/lib.rs \
     && mkdir -p src/shared/src \
     && touch src/shared/src/lib.rs \
-    && ./docker/build --only-dependencies \
+    && cargo fetch --locked \
     && rm -rf src
 
 FROM builder AS build_backend
 COPY src src
 COPY dfx.json dfx.json
 COPY canister_ids.json canister_ids.json
-COPY scripts/build.backend.* build/report.sh scripts/
-COPY target/commit target/tags target/
+COPY scripts/build.backend.* scripts/
+COPY scripts/build.report.sh scripts/
+RUN ls scripts
+RUN mkdir target
+COPY ./target/tags target/tags
+COPY ./target/commit target/commit
 RUN touch src/*/src/*.rs
+RUN cargo build --locked --target wasm32-unknown-unknown --release -p backend
 RUN dfx build --ic backend
 
 FROM scratch AS backend

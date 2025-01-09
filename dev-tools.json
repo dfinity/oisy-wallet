@@ -1,11 +1,74 @@
 {
+	"rustup": {
+		"method": "curl",
+		"version": "1.25.2",
+		"url": "https://raw.githubusercontent.com/rust-lang/rustup/${VERSION}/rustup-init.sh",
+		"pipe": [["sh"]]
+	},
+	"rust": {
+		"method": "sh",
+		"version": "See rust-toolchain.toml"
+	},
+	"n": {
+		"method": "curl",
+		"version": "v9.0.1",
+		"url": "https://raw.githubusercontent.com/tj/n/refs/tags/${VERSION}/bin/n"
+	},
 	"didc": {
 		"method": "curl",
 		"version": "0.4.0",
 		"url": "https://github.com/dfinity/candid/releases/download/2024-07-29/didc-linux64"
 	},
+	"ic-admin": {
+		"version": "release-2024-12-06_03-16-base",
+		"method": "curl",
+		"pipe": "gunzip",
+		"url": "https://github.com/dfinity/ic/releases/download/${VERSION}/ic-admin-x86_64-linux.gz"
+	},
+	"shfmt": {
+		"method": "go",
+		"version": "v3.5.1",
+		"source": "mvdan.cc/sh/v3/cmd/shfmt"
+	},
+	"yq": {
+		"method": "go",
+		"version": "v4.33.3",
+		"source": "github.com/mikefarah/yq/v4"
+	},
+	"node": {
+		"method": "n",
+		"version": "18.14.2"
+	},
+	"cargo-binstall": {
+		"method": "sh",
+		"version": "1.7.4"
+	},
 	"solana": {
 		"method": "sh",
 		"version": "2.0.16"
+	},
+	"ic-wasm": {
+		"method": "cargo-binstall",
+		"version": "0.3.6"
+	},
+	"cargo-audit": {
+		"method": "cargo-binstall",
+		"version": "0.13.1"
+	},
+	"cargo-edit": {
+		"method": "cargo-binstall",
+		"version": "0.13.0"
+	},
+	"cargo-sort": {
+		"method": "cargo-binstall",
+		"version": "1.0.9"
+	},
+	"candid-extractor": {
+		"method": "cargo-binstall",
+		"version": "0.1.4"
+	},
+	"cargo-tarpaulin": {
+		"method": "cargo-binstall",
+		"version": "0.26.1"
 	}
 }

@@ -10,9 +10,6 @@
 # dfx temporary files
 .dfx/
 
-# rust and downloaded wasm|did files
-target/
-
 # frontend code
 node_modules/
 build/

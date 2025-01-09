@@ -8,10 +8,11 @@ for tool in "${@}"; do
   echo "  install_method: $install_method"
   case "$install_method" in
   "curl")
-    url="$(jq -r '.[env.tool].url' dev-tools.json)"
+    url="$(jq -r '.[env.tool].version as $version | .[env.tool].url | gsub("[$]{VERSION}"; $version)' dev-tools.json)"
+    pipe="$(jq -r '.[env.tool].pipe // "cat"' dev-tools.json)"
     target="$HOME/.local/bin/$tool"
     mkdir -p "$(dirname "$target")"
-    curl -Lf "$url" | install -m 755 /dev/stdin "$target"
+    curl -Lf "$url" | "$pipe" | install -m 755 /dev/stdin "$target"
     ;;
   "sh")
     version="$(jq -r '.[env.tool].version' dev-tools.json)" "$0-$tool"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
 (("${BASH_VERSINFO[0]}" >= 5)) || {
   echo "ERROR:  Please use a newer version of bash.  The minimum supported bash version is 5.  Yours appears to be '${BASH_VERSINFO[0]}'" >&2
