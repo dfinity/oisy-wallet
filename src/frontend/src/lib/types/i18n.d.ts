@@ -105,7 +105,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
+	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 

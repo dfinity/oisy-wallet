@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
+	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -77,18 +78,18 @@
 					class:1.5md:h-md:block={$authNotSignedIn}
 					class="text-center md:text-left"
 				>
-					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
+					{$i18n.footer.text.incubated_with}
+					<IconHeart styleClass="inline-flex mb-1" />
+					{$i18n.footer.text.by}
 					<ExternalLink
 						href="https://dfinity.org"
-						ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
+						ariaLabel={$i18n.footer.alt.dfinity}
 						iconVisible={false}
 						color="blue"
 					>
-						{replaceOisyPlaceholders($i18n.footer.text.dfinity_foundation)}
+						{$i18n.footer.text.dfinity_foundation}
 					</ExternalLink>
-					<span class="whitespace-nowrap"
-						>{replaceOisyPlaceholders($i18n.footer.text.copyright)}</span
-					>
+					<span class="whitespace-nowrap">{$i18n.footer.text.copyright}</span>
 				</span>
 			</div>
 		</div>
