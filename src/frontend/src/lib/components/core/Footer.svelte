@@ -9,6 +9,7 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 </script>
 
 <footer
@@ -78,6 +79,8 @@
 					class="text-center md:text-left"
 				>
 					{replaceOisyPlaceholders($i18n.footer.text.incubated_with)}
+					<IconHeart styleClass="inline-flex mb-1"/>
+					{replaceOisyPlaceholders($i18n.footer.text.by)}
 					<ExternalLink
 						href="https://dfinity.org"
 						ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
