@@ -112,9 +112,10 @@
 	},
 	"footer": {
 		"text": {
-			"incubated_with": "Incubated with ❤\uFE0F by",
+			"incubated_with": "Incubated with",
+			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2024"
+			"copyright": "© 2025"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
