@@ -96,7 +96,7 @@
 
 		{#if nonNullish(code)}
 			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2">
-				<output>{qrCodeUrl}</output>
+				<output class="break-all">{qrCodeUrl}</output>
 				<ReceiveCopy
 					address={qrCodeUrl}
 					copyAriaLabel={$i18n.vip.invitation.text.invitation_link_copied}
