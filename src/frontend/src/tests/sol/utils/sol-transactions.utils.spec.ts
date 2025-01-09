@@ -1,6 +1,7 @@
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import {
 	mockSolRpcReceiveTransaction,
+	mockSolRpcSendToMyselfTransaction,
 	mockSolRpcSendTransaction
 } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
@@ -58,6 +59,35 @@ describe('sol-transactions.utils', () => {
 				type: 'send',
 				status: 'finalized',
 				value: -150000000n,
+				timestamp: blockTime
+			});
+		});
+
+		it('should map a transaction from my wallet to my wallet correctly', () => {
+			const {
+				transaction: {
+					signatures,
+					message: { accountKeys }
+				},
+				meta,
+				blockTime
+			} = mockSolRpcSendToMyselfTransaction;
+
+			const myAddress = accountKeys[0];
+
+			const result = mapSolTransactionUi({
+				transaction: mockSolRpcSendToMyselfTransaction,
+				address: myAddress
+			});
+
+			expect(result).toEqual({
+				id: signatures[0],
+				fee: meta?.fee,
+				from: myAddress,
+				to: myAddress,
+				type: 'send',
+				status: 'finalized',
+				value: 0n,
 				timestamp: blockTime
 			});
 		});
