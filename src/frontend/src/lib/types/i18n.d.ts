@@ -38,6 +38,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		confirm_navigate: string;
+		vip_qr_code: string;
 	};
 	alt: {
 		tokens: string;
@@ -49,6 +50,7 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 		open_twitter: string;
+		vip_qr_code: string;
 	};
 }
 
@@ -103,7 +105,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
+	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 
@@ -135,6 +137,7 @@ interface I18nInit {
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_rpc: string;
+		no_solana_network: string;
 		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
@@ -655,6 +658,21 @@ interface I18nAbout {
 	};
 }
 
+interface I18nVip {
+	reward: {
+		text: {
+			open_wallet: string;
+			title_successful: string;
+			title_failed: string;
+			reward_received: string;
+			reward_failed: string;
+			reward_received_description: string;
+			reward_failed_description: string;
+		};
+		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
+	};
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -743,6 +761,7 @@ interface I18n {
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
+	vip: I18nVip;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	license_agreement: I18nLicense_agreement;

@@ -1,5 +1,4 @@
 import { batch } from '$lib/services/batch.services';
-import { expect } from 'vitest';
 
 describe('batch.services', () => {
 	describe('batch', () => {
