@@ -70,7 +70,7 @@
 	};
 
 	onMount(regenerateCode);
-	onDestroy(clearInterval(countdown));
+	onDestroy(() => clearInterval(countdown));
 
 	let qrCodeUrl;
 	$: qrCodeUrl = `${window.location.origin}/?code=${code}`;
