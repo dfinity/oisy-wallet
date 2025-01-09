@@ -88,8 +88,8 @@ describe('tokens.derived', () => {
 				SOLANA_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[5].id },
-				{ ...mockIcrcCustomToken, id: result[6].id }
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[6].id },
+				{ ...mockIcrcCustomToken, id: result[7].id }
 			]);
 		});
 
