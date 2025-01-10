@@ -4,7 +4,7 @@
 </script>
 
 <LoaderEthBalances>
-	<LoaderSolBalances>
+<!--	<LoaderSolBalances>-->
 		<slot />
-	</LoaderSolBalances>
+<!--	</LoaderSolBalances>-->
 </LoaderEthBalances>
