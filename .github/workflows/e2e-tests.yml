@@ -9,7 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   check-e2e-changes:
     runs-on: ubuntu-24.04
     outputs:
@@ -65,7 +64,7 @@ jobs:
       - name: Prepare macOS
         if: runner.os == 'macOS'
         uses: ./.github/actions/prepare-macos
-        
+
       - name: Set Environment Variables
         run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 

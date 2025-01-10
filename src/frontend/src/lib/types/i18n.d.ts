@@ -595,6 +595,8 @@ interface I18nTransaction {
 		confirmed: string;
 		included: string;
 		finalised: string;
+		finalized: string;
+		processed: string;
 		pending: string;
 		safe: string;
 		unconfirmed: string;

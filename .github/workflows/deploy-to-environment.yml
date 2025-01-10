@@ -152,7 +152,7 @@ jobs:
             echo "Error: DFX_DEPLOY_KEY for $NETWORK is not set or is empty. Please provide the deployment identity key."
             exit 1
           fi
-    
+
       - name: Restore cargo cache
         uses: actions/cache@v4
         with:
@@ -163,7 +163,7 @@ jobs:
             ~/.cargo/bin/
           key: ${{ runner.os }}-deploy-cargo-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
           restore-keys: |
-              ${{ runner.os }}-deploy-cargo-
+            ${{ runner.os }}-deploy-cargo-
 
       - name: Prepare
         uses: ./.github/actions/prepare
