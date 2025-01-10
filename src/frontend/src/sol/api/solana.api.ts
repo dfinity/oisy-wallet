@@ -3,13 +3,13 @@ import type { SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
 export const loadSolLamportsBalance = async ({
@@ -26,8 +26,6 @@ export const loadSolLamportsBalance = async ({
 
 	return balance;
 };
-
-
 
 /**
  * Fetches transactions without an error for a given wallet address.

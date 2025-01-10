@@ -6,8 +6,8 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import { getSolTransactions } from '$sol/api/solana.api';
 import {
-	type SolCertifiedTransaction,
-	solTransactionsStore
+	solTransactionsStore,
+	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
