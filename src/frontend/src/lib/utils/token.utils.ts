@@ -5,6 +5,7 @@ import {
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
+import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -16,6 +17,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
@@ -228,3 +230,18 @@ export const findTwinToken = ({
 				(token) => token.symbol === tokenToPair.twinTokenSymbol && isIcCkToken(token)
 			) as IcCkToken | undefined)
 		: undefined;
+
+export const filterTokens = ({ tokens, filter }: { tokens: Token[]; filter: string }): Token[] => {
+	const matchingToken = (token: Token) =>
+		token.name.toLowerCase().includes(filter.toLowerCase()) ||
+		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
+		(icTokenIcrcCustomToken(token) &&
+			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
+
+	return isNullishOrEmpty(filter)
+		? tokens
+		: tokens.filter((token) => {
+				const twinToken = (token as IcCkToken).twinToken;
+				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
+			});
+};

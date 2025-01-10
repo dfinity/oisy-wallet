@@ -12,6 +12,7 @@ export interface Modal<T> {
 		| 'sol-receive'
 		| 'receive'
 		| 'send'
+		| 'swap'
 		| 'buy'
 		| 'convert-ckbtc-btc'
 		| 'convert-btc-ckbtc'
@@ -53,6 +54,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openSolReceive: (id: symbol) => void;
 	openReceive: (id: symbol) => void;
 	openSend: (id: symbol) => void;
+	openSwap: (id: symbol) => void;
 	openBuy: (id: symbol) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertBTCToCkBTC: () => void;
@@ -103,6 +105,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSolReceive: setTypeWithId('sol-receive'),
 		openReceive: setTypeWithId('receive'),
 		openSend: setTypeWithId('send'),
+		openSwap: setTypeWithId('swap'),
 		openBuy: setTypeWithId('buy'),
 		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
 		openConvertBTCToCkBTC: setType('convert-btc-ckbtc'),

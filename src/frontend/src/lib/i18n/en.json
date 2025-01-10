@@ -16,7 +16,8 @@
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
-			"copy": "Copy"
+			"copy": "Copy",
+			"clear_filter": "Clear filter"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -424,6 +425,40 @@
 			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
 		}
 	},
+	"swap": {
+		"text": {
+			"swap": "Swap",
+			"select_destination_token": "Select token to receive",
+			"select_source_token": "Select token to pay",
+			"select_source_token_title": "You pay",
+			"select_destination_token_title": "You receive",
+			"switch_tokens_button": "Switch tokens",
+			"review": "Review transaction",
+			"review_button": "Review swap",
+			"select_token": "Select token",
+			"max_slippage": "Max slippage",
+			"max_balance": "Max",
+			"not_available": "n/a",
+			"value_difference": "Value difference",
+			"total_fee": "Total estimated fee",
+			"token_fee": "Token fee",
+			"gas_fee": "Gas fee",
+			"lp_fee": "LP fee",
+			"max_slippage_info": "Enter value between 0% and 50%",
+			"max_slippage_warning": "Risk warning: high slippage may lead to losses due to market volatility",
+			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
+			"swap_button": "Swap now",
+			"executing_transaction": "Executing transaction...",
+			"initializing": "Initializing transaction...",
+			"swapping": "Swapping...",
+			"refreshing_ui": "Refreshing UI"
+		},
+		"error": {
+			"unexpected": "Something went wrong while swapping tokens.",
+			"unexpected_missing_data": "Something went wrong while initiating a convert transaction.",
+			"pool_not_found": "No pool was found for the provided tokens."
+		}
+	},
 	"buy": {
 		"text": {
 			"buy": "Buy",
@@ -498,7 +533,6 @@
 				"title": "Manage tokens",
 				"manage_list": "Manage list",
 				"do_not_see_import": "Don’t see your token? Import",
-				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance."

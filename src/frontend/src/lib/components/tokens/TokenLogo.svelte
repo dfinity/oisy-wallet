@@ -18,14 +18,12 @@
 	export let ring = false;
 	export let testId: string | undefined = undefined;
 	export let badgeTestId: string | undefined = undefined;
-
-	const { icon, name, network } = data;
 </script>
 
 <div class="relative">
 	<Logo
-		src={icon}
-		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
+		src={data.icon}
+		alt={replacePlaceholders($i18n.core.alt.logo, { $name: data.name })}
 		size={logoSize}
 		{color}
 		{ring}
@@ -42,7 +40,7 @@
 	{:else if badge?.type === 'network'}
 		<div class="absolute -bottom-1 -right-1">
 			<NetworkLogo
-				{network}
+				network={data.network}
 				blackAndWhite={badge.blackAndWhite}
 				{color}
 				testId={`network-${badgeTestId}`}
