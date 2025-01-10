@@ -4,8 +4,9 @@ import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import { SolanaNetworks } from '$sol/types/network';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
+import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { jsonReplacer } from '@dfinity/utils';
 import { lamports } from '@solana/rpc-types';
@@ -16,6 +17,15 @@ describe('sol-wallet.scheduler', () => {
 	let spyLoadTransactions: MockInstance;
 
 	const mockBalance = lamports(100n);
+	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
+
+	const expectedTransactions = mockTransactions.map((transaction) => ({
+		data: mapSolTransactionUi({
+			transaction,
+			address: mockSolAddress
+		}),
+		certified: false
+	}));
 
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncSolWalletStatus',
@@ -40,7 +50,7 @@ describe('sol-wallet.scheduler', () => {
 					data: mockBalance
 				},
 				...(withTransactions && {
-					newTransactions: JSON.stringify(mockSolCertifiedTransactions, jsonReplacer)
+					newTransactions: JSON.stringify(expectedTransactions, jsonReplacer)
 				})
 			}
 		}
@@ -67,7 +77,7 @@ describe('sol-wallet.scheduler', () => {
 		spyLoadBalance = vi.spyOn(solanaApi, 'loadSolLamportsBalance').mockResolvedValue(mockBalance);
 		spyLoadTransactions = vi
 			.spyOn(solanaApi, 'getSolTransactions')
-			.mockResolvedValue(mockSolCertifiedTransactions);
+			.mockResolvedValue(mockTransactions);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
@@ -197,8 +207,8 @@ describe('sol-wallet.scheduler', () => {
 			await scheduler.start(startData);
 
 			expect(scheduler['store'].transactions).toEqual(
-				mockSolCertifiedTransactions.reduce(
-					(acc: Record<string, (typeof mockSolCertifiedTransactions)[0]>, transaction) => ({
+				expectedTransactions.reduce(
+					(acc, transaction) => ({
 						...acc,
 						[transaction.data.id]: transaction
 					}),
