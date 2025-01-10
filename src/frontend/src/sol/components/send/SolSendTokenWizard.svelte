@@ -12,7 +12,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSendBtc, ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -67,11 +67,15 @@
 	const back = () => dispatch('icSendBack');
 
 	const send = async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
 		if (isNullish(networkId) || !isNetworkIdSolana(networkId)) {
-			// TODO: check network
-			// toastsError({
-			// 	msg: { text: $i18n.send.error.no_btc_network_id }
-			// });
+			toastsError({
+				msg: { text: $i18n.send.error.no_solana_network_id }
+			});
 			return;
 		}
 
@@ -95,12 +99,7 @@
 			});
 			return;
 		}
-
-		if (isNullish($authIdentity)) {
-			await nullishSignOut();
-			return;
-		}
-
+    
 		dispatch('icNext');
 
 		try {
@@ -123,7 +122,7 @@
 				}
 			});
 
-			sendProgressStep = ProgressStepsSendBtc.DONE;
+			sendProgressStep = ProgressStepsSendSol.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -142,15 +141,7 @@
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<SolSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<SolSendForm
-		on:icNext
-		on:icClose
-		bind:destination
-		bind:amount
-		on:icQRCodeScan
-		{source}
-		{networkId}
-	>
+	<SolSendForm on:icNext on:icClose bind:destination bind:amount on:icQRCodeScan {source}>
 		<svelte:fragment slot="cancel">
 			{#if formCancelAction === 'back'}
 				<ButtonBack on:click={back} />

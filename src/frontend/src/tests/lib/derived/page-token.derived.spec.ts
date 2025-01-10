@@ -56,4 +56,18 @@ describe('page-token.derived', () => {
 		mockPage.mock({ token: 'non-existent-token' });
 		expect(get(pageToken)).toBeUndefined();
 	});
+
+	it('should return undefined when token name matches but network does not', () => {
+		const mockToken = { ...mockValidErc20Token, enabled: true };
+		mockPage.mock({ token: mockToken.name, network: 'non-existent-network' });
+
+		expect(get(pageToken)).toBeUndefined();
+	});
+
+	it('should return undefined when token network matches but name does not', () => {
+		const mockToken = { ...mockValidErc20Token, enabled: true };
+		mockPage.mock({ token: 'non-existent-token', network: mockToken.network.name });
+
+		expect(get(pageToken)).toBeUndefined();
+	});
 });

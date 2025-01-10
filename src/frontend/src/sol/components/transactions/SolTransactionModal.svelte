@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import type { Commitment } from '@solana/rpc-types';
 	import {
 		SOL_DEVNET_EXPLORER_URL,
 		SOL_MAINNET_EXPLORER_URL,
@@ -12,9 +13,9 @@
 	import type { OptionToken } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
-		isNetworkIdSOLTestnet,
 		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal
+		isNetworkIdSOLLocal,
+		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
 
@@ -27,6 +28,7 @@
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let id: string;
+	let status: Commitment | null;
 
 	let explorerUrl: string | undefined;
 	$: {
@@ -39,7 +41,7 @@
 					: SOL_MAINNET_EXPLORER_URL;
 	}
 
-	$: ({ from, value, timestamp, id, blockNumber, to, type } = transaction);
+	$: ({ from, value, timestamp, id, blockNumber, to, type, status } = transaction);
 
 	let txExplorerUrl: string | undefined;
 	$: txExplorerUrl = nonNullish(explorerUrl)
@@ -52,10 +54,9 @@
 		: undefined;
 
 	let fromExplorerUrl: string | undefined;
-	$: fromExplorerUrl =
-		nonNullish(explorerUrl) && nonNullish(to)
-			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
-			: undefined;
+	$: fromExplorerUrl = nonNullish(explorerUrl)
+		? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
+		: undefined;
 </script>
 
 <TransactionModal
@@ -76,6 +77,8 @@
 >
 	<Value ref="status" slot="transaction-status">
 		<svelte:fragment slot="label">{$i18n.transaction.text.status}</svelte:fragment>
-		{`${$i18n.transaction.text.confirmed}`}
+		{#if nonNullish(status)}
+			{`${$i18n.transaction.status[status]}`}
+		{/if}
 	</Value>
 </TransactionModal>
