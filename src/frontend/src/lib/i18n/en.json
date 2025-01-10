@@ -667,6 +667,8 @@
 			"confirmed": "Confirmed",
 			"included": "Included",
 			"finalised": "Finalised",
+			"finalized": "Finalised",
+			"processed": "Processed",
 			"pending": "Pending...",
 			"safe": "Safe",
 			"unconfirmed": "Unconfirmed"
