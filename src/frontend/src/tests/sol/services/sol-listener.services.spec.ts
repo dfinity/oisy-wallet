@@ -2,7 +2,10 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
+import { jsonReplacer } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { lamports, type Lamports } from '@solana/rpc-types';
 import { get } from 'svelte/store';
@@ -12,21 +15,25 @@ describe('sol-listener', () => {
 	const mockBalance = lamports(1000n);
 
 	const mockPostMessage = ({
-		balance = mockBalance
+		balance = mockBalance,
+		newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer)
 	}: {
 		balance?: Lamports | null;
+		newTransactions?: string;
 	}): SolPostMessageDataResponseWallet => ({
 		wallet: {
 			balance: {
 				certified: true,
 				data: balance
-			}
+			},
+			newTransactions
 		}
 	});
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		balancesStore.reset(tokenId);
+		solTransactionsStore.reset(tokenId);
 	});
 
 	describe('syncWallet', () => {
@@ -48,6 +55,15 @@ describe('sol-listener', () => {
 
 			expect(balance?.[tokenId]).toBeNull();
 		});
+
+		it('should prepend new transactions to solTransactionsStore', () => {
+			const newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer);
+			syncWallet({ data: mockPostMessage({ newTransactions }), tokenId });
+
+			const transactions = get(solTransactionsStore);
+
+			expect(transactions?.[tokenId]).toEqual(mockSolCertifiedTransactions);
+		});
 	});
 
 	describe('syncWalletError', () => {
@@ -59,6 +75,17 @@ describe('sol-listener', () => {
 			const balance = get(balancesStore);
 
 			expect(balance?.[tokenId]).toBeNull();
+		});
+
+		it('should reset transactionsStore on error', () => {
+			const newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer);
+			syncWallet({ data: mockPostMessage({ newTransactions }), tokenId });
+
+			syncWalletError({ error: 'test error', tokenId, hideToast: true });
+
+			const transactions = get(solTransactionsStore);
+
+			expect(transactions?.[tokenId]).toBeNull();
 		});
 
 		it('should log a warning if hideToast is true', () => {
