@@ -40,7 +40,7 @@
 				? $solAddressLocal
 				: $solAddressMainnet;
 
-	$: address, $token, loadSolTransactions({ address, token: $token });
+	// $: address, $token, loadSolTransactions({ address, token: $token });
 
 	let selectedTransaction: SolTransactionUi | undefined;
 	let selectedToken: OptionToken;
