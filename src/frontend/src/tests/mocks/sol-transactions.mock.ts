@@ -3,11 +3,12 @@ import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transac
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
 import {
+	type Base58EncodedBytes,
 	blockhash,
 	lamports,
-	type Base58EncodedBytes,
 	type UnixTimestamp
 } from '@solana/rpc-types';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
@@ -18,17 +19,6 @@ export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	to: 'receiver',
 	status: 'finalized'
 });
-
-export const mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
-	{
-		data: createMockSolTransactionUi('tx1'),
-		certified: false
-	},
-	{
-		data: createMockSolTransactionUi('tx2'),
-		certified: false
-	}
-];
 
 export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 	blockTime: 1736257946n as UnixTimestamp,
@@ -233,3 +223,17 @@ export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
 	},
 	version: 'legacy'
 };
+
+export const mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
+	{
+		data: mapSolTransactionUi({
+			transaction: mockSolRpcReceiveTransaction,
+			address: mockSolAddress
+		}),
+		certified: false
+	},
+	{
+		data: mapSolTransactionUi({ transaction: mockSolRpcSendTransaction, address: mockSolAddress }),
+		certified: false
+	}
+];

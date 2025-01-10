@@ -4,7 +4,11 @@ import { loadNextSolTransactions } from '$sol/services/sol-transactions.services
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
-import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
+import {
+	mockSolCertifiedTransactions,
+	mockSolRpcReceiveTransaction,
+	mockSolRpcSendTransaction
+} from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -12,6 +16,8 @@ import type { MockInstance } from 'vitest';
 describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
 	const signalEnd = vi.fn();
+
+	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction]
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -21,7 +27,7 @@ describe('sol-transactions.services', () => {
 
 	describe('loadNextSolTransactions', () => {
 		it('should load and return transactions successfully', async () => {
-			spyGetTransactions.mockResolvedValue(mockSolCertifiedTransactions);
+			spyGetTransactions.mockResolvedValue(mockTransactions);
 
 			const transactions = await loadNextSolTransactions({
 				address: mockSolAddress,
@@ -38,7 +44,7 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should handle pagination parameters', async () => {
-			spyGetTransactions.mockResolvedValue(mockSolCertifiedTransactions);
+			spyGetTransactions.mockResolvedValue(mockTransactions);
 			const before = mockSolSignature();
 			const limit = 10;
 
@@ -72,7 +78,7 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should append transactions to the store', async () => {
-			spyGetTransactions.mockResolvedValue(mockSolCertifiedTransactions);
+			spyGetTransactions.mockResolvedValue(mockTransactions);
 
 			await loadNextSolTransactions({
 				address: mockSolAddress,
@@ -100,7 +106,7 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should work with different networks', async () => {
-			spyGetTransactions.mockResolvedValue(mockSolCertifiedTransactions);
+			spyGetTransactions.mockResolvedValue(mockTransactions);
 
 			await loadNextSolTransactions({
 				address: mockSolAddress,
