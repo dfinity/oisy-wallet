@@ -96,8 +96,6 @@
 			return;
 		}
 
-
-
 		dispatch('icNext');
 
 		try {
