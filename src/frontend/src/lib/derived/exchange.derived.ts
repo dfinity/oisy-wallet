@@ -14,7 +14,7 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
-import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -29,7 +29,7 @@ export const exchangeInitialized: Readable<boolean> = derived(
 
 // TODO: create tests for store
 export const exchanges: Readable<ExchangesData> = derived(
-	[exchangeStore, enabledErc20Tokens, enabledIcrcTokens, enabledSplTokens],
+	[exchangeStore, enabledErc20Tokens, icrcTokens, enabledSplTokens],
 	// TODO: add price for SPL tokens
 	([$exchangeStore, $erc20Tokens, $icrcTokens, $splTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
