@@ -32,14 +32,14 @@ describe('page-token.derived', () => {
 		['Sepolia token', SEPOLIA_TOKEN]
 		// eslint-disable-next-line local-rules/prefer-object-params
 	])('should find %s', (_, token) => {
-		mockPage.mock({ token: token.name });
+		mockPage.mock({ token: token.name, network: token.network.name });
 		expect(get(pageToken)).toBe(token);
 	});
 
 	it('should find ERC20 token', () => {
 		const mockToken = { ...mockValidErc20Token, enabled: true };
 		erc20UserTokensStore.setAll([{ data: mockToken, certified: true }]);
-		mockPage.mock({ token: mockToken.name });
+		mockPage.mock({ token: mockToken.name, network: mockToken.network.name });
 
 		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 	});
@@ -47,13 +47,27 @@ describe('page-token.derived', () => {
 	it('should find ICRC token', () => {
 		const mockToken = { ...mockIcrcCustomToken, enabled: true };
 		icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-		mockPage.mock({ token: mockToken.name });
+		mockPage.mock({ token: mockToken.name, network: mockToken.network.name });
 
 		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 	});
 
 	it('should return undefined when token is not found in any list', () => {
 		mockPage.mock({ token: 'non-existent-token' });
+		expect(get(pageToken)).toBeUndefined();
+	});
+
+	it('should return undefined when token name matches but network does not', () => {
+		const mockToken = { ...mockValidErc20Token, enabled: true };
+		mockPage.mock({ token: mockToken.name, network: 'non-existent-network' });
+
+		expect(get(pageToken)).toBeUndefined();
+	});
+
+	it('should return undefined when token network matches but name does not', () => {
+		const mockToken = { ...mockValidErc20Token, enabled: true };
+		mockPage.mock({ token: 'non-existent-token', network: mockToken.network.name });
+
 		expect(get(pageToken)).toBeUndefined();
 	});
 });

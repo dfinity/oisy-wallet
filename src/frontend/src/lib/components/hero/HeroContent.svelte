@@ -63,7 +63,7 @@
 
 <div
 	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
-	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || networkSolana}
+	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
 	class:via-interdimensional-blue={$networkICP}
 	class:to-chinese-purple={$networkICP}
 	class:via-beer={$networkBitcoin}
