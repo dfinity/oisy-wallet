@@ -1,4 +1,5 @@
-import { signSchnorrPublicKey } from '$lib/api/signer.api';
+import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
+import { signWithSchnorr } from '$lib/api/signer.api';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -70,9 +71,10 @@ export const sendSol = async ({
 		signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
 			await Promise.all(
 				transactions.map(async (transaction) => {
-					const signedBytes = await signSchnorrPublicKey({
+					const signedBytes = await signWithSchnorr({
 						identity,
 						derivationPath,
+						keyId: SOLANA_KEY_ID,
 						message: Array.from(transaction.messageBytes)
 					});
 
