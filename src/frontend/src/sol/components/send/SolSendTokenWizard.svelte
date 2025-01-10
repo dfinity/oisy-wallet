@@ -63,6 +63,11 @@
 	const back = () => dispatch('icSendBack');
 
 	const send = async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
 		if (isNullish(networkId) || !isNetworkIdSolana(networkId)) {
 			toastsError({
 				msg: { text: $i18n.send.error.no_solana_network_id }
@@ -91,10 +96,7 @@
 			return;
 		}
 
-		if (isNullish($authIdentity)) {
-			await nullishSignOut();
-			return;
-		}
+
 
 		dispatch('icNext');
 
