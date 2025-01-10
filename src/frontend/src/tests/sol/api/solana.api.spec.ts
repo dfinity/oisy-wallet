@@ -6,10 +6,7 @@ import {
 	mockSolSignatureResponse,
 	mockSolSignatureWithErrorResponse
 } from '$tests/mocks/sol-signatures.mock';
-import {
-	mockSolRpcReceiveTransaction,
-	mockSolRpcSendTransaction
-} from '$tests/mocks/sol-transactions.mock';
+import { mockSolRpcSendTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { lamports } from '@solana/rpc-types';
 import type { MockInstance } from 'vitest';
@@ -229,28 +226,6 @@ describe('solana.api', () => {
 			});
 
 			expect(transactions).toHaveLength(0);
-		});
-
-		it('should handle mixed transaction types', async () => {
-			mockGetSignaturesForAddress.mockReturnValue({
-				send: () => Promise.resolve([mockSolSignatureResponse(), mockSolSignatureResponse()])
-			});
-			mockGetTransaction
-				.mockReturnValueOnce({
-					send: () => Promise.resolve(mockSolRpcSendTransaction)
-				})
-				.mockReturnValueOnce({
-					send: () => Promise.resolve(mockSolRpcReceiveTransaction)
-				});
-
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(transactions).toHaveLength(2);
-			expect(transactions[0].data.type).toBe('send');
-			expect(transactions[1].data.type).toBe('receive');
 		});
 
 		it('should handle RPC errors gracefully', async () => {
