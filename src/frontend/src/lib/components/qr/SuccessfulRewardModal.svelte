@@ -17,7 +17,9 @@
 	<ContentWithToolbar>
 		<ImgBanner src={successfulReward} styleClass="aspect-auto" />
 
-		<h3 class="my-3 text-center">{replaceOisyPlaceholders($i18n.vip.reward.text.reward_received)}</h3>
+		<h3 class="my-3 text-center"
+			>{replaceOisyPlaceholders($i18n.vip.reward.text.reward_received)}</h3
+		>
 		<span class="block w-full text-center">{$i18n.vip.reward.text.reward_received_description}</span
 		>
 
