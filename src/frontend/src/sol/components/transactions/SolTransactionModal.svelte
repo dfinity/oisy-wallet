@@ -54,10 +54,9 @@
 		: undefined;
 
 	let fromExplorerUrl: string | undefined;
-	$: fromExplorerUrl =
-		nonNullish(explorerUrl) && nonNullish(to)
-			? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
-			: undefined;
+	$: fromExplorerUrl = nonNullish(explorerUrl)
+		? replacePlaceholders(explorerUrl, { $args: `account/${from}/` })
+		: undefined;
 </script>
 
 <TransactionModal
