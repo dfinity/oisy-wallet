@@ -32,14 +32,14 @@ describe('page-token.derived', () => {
 		['Sepolia token', SEPOLIA_TOKEN]
 		// eslint-disable-next-line local-rules/prefer-object-params
 	])('should find %s', (_, token) => {
-		mockPage.mock({ token: token.name, network: token.network.name });
+		mockPage.mock({ token: token.name, network: token.network.id.description });
 		expect(get(pageToken)).toBe(token);
 	});
 
 	it('should find ERC20 token', () => {
 		const mockToken = { ...mockValidErc20Token, enabled: true };
 		erc20UserTokensStore.setAll([{ data: mockToken, certified: true }]);
-		mockPage.mock({ token: mockToken.name, network: mockToken.network.name });
+		mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 	});
@@ -47,7 +47,7 @@ describe('page-token.derived', () => {
 	it('should find ICRC token', () => {
 		const mockToken = { ...mockIcrcCustomToken, enabled: true };
 		icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
-		mockPage.mock({ token: mockToken.name, network: mockToken.network.name });
+		mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
 	});
