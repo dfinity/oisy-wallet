@@ -98,7 +98,7 @@ export const getSchnorrPublicKey = async ({
 	return await getSchnorrPublicKey(rest);
 };
 
-export const signSchnorrPublicKey = async ({
+export const signWithSchnorr = async ({
 	identity,
 	...rest
 }: CanisterApiFunctionParams<{
