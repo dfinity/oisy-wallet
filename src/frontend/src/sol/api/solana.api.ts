@@ -28,6 +28,47 @@ export const loadSolLamportsBalance = async ({
 };
 
 /**
+ * Fetches the SPL token balance for a wallet.
+ */
+export const loadSplTokenBalance = async ({
+	address,
+	network,
+	tokenAddress
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+	tokenAddress: SolAddress;
+}): Promise<bigint> => {
+	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
+	const wallet = solAddress(address);
+	const relevantTokenAddress = solAddress(tokenAddress);
+
+	const response = await getTokenAccountsByOwner(
+		wallet,
+		{
+			mint: relevantTokenAddress
+		},
+		{ encoding: 'jsonParsed' }
+	).send();
+
+	if (response.value.length === 0) {
+		return BigInt(0);
+	}
+
+	const {
+		account: {
+			data: {
+				parsed: {
+					info: { tokenAmount }
+				}
+			}
+		}
+	} = response.value[0];
+
+	return BigInt(tokenAmount.amount);
+};
+
+/**
  * Fetches transactions without an error for a given wallet address.
  */
 export const getSolTransactions = async ({
