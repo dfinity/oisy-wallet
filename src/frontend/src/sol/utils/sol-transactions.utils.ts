@@ -42,7 +42,7 @@ export const mapSolTransactionUi = ({
 	const amount =
 		(postBalances?.[accountIndex] ?? 0n) - (preBalances?.[accountIndex] ?? 0n) + relevantFee;
 
-	const type = isSender ? 'receive' : 'send';
+	const type = isSender ? 'send' : 'receive';
 
 	return {
 		id,
