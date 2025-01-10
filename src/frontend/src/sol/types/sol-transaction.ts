@@ -1,6 +1,7 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import type { Address } from '@solana/addresses';
+import type { GetSignaturesForAddressApi } from '@solana/rpc';
 import type {
 	Base58EncodedBytes,
 	Commitment,
@@ -10,7 +11,6 @@ import type {
 	TransactionError,
 	UnixTimestamp
 } from '@solana/rpc-types';
-import type { GetSignaturesForAddressApi, GetTransactionApi } from '@solana/rpc';
 
 export type SolTransactionType = Extract<
 	TransactionType,
