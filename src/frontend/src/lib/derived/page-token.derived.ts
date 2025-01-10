@@ -45,8 +45,8 @@ export const pageToken: Readable<OptionToken> = derived(
 			ETHEREUM_TOKEN,
 			SEPOLIA_TOKEN
 		].find(
-			({ name, network: { name: networkName } }) =>
-				name === $routeToken && networkName === $routeNetwork
+			({ name, network: { id: networkId } }) =>
+				name === $routeToken && networkId.description === $routeNetwork
 		);
 	}
 );
