@@ -56,4 +56,14 @@ describe('page-token.derived', () => {
 		mockPage.mock({ token: 'non-existent-token' });
 		expect(get(pageToken)).toBeUndefined();
 	});
+
+	it('should return undefined when token name matches but network does not', () => {
+		mockPage.mock({ token: ETHEREUM_TOKEN.name, network: 'non-existent-network' });
+		expect(get(pageToken)).toBeUndefined();
+	});
+
+	it('should return undefined when token network matches but name does not', () => {
+		mockPage.mock({ token: 'non-existent-token', network: ETHEREUM_TOKEN.network.name });
+		expect(get(pageToken)).toBeUndefined();
+	});
 });
