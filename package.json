@@ -32,7 +32,7 @@
 		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
 		"format-imports": "eslint --fix --rule 'import/no-duplicates: [error, { prefer-inline: true }]' ./src/**/*.svelte",
-		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && npm run format-imports",
+		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml}' && npm run format-imports",
 		"format:backend": "./scripts/format.sh",
 		"generate": "scripts/generate.sh",
 		"deploy": "scripts/deploy.sh",

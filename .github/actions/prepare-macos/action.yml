@@ -5,7 +5,6 @@ description: 'Installs LLVM and Bash 5 on macOS and sets up environment variable
 runs:
   using: composite
   steps:
-
     - name: Install LLVM and Bash on macOS
       shell: bash
       run: |

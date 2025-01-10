@@ -5,7 +5,7 @@ on:
     branches:
       - main
   pull_request:
-    types: [ opened, synchronize, labeled ]
+    types: [opened, synchronize, labeled]
   workflow_dispatch:
 
 concurrency:
@@ -13,7 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   oisy-backend-wasm:
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
@@ -21,7 +20,6 @@ jobs:
       contents: write
       packages: write
     steps:
-
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
@@ -45,9 +43,8 @@ jobs:
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
-    
-    steps:
 
+    steps:
       - name: Fail if branch is main
         if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
         run: |
@@ -81,7 +78,7 @@ jobs:
       - name: Prepare macOS
         if: runner.os == 'macOS'
         uses: ./.github/actions/prepare-macos
-        
+
       - name: Set Environment Variables
         run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 
@@ -100,7 +97,7 @@ jobs:
         with:
           add: e2e
           default_author: github_actions
-          message: "🤖 Update E2E snapshots"
+          message: '🤖 Update E2E snapshots'
 
       - name: Stage Changes
         if: github.ref == 'refs/heads/main'

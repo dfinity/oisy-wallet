@@ -21,39 +21,39 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: Create GitHub App Token
-      uses: actions/create-github-app-token@v1
-      id: app-token
-      with:
-        app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
-        private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Prepare
-      uses: ./.github/actions/prepare
+      - name: Prepare
+        uses: ./.github/actions/prepare
 
-    - name: Bump version
-      id: bump_version
-      run: |
-        npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
-        new_version=$(node -p "require('./package.json').version")
-        echo "new_version=$new_version" >> $GITHUB_OUTPUT
-        echo "Bumped to version: $new_version"
+      - name: Bump version
+        id: bump_version
+        run: |
+          npm version ${{ github.event.inputs.version_bump }} --no-git-tag-version
+          new_version=$(node -p "require('./package.json').version")
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "Bumped to version: $new_version"
 
-    - name: Stage changes
-      run: |
-        git add package.json package-lock.json
+      - name: Stage changes
+        run: |
+          git add package.json package-lock.json
 
-    - name: Create Pull Request
-      uses: ./.github/actions/create-pr
-      with:
-        token: ${{ steps.app-token.outputs.token }}
-        branch: "chore(release)/v${{ steps.bump_version.outputs.new_version }}"
-        title: "chore(release): v${{ steps.bump_version.outputs.new_version }}"
-        body: |
-          This PR prepares the release of version v${{ steps.bump_version.outputs.new_version }}.
+      - name: Create Pull Request
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: 'chore(release)/v${{ steps.bump_version.outputs.new_version }}'
+          title: 'chore(release): v${{ steps.bump_version.outputs.new_version }}'
+          body: |
+            This PR prepares the release of version v${{ steps.bump_version.outputs.new_version }}.
 
-          ### Release Description:
-          ${{ github.event.inputs.release_description }}
+            ### Release Description:
+            ${{ github.event.inputs.release_description }}

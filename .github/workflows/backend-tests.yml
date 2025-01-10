@@ -19,7 +19,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   docker-build-base:
     runs-on: ubuntu-24.04
     steps:
@@ -50,7 +49,7 @@ jobs:
 
   tests:
     runs-on: ubuntu-24.04
-    needs: [ 'docker-build' ]
+    needs: ['docker-build']
     steps:
       - uses: actions/checkout@v4
 
@@ -68,12 +67,12 @@ jobs:
           name: backend.wasm.gz
           path: .
 
-      - name: "Run backend tests"
+      - name: 'Run backend tests'
         working-directory: .
         run: ./scripts/test.backend.sh
 
   may-merge:
-    needs: [ 'tests' ]
+    needs: ['tests']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
