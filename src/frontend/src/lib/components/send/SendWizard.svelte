@@ -11,8 +11,10 @@
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdICP,
-		isNetworkIdBitcoin
+		isNetworkIdBitcoin,
+		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
+	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
 
 	export let source: string;
 	export let destination: string;
@@ -59,6 +61,20 @@
 		/>
 	{:else if isNetworkIdBitcoin($token?.network.id)}
 		<BtcSendTokenWizard
+			{currentStep}
+			{formCancelAction}
+			bind:destination
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icNext
+			on:icClose
+			on:icSendBack
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else if isNetworkIdSolana($token?.network.id)}
+		<SolSendTokenWizard
 			{currentStep}
 			{formCancelAction}
 			bind:destination

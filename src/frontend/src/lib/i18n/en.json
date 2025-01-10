@@ -373,7 +373,8 @@
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
-			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
+			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
+			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
 		}
