@@ -99,7 +99,7 @@
 			});
 			return;
 		}
-    
+
 		dispatch('icNext');
 
 		try {
