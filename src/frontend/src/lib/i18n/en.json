@@ -754,10 +754,10 @@
 			"text": {
 				"open_wallet": "Take me to the wallet",
 				"title_successful": "Congratulations!",
-				"title_failed": "Something went wrong",
-				"reward_received": "You've received a welcome gift!",
-				"reward_failed": "Oops, the link has expired",
-				"reward_received_description": "You've just received your welcome tokens from Oisy",
+				"title_failed": "Invalid invitation code",
+				"reward_received": "Welcome to $oisy_short!",
+				"reward_failed": "Code is expired",
+				"reward_received_description": "Congratulations, you've just received a welcome gift.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {
