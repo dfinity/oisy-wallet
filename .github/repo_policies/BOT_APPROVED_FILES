@@ -3,7 +3,8 @@
 
 package.json
 package-lock.json
-cargo.toml
+Cargo.toml
+Cargo.lock
 rust-toolchain.toml
 e2e/**/*.png
 declarations/**/*
