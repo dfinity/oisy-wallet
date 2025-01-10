@@ -94,7 +94,7 @@ const injectLinkPreloader = (indexHtml) => {
 const extractStartScript = (htmlFile) => {
 	const indexHtml = readFileSync(htmlFile, 'utf8');
 
-	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gm;
+	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gim;
 
 	// 1. extract SvelteKit start script to a separate main.js file
 	const [_script, _scriptStartTag, content, _scriptEndTag] = svelteKitStartScript.exec(indexHtml);
@@ -146,16 +146,21 @@ const updateCSP = (indexHtml) => {
 	const blockstreamApiConnectSrc = 'https://blockstream.info';
 	const blockchainApiConnectSrc = 'https://blockchain.info';
 
+	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
+
 	const walletConnectSrc =
 		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
 	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
 
+	const solanaRpcApiConnectSrc =
+		'https://api.mainnet-beta.solana.com wss://api.mainnet-beta.solana.com https://api.testnet.solana.com wss://api.testnet.solana.com https://api.devnet.solana.com wss://api.devnet.solana.com';
+
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaRpcApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';

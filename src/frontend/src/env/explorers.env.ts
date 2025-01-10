@@ -9,7 +9,10 @@ const EXPLORER_URLS = {
 	SNS: 'https://dashboard.internetcomputer.org/sns',
 	BTC_MAINNET: 'https://blockstream.info',
 	BTC_TESTNET: 'https://blockstream.info/testnet',
-	BTC_REGTEST: 'https://blockstream.regtest.trustless.computer/regtest'
+	BTC_REGTEST: 'https://blockstream.regtest.trustless.computer/regtest',
+	SOL_MAINNET: 'https://solscan.io/$args',
+	SOL_TESTNET: 'https://solscan.io/$args?cluster=testnet',
+	SOL_DEVNET: 'https://solscan.io/$args?cluster=devnet'
 };
 
 export const {
@@ -23,5 +26,8 @@ export const {
 	SNS: SNS_EXPLORER_URL,
 	BTC_MAINNET: BTC_MAINNET_EXPLORER_URL,
 	BTC_TESTNET: BTC_TESTNET_EXPLORER_URL,
-	BTC_REGTEST: BTC_REGTEST_EXPLORER_URL
+	BTC_REGTEST: BTC_REGTEST_EXPLORER_URL,
+	SOL_MAINNET: SOL_MAINNET_EXPLORER_URL,
+	SOL_TESTNET: SOL_TESTNET_EXPLORER_URL,
+	SOL_DEVNET: SOL_DEVNET_EXPLORER_URL
 } = EXPLORER_URLS;
