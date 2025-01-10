@@ -585,7 +585,7 @@ describe('signer.canister', () => {
 	});
 
 	describe('getSchnorrPublicKey', () => {
-		it('returns correct schnorr public key', async () => {
+		it('returns correct Schnorr public key', async () => {
 			const publicKey = [1, 2, 3];
 			const response = { public_key: publicKey, chain_code: [4, 5, 6] };
 			service.schnorr_public_key.mockResolvedValue({ Ok: [response] });
@@ -617,6 +617,53 @@ describe('signer.canister', () => {
 			});
 
 			const res = getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('signWithSchnorr', () => {
+		const message = [1, 2, 3];
+		const signature = [4, 5, 6];
+
+		it('signs with Schnorr', async () => {
+			service.schnorr_sign.mockResolvedValue({ Ok: [{ signature }] });
+
+			const { signWithSchnorr } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await signWithSchnorr({
+				message,
+				derivationPath: ['test'],
+				keyId: SOLANA_KEY_ID
+			});
+
+			expect(res).toEqual(signature);
+			expect(service.schnorr_sign).toHaveBeenCalledWith(
+				{
+					key_id: SOLANA_KEY_ID,
+					derivation_path: mapDerivationPath(['test']),
+					message
+				},
+				[SIGNER_PAYMENT_TYPE]
+			);
+		});
+
+		it('should throw an error if schnorr_sign throws', async () => {
+			service.schnorr_sign.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { signWithSchnorr } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signWithSchnorr({
+				message,
+				derivationPath: ['test'],
+				keyId: SOLANA_KEY_ID
+			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
