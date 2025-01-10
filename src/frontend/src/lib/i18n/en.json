@@ -373,7 +373,8 @@
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
-			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
+			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
+			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
 		}
@@ -667,6 +668,8 @@
 			"confirmed": "Confirmed",
 			"included": "Included",
 			"finalised": "Finalised",
+			"finalized": "Finalised",
+			"processed": "Processed",
 			"pending": "Pending...",
 			"safe": "Safe",
 			"unconfirmed": "Unconfirmed"
@@ -754,10 +757,10 @@
 			"text": {
 				"open_wallet": "Take me to the wallet",
 				"title_successful": "Congratulations!",
-				"title_failed": "Something went wrong",
-				"reward_received": "You've received a welcome gift!",
-				"reward_failed": "Oops, the link has expired",
-				"reward_received_description": "You've just received your welcome tokens from Oisy",
+				"title_failed": "Invalid invitation code",
+				"reward_received": "Welcome to $oisy_short!",
+				"reward_failed": "Code is expired",
+				"reward_received_description": "Congratulations, you've just received a welcome gift.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {

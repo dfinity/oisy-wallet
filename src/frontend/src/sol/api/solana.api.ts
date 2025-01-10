@@ -3,6 +3,7 @@ import type { SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress, type Address } from '@solana/addresses';
@@ -34,12 +35,7 @@ export const getSolTransactions = async ({
 	network,
 	before,
 	limit = Number(WALLET_PAGINATION)
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-	before?: string;
-	limit?: number;
-}): Promise<SolRpcTransaction[]> => {
+}: GetSolTransactionsParams): Promise<SolRpcTransaction[]> => {
 	const wallet = solAddress(address);
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
 	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });

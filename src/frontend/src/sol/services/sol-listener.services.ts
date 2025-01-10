@@ -2,8 +2,9 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
-import { nonNullish } from '@dfinity/utils';
+import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
@@ -16,7 +17,8 @@ export const syncWallet = ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balance }
+			balance: { certified, data: balance },
+			newTransactions
 		}
 	} = data;
 
@@ -32,7 +34,10 @@ export const syncWallet = ({
 		balancesStore.reset(tokenId);
 	}
 
-	// Transaction handling will be added later
+	solTransactionsStore.prepend({
+		tokenId,
+		transactions: JSON.parse(newTransactions, jsonReviver)
+	});
 };
 
 export const syncWalletError = ({
@@ -47,7 +52,7 @@ export const syncWalletError = ({
 	const errorText = get(i18n).init.error.sol_wallet_error;
 
 	balancesStore.reset(tokenId);
-	// Transaction store reset will be added when implementing transactions
+	solTransactionsStore.reset(tokenId);
 
 	if (hideToast) {
 		console.warn(`${errorText}:`, err);
