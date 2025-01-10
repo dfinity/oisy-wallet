@@ -51,6 +51,7 @@ vi.mock('$sol/utils/network.utils', () => ({
 }));
 
 describe('sol-send.services', () => {
+	// TODO: add more practical tests deploying the Solana local node
 	describe('sendSol', () => {
 		const mockAmount = BigNumber.from('1000000');
 		const mockSource = mockSolAddress;
