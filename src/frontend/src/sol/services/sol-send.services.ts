@@ -30,7 +30,7 @@ import {
 	setTransactionMessageFeePayer,
 	setTransactionMessageLifetimeUsingBlockhash
 } from '@solana/transaction-messages';
-import { type Transaction } from '@solana/transactions';
+import type { Transaction } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
