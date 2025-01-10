@@ -58,12 +58,16 @@ describe('page-token.derived', () => {
 	});
 
 	it('should return undefined when token name matches but network does not', () => {
-		mockPage.mock({ token: ETHEREUM_TOKEN.name, network: 'non-existent-network' });
+		const mockToken = { ...mockValidErc20Token, enabled: true };
+		mockPage.mock({ token: mockToken.name, network: 'non-existent-network' });
+
 		expect(get(pageToken)).toBeUndefined();
 	});
 
 	it('should return undefined when token network matches but name does not', () => {
-		mockPage.mock({ token: 'non-existent-token', network: ETHEREUM_TOKEN.network.name });
+		const mockToken = { ...mockValidErc20Token, enabled: true };
+		mockPage.mock({ token: 'non-existent-token', network: mockToken.network.name });
+
 		expect(get(pageToken)).toBeUndefined();
 	});
 });
