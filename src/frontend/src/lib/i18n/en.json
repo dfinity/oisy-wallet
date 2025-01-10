@@ -754,16 +754,25 @@
 			"text": {
 				"open_wallet": "Take me to the wallet",
 				"title_successful": "Congratulations!",
-				"title_failed": "Something went wrong",
-				"reward_received": "You've received a welcome gift!",
-				"reward_failed": "Oops, the link has expired",
-				"reward_received_description": "You've just received your welcome tokens from Oisy",
+				"title_failed": "Invalid invitation code",
+				"reward_received": "Welcome to $oisy_short!",
+				"reward_failed": "Code is expired",
+				"reward_received_description": "Congratulations, you've just received a welcome gift.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
 				"claiming_reward": "Error while claiming reward."
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "Generate invitation link",
+				"invitation_link_copied": "Invitation link copied to clipboard.",
+				"generate_new_link": "Generate new link",
+				"generating_new_code": "Generating new code",
+				"regenerate_countdown_text": "New link will be generated in $counter sec"
 			}
 		}
 	},
@@ -806,6 +815,9 @@
 		"consent_message": {
 			"text": {
 				"loading": "Loading consent message..."
+			},
+			"warning": {
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
 			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
