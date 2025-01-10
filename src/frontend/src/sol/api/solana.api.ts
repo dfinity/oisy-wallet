@@ -9,6 +9,7 @@ import { address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
+import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
 export const loadSolLamportsBalance = async ({
@@ -26,6 +27,8 @@ export const loadSolLamportsBalance = async ({
 	return balance;
 };
 
+
+
 /**
  * Fetches transactions without an error for a given wallet address.
  */
@@ -34,12 +37,7 @@ export const getSolTransactions = async ({
 	network,
 	before,
 	limit = Number(WALLET_PAGINATION)
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-	before?: string;
-	limit?: number;
-}): Promise<SolRpcTransaction[]> => {
+}: GetSolTransactionsParams): Promise<SolRpcTransaction[]> => {
 	const wallet = solAddress(address);
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
 	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
