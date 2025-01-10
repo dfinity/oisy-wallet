@@ -12,7 +12,8 @@ export const TokenStandardSchema = z.enum([
 	'icp',
 	'icrc',
 	'bitcoin',
-	'solana'
+	'solana',
+	'spl'
 ]);
 
 export const TokenCategorySchema = z.enum(['default', 'custom']);
