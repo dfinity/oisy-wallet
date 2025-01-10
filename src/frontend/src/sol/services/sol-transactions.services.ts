@@ -46,7 +46,7 @@ const networkToSolTokenIdMap = {
 	[SolanaNetworks.local]: SOLANA_LOCAL_TOKEN_ID
 };
 
-const loadSolTransactions = async ({
+export const loadSolTransactions = async ({
 	address,
 	network,
 	before,
