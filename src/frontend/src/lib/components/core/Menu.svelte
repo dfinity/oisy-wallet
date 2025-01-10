@@ -16,6 +16,7 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
+	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -31,9 +32,11 @@
 		NAVIGATION_MENU_VIP_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalVipQrCode } from '$lib/derived/modal.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { isVipUser } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		isRouteActivity,
 		isRouteDappExplorer,
@@ -158,11 +161,10 @@
 		{/if}
 
 		{#if isVip}
-			<!-- TODO: implements on:click function -->
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
 				testId={NAVIGATION_MENU_VIP_BUTTON}
-				on:click={() => {}}
+				on:click={modalStore.openVipQrCode}
 			>
 				<IconVipQr size="20" />
 				{$i18n.navigation.text.vip_qr_code}
@@ -204,3 +206,7 @@
 		</span>
 	</div>
 </Popover>
+
+{#if $modalVipQrCode}
+	<VipQrCodeModal />
+{/if}
