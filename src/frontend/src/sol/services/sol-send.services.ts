@@ -7,6 +7,8 @@ import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolTransactionMessage } from '$sol/types/sol-send';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -19,7 +21,8 @@ import {
 	assertIsTransactionSigner,
 	signTransactionMessageWithSigners,
 	type SignatureDictionary,
-	type TransactionPartialSigner
+	type TransactionPartialSigner,
+	type TransactionSigner
 } from '@solana/signers';
 import {
 	appendTransactionMessageInstructions,
@@ -27,10 +30,52 @@ import {
 	setTransactionMessageFeePayer,
 	setTransactionMessageLifetimeUsingBlockhash
 } from '@solana/transaction-messages';
-import { getSignatureFromTransaction, type Transaction } from '@solana/transactions';
+import type { Transaction } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
+const createSolTransactionMessage = async ({
+	signer,
+	destination,
+	amount,
+	network
+}: {
+	signer: TransactionSigner;
+	destination: SolAddress;
+	amount: BigNumber;
+	network: SolanaNetworkType;
+}): Promise<SolTransactionMessage> => {
+	const rpc = solanaHttpRpc(network);
+
+	const { getLatestBlockhash } = rpc;
+
+	const { value: latestBlockhash } = await getLatestBlockhash().send();
+
+	return pipe(
+		createTransactionMessage({ version: 'legacy' }),
+		(tx) => setTransactionMessageFeePayer(signer.address, tx),
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+		(tx) =>
+			appendTransactionMessageInstructions(
+				[
+					getTransferSolInstruction({
+						source: signer,
+						destination: solAddress(destination),
+						amount: lamports(BigInt(amount.toNumber()))
+					})
+				],
+				tx
+			)
+	);
+};
+
+/**
+ * Send SOL from one address to another.
+ *
+ * This function will sign the transaction with the provided identity and send it to the network.
+ * It is based on the Solana web3.js library.
+ * https://solana.com/developers/cookbook/transactions/send-sol
+ */
 export const sendSol = async ({
 	identity,
 	token: {
@@ -62,10 +107,6 @@ export const sendSol = async ({
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
-	const { getLatestBlockhash } = rpc;
-
-	const { value: latestBlockhash } = await getLatestBlockhash().send();
-
 	const signer: TransactionPartialSigner = {
 		address: solAddress(source),
 		signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
@@ -86,22 +127,12 @@ export const sendSol = async ({
 	assertIsTransactionSigner(signer);
 	assertIsTransactionPartialSigner(signer);
 
-	const transactionMessage = pipe(
-		createTransactionMessage({ version: 'legacy' }),
-		(tx) => setTransactionMessageFeePayer(signer.address, tx),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-		(tx) =>
-			appendTransactionMessageInstructions(
-				[
-					getTransferSolInstruction({
-						source: signer,
-						destination: solAddress(destination),
-						amount: lamports(BigInt(amount.toNumber()))
-					})
-				],
-				tx
-			)
-	);
+	const transactionMessage = await createSolTransactionMessage({
+		signer,
+		destination,
+		amount,
+		network: solNetwork
+	});
 
 	onProgress?.();
 
@@ -109,13 +140,8 @@ export const sendSol = async ({
 
 	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 
-	try {
-		// TODO: do not await transaction to be completed
-		await sendAndConfirmTransaction(signedTransaction, { commitment: 'confirmed' });
-		const signature = getSignatureFromTransaction(signedTransaction);
-		console.log('✅ - Transfer transaction:', signature);
-		onProgress?.();
-	} catch (e) {
-		console.error('Transfer failed:', e);
-	}
+	// Explicitly do not await to proceed in the background and allow the UI to continue
+	sendAndConfirmTransaction(signedTransaction, { commitment: 'confirmed' });
+
+	onProgress?.();
 };
