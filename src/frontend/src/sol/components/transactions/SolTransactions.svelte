@@ -28,7 +28,7 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
-	import { loadSolTransactions } from '$sol/services/sol-transactions.services';
+	import { loadSolTransactionsOld as loadSolTransactions } from '$sol/services/sol-transactions.services';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	let address: OptionSolAddress;
