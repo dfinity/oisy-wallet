@@ -94,7 +94,7 @@ const injectLinkPreloader = (indexHtml) => {
 const extractStartScript = (htmlFile) => {
 	const indexHtml = readFileSync(htmlFile, 'utf8');
 
-	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gm;
+	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gim;
 
 	// 1. extract SvelteKit start script to a separate main.js file
 	const [_script, _scriptStartTag, content, _scriptEndTag] = svelteKitStartScript.exec(indexHtml);
