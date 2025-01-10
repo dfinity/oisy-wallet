@@ -1,14 +1,14 @@
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
 import {
-	type Base58EncodedBytes,
 	blockhash,
 	lamports,
+	type Base58EncodedBytes,
 	type UnixTimestamp
 } from '@solana/rpc-types';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,

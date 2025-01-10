@@ -17,7 +17,7 @@ describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
 	const signalEnd = vi.fn();
 
-	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction]
+	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction];
 
 	beforeEach(() => {
 		vi.clearAllMocks();
