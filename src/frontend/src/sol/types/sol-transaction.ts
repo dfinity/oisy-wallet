@@ -10,11 +10,20 @@ import type {
 	TransactionError,
 	UnixTimestamp
 } from '@solana/rpc-types';
+import type { GetSignaturesForAddressApi, GetTransactionApi } from '@solana/rpc';
 
 export type SolTransactionType = Extract<
 	TransactionType,
 	(typeof solTransactionTypes.options)[number]
 >;
+
+export interface SolTransactionUi extends TransactionUiCommon {
+	id: string;
+	type: SolTransactionType;
+	status: Commitment | null;
+	value?: bigint;
+	fee?: bigint;
+}
 
 export interface SolRpcTransaction {
 	id: string;
@@ -44,10 +53,6 @@ export interface SolRpcTransaction {
 	};
 }
 
-export interface SolTransactionUi extends TransactionUiCommon {
-	id: string;
-	type: SolTransactionType;
-	status: Commitment | null;
-	value?: bigint;
-	fee?: bigint;
-}
+export type SolSignature = ReturnType<
+	GetSignaturesForAddressApi['getSignaturesForAddress']
+>[number];

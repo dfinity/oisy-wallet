@@ -5,7 +5,6 @@ import type {
 	EthSignPrehashRequest,
 	EthSignTransactionRequest,
 	GetBalanceRequest,
-	SchnorrKeyId,
 	SendBtcResponse,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
@@ -14,7 +13,11 @@ import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.fact
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type { SendBtcParams } from '$lib/types/api';
+import type {
+	GetSchnorrPublicKeyParams,
+	SendBtcParams,
+	SignWithSchnorrParams
+} from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { Canister, createServices, toNullable } from '@dfinity/utils';
@@ -201,10 +204,7 @@ export class SignerCanister extends Canister<SignerService> {
 	getSchnorrPublicKey = async ({
 		derivationPath,
 		keyId
-	}: {
-		derivationPath: string[];
-		keyId: SchnorrKeyId;
-	}): Promise<Uint8Array | number[]> => {
+	}: GetSchnorrPublicKeyParams): Promise<Uint8Array | number[]> => {
 		const { schnorr_public_key } = this.caller({
 			certified: true
 		});
@@ -229,19 +229,16 @@ export class SignerCanister extends Canister<SignerService> {
 
 	signWithSchnorr = async ({
 		message,
-		derivationPath
-	}: {
-		message: number[];
-		derivationPath: string[];
-	}): Promise<Uint8Array | number[]> => {
+		derivationPath,
+		keyId
+	}: SignWithSchnorrParams): Promise<Uint8Array | number[]> => {
 		const { schnorr_sign } = this.caller({
 			certified: true
 		});
 
 		const response = await schnorr_sign(
 			{
-				// TODO: set the key_id in the signer repo, as done for the ecdsa key
-				key_id: { algorithm: { ed25519: null }, name: 'dfx_test_key' },
+				key_id: keyId,
 				derivation_path: mapDerivationPath(derivationPath),
 				message
 			},
