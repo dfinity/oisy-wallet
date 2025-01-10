@@ -3,6 +3,9 @@
 
 package.json
 package-lock.json
+Cargo.toml
+Cargo.lock
+rust-toolchain.toml
 e2e/**/*.png
 declarations/**/*
 src/frontend/src/env/tokens/tokens.*.json
