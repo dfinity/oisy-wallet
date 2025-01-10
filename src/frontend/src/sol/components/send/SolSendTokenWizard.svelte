@@ -28,11 +28,11 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
-	import { parseToken } from '$lib/utils/parse.utils';
 	import { sendSol } from '$sol/services/sol-send.services';
 
 	export let currentStep: WizardStep | undefined;
