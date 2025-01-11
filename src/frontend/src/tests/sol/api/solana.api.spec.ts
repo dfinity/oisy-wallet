@@ -1,6 +1,16 @@
-import { getSolTransactions, loadSolLamportsBalance } from '$sol/api/solana.api';
+import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import {
+	getSolTransactions,
+	loadSolLamportsBalance,
+	loadSplTokenBalance
+} from '$sol/api/solana.api';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
+import {
+	mockEmptyTokenAccountResponse,
+	mockTokenAccountResponse,
+	mockTokenAccountResponseZeroBalance
+} from '$tests/mocks/sol-balance.mock';
 import {
 	mockSolSignature,
 	mockSolSignatureResponse,
@@ -239,6 +249,93 @@ describe('solana.api', () => {
 					network: SolanaNetworks.mainnet
 				})
 			).rejects.toThrow('RPC Error');
+		});
+	});
+
+	describe('loadSplTokenBalance', () => {
+		let mockGetTokenAccountsByOwner: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			mockGetTokenAccountsByOwner = vi.fn().mockReturnValue({
+				send: () => Promise.resolve(mockTokenAccountResponse)
+			});
+
+			const mockSolanaHttpRpc = vi.fn().mockReturnValue({
+				getTokenAccountsByOwner: mockGetTokenAccountsByOwner
+			});
+			vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
+		});
+
+		it('should load positive token balance successfully', async () => {
+			const balance = await loadSplTokenBalance({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokenAddress: DEVNET_EURC_TOKEN.address
+			});
+
+			expect(balance).toEqual(500000000n);
+		});
+
+		it('should load zero token balance successfully', async () => {
+			mockGetTokenAccountsByOwner.mockReturnValue({
+				send: () => Promise.resolve(mockTokenAccountResponseZeroBalance)
+			});
+			const balance = await loadSplTokenBalance({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokenAddress: DEVNET_EURC_TOKEN.address
+			});
+
+			expect(balance).toEqual(0n);
+		});
+
+		it('should return zero when no token accounts exist', async () => {
+			mockGetTokenAccountsByOwner.mockReturnValue({
+				send: () => Promise.resolve(mockEmptyTokenAccountResponse)
+			});
+
+			const balance = await loadSplTokenBalance({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokenAddress: DEVNET_EURC_TOKEN.address
+			});
+
+			expect(balance).toEqual(0n);
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			const mockError = new Error('RPC Error');
+			mockGetTokenAccountsByOwner.mockReturnValue({ send: () => Promise.reject(mockError) });
+
+			await expect(
+				loadSplTokenBalance({
+					address: mockSolAddress,
+					network: SolanaNetworks.mainnet,
+					tokenAddress: DEVNET_EURC_TOKEN.address
+				})
+			).rejects.toThrow('RPC Error');
+		});
+
+		it('should throw error when address is empty', async () => {
+			await expect(
+				loadSplTokenBalance({
+					address: '',
+					network: SolanaNetworks.mainnet,
+					tokenAddress: DEVNET_EURC_TOKEN.address
+				})
+			).rejects.toThrow();
+		});
+
+		it('should throw error when token address is empty', async () => {
+			await expect(
+				loadSplTokenBalance({
+					address: mockSolAddress,
+					network: SolanaNetworks.mainnet,
+					tokenAddress: ''
+				})
+			).rejects.toThrow();
 		});
 	});
 });
