@@ -1,4 +1,5 @@
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { SOL_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 import { token } from '$lib/stores/token.store';
 import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -16,7 +17,7 @@ describe('SolTransactionsSkeletons', () => {
 
 		// The base TransactionsSkeletons component shows 5 skeleton cards
 		Array.from({ length: 5 }).forEach((_, i) => {
-			expect(getAllByTestId(`sol-txn-${i}`)).toBeTruthy();
+			expect(getAllByTestId(`${SOL_TRANSACTION_SKELETON_PREFIX}-${i}`)).toBeTruthy();
 		});
 	});
 
@@ -26,7 +27,7 @@ describe('SolTransactionsSkeletons', () => {
 		const { getAllByTestId } = render(SolTransactionsSkeletons);
 
 		Array.from({ length: 5 }).forEach((_, i) => {
-			expect(getAllByTestId(`sol-txn-${i}`)).toBeTruthy();
+			expect(getAllByTestId(`${SOL_TRANSACTION_SKELETON_PREFIX}-${i}`)).toBeTruthy();
 		});
 	});
 
@@ -39,6 +40,8 @@ describe('SolTransactionsSkeletons', () => {
 
 		const { container } = render(SolTransactionsSkeletons);
 
-		expect(container.querySelectorAll('[data-testid^="sol-txn-"]')).toHaveLength(0);
+		expect(
+			container.querySelectorAll('[data-testid^="${SOL_TRANSACTION_SKELETON_PREFIX}-"]')
+		).toHaveLength(0);
 	});
 });
