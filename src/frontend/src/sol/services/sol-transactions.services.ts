@@ -4,13 +4,18 @@ import {
 	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
-import type { SolAddress } from '$lib/types/address';
 import { getSolTransactions } from '$sol/api/solana.api';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
-import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
+import { SolanaNetworks } from '$sol/types/network';
+import type { GetSolTransactionsParams } from '$sol/types/sol-api';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
+
+interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
+	signalEnd: () => void;
+}
 
 export const loadNextSolTransactions = async ({
 	address,
@@ -18,13 +23,7 @@ export const loadNextSolTransactions = async ({
 	before,
 	limit,
 	signalEnd
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-	before?: string;
-	limit?: number;
-	signalEnd: () => void;
-}): Promise<SolCertifiedTransaction[]> => {
+}: LoadNextSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	const transactions = await loadSolTransactions({
 		address,
 		network,
@@ -52,12 +51,7 @@ const loadSolTransactions = async ({
 	network,
 	before,
 	limit
-}: {
-	address: SolAddress;
-	network: SolanaNetworkType;
-	before?: string;
-	limit?: number;
-}): Promise<SolCertifiedTransaction[]> => {
+}: GetSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	const solTokenIdForNetwork = networkToSolTokenIdMap[network];
 
 	try {
@@ -68,12 +62,17 @@ const loadSolTransactions = async ({
 			limit
 		});
 
+		const certifiedTransactions = transactions.map((transaction) => ({
+			data: mapSolTransactionUi({ transaction, address }),
+			certified: false
+		}));
+
 		solTransactionsStore.append({
 			tokenId: solTokenIdForNetwork,
-			transactions: transactions
+			transactions: certifiedTransactions
 		});
 
-		return transactions;
+		return certifiedTransactions;
 	} catch (error: unknown) {
 		solTransactionsStore.reset(solTokenIdForNetwork);
 

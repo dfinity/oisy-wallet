@@ -105,7 +105,7 @@ interface I18nDapps {
 }
 
 interface I18nFooter {
-	text: { incubated_with: string; dfinity_foundation: string; copyright: string };
+	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
 }
 
@@ -341,6 +341,7 @@ interface I18nSend {
 		invalid_destination: string;
 		incompatible_token: string;
 		no_btc_network_id: string;
+		no_solana_network_id: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 	};
@@ -677,6 +678,15 @@ interface I18nVip {
 		};
 		error: { loading_reward: string; loading_user_data: string; claiming_reward: string };
 	};
+	invitation: {
+		text: {
+			title: string;
+			invitation_link_copied: string;
+			generate_new_link: string;
+			generating_new_code: string;
+			regenerate_countdown_text: string;
+		};
+	};
 }
 
 interface I18nSigner {
@@ -695,6 +705,7 @@ interface I18nSigner {
 	origin: { text: { request_from: string; invalid_origin: string }; alt: { link_to_dapp: string } };
 	consent_message: {
 		text: { loading: string };
+		warning: { token_without_consent_message: string };
 		error: { no_approve_callback: string; no_reject_callback: string; retrieve: string };
 	};
 	call_canister: {

@@ -12,10 +12,10 @@ export const solTransactions: Readable<SolTransactionUi[]> = derived(
 
 export const solTransactionsInitialized: Readable<boolean> = derived(
 	[solTransactionsStore, tokenWithFallback],
-	([solTransactionsStore, { id: $tokenId }]) => nonNullish(solTransactionsStore?.[$tokenId])
+	([$solTransactionsStore, { id: $tokenId }]) => nonNullish($solTransactionsStore?.[$tokenId])
 );
 
 export const solTransactionsNotInitialized: Readable<boolean> = derived(
 	[solTransactionsInitialized],
-	([solTransactionsInitialized]) => !solTransactionsInitialized
+	([$solTransactionsInitialized]) => !$solTransactionsInitialized
 );

@@ -11,6 +11,7 @@ import { getSolTransactions, loadSolLamportsBalance } from '$sol/api/solana.api'
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
 import type { Lamports } from '@solana/rpc-types';
 
@@ -69,7 +70,12 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		solanaNetwork
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
 		const transactions = await getSolTransactions({ network: solanaNetwork, address });
-		return transactions.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
+		return transactions
+			.map((transaction) => ({
+				data: mapSolTransactionUi({ transaction, address }),
+				certified: false
+			}))
+			.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
 	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {

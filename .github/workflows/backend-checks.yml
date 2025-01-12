@@ -19,7 +19,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   lint:
     runs-on: ubuntu-24.04
     steps:
@@ -43,7 +42,7 @@ jobs:
         run: ./scripts/lint.cargo-workspace-dependencies.sh
 
   may-merge:
-    needs: [ 'lint', 'workspace-dependencies' ]
+    needs: ['lint', 'workspace-dependencies']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
