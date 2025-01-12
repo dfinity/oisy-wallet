@@ -23,17 +23,6 @@ export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	status: 'finalized'
 });
 
-export const mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
-	{
-		data: createMockSolTransactionUi('tx1'),
-		certified: false
-	},
-	{
-		data: createMockSolTransactionUi('tx2'),
-		certified: false
-	}
-];
-
 export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 	blockTime: 1736257946n as UnixTimestamp,
 	confirmationStatus: 'finalized',
