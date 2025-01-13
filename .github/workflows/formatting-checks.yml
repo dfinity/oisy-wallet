@@ -17,7 +17,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   format:
     runs-on: ubuntu-24.04
     steps:

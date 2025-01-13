@@ -5,7 +5,7 @@
 	import { writable } from 'svelte/store';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
-	import SendReview from '$eth/components/send/SendReview.svelte';
+	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -248,7 +248,7 @@
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SendReview
+		<EthSendReview
 			on:icBack
 			on:icSend={send}
 			{destination}

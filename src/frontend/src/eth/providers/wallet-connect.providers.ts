@@ -1,13 +1,13 @@
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
 import {
+	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN,
-	SESSION_REQUEST_SEND_TRANSACTION,
 	WALLET_CONNECT_METADATA
 } from '$eth/constants/wallet-connect.constants';
-import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import type { EthAddress } from '$lib/types/address';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import {
 	formatJsonRpcResult,
@@ -82,7 +82,7 @@ export const initWalletConnect = async ({
 				eip155: {
 					chains: EIP155_CHAINS_KEYS,
 					methods: [
-						SESSION_REQUEST_SEND_TRANSACTION,
+						SESSION_REQUEST_ETH_SEND_TRANSACTION,
 						SESSION_REQUEST_ETH_SIGN,
 						SESSION_REQUEST_PERSONAL_SIGN,
 						SESSION_REQUEST_ETH_SIGN_V4

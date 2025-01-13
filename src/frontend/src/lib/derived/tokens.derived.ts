@@ -1,4 +1,5 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -16,14 +17,23 @@ import {
 	filterEnabledTokens,
 	sumMainnetTokensUsdBalancesPerNetwork
 } from '$lib/utils/tokens.utils';
+import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
-	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens, enabledBitcoinTokens, enabledSolanaTokens],
+	[
+		erc20Tokens,
+		sortedIcrcTokens,
+		splTokens,
+		enabledEthereumTokens,
+		enabledBitcoinTokens,
+		enabledSolanaTokens
+	],
 	([
 		$erc20Tokens,
 		$icrcTokens,
+		$splTokens,
 		$enabledEthereumTokens,
 		$enabledBitcoinTokens,
 		$enabledSolanaTokens
@@ -31,9 +41,10 @@ export const tokens: Readable<Token[]> = derived(
 		ICP_TOKEN,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
+		...$enabledSolanaTokens,
 		...$erc20Tokens,
 		...$icrcTokens,
-		...$enabledSolanaTokens
+		...$splTokens
 	]
 );
 
@@ -43,7 +54,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
-		SOLANA_TOKEN,
+		...(SOLANA_NETWORK_ENABLED ? [SOLANA_TOKEN] : []),
 		...$icrcChainFusionDefaultTokens
 	]
 );
