@@ -68,7 +68,7 @@ describe('kong_backend.canister', () => {
 		sendAmount: sourceAmount,
 		referredBy: 'referredBy',
 		receiveAmount: sourceAmount,
-		destinationAddress: 'destinationAddress',
+		receiveAddress: 'receiveAddress',
 		sourceToken,
 		payTransactionId: { TransactionId: '1' }
 	};
@@ -186,7 +186,7 @@ describe('kong_backend.canister', () => {
 				receive_token: swapParams.destinationToken.symbol,
 				pay_amount: swapParams.sendAmount,
 				max_slippage: toNullable(swapParams.maxSlippage),
-				receive_address: toNullable(swapParams.destinationAddress),
+				receive_address: toNullable(swapParams.receiveAddress),
 				receive_amount: toNullable(swapParams.receiveAmount),
 				pay_tx_id: toNullable(swapParams.payTransactionId),
 				referred_by: toNullable(swapParams.referredBy)

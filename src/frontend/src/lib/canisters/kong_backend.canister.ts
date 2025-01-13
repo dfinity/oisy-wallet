@@ -53,7 +53,7 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 		sendAmount,
 		referredBy,
 		receiveAmount,
-		destinationAddress,
+		receiveAddress,
 		sourceToken,
 		payTransactionId
 	}: KongSwapParams): Promise<bigint> => {
@@ -66,7 +66,7 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 			receive_token: destinationToken.symbol,
 			pay_amount: sendAmount,
 			max_slippage: toNullable(maxSlippage),
-			receive_address: toNullable(destinationAddress),
+			receive_address: toNullable(receiveAddress),
 			receive_amount: toNullable(receiveAmount),
 			pay_tx_id: toNullable(payTransactionId),
 			referred_by: toNullable(referredBy)
