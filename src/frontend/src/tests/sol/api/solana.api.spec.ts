@@ -193,7 +193,6 @@ describe('solana.api', () => {
 			});
 
 			expect(transactions).toHaveLength(0);
-
 		});
 
 		it('should stop fetching when no more signatures are available', async () => {
