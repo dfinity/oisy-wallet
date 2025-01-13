@@ -46,7 +46,7 @@ describe('SolSendForm', () => {
 		expect(balance).not.toBeNull();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
-		expect(fee).toBeNull();
+		expect(fee).not.toBeNull();
 
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 		expect(toolbar).not.toBeNull();
