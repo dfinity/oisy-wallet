@@ -10,6 +10,9 @@ import {
 	type UnixTimestamp
 } from '@solana/rpc-types';
 
+export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
+	Array.from({ length: n }, () => createMockSolTransactionUi(`txn-${n}`));
+
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
 	timestamp: 0n,
