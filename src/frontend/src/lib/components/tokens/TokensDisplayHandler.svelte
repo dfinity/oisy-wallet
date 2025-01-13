@@ -16,14 +16,8 @@
 	$: {
 		const hasBalance = (token: TokenUi | TokenUiGroup) => Number(token.balance ?? 0n) || token.usdBalance || $showZeroBalances
 
-		sortedTokensOrGroups = groupedTokens.filter((t: TokenUiGroup) => {
-			if (nonNullish(t.tokens)) {
-				const tokenWithBalance = t.tokens.find((tok: TokenUi) => hasBalance(tok))
-				return nonNullish(tokenWithBalance)
-			} else {
-				return hasBalance(t)
-			}
-		});
+		sortedTokensOrGroups = groupedTokens.filter((t: TokenUiGroup) =>
+			nonNullish(t.tokens) ? t.tokens.some((tok: TokenUi) => hasBalance(tok)) : hasBalance(t));
 	}
 
 	const updateTokensToDisplay = () => (tokens = [...sortedTokensOrGroups]);
