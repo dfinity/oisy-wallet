@@ -11,7 +11,7 @@ import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { FeeData } from '@ethersproject/providers';
 import type { Transaction as EthTransaction } from '@ethersproject/transactions';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export type Transaction = Omit<EthTransaction, 'data'> &
 	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {

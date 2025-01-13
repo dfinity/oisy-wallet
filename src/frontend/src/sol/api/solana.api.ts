@@ -28,6 +28,47 @@ export const loadSolLamportsBalance = async ({
 };
 
 /**
+ * Fetches the SPL token balance for a wallet.
+ */
+export const loadSplTokenBalance = async ({
+	address,
+	network,
+	tokenAddress
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+	tokenAddress: SolAddress;
+}): Promise<bigint> => {
+	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
+	const wallet = solAddress(address);
+	const relevantTokenAddress = solAddress(tokenAddress);
+
+	const response = await getTokenAccountsByOwner(
+		wallet,
+		{
+			mint: relevantTokenAddress
+		},
+		{ encoding: 'jsonParsed' }
+	).send();
+
+	if (response.value.length === 0) {
+		return BigInt(0);
+	}
+
+	const {
+		account: {
+			data: {
+				parsed: {
+					info: { tokenAmount }
+				}
+			}
+		}
+	} = response.value[0];
+
+	return BigInt(tokenAmount.amount);
+};
+
+/**
  * Fetches transactions without an error for a given wallet address.
  */
 export const getSolTransactions = async ({
@@ -120,4 +161,37 @@ const fetchTransactionDetailForSignature = async ({
 		confirmationStatus,
 		id: signature.toString()
 	};
+};
+
+export const loadTokenAccount = async ({
+	address,
+	network,
+	tokenAddress
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+	tokenAddress: SolAddress;
+}): Promise<SolAddress> => {
+	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
+	const wallet = solAddress(address);
+	const relevantTokenAddress = solAddress(tokenAddress);
+
+	const response = await getTokenAccountsByOwner(
+		wallet,
+		{
+			mint: relevantTokenAddress
+		},
+		{ encoding: 'jsonParsed' }
+	).send();
+
+	// TODO: create missing token account
+	if (response.value.length === 0) {
+		throw new Error(
+			`Token account not found for wallet ${address} and token ${tokenAddress} on ${network} network`
+		);
+	}
+
+	const { pubkey: accountAddress } = response.value[0];
+
+	return accountAddress;
 };
