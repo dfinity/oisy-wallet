@@ -5,14 +5,17 @@ import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
+import { loadTokenAccount } from '$sol/api/solana.api';
+import { SOLANA_DERIVATION_PATH_PREFIX, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
+import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
 import { pipe } from '@solana/functional';
 import { lamports } from '@solana/rpc-types';
@@ -69,8 +72,63 @@ const createSolTransactionMessage = async ({
 	);
 };
 
+const createSplTokenTransactionMessage = async ({
+	signer,
+	destination,
+	amount,
+	network,
+	tokenAddress
+}: {
+	signer: TransactionSigner;
+	destination: SolAddress;
+	amount: BigNumber;
+	network: SolanaNetworkType;
+	tokenAddress: SolAddress;
+}): Promise<SolTransactionMessage> => {
+	const rpc = solanaHttpRpc(network);
+
+	const { getLatestBlockhash } = rpc;
+
+	const { value: latestBlockhash } = await getLatestBlockhash().send();
+
+	const source = signer.address;
+
+	const sourceTokenAccountAddress = await loadTokenAccount({
+		address: source,
+		network,
+		tokenAddress
+	});
+
+	const destinationTokenAccountAddress = await loadTokenAccount({
+		address: destination,
+		network,
+		tokenAddress
+	});
+
+	return pipe(
+		createTransactionMessage({ version: 'legacy' }),
+		(tx) => setTransactionMessageFeePayer(signer.address, tx),
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+		(tx) =>
+			appendTransactionMessageInstructions(
+				[
+					getTransferInstruction(
+						{
+							source: solAddress(sourceTokenAccountAddress),
+							destination: solAddress(destinationTokenAccountAddress),
+							authority: signer,
+							amount: BigInt(amount.toNumber())
+						},
+						{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
+					)
+				],
+				tx
+			)
+	);
+};
+
 /**
- * Send SOL from one address to another.
+ * Send SOL or SPL tokens from one address to another.
  *
  * This function will sign the transaction with the provided identity and send it to the network.
  * It is based on the Solana web3.js library.
@@ -78,9 +136,7 @@ const createSolTransactionMessage = async ({
  */
 export const sendSol = async ({
 	identity,
-	token: {
-		network: { id: networkId }
-	},
+	token,
 	amount,
 	destination,
 	source,
@@ -93,6 +149,10 @@ export const sendSol = async ({
 	source: SolAddress;
 	onProgress?: () => void;
 }): Promise<void> => {
+	const {
+		network: { id: networkId }
+	} = token;
+
 	const solNetwork = mapNetworkIdToNetwork(networkId);
 
 	assertNonNullish(
@@ -127,12 +187,20 @@ export const sendSol = async ({
 	assertIsTransactionSigner(signer);
 	assertIsTransactionPartialSigner(signer);
 
-	const transactionMessage = await createSolTransactionMessage({
-		signer,
-		destination,
-		amount,
-		network: solNetwork
-	});
+	const transactionMessage = isTokenSpl(token)
+		? await createSplTokenTransactionMessage({
+				signer,
+				destination,
+				amount,
+				network: solNetwork,
+				tokenAddress: token.address
+			})
+		: await createSolTransactionMessage({
+				signer,
+				destination,
+				amount,
+				network: solNetwork
+			});
 
 	onProgress?.();
 
