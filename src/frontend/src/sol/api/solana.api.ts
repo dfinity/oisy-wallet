@@ -5,6 +5,7 @@ import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
+import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
@@ -85,7 +86,10 @@ export const getSolTransactions = async ({
 		async (accPromise, signature) => {
 			const acc = await accPromise;
 			const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
-			if (nonNullish(transactionDetail)) {
+			if (
+				nonNullish(transactionDetail) &&
+				getSolBalanceChange({ transaction: transactionDetail, address })
+			) {
 				acc.push(transactionDetail);
 			}
 			return acc;
