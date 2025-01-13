@@ -1,7 +1,7 @@
 import { EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
 import { EnvTokenSymbolSchema } from '$env/schema/env-token-common.schema';
 import { isEthAddress } from '$lib/utils/account.utils';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const EnvErc20ContractAddressSchema = z.custom<string>(
 	isEthAddress,
