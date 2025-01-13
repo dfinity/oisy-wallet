@@ -1,4 +1,9 @@
 import type { SchnorrKeyId } from '$declarations/signer/signer.did';
+import {
+	SOL_DEVNET_EXPLORER_URL,
+	SOL_MAINNET_EXPLORER_URL,
+	SOL_TESTNET_EXPLORER_URL
+} from '$env/explorers.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import solDevnetIconBW from '$lib/assets/networks/sol-devnet-bw.svg';
@@ -9,6 +14,7 @@ import sol from '$lib/assets/networks/sol.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
+import type { SolanaNetwork } from '$sol/types/network';
 
 /**
  * RPC URLs
@@ -31,43 +37,46 @@ export const SOLANA_MAINNET_NETWORK_SYMBOL = 'SOL';
 
 export const SOLANA_MAINNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_MAINNET_NETWORK_SYMBOL);
 
-export const SOLANA_MAINNET_NETWORK: Network = {
+export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	id: SOLANA_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Solana Mainnet Beta',
 	icon: sol,
-	iconBW: solMainnetIconBW
+	iconBW: solMainnetIconBW,
+	explorerUrl: SOL_MAINNET_EXPLORER_URL
 };
 
 export const SOLANA_TESTNET_NETWORK_SYMBOL = 'SOL (Testnet)';
 
 export const SOLANA_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_TESTNET_NETWORK_SYMBOL);
 
-export const SOLANA_TESTNET_NETWORK: Network = {
+export const SOLANA_TESTNET_NETWORK: SolanaNetwork = {
 	id: SOLANA_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Testnet',
 	icon: sol,
-	iconBW: solTestnetIconBW
+	iconBW: solTestnetIconBW,
+	explorerUrl: SOL_TESTNET_EXPLORER_URL
 };
 
 export const SOLANA_DEVNET_NETWORK_SYMBOL = 'SOL (Devnet)';
 
 export const SOLANA_DEVNET_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_DEVNET_NETWORK_SYMBOL);
 
-export const SOLANA_DEVNET_NETWORK: Network = {
+export const SOLANA_DEVNET_NETWORK: SolanaNetwork = {
 	id: SOLANA_DEVNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Devnet',
 	icon: sol,
-	iconBW: solDevnetIconBW
+	iconBW: solDevnetIconBW,
+	explorerUrl: SOL_DEVNET_EXPLORER_URL
 };
 
 export const SOLANA_LOCAL_NETWORK_SYMBOL = 'SOL (Local)';
 
 export const SOLANA_LOCAL_NETWORK_ID: NetworkId = parseNetworkId(SOLANA_LOCAL_NETWORK_SYMBOL);
 
-export const SOLANA_LOCAL_NETWORK: Network = {
+export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',

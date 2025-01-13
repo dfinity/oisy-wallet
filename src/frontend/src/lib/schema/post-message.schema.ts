@@ -17,7 +17,7 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const PostMessageRequestSchema = z.enum([
 	'startIdleTimer',
@@ -88,7 +88,8 @@ export const PostMessageDataRequestBtcSchema = z.object({
 export const PostMessageDataRequestSolSchema = z.object({
 	// TODO: generate zod schema for CertifiedData
 	address: z.custom<CertifiedData<SolAddress>>(),
-	solanaNetwork: z.custom<SolanaNetworkType>()
+	solanaNetwork: z.custom<SolanaNetworkType>(),
+	tokenAddress: z.custom<SolAddress>().optional()
 });
 
 export const PostMessageResponseStatusSchema = z.enum([
