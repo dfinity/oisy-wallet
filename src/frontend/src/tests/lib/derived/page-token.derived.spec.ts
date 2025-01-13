@@ -20,6 +20,11 @@ describe('page-token.derived', () => {
 		mockPage.reset();
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
+
+		vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+			fn([{ ...JUP_TOKEN, enabled: true }]);
+			return () => {};
+		});
 	});
 
 	it('should return undefined when no token in route', () => {
@@ -56,12 +61,6 @@ describe('page-token.derived', () => {
 
 	it('should find SPL token', () => {
 		const mockToken = JUP_TOKEN;
-
-		vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
-			fn([{ ...mockToken, enabled: true }]);
-			return () => {};
-		});
-
 		mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
