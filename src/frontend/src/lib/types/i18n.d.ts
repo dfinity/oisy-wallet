@@ -388,6 +388,39 @@ interface I18nConvert {
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
 }
 
+interface I18nSwap {
+	text: {
+		swap: string;
+		select_destination_token: string;
+		select_source_token: string;
+		select_source_token_title: string;
+		select_destination_token_title: string;
+		switch_tokens_button: string;
+		review: string;
+		review_button: string;
+		select_token: string;
+		max_slippage: string;
+		max_balance: string;
+		not_available: string;
+		value_difference: string;
+		total_fee: string;
+		token_fee: string;
+		gas_fee: string;
+		lp_fee: string;
+		max_slippage_info: string;
+		max_slippage_warning: string;
+		max_slippage_error: string;
+		swap_button: string;
+		swap_is_not_offered: string;
+		exchange_is_not_available: string;
+		executing_transaction: string;
+		initializing: string;
+		swapping: string;
+		refreshing_ui: string;
+	};
+	error: { unexpected: string; unexpected_missing_data: string };
+}
+
 interface I18nBuy {
 	text: { buy: string; buy_dev: string };
 	onramper: { title: string };
@@ -770,6 +803,7 @@ interface I18n {
 	receive: I18nReceive;
 	send: I18nSend;
 	convert: I18nConvert;
+	swap: I18nSwap;
 	buy: I18nBuy;
 	tokens: I18nTokens;
 	fee: I18nFee;

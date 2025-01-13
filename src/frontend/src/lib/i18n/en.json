@@ -425,6 +425,41 @@
 			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
 		}
 	},
+	"swap": {
+		"text": {
+			"swap": "Swap",
+			"select_destination_token": "Select token to receive",
+			"select_source_token": "Select token to pay",
+			"select_source_token_title": "You pay",
+			"select_destination_token_title": "You receive",
+			"switch_tokens_button": "Switch tokens",
+			"review": "Review transaction",
+			"review_button": "Review swap",
+			"select_token": "Select token",
+			"max_slippage": "Max slippage",
+			"max_balance": "Max",
+			"not_available": "n/a",
+			"value_difference": "Value difference",
+			"total_fee": "Total estimated fee",
+			"token_fee": "Token fee",
+			"gas_fee": "Gas fee",
+			"lp_fee": "LP fee",
+			"max_slippage_info": "Enter value between 0% and 50%",
+			"max_slippage_warning": "Risk warning: high slippage may lead to losses due to market volatility",
+			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
+			"swap_button": "Swap now",
+			"swap_is_not_offered": "This swap is currently not offered.",
+			"exchange_is_not_available": "USD value is currently not available.",
+			"executing_transaction": "Executing transaction...",
+			"initializing": "Initializing transaction...",
+			"swapping": "Swapping...",
+			"refreshing_ui": "Refreshing UI"
+		},
+		"error": {
+			"unexpected": "Something went wrong while swapping tokens.",
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
+		}
+	},
 	"buy": {
 		"text": {
 			"buy": "Buy",
