@@ -16,9 +16,10 @@
 	} from '$lib/utils/network.utils';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
+	import { splTokens } from '$sol/derived/spl.derived';
 
 	let walletWorkerTokens: Token[];
-	$: walletWorkerTokens = $enabledSolanaTokens.filter(
+	$: walletWorkerTokens = [...$enabledSolanaTokens, ...$splTokens].filter(
 		({ network: { id: networkId } }) =>
 			(isNetworkIdSOLLocal(networkId) && nonNullish($solAddressLocal)) ||
 			(isNetworkIdSOLTestnet(networkId) && nonNullish($solAddressTestnet)) ||
