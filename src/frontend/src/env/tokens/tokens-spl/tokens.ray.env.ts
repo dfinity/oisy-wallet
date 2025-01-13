@@ -10,7 +10,7 @@ export const RAY_SYMBOL = 'RAY';
 
 export const RAY_TOKEN_ID: TokenId = parseTokenId(RAY_SYMBOL);
 
-export const JUP_TOKEN: RequiredSplToken = {
+export const RAY_TOKEN: RequiredSplToken = {
 	id: RAY_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',
