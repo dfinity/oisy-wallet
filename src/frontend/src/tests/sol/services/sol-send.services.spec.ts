@@ -1,3 +1,4 @@
+import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -86,6 +87,22 @@ describe('sol-send.services', () => {
 			).resolves.not.toThrow();
 
 			expect(mapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
+			expect(mockRpc.getLatestBlockhash).toHaveBeenCalled();
+		});
+
+		it('should send SPL tokens successfully', async () => {
+			await expect(
+				sendSol({
+					identity: mockIdentity,
+					token: DEVNET_USDC_TOKEN,
+					amount: mockAmount,
+					destination: mockDestination,
+					source: mockSource,
+					onProgress: vi.fn()
+				})
+			).resolves.not.toThrow();
+
+			expect(mapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 			expect(mockRpc.getLatestBlockhash).toHaveBeenCalled();
 		});
 
