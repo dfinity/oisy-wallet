@@ -1,27 +1,32 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUi } from '$lib/types/token';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { groupTokensByTwin } from '$lib/utils/token-group.utils';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
 	export let tokens: TokenUiOrGroupUi[] | undefined = undefined;
 
-	let sortedTokens: TokenUi[];
-	$: sortedTokens = $combinedDerivedSortedNetworkTokensUi.filter(
-		({ balance, usdBalance }) => Number(balance ?? 0n) || (usdBalance ?? 0) || $showZeroBalances
-	);
-
 	let groupedTokens: TokenUiOrGroupUi[];
-	$: groupedTokens = groupTokensByTwin(sortedTokens);
+	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedNetworkTokensUi);
 
-	const updateTokensToDisplay = () => (tokens = [...groupedTokens]);
+	let sortedTokensOrGroups: TokenUiOrGroupUi[];
+	$: sortedTokensOrGroups = groupedTokens.filter((t: TokenUiGroup) => {
+		if (nonNullish(t.tokens)) {
+			const tokenWithBalance = t.tokens.find((tok: TokenUi) => Number(tok.balance ?? 0n) || tok.usdBalance || $showZeroBalances)
+			return nonNullish(tokenWithBalance)
+		} else {
+			return Number(t.balance ?? 0n) || t.usdBalance || $showZeroBalances
+		}
+	});
+
+	const updateTokensToDisplay = () => (tokens = [...sortedTokensOrGroups]);
 
 	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
 
-	$: sortedTokens, debounceUpdateTokensToDisplay();
+	$: sortedTokensOrGroups, debounceUpdateTokensToDisplay();
 </script>
 
 <slot />
