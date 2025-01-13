@@ -76,7 +76,7 @@ export interface KongSwapParams {
 	sendAmount: bigint;
 	referredBy?: string;
 	receiveAmount: bigint;
-	destinationAddress: Address;
+	receiveAddress: Address;
 	sourceToken: Token;
 	payTransactionId: TxId;
 }
