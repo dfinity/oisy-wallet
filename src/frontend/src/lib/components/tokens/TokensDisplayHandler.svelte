@@ -14,10 +14,12 @@
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[];
 	$: {
-		const hasBalance = (token: TokenUi | TokenUiGroup) => Number(token.balance ?? 0n) || token.usdBalance || $showZeroBalances
+		const hasBalance = (token: TokenUi | TokenUiGroup) =>
+			Number(token.balance ?? 0n) || token.usdBalance || $showZeroBalances;
 
 		sortedTokensOrGroups = groupedTokens.filter((t: TokenUiGroup) =>
-			nonNullish(t.tokens) ? t.tokens.some((tok: TokenUi) => hasBalance(tok)) : hasBalance(t));
+			nonNullish(t.tokens) ? t.tokens.some((tok: TokenUi) => hasBalance(tok)) : hasBalance(t)
+		);
 	}
 
 	const updateTokensToDisplay = () => (tokens = [...sortedTokensOrGroups]);
