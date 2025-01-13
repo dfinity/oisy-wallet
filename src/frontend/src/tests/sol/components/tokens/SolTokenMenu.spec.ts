@@ -71,8 +71,9 @@ describe('SolTokenMenu', () => {
 		}
 	];
 
-	testCases.forEach(({ token, explorerUrl, network, store, description }) => {
-		it(`external link forwards to correct ${description} explorer`, async () => {
+	it.each(testCases)(
+		'external link forwards to correct $description explorer',
+		async ({ token, explorerUrl, network, store }) => {
 			tokenStore.set(token);
 			erc20UserTokensStore.reset(token.id);
 			store.set({ certified: true, data: mockSolAddress });
@@ -89,6 +90,6 @@ describe('SolTokenMenu', () => {
 					replacePlaceholders(explorerUrl, { $args: `account/${mockSolAddress}/` })
 				);
 			});
-		});
-	});
+		}
+	);
 });
