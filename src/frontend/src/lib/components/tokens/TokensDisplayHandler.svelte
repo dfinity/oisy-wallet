@@ -21,9 +21,8 @@
 				() => $showZeroBalances
 			];
 
-			return checks.some(check => check());
+			return checks.some((check) => check());
 		};
-
 
 		sortedTokensOrGroups = groupedTokens.filter((t: TokenUiOrGroupUi) =>
 			isTokenUiGroup(t) ? t.tokens.some((tok: TokenUi) => hasBalance(tok)) : hasBalance(t)
