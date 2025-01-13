@@ -35,7 +35,7 @@
 
 <Transaction
 	on:click={() => modalStore.openSolTransaction({ transaction, token })}
-  	styleClass="block w-full border-0"
+	styleClass="block w-full border-0"
 	{amount}
 	{type}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
