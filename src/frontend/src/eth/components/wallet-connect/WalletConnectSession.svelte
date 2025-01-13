@@ -9,7 +9,7 @@
 	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectReview from '$eth/components/wallet-connect/WalletConnectReview.svelte';
 	import {
-		SESSION_REQUEST_SEND_TRANSACTION,
+		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_PERSONAL_SIGN,
 		SESSION_REQUEST_ETH_SIGN,
 		SESSION_REQUEST_ETH_SIGN_V4
@@ -225,7 +225,7 @@
 					modalStore.openWalletConnectSign(sessionRequest);
 					return;
 				}
-				case SESSION_REQUEST_SEND_TRANSACTION: {
+				case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
 					modalStore.openWalletConnectSend(sessionRequest);
 					return;
 				}
