@@ -239,5 +239,19 @@
 		"description": "Raydium is an automated market maker (AMM) built on the Solana blockchain, offering a unique blend of AMM technology and access to the Serum decentralized exchange’s liquidity. As an AMM, Raydium allows for trading digital assets in a permissionless way, using liquidity pools.",
 		"logo": "/images/dapps/raydium-logo.svg",
 		"screenshots": ["/images/dapps/raydium.webp"]
+	},
+	{
+		"id": "jupiter",
+		"name": "Jupiter",
+		"oneLiner": "Solana-based DEX aggregator that optimizes for the best available swaps between any supported token pair.",
+		"callToAction": "To infinity and beyond",
+		"website": "https://jup.ag/",
+		"twitter": "https://twitter.com/JupiterExchange",
+		"tags": ["DeFi", "WalletConnect"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Jupiter is a decentralized finance platform on the Solana blockchain, that functions as a liquidity aggregator, streamlining and optimizing trading activities within the DeFi space. Its protocol is designed to facilitate liquidity provision and token swapping and ensures efficient, low-latency, and cost-effective transactions. The platform allows users to swap tokens, provide liquidity, and participate in yield farming through an automated market maker (AMM) model.",
+		"logo": "/images/dapps/jupiter-logo.svg",
+		"screenshots": ["/images/dapps/jupiter.webp"]
 	}
 ]
