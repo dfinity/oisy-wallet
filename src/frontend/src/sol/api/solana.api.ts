@@ -85,7 +85,10 @@ export const getSolTransactions = async ({
 		async (accPromise, signature) => {
 			const acc = await accPromise;
 			const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
-			if (nonNullish(transactionDetail)) {
+			if (
+				nonNullish(transactionDetail) &&
+				getSolBalanceChange({ transaction: transactionDetail, address })
+			) {
 				acc.push(transactionDetail);
 			}
 			return acc;
