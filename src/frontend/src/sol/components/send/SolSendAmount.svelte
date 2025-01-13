@@ -19,9 +19,7 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
-	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { SOLANA_TRANSACTION_FEE_IN_LAMPORTS } from '$sol/constants/sol.constants';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
@@ -74,7 +72,7 @@
 			? undefined
 			: getMaxTransactionAmount({
 					balance: $sendBalance ?? ZERO,
-					fee: BigNumber.from(SOLANA_TRANSACTION_FEE_IN_LAMPORTS),
+					fee: BigNumber.from(fee),
 					tokenDecimals: $sendTokenDecimals,
 					tokenStandard: $sendTokenStandard
 				});
