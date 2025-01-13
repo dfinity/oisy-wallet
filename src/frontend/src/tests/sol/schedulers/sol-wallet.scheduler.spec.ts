@@ -235,7 +235,7 @@ describe('sol-wallet.scheduler', () => {
 		it('should update store with new transactions', async () => {
 			await scheduler.start(startData);
 
-			if (isNullish(startData?.tokenAddress)){
+			if (isNullish(startData?.tokenAddress)) {
 				// TODO add SPL case properly
 				expect(scheduler['store'].transactions).toEqual(
 					expectedSoLTransactions.reduce(
