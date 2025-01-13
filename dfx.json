@@ -321,6 +321,7 @@
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",
+					"beta": "nynz6-haaaa-aaaan-qzqda-cai",
 					"staging": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_be_1": "k2sla-fiaaa-aaaag-atvfa-cai",
 					"test_fe_1": "vi6cu-aiaaa-aaaad-aad7q-cai",
