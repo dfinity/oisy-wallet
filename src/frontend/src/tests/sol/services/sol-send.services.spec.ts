@@ -4,7 +4,7 @@ import { signWithSchnorr } from '$lib/api/signer.api';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import * as networkUtils from '$sol/utils/network.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
@@ -12,6 +12,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import type { MockInstance } from 'vitest';
 
 vi.mock('@solana/functional', () => ({
 	pipe: vi.fn()
@@ -47,10 +48,6 @@ vi.mock('$lib/api/signer.api', () => ({
 	signWithSchnorr: vi.fn()
 }));
 
-vi.mock('$sol/utils/network.utils', () => ({
-	mapNetworkIdToNetwork: vi.fn()
-}));
-
 describe('sol-send.services', () => {
 	// TODO: add more practical tests deploying the Solana local node
 	describe('sendSol', () => {
@@ -67,14 +64,17 @@ describe('sol-send.services', () => {
 		} as unknown as Rpc<SolanaRpcApi>;
 		const mockRpcSubscriptions = {} as RpcSubscriptions<SolanaRpcSubscriptionsApi>;
 
+		let spyMapNetworkIdToNetwork: MockInstance;
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
 			vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);
 			vi.mocked(signWithSchnorr).mockResolvedValue(new Uint8Array([0, 1, 2, 3]));
-			vi.mocked(mapNetworkIdToNetwork).mockReturnValue('mainnet');
 			vi.mocked(sendAndConfirmTransactionFactory).mockReturnValue(() => Promise.resolve());
+
+			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
 		});
 
 		it('should send SOL successfully', async () => {
@@ -89,7 +89,7 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(mapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
 			expect(mockRpc.getLatestBlockhash).toHaveBeenCalled();
 		});
 
@@ -105,12 +105,12 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(mapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 			expect(mockRpc.getLatestBlockhash).toHaveBeenCalled();
 		});
 
 		it('should throw an error if network is invalid', async () => {
-			vi.mocked(mapNetworkIdToNetwork).mockReturnValueOnce(undefined);
+			spyMapNetworkIdToNetwork.mockReturnValueOnce(undefined);
 
 			await expect(
 				sendSol({
