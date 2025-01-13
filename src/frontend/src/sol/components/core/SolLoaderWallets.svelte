@@ -14,9 +14,9 @@
 		isNetworkIdSOLMainnet,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
-	import { splTokens } from '$sol/derived/spl.derived';
 
 	let walletWorkerTokens: Token[];
 	$: walletWorkerTokens = [...$enabledSolanaTokens, ...$splTokens].filter(
