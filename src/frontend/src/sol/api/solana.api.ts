@@ -10,6 +10,7 @@ import { address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
+import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
 export const loadSolLamportsBalance = async ({
