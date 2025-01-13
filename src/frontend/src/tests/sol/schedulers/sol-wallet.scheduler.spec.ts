@@ -1,3 +1,4 @@
+import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
@@ -8,15 +9,18 @@ import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { jsonReplacer } from '@dfinity/utils';
+import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/rpc-types';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
+	let spyLoadSolBalance: MockInstance;
+	let spyLoadSplBalance: MockInstance;
 	let spyLoadTransactions: MockInstance;
 
-	const mockBalance = lamports(100n);
+	const mockSolBalance = lamports(100n);
+	const mockSplBalance = BigInt(123);
 	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
 
 	const expectedTransactions = mockTransactions.map((transaction) => ({
@@ -41,13 +45,19 @@ describe('sol-wallet.scheduler', () => {
 		}
 	};
 
-	const mockPostMessage = ({ withTransactions }: { withTransactions: boolean }) => ({
+	const mockPostMessage = ({
+		withTransactions,
+		isSpl
+	}: {
+		withTransactions: boolean;
+		isSpl: boolean;
+	}) => ({
 		msg: 'syncSolWallet',
 		data: {
 			wallet: {
 				balance: {
 					certified: false,
-					data: mockBalance
+					data: isSpl ? mockSplBalance : mockSolBalance
 				},
 				...(withTransactions && {
 					newTransactions: JSON.stringify(expectedTransactions, jsonReplacer)
@@ -74,7 +84,12 @@ describe('sol-wallet.scheduler', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		spyLoadBalance = vi.spyOn(solanaApi, 'loadSolLamportsBalance').mockResolvedValue(mockBalance);
+		spyLoadSolBalance = vi
+			.spyOn(solanaApi, 'loadSolLamportsBalance')
+			.mockResolvedValue(mockSolBalance);
+		spyLoadSplBalance = vi
+			.spyOn(solanaApi, 'loadSplTokenBalance')
+			.mockResolvedValue(mockSplBalance);
 		spyLoadTransactions = vi
 			.spyOn(solanaApi, 'getSolTransactions')
 			.mockResolvedValue(mockTransactions);
@@ -93,6 +108,12 @@ describe('sol-wallet.scheduler', () => {
 	}) => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
+		const isSpl = nonNullish(startData?.tokenAddress);
+
+		beforeEach(() => {
+			spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
+		});
+
 		afterEach(() => {
 			// reset internal store with balance and transactions
 			scheduler['store'] = {
@@ -110,7 +131,7 @@ describe('sol-wallet.scheduler', () => {
 			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 			expect(postMessageMock).toHaveBeenNthCalledWith(
 				2,
-				mockPostMessage({ withTransactions: true })
+				mockPostMessage({ withTransactions: true, isSpl })
 			);
 			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
@@ -193,7 +214,8 @@ describe('sol-wallet.scheduler', () => {
 
 			// Mock no changes in transactions and balance
 			spyLoadTransactions.mockResolvedValue([]);
-			spyLoadBalance.mockResolvedValue(mockBalance);
+			spyLoadSolBalance.mockResolvedValue(mockSolBalance);
+			spyLoadSplBalance.mockResolvedValue(mockSplBalance);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
@@ -218,13 +240,26 @@ describe('sol-wallet.scheduler', () => {
 		});
 	};
 
-	describe('sol-wallet worker should work', () => {
-		const startData = {
+	describe('sol-wallet worker should work for SOLANA tokens', () => {
+		const startData: PostMessageDataRequestSol = {
 			address: {
 				certified: false,
 				data: mockSolAddress
 			},
 			solanaNetwork: SolanaNetworks.mainnet
+		};
+
+		testWorker({ startData });
+	});
+
+	describe('sol-wallet worker should work for SPL tokens', () => {
+		const startData: PostMessageDataRequestSol = {
+			address: {
+				certified: false,
+				data: mockSolAddress
+			},
+			solanaNetwork: SolanaNetworks.devnet,
+			tokenAddress: DEVNET_USDC_TOKEN.address
 		};
 
 		testWorker({ startData });
