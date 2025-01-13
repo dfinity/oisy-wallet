@@ -18,8 +18,10 @@ import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
-	isNetworkIdSepolia
+	isNetworkIdSepolia,
+	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -31,6 +33,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * @param $ckEthMinterInfo - The CK Ethereum minter info store data.
  * @param $ethAddress - The ETH address of the user.
  * @param $icTransactions - The ICP transactions store data.
+ * @param $solTransactions - The SOL transactions store data.
  * @param $btcStatuses - The BTC statuses store data.
  * @returns The unified list of transactions with their respective token and components.
  */
@@ -41,6 +44,7 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo,
 	$ethAddress,
 	$icTransactions,
+	$solTransactions,
 	$btcStatuses
 }: {
 	tokens: Token[];
@@ -49,6 +53,7 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 }): AllTransactionUiWithCmp[] => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
@@ -119,6 +124,21 @@ export const mapAllTransactionsUi = ({
 					}).data,
 					token,
 					component: 'ic' as const
+				}))
+			];
+		}
+
+		if (isNetworkIdSolana(networkId)) {
+			if (isNullish($solTransactions)) {
+				return acc;
+			}
+
+			return [
+				...acc,
+				...($solTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					transaction,
+					token,
+					component: 'solana' as const
 				}))
 			];
 		}

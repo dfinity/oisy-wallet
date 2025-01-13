@@ -43,7 +43,8 @@ export type AnyTransactionUi =
 export type AnyTransactionUiWithCmp =
 	| { component: 'bitcoin'; transaction: BtcTransactionUi }
 	| { component: 'ethereum'; transaction: EthTransactionUi }
-	| { component: 'ic'; transaction: IcTransactionUi };
+	| { component: 'ic'; transaction: IcTransactionUi }
+	| { component: 'solana'; transaction: SolTransactionUi };
 
 export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;

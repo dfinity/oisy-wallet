@@ -16,8 +16,9 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		modalBtcTransaction,
+		modalEthTransaction,
 		modalIcTransaction,
-		modalEthTransaction
+		modalSolTransaction
 	} from '$lib/derived/modal.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -25,6 +26,9 @@
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
+	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -34,7 +38,8 @@
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress: $ethAddress,
 		$icTransactions: $icTransactionsStore,
-		$btcStatuses: $btcStatusesStore
+		$btcStatuses: $btcStatusesStore,
+		$solTransactions: $solTransactionsStore
 	});
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
@@ -70,6 +75,14 @@
 			$modalOpen: $modalIcTransaction,
 			$modalStore: $modalStore
 		}));
+
+	let selectedSolTransaction: SolTransactionUi | undefined;
+	let selectedSolToken: OptionToken;
+	$: ({ transaction: selectedSolTransaction, token: selectedSolToken } =
+		mapTransactionModalData<SolTransactionUi>({
+			$modalOpen: $modalSolTransaction,
+			$modalStore: $modalStore
+		}));
 </script>
 
 <!--TODO: include skeleton for loading transactions and remove nullish checks-->
@@ -89,4 +102,6 @@
 	<EthTransactionModal transaction={selectedEthTransaction} token={selectedEthToken} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
 	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
+{:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
+	<SolTransactionModal transaction={selectedSolTransaction} token={selectedSolToken} />
 {/if}
