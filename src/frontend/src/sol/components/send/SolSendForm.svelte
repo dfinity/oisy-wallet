@@ -8,6 +8,7 @@
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
+	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
@@ -29,7 +30,7 @@
 
 	<SolSendAmount slot="amount" bind:amount bind:amountError />
 
-	<!--	TODO: calculate and display transaction fee	-->
+	<SolFeeDisplay slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>
