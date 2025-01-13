@@ -9,6 +9,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
 import {
 	getSolTransactions,
+	getSplTransactions,
 	loadSolLamportsBalance,
 	loadSplTokenBalance
 } from '$sol/api/solana.api';
@@ -17,6 +18,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
+import { mapSplTransactionUi } from '$sol/utils/spl-transactions.utils';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
@@ -73,17 +75,32 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		certified: false
 	});
 
+	// TODO add unit tests for spl txns
 	private loadTransactions = async ({
 		address,
-		solanaNetwork
+		solanaNetwork,
+		tokenAddress
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
-		const transactions = await getSolTransactions({ network: solanaNetwork, address });
-		return transactions
-			.map((transaction) => ({
-				data: mapSolTransactionUi({ transaction, address }),
-				certified: false
-			}))
-			.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
+		const transactions = nonNullish(tokenAddress)
+			? await getSplTransactions({
+					network: solanaNetwork,
+					address,
+					tokenAddress
+				})
+			: await getSolTransactions({ network: solanaNetwork, address });
+
+		const transactionsUi = transactions.map((transaction) => ({
+			data: nonNullish(tokenAddress)
+				? mapSplTransactionUi({
+						transaction,
+						tokenAddress,
+						address
+					})
+				: mapSolTransactionUi({ transaction, address }),
+			certified: false
+		}));
+
+		return transactionsUi.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
 	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {

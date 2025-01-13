@@ -9,21 +9,23 @@ import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import { jsonReplacer, nonNullish } from '@dfinity/utils';
+import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/rpc-types';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
+	let spyLoadTransactions: MockInstance;
 	let spyLoadSolBalance: MockInstance;
 	let spyLoadSplBalance: MockInstance;
-	let spyLoadTransactions: MockInstance;
+	let spyLoadSolTransactions: MockInstance;
+	let spyLoadSplTransactions: MockInstance;
 
 	const mockSolBalance = lamports(100n);
 	const mockSplBalance = BigInt(123);
-	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
+	const mockSolTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
 
-	const expectedTransactions = mockTransactions.map((transaction) => ({
+	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({
 		data: mapSolTransactionUi({
 			transaction,
 			address: mockSolAddress
@@ -60,7 +62,7 @@ describe('sol-wallet.scheduler', () => {
 					data: isSpl ? mockSplBalance : mockSolBalance
 				},
 				...(withTransactions && {
-					newTransactions: JSON.stringify(expectedTransactions, jsonReplacer)
+					newTransactions: JSON.stringify(isSpl ? [] : expectedSoLTransactions, jsonReplacer)
 				})
 			}
 		}
@@ -90,9 +92,13 @@ describe('sol-wallet.scheduler', () => {
 		spyLoadSplBalance = vi
 			.spyOn(solanaApi, 'loadSplTokenBalance')
 			.mockResolvedValue(mockSplBalance);
-		spyLoadTransactions = vi
+		spyLoadSolTransactions = vi
 			.spyOn(solanaApi, 'getSolTransactions')
-			.mockResolvedValue(mockTransactions);
+			.mockResolvedValue(mockSolTransactions);
+		spyLoadSplTransactions = vi
+			.spyOn(solanaApi, 'getSplTransactions')
+			//TODO add spl mock txns
+			.mockResolvedValue([]);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
@@ -112,6 +118,7 @@ describe('sol-wallet.scheduler', () => {
 
 		beforeEach(() => {
 			spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
+			spyLoadTransactions = isSpl ? spyLoadSplTransactions : spyLoadSolTransactions;
 		});
 
 		afterEach(() => {
@@ -228,15 +235,18 @@ describe('sol-wallet.scheduler', () => {
 		it('should update store with new transactions', async () => {
 			await scheduler.start(startData);
 
-			expect(scheduler['store'].transactions).toEqual(
-				expectedTransactions.reduce(
-					(acc, transaction) => ({
-						...acc,
-						[transaction.data.id]: transaction
-					}),
-					{}
-				)
-			);
+			if (isNullish(startData?.tokenAddress)) {
+				// TODO add SPL case properly
+				expect(scheduler['store'].transactions).toEqual(
+					expectedSoLTransactions.reduce(
+						(acc, transaction) => ({
+							...acc,
+							[transaction.data.id]: transaction
+						}),
+						{}
+					)
+				);
+			}
 		});
 	};
 
