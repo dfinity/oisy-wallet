@@ -13,14 +13,18 @@
 	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedNetworkTokensUi);
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[];
-	$: sortedTokensOrGroups = groupedTokens.filter((t: TokenUiGroup) => {
-		if (nonNullish(t.tokens)) {
-			const tokenWithBalance = t.tokens.find((tok: TokenUi) => Number(tok.balance ?? 0n) || tok.usdBalance || $showZeroBalances)
-			return nonNullish(tokenWithBalance)
-		} else {
-			return Number(t.balance ?? 0n) || t.usdBalance || $showZeroBalances
-		}
-	});
+	$: {
+		const hasBalance = (token: TokenUi | TokenUiGroup) => Number(token.balance ?? 0n) || token.usdBalance || $showZeroBalances
+
+		sortedTokensOrGroups = groupedTokens.filter((t: TokenUiGroup) => {
+			if (nonNullish(t.tokens)) {
+				const tokenWithBalance = t.tokens.find((tok: TokenUi) => hasBalance(tok))
+				return nonNullish(tokenWithBalance)
+			} else {
+				return hasBalance(t)
+			}
+		});
+	}
 
 	const updateTokensToDisplay = () => (tokens = [...sortedTokensOrGroups]);
 
