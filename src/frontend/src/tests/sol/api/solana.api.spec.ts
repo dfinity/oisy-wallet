@@ -51,7 +51,7 @@ describe('solana.api', () => {
 		vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
 	});
 
-	describe('loadSolBalance', () => {
+	describe('loadSolLamportsBalance', () => {
 		it('should load balance successfully', async () => {
 			const balance = await loadSolLamportsBalance({
 				address: mockSolAddress,
