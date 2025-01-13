@@ -4,7 +4,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import popcat from '$sol/assets/popcat.svg';
 import type { RequiredSplToken } from '$sol/types/spl';
 
-export const POPCAT_DECIMALS = 6;
+export const POPCAT_DECIMALS = 9;
 
 export const POPCAT_SYMBOL = 'POPCAT';
 
