@@ -7,7 +7,6 @@
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import type { IcCkToken } from '$icp/types/ic-token';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
@@ -27,9 +26,8 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 
@@ -62,26 +60,15 @@
 			)
 		: [];
 
-	let filterTokens = '';
-	const updateFilter = () => (filterTokens = filter);
+	let tokensFilter = '';
+	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	const matchingToken = (token: Token): boolean =>
-		token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
-		token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()));
-
 	let filteredTokens: Token[] = [];
-	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? allTokensSorted
-		: allTokensSorted.filter((token) => {
-				const twinToken = (token as IcCkToken).twinToken;
-				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
-			});
+	$: filteredTokens = filterTokens({ tokens: allTokensSorted, filter: tokensFilter });
 
 	let tokens: Token[] = [];
 	$: tokens = filteredTokens.map((token) => {

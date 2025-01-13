@@ -1,3 +1,5 @@
+import type { IcCkToken } from '$icp/types/ic-token';
+import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -5,6 +7,7 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -165,3 +168,25 @@ export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
 export const pinEnabledTokensAtTop = <T extends Token>(
 	$tokens: TokenToggleable<T>[]
 ): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));
+
+/** Filters provided tokens list according to a filter keyword
+ *
+ * @param tokens - The list of tokens.
+ * @param filter - filter keyword.
+ * @returns Filtered list of tokens.
+ * */
+// TODO: add tests
+export const filterTokens = ({ tokens, filter }: { tokens: Token[]; filter: string }): Token[] => {
+	const matchingToken = (token: Token) =>
+		token.name.toLowerCase().includes(filter.toLowerCase()) ||
+		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
+		(icTokenIcrcCustomToken(token) &&
+			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
+
+	return isNullishOrEmpty(filter)
+		? tokens
+		: tokens.filter((token) => {
+				const twinToken = (token as IcCkToken).twinToken;
+				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
+			});
+};
