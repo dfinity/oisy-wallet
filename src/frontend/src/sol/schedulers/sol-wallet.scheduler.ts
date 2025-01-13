@@ -7,26 +7,31 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
-import { getSolTransactions, loadSolLamportsBalance } from '$sol/api/solana.api';
+import {
+	getSolTransactions,
+	loadSolLamportsBalance,
+	loadSplTokenBalance
+} from '$sol/api/solana.api';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
-import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
-import type { Lamports } from '@solana/rpc-types';
+import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
+	tokenAddress?: SolAddress;
 }
 
 interface SolWalletStore {
-	balance: CertifiedData<Option<Lamports>> | undefined;
+	balance: CertifiedData<Option<SolBalance>> | undefined;
 	transactions: Record<string, SolCertifiedTransaction>;
 }
 
 interface SolWalletData {
-	balance: CertifiedData<Lamports | null>;
+	balance: CertifiedData<SolBalance | null>;
 	transactions: SolCertifiedTransaction[];
 }
 
@@ -59,9 +64,12 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private loadBalance = async ({
 		address,
-		solanaNetwork
-	}: LoadSolWalletParams): Promise<CertifiedData<Lamports | null>> => ({
-		data: await loadSolLamportsBalance({ network: solanaNetwork, address }),
+		solanaNetwork,
+		tokenAddress
+	}: LoadSolWalletParams): Promise<CertifiedData<SolBalance | null>> => ({
+		data: nonNullish(tokenAddress)
+			? await loadSplTokenBalance({ address, network: solanaNetwork, tokenAddress })
+			: await loadSolLamportsBalance({ address, network: solanaNetwork }),
 		certified: false
 	});
 
@@ -84,17 +92,20 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		try {
 			const {
 				address: { data: address },
-				solanaNetwork
+				solanaNetwork,
+				tokenAddress
 			} = data;
 
 			const [balance, transactions] = await Promise.all([
 				this.loadBalance({
 					address,
-					solanaNetwork
+					solanaNetwork,
+					tokenAddress
 				}),
 				this.loadTransactions({
 					address,
-					solanaNetwork
+					solanaNetwork,
+					tokenAddress
 				})
 			]);
 

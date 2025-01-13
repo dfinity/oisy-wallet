@@ -3,11 +3,12 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { lamports, type Lamports } from '@solana/rpc-types';
+import { lamports } from '@solana/rpc-types';
 import { get } from 'svelte/store';
 
 describe('sol-listener', () => {
@@ -18,7 +19,7 @@ describe('sol-listener', () => {
 		balance = mockBalance,
 		newTransactions = JSON.stringify(mockSolCertifiedTransactions, jsonReplacer)
 	}: {
-		balance?: Lamports | null;
+		balance?: SolBalance | null;
 		newTransactions?: string;
 	}): SolPostMessageDataResponseWallet => ({
 		wallet: {
