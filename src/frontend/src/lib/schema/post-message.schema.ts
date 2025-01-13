@@ -17,7 +17,7 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const PostMessageRequestSchema = z.enum([
 	'startIdleTimer',

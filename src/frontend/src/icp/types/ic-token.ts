@@ -12,7 +12,7 @@ import {
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
 import type { Option } from '$lib/types/utils';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export type IcFee = z.infer<typeof IcFeeSchema>;
 
