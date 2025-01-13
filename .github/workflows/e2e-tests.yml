@@ -3,6 +3,7 @@ name: E2E Tests
 on:
   pull_request:
   workflow_dispatch:
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
