@@ -54,6 +54,7 @@ describe('IcSendForm', () => {
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		expect(source).not.toBeNull();
+
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 		expect(balance).not.toBeNull();
 
@@ -83,6 +84,7 @@ describe('IcSendForm', () => {
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		expect(source).toBeNull();
+
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 		expect(balance).not.toBeNull();
 
