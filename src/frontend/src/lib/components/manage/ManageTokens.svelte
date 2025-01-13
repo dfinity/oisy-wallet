@@ -67,6 +67,7 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
+	let filteredTokens: Token[] = [];
 	$: filteredTokens = filterTokens({ tokens: allTokensSorted, filter: tokensFilter });
 
 	let tokens: Token[] = [];

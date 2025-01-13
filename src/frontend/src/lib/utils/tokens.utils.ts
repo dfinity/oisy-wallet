@@ -175,6 +175,7 @@ export const pinEnabledTokensAtTop = <T extends Token>(
  * @param filter - filter keyword.
  * @returns Filtered list of tokens.
  * */
+// TODO: add tests
 export const filterTokens = ({ tokens, filter }: { tokens: Token[]; filter: string }): Token[] => {
 	const matchingToken = (token: Token) =>
 		token.name.toLowerCase().includes(filter.toLowerCase()) ||
