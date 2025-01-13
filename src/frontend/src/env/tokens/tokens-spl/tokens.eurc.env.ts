@@ -2,7 +2,7 @@ import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import type { SplToken } from '$sol/types/spl';
+import type { RequiredSplToken } from '$sol/types/spl';
 
 export const EURC_DECIMALS = 6;
 
@@ -12,7 +12,7 @@ export const DEVNET_EURC_SYMBOL = 'DevnetEURC';
 
 export const DEVNET_EURC_TOKEN_ID: TokenId = parseTokenId(DEVNET_EURC_SYMBOL);
 
-export const DEVNET_EURC_TOKEN: SplToken = {
+export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	id: DEVNET_EURC_TOKEN_ID,
 	network: SOLANA_DEVNET_NETWORK,
 	standard: 'spl',
