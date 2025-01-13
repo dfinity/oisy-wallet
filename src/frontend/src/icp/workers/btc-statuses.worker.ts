@@ -3,7 +3,9 @@ import type { PostMessage, PostMessageDataRequestIcCk } from '$lib/types/post-me
 
 const scheduler = new BtcStatusesScheduler();
 
-onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcCk>>) => {
+export const onBtcStatusesMessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequestIcCk>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {

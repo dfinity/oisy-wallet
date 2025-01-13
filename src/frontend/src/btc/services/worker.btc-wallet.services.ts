@@ -26,7 +26,7 @@ export const initBtcWalletWorker = async ({
 	token: Token;
 	minterCanisterId?: OptionCanisterIdText;
 }): Promise<WalletWorker> => {
-	const WalletWorker = await import('$btc/workers/btc-wallet.worker?worker');
+	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
 	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);

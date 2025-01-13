@@ -22,7 +22,7 @@ import type { SyncState } from '$lib/types/sync';
 export const initCkBTCMinterInfoWorker: IcCkWorker = async (
 	params
 ): Promise<IcCkWorkerInitResult> => {
-	const CkBTCMinterInfoWorker = await import('$icp/workers/ckbtc-minter-info.worker?worker');
+	const CkBTCMinterInfoWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new CkBTCMinterInfoWorker.default();
 
 	return initCkMinterInfoWorker({
@@ -37,7 +37,7 @@ export const initCkBTCMinterInfoWorker: IcCkWorker = async (
 export const initCkETHMinterInfoWorker: IcCkWorker = async (
 	params
 ): Promise<IcCkWorkerInitResult> => {
-	const CkETHMinterInfoWorker = await import('$icp/workers/cketh-minter-info.worker?worker');
+	const CkETHMinterInfoWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new CkETHMinterInfoWorker.default();
 
 	return initCkMinterInfoWorker({

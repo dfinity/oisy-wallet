@@ -13,7 +13,9 @@ import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/type
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>>) => {
+export const onExchangeMessage = async ({
+	data
+}: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>>) => {
 	const { msg, data: payload } = data;
 
 	switch (msg) {

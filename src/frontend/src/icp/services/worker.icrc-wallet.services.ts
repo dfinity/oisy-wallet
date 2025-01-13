@@ -18,7 +18,7 @@ export const initIcrcWalletWorker = async ({
 	id: tokenId,
 	network: { env }
 }: IcToken): Promise<WalletWorker> => {
-	const WalletWorker = await import('$icp/workers/icrc-wallet.worker?worker');
+	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
 	const restartWorkerWithLedgerOnly = () =>
