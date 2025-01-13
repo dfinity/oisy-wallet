@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import type { Commitment } from '@solana/rpc-types';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -15,29 +16,30 @@
 	let type: SolTransactionType;
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
+	let status: Commitment | null;
 
-	$: ({ type, value, timestamp } = transaction);
+	$: ({ type, value, timestamp, status } = transaction);
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
-	let pending = false;
+	let pending: boolean;
+	$: pending = status === 'processed' || isNullish(status);
 
-	let status: TransactionStatus;
-	$: status = pending ? 'pending' : 'confirmed';
+	let transactionStatus: TransactionStatus;
+	$: transactionStatus = pending ? 'pending' : 'confirmed';
 
-	let amount: bigint | undefined;
-	$: amount = nonNullish(value) ? value : value;
+	let amount: BigNumber | undefined;
+	$: amount = nonNullish(value) ? BigNumber.from(value) : value;
 </script>
 
-<!--TODO: add transaction modal opening-->
 <Transaction
 	on:click={() => modalStore.openSolTransaction({ transaction, token })}
-	styleClass="block w-full border-0"
-	amount={nonNullish(amount) ? BigNumber.from(amount) : amount}
+  	styleClass="block w-full border-0"
+	{amount}
 	{type}
 	timestamp={nonNullish(timestamp) ? Number(timestamp) : timestamp}
-	{status}
+	status={transactionStatus}
 	{token}
 	{iconType}
 >
