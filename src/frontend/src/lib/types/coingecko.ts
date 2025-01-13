@@ -5,7 +5,7 @@
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { EthAddress } from '$lib/types/address';
 import type { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
 
