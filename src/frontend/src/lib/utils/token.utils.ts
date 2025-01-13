@@ -40,7 +40,7 @@ export const getMaxTransactionAmount = ({
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = balance.sub(tokenStandard !== 'erc20' ? fee : 0n);
+	const value = balance.sub(tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
 
 	return Number(
 		value.isNegative()

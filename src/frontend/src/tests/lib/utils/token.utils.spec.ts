@@ -105,6 +105,16 @@ describe('getMaxTransactionAmount', () => {
 		});
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});
+
+	it('should return the untouched amount if the token is SPL', () => {
+		const result = getMaxTransactionAmount({
+			balance: BigNumber.from(balance),
+			fee: BigNumber.from(fee),
+			tokenDecimals: tokenDecimals,
+			tokenStandard: 'spl'
+		});
+		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+	});
 });
 
 describe('calculateTokenUsdBalance', () => {
