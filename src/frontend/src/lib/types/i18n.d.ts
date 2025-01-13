@@ -20,6 +20,7 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		clear_filter: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -451,7 +452,6 @@ interface I18nTokens {
 			title: string;
 			manage_list: string;
 			do_not_see_import: string;
-			clear_filter: string;
 			manage_for_network: string;
 			network: string;
 			all_tokens_zero_balance: string;

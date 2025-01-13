@@ -16,7 +16,8 @@
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
-			"copy": "Copy"
+			"copy": "Copy",
+			"clear_filter": "Clear filter"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -498,7 +499,6 @@
 				"title": "Manage tokens",
 				"manage_list": "Manage list",
 				"do_not_see_import": "Don’t see your token? Import",
-				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance."
