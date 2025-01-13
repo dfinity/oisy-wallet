@@ -3,7 +3,7 @@
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
-	import LoaderBalances from '$lib/components/loaders/LoaderBalances.svelte';
+	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
@@ -12,7 +12,7 @@
 <AddressGuard>
 	<Loader>
 		<RewardGuard>
-			<LoaderBalances>
+			<LoaderEthBalances>
 				<LoaderWallets>
 					<ExchangeWorker>
 						<LoaderMetamask
@@ -22,7 +22,7 @@
 						</LoaderMetamask>
 					</ExchangeWorker>
 				</LoaderWallets>
-			</LoaderBalances>
+			</LoaderEthBalances>
 		</RewardGuard>
 	</Loader>
 </AddressGuard>
