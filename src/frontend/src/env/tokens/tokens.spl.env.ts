@@ -1,5 +1,4 @@
 import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
-import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
