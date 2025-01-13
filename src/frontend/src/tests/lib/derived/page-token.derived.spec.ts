@@ -55,9 +55,13 @@ describe('page-token.derived', () => {
 	});
 
 	it('should find SPL token', () => {
-		console.log(get(splTokens));
-
 		const mockToken = JUP_TOKEN;
+
+		vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+			fn([{ ...mockToken, enabled: true }]);
+			return () => {};
+		});
+
 		mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
