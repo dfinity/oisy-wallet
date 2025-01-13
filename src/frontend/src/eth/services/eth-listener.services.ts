@@ -6,12 +6,12 @@ import {
 	processEthTransaction
 } from '$eth/services/eth-transaction.services';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { WebSocketListener } from '$eth/types/listener';
-import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import type { EthAddress } from '$lib/types/address';
+import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 export const initTransactionsListener = ({

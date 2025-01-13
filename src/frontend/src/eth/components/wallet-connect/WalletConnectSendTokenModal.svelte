@@ -21,10 +21,7 @@
 		initFeeStore
 	} from '$eth/stores/fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import type {
-		OptionWalletConnectListener,
-		WalletConnectEthSendTransactionParams
-	} from '$eth/types/wallet-connect';
+	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
@@ -41,6 +38,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
