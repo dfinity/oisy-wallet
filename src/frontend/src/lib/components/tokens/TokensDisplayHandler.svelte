@@ -14,7 +14,7 @@
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[];
 	$: {
-		const hasBalance = (token: TokenUi | TokenUiGroup) =>
+		const hasBalance = (token: TokenUiOrGroupUi) =>
 			Number(token.balance ?? 0n) ?? token.usdBalance ?? $showZeroBalances;
 
 		sortedTokensOrGroups = groupedTokens.filter((t: TokenUiGroup) =>
