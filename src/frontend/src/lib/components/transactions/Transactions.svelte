@@ -4,7 +4,8 @@
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-	import { networkBitcoin, networkICP } from '$lib/derived/network.derived';
+	import { networkBitcoin, networkICP, networkSolana } from '$lib/derived/network.derived';
+	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 </script>
 
 {#if nonNullish($routeNetwork)}
@@ -12,6 +13,8 @@
 		<IcTransactions />
 	{:else if $networkBitcoin}
 		<BtcTransactions />
+	{:else if $networkSolana}
+		<SolTransactions />
 	{:else if nonNullish($routeToken)}
 		<EthTransactions />
 	{/if}
