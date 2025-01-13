@@ -174,6 +174,27 @@ describe('solana.api', () => {
 			);
 		});
 
+		it('should not return transactions that do not change SOL balance', async () => {
+			mockGetTransaction.mockReturnValue({
+				send: () =>
+					Promise.resolve({
+						...mockSolRpcSendTransaction,
+						meta: {
+							...mockSolRpcSendTransaction.meta,
+							postBalances: mockSolRpcSendTransaction.meta?.postBalances,
+							preBalances: mockSolRpcSendTransaction.meta?.postBalances
+						}
+					})
+			});
+			const transactions = await getSolTransactions({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				limit: 5
+			});
+
+			expect(transactions).toHaveLength(0);
+		});
+
 		it('should stop fetching when no more signatures are available', async () => {
 			mockGetSignaturesForAddress
 				.mockReturnValueOnce({
