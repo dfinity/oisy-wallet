@@ -6,8 +6,8 @@ import {
 	SESSION_REQUEST_PERSONAL_SIGN,
 	WALLET_CONNECT_METADATA
 } from '$eth/constants/wallet-connect.constants';
-import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import type { EthAddress } from '$lib/types/address';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import {
 	formatJsonRpcResult,
