@@ -1,5 +1,6 @@
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
+import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -31,6 +32,7 @@ export const initSendContext = ({
 	const sendTokenId = derived(sendToken, ({ id }) => id);
 	const sendTokenStandard = derived(sendToken, ({ standard }) => standard);
 	const sendTokenSymbol = derived(sendToken, ({ symbol }) => symbol);
+	const sendTokenNetworkId = derived(sendToken, ({ network: { id: networkId } }) => networkId);
 
 	const sendBalance = derived(
 		[balancesStore, sendTokenId],
@@ -44,6 +46,7 @@ export const initSendContext = ({
 		sendTokenStandard,
 		sendTokenSymbol,
 		sendBalance,
+		sendTokenNetworkId,
 		...staticContext
 	};
 };
@@ -62,6 +65,7 @@ export interface SendContext {
 	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
 	sendPurpose: SendContextPurpose;
+	sendTokenNetworkId: Readable<NetworkId>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');
