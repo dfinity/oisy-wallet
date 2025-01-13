@@ -4,8 +4,8 @@
 	import { initTransactionsListener } from '$eth/services/eth-listener.services';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import type { OptionEthAddress } from '$lib/types/address';
-	import type { Token } from '$lib/types/token';
 	import type { WebSocketListener } from '$lib/types/listener';
+	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
 

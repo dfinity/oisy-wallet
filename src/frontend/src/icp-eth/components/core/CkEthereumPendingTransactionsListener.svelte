@@ -27,8 +27,8 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionBalance } from '$lib/types/balance';
-	import type { NetworkId } from '$lib/types/network';
 	import type { WebSocketListener } from '$lib/types/listener';
+	import type { NetworkId } from '$lib/types/network';
 
 	let listener: WebSocketListener | undefined = undefined;
 

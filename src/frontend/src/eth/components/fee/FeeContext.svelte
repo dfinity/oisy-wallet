@@ -24,12 +24,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
+	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { WebSocketListener } from '$lib/types/listener';
 
 	export let observe: boolean;
 	export let destination = '';

@@ -27,8 +27,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Option } from '$lib/types/utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let listener: OptionWalletConnectListener;
 
