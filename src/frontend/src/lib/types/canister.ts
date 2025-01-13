@@ -4,7 +4,7 @@ import { PrincipalTextSchema } from '$lib/validation/principal.validation';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import type { CanisterOptions } from '@dfinity/utils';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const CanisterIdTextSchema = PrincipalTextSchema;
 

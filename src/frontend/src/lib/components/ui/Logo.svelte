@@ -2,23 +2,17 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: LogoSize = 'xs';
+	export let size: LogoSize = 'xxs';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
 	export let testId: string | undefined = undefined;
 
-	const sizes = {
-		xs: '22px',
-		sm: '36px',
-		md: '42px',
-		lg: '52px',
-		xl: '64px'
-	};
-	let sizePx = sizes[size];
+	let sizePx = logoSizes[size];
 
 	let loaded = false;
 
