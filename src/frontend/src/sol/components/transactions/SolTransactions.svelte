@@ -32,7 +32,7 @@
 </Header>
 
 <SolTransactionsSkeletons>
-  	<!--TODO: add listener-->
+	<!--TODO: add listener-->
 	{#if $solTransactions.length > 0}
 		<SolTransactionsScroll token={$token ?? SOLANA_TOKEN}>
 			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
