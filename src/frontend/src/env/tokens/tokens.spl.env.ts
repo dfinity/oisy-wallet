@@ -1,6 +1,6 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
-import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { JUPITER_TOKEN } from '$env/tokens/tokens-spl/tokens.jupiter.env';
+import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import type { RequiredSplToken } from '$sol/types/spl';
 
