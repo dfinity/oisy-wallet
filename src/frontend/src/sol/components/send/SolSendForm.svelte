@@ -5,10 +5,10 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
-	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
