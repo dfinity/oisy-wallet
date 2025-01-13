@@ -1,11 +1,16 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import * as solEnv from '$env/networks/networks.sol.env';
-import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
 	SOLANA_DEVNET_TOKEN,
+	SOLANA_LOCAL_TOKEN,
 	SOLANA_TESTNET_TOKEN,
 	SOLANA_TOKEN
 } from '$env/tokens/tokens.sol.env';
@@ -104,7 +109,7 @@ describe('tokens.derived', () => {
 			expect(get(tokens)).toEqual([ICP_TOKEN, SOLANA_TOKEN]);
 		});
 
-		it('should return all the tokens when testnets are enabled', () => {
+		it('should return testnet tokens too when testnets are enabled', () => {
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
 			expect(get(tokens)).toEqual([
@@ -116,6 +121,24 @@ describe('tokens.derived', () => {
 				SOLANA_TOKEN,
 				SOLANA_TESTNET_TOKEN,
 				SOLANA_DEVNET_TOKEN
+			]);
+		});
+
+		it('should return local tokens too when testnets are enabled and env is LOCAL', () => {
+			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+
+			expect(get(tokens)).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				BTC_TESTNET_TOKEN,
+				BTC_REGTEST_TOKEN,
+				ETHEREUM_TOKEN,
+				SEPOLIA_TOKEN,
+				SOLANA_TOKEN,
+				SOLANA_TESTNET_TOKEN,
+				SOLANA_DEVNET_TOKEN,
+				SOLANA_LOCAL_TOKEN
 			]);
 		});
 	});
