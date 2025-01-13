@@ -4,7 +4,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import jup from '$sol/assets/jup.svg';
 import type { RequiredSplToken } from '$sol/types/spl';
 
-export const KUP_DECIMALS = 6;
+export const JUP_DECIMALS = 6;
 
 export const JUP_SYMBOL = 'JUP';
 
