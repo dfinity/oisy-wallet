@@ -5,6 +5,7 @@
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction';
+	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 
 	export let date: string;
 	export let transactions: AllTransactionUiWithCmpNonEmptyList;
@@ -22,6 +23,8 @@
 					<BtcTransaction {transaction} {token} iconType="token" />
 				{:else if component === 'ethereum'}
 					<EthTransaction {transaction} {token} iconType="token" />
+				{:else if component === 'solana'}
+					<SolTransaction {transaction} {token} iconType="token" />
 				{:else}
 					<IcTransaction {transaction} {token} iconType="token" />
 				{/if}

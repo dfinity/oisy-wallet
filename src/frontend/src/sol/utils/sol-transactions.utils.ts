@@ -3,6 +3,25 @@ import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
 import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import { address as solAddress } from '@solana/addresses';
 
+interface TransactionWithAddress {
+	transaction: SolRpcTransaction;
+	address: SolAddress;
+}
+
+export const getSolBalanceChange = ({ transaction, address }: TransactionWithAddress) => {
+	const {
+		transaction: {
+			message: { accountKeys }
+		},
+		meta
+	} = transaction;
+
+	const accountIndex = accountKeys.indexOf(solAddress(address));
+	const { preBalances, postBalances } = meta ?? {};
+
+	return (postBalances?.[accountIndex] ?? 0n) - (preBalances?.[accountIndex] ?? 0n);
+};
+
 /**
  * It maps a transaction to a Solana transaction UI object
  */
@@ -10,10 +29,7 @@ import { address as solAddress } from '@solana/addresses';
 export const mapSolTransactionUi = ({
 	transaction,
 	address
-}: {
-	transaction: SolRpcTransaction;
-	address: SolAddress;
-}): SolTransactionUi => {
+}: TransactionWithAddress): SolTransactionUi => {
 	const {
 		id,
 		blockTime,
@@ -39,8 +55,7 @@ export const mapSolTransactionUi = ({
 
 	const relevantFee = isSender ? (fee ?? 0n) : 0n;
 
-	const amount =
-		(postBalances?.[accountIndex] ?? 0n) - (preBalances?.[accountIndex] ?? 0n) + relevantFee;
+	const amount = getSolBalanceChange({ transaction, address }) + relevantFee;
 
 	const type = isSender ? 'receive' : 'send';
 
