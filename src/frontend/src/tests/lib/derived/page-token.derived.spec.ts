@@ -1,5 +1,6 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as solEnv from '$env/networks/networks.sol.env';
+import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -7,6 +8,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { pageToken } from '$lib/derived/page-token.derived';
+import { splTokens } from '$sol/derived/spl.derived';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -18,6 +20,11 @@ describe('page-token.derived', () => {
 		mockPage.reset();
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
+
+		vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+			fn([{ ...JUP_TOKEN, enabled: true }]);
+			return () => {};
+		});
 	});
 
 	it('should return undefined when no token in route', () => {
@@ -47,6 +54,13 @@ describe('page-token.derived', () => {
 	it('should find ICRC token', () => {
 		const mockToken = { ...mockIcrcCustomToken, enabled: true };
 		icrcCustomTokensStore.setAll([{ data: mockToken, certified: true }]);
+		mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
+
+		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
+	});
+
+	it('should find SPL token', () => {
+		const mockToken = JUP_TOKEN;
 		mockPage.mock({ token: mockToken.name, network: mockToken.network.id.description });
 
 		expect(get(pageToken)?.symbol).toBe(mockToken.symbol);
