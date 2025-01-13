@@ -162,3 +162,36 @@ const fetchTransactionDetailForSignature = async ({
 		id: signature.toString()
 	};
 };
+
+export const loadTokenAccount = async ({
+	address,
+	network,
+	tokenAddress
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+	tokenAddress: SolAddress;
+}): Promise<SolAddress> => {
+	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
+	const wallet = solAddress(address);
+	const relevantTokenAddress = solAddress(tokenAddress);
+
+	const response = await getTokenAccountsByOwner(
+		wallet,
+		{
+			mint: relevantTokenAddress
+		},
+		{ encoding: 'jsonParsed' }
+	).send();
+
+	// TODO: create missing token account
+	if (response.value.length === 0) {
+		throw new Error(
+			`Token account not found for wallet ${address} and token ${tokenAddress} on ${network} network`
+		);
+	}
+
+	const { pubkey: accountAddress } = response.value[0];
+
+	return accountAddress;
+};
