@@ -3,7 +3,6 @@
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
@@ -29,6 +28,7 @@
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { NetworkId } from '$lib/types/network';
+	import type { WebSocketListener } from '$lib/types/listener';
 
 	let listener: WebSocketListener | undefined = undefined;
 

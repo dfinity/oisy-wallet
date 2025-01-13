@@ -1,5 +1,5 @@
 <script lang="ts">
-	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
+	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';

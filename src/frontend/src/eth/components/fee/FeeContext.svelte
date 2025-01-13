@@ -11,7 +11,6 @@
 	} from '$eth/services/fee.services';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
@@ -30,6 +29,7 @@
 	import type { Token } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { WebSocketListener } from '$lib/types/listener';
 
 	export let observe: boolean;
 	export let destination = '';
