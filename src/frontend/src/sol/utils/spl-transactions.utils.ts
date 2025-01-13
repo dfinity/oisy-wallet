@@ -18,13 +18,15 @@ export const getSplBalanceChange = ({ transaction, address, tokenAddress }: SplI
 	const relevantPreTokenBalances = preTokenBalances?.filter(filterRelevantTokenBalance);
 	const relevantPostTokenBalances = postTokenBalances?.filter(filterRelevantTokenBalance);
 
-	const preTokenBalance = relevantPreTokenBalances?.reduce((acc, curr) => {
-		return acc + BigInt(curr.uiTokenAmount.amount);
-	}, 0n);
+	const preTokenBalance = relevantPreTokenBalances?.reduce(
+		(acc, curr) => acc + BigInt(curr.uiTokenAmount.amount),
+		0n
+	);
 
-	const postTokenBalance = relevantPostTokenBalances?.reduce((acc, curr) => {
-		return acc + BigInt(curr.uiTokenAmount.amount);
-	}, 0n);
+	const postTokenBalance = relevantPostTokenBalances?.reduce(
+		(acc, curr) => acc + BigInt(curr.uiTokenAmount.amount),
+		0n
+	);
 
 	return (postTokenBalance ?? 0n) - (preTokenBalance ?? 0n);
 };
