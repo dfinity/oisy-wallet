@@ -10,3 +10,4 @@ e2e/**/*.png
 declarations/**/*
 src/frontend/src/env/tokens/tokens.*.json
 src/frontend/src/env/tokens/tokens-erc20/
+src/frontend/static/icons/sns/
