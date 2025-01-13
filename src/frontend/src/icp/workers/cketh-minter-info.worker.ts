@@ -5,7 +5,9 @@ import type { PostMessage, PostMessageDataRequestIcCk } from '$lib/types/post-me
 
 const scheduler = new CkMinterInfoScheduler(CKETH_MINTER_INFO_TIMER, minterInfo);
 
-onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcCk>>) => {
+export const onCkEthMinterInfoMessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequestIcCk>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
