@@ -20,7 +20,7 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 	token: { id: tokenId },
 	twinToken
 }: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
-	const CkBTCUpdateBalanceWorker = await import('$icp/workers/ckbtc-update-balance.worker?worker');
+	const CkBTCUpdateBalanceWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new CkBTCUpdateBalanceWorker.default();
 
 	worker.onmessage = async ({
