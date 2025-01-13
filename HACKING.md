@@ -39,7 +39,7 @@ echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
 > To perform staging development, you'll need a `.env.staging` file.
 
 ```bash
-ENV=staging dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
+dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
 ENV=staging ./scripts/deploy.backend.sh
 ```
 
@@ -49,7 +49,7 @@ ENV=staging ./scripts/deploy.backend.sh
 > Note that beta frontend points to production (IC) backend.
 
 ```bash
-ENV=beta dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
+dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
 ```
 
 ### IC
@@ -57,7 +57,7 @@ ENV=beta dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
 > To perform production development, you'll need a `.env.production` file.
 
 ```bash
-ENV=ic dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
+dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
 ENV=ic ./scripts/deploy.backend.sh
 ```
 
