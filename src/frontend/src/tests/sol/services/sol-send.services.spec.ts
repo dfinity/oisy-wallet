@@ -7,7 +7,7 @@ import { sendSol } from '$sol/services/sol-send.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { BigNumber } from '@ethersproject/bignumber';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
@@ -60,6 +60,9 @@ describe('sol-send.services', () => {
 		const mockRpc = {
 			getLatestBlockhash: vi.fn(() => ({
 				send: vi.fn(() => Promise.resolve({ value: { blockhash: 'test-blockhash' } }))
+			})),
+			getTokenAccountsByOwner: vi.fn(() => ({
+				send: vi.fn(() => Promise.resolve({ value: [{ pubkey: mockSplAddress }] }))
 			}))
 		} as unknown as Rpc<SolanaRpcApi>;
 		const mockRpcSubscriptions = {} as RpcSubscriptions<SolanaRpcSubscriptionsApi>;
@@ -122,6 +125,28 @@ describe('sol-send.services', () => {
 				replacePlaceholders(en.init.error.no_solana_network, {
 					$network: SOLANA_TOKEN.network.id.description ?? ''
 				})
+			);
+		});
+
+		it('should throw an error if no token accounts are found', async () => {
+			vi.mocked(solanaHttpRpc).mockReturnValue({
+				...mockRpc,
+				getTokenAccountsByOwner: vi.fn(() => ({
+					send: vi.fn(() => Promise.resolve({ value: [] }))
+				}))
+			} as unknown as Rpc<SolanaRpcApi>);
+
+			await expect(
+				sendSol({
+					identity: mockIdentity,
+					token: DEVNET_USDC_TOKEN,
+					amount: mockAmount,
+					destination: mockDestination,
+					source: mockSource,
+					onProgress: vi.fn()
+				})
+			).rejects.toThrowError(
+				`Token account not found for wallet ${mockSource} and token ${DEVNET_USDC_TOKEN.address} on devnet network`
 			);
 		});
 	});
