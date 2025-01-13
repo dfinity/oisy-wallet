@@ -3,7 +3,9 @@ import type { PostMessage, PostMessageDataRequestBtc } from '$lib/types/post-mes
 
 const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
-onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestBtc>>) => {
+export const onBtcWalletMessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequestBtc>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
