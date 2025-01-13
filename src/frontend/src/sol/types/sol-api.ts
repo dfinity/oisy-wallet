@@ -7,3 +7,7 @@ export interface GetSolTransactionsParams {
 	before?: string;
 	limit?: number;
 }
+
+export interface GetSplTransactionsParams extends GetSolTransactionsParams {
+	tokenAddress: SolAddress;
+}
