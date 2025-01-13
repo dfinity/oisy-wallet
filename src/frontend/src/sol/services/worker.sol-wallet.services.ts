@@ -28,7 +28,7 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 		network: { id: networkId }
 	} = token;
 
-	const WalletWorker = await import('$sol/workers/sol-wallet.worker?worker');
+	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
 	const isTestnetNetwork = isNetworkIdSOLTestnet(networkId);
