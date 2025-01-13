@@ -5,6 +5,7 @@ import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import type { OptionToken } from '$lib/types/token';
+import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -19,7 +20,8 @@ export const pageToken: Readable<OptionToken> = derived(
 		enabledBitcoinTokens,
 		enabledSolanaTokens,
 		enabledErc20Tokens,
-		enabledIcrcTokens
+		enabledIcrcTokens,
+		splTokens
 	],
 	([
 		$routeToken,
@@ -27,7 +29,8 @@ export const pageToken: Readable<OptionToken> = derived(
 		$enabledBitcoinTokens,
 		$enabledSolanaTokens,
 		$erc20Tokens,
-		$icrcTokens
+		$icrcTokens,
+		$splTokens
 	]) => {
 		if (isNullish($routeToken)) {
 			return undefined;
@@ -42,6 +45,7 @@ export const pageToken: Readable<OptionToken> = derived(
 			...$enabledSolanaTokens,
 			...$erc20Tokens,
 			...$icrcTokens,
+			...$splTokens,
 			ETHEREUM_TOKEN,
 			SEPOLIA_TOKEN
 		].find(
