@@ -4,7 +4,7 @@
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
-	export let size: Extract<LogoSize, 'md' | 'xs'> = 'xs';
+	export let size: Extract<LogoSize, 'md' | 'xxs'> = 'xxs';
 </script>
 
 <div class="flex items-center">
