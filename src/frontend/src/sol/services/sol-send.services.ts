@@ -6,11 +6,10 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
-import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
+import { SOLANA_DERIVATION_PATH_PREFIX, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
-import type { SplToken } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -78,16 +77,14 @@ const createSplTokenTransactionMessage = async ({
 	destination,
 	amount,
 	network,
-	token
+	tokenAddress
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
 	amount: BigNumber;
 	network: SolanaNetworkType;
-	token: SplToken;
+	tokenAddress: SolAddress;
 }): Promise<SolTransactionMessage> => {
-	const { address: tokenAddress, programAddress } = token;
-
 	const rpc = solanaHttpRpc(network);
 
 	const { getLatestBlockhash } = rpc;
@@ -122,7 +119,7 @@ const createSplTokenTransactionMessage = async ({
 							authority: signer,
 							amount: BigInt(amount.toNumber())
 						},
-						{ programAddress: solAddress(programAddress) }
+						{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
 					)
 				],
 				tx
@@ -196,7 +193,7 @@ export const sendSol = async ({
 				destination,
 				amount,
 				network: solNetwork,
-				token
+				tokenAddress: token.address
 			})
 		: await createSolTransactionMessage({
 				signer,
