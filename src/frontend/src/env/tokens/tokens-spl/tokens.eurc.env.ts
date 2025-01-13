@@ -31,7 +31,7 @@ export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	network: SOLANA_DEVNET_NETWORK,
 	standard: 'spl',
 	category: 'default',
-	name: 'Euro Coin (Devnet)',
+	name: 'EURC (Devnet)',
 	symbol: DEVNET_EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
 	icon: usdc,
