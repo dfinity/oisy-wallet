@@ -15,7 +15,7 @@ export const POPCAT_TOKEN: RequiredSplToken = {
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',
 	category: 'default',
-	name: 'POPCAT',
+	name: 'Popcat',
 	symbol: POPCAT_SYMBOL,
 	decimals: POPCAT_DECIMALS,
 	icon: popcat,
