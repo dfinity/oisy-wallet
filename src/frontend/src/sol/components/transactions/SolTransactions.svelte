@@ -40,8 +40,7 @@
 				</li>
 			{/each}
 		</SolTransactionsScroll>
-	{/if}
-	{#if $solTransactions.length === 0}
+	{:else if $solTransactions.length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </SolTransactionsSkeletons>
