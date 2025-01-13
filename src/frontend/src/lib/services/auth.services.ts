@@ -121,6 +121,11 @@ const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
 };
 
+// eslint-disable-next-line require-await
+const clearSessionStorage = async () => {
+	sessionStorage.clear();
+};
+
 const logout = async ({
 	msg = undefined,
 	clearStorages = true,
@@ -141,6 +146,8 @@ const logout = async ({
 			clearTestnetsOption()
 		]);
 	}
+
+	await clearSessionStorage();
 
 	await authStore.signOut();
 

@@ -1,17 +1,35 @@
+import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import { SolanaNetworks } from '$sol/types/network';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/rpc-types';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
+	let spyLoadSolBalance: MockInstance;
+	let spyLoadSplBalance: MockInstance;
+	let spyLoadTransactions: MockInstance;
 
-	const mockBalance = lamports(100n);
+	const mockSolBalance = lamports(100n);
+	const mockSplBalance = BigInt(123);
+	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
+
+	const expectedTransactions = mockTransactions.map((transaction) => ({
+		data: mapSolTransactionUi({
+			transaction,
+			address: mockSolAddress
+		}),
+		certified: false
+	}));
 
 	const mockPostMessageStatusInProgress = {
 		msg: 'syncSolWalletStatus',
@@ -27,14 +45,23 @@ describe('sol-wallet.scheduler', () => {
 		}
 	};
 
-	const mockPostMessage = ({ certified }: { certified: boolean }) => ({
+	const mockPostMessage = ({
+		withTransactions,
+		isSpl
+	}: {
+		withTransactions: boolean;
+		isSpl: boolean;
+	}) => ({
 		msg: 'syncSolWallet',
 		data: {
 			wallet: {
 				balance: {
-					certified,
-					data: mockBalance
-				}
+					certified: false,
+					data: isSpl ? mockSplBalance : mockSolBalance
+				},
+				...(withTransactions && {
+					newTransactions: JSON.stringify(expectedTransactions, jsonReplacer)
+				})
 			}
 		}
 	});
@@ -57,7 +84,15 @@ describe('sol-wallet.scheduler', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		spyLoadBalance = vi.spyOn(solanaApi, 'loadSolLamportsBalance').mockResolvedValue(mockBalance);
+		spyLoadSolBalance = vi
+			.spyOn(solanaApi, 'loadSolLamportsBalance')
+			.mockResolvedValue(mockSolBalance);
+		spyLoadSplBalance = vi
+			.spyOn(solanaApi, 'loadSplTokenBalance')
+			.mockResolvedValue(mockSplBalance);
+		spyLoadTransactions = vi
+			.spyOn(solanaApi, 'getSolTransactions')
+			.mockResolvedValue(mockTransactions);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
@@ -73,14 +108,17 @@ describe('sol-wallet.scheduler', () => {
 	}) => {
 		const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
-		const mockPostMessageCertified = mockPostMessage({
-			certified: false
+		const isSpl = nonNullish(startData?.tokenAddress);
+
+		beforeEach(() => {
+			spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
 		});
 
 		afterEach(() => {
-			// reset internal store with balance
+			// reset internal store with balance and transactions
 			scheduler['store'] = {
-				balance: undefined
+				balance: undefined,
+				transactions: {}
 			};
 
 			scheduler.stop();
@@ -91,7 +129,10 @@ describe('sol-wallet.scheduler', () => {
 
 			expect(postMessageMock).toHaveBeenCalledTimes(3);
 			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+			expect(postMessageMock).toHaveBeenNthCalledWith(
+				2,
+				mockPostMessage({ withTransactions: true, isSpl })
+			);
 			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
@@ -117,6 +158,7 @@ describe('sol-wallet.scheduler', () => {
 			await scheduler.trigger(startData);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(1);
+			expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
 		});
 
 		it('should stop the scheduler', () => {
@@ -128,14 +170,17 @@ describe('sol-wallet.scheduler', () => {
 			await scheduler.start(startData);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(1);
+			expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(2);
+			expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(3);
+			expect(spyLoadTransactions).toHaveBeenCalledTimes(3);
 		});
 
 		it('should postMessage with status of the worker', async () => {
@@ -162,15 +207,59 @@ describe('sol-wallet.scheduler', () => {
 				}
 			});
 		});
+
+		it('should not post message when no new transactions or balance changes', async () => {
+			await scheduler.start(startData);
+			postMessageMock.mockClear();
+
+			// Mock no changes in transactions and balance
+			spyLoadTransactions.mockResolvedValue([]);
+			spyLoadSolBalance.mockResolvedValue(mockSolBalance);
+			spyLoadSplBalance.mockResolvedValue(mockSplBalance);
+
+			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+			// Only status messages should be sent
+			expect(postMessageMock).toHaveBeenCalledTimes(2);
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+		});
+
+		it('should update store with new transactions', async () => {
+			await scheduler.start(startData);
+
+			expect(scheduler['store'].transactions).toEqual(
+				expectedTransactions.reduce(
+					(acc, transaction) => ({
+						...acc,
+						[transaction.data.id]: transaction
+					}),
+					{}
+				)
+			);
+		});
 	};
 
-	describe('sol-wallet worker should work', () => {
-		const startData = {
+	describe('sol-wallet worker should work for SOLANA tokens', () => {
+		const startData: PostMessageDataRequestSol = {
 			address: {
 				certified: false,
-				data: 'mock-sol-address'
+				data: mockSolAddress
 			},
 			solanaNetwork: SolanaNetworks.mainnet
+		};
+
+		testWorker({ startData });
+	});
+
+	describe('sol-wallet worker should work for SPL tokens', () => {
+		const startData: PostMessageDataRequestSol = {
+			address: {
+				certified: false,
+				data: mockSolAddress
+			},
+			solanaNetwork: SolanaNetworks.devnet,
+			tokenAddress: DEVNET_USDC_TOKEN.address
 		};
 
 		testWorker({ startData });
