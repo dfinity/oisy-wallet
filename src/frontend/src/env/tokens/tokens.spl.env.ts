@@ -8,8 +8,13 @@ import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import type { RequiredSplToken } from '$sol/types/spl';
 
-
-const SPL_TOKENS_MAINNET: RequiredSplToken[] = [BONK_TOKEN, JUP_TOKEN, ORCA_TOKEN, POPCAT_TOKEN, RAY_TOKEN];
+const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
+	BONK_TOKEN,
+	JUP_TOKEN,
+	ORCA_TOKEN,
+	POPCAT_TOKEN,
+	RAY_TOKEN
+];
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];
 
