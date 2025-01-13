@@ -226,6 +226,21 @@
 		"screenshots": ["/images/dapps/sonic.webp"]
 	},
 	{
+		"id": "raydium",
+		"name": "Raydium",
+		"oneLiner": "DEX and automated market maker built on the Solana blockchain, offering a central limit order book that enables fast trades.",
+		"callToAction": "Power the evolution of DeFi",
+		"website": "https://raydium.io/",
+		"twitter": "https://twitter.com/RaydiumProtocol",
+		"github": "https://github.com/raydium-io",
+		"tags": ["DeFi", "WalletConnect"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Raydium is an automated market maker (AMM) built on the Solana blockchain, offering a unique blend of AMM technology and access to the Serum decentralized exchange’s liquidity. As an AMM, Raydium allows for trading digital assets in a permissionless way, using liquidity pools.",
+		"logo": "/images/dapps/raydium-logo.svg",
+		"screenshots": ["/images/dapps/raydium.webp"]
+	},
+	{
 		"id": "jupiter",
 		"name": "Jupiter",
 		"oneLiner": "Solana-based DEX aggregator that optimizes for the best available swaps between any supported token pair.",
