@@ -81,7 +81,7 @@ export const initWalletConnect = async ({
 		const { params } = proposal;
 
 		//TODO enable all networks of solana
-		const solMainnet = CAIP10_CHAINS[`solana:${SOLANA_MAINNET_NETWORK.chainId}`];
+		const solMainnetNamespace = `solana:${SOLANA_MAINNET_NETWORK.chainId}`;
 
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
@@ -98,10 +98,10 @@ export const initWalletConnect = async ({
 					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
 				},
 				solana: {
-					chains: [solMainnet.chainId],
+					chains: [solMainnetNamespace],
 					methods: ['solana_signTransaction', 'solana_signMessage'],
 					events: ['accountsChanged', 'chainChanged'],
-					accounts: [`${solMainnet.chainId}:${solAddress}`]
+					accounts: [`${solMainnetNamespace}:${solAddress}`]
 				}
 			}
 		});
