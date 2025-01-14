@@ -29,6 +29,8 @@
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
@@ -106,22 +108,29 @@
 	let saveDisabled = true;
 	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
 
-	let groupModifiedTokens: { icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] } = {
+	let groupModifiedTokens: {
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
+	} = {
 		icrc: [],
-		erc20: []
+		erc20: [],
+		spl: []
 	};
 	$: groupModifiedTokens = Object.values(modifiedTokens).reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
 	}>(
-		({ icrc, erc20 }, token) => ({
+		({ icrc, erc20, spl }, token) => ({
 			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
 			erc20: [
 				...erc20,
 				...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
-			]
+			],
+			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [] }
+		{ icrc: [], erc20: [], spl: [] }
 	);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
@@ -173,7 +182,7 @@
 					<svelte:fragment slot="action">
 						{#if icTokenIcrcCustomToken(token)}
 							<IcManageTokenToggle {token} on:icToken={onToggle} />
-						{:else if icTokenEthereumUserToken(token)}
+						{:else if icTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
 							<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 						{:else if isBitcoinToken(token)}
 							<BtcManageTokenToggle />
