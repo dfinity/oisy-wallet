@@ -9,7 +9,9 @@
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
 		SESSION_REQUEST_ETH_SIGN_V4,
-		SESSION_REQUEST_PERSONAL_SIGN, SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION, SESSION_REQUEST_SOL_SIGN_TRANSACTION
+		SESSION_REQUEST_PERSONAL_SIGN,
+		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+		SESSION_REQUEST_SOL_SIGN_TRANSACTION
 	} from '$eth/constants/wallet-connect.constants';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
