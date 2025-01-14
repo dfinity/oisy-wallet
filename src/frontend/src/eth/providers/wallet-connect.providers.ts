@@ -10,7 +10,7 @@ import {
 	BaseWalletConnectProvider,
 	type WalletConnectMetadata,
 	type WalletConnectNamespace
-} from '$lib/providers/wallet-connect.base';
+} from '$lib/providers/wallet-connect';
 import type { EthAddress } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 
