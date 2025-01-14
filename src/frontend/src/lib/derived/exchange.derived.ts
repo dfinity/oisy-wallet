@@ -18,6 +18,7 @@ import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -28,8 +29,8 @@ export const exchangeInitialized: Readable<boolean> = derived(
 
 // TODO: create tests for store
 export const exchanges: Readable<ExchangesData> = derived(
-	[exchangeStore, enabledErc20Tokens, enabledIcrcTokens],
-	([$exchangeStore, $erc20Tokens, $icrcTokens]) => {
+	[exchangeStore, enabledErc20Tokens, enabledIcrcTokens, enabledSplTokens],
+	([$exchangeStore, $erc20Tokens, $icrcTokens, $splTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
 		const icpPrice = $exchangeStore?.['internet-computer'];
@@ -48,9 +49,9 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[SOLANA_DEVNET_TOKEN_ID]: solPrice,
 			[SOLANA_LOCAL_TOKEN_ID]: solPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
-				const token = $erc20Tokens.find(
-					({ address }) => address.toLowerCase() === key.toLowerCase()
-				);
+				const token =
+					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
+					$splTokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
 
 				return {
 					...acc,

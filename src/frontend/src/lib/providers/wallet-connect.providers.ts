@@ -1,13 +1,14 @@
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
+	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN,
-	SESSION_REQUEST_SEND_TRANSACTION,
 	WALLET_CONNECT_METADATA
 } from '$eth/constants/wallet-connect.constants';
-import type { WalletConnectListener } from '$eth/types/wallet-connect';
-import type { EthAddress } from '$lib/types/address';
+import type { EthAddress, OptionSolAddress } from '$lib/types/address';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import {
 	formatJsonRpcResult,
@@ -21,10 +22,13 @@ const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 export const initWalletConnect = async ({
 	uri,
-	address
+	ethAddress,
+	solAddress
 }: {
 	uri: string;
-	address: EthAddress;
+	ethAddress: EthAddress;
+	// TODO add other networks for solana
+	solAddress: OptionSolAddress;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
 		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
@@ -76,20 +80,33 @@ export const initWalletConnect = async ({
 	const approveSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { params } = proposal;
 
+		//TODO enable all networks of solana
+		const solMainnetNamespace = `solana:${SOLANA_MAINNET_NETWORK.chainId}`;
+
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
 				eip155: {
 					chains: EIP155_CHAINS_KEYS,
 					methods: [
-						SESSION_REQUEST_SEND_TRANSACTION,
+						SESSION_REQUEST_ETH_SEND_TRANSACTION,
 						SESSION_REQUEST_ETH_SIGN,
 						SESSION_REQUEST_PERSONAL_SIGN,
 						SESSION_REQUEST_ETH_SIGN_V4
 					],
 					events: ['accountsChanged', 'chainChanged'],
-					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${address}`)
-				}
+					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
+				},
+				...(solAddress
+					? {
+							solana: {
+								chains: [solMainnetNamespace],
+								methods: ['solana_signTransaction', 'solana_signMessage'],
+								events: ['accountsChanged', 'chainChanged'],
+								accounts: [`${solMainnetNamespace}:${solAddress}`]
+							}
+						}
+					: {})
 			}
 		});
 
