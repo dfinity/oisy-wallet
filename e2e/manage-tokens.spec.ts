@@ -13,7 +13,7 @@ testWithII.beforeEach(async ({ page, iiPage }) => {
 	await homepageLoggedIn.waitForReady();
 });
 
-testWithII('enable ICRC token', async () => {
+testWithII('should enable ICRC token', async () => {
 	// enable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
@@ -26,7 +26,7 @@ testWithII('enable ICRC token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 });
 
-testWithII('disable ICRC token', async () => {
+testWithII('should disable ICRC token', async () => {
 	//disable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
@@ -44,7 +44,7 @@ testWithII('disable ICRC token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 });
 
-testWithII('enable ERC20 token', async () => {
+testWithII('should enable ERC20 token', async () => {
 	// enable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
@@ -57,7 +57,7 @@ testWithII('enable ERC20 token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 });
 
-testWithII('disable ERC20 token', async () => {
+testWithII('should disable ERC20 token', async () => {
 	//disable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
@@ -75,7 +75,7 @@ testWithII('disable ERC20 token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 });
 
-testWithII('enable SepoliaERC20 token', async () => {
+testWithII('should enable SepoliaERC20 token', async () => {
 	// enable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
@@ -88,7 +88,7 @@ testWithII('enable SepoliaERC20 token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 });
 
-testWithII('disable SepoliaERC20 token', async () => {
+testWithII('should disable SepoliaERC20 token', async () => {
 	//disable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
