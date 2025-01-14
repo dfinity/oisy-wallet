@@ -57,7 +57,7 @@
 			return;
 		}
 
-		if (nonNullish($sendBalance) && userAmount.gt($sendBalance)) {
+		if (userAmount.gt($sendBalance ?? ZERO)) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds);
 		}
 
