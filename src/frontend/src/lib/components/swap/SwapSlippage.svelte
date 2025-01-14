@@ -1,0 +1,118 @@
+<script lang="ts">
+	import { Collapsible, IconExpandMore, IconWarning } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
+	import SwapInputContainer from '$lib/components/swap/SwapInputContainer.svelte';
+	import SwapInputCurrency from '$lib/components/swap/SwapInputCurrency.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import {
+		SWAP_SLIPPAGE_INVALID_VALUE,
+		SWAP_SLIPPAGE_PRESET_VALUES,
+		SWAP_SLIPPAGE_VALUE_DECIMALS,
+		SWAP_SLIPPAGE_WARNING_VALUE
+	} from '$lib/constants/swap.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
+
+	export let slippageValue: OptionAmount;
+	export let name = 'swap-slippage';
+
+	let parsedValue: number;
+	$: parsedValue = nonNullish(slippageValue) ? Number(slippageValue) : 0;
+
+	let slippageValueWarning: boolean;
+	$: slippageValueWarning =
+		parsedValue < SWAP_SLIPPAGE_INVALID_VALUE && parsedValue >= SWAP_SLIPPAGE_WARNING_VALUE;
+
+	let slippageValueError: boolean;
+	$: slippageValueError = parsedValue >= SWAP_SLIPPAGE_INVALID_VALUE || parsedValue <= 0;
+
+	let toggleContent: () => void;
+	let expanded = false;
+
+	const extendedToggleContent = () => {
+		expanded = !expanded;
+		toggleContent();
+	};
+
+	let focused: boolean;
+	const onFocus = () => (focused = true);
+	const onBlur = () => (focused = false);
+
+	const onPresetValueClick = (value: OptionAmount) => {
+		slippageValue = value;
+
+		extendedToggleContent();
+	};
+</script>
+
+<div class="mb-2 mt-6 flex items-center">
+	<span class="text-sm text-tertiary">{$i18n.swap.text.max_slippage}</span>
+
+	<button
+		class="ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold hover:bg-brand-subtle-alt"
+		aria-label={$i18n.swap.text.max_slippage}
+		on:click={extendedToggleContent}
+		class:bg-brand-subtle={!slippageValueError && !slippageValueWarning}
+		class:hover:bg-brand-subtle-alt={!slippageValueError && !slippageValueWarning}
+		class:text-brand-primary={!slippageValueError && !slippageValueWarning}
+		class:bg-warning-subtle={slippageValueWarning}
+		class:hover:bg-warning-subtle-alt={slippageValueWarning}
+		class:text-warning={slippageValueWarning}
+		class:bg-error-subtle={slippageValueError}
+		class:hover:bg-error-subtle-alt={slippageValueError}
+		class:text-error={slippageValueError}
+	>
+		<span>{parsedValue}%</span>
+
+		<span class="text-black transition" class:rotate-180={expanded}>
+			<IconExpandMore size="16" />
+		</span>
+	</button>
+</div>
+
+<Collapsible expandButton={false} externalToggle={true} bind:toggleContent>
+	<div class="flex items-center">
+		<SwapInputContainer {focused} error={slippageValueError} styleClass="h-12">
+			<SwapInputCurrency
+				{name}
+				decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
+				error={slippageValueError}
+				bind:value={slippageValue}
+				on:focus={onFocus}
+				on:blur={onBlur}
+			>
+				<span class="text-tertiary" slot="inner-end">%</span>
+			</SwapInputCurrency>
+		</SwapInputContainer>
+
+		{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue}
+			<Button
+				on:click={() => onPresetValueClick(presetValue)}
+				colorStyle="secondary"
+				styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
+				paddingSmall={true}
+			>
+				{presetValue}%
+			</Button>
+		{/each}
+	</div>
+
+	<div
+		class="mt-2 text-sm text-tertiary"
+		class:text-tertiary={!slippageValueError && !slippageValueWarning}
+		class:text-warning={slippageValueWarning}
+		class:text-error={slippageValueError}
+	>
+		{#if slippageValueError}
+			<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
+		{:else if slippageValueWarning}
+			<div in:fade class="flex gap-1">
+				<IconWarning />
+				<span>{$i18n.swap.text.max_slippage_warning}</span>
+			</div>
+		{:else}
+			<div in:fade>{$i18n.swap.text.max_slippage_info}</div>
+		{/if}
+	</div>
+</Collapsible>
