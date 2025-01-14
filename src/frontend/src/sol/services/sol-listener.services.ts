@@ -1,7 +1,10 @@
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { SolAddress } from '$lib/types/address';
 import type { TokenId } from '$lib/types/token';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import { initSolWalletConnect } from '$sol/providers/wallet-connect.providers';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
@@ -64,3 +67,8 @@ export const syncWalletError = ({
 		err
 	});
 };
+
+export const initSolWalletConnectListener = (params: {
+	uri: string;
+	address: SolAddress;
+}): Promise<WalletConnectListener> => initSolWalletConnect(params);

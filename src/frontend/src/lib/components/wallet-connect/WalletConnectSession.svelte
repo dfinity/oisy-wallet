@@ -18,8 +18,15 @@
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import {
+		ethAddress,
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressMainnet,
+		solAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { networkId } from '$lib/derived/network.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -29,6 +36,14 @@
 	import type { Option } from '$lib/types/utils';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		isNetworkIdSolana,
+		isNetworkIdSOLDevnet,
+		isNetworkIdSOLLocal,
+		isNetworkIdSOLTestnet
+	} from '$lib/utils/network.utils';
+	import { initSolWalletConnectListener } from '$sol/services/sol-listener.services';
+	import type { OptionSolAddress } from '$lib/types/address';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -54,6 +69,16 @@
 	};
 
 	let proposal: Option<Web3WalletTypes.SessionProposal>;
+
+	//TODO improve sol integration in this component
+	let solAddress: OptionSolAddress;
+	$: solAddress = isNetworkIdSOLTestnet($networkId)
+		? $solAddressTestnet
+		: isNetworkIdSOLDevnet($networkId)
+			? $solAddressDevnet
+			: isNetworkIdSOLLocal($networkId)
+				? $solAddressLocal
+				: $solAddressMainnet;
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -90,14 +115,26 @@
 
 		try {
 			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
-			if (isNullish($ethAddress)) {
+			if (isNullish($ethAddress) && isNullish(solAddress)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
 				return;
 			}
 
-			listener = await initWalletConnectListener({ uri, address: $ethAddress });
+			const isSolana = isNetworkIdSolana($networkId);
+			const address = isSolana ? solAddress : $ethAddress;
+
+			if (isNullish(address)) {
+				toastsError({
+					msg: { text: $i18n.send.assertion.address_unknown }
+				});
+				return;
+			}
+
+			listener = isSolana
+				? await initSolWalletConnectListener({ uri, address })
+				: await initWalletConnectListener({ uri, address });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
@@ -135,7 +172,7 @@
 		}
 
 		// Address is not defined. We need it.
-		if (isNullish($ethAddress)) {
+		if (isNullish($ethAddress) && isNullish(solAddress)) {
 			return;
 		}
 
@@ -159,7 +196,7 @@
 		await connect($walletConnectUri);
 	};
 
-	$: $ethAddress, $walletConnectUri, $loading, (async () => await uriConnect())();
+	$: $ethAddress, solAddress, $walletConnectUri, $loading, (async () => await uriConnect())();
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
@@ -218,31 +255,39 @@
 				}
 			} = sessionRequest;
 
-			switch (method) {
-				case SESSION_REQUEST_ETH_SIGN_V4:
-				case SESSION_REQUEST_ETH_SIGN:
-				case SESSION_REQUEST_PERSONAL_SIGN: {
+			const isSolana = isNetworkIdSolana($networkId);
+
+			if (isSolana) {
+				if (method === 'solana_signTransaction' || method === 'solana_signMessage') {
 					modalStore.openWalletConnectSign(sessionRequest);
 					return;
 				}
-				case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
-					modalStore.openWalletConnectSend(sessionRequest);
-					return;
-				}
-				default: {
-					await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
-
-					toastsError({
-						msg: {
-							text: replacePlaceholders($i18n.wallet_connect.error.method_not_support, {
-								$method: method
-							})
-						}
-					});
-
-					close();
+			} else {
+				switch (method) {
+					case SESSION_REQUEST_ETH_SIGN_V4:
+					case SESSION_REQUEST_ETH_SIGN:
+					case SESSION_REQUEST_PERSONAL_SIGN: {
+						modalStore.openWalletConnectSign(sessionRequest);
+						return;
+					}
+					case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
+						modalStore.openWalletConnectSend(sessionRequest);
+						return;
+					}
 				}
 			}
+
+			await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
+
+			toastsError({
+				msg: {
+					text: replacePlaceholders($i18n.wallet_connect.error.method_not_support, {
+						$method: method
+					})
+				}
+			});
+
+			close();
 		});
 
 		try {
