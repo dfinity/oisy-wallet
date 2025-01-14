@@ -4,6 +4,7 @@
 	import { getSdkError } from '@walletconnect/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
+	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
@@ -29,7 +30,6 @@
 	import type { Option } from '$lib/types/utils';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 
 	export let listener: OptionWalletConnectListener;
 
