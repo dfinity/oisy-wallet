@@ -9,8 +9,10 @@
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
 		SESSION_REQUEST_ETH_SIGN_V4,
-		SESSION_REQUEST_PERSONAL_SIGN
-	} from '$eth/constants/wallet-connect.constants';
+		SESSION_REQUEST_PERSONAL_SIGN,
+		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+		SESSION_REQUEST_SOL_SIGN_TRANSACTION
+	} from '$lib/constants/wallet-connect.constants';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
@@ -231,11 +233,13 @@
 			switch (method) {
 				case SESSION_REQUEST_ETH_SIGN_V4:
 				case SESSION_REQUEST_ETH_SIGN:
-				case SESSION_REQUEST_PERSONAL_SIGN: {
+				case SESSION_REQUEST_PERSONAL_SIGN:
+				case SESSION_REQUEST_SOL_SIGN_TRANSACTION: {
 					modalStore.openWalletConnectSign(sessionRequest);
 					return;
 				}
-				case SESSION_REQUEST_ETH_SEND_TRANSACTION: {
+				case SESSION_REQUEST_ETH_SEND_TRANSACTION:
+				case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
 					modalStore.openWalletConnectSend(sessionRequest);
 					return;
 				}

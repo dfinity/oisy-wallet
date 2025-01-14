@@ -2,11 +2,9 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
-	import { signMessage } from '$eth/services/wallet-connect.services';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
-	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
@@ -46,20 +44,23 @@
 	 */
 
 	const reject = async () => {
-		await rejectServices({ listener, request });
+		//TODO call sol implementation
+		// await rejectServices({ listener, request });
 
 		close();
 	};
 
 	const approve = async () => {
-		const { success } = await signMessage({
-			request,
-			listener,
-			modalNext: modal.next,
-			progress: (step: ProgressStepsSign) => (signProgressStep = step)
-		});
+		//TODO call sol implementation
+		// const { success } = await signMessage({
+		// 	request,
+		// 	listener,
+		// 	modalNext: modal.next,
+		// 	progress: (step: ProgressStepsSign) => (signProgressStep = step)
+		// });
 
-		setTimeout(() => close(), success ? 750 : 0);
+		//TODO use success from above
+		setTimeout(() => close(), false ? 750 : 0);
 	};
 </script>
 
@@ -71,6 +72,7 @@
 	{#if currentStep?.name === 'Signing'}
 		<SendProgress progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 	{:else}
+		<!--TODO check if correct-->
 		<WalletConnectSignReview {request} on:icApprove={approve} on:icReject={reject} />
 	{/if}
 </WizardModal>

@@ -15,12 +15,13 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
+	import type { SolanaNetwork } from '$sol/types/network';
 
 	export let amount: BigNumber;
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
-	export let sourceNetwork: EthereumNetwork;
+	export let sourceNetwork: EthereumNetwork | SolanaNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 
 	let amountDisplay: BigNumber;
