@@ -21,7 +21,10 @@ export const USDC_TOKEN: RequiredSplToken = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-	twinToken: ETH_USDC_TOKEN
+	twinToken: ETH_USDC_TOKEN,
+	buy: {
+		onramperId: 'usdc_solana'
+	}
 };
 
 export const DEVNET_USDC_SYMBOL = 'DevnetUSDC';

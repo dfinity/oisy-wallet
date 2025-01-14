@@ -19,5 +19,8 @@ export const RAY_TOKEN: RequiredSplToken = {
 	symbol: RAY_SYMBOL,
 	decimals: RAY_DECIMALS,
 	icon: ray,
-	address: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R'
+	address: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
+	buy: {
+		onramperId: 'ray_solana'
+	}
 };
