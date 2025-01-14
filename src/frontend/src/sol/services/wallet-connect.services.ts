@@ -1,14 +1,14 @@
 import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
 import {
-	execute,
-	type WalletConnectCallBackParams,
-	type WalletConnectExecuteParams
-} from '$eth/services/wallet-connect.services';
-import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
+import {
+	execute,
+	type WalletConnectCallBackParams,
+	type WalletConnectExecuteParams
+} from '$lib/services/wallet-connect.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionSolAddress } from '$lib/types/address';
