@@ -37,6 +37,10 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
+export const modalSwap: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'swap'
+);
 export const modalBuy: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'buy'
@@ -105,6 +109,10 @@ export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-token'
 );
+export const modalBtcToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'btc-token'
+);
 export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-token'
@@ -116,6 +124,10 @@ export const modalReceiveBitcoin: Readable<boolean> = derived(
 export const modalAboutWhyOisy: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'about-why-oisy'
+);
+export const modalVipQrCode: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'vip-qr-code'
 );
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,

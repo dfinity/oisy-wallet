@@ -5,7 +5,7 @@ name: Update Rust
 on:
   schedule:
     # check for new rust versions weekly
-    - cron:  '30 3 * * FRI'
+    - cron: '30 3 * * FRI'
   workflow_dispatch:
 
 jobs:
