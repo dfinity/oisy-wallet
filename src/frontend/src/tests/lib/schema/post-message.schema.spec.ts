@@ -4,6 +4,7 @@ import {
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKBTC_MINTER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import {
 	JsonTransactionsTextSchema,
 	PostMessageDataRequestBtcSchema,
@@ -105,11 +106,13 @@ describe('post-message.schema', () => {
 	describe('PostMessageDataRequestExchangeTimerSchema', () => {
 		const mockValidErc20Address = '0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c';
 		const mockValidIndexCanisterId = IC_CKBTC_INDEX_CANISTER_ID;
+		const mockValidSplAddress = USDC_TOKEN.address;
 
 		it('should validate with correct structure for erc20Addresses and icrcCanisterIds', () => {
 			const validData = {
 				erc20Addresses: [mockValidErc20Address],
-				icrcCanisterIds: [mockValidIndexCanisterId]
+				icrcCanisterIds: [mockValidIndexCanisterId],
+				splAddresses: [mockValidSplAddress]
 			};
 
 			expect(PostMessageDataRequestExchangeTimerSchema.parse(validData)).toEqual(validData);
@@ -118,7 +121,8 @@ describe('post-message.schema', () => {
 		it('should an invalid erc20Addresses given the lack of zod parser for erc20', () => {
 			const validData = {
 				erc20Addresses: ['invalid_address', mockValidErc20Address],
-				icrcCanisterIds: [mockValidIndexCanisterId]
+				icrcCanisterIds: [mockValidIndexCanisterId],
+				splAddresses: [mockValidSplAddress]
 			};
 
 			expect(PostMessageDataRequestExchangeTimerSchema.parse(validData)).toEqual(validData);
@@ -127,7 +131,8 @@ describe('post-message.schema', () => {
 		it('should throw an error if icrcCanisterIds is not an array of valid CanisterIdTextSchema', () => {
 			const invalidData = {
 				erc20Addresses: [mockValidErc20Address],
-				icrcCanisterIds: ['invalid_canister_id']
+				icrcCanisterIds: ['invalid_canister_id'],
+				splAddresses: [mockValidSplAddress]
 			};
 
 			expect(() => PostMessageDataRequestExchangeTimerSchema.parse(invalidData)).toThrow();
@@ -135,11 +140,18 @@ describe('post-message.schema', () => {
 
 		it('should throw an error if either field is missing', () => {
 			const missingErc20Addresses = {
-				icrcCanisterIds: [mockValidIndexCanisterId]
+				icrcCanisterIds: [mockValidIndexCanisterId],
+				splAddresses: [mockValidSplAddress]
 			};
 
 			const missingIcrcCanisterIds = {
-				erc20Addresses: [mockValidErc20Address]
+				erc20Addresses: [mockValidErc20Address],
+				splAddresses: [mockValidSplAddress]
+			};
+
+			const missingSplAddresses = {
+				erc20Addresses: [mockValidErc20Address],
+				icrcCanisterIds: [mockValidIndexCanisterId]
 			};
 
 			expect(() =>
@@ -148,8 +160,10 @@ describe('post-message.schema', () => {
 			expect(() =>
 				PostMessageDataRequestExchangeTimerSchema.parse(missingIcrcCanisterIds)
 			).toThrow();
+			expect(() => PostMessageDataRequestExchangeTimerSchema.parse(missingSplAddresses)).toThrow();
 		});
 	});
+
 	describe('PostMessageDataRequestIcrcSchema', () => {
 		const mockCanisters = {
 			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID

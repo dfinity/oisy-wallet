@@ -7,10 +7,12 @@ import {
 	exchangeRateETHToUsd,
 	exchangeRateICPToUsd,
 	exchangeRateICRCToUsd,
-	exchangeRateSOLToUsd
+	exchangeRateSOLToUsd,
+	exchangeRateSPLToUsd
 } from '$lib/services/exchange.services';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const onExchangeMessage = async ({
@@ -39,7 +41,8 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 	const sync = async () =>
 		await syncExchange({
 			erc20ContractAddresses: data?.erc20Addresses ?? [],
-			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? []
+			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? [],
+			splTokenAddresses: data?.splAddresses ?? []
 		});
 
 	// We sync now but also schedule the update afterwards
@@ -61,10 +64,12 @@ let syncInProgress = false;
 
 const syncExchange = async ({
 	erc20ContractAddresses,
-	icrcLedgerCanisterIds
+	icrcLedgerCanisterIds,
+	splTokenAddresses
 }: {
 	erc20ContractAddresses: Erc20ContractAddress[];
 	icrcLedgerCanisterIds: LedgerCanisterIdText[];
+	splTokenAddresses: SplTokenAddress[];
 }) => {
 	// Avoid to duplicate the sync if already in progress and not yet finished
 	if (syncInProgress) {
@@ -80,14 +85,16 @@ const syncExchange = async ({
 			currentErc20Prices,
 			currentIcpPrice,
 			currentIcrcPrices,
-			currentSolPrice
+			currentSolPrice,
+			currentSplPrices
 		] = await Promise.all([
 			exchangeRateETHToUsd(),
 			exchangeRateBTCToUsd(),
 			exchangeRateERC20ToUsd(erc20ContractAddresses),
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
-			exchangeRateSOLToUsd()
+			exchangeRateSOLToUsd(),
+			exchangeRateSPLToUsd(splTokenAddresses)
 		]);
 
 		postMessage({
@@ -98,7 +105,8 @@ const syncExchange = async ({
 				currentErc20Prices,
 				currentIcpPrice,
 				currentIcrcPrices,
-				currentSolPrice
+				currentSolPrice,
+				currentSplPrices
 			}
 		});
 	} catch (err: unknown) {
