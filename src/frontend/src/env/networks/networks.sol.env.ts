@@ -41,6 +41,7 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	id: SOLANA_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Solana Mainnet Beta',
+	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
 	icon: sol,
 	iconBW: solMainnetIconBW,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL
@@ -54,6 +55,7 @@ export const SOLANA_TESTNET_NETWORK: SolanaNetwork = {
 	id: SOLANA_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Testnet',
+	chainId: '4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z',
 	icon: sol,
 	iconBW: solTestnetIconBW,
 	explorerUrl: SOL_TESTNET_EXPLORER_URL
@@ -67,6 +69,7 @@ export const SOLANA_DEVNET_NETWORK: SolanaNetwork = {
 	id: SOLANA_DEVNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Devnet',
+	chainId: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
 	icon: sol,
 	iconBW: solDevnetIconBW,
 	explorerUrl: SOL_DEVNET_EXPLORER_URL
