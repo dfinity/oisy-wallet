@@ -6,7 +6,7 @@ import type { RequiredSplToken } from '$sol/types/spl';
 
 export const USDT_DECIMALS = 6;
 
-export const USDT_SYMBOL = 'USDC';
+export const USDT_SYMBOL = 'USDT';
 
 export const USDT_TOKEN_ID: TokenId = parseTokenId(USDT_SYMBOL);
 
