@@ -1,9 +1,9 @@
 <script lang="ts">
-	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
+	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
 </script>

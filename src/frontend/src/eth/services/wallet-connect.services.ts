@@ -2,7 +2,6 @@ import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
-import type { OptionWalletConnectListener, WalletConnectListener } from '$eth/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
@@ -21,6 +20,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
+import type { OptionWalletConnectListener, WalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
