@@ -40,7 +40,7 @@
 		: undefined;
 
 	let sourceSolNetwork: SolanaNetwork | undefined;
-	$: sourceSolNetwork = nonNullish(ethChainId)
+	$: sourceSolNetwork = nonNullish(solChainId)
 		? $enabledSolanaNetworks.find(({ chainId: cId }) => cId === solChainId)
 		: undefined;
 </script>
