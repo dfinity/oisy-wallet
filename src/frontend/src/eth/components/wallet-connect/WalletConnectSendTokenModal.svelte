@@ -6,7 +6,6 @@
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
@@ -29,6 +28,7 @@
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
