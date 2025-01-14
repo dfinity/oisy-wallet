@@ -1,6 +1,6 @@
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { enabledSolanaNetworksIds } from '$sol/derived/networks.derived';
-import type { SplToken } from '$sol/types/spl';
+import type { SplToken, SplTokenAddress } from '$sol/types/spl';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { derived, type Readable } from 'svelte/store';
 
@@ -23,4 +23,13 @@ const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
 export const splTokens: Readable<SplTokenToggleable[]> = derived(
 	[splDefaultTokensToggleable],
 	([$splDefaultTokensToggleable]) => [...$splDefaultTokensToggleable]
+);
+
+export const enabledSplTokens: Readable<SplToken[]> = derived([splTokens], ([$splTokens]) => [
+	...$splTokens
+]);
+
+export const enabledSplTokenAddresses: Readable<SplTokenAddress[]> = derived(
+	[enabledSplTokens],
+	([$enabledSplTokens]) => $enabledSplTokens.map(({ address }) => address)
 );
