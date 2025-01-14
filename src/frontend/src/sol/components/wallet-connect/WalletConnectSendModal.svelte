@@ -11,17 +11,17 @@
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectSolSendTransactionParams;
-	export let sourceNetwork: SolanaNetwork;
+	export let network: SolanaNetwork;
 	export let listener: OptionWalletConnectListener;
 
 	let token: Token | undefined;
 	$: token = $enabledSolanaTokens.find(
-		({ network: { id: networkId } }) => networkId === sourceNetwork.id
+		({ network: { id: networkId } }) => networkId === network.id
 	);
 </script>
 
 {#if nonNullish(token)}
 	<SendTokenContext {token}>
-		<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {sourceNetwork} />
+		<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {network} />
 	</SendTokenContext>
 {/if}
