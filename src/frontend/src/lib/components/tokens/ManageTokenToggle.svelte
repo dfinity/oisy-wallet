@@ -4,8 +4,9 @@
 	import { type EthereumUserToken } from '$eth/types/erc20-user-token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isEthereumTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
+	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
-	export let token: EthereumUserToken;
+	export let token: EthereumUserToken | SplTokenToggleable;
 
 	let disabled = false;
 	$: disabled = isEthereumTokenToggleDisabled(token);
