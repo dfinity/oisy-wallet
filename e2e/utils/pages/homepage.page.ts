@@ -161,7 +161,7 @@ abstract class Homepage {
 	protected async waitForLoaderModal(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
 	}
- 
+
 	// hotfix for token card issue, needs to be fixed in a later PR
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
