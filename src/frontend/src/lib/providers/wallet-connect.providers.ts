@@ -1,4 +1,6 @@
+import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
@@ -6,7 +8,7 @@ import {
 	SESSION_REQUEST_PERSONAL_SIGN,
 	WALLET_CONNECT_METADATA
 } from '$eth/constants/wallet-connect.constants';
-import type { EthAddress } from '$lib/types/address';
+import type { EthAddress, SolAddress } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import {
@@ -21,10 +23,12 @@ const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 export const initWalletConnect = async ({
 	uri,
-	address
+	ethAddress,
+	solAddress
 }: {
 	uri: string;
-	address: EthAddress;
+	ethAddress: EthAddress;
+	solAddress: SolAddress;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
 		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
@@ -76,6 +80,9 @@ export const initWalletConnect = async ({
 	const approveSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { params } = proposal;
 
+		//TODO enable all networks of solana
+		const solMainnet = CAIP10_CHAINS[`solana:${SOLANA_MAINNET_NETWORK.chainId}`];
+
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
@@ -88,7 +95,13 @@ export const initWalletConnect = async ({
 						SESSION_REQUEST_ETH_SIGN_V4
 					],
 					events: ['accountsChanged', 'chainChanged'],
-					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${address}`)
+					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
+				},
+				solana: {
+					chains: [solMainnet.chainId],
+					methods: ['solana_signTransaction', 'solana_signMessage'],
+					events: ['accountsChanged', 'chainChanged'],
+					accounts: [`${solMainnet.chainId}:${solAddress}`]
 				}
 			}
 		});
