@@ -4,22 +4,23 @@
 	import { getSdkError } from '@walletconnect/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
+	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
-		SESSION_REQUEST_PERSONAL_SIGN,
 		SESSION_REQUEST_ETH_SIGN,
-		SESSION_REQUEST_ETH_SIGN_V4
+		SESSION_REQUEST_ETH_SIGN_V4,
+		SESSION_REQUEST_PERSONAL_SIGN
 	} from '$eth/constants/wallet-connect.constants';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
-	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
 	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -90,14 +91,19 @@
 
 		try {
 			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
-			if (isNullish($ethAddress)) {
+			if (isNullish($ethAddress) || (SOLANA_NETWORK_ENABLED && isNullish($solAddressMainnet))) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
 				return;
 			}
 
-			listener = await initWalletConnectListener({ uri, address: $ethAddress });
+			// TODO add other networks for solana
+			listener = await initWalletConnect({
+				uri,
+				ethAddress: $ethAddress,
+				solAddress: $solAddressMainnet
+			});
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
@@ -135,7 +141,7 @@
 		}
 
 		// Address is not defined. We need it.
-		if (isNullish($ethAddress)) {
+		if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
 			return;
 		}
 
@@ -159,7 +165,11 @@
 		await connect($walletConnectUri);
 	};
 
-	$: $ethAddress, $walletConnectUri, $loading, (async () => await uriConnect())();
+	$: $ethAddress,
+		$solAddressMainnet,
+		$walletConnectUri,
+		$loading,
+		(async () => await uriConnect())();
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
