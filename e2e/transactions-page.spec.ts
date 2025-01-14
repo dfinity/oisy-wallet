@@ -1,5 +1,3 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { TransactionsPage } from './utils/pages/transactions.page';
 
@@ -8,7 +6,7 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 		page,
 		iiPage,
 		tokenSymbol: 'BTC',
-		networkId: BTC_MAINNET_TOKEN.network.id
+		networkId: 'BTC'
 	});
 
 	await transactionsPage.waitForReady();
@@ -22,7 +20,7 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 // 		page,
 // 		iiPage,
 // 		tokenSymbol: 'ETH',
-// 		networkId: ETHEREUM_TOKEN.network.id
+// 		networkId: 'ETH
 // 	});
 //
 // 	await transactionsPage.waitForReady();
@@ -35,7 +33,7 @@ testWithII('should display ICP transactions page', async ({ page, iiPage }) => {
 		page,
 		iiPage,
 		tokenSymbol: 'ICP',
-		networkId: ICP_TOKEN.network.id
+		networkId: 'ICP'
 	});
 
 	await transactionsPage.waitForReady();
