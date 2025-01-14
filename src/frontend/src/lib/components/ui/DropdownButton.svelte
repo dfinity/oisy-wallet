@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
-	import { NAVIGATION_MENU_NETWORKS } from '$lib/constants/test-ids.constants';
 
 	export let disabled = false;
 	export let button: HTMLButtonElement | undefined = undefined;
