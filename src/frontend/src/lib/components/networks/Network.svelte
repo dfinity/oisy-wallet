@@ -4,6 +4,7 @@
 
 	export let network: Network;
 	export let usdBalance: number | undefined = undefined;
+	export let testIdPrefix = 'network';
 
 	let id: NetworkId;
 	let name: string;
@@ -11,4 +12,4 @@
 	$: ({ id, name, iconBW: icon } = network);
 </script>
 
-<NetworkButton {id} {name} {usdBalance} {icon} testId={`network-${name}`} on:icSelected />
+<NetworkButton {id} {name} {usdBalance} {icon} testId={`${testIdPrefix}-${name}`} on:icSelected />

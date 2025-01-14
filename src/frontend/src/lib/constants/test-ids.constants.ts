@@ -1,6 +1,7 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
+export const NAVIGATION_MENU_NETWORKS = 'navigation-menu-networks';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
@@ -11,6 +12,7 @@ export const LOADER_MODAL = 'loader-modal';
 export const TOKEN_CARD = 'token-card';
 export const TOKEN_GROUP = 'token-group';
 export const TOKEN_BALANCE = 'token-balance';
+export const TOKEN_TOGGLE = 'token-toggle';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -71,6 +73,5 @@ export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
-export const TOKEN_TOGGLE = 'token-toggle';
 export const MANAGE_TOKEN_LIST_SAVE = 'manage-token-list-save';
-export const NAVIGATION_MENU_NETWORKS = 'navigation-menu-networks';
+export const NETWORK = 'network';
