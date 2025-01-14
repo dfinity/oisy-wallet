@@ -4,10 +4,6 @@
 	import { getSdkError } from '@walletconnect/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
-	import WalletConnectButton from '$eth/components/wallet-connect/WalletConnectButton.svelte';
-	import WalletConnectForm from '$eth/components/wallet-connect/WalletConnectForm.svelte';
-	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
-	import WalletConnectReview from '$eth/components/wallet-connect/WalletConnectReview.svelte';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_PERSONAL_SIGN,
@@ -17,6 +13,10 @@
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
+	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
+	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';

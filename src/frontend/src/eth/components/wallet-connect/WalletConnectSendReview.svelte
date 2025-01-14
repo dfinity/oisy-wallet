@@ -4,12 +4,12 @@
 	import { getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
-	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectSendData from '$eth/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';

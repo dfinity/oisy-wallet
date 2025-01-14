@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
 	import {
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
 	} from '$eth/utils/wallet-connect.utils';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Json from '$lib/components/ui/Json.svelte';
+	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let request: Web3WalletTypes.SessionRequest;

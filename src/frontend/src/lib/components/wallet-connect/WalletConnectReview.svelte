@@ -6,12 +6,12 @@
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
-	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
-	import WalletConnectDomainVerification from '$eth/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
