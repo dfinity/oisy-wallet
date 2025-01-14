@@ -1,21 +1,21 @@
 import type { IcToken } from '$icp/types/ic-token';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { derived, get, writable, type Readable } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export interface SwapData {
-	sourceToken?: Token;
-	destinationToken?: Token;
+	sourceToken?: IcToken;
+	destinationToken?: IcToken;
 }
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
+	const { update } = data;
 
-	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken as IcToken);
-	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken as IcToken);
+	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
+	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken);
 
 	const sourceTokenBalance = derived(
 		[balancesStore, sourceToken],
@@ -44,16 +44,21 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		destinationTokenBalance,
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
-		setSourceToken: (token: Token) => (get(data).sourceToken = token),
-		setDestinationToken: (token: Token) => (get(data).destinationToken = token),
-		switchTokens: () => {
-			const currentStore = get(data);
-
-			data.update(() => ({
-				sourceToken: currentStore.destinationToken,
-				destinationToken: currentStore.sourceToken
-			}));
-		}
+		setSourceToken: (token: IcToken) =>
+			update((state) => ({
+				...state,
+				sourceToken: token
+			})),
+		setDestinationToken: (token: IcToken) =>
+			update((state) => ({
+				...state,
+				destinationToken: token
+			})),
+		switchTokens: () =>
+			update((state) => ({
+				sourceToken: state.destinationToken,
+				destinationToken: state.sourceToken
+			}))
 	};
 };
 
@@ -64,8 +69,8 @@ export interface SwapContext {
 	destinationTokenBalance: Readable<BigNumber | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
-	setSourceToken: (token: Token) => void;
-	setDestinationToken: (token: Token) => void;
+	setSourceToken: (token: IcToken) => void;
+	setDestinationToken: (token: IcToken) => void;
 	switchTokens: () => void;
 }
 
