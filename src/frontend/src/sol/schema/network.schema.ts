@@ -10,4 +10,4 @@ export const SolanaNetworkSchema = z.enum(['mainnet', 'testnet', 'devnet', 'loca
 
 export const SolanaChainIdSchema = z.object({
 	chainId: z.string()
-})
+});
