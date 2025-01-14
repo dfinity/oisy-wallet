@@ -52,14 +52,8 @@
 	};
 
 	const approve = async () => {
-		const { success } = await signMessage({
-			request,
-			listener,
-			modalNext: modal.next,
-			progress: (step: ProgressStepsSign) => (signProgressStep = step)
-		});
-
-		setTimeout(() => close(), success ? 750 : 0);
+		console.log('received approve requiest', request);
+		console.log('listener', listener);
 	};
 </script>
 
