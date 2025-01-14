@@ -49,13 +49,12 @@
 
 		close();
 	};
-
+	/* eslint-disable no-console */
 	const approve = () => {
-		//@ts-ignore
 		console.log('received approve requiest', request);
-		//@ts-ignore
 		console.log('listener', listener);
 	};
+	/* eslint-enable no-console */
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
