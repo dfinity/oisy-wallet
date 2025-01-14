@@ -16,7 +16,10 @@ testWithII.beforeEach(async ({ page, iiPage }) => {
 testWithII('enable ICRC token', async () => {
 	// enable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList('ckSepoliaETH', 'Internet Computer');
+	await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'ckSepoliaETH',
+    networkName: 'Internet Computer',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('ckSepoliaETH')).toBeVisible();
 	await homepageLoggedIn.waitForLoadState();
 	await homepageLoggedIn.setCarouselFirstSlide();
@@ -26,10 +29,16 @@ testWithII('enable ICRC token', async () => {
 testWithII('disable ICRC token', async () => {
 	//disable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList('ckSepoliaETH', 'Internet Computer');
+	await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'ckSepoliaETH',
+    networkName: 'Internet Computer',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('ckSepoliaETH')).toBeVisible();
 	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.toggleTokenInList('ckSepoliaETH', 'Internet Computer');
+	await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'ckSepoliaETH',
+    networkName: 'Internet Computer',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('ckSepoliaETH')).not.toBeVisible();
 	await homepageLoggedIn.setCarouselFirstSlide();
 	await homepageLoggedIn.takeScreenshot();
@@ -38,7 +47,10 @@ testWithII('disable ICRC token', async () => {
 testWithII('enable ERC20 token', async () => {
 	// enable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList('SHIB', 'Ethereum');
+  await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'SHIB',
+    networkName: 'Ethereum',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('SHIB')).toBeVisible();
 	await homepageLoggedIn.waitForLoadState();
 	await homepageLoggedIn.setCarouselFirstSlide();
@@ -48,10 +60,16 @@ testWithII('enable ERC20 token', async () => {
 testWithII('disable ERC20 token', async () => {
 	//disable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList('SHIB', 'Ethereum');
+  await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'SHIB',
+    networkName: 'Ethereum',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('SHIB')).toBeVisible();
 	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.toggleTokenInList('SHIB', 'Ethereum');
+  await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'SHIB',
+    networkName: 'Ethereum',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('SHIB')).not.toBeVisible();
 	await homepageLoggedIn.setCarouselFirstSlide();
 	await homepageLoggedIn.takeScreenshot();
@@ -60,7 +78,10 @@ testWithII('disable ERC20 token', async () => {
 testWithII('enable SepoliaERC20 token', async () => {
 	// enable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList('USDC', 'Sepolia');
+  await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'USDC',
+    networkName: 'Sepolia',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('USDC')).toBeVisible();
 	await homepageLoggedIn.waitForLoadState();
 	await homepageLoggedIn.setCarouselFirstSlide();
@@ -70,10 +91,16 @@ testWithII('enable SepoliaERC20 token', async () => {
 testWithII('disable SepoliaERC20 token', async () => {
 	//disable the Token in the list
 	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList('USDC', 'Sepolia');
+  await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'USDC',
+    networkName: 'Sepolia',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('USDC')).toBeVisible();
 	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.toggleTokenInList('USDC', 'Sepolia');
+  await homepageLoggedIn.toggleTokenInList({
+    tokenSymbol: 'USDC',
+    networkName: 'Sepolia',
+  });
 	await expect(homepageLoggedIn.getTokenCardLocator('USDC')).not.toBeVisible();
 	await homepageLoggedIn.setCarouselFirstSlide();
 	await homepageLoggedIn.takeScreenshot();
