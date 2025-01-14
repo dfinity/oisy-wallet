@@ -53,7 +53,7 @@ export const initMinedTransactionsListener = ({
 		networkId
 	});
 
-export const initWalletConnectListener = (params: {
+export const initEthWalletConnectListener = (params: {
 	uri: string;
 	address: EthAddress;
 }): Promise<WalletConnectListener> => initEthWalletConnect(params);

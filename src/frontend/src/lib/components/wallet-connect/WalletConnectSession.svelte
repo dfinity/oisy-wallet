@@ -11,7 +11,7 @@
 		SESSION_REQUEST_ETH_SIGN_V4
 	} from '$eth/constants/wallet-connect.constants';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
-	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
+	import { initEthWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
 	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
@@ -97,7 +97,7 @@
 				return;
 			}
 
-			listener = await initWalletConnectListener({ uri, address: $ethAddress });
+			listener = await initEthWalletConnectListener({ uri, address: $ethAddress });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
