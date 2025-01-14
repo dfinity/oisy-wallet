@@ -3,4 +3,4 @@ import type { RequiredToken, Token } from '$lib/types/token';
 
 export type SplToken = Token & { address: SolAddress };
 
-export type RequiredSplToken = RequiredToken<SplToken>;
+export type RequiredSplToken = RequiredToken<SplToken> & { twinToken?: Token };
