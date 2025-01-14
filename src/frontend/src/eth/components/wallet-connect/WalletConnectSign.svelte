@@ -25,6 +25,11 @@
 	$: request = $modalWalletConnectSign
 		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
 		: undefined;
+
+	/* eslint-disable no-console */
+		console.log('received approve requiest', request);
+		console.log('listener', listener);
+	/* eslint-enable no-console */
 </script>
 
 {#if $modalWalletConnectSign && nonNullish(request)}
