@@ -9,6 +9,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { signMessage } from '$eth/services/wallet-connect.services';
+	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 
 	export let listener: OptionWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;
@@ -45,22 +47,22 @@
 
 	const reject = async () => {
 		//TODO call sol implementation
-		// await rejectServices({ listener, request });
+		await rejectServices({ listener, request });
 
 		close();
 	};
 
 	const approve = async () => {
 		//TODO call sol implementation
-		// const { success } = await signMessage({
-		// 	request,
-		// 	listener,
-		// 	modalNext: modal.next,
-		// 	progress: (step: ProgressStepsSign) => (signProgressStep = step)
-		// });
+		const { success } = await signMessage({
+			request,
+			listener,
+			modalNext: modal.next,
+			progress: (step: ProgressStepsSign) => (signProgressStep = step)
+		});
 
 		//TODO use success from above
-		setTimeout(() => close(), false ? 750 : 0);
+		setTimeout(() => close(), success ? 750 : 0);
 	};
 </script>
 

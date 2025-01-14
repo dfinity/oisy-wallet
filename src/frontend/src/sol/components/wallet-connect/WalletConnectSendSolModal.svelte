@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectSendTokenModal from '$eth/components/wallet-connect/WalletConnectSendTokenModal.svelte';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
