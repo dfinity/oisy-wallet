@@ -5,12 +5,12 @@
 	import { signMessage } from '$eth/services/wallet-connect.services';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import { walletConnectSignSteps } from '$lib/constants/wallet-connect-steps.constants';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import { walletConnectSignSteps } from '$lib/constants/wallet-connect-steps.constants';
 
 	export let listener: OptionWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;

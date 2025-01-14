@@ -5,6 +5,13 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
 	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
+	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
+	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
+	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
+	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
@@ -13,13 +20,6 @@
 		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 		SESSION_REQUEST_SOL_SIGN_TRANSACTION
 	} from '$lib/constants/wallet-connect.constants';
-	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
-	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
-	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
-	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
-	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
-	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
