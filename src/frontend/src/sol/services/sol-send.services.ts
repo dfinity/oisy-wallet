@@ -213,3 +213,81 @@ export const sendSol = async ({
 
 	onProgress?.();
 };
+
+// TODO: improve this function to avoid repetition of code
+export const signSol = async ({
+	identity,
+	token,
+	amount,
+	destination,
+	source,
+	onProgress
+}: {
+	identity: OptionIdentity;
+	token: Token;
+	amount: BigNumber;
+	destination: SolAddress;
+	source: SolAddress;
+	onProgress?: () => void;
+}): Promise<void> => {
+	const {
+		network: { id: networkId }
+	} = token;
+
+	const solNetwork = mapNetworkIdToNetwork(networkId);
+
+	assertNonNullish(
+		solNetwork,
+		replacePlaceholders(get(i18n).init.error.no_solana_network, {
+			$network: networkId.description ?? ''
+		})
+	);
+
+	const derivationPath = [SOLANA_DERIVATION_PATH_PREFIX, solNetwork];
+
+	const rpc = solanaHttpRpc(solNetwork);
+	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
+
+	const signer: TransactionPartialSigner = {
+		address: solAddress(source),
+		signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
+			await Promise.all(
+				transactions.map(async (transaction) => {
+					const signedBytes = await signWithSchnorr({
+						identity,
+						derivationPath,
+						keyId: SOLANA_KEY_ID,
+						message: Array.from(transaction.messageBytes)
+					});
+
+					return { [source]: Uint8Array.from(signedBytes) } as SignatureDictionary;
+				})
+			)
+	};
+
+	assertIsTransactionSigner(signer);
+	assertIsTransactionPartialSigner(signer);
+
+	const transactionMessage = isTokenSpl(token)
+		? await createSplTokenTransactionMessage({
+				signer,
+				destination,
+				amount,
+				network: solNetwork,
+				tokenAddress: token.address
+			})
+		: await createSolTransactionMessage({
+				signer,
+				destination,
+				amount,
+				network: solNetwork
+			});
+
+	onProgress?.();
+
+	const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
+
+	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+
+	onProgress?.();
+};
