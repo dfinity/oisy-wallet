@@ -245,7 +245,13 @@ abstract class Homepage {
 		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
 	}
 
-	async toggleTokenInList(tokenSymbol: string, networkName: string): Promise<void> {
+	async toggleTokenInList({
+		tokenSymbol,
+		networkName,
+	}: {
+		tokenSymbol: string;
+		networkName: string;
+	}): Promise<void> {
 		await this.clickByTestId(NAVIGATION_MENU_NETWORKS);
 		await this.#page.click(`[data-tid^="network-${networkName}"]`);
 		await this.clickByTestId(NAVIGATION_ITEM_MANAGE_LIST)
