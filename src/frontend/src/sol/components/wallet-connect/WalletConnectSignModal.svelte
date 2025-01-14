@@ -3,7 +3,6 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
-	import { signMessage } from '$eth/services/wallet-connect.services';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
@@ -51,8 +50,10 @@
 		close();
 	};
 
-	const approve = async () => {
+	const approve = () => {
+		//@ts-ignore
 		console.log('received approve requiest', request);
+		//@ts-ignore
 		console.log('listener', listener);
 	};
 </script>
