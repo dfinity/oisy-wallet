@@ -1,4 +1,7 @@
-import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
+import {
+	SESSION_REQUEST_SOL_SIGN_TRANSACTION,
+	UNEXPECTED_ERROR
+} from '$eth/constants/wallet-connect.constants';
 import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
@@ -17,7 +20,7 @@ import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { parseToken } from '$lib/utils/parse.utils';
-import { sendSol } from '$sol/services/sol-send.services';
+import { sendSol, signSol } from '$sol/services/sol-send.services';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
@@ -47,7 +50,13 @@ export const signAndSendTransaction = ({
 			request,
 			listener
 		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
-			const { id, topic } = request;
+			const {
+				id,
+				topic,
+				params: {
+					request: { method }
+				}
+			} = request;
 
 			const firstParam = request?.params.request.params?.[0];
 
@@ -96,8 +105,10 @@ export const signAndSendTransaction = ({
 
 			modalNext();
 
+			const executeSend = method === SESSION_REQUEST_SOL_SIGN_TRANSACTION ? signSol : sendSol;
+
 			try {
-				await sendSol({
+				await executeSend({
 					identity,
 					token,
 					amount: parseToken({
