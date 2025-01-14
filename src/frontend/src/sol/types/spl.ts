@@ -5,4 +5,4 @@ export type SplTokenAddress = SolAddress;
 
 export type SplToken = Token & { address: SplTokenAddress };
 
-export type RequiredSplToken = RequiredToken<SplToken>;
+export type RequiredSplToken = RequiredToken<SplToken> & { twinToken?: Token };
