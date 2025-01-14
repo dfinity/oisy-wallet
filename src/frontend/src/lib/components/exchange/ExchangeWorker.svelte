@@ -34,8 +34,8 @@
 	$: worker,
 		$enabledMergedErc20TokensAddresses,
 		$enabledIcrcLedgerCanisterIdsNoCk,
-		$enabledSplTokenAddresses;
-	debounceSyncTimer();
+		$enabledSplTokenAddresses,
+		debounceSyncTimer();
 </script>
 
 <slot />
