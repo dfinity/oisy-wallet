@@ -6,13 +6,13 @@
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { NAVIGATION_MENU_NETWORKS } from '$lib/constants/test-ids.constants';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { NAVIGATION_MENU_NETWORKS } from '$lib/constants/test-ids.constants';
 
 	export let disabled = false;
 
@@ -25,7 +25,12 @@
 	);
 </script>
 
-<Dropdown bind:this={dropdown} ariaLabel={$i18n.networks.title} testId={NAVIGATION_MENU_NETWORKS} {disabled}>
+<Dropdown
+	bind:this={dropdown}
+	ariaLabel={$i18n.networks.title}
+	testId={NAVIGATION_MENU_NETWORKS}
+	{disabled}
+>
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
 	<div slot="items">

@@ -16,7 +16,7 @@
 	bind:button
 	on:click={() => (visible = true)}
 	{ariaLabel}
-	testId={testId}
+	{testId}
 	{disabled}
 	opened={visible}
 >

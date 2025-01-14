@@ -4,9 +4,9 @@
 	import { type IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isIcrcTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
-	
+
 	export let token: IcrcCustomToken;
-	export let testIdPrefix: string = "token-toggle";
+	export let testIdPrefix = 'token-toggle';
 
 	let disabled = false;
 	$: disabled = isIcrcTokenToggleDisabled(token);

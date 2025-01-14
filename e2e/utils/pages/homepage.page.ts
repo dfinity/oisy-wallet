@@ -23,7 +23,6 @@ import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
-import { token } from '$lib/stores/token.store';
 
 interface HomepageParams {
 	page: Page;
@@ -254,9 +253,9 @@ abstract class Homepage {
 	}): Promise<void> {
 		await this.clickByTestId(NAVIGATION_MENU_NETWORKS);
 		await this.#page.click(`[data-tid^="network-${networkName}"]`);
-		await this.clickByTestId(NAVIGATION_ITEM_MANAGE_LIST)
+		await this.clickByTestId(NAVIGATION_ITEM_MANAGE_LIST);
 		await this.#page.click(`[data-tid^="token-toggle-${tokenSymbol}"]`);
-		await this.clickByTestId(MANAGE_TOKEN_LIST_SAVE)
+		await this.clickByTestId(MANAGE_TOKEN_LIST_SAVE);
 	}
 
 	getTokenCardLocator(tokenSymbol: string): Locator {
