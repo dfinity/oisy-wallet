@@ -70,7 +70,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 			...$splTokens
 				.filter(({ twinToken }) => nonNullish(twinToken))
 				.reduce((acc, { id, twinToken }) => {
-					const { address } = (twinToken as Partial<Erc20Token>) ?? { address: undefined };
+					const address = (twinToken as Partial<Erc20Token>).address;
 					const price = nonNullish(address) ? $exchangeStore?.[address.toLowerCase()] : undefined;
 
 					return {
