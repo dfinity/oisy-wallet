@@ -56,8 +56,12 @@
 	let modal: WizardModal;
 
 	const saveTokens = async ({
-		detail: { icrc, erc20,spl }
-	}: CustomEvent<{ icrc: IcrcCustomToken[]; erc20: Erc20UserToken[]; spl:SplTokenToggleable[] }>) => {
+		detail: { icrc, erc20, spl }
+	}: CustomEvent<{
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
+	}>) => {
 		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
 			toastsShow({
 				text: $i18n.tokens.manage.info.no_changes,
@@ -140,15 +144,14 @@
 		});
 
 	// TODO: implement this function in the backend
-	const saveSpl = (tokens: SplTokenToggleable[]): void =>
-	{
-		modal.set(3)
+	const saveSpl = (tokens: SplTokenToggleable[]): void => {
+		modal.set(3);
 		progress(ProgressStepsAddToken.SAVE);
-		splDefaultTokensStore.update(tokens)
+		splDefaultTokensStore.update(tokens);
 		progress(ProgressStepsAddToken.UPDATE_UI);
-		progress(ProgressStepsAddToken.DONE)
+		progress(ProgressStepsAddToken.DONE);
 		setTimeout(() => close(), 750);
-	}
+	};
 
 	const close = () => {
 		modalStore.close();
