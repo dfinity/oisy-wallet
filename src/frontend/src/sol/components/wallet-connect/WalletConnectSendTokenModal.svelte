@@ -4,7 +4,7 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { getContext } from 'svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend, ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -85,7 +85,8 @@
 		const { success } = await sendServices({
 			request,
 			listener,
-			address: $ethAddress,
+			// TODO adjust address according to required network
+			address: $solAddressMainnet,
 			amount,
 			modalNext: modal.next,
 			token: $sendToken,
