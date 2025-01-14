@@ -11,3 +11,9 @@ export enum WizardStepsConvert {
 	REVIEW = 'Review',
 	CONVERTING = 'Converting'
 }
+
+export enum WizardStepsSwap {
+	SWAP = 'Swap',
+	REVIEW = 'Review',
+	SWAPPING = 'Swapping'
+}
