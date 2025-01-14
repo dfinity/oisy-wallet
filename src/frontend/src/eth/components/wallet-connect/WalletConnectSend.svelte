@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import WalletConnectSendModal from '$eth/components/wallet-connect/WalletConnectSendModal.svelte';
-	import SolWalletConnectSendModal from '$sol/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import type { SolanaNetwork } from '$sol/types/network';
+	import SolWalletConnectSendModal from '$sol/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
-	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
+	import type { SolanaNetwork } from '$sol/types/network';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -57,7 +57,7 @@
 		<SolWalletConnectSendModal
 			{request}
 			{firstTransaction}
-			sourceNetwork={sourceSolNetwork}
+			network={sourceSolNetwork}
 			bind:listener
 		/>
 	{/if}
