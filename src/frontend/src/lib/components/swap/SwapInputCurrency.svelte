@@ -1,6 +1,7 @@
 <script lang="ts">
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
+
 	export let value: OptionAmount;
 	export let decimals: number;
 	export let name = 'swap-amount';
@@ -15,7 +16,7 @@
 	</InputCurrency>
 </div>
 
-<style lang="postcss">
+<style lang="scss">
 	:global(.swap-input-currency div.input-block) {
 		display: block;
 		height: 100%;
@@ -23,6 +24,7 @@
 		--padding: 0;
 		--input-width: 100%;
 	}
+
 	:global(.swap-input-currency div.input-field input[id]) {
 		height: 100%;
 		border: none;
