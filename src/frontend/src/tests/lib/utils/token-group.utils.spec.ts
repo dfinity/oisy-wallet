@@ -160,7 +160,7 @@ describe('token-group.utils', () => {
 
 		it('should not group tokens when their decimals are mismatched', () => {
 			const groupedTokens = groupTokensByTwin(tokensWithMismatchedDecimals as TokenUi[]);
-			console.log(groupedTokens);
+
 			expect(groupedTokens).toHaveLength(5);
 
 			const fooToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'FOO');
