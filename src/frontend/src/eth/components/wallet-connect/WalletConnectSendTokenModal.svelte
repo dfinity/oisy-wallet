@@ -10,8 +10,7 @@
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import {
-		send as sendServices,
-		reject as rejectServices
+		send as sendServices
 	} from '$eth/services/wallet-connect.services';
 	import {
 		FEE_CONTEXT_KEY,
@@ -39,6 +38,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
