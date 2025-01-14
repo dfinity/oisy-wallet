@@ -3,12 +3,16 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import WalletConnectSendModal from '$eth/components/wallet-connect/WalletConnectSendModal.svelte';
+	import SolWalletConnectSendModal from '$sol/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { SolanaNetwork } from '$sol/types/network';
+	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
+	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -20,17 +24,41 @@
 	let firstTransaction: WalletConnectEthSendTransactionParams | undefined;
 	$: firstTransaction = request?.params.request.params?.[0];
 
-	let chainId: number | undefined;
-	$: chainId = nonNullish(request?.params.chainId)
+	let ethChainId: number | undefined;
+	$: ethChainId = nonNullish(request?.params.chainId)
 		? EIP155_CHAINS[request.params.chainId]?.chainId
 		: undefined;
 
-	let sourceNetwork: EthereumNetwork | undefined;
-	$: sourceNetwork = nonNullish(chainId)
-		? $enabledEthereumNetworks.find(({ chainId: cId }) => cId === BigInt(chainId))
+	let solChainId: string | undefined;
+	$: solChainId = nonNullish(request?.params.chainId)
+		? CAIP10_CHAINS[request.params.chainId]?.chainId
+		: undefined;
+
+	let sourceEthNetwork: EthereumNetwork | undefined;
+	$: sourceEthNetwork = nonNullish(ethChainId)
+		? $enabledEthereumNetworks.find(({ chainId: cId }) => cId === BigInt(ethChainId))
+		: undefined;
+
+	let sourceSolNetwork: SolanaNetwork | undefined;
+	$: sourceSolNetwork = nonNullish(ethChainId)
+		? $enabledSolanaNetworks.find(({ chainId: cId }) => cId === solChainId)
 		: undefined;
 </script>
 
-{#if $modalWalletConnectSend && nonNullish(request) && nonNullish(firstTransaction) && nonNullish(sourceNetwork)}
-	<WalletConnectSendModal {request} {firstTransaction} {sourceNetwork} bind:listener />
+{#if $modalWalletConnectSend && nonNullish(request) && nonNullish(firstTransaction)}
+	{#if nonNullish(sourceEthNetwork)}
+		<WalletConnectSendModal
+			{request}
+			{firstTransaction}
+			sourceNetwork={sourceEthNetwork}
+			bind:listener
+		/>
+	{:else if nonNullish(sourceSolNetwork)}
+		<SolWalletConnectSendModal
+			{request}
+			{firstTransaction}
+			sourceNetwork={sourceSolNetwork}
+			bind:listener
+		/>
+	{/if}
 {/if}
