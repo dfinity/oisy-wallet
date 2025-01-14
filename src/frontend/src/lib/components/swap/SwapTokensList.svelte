@@ -26,7 +26,7 @@
 
 	let tokens: Token[];
 	$: tokens = [ICP_TOKEN, ...$allIcrcTokens].filter(
-		(token: Token) => token.name !== $sourceToken?.name && token.name !== $destinationToken?.name
+		(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 	);
 
 	let filteredTokens: Token[] = [];
