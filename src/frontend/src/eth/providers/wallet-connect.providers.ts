@@ -51,7 +51,7 @@ export class EthWalletConnectProvider extends BaseWalletConnectProvider {
 	}
 }
 
-export const initWalletConnect = async ({
+export const initEthWalletConnect = async ({
 	uri,
 	address
 }: {

@@ -1,6 +1,6 @@
 import { alchemyErc20Providers } from '$eth/providers/alchemy-erc20.providers';
 import { initMinedTransactionsListener as initMinedTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-import { initWalletConnect } from '$eth/providers/wallet-connect.providers';
+import { initEthWalletConnect } from '$eth/providers/wallet-connect.providers';
 import {
 	processErc20Transaction,
 	processEthTransaction
@@ -56,4 +56,4 @@ export const initMinedTransactionsListener = ({
 export const initWalletConnectListener = (params: {
 	uri: string;
 	address: EthAddress;
-}): Promise<WalletConnectListener> => initWalletConnect(params);
+}): Promise<WalletConnectListener> => initEthWalletConnect(params);
