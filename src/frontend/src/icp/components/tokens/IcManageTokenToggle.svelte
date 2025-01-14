@@ -4,8 +4,9 @@
 	import { type IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isIcrcTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
-
+	
 	export let token: IcrcCustomToken;
+	export let testIdPrefix: string = "token-toggle";
 
 	let disabled = false;
 	$: disabled = isIcrcTokenToggleDisabled(token);
@@ -31,6 +32,7 @@
 
 <Toggle
 	ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
+	testId={`${testIdPrefix}-${token.symbol}-${token.network.id.description}`}
 	{disabled}
 	bind:checked
 	on:nnsToggle={toggle}

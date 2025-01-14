@@ -12,6 +12,7 @@
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { NAVIGATION_MENU_NETWORKS } from '$lib/constants/test-ids.constants';
 
 	export let disabled = false;
 
@@ -24,7 +25,7 @@
 	);
 </script>
 
-<Dropdown bind:this={dropdown} ariaLabel={$i18n.networks.title} {disabled}>
+<Dropdown bind:this={dropdown} ariaLabel={$i18n.networks.title} testId={NAVIGATION_MENU_NETWORKS} {disabled}>
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
 	<div slot="items">

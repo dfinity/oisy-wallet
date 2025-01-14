@@ -11,4 +11,4 @@
 	$: ({ id, name, iconBW: icon } = network);
 </script>
 
-<NetworkButton {id} {name} {usdBalance} {icon} on:icSelected />
+<NetworkButton {id} {name} {usdBalance} {icon} testId={`network-${name}`} on:icSelected />

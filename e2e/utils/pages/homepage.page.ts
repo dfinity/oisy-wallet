@@ -3,10 +3,13 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	MANAGE_TOKEN_LIST_SAVE,
 	NAVIGATION_ITEM_HOMEPAGE,
+	NAVIGATION_ITEM_MANAGE_LIST,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
+	NAVIGATION_MENU_NETWORKS,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
@@ -20,6 +23,7 @@ import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
+import { token } from '$lib/stores/token.store';
 
 interface HomepageParams {
 	page: Page;
@@ -239,6 +243,18 @@ abstract class Homepage {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
 		await this.clickByTestId(BTC_TESTNET_TOGGLE);
 		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
+	}
+
+	async toggleTokenInList(tokenSymbol: string, networkName: string): Promise<void> {
+		await this.clickByTestId(NAVIGATION_MENU_NETWORKS);
+		await this.#page.click(`[data-tid^="network-${networkName}"]`);
+		await this.clickByTestId(NAVIGATION_ITEM_MANAGE_LIST)
+		await this.#page.click(`[data-tid^="token-toggle-${tokenSymbol}"]`);
+		await this.clickByTestId(MANAGE_TOKEN_LIST_SAVE)
+	}
+
+	getTokenCardLocator(tokenSymbol: string): Locator {
+		return this.#page.locator(`[data-tid="token-card-${tokenSymbol}"]`);
 	}
 
 	async takeScreenshot(): Promise<void> {

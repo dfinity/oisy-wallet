@@ -52,6 +52,7 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
+export const NAVIGATION_ITEM_MANAGE_LIST = 'navigation-item-manage-list';
 
 export const BTC_TESTNET_TOGGLE = 'btc-testnet-toggle';
 
@@ -69,3 +70,7 @@ export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
+
+export const TOKEN_TOGGLE = 'token-toggle';
+export const MANAGE_TOKEN_LIST_SAVE = 'manage-token-list-save';
+export const NAVIGATION_MENU_NETWORKS = 'navigation-menu-networks';

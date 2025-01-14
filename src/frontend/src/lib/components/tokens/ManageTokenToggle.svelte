@@ -6,6 +6,7 @@
 	import { isEthereumTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
 
 	export let token: EthereumUserToken;
+	export let testIdPrefix: string = "token-toggle";
 
 	let disabled = false;
 	$: disabled = isEthereumTokenToggleDisabled(token);
@@ -36,6 +37,7 @@
 <div role="button" on:click={onClick}>
 	<Toggle
 		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
+		testId={`${testIdPrefix}-${token.symbol}-${token.network.id.description}`}
 		{disabled}
 		bind:checked
 		on:nnsToggle={toggle}

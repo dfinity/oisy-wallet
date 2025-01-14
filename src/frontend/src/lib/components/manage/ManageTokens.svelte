@@ -34,6 +34,7 @@
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+	import { MANAGE_TOKEN_LIST_SAVE } from '$lib/constants/test-ids.constants';
 
 	const dispatch = createEventDispatcher();
 
@@ -219,7 +220,7 @@
 
 	<ButtonGroup>
 		<ButtonCancel on:click={() => dispatch('icClose')} />
-		<Button disabled={saveDisabled} on:click={save}>
+		<Button testId={MANAGE_TOKEN_LIST_SAVE} disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
 		</Button>
 	</ButtonGroup>
