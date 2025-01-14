@@ -1,5 +1,5 @@
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import usdc from '$eth/assets/usdc.svg';
+import eurc from '$eth/assets/eurc.svg';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { RequiredSplToken } from '$sol/types/spl';
@@ -18,7 +18,7 @@ export const EURC_TOKEN: RequiredSplToken = {
 	name: 'Euro Coin',
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
-	icon: usdc,
+	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'
 };
 
@@ -34,6 +34,6 @@ export const DEVNET_EURC_TOKEN: RequiredSplToken = {
 	name: 'EURC (Devnet)',
 	symbol: DEVNET_EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
-	icon: usdc,
+	icon: eurc,
 	address: 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr'
 };
