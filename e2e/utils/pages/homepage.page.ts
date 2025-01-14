@@ -246,7 +246,7 @@ abstract class Homepage {
 
 	async toggleTokenInList({
 		tokenSymbol,
-		networkName,
+		networkName
 	}: {
 		tokenSymbol: string;
 		networkName: string;
