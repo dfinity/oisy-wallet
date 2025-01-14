@@ -1,3 +1,5 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
 	BTC_TESTNET_TOGGLE,
 	LOADER_MODAL,
@@ -158,8 +160,12 @@ abstract class Homepage {
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+		await this.#page
+			.getByTestId(`${TOKEN_CARD}-ICP-${ICP_TOKEN.network.id.description}`)
+			.waitFor(options);
+		await this.#page
+			.getByTestId(`${TOKEN_CARD}-ETH-${BTC_MAINNET_TOKEN.network.id.description}`)
+			.waitFor(options);
 
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
