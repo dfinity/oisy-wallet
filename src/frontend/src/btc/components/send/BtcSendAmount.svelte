@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -23,7 +23,7 @@
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
-		if (nonNullish($sendBalance) && userAmount.gt($sendBalance)) {
+		if (userAmount.gt($sendBalance ?? ZERO)) {
 			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
 	};
