@@ -354,6 +354,7 @@
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
+			"insufficient_solana_funds_to_cover_the_fees": "Insufficient Solana funds to cover the fees",
 			"not_enough_tokens_for_gas": "Not enough $symbol for gas. Balance: $balance $symbol",
 			"gas_fees_not_defined": "Gas fees are not defined.",
 			"max_gas_fee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
