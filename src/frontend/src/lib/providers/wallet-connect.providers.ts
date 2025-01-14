@@ -1,4 +1,3 @@
-import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
@@ -8,7 +7,7 @@ import {
 	SESSION_REQUEST_PERSONAL_SIGN,
 	WALLET_CONNECT_METADATA
 } from '$eth/constants/wallet-connect.constants';
-import type { EthAddress, SolAddress } from '$lib/types/address';
+import type { EthAddress, OptionSolAddress } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import {
@@ -28,7 +27,8 @@ export const initWalletConnect = async ({
 }: {
 	uri: string;
 	ethAddress: EthAddress;
-	solAddress: SolAddress;
+	// TODO add other networks for solana
+	solAddress: OptionSolAddress;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
 		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
@@ -97,12 +97,16 @@ export const initWalletConnect = async ({
 					events: ['accountsChanged', 'chainChanged'],
 					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
 				},
-				solana: {
-					chains: [solMainnetNamespace],
-					methods: ['solana_signTransaction', 'solana_signMessage'],
-					events: ['accountsChanged', 'chainChanged'],
-					accounts: [`${solMainnetNamespace}:${solAddress}`]
-				}
+				...(solAddress
+					? {
+							solana: {
+								chains: [solMainnetNamespace],
+								methods: ['solana_signTransaction', 'solana_signMessage'],
+								events: ['accountsChanged', 'chainChanged'],
+								accounts: [`${solMainnetNamespace}:${solAddress}`]
+							}
+						}
+					: {})
 			}
 		});
 

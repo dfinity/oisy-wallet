@@ -29,6 +29,7 @@
 	import type { Option } from '$lib/types/utils';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -90,7 +91,7 @@
 
 		try {
 			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
-			if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
+			if (isNullish($ethAddress) || (SOLANA_NETWORK_ENABLED && isNullish($solAddressMainnet))) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
