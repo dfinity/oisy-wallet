@@ -32,13 +32,12 @@
 	$: {
 		if (isNullish(request) || isNullish(requestNetwork)) {
 			chainId = undefined;
-			return;
-		}
-
-		if (requestNetwork === 'ethereum') {
-			chainId = EIP155_CHAINS[request.params.chainId]?.chainId;
-		} else if (requestNetwork === 'solana') {
-			chainId = CAIP10_CHAINS[request.params.chainId]?.chainId;
+		} else {
+			if (requestNetwork === 'ethereum') {
+				chainId = EIP155_CHAINS[request.params.chainId]?.chainId;
+			} else if (requestNetwork === 'solana') {
+				chainId = CAIP10_CHAINS[request.params.chainId]?.chainId;
+			}
 		}
 	}
 
