@@ -18,6 +18,13 @@ export enum ProgressStepsConvert {
 	DONE = 'done'
 }
 
+export enum ProgressStepsSwap {
+	INITIALIZATION = 'initialization',
+	SWAP = 'swap',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
 export enum ProgressStepsSign {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
