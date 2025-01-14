@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -8,10 +7,8 @@
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import type { IcCkToken } from '$icp/types/ic-token';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
-	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
@@ -19,7 +16,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
@@ -29,9 +26,8 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 
@@ -64,26 +60,15 @@
 			)
 		: [];
 
-	let filterTokens = '';
-	const updateFilter = () => (filterTokens = filter);
+	let tokensFilter = '';
+	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	const matchingToken = (token: Token): boolean =>
-		token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
-		token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()));
-
 	let filteredTokens: Token[] = [];
-	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? allTokensSorted
-		: allTokensSorted.filter((token) => {
-				const twinToken = (token as IcCkToken).twinToken;
-				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
-			});
+	$: filteredTokens = filterTokens({ tokens: allTokensSorted, filter: tokensFilter });
 
 	let tokens: Token[] = [];
 	$: tokens = filteredTokens.map((token) => {
@@ -145,22 +130,11 @@
 </script>
 
 <div class="mb-4">
-	<InputTextWithAction
-		name="filter"
-		required={false}
-		bind:value={filter}
+	<InputSearch
+		bind:filter
+		noMatch={noTokensMatch}
 		placeholder={$i18n.tokens.placeholder.search_token}
-	>
-		<svelte:fragment slot="inner-end">
-			{#if noTokensMatch}
-				<button on:click={() => (filter = '')} aria-label={$i18n.tokens.manage.text.clear_filter}>
-					<IconClose />
-				</button>
-			{:else}
-				<IconSearch />
-			{/if}
-		</svelte:fragment>
-	</InputTextWithAction>
+	/>
 </div>
 
 {#if nonNullish($selectedNetwork)}

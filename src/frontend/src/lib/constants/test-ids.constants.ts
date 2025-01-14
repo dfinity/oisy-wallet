@@ -70,3 +70,5 @@ export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
+
+export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';

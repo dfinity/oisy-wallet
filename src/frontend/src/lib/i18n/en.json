@@ -16,7 +16,8 @@
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
-			"copy": "Copy"
+			"copy": "Copy",
+			"clear_filter": "Clear filter"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -353,6 +354,7 @@
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
+			"insufficient_solana_funds_to_cover_the_fees": "Insufficient Solana funds to cover the fees",
 			"not_enough_tokens_for_gas": "Not enough $symbol for gas. Balance: $balance $symbol",
 			"gas_fees_not_defined": "Gas fees are not defined.",
 			"max_gas_fee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
@@ -373,7 +375,8 @@
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
-			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
+			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
+			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
 		}
@@ -421,6 +424,41 @@
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized.",
 			"unexpected": "Something went wrong while converting tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
+		}
+	},
+	"swap": {
+		"text": {
+			"swap": "Swap",
+			"select_destination_token": "Select token to receive",
+			"select_source_token": "Select token to pay",
+			"select_source_token_title": "You pay",
+			"select_destination_token_title": "You receive",
+			"switch_tokens_button": "Switch tokens",
+			"review": "Review transaction",
+			"review_button": "Review swap",
+			"select_token": "Select token",
+			"max_slippage": "Max slippage",
+			"max_balance": "Max",
+			"not_available": "n/a",
+			"value_difference": "Value difference",
+			"total_fee": "Total estimated fee",
+			"token_fee": "Token fee",
+			"gas_fee": "Gas fee",
+			"lp_fee": "LP fee",
+			"max_slippage_info": "Enter value between 0% and 50%",
+			"max_slippage_warning": "Risk warning: high slippage may lead to losses due to market volatility",
+			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
+			"swap_button": "Swap now",
+			"swap_is_not_offered": "This swap is currently not offered.",
+			"exchange_is_not_available": "USD value is currently not available.",
+			"executing_transaction": "Executing transaction...",
+			"initializing": "Initializing transaction...",
+			"swapping": "Swapping...",
+			"refreshing_ui": "Refreshing UI"
+		},
+		"error": {
+			"unexpected": "Something went wrong while swapping tokens.",
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
 		}
 	},
 	"buy": {
@@ -497,7 +535,6 @@
 				"title": "Manage tokens",
 				"manage_list": "Manage list",
 				"do_not_see_import": "Don’t see your token? Import",
-				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance."
@@ -667,6 +704,8 @@
 			"confirmed": "Confirmed",
 			"included": "Included",
 			"finalised": "Finalised",
+			"finalized": "Finalised",
+			"processed": "Processed",
 			"pending": "Pending...",
 			"safe": "Safe",
 			"unconfirmed": "Unconfirmed"
@@ -757,7 +796,7 @@
 				"title_failed": "Invalid invitation code",
 				"reward_received": "Welcome to $oisy_short!",
 				"reward_failed": "Code is expired",
-				"reward_received_description": "Congratulations, you've just received a welcome gift.",
+				"reward_received_description": "You will receive your welcome gift any moment.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {

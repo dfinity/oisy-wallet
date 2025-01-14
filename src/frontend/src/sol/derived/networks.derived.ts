@@ -7,7 +7,7 @@ import {
 } from '$env/networks/networks.sol.env';
 import { LOCAL } from '$lib/constants/app.constants';
 import { testnets } from '$lib/derived/testnets.derived';
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
 import { derived, type Readable } from 'svelte/store';
 
 export const enabledSolanaNetworks: Readable<Network[]> = derived([testnets], ([$testnets]) =>
@@ -23,4 +23,9 @@ export const enabledSolanaNetworks: Readable<Network[]> = derived([testnets], ([
 					: [])
 			]
 		: []
+);
+
+export const enabledSolanaNetworksIds: Readable<NetworkId[]> = derived(
+	[enabledSolanaNetworks],
+	([$solanaNetworks]) => $solanaNetworks.map(({ id }) => id)
 );

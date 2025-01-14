@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
-	import { signMessage, reject as rejectServices } from '$eth/services/wallet-connect.services';
-	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
+	import { signMessage } from '$eth/services/wallet-connect.services';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	export let listener: OptionWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;

@@ -4,12 +4,14 @@ import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { loadSolLamportsBalance } from '$sol/api/solana.api';
+import { loadSolLamportsBalance, loadSplTokenBalance } from '$sol/api/solana.api';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
+// TODO: check if this function is used in the app or not
 export const loadSolBalance = async ({
 	address,
 	token
@@ -32,7 +34,9 @@ export const loadSolBalance = async ({
 	);
 
 	try {
-		const balance = await loadSolLamportsBalance({ address, network: solNetwork });
+		const balance = isTokenSpl(token)
+			? await loadSplTokenBalance({ address, network: solNetwork, tokenAddress: token.address })
+			: await loadSolLamportsBalance({ address, network: solNetwork });
 
 		balancesStore.set({ tokenId, data: { data: BigNumber.from(balance), certified: false } });
 
