@@ -259,7 +259,7 @@ abstract class Homepage {
 	}
 
 	getTokenCardLocator(tokenSymbol: string): Locator {
-		return this.#page.locator(`[data-tid="token-card-${tokenSymbol}"]`);
+		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}"]`);
 	}
 
 	async takeScreenshot(): Promise<void> {
