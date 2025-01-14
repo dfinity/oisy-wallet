@@ -16,8 +16,8 @@ export const SESSION_REQUEST_PERSONAL_SIGN = 'personal_sign';
 export const SESSION_REQUEST_ETH_SIGN_V4 = 'eth_signTypedData_v4';
 
 // Solana methods
-export const SESSION_REQUEST_SOL_SIGN_TRANSACTION = 'sol_signTransaction';
-export const SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION = 'sol_signAndSendTransaction';
+export const SESSION_REQUEST_SOL_SIGN_TRANSACTION = 'solana_signTransaction';
+export const SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION = 'solana_signAndSendTransaction';
 
 export const UNEXPECTED_ERROR: ErrorResponse = {
 	code: 20001,
