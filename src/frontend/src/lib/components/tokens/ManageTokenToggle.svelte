@@ -6,7 +6,7 @@
 	import { isEthereumTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
 
 	export let token: EthereumUserToken;
-	export let testIdPrefix: string = "token-toggle";
+	export let testIdPrefix = 'token-toggle';
 
 	let disabled = false;
 	$: disabled = isEthereumTokenToggleDisabled(token);

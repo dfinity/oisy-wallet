@@ -17,6 +17,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { MANAGE_TOKEN_LIST_SAVE } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
@@ -30,7 +31,6 @@
 	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
 	import { isSolanaToken } from '$sol/utils/token.utils';
-	import { MANAGE_TOKEN_LIST_SAVE } from '$lib/constants/test-ids.constants';
 
 	const dispatch = createEventDispatcher();
 
