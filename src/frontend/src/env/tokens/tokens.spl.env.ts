@@ -5,7 +5,7 @@ import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ORCA_TOKEN } from '$env/tokens/tokens-spl/tokens.orca.env';
 import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
 import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
-import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import type { RequiredSplToken } from '$sol/types/spl';
 
@@ -15,6 +15,7 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	ORCA_TOKEN,
 	POPCAT_TOKEN,
 	RAY_TOKEN,
+	USDC_TOKEN,
 	USDT_TOKEN
 ];
 
