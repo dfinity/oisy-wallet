@@ -16,7 +16,7 @@
 	</InputCurrency>
 </div>
 
-<style>
+<style lang="scss">
 	:global(.swap-input-currency div.input-block) {
 		display: block;
 		height: 100%;
