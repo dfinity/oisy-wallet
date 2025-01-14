@@ -254,7 +254,7 @@ abstract class Homepage {
 		await this.clickByTestId(NAVIGATION_MENU_NETWORKS);
 		await this.#page.click(`[data-tid^="network-${networkName}"]`);
 		await this.clickByTestId(NAVIGATION_ITEM_MANAGE_LIST);
-		await this.#page.click(`[data-tid^="token-toggle-${tokenSymbol}"]`);
+		await this.#page.click(`[data-tid^="${TOKEN_TOGGLE}-${tokenSymbol}"]`);
 		await this.clickByTestId(MANAGE_TOKEN_LIST_SAVE);
 	}
 
