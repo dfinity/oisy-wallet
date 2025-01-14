@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -8,7 +9,6 @@
 	import WalletConnectSendModal from '$sol/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 	import type { SolanaNetwork } from '$sol/types/network';
-	import { CAIP10_CHAINS} from '$env/caip10-chains.env';
 
 	export let listener: OptionWalletConnectListener;
 
