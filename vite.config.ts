@@ -80,7 +80,7 @@ const config: UserConfig = {
 						return providersChunk;
 					}
 
-					return 'index';
+					return undefined;
 				}
 			},
 			// Polyfill Buffer for production build
