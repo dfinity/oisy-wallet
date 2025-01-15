@@ -158,8 +158,8 @@ abstract class Homepage {
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ETH-ETH`).waitFor(options);
 
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
