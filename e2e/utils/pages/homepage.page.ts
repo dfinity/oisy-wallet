@@ -167,8 +167,8 @@ abstract class Homepage {
 		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_CARD}-ETH-ETH`).waitFor(options);
 
-		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH-ETH`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
