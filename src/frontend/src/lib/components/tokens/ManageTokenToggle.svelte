@@ -7,7 +7,7 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
 	export let token: EthereumUserToken | SplTokenToggleable;
-  export let testIdPrefix = 'token-toggle';
+	export let testIdPrefix = 'token-toggle';
 
 	let disabled = false;
 	$: disabled = isEthereumTokenToggleDisabled(token);
