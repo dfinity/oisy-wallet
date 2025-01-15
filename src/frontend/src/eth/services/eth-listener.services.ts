@@ -1,6 +1,5 @@
 import { alchemyErc20Providers } from '$eth/providers/alchemy-erc20.providers';
 import { initMinedTransactionsListener as initMinedTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-import { initWalletConnect } from '$eth/providers/wallet-connect.providers';
 import {
 	processErc20Transaction,
 	processEthTransaction
@@ -11,7 +10,6 @@ import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 export const initTransactionsListener = ({
@@ -52,8 +50,3 @@ export const initMinedTransactionsListener = ({
 		listener: callback,
 		networkId
 	});
-
-export const initWalletConnectListener = (params: {
-	uri: string;
-	address: EthAddress;
-}): Promise<WalletConnectListener> => initWalletConnect(params);
