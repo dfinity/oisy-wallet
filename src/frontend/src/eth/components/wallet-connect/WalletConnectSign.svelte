@@ -27,8 +27,8 @@
 		: undefined;
 
 	/* eslint-disable no-console */
-		console.log('received approve requiest', request);
-		console.log('listener', listener);
+	console.log('received approve requiest', request);
+	console.log('listener', listener);
 	/* eslint-enable no-console */
 </script>
 
