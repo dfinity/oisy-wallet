@@ -1,5 +1,4 @@
 import {
-	BTC_TESTNET_TOGGLE,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -14,6 +13,7 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD,
 	TOKEN_TOGGLE
@@ -242,7 +242,7 @@ abstract class Homepage {
 
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId(BTC_TESTNET_TOGGLE);
+		await this.clickByTestId(TESTNET_TOGGLE);
 		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
 	}
 
