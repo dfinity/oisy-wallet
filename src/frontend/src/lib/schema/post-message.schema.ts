@@ -44,9 +44,12 @@ export const PostMessageRequestSchema = z.enum([
 	'triggerBtcStatusesTimer',
 	'stopCkBTCUpdateBalanceTimer',
 	'startCkBTCUpdateBalanceTimer',
-	'stopCkMinterInfoTimer',
-	'startCkMinterInfoTimer',
-	'triggerCkMinterInfoTimer'
+	'stopCkEthMinterInfoTimer',
+	'startCkEthMinterInfoTimer',
+	'triggerCkEthMinterInfoTimer',
+	'stopCkBtcMinterInfoTimer',
+	'startCkBtcMinterInfoTimer',
+	'triggerCkBtcMinterInfoTimer'
 ]);
 
 export const PostMessageDataRequestSchema = z.never();

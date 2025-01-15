@@ -60,9 +60,12 @@ describe('post-message.schema', () => {
 			'triggerBtcStatusesTimer',
 			'stopCkBTCUpdateBalanceTimer',
 			'startCkBTCUpdateBalanceTimer',
-			'stopCkMinterInfoTimer',
-			'startCkMinterInfoTimer',
-			'triggerCkMinterInfoTimer'
+			'stopCkEthMinterInfoTimer',
+			'startCkEthMinterInfoTimer',
+			'triggerCkEthMinterInfoTimer',
+			'stopCkBtcMinterInfoTimer',
+			'startCkBtcMinterInfoTimer',
+			'triggerCkBtcMinterInfoTimer'
 		];
 
 		const invalidCases = [
