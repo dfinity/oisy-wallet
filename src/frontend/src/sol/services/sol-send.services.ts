@@ -8,6 +8,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { SOLANA_DERIVATION_PATH_PREFIX, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { createSplTokenAccount } from '$sol/services/spl-account.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
@@ -73,12 +74,14 @@ const createSolTransactionMessage = async ({
 };
 
 const createSplTokenTransactionMessage = async ({
+	identity,
 	signer,
 	destination,
 	amount,
 	network,
 	tokenAddress
 }: {
+	identity: OptionIdentity;
 	signer: TransactionSigner;
 	destination: SolAddress;
 	amount: BigNumber;
@@ -99,11 +102,25 @@ const createSplTokenTransactionMessage = async ({
 		tokenAddress
 	});
 
-	const destinationTokenAccountAddress = await loadTokenAccount({
-		address: destination,
-		network,
-		tokenAddress
-	});
+	// This should not happen since we are sending from an existing account. But we need it to return a non-nullish value
+	assertNonNullish(
+		sourceTokenAccountAddress,
+		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
+	);
+
+	const destinationTokenAccountAddress =
+		(await loadTokenAccount({
+			address: destination,
+			network,
+			tokenAddress
+		})) ??
+		(await createSplTokenAccount({
+			identity,
+			destination,
+			source,
+			network,
+			tokenAddress
+		}));
 
 	return pipe(
 		createTransactionMessage({ version: 'legacy' }),
@@ -189,6 +206,7 @@ export const sendSol = async ({
 
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({
+				identity,
 				signer,
 				destination,
 				amount,
@@ -206,10 +224,14 @@ export const sendSol = async ({
 
 	const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
 
+	// const signature = getSignatureFromTransaction(signedTransaction);
+
 	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	sendAndConfirmTransaction(signedTransaction, { commitment: 'confirmed' });
 
 	onProgress?.();
+
+	// return signature
 };
