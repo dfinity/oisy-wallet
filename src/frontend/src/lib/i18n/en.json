@@ -41,7 +41,7 @@
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"submit_ticket": "Submit a ticket",
+			"support_email": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes"
 		},
@@ -53,7 +53,7 @@
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"submit_ticket": "Report an issue or request a feature on GitHub",
+			"support_email": "Reach out to the team",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link"
 		}
