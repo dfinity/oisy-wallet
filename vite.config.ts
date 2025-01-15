@@ -1,3 +1,4 @@
+import { nonNullish } from '@dfinity/utils';
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
@@ -27,28 +28,56 @@ const config: UserConfig = {
 		}
 	},
 	build: {
+		sourcemap: true,
 		target: 'es2020',
 		rollupOptions: {
 			output: {
 				manualChunks: (id) => {
 					const folder = dirname(id);
 
-					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
+					const libsWalletConnect = ['@walletconnect'];
+					const libsProviders = ['@ethersproject', 'alchemy-sdk', '@solana'];
+					const libsQrCode = ['html5-qrcode', 'qr-creator'];
 
 					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>
-							folder.includes(lib)
-						) === undefined &&
+						[
+							'@sveltejs',
+							'svelte',
+							'@dfinity/gix-components',
+							...libsQrCode,
+							...libsProviders,
+							...libsWalletConnect
+						].find((lib) => folder.includes(lib)) === undefined &&
 						folder.includes('node_modules')
 					) {
 						return 'vendor';
 					}
 
-					if (
-						lazy.find((lib) => folder.includes(lib)) !== undefined &&
+					const lazy = ({
+						libs,
+						chunkName
+					}: {
+						libs: string[];
+						chunkName: string;
+					}): string | undefined =>
+						libs.find((lib) => folder.includes(lib)) !== undefined &&
 						folder.includes('node_modules')
-					) {
-						return 'lazy';
+							? chunkName
+							: undefined;
+
+					const qrCodeChunk = lazy({ libs: libsQrCode, chunkName: 'qr-code' });
+					if (nonNullish(qrCodeChunk)) {
+						return qrCodeChunk;
+					}
+
+					const walletConnectChunk = lazy({ libs: libsWalletConnect, chunkName: 'walletconnect' });
+					if (nonNullish(walletConnectChunk)) {
+						return walletConnectChunk;
+					}
+
+					const providersChunk = lazy({ libs: libsProviders, chunkName: 'providers' });
+					if (nonNullish(providersChunk)) {
+						return providersChunk;
 					}
 
 					return 'index';
