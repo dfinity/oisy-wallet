@@ -12,9 +12,9 @@
 </script>
 
 <div
-	class:animate-pulse={loading}
 	class="swap-input-currency h-full w-full font-bold"
 	class:text-error={error}
+	class:animate-pulse={loading}
 >
 	<InputCurrency bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
 		<slot name="inner-end" slot="inner-end" />
