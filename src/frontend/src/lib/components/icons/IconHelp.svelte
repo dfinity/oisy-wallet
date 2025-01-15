@@ -1,3 +1,4 @@
+<!-- source: ISC Lucide - please visit https://lucide.dev/license -->
 <script lang="ts">
 	export let size = '20';
 </script>
