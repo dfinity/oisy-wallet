@@ -36,7 +36,6 @@ const config: UserConfig = {
 					const folder = dirname(id);
 
 					const libsWalletConnect = ['@walletconnect'];
-					const libsProviders = ['@ethersproject', 'alchemy-sdk', '@solana'];
 					const libsQrCode = ['html5-qrcode', 'qr-creator'];
 
 					if (
@@ -45,7 +44,6 @@ const config: UserConfig = {
 							'svelte',
 							'@dfinity/gix-components',
 							...libsQrCode,
-							...libsProviders,
 							...libsWalletConnect
 						].find((lib) => folder.includes(lib)) === undefined &&
 						folder.includes('node_modules')
@@ -73,11 +71,6 @@ const config: UserConfig = {
 					const walletConnectChunk = lazy({ libs: libsWalletConnect, chunkName: 'walletconnect' });
 					if (nonNullish(walletConnectChunk)) {
 						return walletConnectChunk;
-					}
-
-					const providersChunk = lazy({ libs: libsProviders, chunkName: 'providers' });
-					if (nonNullish(providersChunk)) {
-						return providersChunk;
 					}
 
 					return undefined;
