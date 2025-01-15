@@ -15,6 +15,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	filterEnabledTokens,
+	filterTokens,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
@@ -23,6 +24,7 @@ import {
 } from '$lib/utils/tokens.utils';
 import { bn1, bn2, bn3, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { MockedFunction } from 'vitest';
 
@@ -392,5 +394,28 @@ describe('pinEnabledTokensAtTop', () => {
 		const result = pinEnabledTokensAtTop(tokens);
 
 		expect(result).toEqual(tokens);
+	});
+});
+
+describe('filterTokens', () => {
+	it('should filter tokens by symbol correctly when filter is provided', () => {
+		expect(filterTokens({ tokens: mockTokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
+		expect(filterTokens({ tokens: mockTokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+		expect(filterTokens({ tokens: mockTokens, filter: 'PEPE' })).toStrictEqual([]);
+	});
+
+	it('should filter tokens by name correctly when filter is provided', () => {
+		expect(filterTokens({ tokens: mockTokens, filter: 'Bit' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+		expect(filterTokens({ tokens: mockTokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
+	});
+
+	it('should filter tokens by twin token symbol correctly when filter is provided', () => {
+		expect(
+			filterTokens({ tokens: [...mockTokens, mockValidIcCkToken], filter: 'STK' })
+		).toStrictEqual([mockValidIcCkToken]);
+	});
+
+	it('should filter tokens correctly when filter is not provided', () => {
+		expect(filterTokens({ tokens: mockTokens, filter: '' })).toStrictEqual(mockTokens);
 	});
 });
