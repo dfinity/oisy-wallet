@@ -9,6 +9,7 @@
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -175,11 +176,9 @@
 
 		<ChangelogLink />
 
-		<ExternalLink
-			href="https://github.com/dfinity/oisy-wallet/issues"
-			ariaLabel={$i18n.navigation.alt.submit_ticket}
-		>
-			{$i18n.navigation.text.submit_ticket}
+		<ExternalLink href="mailto:support@oisy.com" ariaLabel={$i18n.navigation.alt.support_email}>
+			<IconHelp />
+			{$i18n.navigation.text.support_email}
 		</ExternalLink>
 
 		<Hr />
