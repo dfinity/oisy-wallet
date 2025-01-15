@@ -176,10 +176,7 @@
 
 		<ChangelogLink />
 
-		<ExternalLink
-			href="mailto:support@oisy.com"
-			aria-label={$i18n.navigation.alt.support_email}
-		>
+		<ExternalLink href="mailto:support@oisy.com" aria-label={$i18n.navigation.alt.support_email}>
 			<IconHelp />
 			{$i18n.navigation.text.support_email}
 		</ExternalLink>
