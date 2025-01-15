@@ -162,7 +162,6 @@ abstract class Homepage {
 		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
 	}
 
-	// hotfix for token card issue, needs to be fixed in a later PR
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_CARD}-ETH-ETH`).waitFor(options);
@@ -261,8 +260,14 @@ abstract class Homepage {
 		await this.clickByTestId(MANAGE_TOKEN_LIST_SAVE);
 	}
 
-	getTokenCardLocator(tokenSymbol: string): Locator {
-		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}"]`);
+	getTokenCardLocator({
+		tokenSymbol,
+		networkSymbol
+	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Locator {
+		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
 	async takeScreenshot(): Promise<void> {
