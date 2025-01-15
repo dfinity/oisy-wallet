@@ -50,7 +50,11 @@
 			<slot />
 		</div>
 		{#if closable}
-			<button class="p-0.5 text-tertiary" on:click={close} aria-label={$i18n.core.text.close}>
+			<button
+				class="ml-auto p-0.5 text-tertiary"
+				on:click={close}
+				aria-label={$i18n.core.text.close}
+			>
 				<IconClose />
 			</button>
 		{/if}
