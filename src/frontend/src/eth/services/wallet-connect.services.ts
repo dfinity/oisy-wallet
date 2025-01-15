@@ -1,4 +1,3 @@
-import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
@@ -12,6 +11,7 @@ import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
+import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
