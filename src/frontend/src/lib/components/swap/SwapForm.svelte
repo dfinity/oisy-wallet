@@ -57,6 +57,13 @@
 				})
 			: undefined;
 
+	let newSwapAmount = false;
+	// if it's true, it means we are currently fetching a new "swapAmounts" value
+	$: newSwapAmount =
+		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
+			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
+			: false;
+
 	const dispatch = createEventDispatcher();
 
 	let invalid: boolean;
@@ -65,6 +72,7 @@
 		isNullish(swapAmount) ||
 		Number(swapAmount) <= 0 ||
 		isNullish(receiveAmount) ||
+		newSwapAmount ||
 		Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE;
 
 	const onTokensSwitch = () => {
@@ -123,6 +131,7 @@
 			<SwapSelectToken
 				token={$destinationToken}
 				amount={receiveAmount}
+				loading={newSwapAmount}
 				disabled={true}
 				on:click={() => {
 					dispatch('icShowTokensList', 'destination');
