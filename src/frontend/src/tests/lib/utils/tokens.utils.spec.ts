@@ -398,16 +398,18 @@ describe('pinEnabledTokensAtTop', () => {
 });
 
 describe('filterTokens', () => {
-	it('should filter tokens correctly when filter is provided', () => {
-		// by token symbol
+	it('should filter tokens by symbol correctly when filter is provided', () => {
 		expect(filterTokens({ tokens: mockTokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
 		expect(filterTokens({ tokens: mockTokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
 		expect(filterTokens({ tokens: mockTokens, filter: 'PEPE' })).toStrictEqual([]);
+	});
 
-		// by token name
+	it('should filter tokens by name correctly when filter is provided', () => {
 		expect(filterTokens({ tokens: mockTokens, filter: 'Bit' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+		expect(filterTokens({ tokens: mockTokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
+	});
 
-		// by twin token symbol
+	it('should filter tokens by twin token symbol correctly when filter is provided', () => {
 		expect(
 			filterTokens({ tokens: [...mockTokens, mockValidIcCkToken], filter: 'STK' })
 		).toStrictEqual([mockValidIcCkToken]);
