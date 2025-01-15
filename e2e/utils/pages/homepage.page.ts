@@ -87,6 +87,8 @@ abstract class Homepage {
 
 	protected async mockSelector({ selector }: SelectorOperationParams): Promise<void> {
 		if (await this.#page.locator(selector).isVisible()) {
+			await this.#page.locator(selector).innerHTML();
+
 			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
 		}
 	}
