@@ -176,14 +176,13 @@
 
 		<ChangelogLink />
 
-		<a
+		<ExternalLink
 			href="mailto:support@oisy.com"
-			class="flex items-center gap-2 no-underline"
 			aria-label={$i18n.navigation.alt.support_email}
 		>
 			<IconHelp />
 			{$i18n.navigation.text.support_email}
-		</a>
+		</ExternalLink>
 
 		<Hr />
 
