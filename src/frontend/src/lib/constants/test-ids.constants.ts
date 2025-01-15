@@ -53,7 +53,7 @@ export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 
-export const BTC_TESTNET_TOGGLE = 'btc-testnet-toggle';
+export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
