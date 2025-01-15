@@ -185,7 +185,6 @@
 			{$i18n.navigation.text.support_email}
 		</a>
 
-
 		<Hr />
 
 		<a
