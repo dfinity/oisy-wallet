@@ -37,7 +37,7 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		changelog: string;
-		submit_ticket: string;
+		support_email: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 	};
@@ -49,7 +49,7 @@ interface I18nNavigation {
 		more_settings: string;
 		menu: string;
 		changelog: string;
-		submit_ticket: string;
+		support_email: string;
 		open_twitter: string;
 		vip_qr_code: string;
 	};
@@ -321,6 +321,7 @@ interface I18nSend {
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
+		insufficient_solana_funds_to_cover_the_fees: string;
 		not_enough_tokens_for_gas: string;
 		gas_fees_not_defined: string;
 		max_gas_fee_per_gas_undefined: string;

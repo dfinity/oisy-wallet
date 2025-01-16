@@ -19,5 +19,8 @@ export const BONK_TOKEN: RequiredSplToken = {
 	symbol: BONK_SYMBOL,
 	decimals: BONK_DECIMALS,
 	icon: bonk,
-	address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'
+	address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
+	buy: {
+		onramperId: 'bonk_solana'
+	}
 };

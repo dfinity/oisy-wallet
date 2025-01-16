@@ -14,8 +14,8 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
-import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcCkToken } from '$icp/types/ic-token';
+import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
@@ -29,7 +29,7 @@ export const exchangeInitialized: Readable<boolean> = derived(
 
 // TODO: create tests for store
 export const exchanges: Readable<ExchangesData> = derived(
-	[exchangeStore, enabledErc20Tokens, enabledIcrcTokens, enabledSplTokens],
+	[exchangeStore, enabledErc20Tokens, allIcrcTokens, enabledSplTokens],
 	([$exchangeStore, $erc20Tokens, $icrcTokens, $splTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
@@ -67,6 +67,17 @@ export const exchanges: Readable<ExchangesData> = derived(
 					}),
 					{}
 				),
+			...$splTokens
+				.filter(({ twinToken }) => nonNullish(twinToken))
+				.reduce((acc, { id, twinToken }) => {
+					const address = (twinToken as Partial<Erc20Token>).address;
+					const price = nonNullish(address) ? $exchangeStore?.[address.toLowerCase()] : undefined;
+
+					return {
+						...acc,
+						[id]: price
+					};
+				}, {}),
 			...$icrcTokens.reduce((acc, token) => {
 				const { id, ledgerCanisterId, exchangeCoinId } = token;
 

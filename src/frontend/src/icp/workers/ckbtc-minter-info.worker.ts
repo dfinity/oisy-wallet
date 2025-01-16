@@ -11,13 +11,13 @@ export const onCkBtcMinterInfoMessage = async ({
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopCkMinterInfoTimer':
+		case 'stopCkBtcMinterInfoTimer':
 			scheduler.stop();
 			return;
-		case 'startCkMinterInfoTimer':
+		case 'startCkBtcMinterInfoTimer':
 			await scheduler.start(data);
 			return;
-		case 'triggerCkMinterInfoTimer':
+		case 'triggerCkBtcMinterInfoTimer':
 			await scheduler.trigger(data);
 			return;
 	}
