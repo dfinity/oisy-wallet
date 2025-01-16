@@ -4,11 +4,15 @@ import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
-	SESSION_REQUEST_PERSONAL_SIGN,
-	WALLET_CONNECT_METADATA
+	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
+import { WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
 import type { EthAddress, OptionSolAddress } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import {
+	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+	SESSION_REQUEST_SOL_SIGN_TRANSACTION
+} from '$sol/constants/wallet-connect.constants';
 import { Core } from '@walletconnect/core';
 import {
 	formatJsonRpcResult,
@@ -101,7 +105,10 @@ export const initWalletConnect = async ({
 					? {
 							solana: {
 								chains: [solMainnetNamespace],
-								methods: ['solana_signTransaction', 'solana_signMessage'],
+								methods: [
+									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
+									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
+								],
 								events: ['accountsChanged', 'chainChanged'],
 								accounts: [`${solMainnetNamespace}:${solAddress}`]
 							}
