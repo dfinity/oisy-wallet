@@ -24,6 +24,11 @@ vi.mock('@solana/signers', () => ({
 	signTransactionMessageWithSigners: vi.fn()
 }));
 
+vi.mock('@solana/transactions', () => ({
+	assertTransactionIsFullySigned: vi.fn(),
+	getSignatureFromTransaction: vi.fn()
+}));
+
 vi.mock('@solana/transaction-messages', () => ({
 	createTransactionMessage: vi.fn(),
 	setTransactionMessageFeePayer: vi.fn(),
