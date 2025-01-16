@@ -10,6 +10,7 @@ import { SOLANA_DERIVATION_PATH_PREFIX, TOKEN_PROGRAM_ADDRESS } from '$sol/const
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
+import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -18,8 +19,10 @@ import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
 import { pipe } from '@solana/functional';
+import type { Signature } from '@solana/keys';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import { lamports } from '@solana/rpc-types';
+import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
+import { lamports, type Commitment } from '@solana/rpc-types';
 import {
 	assertIsTransactionPartialSigner,
 	assertIsTransactionSigner,
@@ -35,7 +38,11 @@ import {
 	setTransactionMessageLifetimeUsingBlockhash,
 	type TransactionVersion
 } from '@solana/transaction-messages';
-import { type Transaction } from '@solana/transactions';
+import {
+	assertTransactionIsFullySigned,
+	getSignatureFromTransaction,
+	type Transaction
+} from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
@@ -132,6 +139,36 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
+const signTransaction = async ({
+	transactionMessage
+}: {
+	transactionMessage: SolTransactionMessage;
+}): Promise<{ signedTransaction: SolSignedTransaction; signature: Signature }> => {
+	const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
+
+	const signature = getSignatureFromTransaction(signedTransaction);
+
+	return { signedTransaction, signature };
+};
+
+const sendSignedTransaction = ({
+	rpc,
+	rpcSubscriptions,
+	signedTransaction,
+	commitment = 'confirmed'
+}: {
+	rpc: Rpc<SolanaRpcApi>;
+	rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
+	signedTransaction: SolSignedTransaction;
+	commitment?: Commitment;
+}) => {
+	assertTransactionIsFullySigned(signedTransaction);
+
+	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+
+	sendAndConfirmTransaction(signedTransaction, { commitment });
+};
+
 /**
  * Send SOL or SPL tokens from one address to another.
  *
@@ -153,7 +190,7 @@ export const sendSol = async ({
 	destination: SolAddress;
 	source: SolAddress;
 	onProgress?: () => void;
-}): Promise<void> => {
+}): Promise<Signature> => {
 	const {
 		network: { id: networkId }
 	} = token;
@@ -209,12 +246,16 @@ export const sendSol = async ({
 
 	onProgress?.();
 
-	const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
-
-	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+	const { signedTransaction, signature } = await signTransaction({ transactionMessage });
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
-	sendAndConfirmTransaction(signedTransaction, { commitment: 'confirmed' });
+	sendSignedTransaction({
+		rpc,
+		rpcSubscriptions,
+		signedTransaction
+	});
 
 	onProgress?.();
+
+	return signature;
 };
