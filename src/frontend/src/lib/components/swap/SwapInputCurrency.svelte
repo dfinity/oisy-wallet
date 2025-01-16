@@ -8,9 +8,14 @@
 	export let disabled = false;
 	export let placeholder = '0';
 	export let error = false;
+	export let loading = false;
 </script>
 
-<div class="swap-input-currency h-full w-full font-bold" class:text-error={error}>
+<div
+	class="swap-input-currency h-full w-full font-bold"
+	class:text-error={error}
+	class:animate-pulse={loading}
+>
 	<InputCurrency bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
