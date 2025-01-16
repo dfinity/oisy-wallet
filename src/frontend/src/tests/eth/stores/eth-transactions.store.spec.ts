@@ -3,7 +3,6 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { bn3 } from '$tests/mocks/balances.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { get } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('eth-transactions.store', () => {
 	const tokenId = ETHEREUM_TOKEN_ID;

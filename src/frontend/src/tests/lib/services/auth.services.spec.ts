@@ -1,6 +1,5 @@
 import { signOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
-import { vi } from 'vitest';
 
 const rootLocation = 'https://oisy.com/';
 const activityLocation = 'https://oisy.com/activity';
@@ -42,6 +41,18 @@ describe('auth.services', () => {
 
 			expect(signOutSpy).toHaveBeenCalled();
 			expect(window.location.href).toEqual(rootLocation);
+		});
+
+		it('should call the signOut function of the authStore and clear the session storage', async () => {
+			const signOutSpy = vi.spyOn(authStore, 'signOut');
+
+			sessionStorage.setItem('key', 'value');
+			expect(sessionStorage.getItem('key')).toEqual('value');
+
+			await signOut({});
+
+			expect(signOutSpy).toHaveBeenCalled();
+			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 	});
 });

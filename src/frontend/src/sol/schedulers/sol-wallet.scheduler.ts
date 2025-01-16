@@ -6,29 +6,43 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { loadSolLamportsBalance } from '$sol/api/solana.api';
+import type { Option } from '$lib/types/utils';
+import {
+	getSolTransactions,
+	getSplTransactions,
+	loadSolLamportsBalance,
+	loadSplTokenBalance
+} from '$sol/api/solana.api';
+import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
+import { mapSplTransactionUi } from '$sol/utils/spl-transactions.utils';
+import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
+	tokenAddress?: SolAddress;
 }
 
 interface SolWalletStore {
-	balance: CertifiedData<bigint | null> | undefined;
+	balance: CertifiedData<Option<SolBalance>> | undefined;
+	transactions: Record<string, SolCertifiedTransaction>;
 }
 
 interface SolWalletData {
-	balance: CertifiedData<bigint | null>;
+	balance: CertifiedData<SolBalance | null>;
+	transactions: SolCertifiedTransaction[];
 }
 
 export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> {
 	private timer = new SchedulerTimer('syncSolWalletStatus');
 
 	private store: SolWalletStore = {
-		balance: undefined
+		balance: undefined,
+		transactions: {}
 	};
 
 	stop() {
@@ -52,48 +66,109 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private loadBalance = async ({
 		address,
-		solanaNetwork
-	}: LoadSolWalletParams): Promise<CertifiedData<bigint | null>> => ({
-		data: await loadSolLamportsBalance({ network: solanaNetwork, address }),
+		solanaNetwork,
+		tokenAddress
+	}: LoadSolWalletParams): Promise<CertifiedData<SolBalance | null>> => ({
+		data: nonNullish(tokenAddress)
+			? await loadSplTokenBalance({ address, network: solanaNetwork, tokenAddress })
+			: await loadSolLamportsBalance({ address, network: solanaNetwork }),
 		certified: false
 	});
+
+	// TODO add unit tests for spl txns
+	private loadTransactions = async ({
+		address,
+		solanaNetwork,
+		tokenAddress
+	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
+		const transactions = nonNullish(tokenAddress)
+			? await getSplTransactions({
+					network: solanaNetwork,
+					address,
+					tokenAddress
+				})
+			: await getSolTransactions({ network: solanaNetwork, address });
+
+		const transactionsUi = transactions.map((transaction) => ({
+			data: nonNullish(tokenAddress)
+				? mapSplTransactionUi({
+						transaction,
+						tokenAddress,
+						address
+					})
+				: mapSolTransactionUi({ transaction, address }),
+			certified: false
+		}));
+
+		return transactionsUi.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
+	};
 
 	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {
 		assertNonNullish(data, 'No data provided to get Solana balance.');
 
 		try {
-			const balance = await this.loadBalance({
-				address: data.address.data,
-				solanaNetwork: data.solanaNetwork
-			});
+			const {
+				address: { data: address },
+				solanaNetwork,
+				tokenAddress
+			} = data;
 
-			//todo implement loading transactions
+			const [balance, transactions] = await Promise.all([
+				this.loadBalance({
+					address,
+					solanaNetwork,
+					tokenAddress
+				}),
+				this.loadTransactions({
+					address,
+					solanaNetwork,
+					tokenAddress
+				})
+			]);
 
-			this.syncWalletData({ response: { balance } });
+			this.syncWalletData({ response: { balance, transactions } });
 		} catch (error: unknown) {
 			this.postMessageWalletError({ error });
 		}
 	};
 
-	private syncWalletData = ({ response: { balance } }: { response: SolWalletData }) => {
+	private syncWalletData = ({
+		response: { balance, transactions }
+	}: {
+		response: SolWalletData;
+	}) => {
 		if (!this.store.balance?.certified && balance.certified) {
 			throw new Error('Balance certification status cannot change from uncertified to certified');
 		}
 
 		const newBalance = isNullish(this.store.balance) || this.store.balance.data !== balance.data;
-
-		if (!newBalance) {
-			return;
-		}
+		const newTransactions = transactions.length > 0;
 
 		this.store = {
 			...this.store,
-			balance
+			...(newBalance && { balance }),
+			...(newTransactions && {
+				transactions: {
+					...this.store.transactions,
+					...transactions.reduce(
+						(acc, transaction) => ({
+							...acc,
+							[transaction.data.id]: transaction
+						}),
+						{}
+					)
+				}
+			})
 		};
+
+		if (!newBalance && !newTransactions) {
+			return;
+		}
 
 		this.postMessageWallet({
 			wallet: {
-				balance
+				balance,
+				newTransactions: JSON.stringify(transactions, jsonReplacer)
 			}
 		});
 	};

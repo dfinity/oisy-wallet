@@ -2,9 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectSignModal from '$eth/components/wallet-connect/WalletConnectSignModal.svelte';
-	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	export let listener: OptionWalletConnectListener;
 
