@@ -84,7 +84,7 @@ const createSolTransactionMessage = async ({
 				getTransferSolInstruction({
 					source: signer,
 					destination: solAddress(destination),
-					amount: lamports(BigInt(amount.toNumber()))
+					amount: lamports(amount.toBigInt())
 				})
 			],
 			tx
@@ -129,7 +129,7 @@ const createSplTokenTransactionMessage = async ({
 						source: solAddress(sourceTokenAccountAddress),
 						destination: solAddress(destinationTokenAccountAddress),
 						authority: signer,
-						amount: BigInt(amount.toNumber())
+						amount: amount.toBigInt()
 					},
 					{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
 				)
