@@ -22,7 +22,7 @@ import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
-export type WalletConnectSignAndSendTransactionParams = WalletConnectExecuteParams & {
+type WalletConnectSignAndSendTransactionParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
 	modalNext: () => void;
@@ -97,7 +97,7 @@ export const signAndSendTransaction = ({
 			modalNext();
 
 			try {
-				await sendSol({
+				const signature = await sendSol({
 					identity,
 					token,
 					amount: parseToken({
@@ -109,8 +109,7 @@ export const signAndSendTransaction = ({
 					onProgress
 				});
 
-				// TODO: shall we provide the signature as `message` returned
-				await listener.approveRequest({ id, topic, message: '' });
+				await listener.approveRequest({ id, topic, message: signature });
 
 				await trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_SUCCESS,
