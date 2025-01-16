@@ -1,8 +1,8 @@
-import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
 import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
+import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	execute,
