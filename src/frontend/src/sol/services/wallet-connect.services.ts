@@ -1,11 +1,8 @@
 import {
-	SESSION_REQUEST_SOL_SIGN_TRANSACTION,
-	UNEXPECTED_ERROR
-} from '$eth/constants/wallet-connect.constants';
-import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
+import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	execute,
@@ -20,6 +17,7 @@ import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { parseToken } from '$lib/utils/parse.utils';
+import { SESSION_REQUEST_SOL_SIGN_TRANSACTION } from '$sol/constants/wallet-connect.constants';
 import { sendSol, signSol } from '$sol/services/sol-send.services';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
