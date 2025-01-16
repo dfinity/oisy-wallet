@@ -9,6 +9,7 @@
 	import WalletConnectSendModal from '$sol/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import type { WalletConnectSolSendTransactionParams } from '$sol/types/wallet-connect';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -17,7 +18,7 @@
 		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
 		: undefined;
 
-	let firstTransaction: WalletConnectEthSendTransactionParams | undefined;
+	let firstTransaction: WalletConnectSolSendTransactionParams | undefined;
 	$: firstTransaction = request?.params.request.params?.[0];
 
 	let chainId: string | undefined;
