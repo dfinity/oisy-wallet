@@ -44,7 +44,8 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
 	icon: sol,
 	iconBW: solMainnetIconBW,
-	explorerUrl: SOL_MAINNET_EXPLORER_URL
+	explorerUrl: SOL_MAINNET_EXPLORER_URL,
+	buy: { onramperId: 'solana' }
 };
 
 export const SOLANA_TESTNET_NETWORK_SYMBOL = 'SOL (Testnet)';

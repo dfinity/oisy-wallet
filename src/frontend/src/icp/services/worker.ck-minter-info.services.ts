@@ -19,50 +19,41 @@ import type {
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
 
-export const initCkBTCMinterInfoWorker: IcCkWorker = async (
-	params
-): Promise<IcCkWorkerInitResult> => {
-	const CkBTCMinterInfoWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new CkBTCMinterInfoWorker.default();
-
-	return initCkMinterInfoWorker({
-		worker,
+export const initCkBTCMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorkerInitResult> =>
+	initCkMinterInfoWorker({
+		postMessageKey: 'CkBtc',
 		onSyncSuccess: syncCkBtcMinterInfo,
 		onSyncError: syncCkBtcMinterError,
 		onSyncStatus: syncCkBtcMinterStatus,
 		...params
 	});
-};
 
-export const initCkETHMinterInfoWorker: IcCkWorker = async (
-	params
-): Promise<IcCkWorkerInitResult> => {
-	const CkETHMinterInfoWorker = await import('$lib/workers/workers?worker');
-	const worker: Worker = new CkETHMinterInfoWorker.default();
-
-	return initCkMinterInfoWorker({
-		worker,
+export const initCkETHMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorkerInitResult> =>
+	initCkMinterInfoWorker({
+		postMessageKey: 'CkEth',
 		onSyncSuccess: syncCkEthMinterInfo,
 		onSyncError: syncCkEthMinterError,
 		onSyncStatus: syncCkEthMinterStatus,
 		...params
 	});
-};
 
-const initCkMinterInfoWorker = ({
+const initCkMinterInfoWorker = async ({
 	minterCanisterId,
 	token: { id: tokenId },
-	worker,
+	postMessageKey,
 	onSyncSuccess,
 	onSyncError,
 	onSyncStatus
 }: IcCkWorkerParams &
 	Partial<IcCkMetadata> & {
-		worker: Worker;
+		postMessageKey: 'CkBtc' | 'CkEth';
 		onSyncSuccess: (params: SyncCkMinterInfoSuccess) => void;
 		onSyncError: (params: SyncCkMinterInfoError) => void;
 		onSyncStatus: (state: SyncState) => void;
-	}): IcCkWorkerInitResult => {
+	}): Promise<IcCkWorkerInitResult> => {
+	const CkMinterInfoWorker = await import('$lib/workers/workers?worker');
+	const worker: Worker = new CkMinterInfoWorker.default();
+
 	worker.onmessage = ({
 		data
 	}: MessageEvent<
@@ -92,7 +83,7 @@ const initCkMinterInfoWorker = ({
 	return {
 		start: () => {
 			worker.postMessage({
-				msg: 'startCkMinterInfoTimer',
+				msg: `start${postMessageKey}MinterInfoTimer`,
 				data: {
 					minterCanisterId
 				}
@@ -100,12 +91,12 @@ const initCkMinterInfoWorker = ({
 		},
 		stop: () => {
 			worker.postMessage({
-				msg: 'stopCkMinterInfoTimer'
+				msg: `stop${postMessageKey}MinterInfoTimer`
 			});
 		},
 		trigger: () => {
 			worker.postMessage({
-				msg: 'triggerCkMinterInfoTimer',
+				msg: `trigger${postMessageKey}MinterInfoTimer`,
 				data: {
 					minterCanisterId
 				}

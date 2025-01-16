@@ -53,7 +53,7 @@ export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 
-export const BTC_TESTNET_TOGGLE = 'btc-testnet-toggle';
+export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
@@ -64,6 +64,9 @@ export const TOKEN_MENU_ETH = 'token-menu-eth';
 export const TOKEN_MENU_ETH_BUTTON = 'token-menu-eth-button';
 export const TOKEN_MENU_BTC = 'token-menu-btc';
 export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
+export const TOKEN_MENU_SOL = 'token-menu-sol';
+export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
+export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';

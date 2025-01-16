@@ -21,5 +21,8 @@ export const USDT_TOKEN: RequiredSplToken = {
 	decimals: USDT_DECIMALS,
 	icon: usdt,
 	address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
-	twinToken: ETH_USDT_TOKEN
+	twinToken: ETH_USDT_TOKEN,
+	buy: {
+		onramperId: 'usdt_solana'
+	}
 };
