@@ -18,12 +18,18 @@
 	export let ring = false;
 	export let testId: string | undefined = undefined;
 	export let badgeTestId: string | undefined = undefined;
+
+	let icon: CardData['icon'];
+	let name: CardData['name'];
+	let network: CardData['network'];
+
+	$: ({ icon, name, network } = data);
 </script>
 
 <div class="relative">
 	<Logo
-		src={data.icon}
-		alt={replacePlaceholders($i18n.core.alt.logo, { $name: data.name })}
+		src={icon}
+		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })}
 		size={logoSize}
 		{color}
 		{ring}
@@ -32,7 +38,7 @@
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
 			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-white text-sm font-semibold text-black"
-			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: data.name })}
+			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}
@@ -40,7 +46,7 @@
 	{:else if badge?.type === 'network'}
 		<div class="absolute -bottom-1 -right-1">
 			<NetworkLogo
-				network={data.network}
+				{network}
 				blackAndWhite={badge.blackAndWhite}
 				{color}
 				testId={`network-${badgeTestId}`}
