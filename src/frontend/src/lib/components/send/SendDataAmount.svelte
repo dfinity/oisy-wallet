@@ -11,6 +11,18 @@
 
 	let amountDisplay: string;
 	$: (() => {
+		console.log('amount1111', amount, parseToken({
+			value: `${amount ?? 0}`,
+			unitName: token.decimals
+		}),formatToken({
+			value: parseToken({
+				value: `${amount ?? 0}`,
+				unitName: token.decimals
+			}),
+			unitName: token.decimals,
+			displayDecimals: token.decimals
+		}));
+
 		try {
 			amountDisplay = formatToken({
 				value: parseToken({
