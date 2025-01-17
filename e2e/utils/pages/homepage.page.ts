@@ -16,7 +16,7 @@ import {
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
-	TOKEN_CARD,
+	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
