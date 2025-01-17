@@ -8,10 +8,15 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
-	import type { SolanaNetwork } from '$sol/types/network';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
+	import type { SolanaNetwork } from '$sol/types/network';
 
 	export let listener: OptionWalletConnectListener;
+
+	let request: Web3WalletTypes.SessionRequest | undefined;
+	$: request = $modalWalletConnectSign
+		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
+		: undefined;
 
 	let ethChainId: number | undefined;
 	$: ethChainId = nonNullish(request?.params.chainId)
@@ -28,13 +33,8 @@
 		? $enabledSolanaNetworks.find(({ chainId: cId }) => cId === solChainId)
 		: undefined;
 
-	let request: Web3WalletTypes.SessionRequest | undefined;
-	$: request = $modalWalletConnectSign
-		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
-		: undefined;
-
-	$: console.log('received approve request', request);
-	$: console.log('listener', listener);
+	$: request, console.log('received approve request', request);
+	$: listener, console.log('listener', listener);
 </script>
 
 {#if $modalWalletConnectSign && nonNullish(request)}
