@@ -54,7 +54,7 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
-export const NAVIGATION_ITEM_MANAGE_LIST = 'navigation-item-manage-list';
+export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 
 export const TESTNET_TOGGLE = 'testnet-toggle';
 
