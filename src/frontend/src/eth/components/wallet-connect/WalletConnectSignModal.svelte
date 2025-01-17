@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 
 	export let listener: OptionWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;
@@ -21,11 +22,11 @@
 
 	const steps: WizardSteps = [
 		{
-			name: 'Review',
+			name: WizardStepsSign.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: 'Signing',
+			name: WizardStepsSign.SIGNING,
 			title: $i18n.send.text.signing
 		}
 	];
@@ -68,7 +69,7 @@
 		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
 	>
 
-	{#if currentStep?.name === 'Signing'}
+	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<SendProgress progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 	{:else}
 		<WalletConnectSignReview {request} on:icApprove={approve} on:icReject={reject} />
