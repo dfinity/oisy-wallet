@@ -5,11 +5,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { solAddressMainnet } from '$lib/derived/address.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import WalletConnectSendData from '$sol/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { SolanaNetwork } from '$sol/types/network';
-	import { balancesStore } from '$lib/stores/balances.store';
 
 	export let amount: bigint;
 	export let destination: string;

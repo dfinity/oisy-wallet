@@ -21,11 +21,9 @@ import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseToken } from '$lib/utils/parse.utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
-import { SESSION_REQUEST_SOL_SIGN_TRANSACTION } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import { sendSol, signSol, signTransaction } from '$sol/services/sol-send.services';
+import { signTransaction } from '$sol/services/sol-send.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
 	mapSolTransactionMessage,
@@ -215,9 +213,9 @@ export const sign = ({
 
 				progress(ProgressStepsSign.SIGN);
 
-				const { signature } = await signTransaction({
-					transactionMessage
-				});
+				console.log('transactionMessage', transactionMessage);
+
+				const { signature } = await signTransaction({ transactionMessage });
 
 				progress(ProgressStepsSign.APPROVE);
 
@@ -233,118 +231,6 @@ export const sign = ({
 				});
 
 				return { success: true, amount, destination };
-			} catch (err: unknown) {
-				await trackEvent({
-					name: TRACK_COUNT_WC_SOL_SEND_ERROR,
-					metadata: {
-						token: token.symbol
-					}
-				});
-
-				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
-
-				throw err;
-			}
-		},
-		toastMsg: get(i18n).wallet_connect.info.sol_transaction_executed
-	});
-
-export const signAndSendTransaction = ({
-	address,
-	modalNext,
-	token,
-	onProgress,
-	amount,
-	identity,
-	...params
-}: WalletConnectSignAndSendTransactionParams): Promise<ResultSuccess> =>
-	execute({
-		params,
-		callback: async ({
-			request,
-			listener
-		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
-			const {
-				id,
-				topic,
-				params: {
-					request: { method }
-				}
-			} = request;
-
-			const firstParam = request?.params.request.params?.[0];
-
-			const {
-				wallet_connect: {
-					error: {
-						unknown_parameter,
-						wallet_not_initialized,
-						from_address_not_wallet,
-						unknown_destination
-					}
-				}
-			} = get(i18n);
-
-			if (isNullish(firstParam)) {
-				toastsError({
-					msg: { text: unknown_parameter }
-				});
-				return { success: false };
-			}
-
-			if (isNullish(address)) {
-				toastsError({
-					msg: { text: wallet_not_initialized }
-				});
-				return { success: false };
-			}
-
-			if (firstParam.from?.toLowerCase() !== address.toLowerCase()) {
-				toastsError({
-					msg: {
-						text: from_address_not_wallet
-					}
-				});
-				return { success: false };
-			}
-
-			if (isNullish(firstParam.to)) {
-				toastsError({
-					msg: { text: unknown_destination }
-				});
-				return { success: false };
-			}
-
-			const { to } = firstParam;
-
-			modalNext();
-
-			const executeSend = method === SESSION_REQUEST_SOL_SIGN_TRANSACTION ? signSol : sendSol;
-
-			try {
-				await executeSend({
-					identity,
-					token,
-					amount: parseToken({
-						value: `${amount}`,
-						unitName: token.decimals
-					}),
-					destination: to,
-					source: address,
-					onProgress
-				});
-
-				// TODO: shall we provide the signature as `message` returned
-				await listener.approveRequest({ id, topic, message: '' });
-
-				await trackEvent({
-					name: TRACK_COUNT_WC_SOL_SEND_SUCCESS,
-					metadata: {
-						token: token.symbol
-					}
-				});
-
-				return { success: true };
 			} catch (err: unknown) {
 				await trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_ERROR,
