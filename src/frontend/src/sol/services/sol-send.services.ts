@@ -224,7 +224,7 @@ export const sendSol = async ({
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
-	const signer = createSigner({ identity, source, network: solNetwork });
+	const signer = createSigner({ identity, address: source, network: solNetwork });
 
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({

@@ -171,7 +171,7 @@ export const sign = ({
 
 				const rpc = solanaHttpRpc(solNetwork);
 
-				const signer = createSigner({ identity, source, network: solNetwork });
+				const signer = createSigner({ identity, address: source, network: solNetwork });
 
 				const transactionMessageRaw = await parseSolBase64TransactionMessage({
 					transactionMessage: base64EncodedTransactionMessage,

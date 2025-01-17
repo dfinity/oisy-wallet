@@ -71,7 +71,7 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
-export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
+export const AUTH_MAX_TIME_TO_LIVE = BigInt(10 * 60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
 export const AUTH_DERIVATION_ORIGIN = BETA
