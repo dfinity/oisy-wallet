@@ -7,7 +7,6 @@
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { Token } from '$lib/types/token';
-	import { formatToken } from '$lib/utils/format.utils';
 	import WalletConnectSendData from '$sol/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { SolanaNetwork } from '$sol/types/network';
 
@@ -18,12 +17,14 @@
 
 	let network: SolanaNetwork;
 	$: ({ network } = token);
+
+	$: amount, console.log('amount', amount);
 </script>
 
 <ContentWithToolbar>
 	<!-- TODO: add address for devnet and testnet-->
 	<SendData
-		amount={formatToken({ value: amount })}
+		amount={amount.toString()}
 		{destination}
 		{token}
 		balance={$balance}
