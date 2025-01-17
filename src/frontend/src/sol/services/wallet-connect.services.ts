@@ -33,7 +33,7 @@ import {
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
+import { addSignersToTransactionMessage } from '@solana/signers';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {
@@ -46,16 +46,6 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	address: OptionSolAddress;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign) => void;
-	token: Token;
-	identity: OptionIdentity;
-};
-
-type WalletConnectSignAndSendTransactionParams = WalletConnectExecuteParams & {
-	listener: OptionWalletConnectListener;
-	address: OptionSolAddress;
-	modalNext: () => void;
-	amount: BigNumber;
-	onProgress: () => void;
 	token: Token;
 	identity: OptionIdentity;
 };
@@ -172,14 +162,10 @@ export const sign = ({
 
 				const rpc = solanaHttpRpc(solNetwork);
 
-				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
-				const additionalAddresses = Object.keys(signatures).filter((address) => address !== source);
-
 				const signer = createSigner({
 					identity,
 					address: source,
-					network: solNetwork,
-					additionalAddresses
+					network: solNetwork
 				});
 
 				const transactionMessageRaw = await parseSolBase64TransactionMessage({
@@ -199,11 +185,28 @@ export const sign = ({
 					feePayer: signer
 				});
 
+				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
+				const additionalSigners = Object.keys(signatures)
+					.filter((address) => address !== source)
+					.map((signer) =>
+						createSigner({
+							identity,
+							address: signer,
+							network: solNetwork
+						})
+					);
+				const transactionMessageWithAllSigners = addSignersToTransactionMessage(
+					additionalSigners,
+					transactionMessage
+				);
+
 				progress(ProgressStepsSign.SIGN);
 
-				console.log('transactionMessage', transactionMessage);
+				console.log('transactionMessage', transactionMessageWithAllSigners);
 
-				const { signature } = await signTransaction({ transactionMessage });
+				const { signature } = await signTransaction({
+					transactionMessage: transactionMessageWithAllSigners
+				});
 
 				console.log('signature', signature);
 

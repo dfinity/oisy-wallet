@@ -17,14 +17,12 @@ const signTransaction = async ({
 	identity,
 	transaction,
 	address,
-	network,
-	additionalAddresses
+	network
 }: {
 	identity: OptionIdentity;
 	transaction: Transaction;
 	address: SolAddress;
 	network: SolanaNetworkType;
-	additionalAddresses?: SolAddress[];
 }): Promise<SignatureDictionary> => {
 	const derivationPath = [SOLANA_DERIVATION_PATH_PREFIX, network];
 
@@ -35,51 +33,39 @@ const signTransaction = async ({
 		message: Array.from(transaction.messageBytes)
 	});
 
-	const signature = Uint8Array.from(signedBytes);
-
-	return [address, ...(additionalAddresses ?? [])].reduce<SignatureDictionary>(
-		(acc, address) => ({
-			...acc,
-			[address]: signature
-		}),
-		{}
-	);
+	return { [address]: Uint8Array.from(signedBytes) } as SignatureDictionary;
 };
 
 const signTransactions = async ({
 	identity,
 	transactions,
 	address,
-	network,
-	additionalAddresses
+	network
 }: {
 	identity: OptionIdentity;
 	transactions: Transaction[];
 	address: SolAddress;
 	network: SolanaNetworkType;
-	additionalAddresses?: SolAddress[];
 }): Promise<SignatureDictionary[]> =>
 	await Promise.all(
 		transactions.map(async (transaction) =>
-			signTransaction({ identity, transaction, address, network, additionalAddresses })
+			signTransaction({ identity, transaction, address, network })
 		)
 	);
 
 export const createSigner = ({
 	identity,
 	address,
-	network,
-	additionalAddresses
+	network
 }: {
 	identity: OptionIdentity;
 	address: SolAddress;
 	network: SolanaNetworkType;
-	additionalAddresses?: SolAddress[];
 }): TransactionPartialSigner => {
 	const signer: TransactionPartialSigner = {
 		address: solAddress(address),
 		signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
-			await signTransactions({ identity, transactions, address, network, additionalAddresses })
+			await signTransactions({ identity, transactions, address, network })
 	};
 
 	assertIsTransactionSigner(signer);

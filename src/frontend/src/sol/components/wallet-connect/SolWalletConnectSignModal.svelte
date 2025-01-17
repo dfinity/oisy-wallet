@@ -8,8 +8,6 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
-	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
-	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
@@ -19,7 +17,7 @@
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
-	import { WizardStepsSend, WizardStepsSign } from '$lib/enums/wizard-steps';
+	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
