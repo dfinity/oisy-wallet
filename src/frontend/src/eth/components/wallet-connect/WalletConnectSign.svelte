@@ -33,8 +33,8 @@
 		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
 		: undefined;
 
-	console.log('received approve request', request);
-	console.log('listener', listener);
+	$: console.log('received approve request', request);
+	$: console.log('listener', listener);
 </script>
 
 {#if $modalWalletConnectSign && nonNullish(request)}
