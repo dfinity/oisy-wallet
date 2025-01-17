@@ -1,5 +1,3 @@
-import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
-import { signWithSchnorr } from '$lib/api/signer.api';
 import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
@@ -21,9 +19,12 @@ import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import { signTransaction } from '$sol/services/sol-send.services';
+import {
+	setLifetimeAndFeePayerToTransaction,
+	signTransaction
+} from '$sol/services/sol-send.services';
+import { createSigner } from '$sol/services/sol-sign.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
 	mapSolTransactionMessage,
@@ -32,14 +33,6 @@ import {
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { address as solAddress } from '@solana/addresses';
-import {
-	assertIsTransactionPartialSigner,
-	assertIsTransactionSigner,
-	type SignatureDictionary,
-	type TransactionPartialSigner
-} from '@solana/signers';
-import { type Transaction } from '@solana/transactions';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {
@@ -178,38 +171,24 @@ export const sign = ({
 
 				const rpc = solanaHttpRpc(solNetwork);
 
-				const derivationPath = [SOLANA_DERIVATION_PATH_PREFIX, solNetwork];
+				const signer = createSigner({ identity, source, network: solNetwork });
 
-				const signer: TransactionPartialSigner = {
-					address: solAddress(source),
-					signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
-						await Promise.all(
-							transactions.map(async (transaction) => {
-								const signedBytes = await signWithSchnorr({
-									identity,
-									derivationPath,
-									keyId: SOLANA_KEY_ID,
-									message: Array.from(transaction.messageBytes)
-								});
-
-								return { [source]: Uint8Array.from(signedBytes) } as SignatureDictionary;
-							})
-						)
-				};
-
-				assertIsTransactionSigner(signer);
-				assertIsTransactionPartialSigner(signer);
-
-				const transactionMessage = await parseSolBase64TransactionMessage({
+				const transactionMessageRaw = await parseSolBase64TransactionMessage({
 					transactionMessage: base64EncodedTransactionMessage,
 					rpc
 				});
 
 				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct casting
-				if (!transactionMessageHasBlockhashLifetime(transactionMessage)) {
+				if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
 					// throw new Error('Blockhash not found in transaction message lifetime constraint');
 					return { success: false };
 				}
+
+				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
+					transactionMessage: transactionMessageRaw,
+					rpc,
+					feePayer: signer
+				});
 
 				progress(ProgressStepsSign.SIGN);
 
