@@ -170,28 +170,30 @@ type UserReply = record {
     user_id : nat32;
     principal_id : text;
     account_id : text;
-    user_name : text;
     my_referral_code : text;
     referred_by : opt text;
     referred_by_expires_at : opt nat64;
     fee_level : nat8;
     fee_level_expires_at : opt nat64;
-    campaign1_flags : vec bool;
 };
 type UserResult = variant { Ok : UserReply; Err : text };
 
 type UserBalancesReply = variant {
-    LP : BalancesReply;
+    LP : LPBalancesReply;
 };
-type BalancesReply = record {
+type LPBalancesReply = record {
     name : text;
     symbol : text;
     balance : float64;
     usd_balance : float64;
+    chain_0 : text;
     symbol_0 : text;
+    address_0 : text;
     amount_0 : float64;
     usd_amount_0 : float64;
+    chain_1 : text;
     symbol_1 : text;
+    address_1 : text;
     amount_1 : float64;
     usd_amount_1 : float64;
     ts : nat64;
@@ -212,30 +214,28 @@ type TokenReply = variant {
 };
 type LPTokenReply = record {
     token_id : nat32;
-    name : text;
     chain : text;
-    symbol : text;
-    token : text;
-    pool_id_of : nat32;
     address : text;
+    name : text;
+    symbol : text;
+    pool_id_of : nat32;
     decimals : nat8;
     fee : nat;
     total_supply : nat;
-    on_kong : bool;
+    is_removed : bool;
 };
 type ICTokenReply = record {
     token_id : nat32;
-    name : text;
     chain : text;
-    symbol : text;
-    token : text;
     canister_id : text;
+    name : text;
+    symbol : text;
     decimals : nat8;	
     fee : nat;
     icrc1 : bool;
     icrc2 : bool;
     icrc3 : bool;
-    on_kong : bool;
+    is_removed : bool;
 };
 type TokensResult = variant { Ok : vec TokenReply; Err : text };
 
@@ -268,7 +268,7 @@ type PoolReply = record {
     rolling_24h_num_swaps : nat;
     rolling_24h_apy : float64;
     lp_token_symbol : text;
-    on_kong : bool;             // flag indicating if displayed on Kong Swap
+    is_removed : bool;
 };
 type PoolsResult = variant { Ok : PoolsReply; Err : text };
 
@@ -325,15 +325,6 @@ type RequestsResult = variant { Ok : vec RequestsReply; Err : text };
 
 type TransfersResult = variant { Ok : vec TransferIdReply; Err : text };
 
-type AddTokenArgs = record {
-    token : text;
-    on_kong : opt bool;
-};
-type AddTokenReply = variant {
-    IC : ICTokenReply;
-};
-type AddTokenResult = variant { Ok : AddTokenReply; Err : text };
-
 type AddPoolArgs = record {
     token_0 : text;
     amount_0 : nat;
@@ -342,25 +333,28 @@ type AddPoolArgs = record {
     amount_1 : nat;
     tx_id_1 : opt TxId;
     lp_fee_bps : opt nat8;
-    on_kong : opt bool;
 };
 type AddPoolReply = record {
     tx_id : nat64;
-    symbol : text;
+    pool_id : nat32;
     request_id : nat64;
-    status : text;
+    status : text;    
+    name : text;
+    symbol : text;
     chain_0 : text;
+    address_0 : text;
     symbol_0 : text;
     amount_0 : nat;
     chain_1 : text;
+    address_1 : text;
     symbol_1 : text;
     amount_1 : nat;
-    add_lp_token_amount : nat;
     lp_fee_bps : nat8;
     lp_token_symbol : text;
+    add_lp_token_amount : nat;
     transfer_ids : vec TransferIdReply;
     claim_ids : vec nat64;
-    on_kong : bool;
+    is_removed : bool;
     ts : nat64;
 };
 type AddPoolResult = variant { Ok : AddPoolReply; Err : text };
@@ -368,13 +362,13 @@ type AddPoolResult = variant { Ok : AddPoolReply; Err : text };
 type AddLiquidityAmountsReply = record {
     symbol : text;
     chain_0 : text;
-    symbol_0 : text;
     address_0 : text;
+    symbol_0 : text;
     amount_0 : nat;
     fee_0 : nat;
     chain_1 : text;
-    symbol_1 : text;
     address_1 : text;
+    symbol_1 : text;
     amount_1 : nat;
     fee_1 : nat;
     add_lp_token_amount : nat;
@@ -391,13 +385,15 @@ type AddLiquidityArgs = record {
 };
 type AddLiquidityReply = record {
     tx_id : nat64;
-    symbol : text;
     request_id : nat64;
     status : text;
+    symbol : text;
     chain_0 : text;
+    address_0 : text;
     symbol_0 : text;
     amount_0 : nat;
     chain_1 : text;
+    address_1 : text;
     symbol_1 : text;
     amount_1 : nat;
     add_lp_token_amount : nat;
@@ -412,13 +408,13 @@ type ValidateAddLiquidityResult = variant { Ok : text; Err : text };
 type RemoveLiquidityAmountsReply = record {
     symbol : text;
     chain_0 : text;
-    symbol_0 : text;
     address_0 : text;
+    symbol_0 : text;
     amount_0 : nat;
     lp_fee_0 : nat;
     chain_1 : text;
+    address_1 : text;    
     symbol_1 : text;
-    address_1 : text;
     amount_1 : nat;
     lp_fee_1 : nat;
     remove_lp_token_amount : nat;
@@ -432,14 +428,16 @@ type RemoveLiquidityArgs = record {
 };
 type RemoveLiquidityReply = record {
     tx_id : nat64;
-    symbol : text;
     request_id : nat64;
     status : text;
+    symbol : text;
     chain_0 : text;
+    address_0 : text;
     symbol_0 : text;
     amount_0 : nat;
     lp_fee_0 : nat;
     chain_1 : text;
+    address_1 : text;
     symbol_1 : text;
     amount_1 : nat;
     lp_fee_1 : nat;
@@ -495,9 +493,11 @@ type SwapArgs = record {
 type SwapTxReply = record {
     pool_symbol : text;
     pay_chain : text;
+    pay_address : text;
     pay_symbol : text;
     pay_amount : nat;
     receive_chain : text;
+    receive_address : text;
     receive_symbol : text;
     receive_amount : nat;
     price : float64;
@@ -510,9 +510,11 @@ type SwapReply = record {
     request_id : nat64;
     status : text;
     pay_chain : text;
+    pay_address : text;
     pay_symbol : text;
     pay_amount : nat;
     receive_chain : text;
+    receive_address : text;
     receive_symbol : text;
     receive_amount : nat;
     mid_price : float64;
@@ -557,10 +559,8 @@ service : {
 
     // user() - returns user information
     get_user : () -> (UserResult) query;
-    // user_balances(principal_id, opt lp_token_wildcard) - returns all user balances or specific LP token balances (current only supports balance of LP tokens)
-    user_balances : (text, opt text) -> (UserBalancesResult) query;
-    // messages(opt message_id) - returns specific message or all messages of the user
-    messages : (opt nat64) -> (MessagesResult) query;
+    // user_balances(principal_id) - return user's LP balances
+    user_balances : (text) -> (UserBalancesResult) query;
     // requests(opt request_id) - return specific request or most recent requests
     requests : (opt nat64) -> (RequestsResult) query;
     // txs(opt principal_id) - return transactions filtered by principal id
@@ -621,6 +621,4 @@ service : {
 
     // admin functions
     check_pools : () -> (CheckPoolsResult);
-    get_requests : (opt nat64, opt nat32, opt nat16) -> (RequestsResult) query;
-    get_txs : (opt nat64, opt nat64, opt nat32, opt nat16) -> (TxsResult) query;
 }
