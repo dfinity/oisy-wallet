@@ -10,7 +10,7 @@
 	import type { WalletConnectSolSendTransactionParams } from '$sol/types/wallet-connect';
 
 	export let request: Web3WalletTypes.SessionRequest;
-	export let firstTransaction: WalletConnectSolSendTransactionParams;
+	export let transactionMessage: string;
 	export let network: SolanaNetwork;
 	export let listener: OptionWalletConnectListener;
 
@@ -22,6 +22,6 @@
 
 {#if nonNullish(token)}
 	<SendTokenContext {token}>
-		<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {network} />
+		<WalletConnectSendTokenModal {request} {transactionMessage} {listener} {network} />
 	</SendTokenContext>
 {/if}

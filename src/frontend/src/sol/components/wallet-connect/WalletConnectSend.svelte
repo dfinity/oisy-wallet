@@ -18,8 +18,8 @@
 		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
 		: undefined;
 
-	let firstTransaction: WalletConnectSolSendTransactionParams | undefined;
-	$: firstTransaction = request?.params.request.params?.[0];
+	let base64EncodedTransactionMessage: string | undefined;
+	$: base64EncodedTransactionMessage = request?.params.request.params?.transaction;
 
 	let chainId: string | undefined;
 	$: chainId = nonNullish(request?.params.chainId)
@@ -32,6 +32,11 @@
 		: undefined;
 </script>
 
-{#if $modalWalletConnectSend && nonNullish(request) && nonNullish(firstTransaction) && nonNullish(network)}
-	<WalletConnectSendModal {request} {firstTransaction} {network} bind:listener />
+{#if $modalWalletConnectSend && nonNullish(request) && nonNullish(base64EncodedTransactionMessage) && nonNullish(network)}
+	<WalletConnectSendModal
+		{request}
+		transactionMessage={base64EncodedTransactionMessage}
+		{network}
+		bind:listener
+	/>
 {/if}

@@ -195,9 +195,12 @@ export const parseSolBase64TransactionMessage = async ({
 
 export const mapSolTransactionMessage = (
 	transactionMessage: TransactionMessage
-): { amount: bigint } =>
+): { amount: bigint; payer?: SolAddress; source?: SolAddress; destination?: SolAddress } =>
 	Array.from(transactionMessage.instructions).reduce<{
 		amount: bigint;
+		payer?: SolAddress;
+		source?: SolAddress;
+		destination?: SolAddress;
 	}>(
 		(acc, instruction) => {
 			const parsedInstruction = parseSolInstruction(instruction);
@@ -208,23 +211,39 @@ export const mapSolTransactionMessage = (
 
 			const { instructionType, data } = parsedInstruction;
 
-			switch (instructionType) {
-				case SystemInstruction.CreateAccount:
-					return {
-						...acc,
-						amount: (acc.amount ?? 0n) + data.lamports,
-						payer: parsedInstruction.accounts.payer
-					};
-				case SystemInstruction.TransferSol:
-					return {
-						...acc,
-						amount: (acc.amount ?? 0n) + data.amount,
-						source: parsedInstruction.accounts.source,
-						destination: parsedInstruction.accounts.destination
-					};
-				default:
-					return acc;
+			if (instructionType === SystemInstruction.CreateAccount) {
+				const { lamports } = data;
+				const {
+					accounts: {
+						payer: { address: payer }
+					}
+				} = parsedInstruction;
+
+				return {
+					...acc,
+					amount: (acc.amount ?? 0n) + lamports,
+					payer
+				};
 			}
+
+			if (instructionType === SystemInstruction.TransferSol) {
+				const { amount } = data;
+				const {
+					accounts: {
+						source: { address: source },
+						destination: { address: destination }
+					}
+				} = parsedInstruction;
+
+				return {
+					...acc,
+					amount: (acc.amount ?? 0n) + amount,
+					source,
+					destination
+				};
+			}
+
+			return acc;
 		},
-		{ amount: 0n }
+		{ amount: 0n, payer: undefined, source: undefined, destination: undefined }
 	);
