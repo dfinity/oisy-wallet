@@ -54,11 +54,6 @@
 			bind:listener
 		/>
 	{:else if nonNullish(sourceSolNetwork)}
-		<SolWalletConnectSendModal
-			{request}
-			{firstTransaction}
-			network={sourceSolNetwork}
-			bind:listener
-		/>
+		<SolWalletConnectSendModal {request} network={sourceSolNetwork} bind:listener />
 	{/if}
 {/if}

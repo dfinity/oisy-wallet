@@ -36,6 +36,7 @@ import {
 	appendTransactionMessageInstructions,
 	createTransactionMessage,
 	setTransactionMessageLifetimeUsingBlockhash,
+	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import {
@@ -46,6 +47,25 @@ import {
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
+export const setLifetimeAndFeePayerToTransaction = async ({
+	transactionMessage,
+	rpc,
+	feePayer
+}: {
+	transactionMessage: TransactionMessage;
+	rpc: Rpc<SolanaRpcApi>;
+	feePayer: TransactionSigner;
+}): Promise<SolTransactionMessage> => {
+	const { getLatestBlockhash } = rpc;
+	const { value: latestBlockhash } = await getLatestBlockhash().send();
+
+	return pipe(
+		transactionMessage,
+		(tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+	);
+};
+
 const createDefaultTransaction = async ({
 	rpc,
 	feePayer,
@@ -54,16 +74,12 @@ const createDefaultTransaction = async ({
 	rpc: Rpc<SolanaRpcApi>;
 	feePayer: TransactionSigner;
 	version?: TransactionVersion;
-}) => {
-	const { getLatestBlockhash } = rpc;
-	const { value: latestBlockhash } = await getLatestBlockhash().send();
-
-	return pipe(
+}): Promise<SolTransactionMessage> =>
+	await pipe(
 		createTransactionMessage({ version }),
-		(tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+		async (tx) =>
+			await setLifetimeAndFeePayerToTransaction({ transactionMessage: tx, rpc, feePayer })
 	);
-};
 
 const createSolTransactionMessage = async ({
 	signer,
@@ -139,7 +155,7 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
-const signTransaction = async ({
+export const signTransaction = async ({
 	transactionMessage
 }: {
 	transactionMessage: SolTransactionMessage;

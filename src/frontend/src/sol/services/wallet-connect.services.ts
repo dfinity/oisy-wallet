@@ -1,8 +1,11 @@
+import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
+import { signWithSchnorr } from '$lib/api/signer.api';
 import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
+import { ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	execute,
@@ -18,9 +21,15 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseToken } from '$lib/utils/parse.utils';
+import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SESSION_REQUEST_SOL_SIGN_TRANSACTION } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import { sendSol, signSol } from '$sol/services/sol-send.services';
+import {
+	sendSol,
+	setLifetimeAndFeePayerToTransaction,
+	signSol,
+	signTransaction
+} from '$sol/services/sol-send.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
 	mapSolTransactionMessage,
@@ -28,14 +37,21 @@ import {
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
+import { address as solAddress } from '@solana/addresses';
+import {
+	assertIsTransactionPartialSigner,
+	assertIsTransactionSigner,
+	type SignatureDictionary,
+	type TransactionPartialSigner
+} from '@solana/signers';
+import { type Transaction } from '@solana/transactions';
 import { get } from 'svelte/store';
 
 type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
-	transactionMessage: string;
 	modalNext: () => void;
-	onProgress: () => void;
+	progress: (step: ProgressStepsSign) => void;
 	token: Token;
 	identity: OptionIdentity;
 };
@@ -50,12 +66,11 @@ type WalletConnectSignAndSendTransactionParams = WalletConnectExecuteParams & {
 	identity: OptionIdentity;
 };
 
-export const signTransaction = ({
+export const sign = ({
 	address,
-	transactionMessage,
 	modalNext,
 	token,
-	onProgress,
+	progress,
 	identity,
 	...params
 }: WalletConnectSignTransactionParams): Promise<ResultSuccess> =>
@@ -70,7 +85,15 @@ export const signTransaction = ({
 				destination?: SolAddress;
 			}
 		> => {
-			const { id, topic } = request;
+			const {
+				id,
+				topic,
+				params: {
+					request: {
+						params: { transaction: base64EncodedTransactionMessage }
+					}
+				}
+			} = request;
 
 			const {
 				network: { id: networkId }
@@ -99,7 +122,7 @@ export const signTransaction = ({
 			);
 
 			const parsedTransactionMessage = await parseSolBase64TransactionMessage({
-				transactionMessage,
+				transactionMessage: base64EncodedTransactionMessage,
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
@@ -128,19 +151,56 @@ export const signTransaction = ({
 			modalNext();
 
 			try {
-				const signature = await signSol({
-					identity,
-					token,
-					amount: parseToken({
-						value: `${amount}`,
-						unitName: token.decimals
-					}),
-					destination,
-					source: address,
-					onProgress
+				progress(ProgressStepsSign.SIGN);
+
+				assertNonNullish(source);
+
+				const rpc = solanaHttpRpc(solNetwork);
+
+				const derivationPath = [SOLANA_DERIVATION_PATH_PREFIX, solNetwork];
+
+				const signer: TransactionPartialSigner = {
+					address: solAddress(source),
+					signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
+						await Promise.all(
+							transactions.map(async (transaction) => {
+								const signedBytes = await signWithSchnorr({
+									identity,
+									derivationPath,
+									keyId: SOLANA_KEY_ID,
+									message: Array.from(transaction.messageBytes)
+								});
+
+								return { [source]: Uint8Array.from(signedBytes) } as SignatureDictionary;
+							})
+						)
+				};
+
+				assertIsTransactionSigner(signer);
+				assertIsTransactionPartialSigner(signer);
+
+				const transactionMessage = await parseSolBase64TransactionMessage({
+					transactionMessage: base64EncodedTransactionMessage,
+					rpc
 				});
 
+				const compiledTransactioMessage = await setLifetimeAndFeePayerToTransaction({
+					transactionMessage,
+					rpc,
+					feePayer: signer
+				});
+
+				progress(ProgressStepsSign.SIGN);
+
+				const { signature } = await signTransaction({
+					transactionMessage: compiledTransactioMessage
+				});
+
+				progress(ProgressStepsSign.APPROVE);
+
 				await listener.approveRequest({ id, topic, message: signature });
+
+				progress(ProgressStepsSign.DONE);
 
 				await trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_SUCCESS,

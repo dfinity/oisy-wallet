@@ -7,10 +7,8 @@
 	import WalletConnectSendTokenModal from '$sol/components/wallet-connect/WalletConnectSendTokenModal.svelte';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import type { SolanaNetwork } from '$sol/types/network';
-	import type { WalletConnectSolSendTransactionParams } from '$sol/types/wallet-connect';
 
 	export let request: Web3WalletTypes.SessionRequest;
-	export let transactionMessage: string;
 	export let network: SolanaNetwork;
 	export let listener: OptionWalletConnectListener;
 
@@ -22,6 +20,6 @@
 
 {#if nonNullish(token)}
 	<SendTokenContext {token}>
-		<WalletConnectSendTokenModal {request} {transactionMessage} {listener} {network} />
+		<WalletConnectSendTokenModal {request} {listener} {network} />
 	</SendTokenContext>
 {/if}

@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { assertNonNullish, isNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { getContext } from 'svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -12,17 +10,15 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSend, ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import { ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionSolAddress } from '$lib/types/address';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal,
@@ -30,17 +26,10 @@
 	} from '$lib/utils/network.utils';
 	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
 	import WalletConnectSendReview from '$sol/components/wallet-connect/WalletConnectSendReview.svelte';
-	import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-	import { signAndSendTransaction as sendServices } from '$sol/services/wallet-connect.services';
+	import { sign as signService } from '$sol/services/wallet-connect.services';
 	import type { SolanaNetwork } from '$sol/types/network';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-	import {
-		mapSolTransactionMessage,
-		parseSolBase64TransactionMessage
-	} from '$sol/utils/sol-transactions.utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
-	export let transactionMessage: string;
 	export let network: SolanaNetwork;
 
 	/**
@@ -65,7 +54,8 @@
 				? $solAddressLocal
 				: $solAddressMainnet;
 
-
+	let data:string;
+	$: data = request.params.request.params.transaction;
 
 	/**
 	 * Modal
@@ -107,23 +97,16 @@
 	 * Send and approve
 	 */
 
-	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
+	let sendProgressStep: string = ProgressStepsSign.INITIALIZATION;
 
 	const send = async () => {
-		const { success } = await sendServices({
+		const { success } = await signService({
 			request,
 			listener,
 			address,
-			amount: BigNumber.from(amount),
 			modalNext: modal.next,
 			token: $sendToken,
-			onProgress: () => {
-				if (sendProgressStep === ProgressStepsSendSol.INITIALIZATION) {
-					sendProgressStep = ProgressStepsSendSol.SEND;
-				} else if (sendProgressStep === ProgressStepsSendSol.SEND) {
-					sendProgressStep = ProgressStepsSendSol.DONE;
-				}
-			},
+			progress: (step: ProgressStepsSign) => (sendProgressStep = step),
 			identity: $authIdentity
 		});
 
@@ -140,7 +123,7 @@
 		<WalletConnectSendReview
 			{amount}
 			{destination}
-			data={transactionMessage}
+			{data}
 			{network}
 			on:icApprove={send}
 			on:icReject={reject}

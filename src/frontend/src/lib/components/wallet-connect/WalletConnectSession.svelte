@@ -34,8 +34,6 @@
 		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 		SESSION_REQUEST_SOL_SIGN_TRANSACTION
 	} from '$sol/constants/wallet-connect.constants';
-	import { getCompiledTransactionMessageDecoder } from '@solana/web3.js';
-	import type { TransactionMessageBytes } from '@solana/transactions';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -230,21 +228,13 @@
 				id,
 				topic,
 				params: {
-					request: { method, params:{transaction} }
+					request: { method }
 				}
 			} = sessionRequest;
 
 			switch (method) {
 				case SESSION_REQUEST_SOL_SIGN_TRANSACTION: {
-					console.log(sessionRequest)
-
-					const decoder = getCompiledTransactionMessageDecoder();
-					const rawTransaction = Buffer.from(
-						transaction,
-						'base64'
-					) as unknown as TransactionMessageBytes;
-
-					console.log(123, decoder.decode(rawTransaction));
+					console.log(sessionRequest);
 					return;
 				}
 				case SESSION_REQUEST_ETH_SIGN_V4:

@@ -2,14 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
-	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import WalletConnectSendModal from '$sol/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 	import type { SolanaNetwork } from '$sol/types/network';
-	import type { WalletConnectSolSendTransactionParams } from '$sol/types/wallet-connect';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -35,7 +33,6 @@
 {#if $modalWalletConnectSend && nonNullish(request) && nonNullish(base64EncodedTransactionMessage) && nonNullish(network)}
 	<WalletConnectSendModal
 		{request}
-		transactionMessage={base64EncodedTransactionMessage}
 		{network}
 		bind:listener
 	/>
