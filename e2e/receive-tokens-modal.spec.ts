@@ -20,12 +20,6 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
-		viewportSize: !isMobile
-			? {
-					width: MODALS_VIEWPORT_WIDTH,
-					height: RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT
-				}
-			: undefined
 	});
 	await homepageLoggedIn.waitForReady();
 	await homepageLoggedIn.activateTestnetSettings();

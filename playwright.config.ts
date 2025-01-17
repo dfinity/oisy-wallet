@@ -23,7 +23,11 @@ const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
 const appleProjects = [
 	{
 		name: 'Safari',
-		use: devices['Desktop Safari']
+		use: {
+			...devices['Desktop Safari'],
+			screen: { width: 1920, height: 1080 }, 
+			viewport: { width: 1280, height: 720 },
+		},
 	},
 	{
 		name: 'iPhone SE',
@@ -34,15 +38,23 @@ const appleProjects = [
 const nonAppleProjects = [
 	{
 		name: 'Google Chrome',
-		use: devices['Desktop Chrome']
+		use: { 
+			...devices['Desktop Chrome '], channel: 'chrome',
+			screen: { width: 1920, height: 1080 }, 
+			viewport: { width: 1280, height: 720 },
+		},
 	},
 	{
 		name: 'Firefox',
-		use: devices['Desktop Firefox']
+		use: {
+			...devices['Desktop Firefox'],
+			screen: { width: 1920, height: 1080 }, 
+			viewport: { width: 1280, height: 720 },
+		},
 	},
 	{
-		name: 'Pixel 5',
-		use: devices['Pixel 5']
+		name: 'Pixel 7',
+		use: devices['Pixel 7']
 	}
 ];
 
