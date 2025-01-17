@@ -2,21 +2,21 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
-	MANAGE_TOKEN_LIST_SAVE,
+	MANAGE_TOKENS_MODAL_BUTTON,
+	MANAGE_TOKENS_MODAL_SAVE,
+	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
 	NAVIGATION_ITEM_HOMEPAGE,
-	NAVIGATION_ITEM_MANAGE_LIST,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
-	NAVIGATION_MENU_NETWORKS,
-	NETWORK,
+	NETWORKS_SWITCHER_DROPDOWN,
+	NETWORKS_SWITCHER_SELECTOR,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD,
-	TOKEN_TOGGLE
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -253,11 +253,11 @@ abstract class Homepage {
 		tokenSymbol: string;
 		networkName: string;
 	}): Promise<void> {
-		await this.clickByTestId(NAVIGATION_MENU_NETWORKS);
-		await this.#page.click(`[data-tid^="${NETWORK}-${networkName}"]`);
-		await this.clickByTestId(NAVIGATION_ITEM_MANAGE_LIST);
-		await this.#page.click(`[data-tid^="${TOKEN_TOGGLE}-${tokenSymbol}"]`);
-		await this.clickByTestId(MANAGE_TOKEN_LIST_SAVE);
+		await this.clickByTestId(NETWORKS_SWITCHER_DROPDOWN);
+		await this.#page.click(`[data-tid^="${NETWORKS_SWITCHER_SELECTOR}-${networkName}"]`);
+		await this.clickByTestId(MANAGE_TOKENS_MODAL_BUTTON);
+		await this.#page.click(`[data-tid^="${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}"]`);
+		await this.clickByTestId(MANAGE_TOKENS_MODAL_SAVE);
 	}
 
 	getTokenCardLocator({
