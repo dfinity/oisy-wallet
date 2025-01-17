@@ -6,7 +6,7 @@
 	import { isIcrcTokenToggleDisabled } from '$lib/utils/token-toggle.utils';
 
 	export let token: IcrcCustomToken;
-	export let testIdPrefix = 'token-toggle';
+	export let testIdPrefix = TOKEN_TOGGLE;
 
 	let disabled = false;
 	$: disabled = isIcrcTokenToggleDisabled(token);
