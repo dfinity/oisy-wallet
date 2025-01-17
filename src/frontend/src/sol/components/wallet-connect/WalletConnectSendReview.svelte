@@ -5,11 +5,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { solAddressMainnet } from '$lib/derived/address.derived';
-	import { balance } from '$lib/derived/balances.derived';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import WalletConnectSendData from '$sol/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import { balancesStore } from '$lib/stores/balances.store';
 
 	export let amount: bigint;
 	export let destination: string;
@@ -18,7 +18,10 @@
 
 	let network: SolanaNetwork;
 	let decimals: number;
-	$: ({ network, decimals } = token);
+	$: ({ id: tokenId, network, decimals } = token);
+
+	let balance: BigNumber | undefined;
+	$: balance = $balancesStore?.[tokenId]?.data;
 
 	$: amount, console.log('amount', amount);
 </script>
@@ -29,7 +32,7 @@
 		amount={formatToken({ value: BigNumber.from(amount), unitName: decimals })}
 		{destination}
 		{token}
-		balance={$balance}
+		{balance}
 		source={$solAddressMainnet ?? ''}
 	>
 		<WalletConnectSendData {data} />

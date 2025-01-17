@@ -73,8 +73,6 @@
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
-
-		console.log('amount', amount, destination, data);
 	})();
 
 	/**
