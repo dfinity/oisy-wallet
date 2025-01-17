@@ -76,5 +76,5 @@ export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
-export const MANAGE_TOKEN_LIST_SAVE = 'manage-token-list-save';
+export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
 export const NETWORK = 'network';
