@@ -637,6 +637,7 @@
 			"events": "Events",
 			"message": "Message",
 			"hex_data": "HEX Data",
+			"base64_data": "Base-64 Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message"
 		},
