@@ -181,11 +181,11 @@ export const sign = ({
 					return { success: false };
 				}
 
-				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
-					transactionMessage: transactionMessageRaw,
-					rpc,
-					feePayer: signer
-				});
+				// const transactionMessage = await setLifetimeAndFeePayerToTransaction({
+				// 	transactionMessage: transactionMessageRaw,
+				// 	rpc,
+				// 	feePayer: signer
+				// });
 
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 				const additionalSigners = Object.keys(signatures)
@@ -199,15 +199,21 @@ export const sign = ({
 					);
 				const transactionMessageWithAllSigners = addSignersToTransactionMessage(
 					additionalSigners,
-					transactionMessage
+					transactionMessageRaw
 				);
+
+				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
+					transactionMessage: transactionMessageWithAllSigners,
+					rpc,
+					feePayer: signer
+				});
 
 				progress(ProgressStepsSign.SIGN);
 
-				console.log('transactionMessage', transactionMessageWithAllSigners);
+				console.log('transactionMessage', transactionMessageWithAllSigners, transactionMessage);
 
 				const { signedTransaction, signature } = await signTransaction({
-					transactionMessage: transactionMessageWithAllSigners
+					transactionMessage: transactionMessage
 				});
 
 				console.log('signature', signature);
