@@ -7,7 +7,9 @@
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import SolWalletConnectSignModal from '$sol/components/wallet-connect/WalletConnectSignModal.svelte';
+	import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
+	import type { SolanaNetwork } from '$sol/types/network';
+	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -19,6 +21,11 @@
 	let solChainId: string | undefined;
 	$: solChainId = nonNullish(request?.params.chainId)
 		? CAIP10_CHAINS[request.params.chainId]?.chainId
+		: undefined;
+
+	let sourceSolNetwork: SolanaNetwork | undefined;
+	$: sourceSolNetwork = nonNullish(solChainId)
+		? $enabledSolanaNetworks.find(({ chainId: cId }) => cId === solChainId)
 		: undefined;
 
 	let request: Web3WalletTypes.SessionRequest | undefined;
@@ -35,7 +42,7 @@
 {#if $modalWalletConnectSign && nonNullish(request)}
 	{#if nonNullish(ethChainId)}
 		<WalletConnectSignModal {request} bind:listener />
-	{:else if nonNullish(solChainId)}
-		<SolWalletConnectSignModal {request} bind:listener />
+	{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
+		<SolWalletConnectSignModal {request} network={sourceSolNetwork} bind:listener />
 	{/if}
 {/if}

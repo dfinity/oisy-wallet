@@ -3,7 +3,12 @@
 	import { assertNonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { getContext } from 'svelte';
+	import {
+		SOLANA_DEVNET_TOKEN,
+		SOLANA_LOCAL_TOKEN,
+		SOLANA_TESTNET_TOKEN,
+		SOLANA_TOKEN
+	} from '$env/tokens/tokens.sol.env';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
@@ -17,9 +22,9 @@
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { OptionSolAddress, SolAddress } from '$lib/types/address';
+	import type { OptionSolAddress } from '$lib/types/address';
 	import type { NetworkId } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import {
 		isNetworkIdSOLDevnet,
@@ -38,12 +43,6 @@
 	export let network: SolanaNetwork;
 
 	/**
-	 * Send context store
-	 */
-
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	/**
 	 * Transaction
 	 */
 
@@ -51,13 +50,14 @@
 	$: ({ id: networkId } = network);
 
 	let address: OptionSolAddress;
-	$: address = isNetworkIdSOLTestnet(networkId)
-		? $solAddressTestnet
+	let token: Token;
+	$: [address, token] = isNetworkIdSOLTestnet(networkId)
+		? [$solAddressTestnet, SOLANA_TESTNET_TOKEN]
 		: isNetworkIdSOLDevnet(networkId)
-			? $solAddressDevnet
+			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
 			: isNetworkIdSOLLocal(networkId)
-				? $solAddressLocal
-				: $solAddressMainnet;
+				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+				: [$solAddressMainnet, SOLANA_TOKEN];
 
 	let data: string;
 	let amount: bigint | undefined;
@@ -69,7 +69,10 @@
 		// This should not happen since we arrive here only if there is a transaction message
 		assertNonNullish(data);
 
-		( {amount,destination} = await decodeService({ base64EncodedTransactionMessage: data, networkId }));
+		({ amount, destination } = await decodeService({
+			base64EncodedTransactionMessage: data,
+			networkId
+		}));
 	})();
 
 	/**
@@ -120,7 +123,7 @@
 			listener,
 			address,
 			modalNext: modal.next,
-			token: $sendToken,
+			token,
 			progress: (step: ProgressStepsSign) => (sendProgressStep = step),
 			identity: $authIdentity
 		});
