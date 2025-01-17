@@ -1,5 +1,6 @@
 import type { SolAddress } from '$lib/types/address';
 import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
+import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type {
 	SolInstruction,
 	SolParsedSystemInstruction,
@@ -26,7 +27,10 @@ import {
 import { address as solAddress } from '@solana/addresses';
 import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/instructions';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { TransactionMessage } from '@solana/transaction-messages';
+import type {
+	CompilableTransactionMessage,
+	TransactionMessage
+} from '@solana/transaction-messages';
 import { getTransactionDecoder } from '@solana/transactions';
 import {
 	decompileTransactionMessageFetchingLookupTables,
@@ -186,7 +190,7 @@ export const parseSolBase64TransactionMessage = async ({
 }: {
 	transactionMessage: string;
 	rpc: Rpc<SolanaRpcApi>;
-}): Promise<TransactionMessage> => {
+}): Promise<CompilableTransactionMessage> => {
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
 	const { messageBytes } = getTransactionDecoder().decode(transactionBytes);
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
@@ -247,3 +251,8 @@ export const mapSolTransactionMessage = (
 		},
 		{ amount: 0n, payer: undefined, source: undefined, destination: undefined }
 	);
+
+export const transactionMessageHasBlockhashLifetime = (
+	message: CompilableTransactionMessage
+): message is SolTransactionMessage =>
+	'blockhash' in message.lifetimeConstraint && 'lastValidBlockHeight' in message.lifetimeConstraint;

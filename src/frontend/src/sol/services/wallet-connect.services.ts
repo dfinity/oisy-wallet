@@ -25,16 +25,12 @@ import { parseToken } from '$lib/utils/parse.utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SESSION_REQUEST_SOL_SIGN_TRANSACTION } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import {
-	sendSol,
-	setLifetimeAndFeePayerToTransaction,
-	signSol,
-	signTransaction
-} from '$sol/services/sol-send.services';
+import { sendSol, signSol, signTransaction } from '$sol/services/sol-send.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
 	mapSolTransactionMessage,
-	parseSolBase64TransactionMessage
+	parseSolBase64TransactionMessage,
+	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -211,16 +207,16 @@ export const sign = ({
 					rpc
 				});
 
-				const compiledTransactioMessage = await setLifetimeAndFeePayerToTransaction({
-					transactionMessage,
-					rpc,
-					feePayer: signer
-				});
+				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct casting
+				if (!transactionMessageHasBlockhashLifetime(transactionMessage)) {
+					// throw new Error('Blockhash not found in transaction message lifetime constraint');
+					return { success: false };
+				}
 
 				progress(ProgressStepsSign.SIGN);
 
 				const { signature } = await signTransaction({
-					transactionMessage: compiledTransactioMessage
+					transactionMessage
 				});
 
 				progress(ProgressStepsSign.APPROVE);

@@ -47,7 +47,7 @@ import {
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
-export const setLifetimeAndFeePayerToTransaction = async ({
+const setLifetimeAndFeePayerToTransaction = async ({
 	transactionMessage,
 	rpc,
 	feePayer
