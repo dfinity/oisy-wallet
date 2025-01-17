@@ -17,7 +17,7 @@ let homepageLoggedIn: HomepageLoggedIn;
 testWithII.beforeEach(async ({ page, iiPage }) => {
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
-		iiPage,
+		iiPage
 	});
 	await homepageLoggedIn.waitForReady();
 	await homepageLoggedIn.activateTestnetSettings();
