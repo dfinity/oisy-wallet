@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { BigNumber } from '@ethersproject/bignumber';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -6,6 +7,7 @@
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { Token } from '$lib/types/token';
+	import { formatToken } from '$lib/utils/format.utils';
 	import WalletConnectSendData from '$sol/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { SolanaNetwork } from '$sol/types/network';
 
@@ -15,7 +17,8 @@
 	export let token: Token;
 
 	let network: SolanaNetwork;
-	$: ({ network } = token);
+	let decimals: number;
+	$: ({ network, decimals } = token);
 
 	$: amount, console.log('amount', amount);
 </script>
@@ -23,7 +26,7 @@
 <ContentWithToolbar>
 	<!-- TODO: add address for devnet and testnet-->
 	<SendData
-		amount={amount.toString()}
+		amount={formatToken({ value: BigNumber.from(amount), unitName: decimals })}
 		{destination}
 		{token}
 		balance={$balance}
