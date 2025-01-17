@@ -33,7 +33,9 @@ import {
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { getBase64Decoder } from '@solana/codecs';
 import { addSignersToTransactionMessage } from '@solana/signers';
+import { getTransactionEncoder } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {
@@ -204,11 +206,16 @@ export const sign = ({
 
 				console.log('transactionMessage', transactionMessageWithAllSigners);
 
-				const { signature } = await signTransaction({
+				const { signedTransaction, signature } = await signTransaction({
 					transactionMessage: transactionMessageWithAllSigners
 				});
 
 				console.log('signature', signature);
+
+				const bar = getTransactionEncoder().encode(signedTransaction);
+				const transactionBytes = getBase64Decoder().decode(bar);
+
+				console.log('bar', bar, transactionBytes);
 
 				progress(ProgressStepsSign.APPROVE);
 
