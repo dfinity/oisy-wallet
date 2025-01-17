@@ -4,7 +4,7 @@
 
 	export let network: Network;
 	export let usdBalance: number | undefined = undefined;
-	export let testIdPrefix = 'network';
+	export let testIdPrefix = NETWORK;
 
 	let id: NetworkId;
 	let name: string;
