@@ -219,7 +219,11 @@ export const sign = ({
 
 				progress(ProgressStepsSign.APPROVE);
 
-				await listener.approveRequest({ id, topic, message: { signature } });
+				await listener.approveRequest({
+					id,
+					topic,
+					message: { signature, transaction: transactionBytes }
+				});
 
 				progress(ProgressStepsSign.DONE);
 
