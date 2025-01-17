@@ -144,7 +144,7 @@
 			amount={BigNumber.from(amount ?? 0n)}
 			destination={destination ?? ''}
 			{data}
-			{network}
+			{token}
 			on:icApprove={send}
 			on:icReject={reject}
 		/>
