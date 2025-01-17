@@ -31,9 +31,5 @@
 </script>
 
 {#if $modalWalletConnectSend && nonNullish(request) && nonNullish(base64EncodedTransactionMessage) && nonNullish(network)}
-	<WalletConnectSendModal
-		{request}
-		{network}
-		bind:listener
-	/>
+	<WalletConnectSendModal {request} {network} bind:listener />
 {/if}

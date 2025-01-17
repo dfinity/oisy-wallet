@@ -16,6 +16,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
@@ -47,6 +48,11 @@ import {
 import { type Transaction } from '@solana/transactions';
 import { get } from 'svelte/store';
 
+interface WalletConnectDecodeTransactionParams {
+	base64EncodedTransactionMessage: string;
+	networkId: NetworkId;
+}
+
 type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
@@ -64,6 +70,27 @@ type WalletConnectSignAndSendTransactionParams = WalletConnectExecuteParams & {
 	onProgress: () => void;
 	token: Token;
 	identity: OptionIdentity;
+};
+
+export const decode = async ({
+	base64EncodedTransactionMessage,
+	networkId
+}: WalletConnectDecodeTransactionParams) => {
+	const solNetwork = mapNetworkIdToNetwork(networkId);
+
+	assertNonNullish(
+		solNetwork,
+		replacePlaceholders(get(i18n).init.error.no_solana_network, {
+			$network: networkId.description ?? ''
+		})
+	);
+
+	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
+		transactionMessage: base64EncodedTransactionMessage,
+		rpc: solanaHttpRpc(solNetwork)
+	});
+
+	return mapSolTransactionMessage(parsedTransactionMessage);
 };
 
 export const sign = ({

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { assertNonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { getContext } from 'svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -16,7 +18,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { OptionSolAddress } from '$lib/types/address';
+	import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import {
@@ -26,7 +28,10 @@
 	} from '$lib/utils/network.utils';
 	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
 	import WalletConnectSendReview from '$sol/components/wallet-connect/WalletConnectSendReview.svelte';
-	import { sign as signService } from '$sol/services/wallet-connect.services';
+	import {
+		sign as signService,
+		decode as decodeService
+	} from '$sol/services/wallet-connect.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 
 	export let request: Web3WalletTypes.SessionRequest;
@@ -54,8 +59,18 @@
 				? $solAddressLocal
 				: $solAddressMainnet;
 
-	let data:string;
-	$: data = request.params.request.params.transaction;
+	let data: string;
+	let amount: bigint | undefined;
+	let destination: OptionSolAddress;
+
+	$: (async () => {
+		data = request.params.request.params.transaction;
+
+		// This should not happen since we arrive here only if there is a transaction message
+		assertNonNullish(data);
+
+		( {amount,destination} = await decodeService({ base64EncodedTransactionMessage: data, networkId }));
+	})();
 
 	/**
 	 * Modal
@@ -121,8 +136,8 @@
 		<SolSendProgress bind:sendProgressStep />
 	{:else}
 		<WalletConnectSendReview
-			{amount}
-			{destination}
+			amount={BigNumber.from(amount)}
+			destination={destination ?? ''}
 			{data}
 			{network}
 			on:icApprove={send}
