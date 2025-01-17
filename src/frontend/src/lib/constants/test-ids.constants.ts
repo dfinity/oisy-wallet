@@ -1,7 +1,7 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
-export const NAVIGATION_MENU_NETWORKS = 'navigation-menu-networks';
+export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
