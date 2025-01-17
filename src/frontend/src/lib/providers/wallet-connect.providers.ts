@@ -160,7 +160,7 @@ export const initWalletConnect = async ({
 	}: {
 		id: number;
 		topic: string;
-		message: string;
+		message: string | { signature: string };
 	}) =>
 		await respond({
 			topic,
