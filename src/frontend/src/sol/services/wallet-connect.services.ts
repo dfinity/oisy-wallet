@@ -205,6 +205,8 @@ export const sign = ({
 
 				const { signature } = await signTransaction({ transactionMessage });
 
+				console.log('signature', signature);
+
 				progress(ProgressStepsSign.APPROVE);
 
 				await listener.approveRequest({ id, topic, message: signature });
