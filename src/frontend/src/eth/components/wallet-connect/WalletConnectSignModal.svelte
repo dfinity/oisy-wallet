@@ -7,11 +7,11 @@
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 
 	export let listener: OptionWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;
