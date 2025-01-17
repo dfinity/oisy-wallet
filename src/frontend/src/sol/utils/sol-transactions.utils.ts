@@ -31,7 +31,7 @@ import type {
 	CompilableTransactionMessage,
 	TransactionMessage
 } from '@solana/transaction-messages';
-import { getTransactionDecoder } from '@solana/transactions';
+import { getTransactionDecoder, type Transaction } from '@solana/transactions';
 import {
 	decompileTransactionMessageFetchingLookupTables,
 	getBase64Encoder,
@@ -184,6 +184,11 @@ export const parseSolInstruction = (
 	}
 };
 
+export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
+	const transactionBytes = getBase64Encoder().encode(transactionMessage);
+	return getTransactionDecoder().decode(transactionBytes);
+};
+
 export const parseSolBase64TransactionMessage = async ({
 	transactionMessage,
 	rpc
@@ -191,8 +196,7 @@ export const parseSolBase64TransactionMessage = async ({
 	transactionMessage: string;
 	rpc: Rpc<SolanaRpcApi>;
 }): Promise<CompilableTransactionMessage> => {
-	const transactionBytes = getBase64Encoder().encode(transactionMessage);
-	const { messageBytes } = getTransactionDecoder().decode(transactionBytes);
+	const { messageBytes } = decodeTransactionMessage(transactionMessage);
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };

@@ -27,6 +27,7 @@ import {
 import { createSigner } from '$sol/services/sol-sign.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
+	decodeTransactionMessage,
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage,
 	transactionMessageHasBlockhashLifetime
@@ -171,7 +172,15 @@ export const sign = ({
 
 				const rpc = solanaHttpRpc(solNetwork);
 
-				const signer = createSigner({ identity, address: source, network: solNetwork });
+				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
+				const additionalAddresses = Object.keys(signatures).filter((address) => address !== source);
+
+				const signer = createSigner({
+					identity,
+					address: source,
+					network: solNetwork,
+					additionalAddresses
+				});
 
 				const transactionMessageRaw = await parseSolBase64TransactionMessage({
 					transactionMessage: base64EncodedTransactionMessage,
