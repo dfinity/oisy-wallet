@@ -9,14 +9,12 @@ import {
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { testWithII } from '@dfinity/internet-identity-playwright';
-import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { getReceiveTokensModalAddressLabelSelectors } from './utils/selectors.utils';
 
-const RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT = 900;
 let homepageLoggedIn: HomepageLoggedIn;
 
-testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
+testWithII.beforeEach(async ({ page, iiPage }) => {
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
