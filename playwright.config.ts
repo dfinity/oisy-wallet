@@ -26,7 +26,7 @@ const appleProjects = [
 		use: {
 			...devices['Desktop Safari'],
 			screen: { width: 1920, height: 1080 },
-			viewport: { width: 1280, height: 720 }
+			viewport: { width: 1920, height: 1080 }
 		}
 	},
 	{
@@ -42,7 +42,7 @@ const nonAppleProjects = [
 			...devices['Desktop Chrome '],
 			channel: 'chrome',
 			screen: { width: 1920, height: 1080 },
-			viewport: { width: 1280, height: 720 }
+			viewport: { width: 1920, height: 1080 }
 		}
 	},
 	{
@@ -50,7 +50,7 @@ const nonAppleProjects = [
 		use: {
 			...devices['Desktop Firefox'],
 			screen: { width: 1920, height: 1080 },
-			viewport: { width: 1280, height: 720 }
+			viewport: { width: 1920, height: 1080 }
 		}
 	},
 	{
