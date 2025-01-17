@@ -139,7 +139,7 @@
 		<SolSendProgress bind:sendProgressStep />
 	{:else}
 		<WalletConnectSendReview
-			amount={BigNumber.from(amount)}
+			amount={BigNumber.from(amount ?? 0n)}
 			destination={destination ?? ''}
 			{data}
 			{network}
