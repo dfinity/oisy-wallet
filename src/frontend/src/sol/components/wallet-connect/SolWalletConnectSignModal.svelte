@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { assertNonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -9,6 +8,8 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
+	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
@@ -18,7 +19,7 @@
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { WizardStepsSend, WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -81,12 +82,12 @@
 
 	const steps: WizardSteps = [
 		{
-			name: WizardStepsSend.REVIEW,
+			name: WizardStepsSign.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: WizardStepsSend.SENDING,
-			title: $i18n.send.text.sending
+			name: WizardStepsSign.SIGNING,
+			title: $i18n.send.text.signing
 		}
 	];
 
@@ -133,9 +134,11 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<WalletConnectModalTitle slot="title">{$i18n.send.text.send}</WalletConnectModalTitle>
+	<WalletConnectModalTitle slot="title"
+		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
+	>
 
-	{#if currentStep?.name === WizardStepsSend.SENDING}
+	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<SolSendProgress bind:sendProgressStep />
 	{:else}
 		<WalletConnectSendReview

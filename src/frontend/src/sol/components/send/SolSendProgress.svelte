@@ -1,6 +1,6 @@
 <script lang="ts">
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 
@@ -9,18 +9,18 @@
 	let steps: ProgressSteps;
 	$: steps = [
 		{
-			step: ProgressStepsSendSol.INITIALIZATION,
-			text: $i18n.send.text.initializing_transaction,
+			step: ProgressStepsSign.INITIALIZATION,
+			text: $i18n.send.text.initializing,
 			state: 'in_progress'
 		},
 		{
-			step: ProgressStepsSendSol.SEND,
-			text: $i18n.send.text.sending,
+			step: ProgressStepsSign.SIGN,
+			text: $i18n.send.text.signing_message,
 			state: 'next'
 		},
 		{
-			step: ProgressStepsSendSol.RELOAD,
-			text: $i18n.send.text.refreshing_ui,
+			step: ProgressStepsSign.APPROVE,
+			text: $i18n.send.text.approving,
 			state: 'next'
 		}
 	];
