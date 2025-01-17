@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -10,7 +9,7 @@
 	import WalletConnectSendData from '$sol/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { SolanaNetwork } from '$sol/types/network';
 
-	export let amount: BigNumber;
+	export let amount: bigint;
 	export let destination: string;
 	export let data: string | undefined;
 	export let token: Token;
