@@ -22,6 +22,7 @@
 	export let placeholder = '0';
 	export let errorType: ConvertAmountErrorType = undefined;
 	export let amountSetToMax = false;
+	export let loading = false;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
 
 	const dispatch = createEventDispatcher();
@@ -70,6 +71,7 @@
 					{name}
 					{placeholder}
 					{disabled}
+					{loading}
 					decimals={token.decimals}
 					error={nonNullish(errorType)}
 					on:focus={onFocus}
