@@ -29,7 +29,9 @@ export const isRouteDappExplorer = ({ route: { id } }: Page): boolean =>
 export const isRouteActivity = ({ route: { id } }: Page): boolean =>
 	id === `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
 
-export const isRouteTokens = ({ route: { id } }: Page): boolean => id === ROUTE_ID_GROUP_APP;
+// The page of the link for WalletConnect is the same as the page where we show the Tokens list
+export const isRouteTokens = ({ route: { id } }: Page): boolean =>
+	id === ROUTE_ID_GROUP_APP || id === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 
 const tokenUrl = ({
 	token: {
