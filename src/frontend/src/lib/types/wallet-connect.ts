@@ -15,7 +15,7 @@ export interface WalletConnectListener extends WebSocketListener {
 	approveRequest: (params: {
 		id: number;
 		topic: string;
-		message: string | { signature: string; transaction: string };
+		message: string | { signature: string; transaction?: string };
 	}) => Promise<void>;
 }
 

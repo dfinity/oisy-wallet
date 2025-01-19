@@ -34,13 +34,14 @@ import {
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
-import { getBase58Codec, getBase64Decoder } from '@solana/codecs';
+import { getBase64Decoder } from '@solana/codecs';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import type { Commitment } from '@solana/rpc-types';
-import { addSignersToTransactionMessage } from '@solana/signers';
+import { addSignersToTransactionMessage, signTransactionMessageWithSigners } from '@solana/signers';
 import {
 	assertTransactionIsFullySigned,
+	getSignatureFromTransaction,
 	type Base64EncodedWireTransaction
 } from '@solana/transactions';
 import { getTransactionEncoder, sendAndConfirmTransactionFactory } from '@solana/web3.js';
@@ -246,7 +247,6 @@ export const sign = ({
 
 				const bar = getTransactionEncoder().encode(signedTransaction);
 				const transactionBytes = getBase64Decoder().decode(bar);
-				const bar2 = getBase58Codec().decode(bar);
 
 				console.log('bar', bar, transactionBytes);
 
@@ -262,6 +262,28 @@ export const sign = ({
 				console.log('simulationResult', simulationResult);
 
 				progress(ProgressStepsSign.APPROVE);
+
+				const signedTransaction2 = await signTransactionMessageWithSigners(transactionMessageRaw);
+
+				const signature2 = getSignatureFromTransaction(signedTransaction2);
+
+				const bar2 = getTransactionEncoder().encode(signedTransaction2);
+				const transactionBytes2 = getBase64Decoder().decode(bar2);
+
+				const simulationResult2 = await simulateTransaction(
+					transactionBytes2 as Base64EncodedWireTransaction,
+					{
+						encoding: 'base64'
+					}
+				).send();
+
+				console.log('simulationResult2', simulationResult2);
+
+				await listener.approveRequest({
+					id,
+					topic,
+					message: { signature: signature2 }
+				});
 
 				// await listener.approveRequest({
 				// 	id,
@@ -293,11 +315,11 @@ export const sign = ({
 				};
 
 				// Explicitly do not await to proceed in the background and allow the UI to continue
-				await sendSignedTransaction({
-					rpc,
-					rpcSubscriptions,
-					signedTransaction
-				});
+				// await sendSignedTransaction({
+				// 	rpc,
+				// 	rpcSubscriptions,
+				// 	signedTransaction
+				// });
 
 				progress(ProgressStepsSign.DONE);
 
