@@ -34,12 +34,15 @@ import {
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
-import { getBase64Decoder } from '@solana/codecs';
+import { getBase58Codec, getBase64Decoder } from '@solana/codecs';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import type { Commitment } from '@solana/rpc-types';
 import { addSignersToTransactionMessage } from '@solana/signers';
-import { assertTransactionIsFullySigned } from '@solana/transactions';
+import {
+	assertTransactionIsFullySigned,
+	type Base64EncodedWireTransaction
+} from '@solana/transactions';
 import { getTransactionEncoder, sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
@@ -243,12 +246,18 @@ export const sign = ({
 
 				const bar = getTransactionEncoder().encode(signedTransaction);
 				const transactionBytes = getBase64Decoder().decode(bar);
+				const bar2 = getBase58Codec().decode(bar);
 
 				console.log('bar', bar, transactionBytes);
 
 				const { simulateTransaction } = rpc;
 
-				const simulationResult = await simulateTransaction(signedTransaction);
+				const simulationResult = simulateTransaction(
+					transactionBytes as Base64EncodedWireTransaction,
+					{
+						encoding: 'base64'
+					}
+				);
 
 				console.log('simulationResult', simulationResult);
 
