@@ -38,7 +38,11 @@ import { getBase64Decoder } from '@solana/codecs';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import type { Commitment } from '@solana/rpc-types';
-import { addSignersToTransactionMessage, signTransactionMessageWithSigners } from '@solana/signers';
+import {
+	addSignersToTransactionMessage,
+	getSignersFromTransactionMessage,
+	signTransactionMessageWithSigners
+} from '@solana/signers';
 import {
 	assertTransactionIsFullySigned,
 	getSignatureFromTransaction,
@@ -202,7 +206,8 @@ export const sign = ({
 
 				console.log(
 					'transactionMessageRawDecoded',
-					decodeTransactionMessage(base64EncodedTransactionMessage)
+					decodeTransactionMessage(base64EncodedTransactionMessage),
+					getSignersFromTransactionMessage(transactionMessageRaw)
 				);
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 				const additionalSigners = Object.keys(signatures)
