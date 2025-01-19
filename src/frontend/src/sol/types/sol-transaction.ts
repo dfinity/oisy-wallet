@@ -1,10 +1,7 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
-import type { SolAddress } from '$lib/types/address';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
-import type { ParsedSystemInstruction } from '@solana-program/system';
 import type { GetSignaturesForAddressApi, GetTransactionApi } from '@solana/rpc';
 import type { Commitment } from '@solana/rpc-types';
-import type { CompilableTransactionMessage } from '@solana/transaction-messages';
 import type {
 	FullySignedTransaction,
 	TransactionWithBlockhashLifetime
@@ -33,7 +30,3 @@ export type SolSignature = ReturnType<
 >[number];
 
 export type SolSignedTransaction = FullySignedTransaction & TransactionWithBlockhashLifetime;
-
-export type SolParsedSystemInstruction = ParsedSystemInstruction<SolAddress>;
-
-export type SolInstruction = CompilableTransactionMessage['instructions'][number];

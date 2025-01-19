@@ -1,31 +1,10 @@
 import type { SolAddress } from '$lib/types/address';
-import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
+import { SYSTEM_ACCOUNT_KEYS, SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
-import type {
-	SolInstruction,
-	SolParsedSystemInstruction,
-	SolRpcTransaction,
-	SolTransactionUi
-} from '$sol/types/sol-transaction';
-import {
-	SystemInstruction,
-	identifySystemInstruction,
-	parseAdvanceNonceAccountInstruction,
-	parseAllocateInstruction,
-	parseAllocateWithSeedInstruction,
-	parseAssignInstruction,
-	parseAssignWithSeedInstruction,
-	parseAuthorizeNonceAccountInstruction,
-	parseCreateAccountInstruction,
-	parseCreateAccountWithSeedInstruction,
-	parseInitializeNonceAccountInstruction,
-	parseTransferSolInstruction,
-	parseTransferSolWithSeedInstruction,
-	parseUpgradeNonceAccountInstruction,
-	parseWithdrawNonceAccountInstruction
-} from '@solana-program/system';
+import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
+import { parseSolInstruction } from '$sol/utils/sol-instructions.utils';
+import { SystemInstruction } from '@solana-program/system';
 import { address as solAddress } from '@solana/addresses';
-import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/instructions';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type {
 	CompilableTransactionMessage,
@@ -100,90 +79,6 @@ export const mapSolTransactionUi = ({
 	};
 };
 
-export const parseSolInstruction = (
-	instruction: SolInstruction
-): SolInstruction | SolParsedSystemInstruction => {
-	try {
-		assertIsInstructionWithData(instruction);
-		assertIsInstructionWithAccounts(instruction);
-
-		const decodedInstruction = identifySystemInstruction(instruction);
-		switch (decodedInstruction) {
-			case SystemInstruction.CreateAccount:
-				return {
-					...parseCreateAccountInstruction(instruction),
-					instructionType: SystemInstruction.CreateAccount
-				};
-			case SystemInstruction.Assign:
-				return {
-					...parseAssignInstruction(instruction),
-					instructionType: SystemInstruction.Assign
-				};
-			case SystemInstruction.TransferSol:
-				return {
-					...parseTransferSolInstruction(instruction),
-					instructionType: SystemInstruction.TransferSol
-				};
-			case SystemInstruction.CreateAccountWithSeed:
-				return {
-					...parseCreateAccountWithSeedInstruction(instruction),
-					instructionType: SystemInstruction.CreateAccountWithSeed
-				};
-			case SystemInstruction.AdvanceNonceAccount:
-				return {
-					...parseAdvanceNonceAccountInstruction(instruction),
-					instructionType: SystemInstruction.AdvanceNonceAccount
-				};
-			case SystemInstruction.WithdrawNonceAccount:
-				return {
-					...parseWithdrawNonceAccountInstruction(instruction),
-					instructionType: SystemInstruction.WithdrawNonceAccount
-				};
-			case SystemInstruction.InitializeNonceAccount:
-				return {
-					...parseInitializeNonceAccountInstruction(instruction),
-					instructionType: SystemInstruction.InitializeNonceAccount
-				};
-			case SystemInstruction.AuthorizeNonceAccount:
-				return {
-					...parseAuthorizeNonceAccountInstruction(instruction),
-					instructionType: SystemInstruction.AuthorizeNonceAccount
-				};
-			case SystemInstruction.Allocate:
-				return {
-					...parseAllocateInstruction(instruction),
-					instructionType: SystemInstruction.Allocate
-				};
-			case SystemInstruction.AllocateWithSeed:
-				return {
-					...parseAllocateWithSeedInstruction(instruction),
-					instructionType: SystemInstruction.AllocateWithSeed
-				};
-			case SystemInstruction.AssignWithSeed:
-				return {
-					...parseAssignWithSeedInstruction(instruction),
-					instructionType: SystemInstruction.AssignWithSeed
-				};
-			case SystemInstruction.TransferSolWithSeed:
-				return {
-					...parseTransferSolWithSeedInstruction(instruction),
-					instructionType: SystemInstruction.TransferSolWithSeed
-				};
-			case SystemInstruction.UpgradeNonceAccount:
-				return {
-					...parseUpgradeNonceAccountInstruction(instruction),
-					instructionType: SystemInstruction.UpgradeNonceAccount
-				};
-			default:
-				// If the instruction is not a system instruction, we are unable to parse it, so we return it as is
-				return instruction;
-		}
-	} catch (_: unknown) {
-		// If the instruction is not a system instruction, we are unable to parse it, so we return it as is
-		return instruction;
-	}
-};
-
 export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
 	return getTransactionDecoder().decode(transactionBytes);
@@ -201,10 +96,15 @@ export const parseSolBase64TransactionMessage = async ({
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
 
-export const mapSolTransactionMessage = (
-	transactionMessage: TransactionMessage
-): { amount: bigint; payer?: SolAddress; source?: SolAddress; destination?: SolAddress } =>
-	Array.from(transactionMessage.instructions).reduce<{
+export const mapSolTransactionMessage = ({
+	instructions
+}: TransactionMessage): {
+	amount: bigint;
+	payer?: SolAddress;
+	source?: SolAddress;
+	destination?: SolAddress;
+} =>
+	Array.from(instructions).reduce<{
 		amount: bigint;
 		payer?: SolAddress;
 		source?: SolAddress;
@@ -213,7 +113,15 @@ export const mapSolTransactionMessage = (
 		(acc, instruction) => {
 			const parsedInstruction = parseSolInstruction(instruction);
 
+			console.log('parsedInstruction', parsedInstruction);
+
 			if (!('instructionType' in parsedInstruction)) {
+				return acc;
+			}
+
+			const { programAddress } = parsedInstruction;
+
+			if (programAddress !== SYSTEM_PROGRAM_ADDRESS) {
 				return acc;
 			}
 
