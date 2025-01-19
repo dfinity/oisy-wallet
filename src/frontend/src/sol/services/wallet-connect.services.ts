@@ -316,12 +316,12 @@ export const sign = ({
 					await sendAndConfirmTransaction(signedTransaction, { commitment });
 				};
 
-				// Explicitly do not await to proceed in the background and allow the UI to continue
-				await sendSignedTransaction({
-					rpc,
-					rpcSubscriptions,
-					signedTransaction
-				});
+				// // Explicitly do not await to proceed in the background and allow the UI to continue
+				// await sendSignedTransaction({
+				// 	rpc,
+				// 	rpcSubscriptions,
+				// 	signedTransaction
+				// });
 
 				progress(ProgressStepsSign.DONE);
 
