@@ -147,14 +147,14 @@ export const sign = ({
 						text: from_address_not_wallet
 					}
 				});
-				return { success: false };
+				// return { success: false };
 			}
 
 			if (isNullish(destination)) {
 				toastsError({
 					msg: { text: unknown_destination }
 				});
-				return { success: false };
+				// return { success: false };
 			}
 
 			modalNext();
