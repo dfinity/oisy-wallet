@@ -11,8 +11,6 @@ import type {
 	TransactionError,
 	UnixTimestamp
 } from '@solana/rpc-types';
-import type { GetSignaturesForAddressApi, GetTransactionApi } from '@solana/rpc';
-import type { Commitment } from '@solana/rpc-types';
 import type {
 	FullySignedTransaction,
 	TransactionWithBlockhashLifetime
