@@ -21,11 +21,11 @@ import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import {
+	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction,
 	signTransaction
 } from '$sol/services/sol-send.services';
 import { createSigner } from '$sol/services/sol-sign.services';
-import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
 	decodeTransactionMessage,
@@ -35,16 +35,9 @@ import {
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { getBase64Decoder } from '@solana/codecs';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
-import type { Commitment } from '@solana/rpc-types';
 import { addSignersToTransactionMessage, getSignersFromTransactionMessage } from '@solana/signers';
-import {
-	assertTransactionIsFullySigned,
-	getSignatureFromTransaction,
-	type Base64EncodedWireTransaction
-} from '@solana/transactions';
-import { getTransactionEncoder, sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import { type Base64EncodedWireTransaction } from '@solana/transactions';
+import { getTransactionEncoder } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {
@@ -262,62 +255,15 @@ export const sign = ({
 
 				progress(ProgressStepsSign.APPROVE);
 
-				const signedTransaction2 = {
-					...transactionMessageRawDecoded,
-					signatures: signedTransaction.signatures
-				};
-
-				const signature2 = getSignatureFromTransaction(signedTransaction2);
-
-				const bar2 = getTransactionEncoder().encode(signedTransaction2);
-				const transactionBytes2 = getBase64Decoder().decode(bar2);
-
-				const simulationResult2 = await simulateTransaction(
-					transactionBytes2 as Base64EncodedWireTransaction,
-					{
-						encoding: 'base64'
-					}
-				).send();
-
-				console.log('simulationResult2', simulationResult2);
-
 				await listener.approveRequest({
 					id,
 					topic,
-					message: { signature: signature }
+					message: { signature }
 				});
-
-				// await listener.approveRequest({
-				// 	id,
-				// 	topic,
-				// 	message: { signature, transaction: transactionBytes }
-				// });
 
 				const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
-				const sendSignedTransaction = async ({
-					rpc,
-					rpcSubscriptions,
-					signedTransaction,
-					commitment = 'confirmed'
-				}: {
-					rpc: Rpc<SolanaRpcApi>;
-					rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
-					signedTransaction: SolSignedTransaction;
-					commitment?: Commitment;
-				}) => {
-					assertTransactionIsFullySigned(signedTransaction);
-
-					const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
-						rpc,
-						rpcSubscriptions
-					});
-
-					await sendAndConfirmTransaction(signedTransaction, { commitment });
-				};
-
-				// Explicitly do not await to proceed in the background and allow the UI to continue
-				await sendSignedTransaction({
+				sendSignedTransaction({
 					rpc,
 					rpcSubscriptions,
 					signedTransaction

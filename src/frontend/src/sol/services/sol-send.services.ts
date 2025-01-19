@@ -168,7 +168,7 @@ export const signTransaction = async ({
 	return { signedTransaction, signature };
 };
 
-const sendSignedTransaction = ({
+export const sendSignedTransaction = ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
