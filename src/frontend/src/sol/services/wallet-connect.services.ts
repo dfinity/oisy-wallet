@@ -38,11 +38,7 @@ import { getBase64Decoder } from '@solana/codecs';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import type { Commitment } from '@solana/rpc-types';
-import {
-	addSignersToTransactionMessage,
-	getSignersFromTransactionMessage,
-	signTransactionMessageWithSigners
-} from '@solana/signers';
+import { addSignersToTransactionMessage, getSignersFromTransactionMessage } from '@solana/signers';
 import {
 	assertTransactionIsFullySigned,
 	getSignatureFromTransaction,
@@ -198,15 +194,13 @@ export const sign = ({
 					return { success: false };
 				}
 
-				// const transactionMessage = await setLifetimeAndFeePayerToTransaction({
-				// 	transactionMessage: transactionMessageRaw,
-				// 	rpc,
-				// 	feePayer: signer
-				// });
+				const transactionMessageRawDecoded = decodeTransactionMessage(
+					base64EncodedTransactionMessage
+				);
 
 				console.log(
 					'transactionMessageRawDecoded',
-					decodeTransactionMessage(base64EncodedTransactionMessage),
+					transactionMessageRawDecoded,
 					getSignersFromTransactionMessage(transactionMessageRaw)
 				);
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
@@ -268,7 +262,10 @@ export const sign = ({
 
 				progress(ProgressStepsSign.APPROVE);
 
-				const signedTransaction2 = await signTransactionMessageWithSigners(transactionMessageRaw);
+				const signedTransaction2 = {
+					...transactionMessageRawDecoded,
+					signatures: signedTransaction.signatures
+				};
 
 				const signature2 = getSignatureFromTransaction(signedTransaction2);
 
