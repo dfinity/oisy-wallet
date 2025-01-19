@@ -19,12 +19,13 @@ import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	setLifetimeAndFeePayerToTransaction,
 	signTransaction
 } from '$sol/services/sol-send.services';
 import { createSigner } from '$sol/services/sol-sign.services';
+import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
 	decodeTransactionMessage,
@@ -34,8 +35,12 @@ import {
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { getBase64Decoder } from '@solana/codecs';
+import type { Rpc, SolanaRpcApi } from '@solana/rpc';
+import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
+import type { Commitment } from '@solana/rpc-types';
 import { addSignersToTransactionMessage } from '@solana/signers';
-import { getTransactionEncoder } from '@solana/web3.js';
+import { assertTransactionIsFullySigned } from '@solana/transactions';
+import { getTransactionEncoder, sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {
@@ -243,10 +248,41 @@ export const sign = ({
 
 				progress(ProgressStepsSign.APPROVE);
 
-				await listener.approveRequest({
-					id,
-					topic,
-					message: { signature, transaction: transactionBytes }
+				// await listener.approveRequest({
+				// 	id,
+				// 	topic,
+				// 	message: { signature, transaction: transactionBytes }
+				// });
+
+				const rpc = solanaHttpRpc(solNetwork);
+				const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
+
+				const sendSignedTransaction = async ({
+					rpc,
+					rpcSubscriptions,
+					signedTransaction,
+					commitment = 'confirmed'
+				}: {
+					rpc: Rpc<SolanaRpcApi>;
+					rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
+					signedTransaction: SolSignedTransaction;
+					commitment?: Commitment;
+				}) => {
+					assertTransactionIsFullySigned(signedTransaction);
+
+					const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({
+						rpc,
+						rpcSubscriptions
+					});
+
+					await sendAndConfirmTransaction(signedTransaction, { commitment });
+				};
+
+				// Explicitly do not await to proceed in the background and allow the UI to continue
+				await sendSignedTransaction({
+					rpc,
+					rpcSubscriptions,
+					signedTransaction
 				});
 
 				progress(ProgressStepsSign.DONE);
