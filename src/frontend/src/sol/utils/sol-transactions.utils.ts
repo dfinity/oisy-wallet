@@ -196,14 +196,8 @@ export const parseSolBase64TransactionMessage = async ({
 	transactionMessage: string;
 	rpc: Rpc<SolanaRpcApi>;
 }): Promise<CompilableTransactionMessage> => {
-	console.log(
-		'transactionMessage',
-		transactionMessage,
-		decodeTransactionMessage(transactionMessage)
-	);
 	const { messageBytes } = decodeTransactionMessage(transactionMessage);
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
-	console.log('compiledTransactionMessage', compiledTransactionMessage);
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
 
@@ -218,8 +212,6 @@ export const mapSolTransactionMessage = (
 	}>(
 		(acc, instruction) => {
 			const parsedInstruction = parseSolInstruction(instruction);
-
-			console.log('parsedInstruction', parsedInstruction, instruction);
 
 			if (!('instructionType' in parsedInstruction)) {
 				return acc;

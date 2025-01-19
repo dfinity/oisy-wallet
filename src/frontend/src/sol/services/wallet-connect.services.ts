@@ -237,10 +237,9 @@ export const sign = ({
 
 				console.log('signature', signature, signedTransaction);
 
-				const bar = getTransactionEncoder().encode(signedTransaction);
-				const transactionBytes = getBase64Decoder().decode(bar);
-
-				console.log('bar', bar, transactionBytes);
+				const transactionBytes = getBase64Decoder().decode(
+					getTransactionEncoder().encode(signedTransaction)
+				);
 
 				const { simulateTransaction } = rpc;
 
