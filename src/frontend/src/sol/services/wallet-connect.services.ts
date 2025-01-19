@@ -252,12 +252,12 @@ export const sign = ({
 
 				const { simulateTransaction } = rpc;
 
-				const simulationResult = simulateTransaction(
+				const simulationResult = await simulateTransaction(
 					transactionBytes as Base64EncodedWireTransaction,
 					{
 						encoding: 'base64'
 					}
-				);
+				).send();
 
 				console.log('simulationResult', simulationResult);
 
