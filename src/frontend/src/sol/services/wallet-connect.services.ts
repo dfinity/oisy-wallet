@@ -284,7 +284,7 @@ export const sign = ({
 				await listener.approveRequest({
 					id,
 					topic,
-					message: { signature: signature }
+					message: { signature: signature2 }
 				});
 
 				// await listener.approveRequest({
@@ -316,11 +316,11 @@ export const sign = ({
 					await sendAndConfirmTransaction(signedTransaction, { commitment });
 				};
 
-				await sendSignedTransaction({
-					rpc,
-					rpcSubscriptions,
-					signedTransaction
-				});
+				// await sendSignedTransaction({
+				// 	rpc,
+				// 	rpcSubscriptions,
+				// 	signedTransaction
+				// });
 
 				progress(ProgressStepsSign.DONE);
 
