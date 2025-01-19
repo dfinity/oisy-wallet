@@ -12,8 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
-	import { mapTokenUi } from '$lib/utils/token.utils';
-	import { filterTokens } from '$lib/utils/tokens.utils';
+	import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -25,9 +24,13 @@
 	$: noTokensMatch = filteredTokens.length === 0;
 
 	let tokens: Token[];
-	$: tokens = [ICP_TOKEN, ...$allIcrcTokens].filter(
-		(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
-	);
+	$: tokens = pinTokensWithBalanceAtTop({
+		$tokens: [ICP_TOKEN, ...$allIcrcTokens].filter(
+			(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
+		),
+		$exchanges: $exchanges,
+		$balances: $balancesStore
+	});
 
 	let filteredTokens: Token[] = [];
 	$: filteredTokens = filterTokens({ tokens, filter });
@@ -43,9 +46,7 @@
 	<div class="tokens-scroll flex flex-col gap-6 overflow-y-auto overscroll-contain">
 		{#each filteredTokens as token (token.id)}
 			<TokenCardWithOnClick on:click={() => dispatch('icSelectToken', token)}>
-				<TokenCardContent
-					data={mapTokenUi({ token, $exchanges: $exchanges, $balances: $balancesStore })}
-				/>
+				<TokenCardContent data={token} />
 			</TokenCardWithOnClick>
 		{/each}
 	</div>
