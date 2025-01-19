@@ -284,7 +284,7 @@ export const sign = ({
 				await listener.approveRequest({
 					id,
 					topic,
-					message: { signature: signature2 }
+					message: { signature: signature }
 				});
 
 				// await listener.approveRequest({
