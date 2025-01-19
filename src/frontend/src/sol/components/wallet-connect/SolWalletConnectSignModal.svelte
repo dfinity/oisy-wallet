@@ -2,6 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { assertNonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { onMount } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -62,17 +63,14 @@
 	let amount: bigint | undefined;
 	let destination: OptionSolAddress;
 
-	$: (async () => {
+	onMount(async () => {
 		data = request.params.request.params.transaction;
-
-		// This should not happen since we arrive here only if there is a transaction message
-		assertNonNullish(data);
 
 		({ amount, destination } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
-	})();
+	});
 
 	/**
 	 * Modal
