@@ -246,6 +246,12 @@ export const sign = ({
 
 				console.log('bar', bar, transactionBytes);
 
+				const { simulateTransaction } = rpc;
+
+				const simulationResult = await simulateTransaction(signedTransaction);
+
+				console.log('simulationResult', simulationResult);
+
 				progress(ProgressStepsSign.APPROVE);
 
 				// await listener.approveRequest({
@@ -254,7 +260,6 @@ export const sign = ({
 				// 	message: { signature, transaction: transactionBytes }
 				// });
 
-				const rpc = solanaHttpRpc(solNetwork);
 				const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
 				const sendSignedTransaction = async ({
