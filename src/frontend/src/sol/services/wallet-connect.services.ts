@@ -162,13 +162,13 @@ export const sign = ({
 			try {
 				progress(ProgressStepsSign.SIGN);
 
-				assertNonNullish(source);
+				assertNonNullish(address);
 
 				const rpc = solanaHttpRpc(solNetwork);
 
 				const signer = createSigner({
 					identity,
-					address: source,
+					address,
 					network: solNetwork
 				});
 
@@ -197,7 +197,7 @@ export const sign = ({
 				);
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 				const additionalSigners = Object.keys(signatures)
-					.filter((address) => address !== source)
+					.filter((a) => a !== address)
 					.map((signer) =>
 						createSigner({
 							identity,
