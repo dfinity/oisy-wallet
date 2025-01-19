@@ -13,17 +13,18 @@ import {
 } from '@solana/signers';
 import type { Transaction } from '@solana/transactions';
 
+interface CreateSignerParams {
+	identity: OptionIdentity;
+	address: SolAddress;
+	network: SolanaNetworkType;
+}
+
 const signTransaction = async ({
 	identity,
 	transaction,
 	address,
 	network
-}: {
-	identity: OptionIdentity;
-	transaction: Transaction;
-	address: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<SignatureDictionary> => {
+}: CreateSignerParams & { transaction: Transaction }): Promise<SignatureDictionary> => {
 	const derivationPath = [SOLANA_DERIVATION_PATH_PREFIX, network];
 
 	const signedBytes = await signWithSchnorr({
@@ -41,12 +42,7 @@ const signTransactions = async ({
 	transactions,
 	address,
 	network
-}: {
-	identity: OptionIdentity;
-	transactions: Transaction[];
-	address: SolAddress;
-	network: SolanaNetworkType;
-}): Promise<SignatureDictionary[]> =>
+}: CreateSignerParams & { transactions: Transaction[] }): Promise<SignatureDictionary[]> =>
 	await Promise.all(
 		transactions.map(
 			async (transaction) => await signTransaction({ identity, transaction, address, network })
@@ -57,11 +53,7 @@ export const createSigner = ({
 	identity,
 	address,
 	network
-}: {
-	identity: OptionIdentity;
-	address: SolAddress;
-	network: SolanaNetworkType;
-}): TransactionPartialSigner => {
+}: CreateSignerParams): TransactionPartialSigner => {
 	const signer: TransactionPartialSigner = {
 		address: solAddress(address),
 		signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
