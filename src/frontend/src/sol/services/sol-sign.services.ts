@@ -33,6 +33,8 @@ const signTransaction = async ({
 		message: Array.from(transaction.messageBytes)
 	});
 
+	console.log('signedBytes', signedBytes, transaction);
+
 	return { [address]: Uint8Array.from(signedBytes) } as SignatureDictionary;
 };
 

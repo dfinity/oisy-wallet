@@ -70,6 +70,8 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
+	console.log('parsedTransactionMessage', parsedTransactionMessage);
+
 	return mapSolTransactionMessage(parsedTransactionMessage);
 };
 
@@ -175,6 +177,8 @@ export const sign = ({
 					rpc
 				});
 
+				console.log('transactionMessageRaw', transactionMessageRaw);
+
 				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct casting
 				if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
 					// throw new Error('Blockhash not found in transaction message lifetime constraint');
@@ -187,6 +191,10 @@ export const sign = ({
 				// 	feePayer: signer
 				// });
 
+				console.log(
+					'transactionMessageRawDecoded',
+					decodeTransactionMessage(base64EncodedTransactionMessage)
+				);
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 				const additionalSigners = Object.keys(signatures)
 					.filter((address) => address !== source)
@@ -201,6 +209,7 @@ export const sign = ({
 					additionalSigners,
 					transactionMessageRaw
 				);
+				console.log('transactionMessageWithAllSigners', transactionMessageWithAllSigners);
 
 				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
 					transactionMessage: transactionMessageWithAllSigners,
@@ -208,15 +217,24 @@ export const sign = ({
 					feePayer: signer
 				});
 
+				console.log(
+					'transactionMessage after setLifetimeAndFeePayerToTransaction',
+					transactionMessage
+				);
+
 				progress(ProgressStepsSign.SIGN);
 
-				console.log('transactionMessage', transactionMessageWithAllSigners, transactionMessage);
+				console.log(
+					'transactionMessageFinal',
+					transactionMessageWithAllSigners,
+					transactionMessage
+				);
 
 				const { signedTransaction, signature } = await signTransaction({
 					transactionMessage: transactionMessage
 				});
 
-				console.log('signature', signature);
+				console.log('signature', signature, signedTransaction);
 
 				const bar = getTransactionEncoder().encode(signedTransaction);
 				const transactionBytes = getBase64Decoder().decode(bar);
