@@ -23,11 +23,11 @@ import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wa
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	sendSignedTransaction,
-	setLifetimeAndFeePayerToTransaction,
-	signTransaction
+	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
-import { createSigner } from '$sol/services/sol-sign.services';
+import { signTransaction } from '$sol/services/sol-sign.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { createSigner } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
 	mapSolTransactionMessage,
@@ -184,9 +184,7 @@ export const sign = ({
 
 				progress(ProgressStepsSign.SIGN);
 
-				const { signedTransaction, signature } = await signTransaction({
-					transactionMessage: transactionMessage
-				});
+				const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
 				const transactionBytes = getBase64Decoder().decode(
 					getTransactionEncoder().encode(signedTransaction)
