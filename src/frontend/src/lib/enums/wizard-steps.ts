@@ -6,6 +6,11 @@ export enum WizardStepsSend {
 	QR_CODE_SCAN = 'QR Code Scan'
 }
 
+export enum WizardStepsSign {
+	REVIEW = 'Review',
+	SIGNING = 'Signing'
+}
+
 export enum WizardStepsConvert {
 	CONVERT = 'Convert',
 	REVIEW = 'Review',
