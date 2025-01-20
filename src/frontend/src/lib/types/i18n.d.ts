@@ -533,6 +533,7 @@ interface I18nFee {
 		convert_btc_network_fee: string;
 		zero_fee: string;
 		total_fee: string;
+		ata_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
