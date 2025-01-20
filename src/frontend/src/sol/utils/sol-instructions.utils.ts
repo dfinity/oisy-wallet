@@ -6,9 +6,11 @@ import {
 import type {
 	SolInstruction,
 	SolParsedComputeBudgetInstruction,
+	SolParsedInstruction,
 	SolParsedSystemInstruction,
 	SolParsedTokenInstruction
 } from '$sol/types/sol-instructions';
+import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import {
 	ComputeBudgetInstruction,
 	identifyComputeBudgetInstruction,
@@ -329,11 +331,7 @@ const parseSolTokenInstruction = (
  */
 export const parseSolInstruction = (
 	instruction: SolInstruction
-):
-	| SolInstruction
-	| SolParsedComputeBudgetInstruction
-	| SolParsedSystemInstruction
-	| SolParsedTokenInstruction => {
+): SolInstruction | SolParsedInstruction => {
 	const { programAddress } = instruction;
 
 	if (programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
@@ -349,4 +347,58 @@ export const parseSolInstruction = (
 	}
 
 	return instruction;
+};
+
+const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	if (instructionType === SystemInstruction.CreateAccount) {
+		const {
+			data: { lamports },
+			accounts: {
+				payer: { address: payer }
+			}
+		} = instruction;
+
+		return {
+			amount: lamports,
+			payer
+		};
+	}
+
+	if (instructionType === SystemInstruction.TransferSol) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	return { amount: undefined };
+};
+
+// TODO: find a way to map correctly all the transaction message instructions
+// TODO: create tests
+export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+	const parsedInstruction = parseSolInstruction(instruction);
+
+	if (!('instructionType' in parsedInstruction)) {
+		return { amount: undefined };
+	}
+
+	const { programAddress } = parsedInstruction;
+
+	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
+		return mapSolSystemInstruction(parsedInstruction);
+	}
+
+	return { amount: undefined };
 };
