@@ -20,8 +20,8 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
 const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
 //temporary hotfix for scrolling issue
-const DESKTOP_SCREEN = { width: 1920, height: 1080 }
-const DESKTOP_VIEWPORT = { width: 1920, height: 1080 }
+const DESKTOP_SCREEN = { width: 1920, height: 1080 };
+const DESKTOP_VIEWPORT = { width: 1920, height: 1080 };
 
 const appleProjects = [
 	{
