@@ -25,7 +25,7 @@ import {
 import { bn1, bn2, bn3, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
-import { mockTokens } from '$tests/mocks/tokens.mock';
+import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
@@ -116,6 +116,27 @@ describe('sortTokens', () => {
 			$tokensToPin: tokensToPin
 		});
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, ICP_TOKEN]);
+	});
+
+	it('should sort deprecated sns tokens at the end', () => {
+		const mockDeprecatedTokenName = {
+			...mockValidToken,
+			name: '---- Deprecated'
+		};
+
+		const mockTokensWithDeprecated = [mockDeprecatedTokenName, ...mockTokens];
+
+		const sortedTokens = sortTokens({
+			$tokens: mockTokensWithDeprecated,
+			$exchanges: {},
+			$tokensToPin: []
+		});
+		expect(sortedTokens).toEqual([
+			BTC_MAINNET_TOKEN,
+			ETHEREUM_TOKEN,
+			ICP_TOKEN,
+			mockDeprecatedTokenName
+		]);
 	});
 });
 
