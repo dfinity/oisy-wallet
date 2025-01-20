@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { assertNonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onMount } from 'svelte';
 	import {
@@ -35,7 +34,6 @@
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-
 	import {
 		sign as signService,
 		decode as decodeService
