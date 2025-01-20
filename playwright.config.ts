@@ -36,8 +36,8 @@ const appleProjects = [
 		name: 'iPhone SE',
 		use: {
 			...devices['iPhone SE'],
-			screen: { width: 320, height: 568 },
-			viewport: { width: 320, height: 568 }
+			screen: { width: 375, height: 667 },
+			viewport: { width: 375, height: 667 }
 		}
 	}
 ];
