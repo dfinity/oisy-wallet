@@ -1,8 +1,14 @@
+import type { WalletConnectEthApproveRequestMessage } from '$eth/types/wallet-connect';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { Option } from '$lib/types/utils';
+import type { WalletConnectSolApproveRequestMessage } from '$sol/types/wallet-connect';
 import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
 import type { PairingTypes } from '@walletconnect/types';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+
+export type WalletConnectApproveRequestMessage =
+	| WalletConnectEthApproveRequestMessage
+	| WalletConnectSolApproveRequestMessage;
 
 export interface WalletConnectListener extends WebSocketListener {
 	pair: () => Promise<PairingTypes.Struct>;
@@ -15,7 +21,7 @@ export interface WalletConnectListener extends WebSocketListener {
 	approveRequest: (params: {
 		id: number;
 		topic: string;
-		message: string | { signature: string; transaction?: string };
+		message: WalletConnectApproveRequestMessage;
 	}) => Promise<void>;
 }
 
