@@ -31,7 +31,7 @@
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
-	import SolWalletConnectSendReview from '$sol/components/wallet-connect/SolWalletConnectSendReview.svelte';
+	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import {
 		sign as signService,
 		decode as decodeService
@@ -136,7 +136,7 @@
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<SolSendProgress bind:sendProgressStep />
 	{:else}
-		<SolWalletConnectSendReview
+		<SolWalletConnectSignReview
 			{amount}
 			destination={destination ?? ''}
 			{data}
