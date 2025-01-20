@@ -8,4 +8,9 @@ export type SolParsedComputeBudgetInstruction = ParsedComputeBudgetInstruction<S
 export type SolParsedSystemInstruction = ParsedSystemInstruction<SolAddress>;
 export type SolParsedTokenInstruction = ParsedTokenInstruction<SolAddress>;
 
+export type SolParsedInstruction =
+	| SolParsedComputeBudgetInstruction
+	| SolParsedSystemInstruction
+	| SolParsedTokenInstruction;
+
 export type SolInstruction = CompilableTransactionMessage['instructions'][number];
