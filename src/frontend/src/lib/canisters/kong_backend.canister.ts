@@ -1,6 +1,7 @@
 import type {
 	_SERVICE as KongBackendService,
-	SwapAmountsReply
+	SwapAmountsReply,
+	TokenReply
 } from '$declarations/kong_backend/kong_backend.did';
 import { idlFactory as idlCertifiedFactoryKongBackend } from '$declarations/kong_backend/kong_backend.factory.certified.did';
 import { idlFactory as idlFactoryKongBackend } from '$declarations/kong_backend/kong_backend.factory.did';
@@ -71,6 +72,20 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 			pay_tx_id: toNullable(payTransactionId),
 			referred_by: toNullable(referredBy)
 		});
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapKongBackendCanisterError(response.Err);
+	};
+
+	tokens = async (): Promise<TokenReply[]> => {
+		const { tokens } = this.caller({
+			certified: true
+		});
+
+		const response = await tokens(toNullable());
 
 		if ('Ok' in response) {
 			return response.Ok;
