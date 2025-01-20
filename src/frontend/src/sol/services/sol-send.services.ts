@@ -6,6 +6,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { signTransaction } from '$sol/services/sol-sign.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
@@ -23,8 +24,9 @@ import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import { lamports, type Commitment } from '@solana/rpc-types';
 import {
-	setTransactionMessageFeePayerSigner,
+	setTransactionMessageFeePayerSigner.
 	signTransactionMessageWithSigners,
+	type SignatureDictionary,
 	type TransactionPartialSigner,
 	type TransactionSigner
 } from '@solana/signers';
@@ -35,6 +37,7 @@ import {
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned, getSignatureFromTransaction } from '@solana/transactions';
+import { type Transaction } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
@@ -131,18 +134,6 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
-const signTransaction = async ({
-	transactionMessage
-}: {
-	transactionMessage: SolTransactionMessage;
-}): Promise<{ signedTransaction: SolSignedTransaction; signature: Signature }> => {
-	const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
-
-	const signature = getSignatureFromTransaction(signedTransaction);
-
-	return { signedTransaction, signature };
-};
-
 const sendSignedTransaction = ({
 	rpc,
 	rpcSubscriptions,
@@ -222,7 +213,7 @@ export const sendSol = async ({
 
 	onProgress?.();
 
-	const { signedTransaction, signature } = await signTransaction({ transactionMessage });
+	const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	sendSignedTransaction({
