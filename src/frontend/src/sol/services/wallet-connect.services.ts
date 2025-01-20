@@ -3,7 +3,6 @@ import {
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
-import { ProgressStepsSign } from '$lib/enums/progress-steps';
 import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -20,6 +19,7 @@ import type { Token } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	sendSignedTransaction,
@@ -28,24 +28,12 @@ import {
 } from '$sol/services/sol-send.services';
 import { createSigner } from '$sol/services/sol-sign.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
-import {
-	sendSignedTransaction,
-	setLifetimeAndFeePayerToTransaction
-} from '$sol/services/sol-send.services';
-import { signTransaction } from '$sol/services/sol-sign.services';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { createSigner } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage,
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
-import { getBase64Decoder } from '@solana/codecs';
-import { addSignersToTransactionMessage, getSignersFromTransactionMessage } from '@solana/signers';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { getBase64Decoder } from '@solana/codecs';
 import { addSignersToTransactionMessage } from '@solana/signers';
@@ -171,7 +159,6 @@ export const sign = ({
 				if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
 					return { success: false };
 				}
-
 
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 				const additionalSigners = Object.keys(signatures)
