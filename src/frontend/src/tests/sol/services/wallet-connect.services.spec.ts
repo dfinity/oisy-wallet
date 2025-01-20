@@ -1,8 +1,12 @@
 import { ICP_NETWORK_ID } from '$env/networks/networks.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { decode } from '$sol/services/wallet-connect.services';
+import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solTransactionsUtils from '$sol/utils/sol-transactions.utils';
-import { parseSolBase64TransactionMessage } from '$sol/utils/sol-transactions.utils';
+import {
+	mapSolTransactionMessage,
+	parseSolBase64TransactionMessage
+} from '$sol/utils/sol-transactions.utils';
 import type { CompilableTransactionMessage } from '@solana/transaction-messages';
 
 describe('wallet-connect.services', () => {
@@ -23,7 +27,6 @@ describe('wallet-connect.services', () => {
 		it('should parse and map a transaction successfully for a valid network', async () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = SOLANA_MAINNET_NETWORK_ID;
-			const solNetwork = 'mockSolNetwork';
 			const parsedTransaction = { mock: 'parsedTransaction' };
 			const mappedTransaction = { mock: 'mappedTransaction' };
 
