@@ -16,11 +16,15 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
-import { icrcTokens } from '$icp/derived/icrc.derived';
+import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import * as icrcCustomTokensServices from '$icp/services/icrc-custom-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
-import { allTokens } from '$lib/derived/all-tokens.derived';
+import {
+	allDisabledKongSwapCompatibleIcrcTokens,
+	allKongSwapCompatibleIcrcTokens,
+	allTokens
+} from '$lib/derived/all-tokens.derived';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
@@ -191,6 +195,54 @@ describe('all-tokens.derived', () => {
 				SOLANA_DEVNET_TOKEN.id.description,
 				SOLANA_LOCAL_TOKEN.id.description
 			]);
+		});
+	});
+
+	describe('allDisabledKongSwapCompatibleIcrcTokens', () => {
+		beforeEach(() => {
+			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([]);
+				return () => {};
+			});
+		});
+
+		it('correctly sets store if there are some disabled kong-compatible icrc tokens', () => {
+			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken2]);
+				return () => {};
+			});
+
+			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([mockIcrcToken]);
+		});
+
+		it('correctly sets store if all icrc tokens are enabled', () => {
+			vi.spyOn(allKongSwapCompatibleIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+
+			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([]);
+		});
+
+		it('correctly sets store if there are no kong-compatible tokens', () => {
+			vi.spyOn(enabledIcrcTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockIcrcToken, mockIcrcToken2]);
+				return () => {};
+			});
+
+			expect(get(allDisabledKongSwapCompatibleIcrcTokens)).toStrictEqual([]);
 		});
 	});
 });
