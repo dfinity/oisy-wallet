@@ -277,12 +277,7 @@ export const getSplTransactions = async ({
  * The cost is equivalent to the rent-exempt cost for the size of an ATA.
  * https://solana.com/docs/core/fees#rent-exempt
  */
-export const getSolCreateAccountFee = async ({
-	network
-}: {
-	network: SolanaNetworkType;
-}): Promise<Lamports> => {
+export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promise<Lamports> => {
 	const { getMinimumBalanceForRentExemption } = solanaHttpRpc(network);
-
 	return await getMinimumBalanceForRentExemption(ATA_SIZE).send();
 };

@@ -471,7 +471,7 @@ describe('solana.api', () => {
 
 	describe('getSolCreateAccountFee', () => {
 		it('should get the fee to create a new account', async () => {
-			const fee = await getSolCreateAccountFee({ network: SolanaNetworks.mainnet });
+			const fee = await getSolCreateAccountFee(SolanaNetworks.mainnet);
 
 			expect(fee).toEqual(mockCreateAccountFee);
 			expect(mockGetMinimumBalanceForRentExemption).toHaveBeenCalledWith(ATA_SIZE);
@@ -482,9 +482,7 @@ describe('solana.api', () => {
 				send: () => Promise.reject(mockError)
 			});
 
-			await expect(getSolCreateAccountFee({ network: SolanaNetworks.mainnet })).rejects.toThrow(
-				mockError
-			);
+			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrow(mockError);
 		});
 	});
 });
