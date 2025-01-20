@@ -4,6 +4,7 @@ import {
 } from '$lib/constants/analytics.contants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSign } from '$lib/enums/progress-steps';
+import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	execute,
@@ -27,6 +28,15 @@ import {
 } from '$sol/services/sol-send.services';
 import { createSigner } from '$sol/services/sol-sign.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
+import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import {
+	sendSignedTransaction,
+	setLifetimeAndFeePayerToTransaction
+} from '$sol/services/sol-send.services';
+import { signTransaction } from '$sol/services/sol-sign.services';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { createSigner } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
 	mapSolTransactionMessage,
@@ -36,6 +46,9 @@ import {
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { getBase64Decoder } from '@solana/codecs';
 import { addSignersToTransactionMessage, getSignersFromTransactionMessage } from '@solana/signers';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { getBase64Decoder } from '@solana/codecs';
+import { addSignersToTransactionMessage } from '@solana/signers';
 import { type Base64EncodedWireTransaction } from '@solana/transactions';
 import { getTransactionEncoder } from '@solana/web3.js';
 import { get } from 'svelte/store';
@@ -49,7 +62,7 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
 	modalNext: () => void;
-	progress: (step: ProgressStepsSign) => void;
+	progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => void;
 	token: Token;
 	identity: OptionIdentity;
 };
@@ -71,8 +84,6 @@ export const decode = async ({
 		transactionMessage: base64EncodedTransactionMessage,
 		rpc: solanaHttpRpc(solNetwork)
 	});
-
-	console.log('parsedTransactionMessage', parsedTransactionMessage);
 
 	return mapSolTransactionMessage(parsedTransactionMessage);
 };
@@ -101,6 +112,7 @@ export const sign = ({
 				topic,
 				params: {
 					request: {
+						method,
 						params: { transaction: base64EncodedTransactionMessage }
 					}
 				}
@@ -110,15 +122,9 @@ export const sign = ({
 				network: { id: networkId }
 			} = token;
 
-			const {
-				wallet_connect: {
-					error: { wallet_not_initialized, from_address_not_wallet, unknown_destination }
-				}
-			} = get(i18n);
-
 			if (isNullish(address)) {
 				toastsError({
-					msg: { text: wallet_not_initialized }
+					msg: { text: get(i18n).wallet_connect.error.wallet_not_initialized }
 				});
 				return { success: false };
 			}
@@ -137,27 +143,9 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, payer, source, destination } =
-				mapSolTransactionMessage(parsedTransactionMessage);
+			const { amount, destination } = mapSolTransactionMessage(parsedTransactionMessage);
 
-			if (
-				source?.toLowerCase() !== address.toLowerCase() &&
-				payer?.toLowerCase() !== address.toLowerCase()
-			) {
-				toastsError({
-					msg: {
-						text: from_address_not_wallet
-					}
-				});
-				// return { success: false };
-			}
-
-			if (isNullish(destination)) {
-				toastsError({
-					msg: { text: unknown_destination }
-				});
-				// return { success: false };
-			}
+			// TODO: add assertions checks about amount, payer, source and destination when we will able to properly parse them for ALL the transactions
 
 			modalNext();
 
@@ -179,23 +167,12 @@ export const sign = ({
 					rpc
 				});
 
-				console.log('transactionMessageRaw', transactionMessageRaw);
-
-				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct casting
+				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct type casting
 				if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
-					// throw new Error('Blockhash not found in transaction message lifetime constraint');
 					return { success: false };
 				}
 
-				const transactionMessageRawDecoded = decodeTransactionMessage(
-					base64EncodedTransactionMessage
-				);
 
-				console.log(
-					'transactionMessageRawDecoded',
-					transactionMessageRawDecoded,
-					getSignersFromTransactionMessage(transactionMessageRaw)
-				);
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 				const additionalSigners = Object.keys(signatures)
 					.filter((a) => a !== address)
@@ -210,7 +187,6 @@ export const sign = ({
 					additionalSigners,
 					transactionMessageRaw
 				);
-				console.log('transactionMessageWithAllSigners', transactionMessageWithAllSigners);
 
 				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
 					transactionMessage: transactionMessageWithAllSigners,
@@ -218,24 +194,7 @@ export const sign = ({
 					feePayer: signer
 				});
 
-				console.log(
-					'transactionMessage after setLifetimeAndFeePayerToTransaction',
-					transactionMessage
-				);
-
-				progress(ProgressStepsSign.SIGN);
-
-				console.log(
-					'transactionMessageFinal',
-					transactionMessageWithAllSigners,
-					transactionMessage
-				);
-
-				const { signedTransaction, signature } = await signTransaction({
-					transactionMessage: transactionMessage
-				});
-
-				console.log('signature', signature, signedTransaction);
+				const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
 				const transactionBytes = getBase64Decoder().decode(
 					getTransactionEncoder().encode(signedTransaction)
@@ -250,22 +209,37 @@ export const sign = ({
 					}
 				).send();
 
-				console.log('simulationResult', simulationResult);
+				if (nonNullish(simulationResult.value.err)) {
+					// In case of simulation error, it is useful to log the error to the console for development purposes
+					console.warn('WalletConnect Solana transaction simulation error', simulationResult);
+				}
 
-				progress(ProgressStepsSign.APPROVE);
+				if (method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {
+					progress(ProgressStepsSendSol.SEND);
+				}
+
+				try {
+					// Even if some DEXs send an only-sign transaction, they do not send it when we return it.
+					// So, for good measure, we will send it anyway. It is not an issue if it is sent twice, since only one will pass.
+					// Plus, if it requires more signatures on the DEX's side, it will be sent again by them and it will fail with us.
+					sendSignedTransaction({
+						rpc,
+						rpcSubscriptions: solanaWebSocketRpc(solNetwork),
+						signedTransaction
+					});
+				} catch (err: unknown) {
+					// If the transaction requires that we send it, and it fails, we reject the request, otherwise we just log the error
+					if (method !== SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {
+						console.warn('WalletConnect Solana transaction send error', err);
+					}
+				}
+
+				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
 
 				await listener.approveRequest({
 					id,
 					topic,
 					message: { signature }
-				});
-
-				const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
-
-				sendSignedTransaction({
-					rpc,
-					rpcSubscriptions,
-					signedTransaction
 				});
 
 				progress(ProgressStepsSign.DONE);
@@ -291,5 +265,7 @@ export const sign = ({
 				throw err;
 			}
 		},
-		toastMsg: get(i18n).wallet_connect.info.sol_transaction_executed
+		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.sol_transaction_executed, {
+			$method: params.request.params.request.method
+		})
 	});
