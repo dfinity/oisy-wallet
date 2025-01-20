@@ -1,7 +1,6 @@
 import type { SolAddress } from '$lib/types/address';
 import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
-import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import type {
 	MappedSolTransaction,
 	SolRpcTransaction,
@@ -101,7 +100,6 @@ export const parseSolBase64TransactionMessage = async ({
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
-
 
 export const mapSolTransactionMessage = ({
 	instructions
