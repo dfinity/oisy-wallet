@@ -7,6 +7,7 @@
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -21,11 +22,11 @@
 
 	const steps: WizardSteps = [
 		{
-			name: 'Review',
+			name: WizardStepsSign.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: 'Signing',
+			name: WizardStepsSign.SIGNING,
 			title: $i18n.send.text.signing
 		}
 	];
@@ -68,7 +69,7 @@
 		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
 	>
 
-	{#if currentStep?.name === 'Signing'}
+	{#if currentStep?.name === WizardStepsSign.SIGNING}
 		<SendProgress progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 	{:else}
 		<WalletConnectSignReview {request} on:icApprove={approve} on:icReject={reject} />
