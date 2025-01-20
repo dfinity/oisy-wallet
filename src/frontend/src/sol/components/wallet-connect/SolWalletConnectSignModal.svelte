@@ -17,7 +17,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -132,7 +132,7 @@
 			address,
 			modalNext: modal.next,
 			token,
-			progress: (step: ProgressStepsSign) => (signProgressStep = step),
+			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
 			identity: $authIdentity
 		});
 
