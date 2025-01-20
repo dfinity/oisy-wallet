@@ -39,6 +39,16 @@ import { getBase64Decoder } from '@solana/codecs';
 import { addSignersToTransactionMessage } from '@solana/signers';
 import { type Base64EncodedWireTransaction } from '@solana/transactions';
 import { getTransactionEncoder } from '@solana/web3.js';
+import { i18n } from '$lib/stores/i18n.store';
+import type { NetworkId } from '$lib/types/network';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import {
+	mapSolTransactionMessage,
+	parseSolBase64TransactionMessage
+} from '$sol/utils/sol-transactions.utils';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {
@@ -54,6 +64,7 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	token: Token;
 	identity: OptionIdentity;
 };
+
 
 export const decode = async ({
 	base64EncodedTransactionMessage,
@@ -75,6 +86,7 @@ export const decode = async ({
 
 	return mapSolTransactionMessage(parsedTransactionMessage);
 };
+
 
 export const sign = ({
 	address,
@@ -259,3 +271,4 @@ export const sign = ({
 			$method: params.request.params.request.method
 		})
 	});
+
