@@ -36,7 +36,7 @@ const appleProjects = [
 		name: 'iPhone SE',
 		use: {
 			...devices['iPhone SE'],
-			screen: { width: 640, height: 1136 },
+			screen: { width: 320, height: 568 },
 			viewport: { width: 320, height: 568 }
 		}
 	}
@@ -64,7 +64,7 @@ const nonAppleProjects = [
 		name: 'Pixel 7',
 		use: {
 			...devices['Pixel 7'],
-			screen: { width: 1080, height: 2400 },
+			screen: { width: 412, height: 915 },
 			viewport: { width: 412, height: 915 }
 		}
 	}
