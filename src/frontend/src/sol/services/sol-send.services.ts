@@ -12,6 +12,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -40,6 +41,7 @@ import {
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned, getSignatureFromTransaction } from '@solana/transactions';
 import { assertTransactionIsFullySigned, type Transaction } from '@solana/transactions';
+import { assertTransactionIsFullySigned } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
@@ -216,7 +218,11 @@ export const sendSol = async ({
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
-	const signer = createSigner({ identity, address: source, network: solNetwork });
+	const signer: TransactionPartialSigner = createSigner({
+		identity,
+		address: source,
+		network: solNetwork
+	});
 
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({
