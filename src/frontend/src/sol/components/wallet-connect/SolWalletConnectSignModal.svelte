@@ -8,6 +8,7 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
@@ -30,14 +31,15 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
-	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import {
 		sign as signService,
 		decode as decodeService
 	} from '$sol/services/wallet-connect.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 
+	export let listener: OptionWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;
 	export let network: SolanaNetwork;
 
@@ -95,7 +97,7 @@
 	 * WalletConnect
 	 */
 
-	export let listener: OptionWalletConnectListener;
+	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
 
 	/**
 	 * Reject a transaction
@@ -108,19 +110,17 @@
 	};
 
 	/**
-	 * Send and approve
+	 * Sign
 	 */
 
-	let sendProgressStep: string = ProgressStepsSign.INITIALIZATION;
-
-	const send = async () => {
+	const sign = async () => {
 		const { success } = await signService({
 			request,
 			listener,
 			address,
 			modalNext: modal.next,
 			token,
-			progress: (step: ProgressStepsSign) => (sendProgressStep = step),
+			progress: (step: ProgressStepsSign) => (signProgressStep = step),
 			identity: $authIdentity
 		});
 
@@ -134,14 +134,14 @@
 	>
 
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
-		<SolSendProgress bind:sendProgressStep />
+		<InProgressWizard progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 	{:else}
 		<SolWalletConnectSignReview
 			{amount}
 			destination={destination ?? ''}
 			{data}
 			{token}
-			on:icApprove={send}
+			on:icApprove={sign}
 			on:icReject={reject}
 		/>
 	{/if}
