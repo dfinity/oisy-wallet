@@ -10,16 +10,13 @@ import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
 import { nonNullish } from '@dfinity/utils';
 import { address as solAddress } from '@solana/addresses';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type {
-	CompilableTransactionMessage,
-	TransactionMessage
+import {
+	getCompiledTransactionMessageDecoder,
+	type CompilableTransactionMessage,
+	type TransactionMessage
 } from '@solana/transaction-messages';
 import { getTransactionDecoder, type Transaction } from '@solana/transactions';
-import {
-	decompileTransactionMessageFetchingLookupTables,
-	getBase64Encoder,
-	getCompiledTransactionMessageDecoder
-} from '@solana/web3.js';
+import { decompileTransactionMessageFetchingLookupTables, getBase64Encoder } from '@solana/web3.js';
 
 interface TransactionWithAddress {
 	transaction: SolRpcTransaction;
