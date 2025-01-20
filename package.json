@@ -23,6 +23,7 @@
 		"build:tokens-ckerc20": "node scripts/build.tokens.ckerc20.mjs && npm run format",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
+		"prepare": "svelte-kit sync",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
