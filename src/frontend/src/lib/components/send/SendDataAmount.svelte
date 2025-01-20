@@ -8,6 +8,7 @@
 
 	export let amount: OptionAmount = undefined;
 	export let token: Token;
+	export let showNullishLabel = false;
 
 	let amountDisplay: string;
 	$: (() => {
@@ -29,6 +30,10 @@
 
 <Value ref="amount" element="div">
 	<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-	{amountDisplay}
-	{token.symbol}
+	{#if showNullishLabel}
+		{$i18n.send.error.unable_to_retrieve_amount}
+	{:else}
+		{amountDisplay}
+		{token.symbol}
+	{/if}
 </Value>
