@@ -378,7 +378,8 @@
 			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
-			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
+			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
+			"unable_to_retrieve_amount": "n/a (unable to retrieve)"
 		}
 	},
 	"convert": {
