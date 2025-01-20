@@ -9,6 +9,7 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
@@ -17,7 +18,7 @@
 		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { WizardStepsSign } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -33,12 +34,17 @@
 	} from '$lib/utils/network.utils';
 	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
 	import WalletConnectSendReview from '$sol/components/wallet-connect/WalletConnectSendReview.svelte';
+	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
+	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
+
 	import {
 		sign as signService,
 		decode as decodeService
 	} from '$sol/services/wallet-connect.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 
+	export let listener: OptionWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;
 	export let network: SolanaNetwork;
 
@@ -59,12 +65,23 @@
 				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
 				: [$solAddressMainnet, SOLANA_TOKEN];
 
+	let signWithSending = false;
 	let data: string;
 	let amount: bigint | undefined;
 	let destination: OptionSolAddress;
 
 	onMount(async () => {
-		data = request.params.request.params.transaction;
+		const {
+			params: {
+				request: {
+					method,
+					params: { transaction }
+				}
+			}
+		} = request;
+
+		signWithSending = method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION;
+		data = transaction;
 
 		({ amount, destination } = await decodeService({
 			base64EncodedTransactionMessage: data,
@@ -96,7 +113,7 @@
 	 * WalletConnect
 	 */
 
-	export let listener: OptionWalletConnectListener;
+	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
 
 	/**
 	 * Reject a transaction
@@ -109,19 +126,17 @@
 	};
 
 	/**
-	 * Send and approve
+	 * Sign
 	 */
 
-	let sendProgressStep: string = ProgressStepsSign.INITIALIZATION;
-
-	const send = async () => {
+	const sign = async () => {
 		const { success } = await signService({
 			request,
 			listener,
 			address,
 			modalNext: modal.next,
 			token,
-			progress: (step: ProgressStepsSign) => (sendProgressStep = step),
+			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
 			identity: $authIdentity
 		});
 
@@ -135,14 +150,17 @@
 	>
 
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
-		<SolSendProgress bind:sendProgressStep />
+		<InProgressWizard
+			progressStep={signProgressStep}
+			steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
+		/>
 	{:else}
-		<WalletConnectSendReview
-			amount={amount ?? 0n}
+		<SolWalletConnectSignReview
+			{amount}
 			destination={destination ?? ''}
 			{data}
 			{token}
-			on:icApprove={send}
+			on:icApprove={sign}
 			on:icReject={reject}
 		/>
 	{/if}
