@@ -6,7 +6,6 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
-import { createSigner } from '$sol/services/sol-sign.services';
 import { signTransaction } from '$sol/services/sol-sign.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
@@ -26,8 +25,6 @@ import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-su
 import { lamports, type Commitment } from '@solana/rpc-types';
 import {
 	setTransactionMessageFeePayerSigner,
-	signTransactionMessageWithSigners,
-	type SignatureDictionary,
 	type TransactionPartialSigner,
 	type TransactionSigner
 } from '@solana/signers';
@@ -39,8 +36,6 @@ import {
 	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
-import { assertTransactionIsFullySigned, getSignatureFromTransaction } from '@solana/transactions';
-import { assertTransactionIsFullySigned, type Transaction } from '@solana/transactions';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';

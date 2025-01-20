@@ -1,9 +1,13 @@
 import type { SolAddress } from '$lib/types/address';
-import { SYSTEM_ACCOUNT_KEYS, SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
-import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
-import { parseSolInstruction } from '$sol/utils/sol-instructions.utils';
-import { SystemInstruction } from '@solana-program/system';
+import type {
+	MappedSolTransaction,
+	SolRpcTransaction,
+	SolTransactionUi
+} from '$sol/types/sol-transaction';
+import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
+import { nonNullish } from '@dfinity/utils';
 import { address as solAddress } from '@solana/addresses';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type {
@@ -16,14 +20,6 @@ import {
 	getBase64Encoder,
 	getCompiledTransactionMessageDecoder
 } from '@solana/web3.js';
-import { getBase64Encoder } from '@solana/codecs';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import {
-	getCompiledTransactionMessageDecoder,
-	type CompilableTransactionMessage
-} from '@solana/transaction-messages';
-import { getTransactionDecoder, type Transaction } from '@solana/transactions';
-import { decompileTransactionMessageFetchingLookupTables } from '@solana/web3.js';
 
 interface TransactionWithAddress {
 	transaction: SolRpcTransaction;
@@ -109,70 +105,20 @@ export const parseSolBase64TransactionMessage = async ({
 
 export const mapSolTransactionMessage = ({
 	instructions
-}: TransactionMessage): {
-	amount: bigint;
-	payer?: SolAddress;
-	source?: SolAddress;
-	destination?: SolAddress;
-} =>
-	Array.from(instructions).reduce<{
-		amount: bigint;
-		payer?: SolAddress;
-		source?: SolAddress;
-		destination?: SolAddress;
-	}>(
+}: TransactionMessage): MappedSolTransaction =>
+	Array.from(instructions).reduce<MappedSolTransaction>(
 		(acc, instruction) => {
-			const parsedInstruction = parseSolInstruction(instruction);
+			const { amount, source, destination, payer } = mapSolInstruction(instruction);
 
-			console.log('parsedInstruction', parsedInstruction);
-
-			if (!('instructionType' in parsedInstruction)) {
-				return acc;
-			}
-
-			const { programAddress } = parsedInstruction;
-
-			if (programAddress !== SYSTEM_PROGRAM_ADDRESS) {
-				return acc;
-			}
-
-			const { instructionType, data } = parsedInstruction;
-
-			if (instructionType === SystemInstruction.CreateAccount) {
-				const { lamports } = data;
-				const {
-					accounts: {
-						payer: { address: payer }
-					}
-				} = parsedInstruction;
-
-				return {
-					...acc,
-					amount: (acc.amount ?? 0n) + lamports,
-					payer
-				};
-			}
-
-			if (instructionType === SystemInstruction.TransferSol) {
-				const { amount } = data;
-				const {
-					accounts: {
-						source: { address: source },
-						destination: { address: destination }
-					}
-				} = parsedInstruction;
-
-				return {
-					...acc,
-					amount: (acc.amount ?? 0n) + amount,
-					source,
-					destination
-				};
-			}
-
-			return acc;
+			return {
+				...acc,
+				amount: nonNullish(amount) ? (acc.amount ?? 0n) + amount : acc.amount,
+				source,
+				destination,
+				payer
+			};
 		},
-		{ amount: 0n, payer: undefined, source: undefined, destination: undefined }
+		{ amount: undefined }
 	);
 
 export const transactionMessageHasBlockhashLifetime = (
