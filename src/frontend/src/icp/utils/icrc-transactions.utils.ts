@@ -6,7 +6,13 @@ import type {
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import {
+	fromNullable,
+	fromNullishNullable,
+	isNullish,
+	jsonReplacer,
+	nonNullish
+} from '@dfinity/utils';
 
 export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
@@ -115,7 +121,7 @@ export const mapIcrcTransaction = ({
 		: nonNullish(data?.amount)
 			? data.amount +
 				(isTransfer && source.incoming === false
-					? (fromNullable(fromNullable(transfer)?.fee ?? []) ?? 0n)
+					? (fromNullishNullable(fromNullable(transfer)?.fee) ?? 0n)
 					: 0n)
 			: undefined;
 
