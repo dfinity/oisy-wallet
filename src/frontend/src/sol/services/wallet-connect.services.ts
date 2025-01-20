@@ -182,8 +182,6 @@ export const sign = ({
 					feePayer: signer
 				});
 
-				progress(ProgressStepsSign.SIGN);
-
 				const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
 				const transactionBytes = getBase64Decoder().decode(
