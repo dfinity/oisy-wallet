@@ -155,9 +155,8 @@ export const sign = ({
 					rpc
 				});
 
-				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct casting
+				// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct type casting
 				if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
-					// throw new Error('Blockhash not found in transaction message lifetime constraint');
 					return { success: false };
 				}
 
