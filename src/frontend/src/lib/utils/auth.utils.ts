@@ -1,4 +1,5 @@
 import { AUTH_ALTERNATIVE_ORIGINS, AUTH_DERIVATION_ORIGIN } from '$lib/constants/app.constants';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import type { Identity } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';
 import { notEmptyString } from '@dfinity/utils';
@@ -38,12 +39,10 @@ const isAlternativeOrigin = (): boolean => {
 	return knownAlternativeOrigins.includes(origin);
 };
 
-const hasDerivationOrigin = (): boolean => notEmptyString(AUTH_DERIVATION_ORIGIN);
-
 export const getOptionalDerivationOrigin = ():
 	| { derivationOrigin: string }
 	| Record<string, never> =>
-	isAlternativeOrigin() && hasDerivationOrigin()
+	isAlternativeOrigin() && !isNullishOrEmpty(AUTH_DERIVATION_ORIGIN)
 		? {
 				derivationOrigin: AUTH_DERIVATION_ORIGIN
 			}

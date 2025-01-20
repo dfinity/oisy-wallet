@@ -1,7 +1,11 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
-import type { GetTransactionApi } from '@solana/rpc';
+import type { GetSignaturesForAddressApi, GetTransactionApi } from '@solana/rpc';
 import type { Commitment } from '@solana/rpc-types';
+import type {
+	FullySignedTransaction,
+	TransactionWithBlockhashLifetime
+} from '@solana/transactions';
 
 export type SolTransactionType = Extract<
 	TransactionType,
@@ -20,3 +24,9 @@ export type SolRpcTransaction = NonNullable<ReturnType<GetTransactionApi['getTra
 	id: string;
 	confirmationStatus: Commitment | null;
 };
+
+export type SolSignature = ReturnType<
+	GetSignaturesForAddressApi['getSignaturesForAddress']
+>[number];
+
+export type SolSignedTransaction = FullySignedTransaction & TransactionWithBlockhashLifetime;

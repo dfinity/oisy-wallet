@@ -1,12 +1,25 @@
-import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
+import type { SolTransactionMessage } from '$sol/types/sol-send';
+import type {
+	SolRpcTransaction,
+	SolSignedTransaction,
+	SolTransactionUi
+} from '$sol/types/sol-transaction';
+import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
+import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
 import {
 	blockhash,
 	lamports,
 	type Base58EncodedBytes,
+	type Blockhash,
 	type UnixTimestamp
 } from '@solana/rpc-types';
+import type { TransactionMessageBytes } from '@solana/transactions';
+
+export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
+	Array.from({ length: n }, () => createMockSolTransactionUi(`txn-${n}`));
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
@@ -221,3 +234,47 @@ export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
 	},
 	version: 'legacy'
 };
+
+export const mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
+	{
+		data: mapSolTransactionUi({
+			transaction: mockSolRpcReceiveTransaction,
+			address: mockSolAddress
+		}),
+		certified: false
+	},
+	{
+		data: mapSolTransactionUi({ transaction: mockSolRpcSendTransaction, address: mockSolAddress }),
+		certified: false
+	}
+];
+
+export const mockSolTransactionMessage: SolTransactionMessage = {
+	lifetimeConstraint: {
+		blockhash: 'mock-blockhash' as Blockhash,
+		lastValidBlockHeight: 1000n
+	},
+	feePayer: { address: address(mockSolAddress) },
+	version: 'legacy',
+	instructions: [
+		{
+			accounts: [
+				{
+					address: address(mockSolAddress),
+					role: 3
+				},
+				{
+					address: address(mockSolAddress2),
+					role: 1
+				}
+			],
+			data: Uint8Array.from([1, 2, 3]),
+			programAddress: address(TOKEN_PROGRAM_ADDRESS)
+		}
+	]
+};
+
+export const mockSolSignedTransaction: SolSignedTransaction = {
+	messageBytes: Uint8Array.from([1, 2, 3, 4, 5, 6]) as unknown as TransactionMessageBytes,
+	signatures: Uint8Array.from([9, 8, 7, 6, 5, 4, 3, 2, 1])
+} as unknown as SolSignedTransaction;
