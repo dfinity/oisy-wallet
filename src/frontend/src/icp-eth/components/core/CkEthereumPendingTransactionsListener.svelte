@@ -1,11 +1,5 @@
 <script lang="ts">
-	import {
-		fromNullable,
-		isNullish,
-		nonNullish,
-		isEmptyString,
-		fromNullishNullable
-	} from '@dfinity/utils';
+	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
