@@ -6,7 +6,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,7 +25,7 @@
 
 	let tokens: Token[];
 	$: tokens = pinTokensWithBalanceAtTop({
-		$tokens: [ICP_TOKEN, ...$allIcrcTokens].filter(
+		$tokens: [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].filter(
 			(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 		),
 		$exchanges: $exchanges,

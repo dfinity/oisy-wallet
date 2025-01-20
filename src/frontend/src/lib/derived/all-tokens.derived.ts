@@ -5,9 +5,11 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
+import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+import { nonNullish } from '@dfinity/utils';
 import { derived } from 'svelte/store';
 
 // The entire list of ICRC tokens to display to the user:
@@ -31,13 +33,18 @@ export const allIcrcTokens = derived([icrcTokens], ([$icrcTokens]) => {
 	].sort(sortIcTokens);
 });
 
-// TODO: add tests
-export const allDisabledIcrcTokens = derived(
-	[allIcrcTokens, enabledIcrcTokens],
-	([$allIcrcTokens, $enabledIcrcTokens]) => {
+export const allKongSwapCompatibleIcrcTokens = derived(
+	[allIcrcTokens, kongSwapTokensStore],
+	([$allIcrcTokens, $kongSwapTokensStore]) =>
+		$allIcrcTokens.filter(({ symbol }) => nonNullish($kongSwapTokensStore?.[symbol]))
+);
+
+export const allDisabledKongSwapCompatibleIcrcTokens = derived(
+	[allKongSwapCompatibleIcrcTokens, enabledIcrcTokens],
+	([allKongSwapCompatibleIcrcTokens, $enabledIcrcTokens]) => {
 		const enabledIcrcTokenIds = $enabledIcrcTokens.map(({ id }) => id);
 
-		return $allIcrcTokens.filter(({ id }) => !enabledIcrcTokenIds.includes(id));
+		return allKongSwapCompatibleIcrcTokens.filter(({ id }) => !enabledIcrcTokenIds.includes(id));
 	}
 );
 
