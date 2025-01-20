@@ -1,12 +1,20 @@
 import type { SolAddress } from '$lib/types/address';
 import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
-import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolTransactionMessage } from '$sol/types/sol-send';
+import type {
+	MappedSolTransaction,
+	SolRpcTransaction,
+	SolTransactionUi
+} from '$sol/types/sol-transaction';
+import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
+import { nonNullish } from '@dfinity/utils';
 import { address as solAddress } from '@solana/addresses';
 import { getBase64Encoder } from '@solana/codecs';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import {
 	getCompiledTransactionMessageDecoder,
-	type CompilableTransactionMessage
+	type CompilableTransactionMessage,
+	type TransactionMessage
 } from '@solana/transaction-messages';
 import { getTransactionDecoder, type Transaction } from '@solana/transactions';
 import { decompileTransactionMessageFetchingLookupTables } from '@solana/web3.js';
@@ -73,7 +81,7 @@ export const mapSolTransactionUi = ({
 	};
 };
 
-const decodeTransactionMessage = (transactionMessage: string): Transaction => {
+export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
 	return getTransactionDecoder().decode(transactionBytes);
 };
@@ -92,3 +100,26 @@ export const parseSolBase64TransactionMessage = async ({
 	const compiledTransactionMessage = getCompiledTransactionMessageDecoder().decode(messageBytes);
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
+
+export const mapSolTransactionMessage = ({
+	instructions
+}: TransactionMessage): MappedSolTransaction =>
+	Array.from(instructions).reduce<MappedSolTransaction>(
+		(acc, instruction) => {
+			const { amount, source, destination, payer } = mapSolInstruction(instruction);
+
+			return {
+				...acc,
+				amount: nonNullish(amount) ? (acc.amount ?? 0n) + amount : acc.amount,
+				source,
+				destination,
+				payer
+			};
+		},
+		{ amount: undefined }
+	);
+
+export const transactionMessageHasBlockhashLifetime = (
+	message: CompilableTransactionMessage
+): message is SolTransactionMessage =>
+	'blockhash' in message.lifetimeConstraint && 'lastValidBlockHeight' in message.lifetimeConstraint;
