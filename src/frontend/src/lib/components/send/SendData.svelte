@@ -12,6 +12,7 @@
 	export let token: Token;
 	export let balance: OptionBalance;
 	export let source: string;
+	export let showNullishAmountLabel = false;
 </script>
 
 {#if nonNullish(destination)}
@@ -20,7 +21,7 @@
 
 <slot name="network" />
 
-<SendDataAmount {amount} {token} />
+<SendDataAmount {amount} {token} showNullishLabel={showNullishAmountLabel} />
 
 <slot />
 

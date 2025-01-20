@@ -40,6 +40,7 @@
 		{token}
 		{balance}
 		source={$solAddressMainnet ?? ''}
+		showNullishAmountLabel
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
