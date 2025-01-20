@@ -1,16 +1,17 @@
-import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
-import { signWithSchnorr } from '$lib/api/signer.api';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
-import { SOLANA_DERIVATION_PATH_PREFIX, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { signTransaction } from '$sol/services/sol-sign.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
+import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -18,24 +19,43 @@ import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
 import { pipe } from '@solana/functional';
-import { lamports } from '@solana/rpc-types';
+import type { Signature } from '@solana/keys';
+import type { Rpc, SolanaRpcApi } from '@solana/rpc';
+import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
+import { lamports, type Commitment } from '@solana/rpc-types';
 import {
-	assertIsTransactionPartialSigner,
-	assertIsTransactionSigner,
-	signTransactionMessageWithSigners,
-	type SignatureDictionary,
+	setTransactionMessageFeePayerSigner,
 	type TransactionPartialSigner,
 	type TransactionSigner
 } from '@solana/signers';
 import {
 	appendTransactionMessageInstructions,
 	createTransactionMessage,
-	setTransactionMessageFeePayer,
-	setTransactionMessageLifetimeUsingBlockhash
+	setTransactionMessageLifetimeUsingBlockhash,
+	type TransactionVersion
 } from '@solana/transaction-messages';
-import type { Transaction } from '@solana/transactions';
+import { assertTransactionIsFullySigned } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
+
+const createDefaultTransaction = async ({
+	rpc,
+	feePayer,
+	version = 'legacy'
+}: {
+	rpc: Rpc<SolanaRpcApi>;
+	feePayer: TransactionSigner;
+	version?: TransactionVersion;
+}) => {
+	const { getLatestBlockhash } = rpc;
+	const { value: latestBlockhash } = await getLatestBlockhash().send();
+
+	return pipe(
+		createTransactionMessage({ version }),
+		(tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+	);
+};
 
 const createSolTransactionMessage = async ({
 	signer,
@@ -50,25 +70,17 @@ const createSolTransactionMessage = async ({
 }): Promise<SolTransactionMessage> => {
 	const rpc = solanaHttpRpc(network);
 
-	const { getLatestBlockhash } = rpc;
-
-	const { value: latestBlockhash } = await getLatestBlockhash().send();
-
-	return pipe(
-		createTransactionMessage({ version: 'legacy' }),
-		(tx) => setTransactionMessageFeePayer(signer.address, tx),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-		(tx) =>
-			appendTransactionMessageInstructions(
-				[
-					getTransferSolInstruction({
-						source: signer,
-						destination: solAddress(destination),
-						amount: lamports(BigInt(amount.toNumber()))
-					})
-				],
-				tx
-			)
+	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
+		appendTransactionMessageInstructions(
+			[
+				getTransferSolInstruction({
+					source: signer,
+					destination: solAddress(destination),
+					amount: lamports(amount.toBigInt())
+				})
+			],
+			tx
+		)
 	);
 };
 
@@ -87,10 +99,6 @@ const createSplTokenTransactionMessage = async ({
 }): Promise<SolTransactionMessage> => {
 	const rpc = solanaHttpRpc(network);
 
-	const { getLatestBlockhash } = rpc;
-
-	const { value: latestBlockhash } = await getLatestBlockhash().send();
-
 	const source = signer.address;
 
 	const sourceTokenAccountAddress = await loadTokenAccount({
@@ -105,26 +113,40 @@ const createSplTokenTransactionMessage = async ({
 		tokenAddress
 	});
 
-	return pipe(
-		createTransactionMessage({ version: 'legacy' }),
-		(tx) => setTransactionMessageFeePayer(signer.address, tx),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-		(tx) =>
-			appendTransactionMessageInstructions(
-				[
-					getTransferInstruction(
-						{
-							source: solAddress(sourceTokenAccountAddress),
-							destination: solAddress(destinationTokenAccountAddress),
-							authority: signer,
-							amount: BigInt(amount.toNumber())
-						},
-						{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
-					)
-				],
-				tx
-			)
+	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
+		appendTransactionMessageInstructions(
+			[
+				getTransferInstruction(
+					{
+						source: solAddress(sourceTokenAccountAddress),
+						destination: solAddress(destinationTokenAccountAddress),
+						authority: signer,
+						amount: amount.toBigInt()
+					},
+					{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
+				)
+			],
+			tx
+		)
 	);
+};
+
+const sendSignedTransaction = ({
+	rpc,
+	rpcSubscriptions,
+	signedTransaction,
+	commitment = 'confirmed'
+}: {
+	rpc: Rpc<SolanaRpcApi>;
+	rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
+	signedTransaction: SolSignedTransaction;
+	commitment?: Commitment;
+}) => {
+	assertTransactionIsFullySigned(signedTransaction);
+
+	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+
+	sendAndConfirmTransaction(signedTransaction, { commitment });
 };
 
 /**
@@ -148,7 +170,7 @@ export const sendSol = async ({
 	destination: SolAddress;
 	source: SolAddress;
 	onProgress?: () => void;
-}): Promise<void> => {
+}): Promise<Signature> => {
 	const {
 		network: { id: networkId }
 	} = token;
@@ -162,30 +184,14 @@ export const sendSol = async ({
 		})
 	);
 
-	const derivationPath = [SOLANA_DERIVATION_PATH_PREFIX, solNetwork];
-
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
-	const signer: TransactionPartialSigner = {
-		address: solAddress(source),
-		signTransactions: async (transactions: Transaction[]): Promise<SignatureDictionary[]> =>
-			await Promise.all(
-				transactions.map(async (transaction) => {
-					const signedBytes = await signWithSchnorr({
-						identity,
-						derivationPath,
-						keyId: SOLANA_KEY_ID,
-						message: Array.from(transaction.messageBytes)
-					});
-
-					return { [source]: Uint8Array.from(signedBytes) } as SignatureDictionary;
-				})
-			)
-	};
-
-	assertIsTransactionSigner(signer);
-	assertIsTransactionPartialSigner(signer);
+	const signer: TransactionPartialSigner = createSigner({
+		identity,
+		address: source,
+		network: solNetwork
+	});
 
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({
@@ -204,12 +210,16 @@ export const sendSol = async ({
 
 	onProgress?.();
 
-	const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
-
-	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+	const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
-	sendAndConfirmTransaction(signedTransaction, { commitment: 'confirmed' });
+	sendSignedTransaction({
+		rpc,
+		rpcSubscriptions,
+		signedTransaction
+	});
 
 	onProgress?.();
+
+	return signature;
 };
