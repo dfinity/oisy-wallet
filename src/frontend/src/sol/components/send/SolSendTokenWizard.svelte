@@ -5,6 +5,7 @@
 	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -31,8 +32,8 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
-	import SolSendProgress from '$sol/components/send/SolSendProgress.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
+	import { sendSteps } from '$sol/constants/steps.constants';
 	import { sendSol } from '$sol/services/sol-send.services';
 
 	export let currentStep: WizardStep | undefined;
@@ -103,6 +104,8 @@
 		dispatch('icNext');
 
 		try {
+			sendProgressStep = ProgressStepsSendSol.INITIALIZATION;
+
 			// TODO: add tracking
 			await sendSol({
 				identity: $authIdentity,
@@ -139,7 +142,7 @@
 {#if currentStep?.name === WizardStepsSend.REVIEW}
 	<SolSendReview on:icBack on:icSend={send} {destination} {amount} {network} {source} />
 {:else if currentStep?.name === WizardStepsSend.SENDING}
-	<SolSendProgress bind:sendProgressStep />
+	<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<SolSendForm on:icNext on:icClose bind:destination bind:amount on:icQRCodeScan {source}>
 		<svelte:fragment slot="cancel">
