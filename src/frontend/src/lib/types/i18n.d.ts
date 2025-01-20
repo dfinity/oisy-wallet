@@ -347,6 +347,7 @@ interface I18nSend {
 		no_solana_network_id: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
+		unable_to_retrieve_amount: string;
 	};
 }
 
@@ -565,6 +566,7 @@ interface I18nWallet_connect {
 		events: string;
 		message: string;
 		hex_data: string;
+		base64_data: string;
 		raw_copied: string;
 		sign_message: string;
 	};
@@ -585,6 +587,7 @@ interface I18nWallet_connect {
 		session_ended: string;
 		connected: string;
 		eth_transaction_executed: string;
+		sol_transaction_executed: string;
 		sign_executed: string;
 	};
 	error: {

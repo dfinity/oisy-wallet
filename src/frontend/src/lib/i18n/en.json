@@ -379,7 +379,8 @@
 			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
-			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
+			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
+			"unable_to_retrieve_amount": "n/a (unable to retrieve)"
 		}
 	},
 	"convert": {
@@ -638,6 +639,7 @@
 			"events": "Events",
 			"message": "Message",
 			"hex_data": "HEX Data",
+			"base64_data": "Base-64 Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message"
 		},
@@ -660,6 +662,7 @@
 			"session_ended": "WalletConnect session was ended.",
 			"connected": "WalletConnect connected.",
 			"eth_transaction_executed": "WalletConnect eth_sendTransaction request executed.",
+			"sol_transaction_executed": "WalletConnect \"$method\" request executed.",
 			"sign_executed": "WalletConnect sign request executed."
 		},
 		"error": {

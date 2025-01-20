@@ -1,4 +1,5 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
+import type { SolAddress } from '$lib/types/address';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import type { Address } from '@solana/addresses';
 import type { GetSignaturesForAddressApi } from '@solana/rpc';
@@ -62,3 +63,10 @@ export type SolSignature = ReturnType<
 >[number];
 
 export type SolSignedTransaction = FullySignedTransaction & TransactionWithBlockhashLifetime;
+
+export interface MappedSolTransaction {
+	amount: bigint | undefined;
+	payer?: SolAddress;
+	source?: SolAddress;
+	destination?: SolAddress;
+}
