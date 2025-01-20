@@ -30,6 +30,10 @@
 	import type { Option } from '$lib/types/utils';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+		SESSION_REQUEST_SOL_SIGN_TRANSACTION
+	} from '$sol/constants/wallet-connect.constants';
 
 	export let listener: OptionWalletConnectListener;
 
@@ -231,7 +235,9 @@
 			switch (method) {
 				case SESSION_REQUEST_ETH_SIGN_V4:
 				case SESSION_REQUEST_ETH_SIGN:
-				case SESSION_REQUEST_PERSONAL_SIGN: {
+				case SESSION_REQUEST_PERSONAL_SIGN:
+				case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
+				case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
 					modalStore.openWalletConnectSign(sessionRequest);
 					return;
 				}
