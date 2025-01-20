@@ -1,44 +1,19 @@
-import {
-	TRACK_COUNT_WC_SOL_SEND_ERROR,
-	TRACK_COUNT_WC_SOL_SEND_SUCCESS
-} from '$lib/constants/analytics.contants';
-import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
-import { trackEvent } from '$lib/services/analytics.services';
-import {
-	execute,
-	type WalletConnectCallBackParams,
-	type WalletConnectExecuteParams
-} from '$lib/services/wallet-connect.services';
+import { type WalletConnectExecuteParams } from '$lib/services/wallet-connect.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
+import type { OptionSolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
-import {
-	sendSignedTransaction,
-	setLifetimeAndFeePayerToTransaction,
-	signTransaction
-} from '$sol/services/sol-send.services';
-import { createSigner } from '$sol/services/sol-sign.services';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import {
-	decodeTransactionMessage,
 	mapSolTransactionMessage,
-	parseSolBase64TransactionMessage,
-	transactionMessageHasBlockhashLifetime
+	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import { getBase64Decoder } from '@solana/codecs';
-import { addSignersToTransactionMessage } from '@solana/signers';
-import { type Base64EncodedWireTransaction } from '@solana/transactions';
-import { getTransactionEncoder } from '@solana/web3.js';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {
