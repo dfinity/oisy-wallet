@@ -29,7 +29,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
-export type WalletConnectSendParams = WalletConnectExecuteParams & {
+type WalletConnectSendParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionEthAddress;
 	fee: FeeStoreData;
@@ -37,7 +37,7 @@ export type WalletConnectSendParams = WalletConnectExecuteParams & {
 	amount: BigNumber;
 } & SendParams;
 
-export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
+type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign) => void;
