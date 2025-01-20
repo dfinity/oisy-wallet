@@ -64,6 +64,7 @@
 		"@dfinity/verifiable-credentials": "^0.0.4",
 		"@junobuild/analytics": "^0.0.31",
 		"@metamask/detect-provider": "^2.0.0",
+		"@solana-program/compute-budget": "^0.6.1",
 		"@solana-program/system": "^0.6.2",
 		"@solana-program/token": "^0.4.1",
 		"@solana/addresses": "^2.0.0",
