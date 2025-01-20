@@ -5,10 +5,12 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	export let data: string | undefined;
+	export let label: string;
 </script>
 
 {#if nonNullish(data)}
-	<label for="data" class="px-4.5 font-bold">{$i18n.wallet_connect.text.hex_data}:</label>
+	<label for="data" class="px-4.5 font-bold">{label}:</label>
+
 	<div id="data" class="px-4.5 mb-4 flex items-center gap-1 font-normal">
 		{shortenWithMiddleEllipsis({ text: data })}<Copy
 			inline

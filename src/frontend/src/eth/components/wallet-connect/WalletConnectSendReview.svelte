@@ -4,14 +4,15 @@
 	import { getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
-	import WalletConnectSendData from '$eth/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balance } from '$lib/derived/balances.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -37,7 +38,7 @@
 		balance={$balance}
 		source={$ethAddress ?? ''}
 	>
-		<WalletConnectSendData {data} />
+		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
 		<FeeDisplay slot="fee" />
 
