@@ -25,6 +25,7 @@ import {
 	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
+import { signTransaction } from '$sol/services/sol-sign.services';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import {
@@ -39,7 +40,6 @@ import { addSignersToTransactionMessage } from '@solana/signers';
 import { type Base64EncodedWireTransaction } from '@solana/transactions';
 import { getTransactionEncoder } from '@solana/web3.js';
 import { get } from 'svelte/store';
-import { signTransaction } from '$sol/services/sol-sign.services';
 
 interface WalletConnectDecodeTransactionParams {
 	base64EncodedTransactionMessage: string;
