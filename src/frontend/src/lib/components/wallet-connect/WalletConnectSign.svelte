@@ -32,9 +32,6 @@
 	$: sourceSolNetwork = nonNullish(solChainId)
 		? $enabledSolanaNetworks.find(({ chainId: cId }) => cId === solChainId)
 		: undefined;
-
-	$: request, console.log('received approve request', request);
-	$: listener, console.log('listener', listener);
 </script>
 
 {#if $modalWalletConnectSign && nonNullish(request)}
