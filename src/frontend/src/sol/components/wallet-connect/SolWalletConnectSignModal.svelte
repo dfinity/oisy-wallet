@@ -138,7 +138,7 @@
 		<SolSendProgress bind:sendProgressStep />
 	{:else}
 		<SolWalletConnectSendReview
-			amount={amount ?? 0n}
+			{amount}
 			destination={destination ?? ''}
 			{data}
 			{token}
