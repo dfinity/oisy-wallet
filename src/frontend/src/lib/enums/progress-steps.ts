@@ -29,6 +29,7 @@ export enum ProgressStepsSign {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
 	APPROVE = 'approve',
+	APPROVE_WALLET_CONNECT = 'approve_wallet_connect',
 	DONE = 'done'
 }
 
