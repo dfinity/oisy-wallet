@@ -19,14 +19,17 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
 const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
+//temporary hotfix for scrolling issue
+const DESKTOP_SCREEN = { width: 1920, height: 1080 }
+const DESKTOP_VIEWPORT = { width: 1920, height: 1080 }
 
 const appleProjects = [
 	{
 		name: 'Safari',
 		use: {
 			...devices['Desktop Safari'],
-			screen: { width: 1920, height: 1080 },
-			viewport: { width: 1920, height: 1080 }
+			screen: DESKTOP_SCREEN,
+			viewport: DESKTOP_VIEWPORT
 		}
 	},
 	{
@@ -45,16 +48,16 @@ const nonAppleProjects = [
 		use: {
 			...devices['Desktop Chrome'],
 			channel: 'chrome',
-			screen: { width: 1920, height: 1080 },
-			viewport: { width: 1920, height: 1080 }
+			screen: DESKTOP_SCREEN,
+			viewport: DESKTOP_VIEWPORT
 		}
 	},
 	{
 		name: 'Firefox',
 		use: {
 			...devices['Desktop Firefox'],
-			screen: { width: 1920, height: 1080 },
-			viewport: { width: 1920, height: 1080 }
+			screen: DESKTOP_SCREEN,
+			viewport: DESKTOP_VIEWPORT
 		}
 	},
 	{
