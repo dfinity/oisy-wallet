@@ -1,7 +1,5 @@
 import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 import type { ProgressSteps } from '$lib/types/progress-steps';
-import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
-import type { ProgressSteps } from '$lib/types/progress-steps';
 
 export const sendSteps = (i18n: I18n): ProgressSteps => [
 	{
@@ -20,7 +18,6 @@ export const sendSteps = (i18n: I18n): ProgressSteps => [
 		state: 'next'
 	}
 ];
-
 
 export const walletConnectSignSteps = ({
 	i18n,
