@@ -1,0 +1,10 @@
+[package]
+name = "ic-cycles-ledger-types"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+candid = { workspace = true }
+ic-cdk = { workspace = true }
+serde = { workspace = true }
+serde_bytes = { workspace = true }

@@ -13,8 +13,13 @@ import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.fact
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type { SendBtcParams } from '$lib/types/api';
+import type {
+	GetSchnorrPublicKeyParams,
+	SendBtcParams,
+	SignWithSchnorrParams
+} from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { Canister, createServices, toNullable } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
@@ -194,5 +199,58 @@ export class SignerCanister extends Canister<SignerService> {
 		}
 
 		throw mapSignerCanisterSendBtcError(response.Err);
+	};
+
+	getSchnorrPublicKey = async ({
+		derivationPath,
+		keyId
+	}: GetSchnorrPublicKeyParams): Promise<Uint8Array | number[]> => {
+		const { schnorr_public_key } = this.caller({
+			certified: true
+		});
+
+		const response = await schnorr_public_key(
+			{
+				key_id: keyId,
+				canister_id: [],
+				derivation_path: mapDerivationPath(derivationPath)
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { public_key } = response.Ok[0];
+			return public_key;
+		}
+
+		// TODO: map error like the other methods when SchnorrPublicKeyError is exposed in the Signer repo
+		throw response.Err;
+	};
+
+	signWithSchnorr = async ({
+		message,
+		derivationPath,
+		keyId
+	}: SignWithSchnorrParams): Promise<Uint8Array | number[]> => {
+		const { schnorr_sign } = this.caller({
+			certified: true
+		});
+
+		const response = await schnorr_sign(
+			{
+				key_id: keyId,
+				derivation_path: mapDerivationPath(derivationPath),
+				message
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+
+		if ('Ok' in response) {
+			const { signature } = response.Ok[0];
+			return signature;
+		}
+
+		// TODO: map error like the other methods when SchnorrSignError is exposed in the Signer repo
+		throw response.Err;
 	};
 }

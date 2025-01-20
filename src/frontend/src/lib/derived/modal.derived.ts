@@ -25,6 +25,10 @@ export const modalBtcReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-receive'
 );
+export const modalSolReceive: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'sol-receive'
+);
 export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
@@ -32,6 +36,10 @@ export const modalReceive: Readable<boolean> = derived(
 export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
+);
+export const modalSwap: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'swap'
 );
 export const modalBuy: Readable<boolean> = derived(
 	modalStore,
@@ -93,9 +101,17 @@ export const modalBtcTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-transaction'
 );
+export const modalSolTransaction: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'sol-transaction'
+);
 export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-token'
+);
+export const modalBtcToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'btc-token'
 );
 export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
@@ -109,9 +125,21 @@ export const modalAboutWhyOisy: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'about-why-oisy'
 );
+export const modalVipQrCode: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'vip-qr-code'
+);
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'
+);
+export const modalSuccessfulRewardModal: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'successful-reward'
+);
+export const modalFailedRewardModal: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'failed-reward'
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(

@@ -17,12 +17,12 @@ on:
   workflow_dispatch:
 
 jobs:
-
   format:
     runs-on: ubuntu-24.04
     steps:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
+        continue-on-error: true
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
