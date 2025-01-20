@@ -32,11 +32,41 @@ import {
 	appendTransactionMessageInstructions,
 	createTransactionMessage,
 	setTransactionMessageLifetimeUsingBlockhash,
+	type ITransactionMessageWithFeePayer,
+	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
+
+const setFeePayerToTransaction = ({
+	transactionMessage,
+	feePayer
+}: {
+	transactionMessage: TransactionMessage;
+	feePayer: TransactionSigner;
+}): TransactionMessage & ITransactionMessageWithFeePayer =>
+	pipe(transactionMessage, (tx) => setTransactionMessageFeePayerSigner(feePayer, tx));
+
+const setLifetimeAndFeePayerToTransaction = async ({
+	transactionMessage,
+	rpc,
+	feePayer
+}: {
+	transactionMessage: TransactionMessage;
+	rpc: Rpc<SolanaRpcApi>;
+	feePayer: TransactionSigner;
+}): Promise<SolTransactionMessage> => {
+	const { getLatestBlockhash } = rpc;
+	const { value: latestBlockhash } = await getLatestBlockhash().send();
+
+	return pipe(
+		transactionMessage,
+		(tx) => setFeePayerToTransaction({ transactionMessage: tx, feePayer }),
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+	);
+};
 
 const createDefaultTransaction = async ({
 	rpc,
@@ -46,16 +76,12 @@ const createDefaultTransaction = async ({
 	rpc: Rpc<SolanaRpcApi>;
 	feePayer: TransactionSigner;
 	version?: TransactionVersion;
-}) => {
-	const { getLatestBlockhash } = rpc;
-	const { value: latestBlockhash } = await getLatestBlockhash().send();
-
-	return pipe(
+}): Promise<SolTransactionMessage> =>
+	await pipe(
 		createTransactionMessage({ version }),
-		(tx) => setTransactionMessageFeePayerSigner(feePayer, tx),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+		async (tx) =>
+			await setLifetimeAndFeePayerToTransaction({ transactionMessage: tx, rpc, feePayer })
 	);
-};
 
 const createSolTransactionMessage = async ({
 	signer,
