@@ -43,7 +43,7 @@
 
 	const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS;
 
-	let ataFee: Lamports | undefined;
+	let ataFee: Lamports | undefined = undefined;
 
 	const updateAtaFee = async () => {
 		const solNetwork = mapNetworkIdToNetwork($sendTokenNetworkId);
