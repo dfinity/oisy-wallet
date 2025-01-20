@@ -16,6 +16,14 @@ import {
 	getBase64Encoder,
 	getCompiledTransactionMessageDecoder
 } from '@solana/web3.js';
+import { getBase64Encoder } from '@solana/codecs';
+import type { Rpc, SolanaRpcApi } from '@solana/rpc';
+import {
+	getCompiledTransactionMessageDecoder,
+	type CompilableTransactionMessage
+} from '@solana/transaction-messages';
+import { getTransactionDecoder, type Transaction } from '@solana/transactions';
+import { decompileTransactionMessageFetchingLookupTables } from '@solana/web3.js';
 
 interface TransactionWithAddress {
 	transaction: SolRpcTransaction;
@@ -84,6 +92,9 @@ export const decodeTransactionMessage = (transactionMessage: string): Transactio
 	return getTransactionDecoder().decode(transactionBytes);
 };
 
+/**
+ * It parses a base64 encoded transaction message into a compilable transaction message with lookup tables and instruction
+ */
 export const parseSolBase64TransactionMessage = async ({
 	transactionMessage,
 	rpc

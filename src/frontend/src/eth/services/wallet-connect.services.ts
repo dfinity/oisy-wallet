@@ -238,7 +238,7 @@ export const signMessage = ({
 
 				const signedMessage = await sign(params);
 
-				progress(ProgressStepsSign.APPROVE);
+				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
 
 				await listener.approveRequest({ topic, id, message: signedMessage });
 

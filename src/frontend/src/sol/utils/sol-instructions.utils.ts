@@ -319,6 +319,14 @@ const parseSolTokenInstruction = (
 	}
 };
 
+/**
+ * Parse a Solana instruction according to its program address.
+ *
+ * Note that we do not map all the instructions, only the ones we are able to get the IDL for.
+ *
+ * @param instruction - The Solana instruction to parse.
+ * @returns The parsed instruction or the original instruction if it could not be parsed.
+ */
 export const parseSolInstruction = (
 	instruction: SolInstruction
 ):
