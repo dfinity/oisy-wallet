@@ -338,7 +338,7 @@
 			"name": "Motoko",
 			"symbol": "MOTOKO",
 			"fee": {
-				"__bigint__": "10000"
+				"__bigint__": "100000000"
 			},
 			"alternativeName": "Motoko",
 			"url": "https://2uktw-yiaaa-aaaah-adwxq-cai.icp0.io/"
@@ -447,6 +447,21 @@
 			},
 			"alternativeName": "KongSwap",
 			"url": "https://www.kongswap.io/"
+		}
+	},
+	{
+		"ledgerCanisterId": "o4zzi-qaaaa-aaaaq-aaeeq-cai",
+		"rootCanisterId": "pww3s-sqaaa-aaaaq-aaedq-cai",
+		"indexCanisterId": "os3ua-lqaaa-aaaaq-aaefq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "FomoWell",
+			"symbol": "WELL",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "FomoWell",
+			"url": "https://fomowell.com/"
 		}
 	}
 ]

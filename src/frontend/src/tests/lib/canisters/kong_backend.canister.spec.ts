@@ -10,6 +10,7 @@ import { CanisterInternalError } from '$lib/canisters/errors';
 import { KongBackendCanister } from '$lib/canisters/kong_backend.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -228,6 +229,62 @@ describe('kong_backend.canister', () => {
 			});
 
 			const res = swap(swapParams);
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('tokens', () => {
+		it('returns compatible with kong swap tokens', async () => {
+			const response = {
+				Ok: mockKongBackendTokens
+			};
+			service.tokens.mockResolvedValue(response);
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await tokens();
+
+			expect(res).toEqual(response.Ok);
+		});
+
+		it('should throw an error if tokens returns an error', async () => {
+			service.tokens.mockResolvedValue(errorResponse);
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = tokens();
+
+			await expect(res).rejects.toThrow(new CanisterInternalError(errorResponse.Err));
+		});
+
+		it('should throw an error if tokems throws', async () => {
+			service.tokens.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = tokens();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if tokens returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.tokens.mockResolvedValue({ test: 'unexpected' });
+
+			const { tokens } = await createKongBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = tokens();
 
 			await expect(res).rejects.toThrow();
 		});
