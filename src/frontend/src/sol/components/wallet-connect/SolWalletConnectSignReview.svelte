@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
@@ -8,11 +9,12 @@
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
 
-	export let amount: bigint;
+	export let amount: bigint | undefined;
 	export let destination: string;
 	export let data: string | undefined;
 	export let token: Token;
@@ -24,13 +26,16 @@
 	let balance: BigNumber | undefined;
 	$: balance = $balancesStore?.[tokenId]?.data;
 
-	$: amount, console.log('amount', amount);
+	let amountDisplay: OptionAmount;
+	$: amountDisplay = nonNullish(amount)
+		? formatToken({ value: BigNumber.from(amount), unitName: decimals })
+		: undefined;
 </script>
 
 <ContentWithToolbar>
 	<!-- TODO: add address for devnet and testnet-->
 	<SendData
-		amount={formatToken({ value: BigNumber.from(amount), unitName: decimals })}
+		amount={amountDisplay}
 		{destination}
 		{token}
 		{balance}
