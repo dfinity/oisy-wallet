@@ -31,7 +31,11 @@ const appleProjects = [
 	},
 	{
 		name: 'iPhone SE',
-		use: devices['iPhone SE']
+		use: {
+			...devices['iPhone SE'],
+			screen: { width: 640, height: 1136 },
+			viewport: { width: 320, height: 568 }
+		}
 	}
 ];
 
@@ -39,7 +43,7 @@ const nonAppleProjects = [
 	{
 		name: 'Google Chrome',
 		use: {
-			...devices['Desktop Chrome '],
+			...devices['Desktop Chrome'],
 			channel: 'chrome',
 			screen: { width: 1920, height: 1080 },
 			viewport: { width: 1920, height: 1080 }
@@ -55,7 +59,11 @@ const nonAppleProjects = [
 	},
 	{
 		name: 'Pixel 7',
-		use: devices['Pixel 7']
+		use: {
+			...devices['Pixel 7'],
+			screen: { width: 1080, height: 2400 },
+			viewport: { width: 412, height: 915 }
+		}
 	}
 ];
 
