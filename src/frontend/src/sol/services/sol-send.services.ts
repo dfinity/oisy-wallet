@@ -24,9 +24,7 @@ import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import { lamports, type Commitment } from '@solana/rpc-types';
 import {
-	setTransactionMessageFeePayerSigner.
-	signTransactionMessageWithSigners,
-	type SignatureDictionary,
+	setTransactionMessageFeePayerSigner,
 	type TransactionPartialSigner,
 	type TransactionSigner
 } from '@solana/signers';
@@ -36,8 +34,7 @@ import {
 	setTransactionMessageLifetimeUsingBlockhash,
 	type TransactionVersion
 } from '@solana/transaction-messages';
-import { assertTransactionIsFullySigned, getSignatureFromTransaction } from '@solana/transactions';
-import { type Transaction } from '@solana/transactions';
+import { assertTransactionIsFullySigned } from '@solana/transactions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
