@@ -1,6 +1,6 @@
-import { PrincipalTextSchema } from '$lib/validation/principal.validation';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
+import { PrincipalTextSchema } from '@dfinity/zod-schemas';
 
 describe('PrincipalText', () => {
 	it('should pass validation with a valid Principal string', () => {
