@@ -395,13 +395,11 @@
 		"indexCanisterId": "i5e5b-eaaaa-aaaaq-aadpa-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "CYCLES-TRANSFER-STATION",
-			"symbol": "CTS",
+			"name": "---- (formerly CYCLES-TRANSFER-STATION)",
+			"symbol": "--- (CTS)",
 			"fee": {
-				"__bigint__": "100000"
-			},
-			"alternativeName": "CYCLES-TRANSFER-STATION",
-			"url": "https://cycles-transfer-station.com"
+				"__bigint__": "1000000000000000000"
+			}
 		}
 	},
 	{
