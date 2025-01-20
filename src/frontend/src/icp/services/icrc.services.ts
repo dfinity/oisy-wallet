@@ -1,10 +1,12 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS } from '$env/networks/networks.icrc.env';
-import { metadata } from '$icp/api/icrc-ledger.api';
+import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
+import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
+import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
-import type { IcInterface } from '$icp/types/ic-token';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
@@ -18,12 +20,16 @@ import {
 	type QueryAndUpdateStrategy
 } from '$lib/actors/query.ic';
 import { listCustomTokens } from '$lib/api/backend.api';
+import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
+import { balancesStore } from '$lib/stores/balances.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
-import { AnonymousIdentity } from '@dfinity/agent';
+import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -187,4 +193,67 @@ const loadIcrcCustomData = ({
 	response: IcrcCustomTokenWithoutId[];
 }) => {
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+export const loadDisabledIcrcTokensBalances = ({
+	identity,
+	disabledIcrcTokens
+}: {
+	identity: Identity;
+	disabledIcrcTokens: IcToken[];
+}): Promise<void[]> =>
+	Promise.all(
+		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
+			const icrcTokenBalance = await balance({
+				identity,
+				owner: identity.getPrincipal(),
+				ledgerCanisterId
+			});
+
+			balancesStore.set({
+				tokenId: id,
+				data: {
+					data: BigNumber.from(icrcTokenBalance),
+					certified: true
+				}
+			});
+		})
+	);
+
+export const loadDisabledIcrcTokensExchanges = async ({
+	disabledIcrcTokens
+}: {
+	disabledIcrcTokens: IcToken[];
+}): Promise<void> => {
+	const [currentErc20Prices, currentIcrcPrices] = await Promise.all([
+		exchangeRateERC20ToUsd(
+			disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
+				const twinTokenAddress = ((token as Partial<IcCkToken>).twinToken as Erc20Token | undefined)
+					?.address;
+
+				return nonNullish(twinTokenAddress)
+					? [
+							...acc,
+							{
+								address: twinTokenAddress
+							}
+						]
+					: acc;
+			}, [])
+		),
+		exchangeRateICRCToUsd(
+			disabledIcrcTokens.reduce<LedgerCanisterIdText[]>(
+				(acc, { ledgerCanisterId }) =>
+					!ICRC_CK_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)
+						? [...acc, ledgerCanisterId]
+						: acc,
+				[]
+			)
+		)
+	]);
+
+	exchangeStore.set([
+		...(nonNullish(currentErc20Prices) ? [currentErc20Prices] : []),
+		...(nonNullish(currentIcrcPrices) ? [currentIcrcPrices] : [])
+	]);
 };
