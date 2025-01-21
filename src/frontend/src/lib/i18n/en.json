@@ -598,7 +598,8 @@
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
-			"total_fee": "Total fee"
+			"total_fee": "Total fee",
+			"ata_fee": "ATA fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
