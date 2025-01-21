@@ -13,3 +13,7 @@ export interface TokenToListener {
 	token: Token;
 	listener: ComponentType;
 }
+
+export interface WebSocketListener {
+	disconnect: () => Promise<void>;
+}

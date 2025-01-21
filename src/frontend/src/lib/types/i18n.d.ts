@@ -20,6 +20,7 @@ interface I18nCore {
 		approve: string;
 		view: string;
 		copy: string;
+		clear_filter: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -36,7 +37,7 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		changelog: string;
-		submit_ticket: string;
+		support_email: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 	};
@@ -48,7 +49,7 @@ interface I18nNavigation {
 		more_settings: string;
 		menu: string;
 		changelog: string;
-		submit_ticket: string;
+		support_email: string;
 		open_twitter: string;
 		vip_qr_code: string;
 	};
@@ -320,6 +321,7 @@ interface I18nSend {
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
+		insufficient_solana_funds_to_cover_the_fees: string;
 		not_enough_tokens_for_gas: string;
 		gas_fees_not_defined: string;
 		max_gas_fee_per_gas_undefined: string;
@@ -344,6 +346,7 @@ interface I18nSend {
 		no_solana_network_id: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
+		unable_to_retrieve_amount: string;
 	};
 }
 
@@ -385,6 +388,39 @@ interface I18nConvert {
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
+}
+
+interface I18nSwap {
+	text: {
+		swap: string;
+		select_destination_token: string;
+		select_source_token: string;
+		select_source_token_title: string;
+		select_destination_token_title: string;
+		switch_tokens_button: string;
+		review: string;
+		review_button: string;
+		select_token: string;
+		max_slippage: string;
+		max_balance: string;
+		not_available: string;
+		value_difference: string;
+		total_fee: string;
+		token_fee: string;
+		gas_fee: string;
+		lp_fee: string;
+		max_slippage_info: string;
+		max_slippage_warning: string;
+		max_slippage_error: string;
+		swap_button: string;
+		swap_is_not_offered: string;
+		exchange_is_not_available: string;
+		executing_transaction: string;
+		initializing: string;
+		swapping: string;
+		refreshing_ui: string;
+	};
+	error: { unexpected: string; unexpected_missing_data: string };
 }
 
 interface I18nBuy {
@@ -451,7 +487,6 @@ interface I18nTokens {
 			title: string;
 			manage_list: string;
 			do_not_see_import: string;
-			clear_filter: string;
 			manage_for_network: string;
 			network: string;
 			all_tokens_zero_balance: string;
@@ -530,6 +565,7 @@ interface I18nWallet_connect {
 		events: string;
 		message: string;
 		hex_data: string;
+		base64_data: string;
 		raw_copied: string;
 		sign_message: string;
 	};
@@ -550,6 +586,7 @@ interface I18nWallet_connect {
 		session_ended: string;
 		connected: string;
 		eth_transaction_executed: string;
+		sol_transaction_executed: string;
 		sign_executed: string;
 	};
 	error: {
@@ -770,6 +807,7 @@ interface I18n {
 	receive: I18nReceive;
 	send: I18nSend;
 	convert: I18nConvert;
+	swap: I18nSwap;
 	buy: I18nBuy;
 	tokens: I18nTokens;
 	fee: I18nFee;
