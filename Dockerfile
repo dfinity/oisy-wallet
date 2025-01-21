@@ -42,7 +42,12 @@ COPY ./rust-toolchain.toml ./rust-toolchain.toml
 COPY rust-toolchain.toml .
 COPY dev-tools.json .
 COPY scripts/setup scripts/setup-cargo-binstall scripts/setup-rust scripts/
-RUN scripts/setup rust cargo-binstall ic-wasm yq
+RUN scripts/setup rust
+RUN scripts/setup cargo-binstall
+RUN scripts/setup candid-extractor
+RUN scripts/setup ic-wasm
+RUN scripts/setup didc
+RUN scripts/setup yq
 
 # Pre-build all cargo dependencies. Because cargo doesn't have a build option
 # to build only the dependencies, we pretend that our project is a simple, empty
