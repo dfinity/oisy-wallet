@@ -26,7 +26,7 @@ export const loadErc20Tokens = async ({
 }: {
 	identity: OptionIdentity;
 }): Promise<void> => {
-	await Promise.all([loadDefaultErc20Tokens(), loadUserTokens({ identity })]);
+	await Promise.all([loadDefaultErc20Tokens(), loadErc20UserTokens({ identity })]);
 };
 
 // TODO(GIX-2740): use environment static metadata
@@ -68,10 +68,10 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	return { success: true };
 };
 
-export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadErc20UserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<Erc20UserToken[]>({
-		request: (params) => loadErc20UserTokens(params),
-		onLoad: loadErc20UserTokenData,
+		request: (params) => loadUserTokens(params),
+		onLoad: loadUserTokenData,
 		onCertifiedError: ({ error: err }) => {
 			erc20UserTokensStore.resetAll();
 
@@ -83,7 +83,7 @@ export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Prom
 		identity
 	});
 
-const loadErc20UserTokens = async (params: {
+const loadUserTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<Erc20UserToken[]> => {
@@ -136,7 +136,7 @@ const loadErc20UserTokens = async (params: {
 	return contracts.map(mapErc20UserToken);
 };
 
-const loadErc20UserTokenData = ({
+const loadUserTokenData = ({
 	response: tokens,
 	certified
 }: {
