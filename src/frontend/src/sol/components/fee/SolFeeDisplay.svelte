@@ -60,7 +60,7 @@
 			})
 		);
 
-		ataFee = showAtaFee ? await getSolCreateAccountFee(solNetwork) : undefined;
+		ataFee = await getSolCreateAccountFee(solNetwork);
 	};
 
 	$: showAtaFee, $sendTokenNetworkId, updateAtaFee();
