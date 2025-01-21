@@ -5,6 +5,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { saveTokens } from '$lib/services/manage-tokens.services';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -35,6 +36,8 @@ describe('manage-tokens.services', () => {
 
 		beforeEach(() => {
 			vi.resetAllMocks();
+
+			vi.spyOn(toastsStore, 'toastsError');
 		});
 
 		it('should call nullishSignOut if identity is nullish', async () => {
