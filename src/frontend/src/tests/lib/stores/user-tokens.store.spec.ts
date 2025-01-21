@@ -30,7 +30,6 @@ describe('user-token.store', () => {
 		describe('setAll', () => {
 			it('should set all tokens correctly', () => {
 				const tokens = [BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN, SOLANA_TOKEN];
-
 				const mockTokens = tokens.map((token) => ({
 					data: { ...token, enabled },
 					certified
