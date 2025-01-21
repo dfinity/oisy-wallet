@@ -47,7 +47,7 @@
 		const tokenAccount = await loadTokenAccount({
 			address: destination,
 			network: solNetwork,
-			tokenAddress: ($sendToken).address
+			tokenAddress: $sendToken.address
 		});
 
 		// If the token account does not exist, show the ATA fee, since we are going to create one and pay for it
