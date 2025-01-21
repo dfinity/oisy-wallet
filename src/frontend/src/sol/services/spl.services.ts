@@ -6,9 +6,14 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
-import { SPL_USER_TOKENS_KEY, splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
+import {
+	SPL_USER_TOKENS_KEY,
+	splUserTokensStore,
+	type SplAddressMap
+} from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
+import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -34,7 +39,7 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 
 export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<SplUserToken[]>({
-		request: () => loadSplUserTokens(),
+		request: () => loadSplUserTokens({ identity }),
 		onLoad: loadSplUserTokenData,
 		onCertifiedError: ({ error: err }) => {
 			splUserTokensStore.resetAll();
@@ -48,11 +53,17 @@ export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Prom
 		strategy: 'query'
 	});
 
-export const loadSplUserTokens = async (): Promise<SplUserToken[]> => {
+export const loadSplUserTokens = async ({
+	identity
+}: {
+	identity: OptionIdentity;
+}): Promise<SplUserToken[]> => {
 	// TODO: use the backend method when we add the SPL tokens to the backend, similar to ERC20
 	const loadUserContracts = async (): Promise<SplTokenAddress[]> => {
-		const contracts: SplTokenAddress[] =
-			getStorage<SplTokenAddress[]>({ key: SPL_USER_TOKENS_KEY }) ?? [];
+		const contractsMap: SplAddressMap =
+			getStorage<SplAddressMap>({ key: SPL_USER_TOKENS_KEY }) ?? {};
+		const principal = identity?.getPrincipal().toString();
+		const contracts = nonNullish(principal) ? (contractsMap[principal] ?? []) : [];
 
 		return await Promise.resolve(contracts);
 	};

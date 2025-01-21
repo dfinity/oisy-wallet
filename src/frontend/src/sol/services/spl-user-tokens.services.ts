@@ -1,7 +1,11 @@
 import { get as getStorage, set as setStorage } from '$icp/utils/storage.utils';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import { loadUserTokens } from '$sol/services/spl.services';
-import { SPL_USER_TOKENS_KEY, splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
+import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
+import {
+	SPL_USER_TOKENS_KEY,
+	splUserTokensStore,
+	type SplAddressMap
+} from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import type { Identity } from '@dfinity/agent';
@@ -18,8 +22,11 @@ export const saveUserTokens = async ({
 }) => {
 	progress(ProgressStepsAddToken.SAVE);
 
-	const savedAddresses: SplTokenAddress[] =
-		getStorage<SplTokenAddress[]>({ key: SPL_USER_TOKENS_KEY }) ?? [];
+	const savedAddresses: SplTokenAddress[] = (
+		await loadSplUserTokens({
+			identity
+		})
+	).map(({ address }) => address);
 
 	const [enabledNewAddresses, disabledNewAddresses] = tokens.reduce<
 		[SplTokenAddress[], SplTokenAddress[]]
@@ -38,9 +45,14 @@ export const saveUserTokens = async ({
 		])
 	);
 
+	const oldValues = getStorage<SplAddressMap>({ key: SPL_USER_TOKENS_KEY });
+
 	setStorage({
 		key: SPL_USER_TOKENS_KEY,
-		value: tokenAddresses
+		value: {
+			...oldValues,
+			[identity.getPrincipal().toText()]: tokenAddresses
+		}
 	});
 
 	progress(ProgressStepsAddToken.UPDATE_UI);

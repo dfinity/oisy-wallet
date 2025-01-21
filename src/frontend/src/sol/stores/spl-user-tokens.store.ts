@@ -1,7 +1,9 @@
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
+import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
+import type { PrincipalText } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
 export type CertifiedSplUserTokensData = Option<CertifiedData<SplUserToken>[]>;
@@ -40,5 +42,7 @@ export const initCertifiedSplUserTokensStore = (): CertifiedSplUserTokensStore =
 };
 
 export const SPL_USER_TOKENS_KEY = 'spl-user-tokens';
+
+export type SplAddressMap = Record<PrincipalText, SplTokenAddress[]>;
 
 export const splUserTokensStore = initCertifiedSplUserTokensStore();
