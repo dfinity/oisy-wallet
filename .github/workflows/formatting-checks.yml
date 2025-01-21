@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install shfmt
-        run: sudo snap install --classic shfmt
+        run: scripts/setup shfmt
 
       - name: Install binstall
         run: scripts/setup cargo-binstall
