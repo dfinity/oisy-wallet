@@ -21,7 +21,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
 
 # Gets dfx version
 #
-# Note: This can be done in the builder but is slow because unrelated changes to dfx.json can cause a rebuild.
+# Note: This can be done in 'deps' but is slow because unrelated changes to dfx.json can cause a rebuild.
 FROM base AS tool_versions
 SHELL ["bash", "-c"]
 RUN mkdir -p config
@@ -29,7 +29,7 @@ COPY dfx.json dfx.json
 RUN jq -r .dfx dfx.json > config/dfx_version
 
 # Install tools && warm up the build cache
-FROM base AS builder
+FROM base AS deps
 SHELL ["bash", "-c"]
 # Install dfx
 # Note: dfx is installed in `$HOME/.local/share/dfx/bin` but we can't reference `$HOME` here so we hardcode `/root`.
@@ -91,7 +91,7 @@ RUN mkdir -p src/backend/src \
     && cargo fetch --locked \
     && rm -rf src
 
-FROM builder AS build_backend
+FROM deps AS build_backend
 COPY src src
 COPY dfx.json dfx.json
 COPY canister_ids.json canister_ids.json
