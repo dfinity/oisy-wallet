@@ -1,10 +1,12 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import {
+	getSolCreateAccountFee,
 	getSolTransactions,
 	loadSolLamportsBalance,
 	loadSplTokenBalance,
 	loadTokenAccount
 } from '$sol/api/solana.api';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
 import {
@@ -462,6 +464,23 @@ describe('solana.api', () => {
 					tokenAddress: ''
 				})
 			).rejects.toThrow();
+		});
+	});
+
+	describe('getSolCreateAccountFee', () => {
+		it('should get the fee to create a new account', async () => {
+			const fee = await getSolCreateAccountFee(SolanaNetworks.mainnet);
+
+			expect(fee).toEqual(mockCreateAccountFee);
+			expect(mockGetMinimumBalanceForRentExemption).toHaveBeenCalledWith(ATA_SIZE);
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetMinimumBalanceForRentExemption.mockReturnValue({
+				send: () => Promise.reject(mockError)
+			});
+
+			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrow(mockError);
 		});
 	});
 });

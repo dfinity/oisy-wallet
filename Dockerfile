@@ -17,8 +17,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -L https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_amd64 | install -m 755 /dev/stdin /bin/yq && yq --version | grep yq
-
 # Install node
 RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 ENV NVM_DIR=/root/.nvm
@@ -41,7 +39,15 @@ COPY ./docker ./docker
 COPY ./rust-toolchain.toml ./rust-toolchain.toml
 
 # Setup toolchain and ic-wasm
-RUN ./docker/bootstrap
+COPY rust-toolchain.toml .
+COPY dev-tools.json .
+COPY scripts/setup scripts/setup-cargo-binstall scripts/setup-rust scripts/
+RUN scripts/setup rust
+RUN scripts/setup cargo-binstall
+RUN scripts/setup candid-extractor
+RUN scripts/setup ic-wasm
+RUN scripts/setup didc
+RUN scripts/setup yq
 
 # Pre-build all cargo dependencies. Because cargo doesn't have a build option
 # to build only the dependencies, we pretend that our project is a simple, empty
