@@ -36,6 +36,7 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
 			Partial<Pick<Erc20Token, 'id'>>;
 
+		// TODO: save the metadata to environment static metadata, to reduce calls
 		const loadKnownContracts = (): Promise<ContractData>[] =>
 			ERC20_CONTRACTS.map(
 				async ({ network, ...contract }): Promise<ContractData> => ({
@@ -51,14 +52,8 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	} catch (err: unknown) {
 		erc20DefaultTokensStore.reset();
 
-		const {
-			init: {
-				error: { erc20_contracts }
-			}
-		} = get(i18n);
-
 		toastsError({
-			msg: { text: erc20_contracts },
+			msg: { text: get(i18n).init.error.erc20_contracts },
 			err
 		});
 
