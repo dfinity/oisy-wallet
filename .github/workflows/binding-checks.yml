@@ -71,11 +71,7 @@ jobs:
 
       - name: Install binstall
         if: steps.changes.outputs.src == 'true'
-        run: |
-          BINSTALL_VERSION="1.8.0"
-          curl -L --proto '=https' --tlsv1.2 -sSf "https://github.com/cargo-bins/cargo-binstall/releases/download/v${BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" | tar -xvzf - cargo-binstall
-          ./cargo-binstall -y --force "cargo-binstall@$BINSTALL_VERSION"
-          rm cargo-binstall
+        run: scripts/setup cargo-binstall
 
       - name: Install candid-extractor
         if: steps.changes.outputs.src == 'true'
