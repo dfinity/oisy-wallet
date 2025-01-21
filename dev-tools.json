@@ -20,9 +20,9 @@
 		"source": "mvdan.cc/sh/v3/cmd/shfmt"
 	},
 	"yq": {
-		"method": "go",
-		"version": "v4.33.3",
-		"source": "github.com/mikefarah/yq/v4"
+		"method": "curl",
+		"version": "4.33.3",
+		"url": "https://github.com/mikefarah/yq/releases/download/v${VERSION}/yq_linux_amd64"
 	},
 	"cargo-binstall": {
 		"method": "sh",
