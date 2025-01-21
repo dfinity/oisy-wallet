@@ -28,6 +28,7 @@
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
 	import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
@@ -143,14 +144,15 @@
 			identity: $authIdentity
 		});
 
-	// TODO: implement this function in the backend
 	const saveSpl = (tokens: SplTokenToggleable[]): void => {
-		modal.set(3);
-		progress(ProgressStepsAddToken.SAVE);
-		splDefaultTokensStore.update(tokens);
-		progress(ProgressStepsAddToken.UPDATE_UI);
-		progress(ProgressStepsAddToken.DONE);
-		setTimeout(() => close(), 750);
+		saveSplUserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authIdentity
+		});
 	};
 
 	const close = () => {

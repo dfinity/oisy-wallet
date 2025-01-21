@@ -144,6 +144,7 @@ interface I18nInit {
 		loading_balance: string;
 		loading_balance_symbol: string;
 		erc20_contracts: string;
+		spl_contract: string;
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
 		minter_ckerc20_erc20: string;
@@ -158,6 +159,7 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_user_tokens: string;
+		spl_user_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
