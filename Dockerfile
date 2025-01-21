@@ -19,6 +19,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     xxd \
     && rm -rf /var/lib/apt/lists/*
 
+# Install node
+RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+COPY .node-version .node-version
+RUN . "$NVM_DIR/nvm.sh" && nvm install "$(cat .node-version)"
+RUN . "$NVM_DIR/nvm.sh" && nvm use "v$(cat .node-version)"
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default "v$(cat .node-version)"
+RUN ln -s "$NVM_DIR/versions/node/v$(cat .node-version)" "$NVM_DIR/versions/node/default"
+ENV PATH="$NVM_DIR/versions/node/default/bin/:${PATH}"
+RUN node --version
+RUN npm --version
 
 # Gets dfx version
 #
@@ -28,7 +39,6 @@ SHELL ["bash", "-c"]
 RUN mkdir -p config
 COPY dfx.json dfx.json
 RUN jq -r .dfx dfx.json > config/dfx_version
-
 
 # Install tools && warm up the build cache
 FROM base AS builder
@@ -43,13 +53,18 @@ COPY ./rust-toolchain.toml .
 ENV RUSTUP_HOME=/opt/rustup \
     CARGO_HOME=/cargo \
     PATH=/cargo/bin:$PATH
-COPY dev-tools.json dev-tools.json
+
+# Setup toolchain and ic-wasm
+COPY ./docker ./docker
+COPY rust-toolchain.toml .
+COPY dev-tools.json .
 COPY scripts/setup scripts/setup-cargo-binstall scripts/setup-rust scripts/
 RUN scripts/setup rust
 RUN scripts/setup cargo-binstall
 RUN scripts/setup candid-extractor
 RUN scripts/setup ic-wasm
 RUN scripts/setup didc
+RUN scripts/setup yq
 
 # Pre-build all cargo dependencies. Because cargo doesn't have a build option
 # to build only the dependencies, we pretend that our project is a simple, empty
