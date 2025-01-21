@@ -1,6 +1,7 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
+import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
@@ -268,4 +269,15 @@ export const getSplTransactions = async ({
 	);
 
 	return transactions.slice(0, limit);
+};
+
+/**
+ * Fetches the cost in lamports of creating a new Associated Token Account (ATA).
+ *
+ * The cost is equivalent to the rent-exempt cost for the size of an ATA.
+ * https://solana.com/docs/core/fees#rent-exempt
+ */
+export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promise<Lamports> => {
+	const { getMinimumBalanceForRentExemption } = solanaHttpRpc(network);
+	return await getMinimumBalanceForRentExemption(ATA_SIZE).send();
 };
