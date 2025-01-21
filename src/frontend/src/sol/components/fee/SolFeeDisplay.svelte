@@ -79,7 +79,7 @@
 		<Value ref="ataFee">
 			<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
 
-			{#if nonNullish(ataFee) && nonNullish(decimals) && nonNullish(symbol)}
+			{#if nonNullish(decimals) && nonNullish(symbol)}
 				{formatToken({
 					value: BigNumber.from(ataFee),
 					unitName: decimals,
