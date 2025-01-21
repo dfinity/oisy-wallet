@@ -19,18 +19,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     xxd \
     && rm -rf /var/lib/apt/lists/*
 
-# Install node
-RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-COPY .node-version .node-version
-RUN . "$NVM_DIR/nvm.sh" && nvm install "$(cat .node-version)"
-RUN . "$NVM_DIR/nvm.sh" && nvm use "v$(cat .node-version)"
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default "v$(cat .node-version)"
-RUN ln -s "$NVM_DIR/versions/node/v$(cat .node-version)" "$NVM_DIR/versions/node/default"
-ENV PATH="$NVM_DIR/versions/node/default/bin/:${PATH}"
-RUN node --version
-RUN npm --version
-
 # Gets dfx version
 #
 # Note: This can be done in the builder but is slow because unrelated changes to dfx.json can cause a rebuild.
@@ -48,6 +36,19 @@ SHELL ["bash", "-c"]
 COPY --from=tool_versions /config/*_version config/
 ENV PATH="/root/.local/share/dfx/bin:/root/.local/bin:${PATH}"
 RUN DFXVM_INIT_YES=true DFX_VERSION="$(cat config/dfx_version)" sh -c "$(curl -fsSL https://sdk.dfinity.org/install.sh)" && dfx --version
+
+# Install node
+RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+COPY .node-version .node-version
+RUN . "$NVM_DIR/nvm.sh" && nvm install "$(cat .node-version)"
+RUN . "$NVM_DIR/nvm.sh" && nvm use "v$(cat .node-version)"
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default "v$(cat .node-version)"
+RUN ln -s "$NVM_DIR/versions/node/v$(cat .node-version)" "$NVM_DIR/versions/node/default"
+ENV PATH="$NVM_DIR/versions/node/default/bin/:${PATH}"
+RUN node --version
+RUN npm --version
+
 # Install Rust
 COPY ./rust-toolchain.toml .
 ENV RUSTUP_HOME=/opt/rustup \
