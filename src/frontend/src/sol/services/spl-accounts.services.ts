@@ -17,14 +17,11 @@ export const createAtaInstruction = async ({
 	destination: SolAddress;
 	tokenAddress: SolAddress;
 }): Promise<{ ataInstruction: SolInstruction; ataAddress: SolAddress }> => {
-	const ataInstruction = await getCreateAssociatedTokenInstructionAsync(
-		{
-			payer: signer,
-			mint: solAddress(tokenAddress),
-			owner: solAddress(destination)
-		},
-		{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
-	);
+	const ataInstruction = await getCreateAssociatedTokenInstructionAsync({
+		payer: signer,
+		mint: solAddress(tokenAddress),
+		owner: solAddress(destination)
+	});
 
 	const [ataAddress] = await findAssociatedTokenPda({
 		owner: solAddress(destination),
