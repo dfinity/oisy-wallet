@@ -1,4 +1,8 @@
-FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS deps
+#
+# Reproducible Builds
+#
+
+FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS base
 # Note: The above is ubuntu 22.04
 
 ENV TZ=UTC
@@ -16,6 +20,18 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     cmake \
     jq \
     && rm -rf /var/lib/apt/lists/*
+
+# Gets dfx version
+#
+# Note: This can be done in the builder but is slow because unrelated changes to dfx.json can cause a rebuild.
+FROM base AS tool_versions
+SHELL ["bash", "-c"]
+RUN mkdir -p config
+COPY dfx.json dfx.json
+RUN jq -r .dfx dfx.json > config/dfx_version
+
+# Install tools && warm up the build cache
+FROM base AS builder
 
 # Install node
 RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -74,7 +90,7 @@ RUN mkdir -p src/backend/src \
     && ./docker/build --only-dependencies \
     && rm -rf src
 
-FROM deps AS build_backend
+FROM builder AS build_backend
 
 COPY . .
 
