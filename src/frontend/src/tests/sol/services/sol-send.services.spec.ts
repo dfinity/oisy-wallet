@@ -9,10 +9,11 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { BigNumber } from '@ethersproject/bignumber';
+import * as solanaFunctional from '@solana/functional';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
-import type { MockInstance } from 'vitest';
+import { expect, type MockInstance } from 'vitest';
 
 vi.mock('@solana/functional', () => ({
 	pipe: vi.fn()
@@ -60,9 +61,6 @@ describe('sol-send.services', () => {
 		const mockSource = mockSolAddress;
 		const mockDestination = mockSolAddress2;
 		const mockRpc = {
-			getLatestBlockhash: vi.fn(() => ({
-				send: vi.fn(() => Promise.resolve({ value: { blockhash: 'test-blockhash' } }))
-			})),
 			getTokenAccountsByOwner: vi.fn(() => ({
 				send: vi.fn(() => Promise.resolve({ value: [{ pubkey: mockSplAddress }] }))
 			}))
@@ -70,6 +68,7 @@ describe('sol-send.services', () => {
 		const mockRpcSubscriptions = {} as RpcSubscriptions<SolanaRpcSubscriptionsApi>;
 
 		let spyMapNetworkIdToNetwork: MockInstance;
+		let spyPipe: MockInstance;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -80,6 +79,7 @@ describe('sol-send.services', () => {
 			vi.mocked(sendAndConfirmTransactionFactory).mockReturnValue(() => Promise.resolve());
 
 			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
+			spyPipe = vi.spyOn(solanaFunctional, 'pipe').mockImplementation(vi.fn());
 		});
 
 		it('should send SOL successfully', async () => {
@@ -95,7 +95,7 @@ describe('sol-send.services', () => {
 			).resolves.not.toThrow();
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
-			expect(mockRpc.getLatestBlockhash).toHaveBeenCalled();
+			expect(spyPipe).toHaveBeenCalled();
 		});
 
 		it('should send SPL tokens successfully', async () => {
@@ -111,7 +111,7 @@ describe('sol-send.services', () => {
 			).resolves.not.toThrow();
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
-			expect(mockRpc.getLatestBlockhash).toHaveBeenCalled();
+			expect(spyPipe).toHaveBeenCalled();
 		});
 
 		it('should throw an error if network is invalid', async () => {
@@ -135,7 +135,6 @@ describe('sol-send.services', () => {
 
 		it('should throw an error if no token accounts are found', async () => {
 			vi.mocked(solanaHttpRpc).mockReturnValue({
-				...mockRpc,
 				getTokenAccountsByOwner: vi.fn(() => ({
 					send: vi.fn(() => Promise.resolve({ value: [] }))
 				}))
