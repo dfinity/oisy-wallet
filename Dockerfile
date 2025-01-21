@@ -1,5 +1,5 @@
 #
-# Reproducible Builds
+# Reproducible builds of the Oisy backend canister
 #
 
 FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS base
