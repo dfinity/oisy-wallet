@@ -1,9 +1,9 @@
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
-import { PrincipalTextSchema } from '$lib/validation/principal.validation';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import type { CanisterOptions } from '@dfinity/utils';
+import { PrincipalTextSchema } from '@dfinity/zod-schemas';
 import * as z from 'zod';
 
 export const CanisterIdTextSchema = PrincipalTextSchema;
