@@ -70,7 +70,7 @@
 			loadIcrcTokens({
 				identity: $authIdentity
 			}),
-			loadSplTokens(),
+			loadSplTokens()
 		]);
 	};
 
