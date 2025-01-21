@@ -16,6 +16,7 @@
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
 	import type { SplToken } from '$sol/types/spl';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
@@ -29,7 +30,7 @@
 	let showAtaFee = false;
 
 	const updateAtaExists = async () => {
-		if (isNullishOrEmpty(destination)) {
+		if (isNullishOrEmpty(destination) || !isTokenSpl($sendToken)) {
 			showAtaFee = false;
 			return;
 		}
