@@ -9,12 +9,12 @@ CANDID_FILE="$(jq -r ".canisters.$CANISTER.candid" dfx.json)"
 ARGS_FILE="$(jq -r ".canisters.$CANISTER.init_arg_file" dfx.json)"
 WASM_FILE="$(jq -r ".canisters.$CANISTER.wasm" dfx.json)"
 BUILD_DIR="target/wasm32-unknown-unknown/release"
-COMMIT_FILE="target/commit"
-TAGS_FILE="target/tags"
+COMMIT_FILE="in/commit"
+TAGS_FILE="in/tags"
 
 ####
 # Gets commit and tag information, if available.
-mkdir -p target
+mkdir -p in
 if test -d .git; then
   scripts/commit-metadata
 else

@@ -84,8 +84,8 @@ COPY scripts/build.report.sh scripts/
 # The Wasm build is slow and typically cached:
 RUN scripts/build.backend.wasm.sh
 # Commit will change even with unrelated changes, so is afetr the rust build:
-COPY ./target/tags target/tags
-COPY ./target/commit target/commit
+COPY ./in/tags in/tags
+COPY ./in/commit in/commit
 # The network may be overridden with arguments to the docker call:  --env DFX_NETWORK=whatever 
 # Note: The rust is re-built but that is fast.
 ENV DFX_NETWORK=ic
