@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Commands run before calling docker.
+# This is used both in command line docker builds and in CI docker builds (that are called in a different way)
+
+set -euxo pipefail
+scripts/commit-metadata

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+: The commit and any tags.
+
+mkdir -p in
+git rev-parse HEAD >in/commit
+git tag -l --contains HEAD >in/tags
