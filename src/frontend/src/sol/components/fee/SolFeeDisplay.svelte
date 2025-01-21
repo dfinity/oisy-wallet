@@ -46,6 +46,11 @@
 	let ataFee: Lamports | undefined = undefined;
 
 	const updateAtaFee = async () => {
+		if (!showAtaFee) {
+			ataFee = undefined;
+			return;
+		}
+
 		const solNetwork = mapNetworkIdToNetwork($sendTokenNetworkId);
 
 		assertNonNullish(
