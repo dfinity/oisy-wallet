@@ -6,7 +6,7 @@ import { get } from 'svelte/store';
 
 describe('RewardStateModal', () => {
 	it('should render expected texts in the positive case', () => {
-		const { getByText } = render(RewardStateModal, {isSuccessful: true});
+		const { getByText } = render(RewardStateModal, { isSuccessful: true });
 
 		expect(getByText(get(i18n).vip.reward.text.title_successful)).toBeInTheDocument();
 		expect(
@@ -17,7 +17,7 @@ describe('RewardStateModal', () => {
 	});
 
 	it('should render expected texts in the negative case', () => {
-		const { getByText } = render(RewardStateModal, {isSuccessful: false});
+		const { getByText } = render(RewardStateModal, { isSuccessful: false });
 
 		expect(getByText(get(i18n).vip.reward.text.title_failed)).toBeInTheDocument();
 		expect(getByText(get(i18n).vip.reward.text.reward_failed)).toBeInTheDocument();
