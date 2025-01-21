@@ -49,7 +49,7 @@ const setFeePayerToTransaction = ({
 }): TransactionMessage & ITransactionMessageWithFeePayer =>
 	pipe(transactionMessage, (tx) => setTransactionMessageFeePayerSigner(feePayer, tx));
 
-const setLifetimeAndFeePayerToTransaction = async ({
+export const setLifetimeAndFeePayerToTransaction = async ({
 	transactionMessage,
 	rpc,
 	feePayer
@@ -157,7 +157,7 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
-const sendSignedTransaction = ({
+export const sendSignedTransaction = ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
