@@ -8,7 +8,12 @@ testWithII(
 	'should be redirected to home if not network is provided to access transactions',
 	async ({ page, iiPage }) => {
 		// We load the transaction page for ICP. This way we know ICP is supported.
-		const transactionsPage = new TransactionsPage({ page, iiPage, tokenSymbol: 'ICP' });
+		const transactionsPage = new TransactionsPage({
+			page,
+			iiPage,
+			tokenSymbol: 'ICP',
+			networkId: 'ICP'
+		});
 
 		await transactionsPage.waitForReady();
 
