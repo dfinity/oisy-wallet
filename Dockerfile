@@ -41,7 +41,10 @@ COPY ./docker ./docker
 COPY ./rust-toolchain.toml ./rust-toolchain.toml
 
 # Setup toolchain and ic-wasm
-RUN ./docker/bootstrap
+COPY rust-toolchain.toml .
+COPY dev-tools.json .
+COPY scripts/setup scripts/setup-cargo-binstall scripts/setup-rust scripts/
+RUN scripts/setup rust cargo-binstall ic-wasm
 
 # Pre-build all cargo dependencies. Because cargo doesn't have a build option
 # to build only the dependencies, we pretend that our project is a simple, empty
