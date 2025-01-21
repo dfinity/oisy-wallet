@@ -32,6 +32,12 @@ RUN jq -r .dfx dfx.json > config/dfx_version
 
 # Install tools && warm up the build cache
 FROM base AS builder
+SHELL ["bash", "-c"]
+# Install dfx
+# Note: dfx is installed in `$HOME/.local/share/dfx/bin` but we can't reference `$HOME` here so we hardcode `/root`.
+COPY --from=tool_versions /config/*_version config/
+ENV PATH="/root/.local/share/dfx/bin:/root/.local/bin:${PATH}"
+RUN DFXVM_INIT_YES=true DFX_VERSION="$(cat config/dfx_version)" sh -c "$(curl -fsSL https://sdk.dfinity.org/install.sh)" && dfx --version
 
 # Install node
 RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
