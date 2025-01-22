@@ -418,20 +418,18 @@ describe('solana.api', () => {
 			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledTimes(1);
 		});
 
-		it('should throw an error if no token account exists', async () => {
+		it('should return undefined if no token account exists', async () => {
 			mockGetTokenAccountsByOwner.mockReturnValueOnce({
 				send: () => Promise.resolve({ value: [] })
 			});
 
-			await expect(
-				loadTokenAccount({
-					address: mockSolAddress,
-					network: SolanaNetworks.mainnet,
-					tokenAddress: DEVNET_EURC_TOKEN.address
-				})
-			).rejects.toThrow(
-				`Token account not found for wallet ${mockSolAddress} and token ${DEVNET_EURC_TOKEN.address} on ${SolanaNetworks.mainnet} network`
-			);
+			const account = await loadTokenAccount({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokenAddress: DEVNET_EURC_TOKEN.address
+			});
+
+			expect(account).toBeUndefined();
 		});
 
 		it('should throw an error if RPC call fails', async () => {

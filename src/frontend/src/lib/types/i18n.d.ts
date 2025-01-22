@@ -432,6 +432,7 @@ interface I18nTokens {
 	text: {
 		title: string;
 		contract_address: string;
+		token_address: string;
 		balance: string;
 		hide_zero_balances: string;
 		hide_zeros: string;
@@ -447,6 +448,7 @@ interface I18nTokens {
 		token: string;
 		network: string;
 		contract_address_copied: string;
+		token_address_copied: string;
 		twin_token: string;
 		standard: string;
 	};
@@ -502,6 +504,7 @@ interface I18nTokens {
 		open_blockstream: string;
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
+		open_token_address_block_explorer: string;
 		token_group_number: string;
 	};
 	placeholder: { enter_contract_address: string; search_token: string };
@@ -533,6 +536,7 @@ interface I18nFee {
 		convert_btc_network_fee: string;
 		zero_fee: string;
 		total_fee: string;
+		ata_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
