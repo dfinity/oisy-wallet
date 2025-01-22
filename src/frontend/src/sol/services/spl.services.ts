@@ -38,7 +38,7 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-const loadSplUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadSplUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<SplUserToken[]>({
 		request: () => loadUserTokens({ identity }),
 		onLoad: loadUserTokenData,
@@ -54,7 +54,7 @@ const loadSplUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<
 		strategy: 'query'
 	});
 
-const loadUserTokens = async ({
+export const loadUserTokens = async ({
 	identity
 }: {
 	identity: OptionIdentity;
