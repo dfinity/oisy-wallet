@@ -7,6 +7,12 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
+		TRACK_COUNT_ETH_SEND_ERROR,
+		TRACK_COUNT_ETH_SEND_SUCCESS,
+		TRACK_COUNT_SOL_SEND_ERROR,
+		TRACK_COUNT_SOL_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import {
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
@@ -15,6 +21,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -35,12 +42,6 @@
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
 	import { sendSteps } from '$sol/constants/steps.constants';
 	import { sendSol } from '$sol/services/sol-send.services';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import {
-		TRACK_COUNT_ETH_SEND_ERROR,
-		TRACK_COUNT_ETH_SEND_SUCCESS, TRACK_COUNT_SOL_SEND_ERROR,
-		TRACK_COUNT_SOL_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -139,7 +140,6 @@
 				}
 			});
 
-
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			await trackEvent({
@@ -148,7 +148,6 @@
 					token: $sendToken.symbol
 				}
 			});
-
 
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
