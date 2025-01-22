@@ -6,6 +6,11 @@ on:
       - main
     tags:
       - v*
+  workflow_run:
+    workflows: ['bump-version.yml']
+    types:
+      - completed
+
   workflow_dispatch:
     inputs:
       network:
