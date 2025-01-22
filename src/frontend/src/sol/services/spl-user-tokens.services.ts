@@ -1,8 +1,5 @@
-
 import { get as getStorage, set as setStorage } from '$icp/utils/storage.utils';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
 	SPL_USER_TOKENS_KEY,

@@ -1,6 +1,5 @@
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { queryAndUpdate } from '$lib/actors/query.ic';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -15,8 +14,6 @@ import {
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
-import { nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -56,7 +53,6 @@ export const loadSplUserTokens = ({ identity }: { identity: OptionIdentity }): P
 		identity,
 		strategy: 'query'
 	});
-
 
 export const loadUserTokens = async ({
 	identity
