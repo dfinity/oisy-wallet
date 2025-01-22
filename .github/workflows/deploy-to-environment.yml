@@ -6,6 +6,11 @@ on:
       - main
     tags:
       - v*
+  workflow_run:
+    workflows: ['Tag on Merge from Release Branch']
+    types:
+      - completed
+
   workflow_dispatch:
     inputs:
       network:
@@ -54,6 +59,8 @@ jobs:
             if [ "${{ github.ref_type }}" == "branch" ]; then
               echo "NETWORK=staging" >> $GITHUB_ENV
             elif [ "${{ github.ref_type }}" == "tag" ]; then
+              echo "NETWORK=beta" >> $GITHUB_ENV
+            elif [ "${{ github.ref_type }}" == "workflow_run" ]; then
               echo "NETWORK=beta" >> $GITHUB_ENV
             else
               echo "Error: Unsupported ref type."

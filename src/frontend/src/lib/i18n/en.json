@@ -166,6 +166,7 @@
 			"loading_balance": "Error while loading the ETH balance.",
 			"loading_balance_symbol": "Error while loading $symbol balance.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
+			"spl_contract": "Error while loading the SPL contract.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
 			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to Erc20.",
@@ -180,6 +181,7 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
+			"spl_user_tokens": "Error while loading the SPL user tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
@@ -475,6 +477,7 @@
 		"text": {
 			"title": "Tokens",
 			"contract_address": "Contract address",
+			"token_address": "Token address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
@@ -490,6 +493,7 @@
 			"token": "Token",
 			"network": "Network",
 			"contract_address_copied": "Contract address copied to clipboard.",
+			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
 			"standard": "Standard"
 		},
@@ -564,6 +568,7 @@
 			"open_blockstream": "Open the details of the token on Blockstream",
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
+			"open_token_address_block_explorer": "Open the token address on a block explorer",
 			"token_group_number": "Total number of tokens in the group for native token $token"
 		},
 		"placeholder": {
@@ -598,7 +603,8 @@
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
-			"total_fee": "Total fee"
+			"total_fee": "Total fee",
+			"ata_fee": "ATA fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
