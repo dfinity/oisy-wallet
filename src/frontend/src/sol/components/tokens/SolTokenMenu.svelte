@@ -38,7 +38,9 @@
 
 	let explorerAddressUrl: string | undefined;
 	$: explorerAddressUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: nonNullish(tokenAddress) ? `token/${tokenAddress}/` : `account/${address}/` })
+		? replacePlaceholders(explorerUrl, {
+				$args: nonNullish(tokenAddress) ? `token/${tokenAddress}/` : `account/${address}/`
+			})
 		: undefined;
 </script>
 
