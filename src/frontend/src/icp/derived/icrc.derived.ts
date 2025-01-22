@@ -46,7 +46,7 @@ const icrcDefaultTokensCanisterIds: Readable<string[]> = derived(
 	[icrcDefaultTokens],
 	([$icrcDefaultTokens]) =>
 		$icrcDefaultTokens.map(
-			({ ledgerCanisterId, indexCanisterId }) => `${ledgerCanisterId}:${indexCanisterId ?? ''}`
+			({ ledgerCanisterId, indexCanisterId }) => `${ledgerCanisterId}:${indexCanisterId}`
 		)
 );
 
@@ -68,7 +68,10 @@ const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 		$icrcDefaultTokens.map(({ ledgerCanisterId, indexCanisterId, ...rest }) => {
 			const userToken = $icrcUserTokens.find(
 				({ ledgerCanisterId: userLedgerCanisterId, indexCanisterId: userIndexCanisterId }) =>
-					userLedgerCanisterId === ledgerCanisterId && userIndexCanisterId === indexCanisterId
+					userLedgerCanisterId === ledgerCanisterId &&
+					(nonNullish(userIndexCanisterId) || nonNullish(indexCanisterId)
+						? userIndexCanisterId === indexCanisterId
+						: true)
 			);
 
 			return mapDefaultTokenToToggleable<IcToken>({
