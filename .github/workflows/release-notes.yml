@@ -7,7 +7,7 @@ on:
     tags:
       - v*
   workflow_run:
-    workflows: ['bump-version.yml']
+    workflows: ['tag-release.yml']
     types:
       - completed
 
