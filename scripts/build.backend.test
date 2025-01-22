@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -euo pipefail
+EXIT=0
+
+(
+  : The backend Wasm should include metadata
+  set -euo pipefail
+  rm -fr in out
+  TOY_TAG="v000.000.$RANDOM"
+  git tag -f "$TOY_TAG"
+  dfx build backend --ic
+  git tag -d "$TOY_TAG"
+
+  (
+    echo "Tag metadata should include the tag we just created"
+    tag_metadata="$(ic-wasm <(gunzip <./out/backend.wasm.gz) metadata git:tags)"
+    if echo "$tag_metadata" | grep -q --line-regexp "$TOY_TAG"; then
+      echo OK: Found tag
+    else
+      echo "ERROR: Incorrect tag metadata"
+      echo "Expected a line consisting of '$TOY_TAG'"
+      echo "Found: '$tag_metadata'"
+      exit 1
+    fi
+  ) || EXIT=1
+
+  (
+    echo "Commit metadata should be the current commit"
+    COMMIT="$(git rev-parse HEAD)"
+    commit_metadata="$(ic-wasm <(gunzip <./out/backend.wasm.gz) metadata git:commit)"
+    if [[ "${commit_metadata:-}" == "$COMMIT" ]]; then
+      echo OK: Commit
+    else
+      echo "ERROR: Incorrect git:commit metadata"
+      echo "Expected: '$COMMIT'"
+      echo "Found:    '$commit_metadata'"
+      exit 1
+    fi
+  ) || EXIT=1
+
+  (
+    echo "Service metadata should be the did file"
+    CANDID_SERVICE_FILE="$(mktemp ,candid-service.XXXXXX)"
+    EXPECTED_SERVICE_FILE="src/backend/backend.did"
+    ic-wasm <(gunzip <./out/backend.wasm.gz) metadata candid:service >"$CANDID_SERVICE_FILE"
+    if diff --ignore-all-space --ignore-blank-lines "$EXPECTED_SERVICE_FILE" "$CANDID_SERVICE_FILE"; then
+      echo OK: Service
+      rm "$CANDID_SERVICE_FILE"
+    else
+      echo "ERROR: Incorrect candid:service metadata"
+      echo "Expected: EXPECTED_SERVICE_FILE"
+      echo "Found:    $CANDID_SERVICE_FILE"
+      exit 1
+    fi
+  ) || EXIT=1
+  (
+    echo "Argument metadata should be the generated args"
+    CANDID_ARGS_FILE="$(mktemp ,candid-args.XXXXXX)"
+    EXPECTED_ARGS_FILE="out/backend.args.did"
+    ic-wasm <(gunzip <./out/backend.wasm.gz) metadata candid:args >"$CANDID_ARGS_FILE"
+    if diff --ignore-all-space --ignore-blank-lines "$EXPECTED_ARGS_FILE" "$CANDID_ARGS_FILE"; then
+      echo OK: Args
+      rm "$CANDID_ARGS_FILE"
+    else
+      echo "ERROR: Incorrect candid:args metadata"
+      echo "Expected: $EXPECTED_ARGS_FILE"
+      echo "Found:    $CANDID_ARGS_FILE"
+      exit 1
+    fi
+  ) || EXIT=1
+
+) || EXIT=1
+
+(
+  echo "Change detector test for production"
+  EXPECTED="scripts/build.backend.args.ic.did"
+  ACTUAL="out/backend.args.ic.did"
+  if diff --ignore-all-space --ignore-blank-lines "$EXPECTED" "$ACTUAL"; then
+    echo "OK: Mainnet arguments are unchanged"
+  else
+    echo "WARNING: Mainnet arguments have changed.  If this is intentional, please run:"
+    echo "  cp '$ACTUAL' '$EXPECTED'"
+  fi
+
+)
+
+if ((EXIT == 0)); then
+  echo "SUCCESS: Wasm metadata checks pass."
+else
+  echo "ERROR: One or more Wasm metadata checks failed"
+fi
+exit "$EXIT"
