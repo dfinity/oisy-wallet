@@ -19,6 +19,7 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
+import { getBase64Decode } from '@solana/codecs';
 import { pipe } from '@solana/functional';
 import type { Signature } from '@solana/keys';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
@@ -38,7 +39,7 @@ import {
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
-import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import { getTransactionEncoder, sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -72,7 +73,7 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 const createDefaultTransaction = async ({
 	rpc,
 	feePayer,
-	version = 'legacy'
+	version = 0
 }: {
 	rpc: Rpc<SolanaRpcApi>;
 	feePayer: TransactionSigner;
@@ -241,6 +242,8 @@ export const sendSol = async ({
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
+	const { simulateTransaction } = rpc;
+
 	const signer: TransactionPartialSigner = createSigner({
 		identity,
 		address: source,
@@ -266,7 +269,15 @@ export const sendSol = async ({
 
 	const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
+	const av = getTransactionEncoder().encode(signedTransaction);
+
+	const av2 = getBase64Decode().decode(av);
+
 	console.log('av', signedTransaction, signature, transactionMessage);
+
+	const foo = simulateTransaction(av2, { commitment: 'confirmed', encoding: 'base64' });
+
+	console.log('foo', foo);
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	await sendSignedTransaction({
