@@ -1,5 +1,5 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
+import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -177,7 +177,7 @@ export const loadTokenAccount = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 	tokenAddress: SolAddress;
-}): Promise<SolAddress> => {
+}): Promise<OptionSolAddress> => {
 	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
 	const relevantTokenAddress = solAddress(tokenAddress);
@@ -190,11 +190,9 @@ export const loadTokenAccount = async ({
 		{ encoding: 'jsonParsed' }
 	).send();
 
-	// TODO: create missing token account
+	// In case of missing token account, we let the caller handle it.
 	if (response.value.length === 0) {
-		throw new Error(
-			`Token account not found for wallet ${address} and token ${tokenAddress} on ${network} network`
-		);
+		return undefined;
 	}
 
 	const { pubkey: accountAddress } = response.value[0];
