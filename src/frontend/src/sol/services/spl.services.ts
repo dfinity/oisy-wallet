@@ -1,5 +1,6 @@
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -13,7 +14,7 @@ import {
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -60,9 +61,14 @@ const loadUserTokens = async ({
 }): Promise<SplUserToken[]> => {
 	// TODO: use the backend method when we add the SPL tokens to the backend, similar to ERC20
 	const loadUserContracts = async (): Promise<SplTokenAddress[]> => {
+		if (isNullish(identity)) {
+			await nullishSignOut();
+			return await Promise.resolve([]);
+		}
+
 		const contractsMap: SplAddressMap =
 			getStorage<SplAddressMap>({ key: SPL_USER_TOKENS_KEY }) ?? {};
-		const principal = identity?.getPrincipal().toString();
+		const principal = identity.getPrincipal().toString();
 		const contracts = nonNullish(principal) ? (contractsMap[principal] ?? []) : [];
 
 		return await Promise.resolve(contracts);
