@@ -1,10 +1,12 @@
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { get as getStorage } from '$icp/utils/storage.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { queryAndUpdate } from '$lib/actors/query.ic';
+import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
+import { get as getStorage } from '$lib/utils/storage.utils';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import {
 	SPL_USER_TOKENS_KEY,
@@ -15,9 +17,11 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultSplTokens(), loadUserTokens({ identity })]);
+	await Promise.all([loadDefaultSplTokens(), loadSplUserTokens({ identity })]);
 };
 
 const loadDefaultSplTokens = (): ResultSuccess => {
@@ -37,10 +41,10 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 	return { success: true };
 };
 
-export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadSplUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<SplUserToken[]>({
-		request: () => loadSplUserTokens({ identity }),
-		onLoad: loadSplUserTokenData,
+		request: () => loadUserTokens({ identity }),
+		onLoad: loadUserTokenData,
 		onCertifiedError: ({ error: err }) => {
 			splUserTokensStore.resetAll();
 
@@ -53,16 +57,22 @@ export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Prom
 		strategy: 'query'
 	});
 
-export const loadSplUserTokens = async ({
+
+export const loadUserTokens = async ({
 	identity
 }: {
 	identity: OptionIdentity;
 }): Promise<SplUserToken[]> => {
 	// TODO: use the backend method when we add the SPL tokens to the backend, similar to ERC20
 	const loadUserContracts = async (): Promise<SplTokenAddress[]> => {
+		if (isNullish(identity)) {
+			await nullishSignOut();
+			return await Promise.resolve([]);
+		}
+
 		const contractsMap: SplAddressMap =
 			getStorage<SplAddressMap>({ key: SPL_USER_TOKENS_KEY }) ?? {};
-		const principal = identity?.getPrincipal().toString();
+		const principal = identity.getPrincipal().toString();
 		const contracts = nonNullish(principal) ? (contractsMap[principal] ?? []) : [];
 
 		return await Promise.resolve(contracts);
@@ -75,7 +85,7 @@ export const loadSplUserTokens = async ({
 	}));
 };
 
-const loadSplUserTokenData = ({
+const loadUserTokenData = ({
 	response: tokens,
 	certified
 }: {

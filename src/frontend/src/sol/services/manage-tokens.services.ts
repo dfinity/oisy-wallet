@@ -8,6 +8,9 @@ import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { saveTokens, type ManageTokensSaveParams } from '$lib/services/manage-tokens.services';
+import { saveUserTokens } from '$sol/services/spl-user-tokens.services';
+import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
 export interface ManageTokensSaveParams {
 	progress: (step: ProgressStepsAddToken) => void;
@@ -23,67 +26,9 @@ export const saveSplUserTokens = async ({
 }: {
 	tokens: SplTokenToggleable[];
 } & ManageTokensSaveParams) => {
-	const save = (params: {
-		progress: (step: ProgressStepsAddToken) => void;
-		identity: Identity;
-		tokens: [SplTokenToggleable, ...SplTokenToggleable[]];
-	}): Promise<void> => saveUserTokens(params);
-
 	await saveTokens({
 		...rest,
 		tokens,
-		save
+		save: saveUserTokens
 	});
-};
-
-const saveTokens = async <T>({
-	tokens,
-	save,
-	progress,
-	modalNext,
-	onSuccess,
-	onError,
-	identity
-}: {
-	tokens: T[];
-	save: (params: {
-		progress: (step: ProgressStepsAddToken) => void;
-		identity: Identity;
-		tokens: [T, ...T[]];
-	}) => Promise<void>;
-} & ManageTokensSaveParams) => {
-	const $i18n = get(i18n);
-
-	if (isNullish(identity)) {
-		await nullishSignOut();
-		return;
-	}
-
-	if (tokens.length === 0) {
-		toastsError({
-			msg: { text: $i18n.tokens.manage.error.empty }
-		});
-		return;
-	}
-
-	modalNext();
-
-	try {
-		await save({
-			progress,
-			identity,
-			tokens: tokens as [T, ...T[]]
-		});
-
-		progress(ProgressStepsAddToken.DONE);
-
-		setTimeout(() => onSuccess(), 750);
-	} catch (err: unknown) {
-		toastsError({
-			msg: { text: $i18n.tokens.error.unexpected },
-			err
-		});
-
-		onError();
-	}
 };

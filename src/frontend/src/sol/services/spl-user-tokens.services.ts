@@ -1,5 +1,8 @@
+
 import { get as getStorage, set as setStorage } from '$icp/utils/storage.utils';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
 	SPL_USER_TOKENS_KEY,
@@ -11,6 +14,7 @@ import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
 
+// TODO: adapt this function when we have the backend ready to save the SPL user tokens
 export const saveUserTokens = async ({
 	progress,
 	identity,
@@ -23,7 +27,7 @@ export const saveUserTokens = async ({
 	progress(ProgressStepsAddToken.SAVE);
 
 	const savedAddresses: SplTokenAddress[] = (
-		await loadSplUserTokens({
+		await loadUserTokens({
 			identity
 		})
 	).map(({ address }) => address);
@@ -62,5 +66,5 @@ export const saveUserTokens = async ({
 	disabledTokens.forEach(({ id }) => splUserTokensStore.reset(id));
 
 	// Reload all user tokens for simplicity reason.
-	await loadUserTokens({ identity });
+	await loadSplUserTokens({ identity });
 };
