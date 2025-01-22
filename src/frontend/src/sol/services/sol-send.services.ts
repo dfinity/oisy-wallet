@@ -38,7 +38,7 @@ import {
 	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
-import { assertTransactionIsFullySigned } from '@solana/transactions';
+import { assertTransactionIsFullySigned, type Base64EncodedWireTransaction } from '@solana/transactions';
 import { getTransactionEncoder, sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
@@ -275,7 +275,7 @@ export const sendSol = async ({
 
 	console.log('av', signedTransaction, signature, transactionMessage);
 
-	const foo = simulateTransaction(av2, { commitment: 'confirmed', encoding: 'base64' });
+	const foo = simulateTransaction(av2 as Base64EncodedWireTransaction, { commitment: 'confirmed', encoding: 'base64' });
 
 	console.log('foo', foo);
 
