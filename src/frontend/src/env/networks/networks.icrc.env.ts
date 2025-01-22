@@ -410,7 +410,7 @@ const CLOUD_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUC
 		}
 	: undefined;
 
-const AAA_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.CLOUD)
+const AAA_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.AAA)
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.AAA,
 			position: 15
