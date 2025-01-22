@@ -20,21 +20,18 @@
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = ($token?.network as SolanaNetwork)?.explorerUrl;
 
-	$: address = isNetworkIdSOLTestnet($networkId)
-		? $solAddressTestnet
-		: isNetworkIdSOLDevnet($networkId)
-			? $solAddressDevnet
-			: isNetworkIdSOLLocal($networkId)
-				? $solAddressLocal
-				: $solAddressMainnet;
+	let tokenAddress: string | undefined;
+	$: tokenAddress = nonNullish($token) && isTokenSpl($token) ? $token.address : undefined;
+
 
 	let explorerAddressUrl: string | undefined;
 	$: explorerAddressUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: `account/${address}/` })
+		? replacePlaceholders(explorerUrl, { $args: `token/${tokenAddress}/` })
 		: undefined;
 </script>
 
