@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
-: The commit and any tags.
 
-mkdir -p in
-git rev-parse HEAD >in/commit
-git tag -l --contains HEAD >in/tags
+print_help() {
+  cat <<-EOF
+
+	Records the commit and any tags, if we are in a git repository, in 'in/{commit,tags}'.
+	Otherwise creates placeholder files.
+
+	EOF
+}
+
+[[ "${1:-}" != "--help" ]] || {
+  print_help
+  exit 0
+}
+
+mkdir -p "in"
+if test -e .git; then
+  git rev-parse HEAD >"in/commit"
+  git tag -l --contains HEAD >"in/tags"
+else
+  touch "in/commit" "in/tags"
+fi
