@@ -1,3 +1,4 @@
+import { initCertifiedUserTokensStore } from '$lib/stores/user-tokens.store';
 import type { SplToken, SplTokenAddress } from '$sol/types/spl';
 import type { PrincipalText } from '@dfinity/zod-schemas';
 

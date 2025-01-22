@@ -1,10 +1,10 @@
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { get as getStorage } from '$icp/utils/storage.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
+import { get as getStorage } from '$lib/utils/storage.utils';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import {
 	SPL_USER_TOKENS_KEY,
