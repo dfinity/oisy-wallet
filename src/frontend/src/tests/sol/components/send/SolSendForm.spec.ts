@@ -60,6 +60,8 @@ describe('SolSendForm', () => {
 	describe('with SPL token', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
+			vi.clearAllMocks();
+			vi.resetAllMocks();
 
 			mockContext.set(
 				SEND_CONTEXT_KEY,
