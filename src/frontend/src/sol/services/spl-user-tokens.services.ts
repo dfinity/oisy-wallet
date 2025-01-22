@@ -23,7 +23,7 @@ export const saveUserTokens = async ({
 	progress(ProgressStepsAddToken.SAVE);
 
 	const savedAddresses: SplTokenAddress[] = (
-		await loadSplUserTokens({
+		await loadUserTokens({
 			identity
 		})
 	).map(({ address }) => address);
@@ -62,5 +62,5 @@ export const saveUserTokens = async ({
 	disabledTokens.forEach(({ id }) => splUserTokensStore.reset(id));
 
 	// Reload all user tokens for simplicity reason.
-	await loadUserTokens({ identity });
+	await loadSplUserTokens({ identity });
 };
