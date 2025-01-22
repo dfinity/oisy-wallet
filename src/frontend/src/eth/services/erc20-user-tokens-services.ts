@@ -1,4 +1,4 @@
-import { loadUserTokens } from '$eth/services/erc20.services';
+import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { toUserToken } from '$icp-eth/services/user-token.services';
@@ -37,5 +37,5 @@ export const saveUserTokens = async ({
 
 	// TODO(GIX-2740): reload only what's needed to spare Infura calls
 	// Reload all user tokens for simplicity reason.
-	await loadUserTokens({ identity });
+	await loadErc20UserTokens({ identity });
 };
