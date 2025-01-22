@@ -32,6 +32,7 @@ export interface Modal<T> {
 		| 'eth-token'
 		| 'btc-token'
 		| 'ic-token'
+		| 'sol-token'
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
@@ -74,6 +75,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthToken: () => void;
 	openBtcToken: () => void;
 	openIcToken: () => void;
+	openSolToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
@@ -125,6 +127,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openEthToken: setType('eth-token'),
 		openBtcToken: setType('btc-token'),
 		openIcToken: setType('ic-token'),
+		openSolToken: setType('sol-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
