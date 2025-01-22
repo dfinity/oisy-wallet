@@ -18,12 +18,16 @@ import {
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import type { SolanaNetwork } from '$sol/types/network';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { nonNullish } from '@dfinity/utils';
 
 export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
+
+export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>
+	isNetworkIdSolana(network?.id);
 
 export const isNetworkIdICP: IsNetworkIdUtil = (id) => nonNullish(id) && ICP_NETWORK_ID === id;
 
