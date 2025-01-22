@@ -41,7 +41,7 @@ export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
 );
 
 /**
- * A flatten list of the default Icrc Ledger and Index canister Ids.
+ * A flatten list of the default ICRC Ledger canister Id.
  */
 const icrcDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
 	[icrcDefaultTokens],
@@ -63,17 +63,13 @@ const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 	[icrcDefaultTokens, icrcCustomTokens],
 	([$icrcDefaultTokens, $icrcUserTokens]) =>
-		$icrcDefaultTokens.map(({ ledgerCanisterId, indexCanisterId, ...rest }) => {
+		$icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) => {
 			const userToken = $icrcUserTokens.find(
 				({ ledgerCanisterId: userLedgerCanisterId }) => userLedgerCanisterId === ledgerCanisterId
 			);
 
 			return mapDefaultTokenToToggleable<IcToken>({
-				defaultToken: {
-					ledgerCanisterId,
-					indexCanisterId,
-					...rest
-				},
+				defaultToken: { ledgerCanisterId, ...rest },
 				userToken
 			});
 		})
