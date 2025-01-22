@@ -15,6 +15,11 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { i18n } from '$lib/stores/i18n.store';
+import { toastsError } from '$lib/stores/toasts.store';
+import type { ResultSuccess } from '$lib/types/utils';
+import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
+import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
 	await Promise.all([loadDefaultSplTokens(), loadSplUserTokens({ identity })]);
