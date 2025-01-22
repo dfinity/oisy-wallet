@@ -28,6 +28,8 @@
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
+	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
 	const steps: WizardSteps = [
 		{
@@ -54,9 +56,13 @@
 	let modal: WizardModal;
 
 	const saveTokens = async ({
-		detail: { icrc, erc20 }
-	}: CustomEvent<{ icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] }>) => {
-		if (icrc.length === 0 && erc20.length === 0) {
+		detail: { icrc, erc20, spl }
+	}: CustomEvent<{
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
+	}>) => {
+		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
 			toastsShow({
 				text: $i18n.tokens.manage.info.no_changes,
 				level: 'info',
@@ -68,7 +74,8 @@
 
 		await Promise.allSettled([
 			...(icrc.length > 0 ? [saveIcrc(icrc)] : []),
-			...(erc20.length > 0 ? [saveErc20(erc20)] : [])
+			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
+			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
 	};
 
@@ -135,6 +142,18 @@
 			onError: () => modal.set(0),
 			identity: $authIdentity
 		});
+
+	// TODO: implement this function in the backend
+	const saveSpl = (tokens: SplTokenToggleable[]): void => {
+		saveSplUserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authIdentity
+		});
+	};
 
 	const close = () => {
 		modalStore.close();

@@ -2,7 +2,7 @@ import type { NetworkBuy } from '$lib/types/network';
 import type { OnramperNetworkId } from '$lib/types/onramper';
 import type { AtLeastOne } from '$lib/types/utils';
 import { UrlSchema } from '$lib/validation/url.validation';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
 
@@ -19,7 +19,9 @@ export const NetworkAppMetadataSchema = z.object({
 
 const IconSchema = z
 	.string()
-	.refine((value) => value.endsWith('.svg'), { message: 'Must be an SVG file' });
+	.refine((value) => value.endsWith('.svg') || value.startsWith('data:image/svg+xml'), {
+		message: 'Must be an SVG file'
+	});
 
 export const NetworkSchema = z.object({
 	id: NetworkIdSchema,

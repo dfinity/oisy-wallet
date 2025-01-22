@@ -34,7 +34,7 @@ describe('modal.store', () => {
 	});
 
 	it('should close the modal and reset the store', () => {
-		modalStore.openToken();
+		modalStore.openEthToken();
 		modalStore.close();
 
 		expect(get(modalStore)).toBeNull();

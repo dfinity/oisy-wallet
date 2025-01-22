@@ -1,4 +1,4 @@
-import { BTC_MAINNET_ENABLED } from '$env/networks.btc.env';
+import { BTC_MAINNET_ENABLED } from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,

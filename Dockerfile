@@ -1,4 +1,8 @@
-FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS deps
+#
+# Reproducible builds of the Oisy backend canister
+#
+
+FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS base
 # Note: The above is ubuntu 22.04
 
 ENV TZ=UTC
@@ -17,7 +21,23 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -L https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_amd64 | install -m 755 /dev/stdin /bin/yq && yq --version | grep yq
+# Gets dfx version
+#
+# Note: This can be done in 'deps' but is slow because unrelated changes to dfx.json can cause a rebuild.
+FROM base AS tool_versions
+SHELL ["bash", "-c"]
+RUN mkdir -p config
+COPY dfx.json dfx.json
+RUN jq -r .dfx dfx.json > config/dfx_version
+
+# Install tools && warm up the build cache
+FROM base AS deps
+SHELL ["bash", "-c"]
+# Install dfx
+# Note: dfx is installed in `$HOME/.local/share/dfx/bin` but we can't reference `$HOME` here so we hardcode `/root`.
+COPY --from=tool_versions /config/*_version config/
+ENV PATH="/root/.local/share/dfx/bin:/root/.local/bin:${PATH}"
+RUN DFXVM_INIT_YES=true DFX_VERSION="$(cat config/dfx_version)" sh -c "$(curl -fsSL https://sdk.dfinity.org/install.sh)" && dfx --version
 
 # Install node
 RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -41,22 +61,36 @@ COPY ./docker ./docker
 COPY ./rust-toolchain.toml ./rust-toolchain.toml
 
 # Setup toolchain and ic-wasm
-RUN ./docker/bootstrap
+COPY rust-toolchain.toml .
+COPY dev-tools.json .
+COPY scripts/setup scripts/setup-cargo-binstall scripts/setup-rust scripts/
+RUN scripts/setup rust
+RUN scripts/setup cargo-binstall
+RUN scripts/setup candid-extractor
+RUN scripts/setup ic-wasm
+RUN scripts/setup didc
+RUN scripts/setup yq
 
 # Pre-build all cargo dependencies. Because cargo doesn't have a build option
-# to build only the dependecies, we pretend that our project is a simple, empty
+# to build only the dependencies, we pretend that our project is a simple, empty
 # `lib.rs`. When we COPY the actual files we make sure to `touch` lib.rs so
 # that cargo knows to rebuild it with the new content.
 COPY Cargo.lock .
 COPY Cargo.toml .
 COPY src/backend/Cargo.toml src/backend/Cargo.toml
 COPY src/cycles_ledger/client/Cargo.toml src/cycles_ledger/client/Cargo.toml
+COPY src/cycles_ledger/pic/Cargo.toml src/cycles_ledger/pic/Cargo.toml
+COPY src/cycles_ledger/types/Cargo.toml src/cycles_ledger/types/Cargo.toml
 COPY src/shared/Cargo.toml src/shared/Cargo.toml
 ENV CARGO_TARGET_DIR=/cargo_target
 RUN mkdir -p src/backend/src \
     && touch src/backend/src/lib.rs \
     && mkdir -p src/cycles_ledger/client/src \
     && touch src/cycles_ledger/client/src/lib.rs \
+    && mkdir -p src/cycles_ledger/pic/src \
+    && touch src/cycles_ledger/pic/src/lib.rs \
+    && mkdir -p src/cycles_ledger/types/src \
+    && touch src/cycles_ledger/types/src/lib.rs \
     && mkdir -p src/shared/src \
     && touch src/shared/src/lib.rs \
     && ./docker/build --only-dependencies \

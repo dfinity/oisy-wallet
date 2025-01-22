@@ -22,7 +22,20 @@ export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_e
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
 
+// Solana
+export const TRACK_COUNT_WC_SOL_SEND_SUCCESS = 'wc_sol_send_success_count';
+export const TRACK_COUNT_WC_SOL_SEND_ERROR = 'wc_sol_send_error_count';
+
 // WalletConnect
 export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open_count';
 export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code_count';
 export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect_count';
+
+// dApps
+export const TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK = 'dapp_modal_open_hyperlink_count';
+
+// Carousel
+export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next_count';
+export const TRACK_COUNT_CAROUSEL_PREVIOUS = 'carousel_previous_count';
+export const TRACK_COUNT_CAROUSEL_CLOSE = 'carousel_close_count';
+export const TRACK_COUNT_CAROUSEL_OPEN = 'carousel_open_count';
