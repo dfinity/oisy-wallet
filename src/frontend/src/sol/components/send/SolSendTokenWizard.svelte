@@ -7,8 +7,6 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
-		TRACK_COUNT_ETH_SEND_ERROR,
-		TRACK_COUNT_ETH_SEND_SUCCESS,
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
