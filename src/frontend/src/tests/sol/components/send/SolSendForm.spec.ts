@@ -4,6 +4,7 @@ import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { lamports } from '@solana/rpc-types';
 import { render } from '@testing-library/svelte';
 
 describe('SolSendForm', () => {
@@ -20,7 +21,7 @@ describe('SolSendForm', () => {
 	const sourceSelector = 'div[id="source"]';
 	const balanceSelector = 'div[id="balance"]';
 	const feeSelector = 'p[id="fee"]';
-	const ataFeeSelector = 'p[id="ata-fee"]';
+	const ataFeeSelector = 'p[id="ataFee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
@@ -79,25 +80,32 @@ describe('SolSendForm', () => {
 			expect(ataFee).toBeNull();
 		});
 
-		it('should render ATA creation fee if there is no ATA for the destination', () => {
+		it('should render ATA creation fee if there is no ATA for the destination', async () => {
 			vi.spyOn(solanaApi, 'loadTokenAccount').mockResolvedValueOnce(undefined);
+			vi.spyOn(solanaApi, 'getSolCreateAccountFee').mockResolvedValueOnce(lamports(123n));
 
 			const { container } = render(SolSendForm, {
 				props,
 				context: mockContext
 			});
 
+			// Wait for the fee to be loaded
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
 			expect(ataFee).not.toBeNull();
 		});
 
-		it('should not render ATA creation fee if there is an ATA for the destination', () => {
+		it('should not render ATA creation fee if there is an ATA for the destination', async () => {
 			vi.spyOn(solanaApi, 'loadTokenAccount').mockResolvedValueOnce('mock-ata');
 
 			const { container } = render(SolSendForm, {
 				props,
 				context: mockContext
 			});
+
+			// Wait for the fee to be loaded
+			await new Promise((resolve) => setTimeout(resolve, 100));
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
 			expect(ataFee).toBeNull();
