@@ -7,13 +7,14 @@ import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
+import { createAtaInstruction } from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
@@ -133,25 +134,45 @@ const createSplTokenTransactionMessage = async ({
 		tokenAddress
 	});
 
+	// This should not happen since we are sending from an existing account.
+	// But we need it to return a non-nullish value.
+	assertNonNullish(
+		sourceTokenAccountAddress,
+		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
+	);
+
 	const destinationTokenAccountAddress = await loadTokenAccount({
 		address: destination,
 		network,
 		tokenAddress
 	});
 
+	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
+
+	const { ataInstruction, ataAddress: calculatedDestinationTokenAccountAddress } =
+		await createAtaInstruction({
+			signer,
+			destination,
+			tokenAddress
+		});
+
+	const transferInstruction = getTransferInstruction(
+		{
+			source: solAddress(sourceTokenAccountAddress),
+			destination: solAddress(
+				mustCreateDestinationTokenAccount
+					? calculatedDestinationTokenAccountAddress
+					: destinationTokenAccountAddress
+			),
+			authority: signer,
+			amount: amount.toBigInt()
+		},
+		{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
+	);
+
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
-			[
-				getTransferInstruction(
-					{
-						source: solAddress(sourceTokenAccountAddress),
-						destination: solAddress(destinationTokenAccountAddress),
-						authority: signer,
-						amount: amount.toBigInt()
-					},
-					{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
-				)
-			],
+			[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
 			tx
 		)
 	);
