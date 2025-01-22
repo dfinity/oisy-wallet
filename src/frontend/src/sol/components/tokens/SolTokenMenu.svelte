@@ -25,12 +25,20 @@
 	let explorerUrl: string | undefined;
 	$: explorerUrl = ($token?.network as SolanaNetwork)?.explorerUrl;
 
+	$: address = isNetworkIdSOLTestnet($networkId)
+		? $solAddressTestnet
+		: isNetworkIdSOLDevnet($networkId)
+			? $solAddressDevnet
+			: isNetworkIdSOLLocal($networkId)
+				? $solAddressLocal
+				: $solAddressMainnet;
+
 	let tokenAddress: string | undefined;
 	$: tokenAddress = nonNullish($token) && isTokenSpl($token) ? $token.address : undefined;
 
 	let explorerAddressUrl: string | undefined;
 	$: explorerAddressUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: `token/${tokenAddress}/` })
+		? replacePlaceholders(explorerUrl, { $args: nonNullish(tokenAddress) ? `token/${tokenAddress}/` : `account/${address}/` })
 		: undefined;
 </script>
 
