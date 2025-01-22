@@ -11,6 +11,7 @@ import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
 
+// TODO: adapt this function when we have the backend ready to save the SPL user tokens
 export const saveUserTokens = async ({
 	progress,
 	identity,
