@@ -147,7 +147,7 @@
 	const saveSpl = (tokens: SplTokenToggleable[]): void => {
 		modal.set(3);
 		progress(ProgressStepsAddToken.SAVE);
-		splDefaultTokensStore.update(tokens);
+		splDefaultTokensStore.set(tokens);
 		progress(ProgressStepsAddToken.UPDATE_UI);
 		progress(ProgressStepsAddToken.DONE);
 		setTimeout(() => close(), 750);

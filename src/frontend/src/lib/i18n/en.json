@@ -166,6 +166,7 @@
 			"loading_balance": "Error while loading the ETH balance.",
 			"loading_balance_symbol": "Error while loading $symbol balance.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
+			"spl_contract": "Error while loading the SPL contract.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
 			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to Erc20.",

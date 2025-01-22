@@ -34,6 +34,7 @@
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
+	import { loadSplTokens } from '$sol/services/spl.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -68,7 +69,8 @@
 			}),
 			loadIcrcTokens({
 				identity: $authIdentity
-			})
+			}),
+			loadSplTokens()
 		]);
 	};
 
