@@ -181,11 +181,17 @@ const createSplTokenTransactionMessage = async ({
 		calculatedDestinationTokenAccountAddress
 	);
 
-	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
-		appendTransactionMessageInstructions(
-			[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
-			tx
-		)
+	return pipe(
+		await createDefaultTransaction({
+			rpc,
+			feePayer: signer,
+			version: mustCreateDestinationTokenAccount ? 0 : 'legacy'
+		}),
+		(tx) =>
+			appendTransactionMessageInstructions(
+				[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
+				tx
+			)
 	);
 };
 
@@ -278,10 +284,10 @@ export const sendSol = async ({
 
 	console.log('av', signedTransaction, signature, transactionMessage);
 
-	const foo = simulateTransaction(av2 as Base64EncodedWireTransaction, {
+	const foo = await simulateTransaction(av2 as Base64EncodedWireTransaction, {
 		commitment: 'confirmed',
 		encoding: 'base64'
-	});
+	}).send();
 
 	console.log('foo', foo);
 
