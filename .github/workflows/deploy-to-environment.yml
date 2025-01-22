@@ -60,8 +60,6 @@ jobs:
               echo "NETWORK=staging" >> $GITHUB_ENV
             elif [ "${{ github.ref_type }}" == "tag" ]; then
               echo "NETWORK=beta" >> $GITHUB_ENV
-            elif [ "${{ github.ref_type }}" == "workflow_run" ]; then
-              echo "NETWORK=beta" >> $GITHUB_ENV
             else
               echo "Error: Unsupported ref type."
               exit 1
@@ -70,6 +68,8 @@ jobs:
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "NETWORK=${{ github.event.inputs.network }}" >> $GITHUB_ENV
             echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "workflow_run" ]; then
+            echo "NETWORK=beta" >> $GITHUB_ENV
           else
             echo "Error: Unsupported event type."
             exit 1
