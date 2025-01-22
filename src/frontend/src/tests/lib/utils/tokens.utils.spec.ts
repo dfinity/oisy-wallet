@@ -3,6 +3,7 @@ import {
 	ETHEREUM_NETWORK_ID,
 	ICP_NETWORK_ID
 } from '$env/networks/networks.env';
+import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -438,5 +439,11 @@ describe('filterTokens', () => {
 
 	it('should filter tokens correctly when filter is not provided', () => {
 		expect(filterTokens({ tokens: mockTokens, filter: '' })).toStrictEqual(mockTokens);
+	});
+
+	it('should filter correctly by network', () => {
+		expect(filterTokens({ tokens: [...mockTokens, PEPE_TOKEN], filter: 'ethereum' })).toStrictEqual(
+			[ETHEREUM_TOKEN, PEPE_TOKEN]
+		);
 	});
 });
