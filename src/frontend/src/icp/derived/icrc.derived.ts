@@ -100,9 +100,12 @@ const enabledIcrcDefaultTokens: Readable<IcToken[]> = derived(
 const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokens, icrcDefaultTokensCanisterIds],
 	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) =>
-		$icrcCustomTokens.filter(
-			({ ledgerCanisterId, indexCanisterId }) =>
-				!$icrcDefaultTokensCanisterIds.includes(`${ledgerCanisterId}:${indexCanisterId}`)
+		$icrcCustomTokens.filter(({ ledgerCanisterId, indexCanisterId }) =>
+			nonNullish(indexCanisterId)
+				? !$icrcDefaultTokensCanisterIds.includes(`${ledgerCanisterId}:${indexCanisterId}`)
+				: !$icrcDefaultTokensCanisterIds.some((canisterId) =>
+						canisterId.startsWith(`${ledgerCanisterId}:`)
+					)
 		)
 );
 
