@@ -46,7 +46,7 @@ const icrcDefaultTokensCanisterIds: Readable<string[]> = derived(
 	[icrcDefaultTokens],
 	([$icrcDefaultTokens]) =>
 		$icrcDefaultTokens.map(
-			({ ledgerCanisterId, indexCanisterId }) => `${ledgerCanisterId}:${indexCanisterId}`
+			({ ledgerCanisterId, indexCanisterId }) => `${ledgerCanisterId}:${indexCanisterId ?? ''}`
 		)
 );
 
