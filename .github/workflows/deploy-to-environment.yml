@@ -7,7 +7,7 @@ on:
     tags:
       - v*
   workflow_run:
-    workflows: ['tag-release.yml']
+    workflows: ['Tag on Merge from Release Branch']
     types:
       - completed
 
