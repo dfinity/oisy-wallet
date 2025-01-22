@@ -13,6 +13,7 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_NETWORKS,
 	SOLANA_NETWORKS_IDS,
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
@@ -31,6 +32,7 @@ import {
 	isNetworkIdSOLTestnet,
 	isNetworkIdSepolia,
 	isNetworkIdSolana,
+	isNetworkSolana,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 
@@ -42,6 +44,16 @@ describe('network utils', () => {
 
 		it('should return false for non-ICP network', () => {
 			expect(isNetworkICP(ETHEREUM_NETWORK)).toBe(false);
+		});
+	});
+
+	describe('isNetworkSolana', () => {
+		it.each(SOLANA_NETWORKS)('should return true for Solana network $name', (network) => {
+			expect(isNetworkSolana(network)).toBe(true);
+		});
+
+		it('should return false for non-ICP network', () => {
+			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBe(false);
 		});
 	});
 

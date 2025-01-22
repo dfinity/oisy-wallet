@@ -1,8 +1,10 @@
 #
-# Reproducible Builds
+# Reproducible builds of the Oisy backend canister
 #
 
-FROM ubuntu:22.04 AS base
+FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS base
+# Note: The above is ubuntu 22.04
+
 ENV TZ=UTC
 # Install basic tools
 RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \

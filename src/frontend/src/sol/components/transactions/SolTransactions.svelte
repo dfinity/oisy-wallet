@@ -5,12 +5,13 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalSolTransaction } from '$lib/derived/modal.derived';
+	import { modalSolToken, modalSolTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import SolTokenModal from '$sol/components/tokens/SolTokenModal.svelte';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import SolTransactionsScroll from '$sol/components/transactions/SolTransactionsScroll.svelte';
@@ -47,4 +48,6 @@
 
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
 	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
+{:else if $modalSolToken}
+	<SolTokenModal />
 {/if}
