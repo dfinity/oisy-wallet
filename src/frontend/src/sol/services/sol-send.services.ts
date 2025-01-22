@@ -266,7 +266,7 @@ export const sendSol = async ({
 
 	const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
-	console.log('av',signedTransaction, signature, transactionMessage);
+	console.log('av', signedTransaction, signature, transactionMessage);
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	await sendSignedTransaction({
