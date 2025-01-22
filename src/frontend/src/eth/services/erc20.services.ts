@@ -51,14 +51,8 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	} catch (err: unknown) {
 		erc20DefaultTokensStore.reset();
 
-		const {
-			init: {
-				error: { erc20_contracts }
-			}
-		} = get(i18n);
-
 		toastsError({
-			msg: { text: erc20_contracts },
+			msg: { text: get(i18n).init.error.erc20_contracts },
 			err
 		});
 
