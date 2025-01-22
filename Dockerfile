@@ -18,7 +18,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     clang \
     cmake \
     jq \
-    xxd \
     && rm -rf /var/lib/apt/lists/*
 
 # Gets dfx version
@@ -51,14 +50,15 @@ ENV PATH="$NVM_DIR/versions/node/default/bin/:${PATH}"
 RUN node --version
 RUN npm --version
 
-# Install Rust
-COPY ./rust-toolchain.toml .
+# Install Rust and Cargo in /opt
 ENV RUSTUP_HOME=/opt/rustup \
     CARGO_HOME=/cargo \
     PATH=/cargo/bin:$PATH
 
+# Copy resources	
+COPY ./docker ./docker	
+
 # Setup toolchain and ic-wasm
-COPY ./docker ./docker
 COPY rust-toolchain.toml .
 COPY dev-tools.json .
 COPY scripts/setup scripts/setup-cargo-binstall scripts/setup-rust scripts/
@@ -95,18 +95,17 @@ RUN mkdir -p src/backend/src \
 
 FROM deps AS build_backend
 COPY src src
-COPY dfx.json dfx.json
-COPY canister_ids.json canister_ids.json
 COPY scripts/build.backend.* scripts/
 COPY scripts/build.report.sh scripts/
-# The Wasm build is slow and typically cached:
+# Cache the rust build, to make the dfx build fast:
 RUN scripts/build.backend.wasm.sh
-# Commit will change even with unrelated changes, so is afetr the rust build:
+# Variables that don't affect the rust build:
+COPY dfx.json dfx.json
+COPY canister_ids.json canister_ids.json
 COPY ./in/tags in/tags
 COPY ./in/commit in/commit
-# The network may be overridden with arguments to the docker call:  --env DFX_NETWORK=whatever 
-# Note: The rust is re-built but that is fast.
 ENV DFX_NETWORK=ic
+COPY scripts/commit-metadata scripts/
 RUN dfx build backend --network "$DFX_NETWORK"
 
 FROM scratch AS backend
