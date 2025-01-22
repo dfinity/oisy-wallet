@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 print_help() {
-	cat <<-EOF
+  cat <<-EOF
 
 	Records the commit and any tags, if we are in a git repository, in 'in/{commit,tags}'.
 	Otherwise creates placeholder files.
@@ -10,14 +10,14 @@ print_help() {
 }
 
 [[ "${1:-}" != "--help" ]] || {
-	print_help
-	exit 0
+  print_help
+  exit 0
 }
 
 mkdir -p "in"
-if test -e .git ; then
-	git rev-parse HEAD >"in/commit"
-	git tag -l --contains HEAD >"in/tags"
+if test -e .git; then
+  git rev-parse HEAD >"in/commit"
+  git tag -l --contains HEAD >"in/tags"
 else
-	touch "in/commit" "in/tags"
+  touch "in/commit" "in/tags"
 fi
