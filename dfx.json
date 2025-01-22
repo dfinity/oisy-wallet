@@ -45,9 +45,12 @@
 		"backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
-			"type": "rust",
+			"type": "custom",
 			"optimize": "cycles",
 			"gzip": true,
+			"wasm": "out/backend.wasm.gz",
+			"init_arg_file": "out/backend.args.did",
+			"build": "scripts/build.backend.sh",
 			"remote": {
 				"id": {
 					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",
