@@ -28,9 +28,9 @@
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
 	import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
 
 	const steps: WizardSteps = [
 		{
