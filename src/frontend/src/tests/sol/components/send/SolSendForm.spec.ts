@@ -12,7 +12,7 @@ describe('SolSendForm', () => {
 
 	const props = {
 		destination: mockSolAddress2,
-		amount: 22_000_000,
+		amount: 22_000,
 		source: mockSolAddress
 	};
 
@@ -59,8 +59,6 @@ describe('SolSendForm', () => {
 
 	describe('with SPL token', () => {
 		beforeEach(() => {
-			vi.resetAllMocks();
-			vi.clearAllMocks();
 			vi.resetAllMocks();
 
 			mockContext.set(
