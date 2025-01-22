@@ -51,6 +51,8 @@
 		$pseudoNetworkChainFusion
 	]);
 
+	$: $allTokens, console.log('allTokens', $allTokens);
+
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
 		? pinEnabledTokensAtTop(

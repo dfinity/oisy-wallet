@@ -17,10 +17,13 @@ import { derived } from 'svelte/store';
 // and the environment tokens that have never been used.
 export const allIcrcTokens = derived([icrcTokens], ([$icrcTokens]) => {
 	// The list of ICRC tokens (SNSes) is defined as environment variables.
-	// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
+	// These tokens are not necessarily loaded at boot time if the
+	// user has not added them to their list of custom tokens.
 	const tokens = buildIcrcCustomTokens();
+	console.log('buildIcrcCustomTokens', tokens);
 	const icrcEnvTokens =
 		tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
+	console.log('icrcEnvTokens', icrcEnvTokens);
 
 	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
 	const knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
