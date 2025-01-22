@@ -461,5 +461,20 @@
 			"alternativeName": "FomoWell",
 			"url": "https://fomowell.com/"
 		}
+	},
+	{
+		"ledgerCanisterId": "oj6if-riaaa-aaaaq-aaeha-cai",
+		"rootCanisterId": "oh4fn-kyaaa-aaaaq-aaega-cai",
+		"indexCanisterId": "mtcaz-pyaaa-aaaaq-aaeia-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ALICE",
+			"symbol": "ALICE",
+			"fee": {
+				"__bigint__": "100000000"
+			},
+			"alternativeName": "Alice",
+			"url": "https://alice.fun/"
+		}
 	}
 ]
