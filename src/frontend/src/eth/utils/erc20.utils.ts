@@ -79,3 +79,5 @@ export const icTokenEthereumUserToken = (token: Token): token is EthereumUserTok
 
 export const icTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
 	token.standard === 'erc20' && 'enabled' in token && 'address' in token && 'exchange' in token;
+
+export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard === 'erc20';
