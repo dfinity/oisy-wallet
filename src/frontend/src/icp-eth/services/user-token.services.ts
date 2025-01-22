@@ -1,6 +1,6 @@
 import type { UserToken } from '$declarations/backend/backend.did';
 import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
-import { loadUserTokens } from '$eth/services/erc20.services';
+import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -63,7 +63,7 @@ export const autoLoadUserToken = async ({
 		assertSendTokenData: assertIcrcSendTokenData,
 		findToken: findUserToken,
 		setToken: setUserToken,
-		loadTokens: loadUserTokens,
+		loadTokens: loadErc20UserTokens,
 		errorMessage: get(i18n).init.error.erc20_user_token
 	});
 
