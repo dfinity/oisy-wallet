@@ -298,6 +298,8 @@ export const sendSol = async ({
 		signedTransaction
 	});
 
+	console.log(111111111);
+
 	onProgress?.();
 
 	return signature;
