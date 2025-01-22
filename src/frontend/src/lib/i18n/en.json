@@ -475,6 +475,7 @@
 		"text": {
 			"title": "Tokens",
 			"contract_address": "Contract address",
+			"token_address": "Token address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
@@ -490,6 +491,7 @@
 			"token": "Token",
 			"network": "Network",
 			"contract_address_copied": "Contract address copied to clipboard.",
+			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
 			"standard": "Standard"
 		},
@@ -564,6 +566,7 @@
 			"open_blockstream": "Open the details of the token on Blockstream",
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
+			"open_token_address_block_explorer": "Open the token address on a block explorer",
 			"token_group_number": "Total number of tokens in the group for native token $token"
 		},
 		"placeholder": {
