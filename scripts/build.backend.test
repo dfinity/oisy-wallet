@@ -71,6 +71,19 @@ EXIT=0
 
 ) || EXIT=1
 
+(
+  echo "Change detector test for production"
+  EXPECTED="scripts/build.backend.args.ic.did"
+  ACTUAL="out/backend.args.ic.did"
+  if diff --ignore-all-space --ignore-blank-lines "$EXPECTED" "$ACTUAL"; then
+    echo "OK: Mainnet arguments are unchanged"
+  else
+    echo "WARNING: Mainnet arguments have changed.  If this is intentional, please run:"
+    echo "  cp '$ACTUAL' '$EXPECTED'"
+  fi
+
+)
+
 if ((EXIT == 0)); then
   echo "SUCCESS: Wasm metadata checks pass."
 else
