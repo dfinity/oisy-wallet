@@ -19,6 +19,7 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
+import { getBase64Decoder } from '@solana/codecs';
 import { pipe } from '@solana/functional';
 import type { Signature } from '@solana/keys';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
@@ -38,11 +39,7 @@ import {
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
-import {
-	getTransactionEncoder,
-	sendAndConfirmTransactionFactory
-} from '@solana/web3.js';
-import { getBase64Decoder } from '@solana/codecs';
+import { getTransactionEncoder, sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
