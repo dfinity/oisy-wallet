@@ -136,6 +136,7 @@
 		},
 		"alt": {
 			"open_etherscan": "Open your address on Etherscan",
+			"open_solscan": "Open your address on Solscan",
 			"qrcode_address": "Scan this QR code to copy the address to receive $token tokens"
 		}
 	},

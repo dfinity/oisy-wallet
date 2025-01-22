@@ -121,7 +121,7 @@ interface I18nWallet {
 		icp_deposits: string;
 		use_address_from_to: string;
 	};
-	alt: { open_etherscan: string; qrcode_address: string };
+	alt: { open_etherscan: string; open_solscan: string; qrcode_address: string };
 }
 
 interface I18nInit {
