@@ -1,4 +1,8 @@
-FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS deps
+#
+# Reproducible builds of the Oisy backend canister
+#
+
+FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS base
 # Note: The above is ubuntu 22.04
 
 ENV TZ=UTC
@@ -16,6 +20,24 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     cmake \
     jq \
     && rm -rf /var/lib/apt/lists/*
+
+# Gets dfx version
+#
+# Note: This can be done in 'deps' but is slow because unrelated changes to dfx.json can cause a rebuild.
+FROM base AS tool_versions
+SHELL ["bash", "-c"]
+RUN mkdir -p config
+COPY dfx.json dfx.json
+RUN jq -r .dfx dfx.json > config/dfx_version
+
+# Install tools && warm up the build cache
+FROM base AS deps
+SHELL ["bash", "-c"]
+# Install dfx
+# Note: dfx is installed in `$HOME/.local/share/dfx/bin` but we can't reference `$HOME` here so we hardcode `/root`.
+COPY --from=tool_versions /config/*_version config/
+ENV PATH="/root/.local/share/dfx/bin:/root/.local/bin:${PATH}"
+RUN DFXVM_INIT_YES=true DFX_VERSION="$(cat config/dfx_version)" sh -c "$(curl -fsSL https://sdk.dfinity.org/install.sh)" && dfx --version
 
 # Install node
 RUN curl --fail -sSf https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
