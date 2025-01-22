@@ -35,6 +35,12 @@
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
 	import { sendSteps } from '$sol/constants/steps.constants';
 	import { sendSol } from '$sol/services/sol-send.services';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		TRACK_COUNT_ETH_SEND_ERROR,
+		TRACK_COUNT_ETH_SEND_SUCCESS, TRACK_COUNT_SOL_SEND_ERROR,
+		TRACK_COUNT_SOL_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -106,7 +112,6 @@
 		try {
 			sendProgressStep = ProgressStepsSendSol.INITIALIZATION;
 
-			// TODO: add tracking
 			await sendSol({
 				identity: $authIdentity,
 				token: $sendToken,
@@ -127,8 +132,24 @@
 
 			sendProgressStep = ProgressStepsSendSol.DONE;
 
+			await trackEvent({
+				name: TRACK_COUNT_SOL_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
+
+
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			await trackEvent({
+				name: TRACK_COUNT_SOL_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
+
+
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
 				err
