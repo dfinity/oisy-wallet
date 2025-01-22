@@ -1,4 +1,4 @@
-name: Tag and Release on Merge from Release Branch
+name: Tag on Merge from Release Branch
 
 on:
   pull_request:
