@@ -18,7 +18,6 @@ describe('SolSendForm', () => {
 	const sourceSelector = 'div[id="source"]';
 	const balanceSelector = 'div[id="balance"]';
 	const feeSelector = 'p[id="fee"]';
-	const ataFeeSelector = 'p[id="ataFee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
