@@ -4,6 +4,8 @@ import { signWithSchnorr } from '$lib/api/signer.api';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
+import * as accountServices from '$sol/services/spl-accounts.services';
+import type { SolInstruction } from '$sol/types/sol-instructions';
 import * as networkUtils from '$sol/utils/network.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -70,6 +72,8 @@ describe('sol-send.services', () => {
 		let spyMapNetworkIdToNetwork: MockInstance;
 		let spyPipe: MockInstance;
 
+		let spyCreateAtaInstruction: MockInstance;
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -80,6 +84,13 @@ describe('sol-send.services', () => {
 
 			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
 			spyPipe = vi.spyOn(solanaFunctional, 'pipe').mockImplementation(vi.fn());
+
+			spyCreateAtaInstruction = vi
+				.spyOn(accountServices, 'createAtaInstruction')
+				.mockResolvedValue({
+					ataInstruction: { keys: 'mock-instruction' } as unknown as SolInstruction,
+					ataAddress: mockSplAddress
+				});
 		});
 
 		it('should send SOL successfully', async () => {
@@ -112,6 +123,23 @@ describe('sol-send.services', () => {
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 			expect(spyPipe).toHaveBeenCalled();
+		});
+
+		it('should send add ATA creation instructions if needed', async () => {
+			await expect(
+				sendSol({
+					identity: mockIdentity,
+					token: DEVNET_USDC_TOKEN,
+					amount: mockAmount,
+					destination: mockDestination,
+					source: mockSource,
+					onProgress: vi.fn()
+				})
+			).resolves.not.toThrow();
+
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
+			expect(spyPipe).toHaveBeenCalled();
+			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 		});
 
 		it('should throw an error if network is invalid', async () => {
