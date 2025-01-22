@@ -14,7 +14,6 @@
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
-	import type { SplToken } from '$sol/types/spl';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
