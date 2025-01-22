@@ -28,7 +28,6 @@
 	let tokenAddress: string | undefined;
 	$: tokenAddress = nonNullish($token) && isTokenSpl($token) ? $token.address : undefined;
 
-
 	let explorerAddressUrl: string | undefined;
 	$: explorerAddressUrl = nonNullish(explorerUrl)
 		? replacePlaceholders(explorerUrl, { $args: `token/${tokenAddress}/` })
