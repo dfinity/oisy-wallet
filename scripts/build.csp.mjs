@@ -155,7 +155,7 @@ const updateCSP = (indexHtml) => {
 	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
 
 	const solanaRpcApiConnectSrc =
-		'https://api.mainnet-beta.solana.com wss://api.mainnet-beta.solana.com https://api.testnet.solana.com wss://api.testnet.solana.com https://api.devnet.solana.com wss://api.devnet.solana.com';
+		'https://api.mainnet-beta.solana.com ws://api.mainnet-beta.solana.com https://api.testnet.solana.com wss://api.testnet.solana.com https://api.devnet.solana.com wss://api.devnet.solana.com';
 	const solanaAlchemyApiConnectSrc =
 		'https://solana-mainnet.g.alchemy.com wss://solana-mainnet.g.alchemy.com https://solana-testnet.g.alchemy.com wss://solana-testnet.g.alchemy.com https://solana-devnet.g.alchemy.com wss://solana-devnet.g.alchemy.com';
 
