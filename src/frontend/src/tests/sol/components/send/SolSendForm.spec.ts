@@ -6,13 +6,6 @@ import { render } from '@testing-library/svelte';
 
 describe('SolSendForm', () => {
 	const mockContext = new Map([]);
-	mockContext.set(
-		SEND_CONTEXT_KEY,
-		initSendContext({
-			sendPurpose: 'send',
-			token: SOLANA_TOKEN
-		})
-	);
 
 	const props = {
 		destination: mockSolAddress2,
@@ -28,6 +21,14 @@ describe('SolSendForm', () => {
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	it('should render all fields', () => {
+		mockContext.set(
+			SEND_CONTEXT_KEY,
+			initSendContext({
+				sendPurpose: 'send',
+				token: SOLANA_TOKEN
+			})
+		);
+
 		const { container } = render(SolSendForm, {
 			props,
 			context: mockContext
