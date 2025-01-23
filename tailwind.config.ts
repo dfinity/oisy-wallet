@@ -31,8 +31,6 @@ export default {
 			'united-nations-blue': '#627eea',
 			'pale-cornflower-blue': '#b0cdff',
 			'brilliant-azure': '#348afd',
-			'lapis-on-neptune': '#232bcc',
-			'space-exploration': '#000797',
 			'misty-rose': '#937993',
 			'chinese-purple': '#7014a4',
 			'lavander-indigo': '#904efa',
@@ -60,6 +58,10 @@ export default {
 			borderColor: themeVariables.border,
 			ringColor: themeVariables.border,
 			textColor: themeVariables.foreground,
+			backgroundImage: {
+				'trump-token-hero-image':
+					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)'
+			},
 			backgroundSize: {
 				'size-200': '200% 200%'
 			},
