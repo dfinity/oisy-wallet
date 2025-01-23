@@ -53,6 +53,11 @@
 	$: displayMode, changeDirection();
 
 	const updateDisplay = () => {
+		if (isNullish(value)) {
+			value = undefined;
+			return;
+		}
+		
 		if (nonNullish(value) && nonNullish(exchangeRate) && displayMode === 'token') {
 			const newDisplayValue = formatNumber(Number(value) * exchangeRate, 2);
 			if (Number(newDisplayValue) !== Number(displayValue)) {
