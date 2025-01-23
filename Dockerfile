@@ -6,7 +6,8 @@ FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0de
 # Note: The above is ubuntu 22.04
 
 ENV TZ=UTC
-# Install basic tools
+
+# Install required tools
 RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     curl \
     ca-certificates \
