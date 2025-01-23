@@ -54,7 +54,7 @@ dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
 
 ### IC
 
-Ensure that you have `dfx-orbit` installed and are using the correct station:
+Ensure that you have [`dfx-orbit`](https://github.com/dfinity/orbit/tree/main/tools/dfx-orbit) installed and are using the correct station:
 
 ```
 dfx-orbit station show
