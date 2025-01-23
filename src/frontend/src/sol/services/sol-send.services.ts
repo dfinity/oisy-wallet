@@ -181,17 +181,11 @@ const createSplTokenTransactionMessage = async ({
 		calculatedDestinationTokenAccountAddress
 	);
 
-	return pipe(
-		await createDefaultTransaction({
-			rpc,
-			feePayer: signer,
-			version: mustCreateDestinationTokenAccount ? 0 : 'legacy'
-		}),
-		(tx) =>
-			appendTransactionMessageInstructions(
-				[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
-				tx
-			)
+	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
+		appendTransactionMessageInstructions(
+			[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
+			tx
+		)
 	);
 };
 
