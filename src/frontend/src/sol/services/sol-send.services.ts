@@ -69,7 +69,11 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 	return pipe(
 		transactionMessage,
 		(tx) => setFeePayerToTransaction({ transactionMessage: tx, feePayer }),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+		(tx) =>
+			setTransactionMessageLifetimeUsingBlockhash(
+				{ ...latestBlockhash, lastValidBlockHeight: latestBlockhash.lastValidBlockHeight + 100n },
+				tx
+			)
 	);
 };
 
