@@ -54,7 +54,7 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error,
 					// TODO: Remove "isMainnetNetwork" after the issue with SOL wallet is investigated and fixed
-					hideToast: isTestnetNetwork || isDevnetNetwork || isLocalNetwork || isMainnetNetwork
+					hideToast: isTestnetNetwork || isDevnetNetwork || isLocalNetwork
 				});
 				return;
 		}
