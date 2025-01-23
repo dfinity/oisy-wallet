@@ -47,6 +47,7 @@
 
 	let errorType: ConvertAmountErrorType = undefined;
 	let amountSetToMax = false;
+	let displayMode: 'usd' | 'token' = 'usd';
 
 	$: receiveAmount =
 		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
@@ -100,6 +101,8 @@
 		<div class="relative">
 			<SwapSelectToken
 				bind:amount={swapAmount}
+				displayMode={displayMode}
+				exchangeRate={$sourceTokenExchangeRate}
 				bind:errorType
 				bind:amountSetToMax
 				token={$sourceToken}
@@ -113,7 +116,15 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($sourceToken)}
 						<div class="text-tertiary">
-							<SwapAmountExchange amount={swapAmount} exchangeRate={$sourceTokenExchangeRate} />
+							<SwapAmountExchange
+								amount={swapAmount}
+								exchangeRate={$sourceTokenExchangeRate}
+								token={$sourceToken}
+								mode={displayMode}
+								on:mode={(e) => {
+									displayMode = e.detail
+									}}
+							/>
 						</div>
 					{/if}
 				</svelte:fragment>
@@ -130,6 +141,7 @@
 			<SwapSelectToken
 				token={$destinationToken}
 				amount={receiveAmount}
+				exchangeRate={$sourceTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
 				on:click={() => {
@@ -147,8 +159,11 @@
 						{:else}
 							<div class="flex gap-3 text-tertiary">
 								<SwapAmountExchange
+									token={$destinationToken}
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
+									mode={displayMode}
+									on:mode={(e) => displayMode = e.detail}
 								/>
 
 								<SwapValueDifference {swapAmount} {receiveAmount} />

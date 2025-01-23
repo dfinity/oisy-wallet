@@ -1,14 +1,76 @@
 <script lang="ts">
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { SwapDisplayMode } from '$lib/types/swap';
+	import { formatUSD } from '$lib/utils/format.utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	export let value: OptionAmount;
+	export let displayMode: SwapDisplayMode = 'usd';
+	export let exchangeRate: number | undefined;
 	export let decimals: number;
 	export let name = 'swap-amount';
 	export let disabled = false;
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
+
+	let displayValue: OptionAmount;
+
+	function formatNumber(num: number, decimalsCount: number): string {
+		return num.toFixed(decimalsCount);
+	}
+
+	// Handle user input changes
+	function handleInput() {
+		if (isNullish(displayValue)) {
+			value = 0;
+			return;
+		}
+
+		if (nonNullish(exchangeRate)) {
+			if (displayMode === 'token') {
+				value = formatNumber(Number(displayValue) / exchangeRate, decimals);
+			} else {
+				value = formatNumber(Number(displayValue), decimals);
+			}
+		} else {
+			value = displayValue;
+		}
+	}
+
+	const changeDirection = () => {
+		if (isNullish(exchangeRate) || isNullish(value)) {
+			return;
+		}
+
+		if (displayMode === 'token') {
+			displayValue = formatUSD({value: Number(value) * exchangeRate, options: {minFraction: 0}});
+		} else {
+			displayValue = Number(value);
+		}
+	};
+
+	const updateDisplay = () => {
+		if (isNullish(exchangeRate) || isNullish(value)) {
+			return;
+		}
+
+		let newDisplayValue;
+
+		if (displayMode === 'token') {
+			newDisplayValue = Number(value) * exchangeRate, 2;
+		} else {
+			newDisplayValue = Number(value), decimals;
+		}
+
+		if (newDisplayValue !== displayValue) {
+			displayValue = newDisplayValue;
+		}
+	}
+
+	$: displayMode, changeDirection()
+	// $: value, updateDisplay()
 </script>
 
 <div
@@ -16,7 +78,16 @@
 	class:text-error={error}
 	class:animate-pulse={loading}
 >
-	<InputCurrency bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
+	<InputCurrency
+		bind:value={displayValue}
+		on:nnsInput={handleInput}
+		{name}
+		{placeholder}
+		{disabled}
+		decimals={displayMode === 'token' ? 2 : decimals}
+		on:focus
+		on:blur
+	>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
 </div>

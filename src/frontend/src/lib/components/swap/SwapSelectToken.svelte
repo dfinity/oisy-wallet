@@ -14,10 +14,13 @@
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { SwapDisplayMode } from '$lib/types/swap';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
 	export let name = 'swap-amount';
+	export let displayMode: SwapDisplayMode = 'usd';
+	export let exchangeRate: number | undefined;
 	export let disabled = false;
 	export let placeholder = '0';
 	export let errorType: ConvertAmountErrorType = undefined;
@@ -68,6 +71,8 @@
 			{#if token}
 				<SwapInputCurrency
 					bind:value={amount}
+					{displayMode}
+					{exchangeRate}
 					{name}
 					{placeholder}
 					{disabled}
