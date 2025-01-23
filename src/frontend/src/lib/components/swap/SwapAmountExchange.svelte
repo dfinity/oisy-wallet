@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from 'ethers';
 	import { createEventDispatcher } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';

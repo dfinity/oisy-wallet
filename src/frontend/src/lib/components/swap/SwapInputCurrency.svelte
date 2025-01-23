@@ -17,7 +17,7 @@
 
 	let displayValue: OptionAmount;
 
-	function formatNumber(num: number, decimalsCount: number): string {
+	function formatNumber({ num, decimalsCount }: { num: number, decimalsCount: number }): string {
 		return num.toFixed(decimalsCount);
 	}
 
@@ -30,9 +30,9 @@
 
 		if (nonNullish(exchangeRate)) {
 			if (displayMode === 'token') {
-				value = formatNumber(Number(displayValue) / exchangeRate, decimals);
+				value = formatNumber({ num: Number(displayValue) / exchangeRate, decimalsCount: decimals });
 			} else {
-				value = formatNumber(Number(displayValue), decimals);
+				value = formatNumber({ num: Number(displayValue), decimalsCount: decimals });
 			}
 		} else {
 			value = displayValue;
@@ -54,26 +54,8 @@
 		}
 	};
 
-	const updateDisplay = () => {
-		if (isNullish(exchangeRate) || isNullish(value)) {
-			return;
-		}
-
-		let newDisplayValue;
-
-		if (displayMode === 'token') {
-			(newDisplayValue = Number(value) * exchangeRate), 2;
-		} else {
-			(newDisplayValue = Number(value)), decimals;
-		}
-
-		if (newDisplayValue !== displayValue) {
-			displayValue = newDisplayValue;
-		}
-	};
 
 	$: displayMode, changeDirection();
-	// $: value, updateDisplay()
 </script>
 
 <div
