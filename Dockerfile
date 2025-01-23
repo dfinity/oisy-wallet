@@ -81,6 +81,7 @@ COPY src/cycles_ledger/client/Cargo.toml src/cycles_ledger/client/Cargo.toml
 COPY src/cycles_ledger/pic/Cargo.toml src/cycles_ledger/pic/Cargo.toml
 COPY src/cycles_ledger/types/Cargo.toml src/cycles_ledger/types/Cargo.toml
 COPY src/shared/Cargo.toml src/shared/Cargo.toml
+COPY scripts/build.backend.wasm.sh scripts/
 RUN mkdir -p src/backend/src \
     && touch src/backend/src/lib.rs \
     && mkdir -p src/cycles_ledger/client/src \
@@ -90,9 +91,10 @@ RUN mkdir -p src/backend/src \
     && mkdir -p src/cycles_ledger/types/src \
     && touch src/cycles_ledger/types/src/lib.rs \
     && mkdir -p src/shared/src \
-    && touch src/shared/src/lib.rs \
-    && scripts/build.backend.wasm.sh \
-    && rm -rf src
+    && touch src/shared/src/lib.rs
+RUN cargo fetch
+RUN scripts/build.backend.wasm.sh
+RUN rm -rf src
 
 FROM deps AS build_backend
 COPY src src
