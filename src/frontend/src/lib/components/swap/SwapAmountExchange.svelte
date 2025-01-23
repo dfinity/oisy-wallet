@@ -6,7 +6,7 @@
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import {formatUSD } from '$lib/utils/format.utils';
+	import { formatUSD } from '$lib/utils/format.utils';
 
 	export let amount: OptionAmount;
 	export let exchangeRate: number | undefined;
@@ -31,8 +31,8 @@
 	let formattedTokenAmount: string | undefined;
 	$: formattedTokenAmount = nonNullish(token)
 		? mode === 'token' && nonNullish(amount)
-			? `${Number(amount).toString()  } ${  token.symbol}`
-			: `${0  } ${  token.symbol}`
+			? `${Number(amount).toString()} ${token.symbol}`
+			: `${0} ${token.symbol}`
 		: '0';
 </script>
 
