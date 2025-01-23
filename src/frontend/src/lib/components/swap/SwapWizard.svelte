@@ -28,7 +28,7 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let isSourceTokenIcrc2: boolean | undefined;
+	let isSourceTokenIcrc2: boolean;
 	$: isSourceTokenIcrc2 =
 		nonNullish($sourceToken) &&
 		nonNullish($kongSwapTokensStore) &&

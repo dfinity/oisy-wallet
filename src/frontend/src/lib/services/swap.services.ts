@@ -34,7 +34,7 @@ export const swap = async ({
 	swapAmount: Amount;
 	receiveAmount: bigint;
 	slippageValue: Amount;
-	isSourceTokenIcrc2?: boolean;
+	isSourceTokenIcrc2: boolean;
 }) => {
 	progress(ProgressStepsSwap.SWAP);
 
