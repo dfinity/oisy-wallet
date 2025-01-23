@@ -57,7 +57,7 @@
 			value = undefined;
 			return;
 		}
-		
+
 		if (nonNullish(value) && nonNullish(exchangeRate) && displayMode === 'token') {
 			const newDisplayValue = formatNumber(Number(value) * exchangeRate, 2);
 			if (Number(newDisplayValue) !== Number(displayValue)) {
@@ -72,10 +72,16 @@
 </script>
 
 <div
-	class="swap-input-currency h-full w-full font-bold"
+	class="swap-input-currency h-full w-full font-bold flex items-center"
+	class:padding={displayMode === 'usd'}
 	class:text-error={error}
 	class:animate-pulse={loading}
 >
+	{#if displayMode === 'token'}
+		<span class="pl-3 transition-colors" class:text-placeholder={isNullish(displayValue)}>
+			$
+		</span>
+	{/if}
 	<InputCurrency
 		bind:value={displayValue}
 		on:nnsInput={handleInput}
@@ -103,6 +109,14 @@
 		height: 100%;
 		border: none;
 		border-radius: 0;
+		padding: 0;
+	}
+
+	:global(.swap-input-currency.padding div.input-field input[id]) {
 		padding: 0 0 0 0.75rem;
+	}
+
+	.transition-colors {
+		transition: color var(--animation-time-short);
 	}
 </style>

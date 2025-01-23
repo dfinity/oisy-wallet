@@ -25,5 +25,6 @@
 	on:blur
 	on:focus
 >
+	<slot name="start" slot="start" />
 	<slot name="inner-end" slot="inner-end" />
 </Input>
