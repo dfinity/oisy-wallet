@@ -20,7 +20,7 @@
 />
 
 {#if ckEthPendingTransactionsSyncState === 'in_progress' || ckEthMinterInfoSyncState === 'in_progress'}
-	<div class="animate-pulse text-misty-rose">
+	<div class="text-misty-rose animate-pulse">
 		<span transition:blur
 			>{replacePlaceholders($i18n.receive.ethereum.text.checking_status, {
 				$token: $ckEthereumTwinToken.symbol

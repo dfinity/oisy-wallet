@@ -19,7 +19,7 @@
 />
 
 <div class="my-4 flex justify-center">
-	<div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+	<div class="bg-secondary flex h-12 w-12 items-center justify-center rounded-full">
 		<IconMoveDown />
 	</div>
 </div>

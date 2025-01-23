@@ -27,7 +27,7 @@
 			{$i18n.wallet_connect.domain.unknown}
 		{/if}</label
 	>
-	<div id="verification" class="mb-4 break-all font-normal">
+	<div id="verification" class="mb-4 font-normal break-all">
 		{#if validation === 'VALID'}
 			{$i18n.wallet_connect.domain.valid_description}
 		{:else if validation === 'INVALID'}

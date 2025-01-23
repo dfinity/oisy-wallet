@@ -32,15 +32,15 @@
 </script>
 
 {#if nonNullish(origin)}
-	<p class="mb-6 break-normal text-center">
+	<p class="mb-6 text-center break-normal">
 		{$i18n.signer.origin.text.request_from}
-		{#if nonNullish(host)}<span class="font-bold text-brand-primary"
+		{#if nonNullish(host)}<span class="text-brand-primary font-bold"
 				><ExternalLink
 					ariaLabel={$i18n.signer.origin.alt.link_to_dapp}
 					href={origin}
 					iconVisible={false}>{host}</ExternalLink
 				></span
-			>{:else}<span class="font-bold text-cyclamen">{$i18n.signer.origin.text.invalid_origin}</span
+			>{:else}<span class="text-cyclamen font-bold">{$i18n.signer.origin.text.invalid_origin}</span
 			>{/if}
 	</p>
 {/if}

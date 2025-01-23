@@ -60,13 +60,13 @@
 		<button
 			on:click={open}
 			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
-			class="text-sm font-semibold text-brand-primary"
+			class="text-brand-primary text-sm font-semibold"
 		>
 			{callToAction} →
 		</button>
 	</div>
 	<div class="h-full items-start">
-		<button class="p-1 text-tertiary" on:click={close} aria-label={$i18n.core.text.close}>
+		<button class="text-tertiary p-1" on:click={close} aria-label={$i18n.core.text.close}>
 			<IconClose size="20" />
 		</button>
 	</div>

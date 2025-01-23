@@ -15,6 +15,6 @@
 			><slot name="main-value" /></span
 		>
 
-		<span class="text-sm text-tertiary"><slot name="secondary-value" /></span>
+		<span class="text-tertiary text-sm"><slot name="secondary-value" /></span>
 	</div>
 </div>

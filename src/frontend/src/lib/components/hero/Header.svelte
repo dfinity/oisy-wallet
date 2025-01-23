@@ -9,7 +9,7 @@
 </script>
 
 <header
-	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
+	class="max-w-screen-2.5xl pointer-events-none relative z-1 flex w-full items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:lg:fixed={$authSignedIn}
 	class:lg:top-0={$authSignedIn}
 	class:lg:inset-x-0={$authSignedIn}

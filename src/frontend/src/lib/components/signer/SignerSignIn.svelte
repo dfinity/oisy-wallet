@@ -9,7 +9,7 @@
 	<SignerAnimatedAstronaut />
 </div>
 
-<h2 class="mb-4 mt-12 text-center">
+<h2 class="mt-12 mb-4 text-center">
 	{replaceOisyPlaceholders($i18n.signer.sign_in.text.access_your_wallet)}
 </h2>
 

@@ -20,7 +20,7 @@
 	<span class="flex flex-col gap-0.5">
 		<span class="leading-5">{name}</span>
 		{#if nonNullish(description)}
-			<span class="text-left text-xs leading-none text-misty-rose">{description}</span>
+			<span class="text-misty-rose text-left text-xs leading-none">{description}</span>
 		{/if}
 	</span>
 	<Logo src={icon} alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })} />

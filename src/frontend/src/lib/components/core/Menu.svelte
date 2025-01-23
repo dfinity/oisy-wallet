@@ -204,7 +204,7 @@
 
 		<Hr />
 
-		<span class="text-center text-sm text-tertiary">
+		<span class="text-tertiary text-center text-sm">
 			<LicenseLink noUnderline />
 		</span>
 	</div>

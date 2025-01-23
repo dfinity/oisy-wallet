@@ -91,7 +91,7 @@
 
 	<div slot="amount-info" data-tid="convert-amount-source-amount-info">
 		{#if insufficientFunds}
-			<div transition:slide={SLIDE_DURATION} class="text-sm text-error">
+			<div transition:slide={SLIDE_DURATION} class="text-error text-sm">
 				{$i18n.convert.assertion.insufficient_funds}
 			</div>
 		{:else}
@@ -103,7 +103,7 @@
 
 	<button
 		slot="balance"
-		class={`rounded px-2 py-0.5 transition-all ${isZeroBalance ? 'bg-error-subtle-alt text-error' : isNullish(maxAmount) ? 'animate-pulse bg-disabled text-tertiary' : 'bg-brand-subtle text-brand-primary'}`}
+		class={`rounded px-2 py-0.5 transition-all ${isZeroBalance ? 'bg-error-subtle-alt text-error' : isNullish(maxAmount) ? 'bg-disabled text-tertiary animate-pulse' : 'bg-brand-subtle text-brand-primary'}`}
 		on:click|preventDefault={setMax}
 		data-tid="convert-amount-source-balance"
 	>
