@@ -146,17 +146,20 @@ pub mod custom_token {
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
 
+    /// An ICRC-1 compliant token on the Internet Computer.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
         pub index_id: Option<IndexId>,
     }
 
+    /// A variant describing any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum Token {
         Icrc(IcrcToken),
     }
 
+    /// User preferences for any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct CustomToken {
         pub token: Token,
@@ -164,6 +167,7 @@ pub mod custom_token {
         pub version: Option<Version>,
     }
 
+    /// A cross-chain token identifier.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub enum CustomTokenId {
         Icrc(LedgerId),
