@@ -137,13 +137,9 @@ export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'
 );
-export const modalSuccessfulRewardModal: Readable<boolean> = derived(
+export const modalRewardState: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'successful-reward'
-);
-export const modalFailedRewardModal: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'failed-reward'
+	($modalStore) => $modalStore?.type === 'reward-state'
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(
