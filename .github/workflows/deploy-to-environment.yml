@@ -204,9 +204,11 @@ jobs:
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
-                ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
+                ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
+                dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
               fi
-            else            
-              ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
+            else
+              ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
+              dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
             fi
           fi
