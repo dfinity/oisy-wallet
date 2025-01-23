@@ -199,7 +199,7 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
-export const sendSignedTransaction = async ({
+export const sendSignedTransaction = ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
@@ -214,7 +214,7 @@ export const sendSignedTransaction = async ({
 
 	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 
-	await sendAndConfirmTransaction(signedTransaction, { commitment });
+	sendAndConfirmTransaction(signedTransaction, { commitment });
 };
 
 /**
@@ -255,8 +255,6 @@ export const sendSol = async ({
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
-	const { simulateTransaction } = rpc;
-
 	const signer: TransactionPartialSigner = createSigner({
 		identity,
 		address: source,
@@ -282,21 +280,19 @@ export const sendSol = async ({
 
 	const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
-	const av = getTransactionEncoder().encode(signedTransaction);
+	const { simulateTransaction } = rpc;
 
-	const av2 = getBase64Decoder().decode(av);
+	const enc = getBase64Decoder().decode(getTransactionEncoder().encode(signedTransaction));
 
-	console.log('av', signedTransaction, signature, transactionMessage);
-
-	const foo = await simulateTransaction(av2 as Base64EncodedWireTransaction, {
+	const simulation = await simulateTransaction(enc as Base64EncodedWireTransaction, {
 		commitment: 'confirmed',
 		encoding: 'base64'
 	}).send();
 
-	console.log('foo', foo);
+	console.log('simulation', simulation);
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
-	await sendSignedTransaction({ rpc, rpcSubscriptions, signedTransaction });
+	sendSignedTransaction({ rpc, rpcSubscriptions, signedTransaction });
 
 	console.log(111111111);
 
