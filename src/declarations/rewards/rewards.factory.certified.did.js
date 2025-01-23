@@ -21,10 +21,16 @@ export const idlFactory = ({ IDL }) => {
 		start_timestamp_ns: IDL.Nat64,
 		token_configs: IDL.Vec(TokenConfig)
 	});
+	const VipConfig = IDL.Record({
+		code_validity_duration: IDL.Nat64,
+		vips: IDL.Vec(IDL.Principal),
+		rewards: IDL.Vec(TokenConfig)
+	});
 	const Config = IDL.Record({
 		batch_sizes: IDL.Opt(BatchSizes),
 		airdrop_config: IDL.Opt(AirDropConfig),
 		index_canisters: IDL.Vec(IDL.Principal),
+		vip_config: IDL.Opt(VipConfig),
 		processing_interval_s: IDL.Opt(IDL.Nat16),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)
@@ -36,6 +42,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidCode: IDL.Null
 	});
 	const NewVipRewardResponse = IDL.Variant({
+		Anonymous: IDL.Null,
 		NotImportantPerson: IDL.Null,
 		VipReward: VipReward
 	});
@@ -96,6 +103,11 @@ export const idlFactory = ({ IDL }) => {
 		is_vip: IDL.Opt(IDL.Bool),
 		sprinkles: IDL.Vec(RewardInfo)
 	});
+	const VipStats = IDL.Record({
+		total_rejected: IDL.Nat32,
+		total_redeemed: IDL.Nat32,
+		total_issued: IDL.Nat32
+	});
 	return IDL.Service({
 		claim_vip_reward: IDL.Func([VipReward], [ClaimVipRewardResponse], []),
 		config: IDL.Func([], [Config]),
@@ -103,7 +115,8 @@ export const idlFactory = ({ IDL }) => {
 		public_rewards_info: IDL.Func([], [PublicRewardsInfo]),
 		set_sprinkle_timestamp: IDL.Func([SetSprinkleTimestampArg], [], []),
 		status: IDL.Func([], [StatusResponse]),
-		user_info: IDL.Func([], [UserData])
+		user_info: IDL.Func([], [UserData]),
+		vip_stats: IDL.Func([], [VipStats])
 	});
 };
 // @ts-ignore
@@ -129,10 +142,16 @@ export const init = ({ IDL }) => {
 		start_timestamp_ns: IDL.Nat64,
 		token_configs: IDL.Vec(TokenConfig)
 	});
+	const VipConfig = IDL.Record({
+		code_validity_duration: IDL.Nat64,
+		vips: IDL.Vec(IDL.Principal),
+		rewards: IDL.Vec(TokenConfig)
+	});
 	const Config = IDL.Record({
 		batch_sizes: IDL.Opt(BatchSizes),
 		airdrop_config: IDL.Opt(AirDropConfig),
 		index_canisters: IDL.Vec(IDL.Principal),
+		vip_config: IDL.Opt(VipConfig),
 		processing_interval_s: IDL.Opt(IDL.Nat16),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)

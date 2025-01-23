@@ -26,6 +26,7 @@ export interface Config {
 	batch_sizes: [] | [BatchSizes];
 	airdrop_config: [] | [AirDropConfig];
 	index_canisters: Array<Principal>;
+	vip_config: [] | [VipConfig];
 	processing_interval_s: [] | [number];
 	readonly_admins: Array<Principal>;
 	oisy_canister: [] | [Principal];
@@ -35,7 +36,10 @@ export interface LedgerConfig {
 	ledger: Principal;
 	ledger_account: Account;
 }
-export type NewVipRewardResponse = { NotImportantPerson: null } | { VipReward: VipReward };
+export type NewVipRewardResponse =
+	| { Anonymous: null }
+	| { NotImportantPerson: null }
+	| { VipReward: VipReward };
 export type PublicAirdropStatus =
 	| {
 			Ongoing: { remaining_airdrops: bigint; total_airdrops: bigint };
@@ -91,8 +95,18 @@ export interface UserData {
 	is_vip: [] | [boolean];
 	sprinkles: Array<RewardInfo>;
 }
+export interface VipConfig {
+	code_validity_duration: bigint;
+	vips: Array<Principal>;
+	rewards: Array<TokenConfig>;
+}
 export interface VipReward {
 	code: string;
+}
+export interface VipStats {
+	total_rejected: number;
+	total_redeemed: number;
+	total_issued: number;
 }
 export interface _SERVICE {
 	claim_vip_reward: ActorMethod<[VipReward], ClaimVipRewardResponse>;
@@ -102,6 +116,7 @@ export interface _SERVICE {
 	set_sprinkle_timestamp: ActorMethod<[SetSprinkleTimestampArg], undefined>;
 	status: ActorMethod<[], StatusResponse>;
 	user_info: ActorMethod<[], UserData>;
+	vip_stats: ActorMethod<[], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
