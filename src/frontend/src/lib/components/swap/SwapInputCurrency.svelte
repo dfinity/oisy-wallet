@@ -23,7 +23,7 @@
 	// Handle user input changes
 	function handleInput() {
 		if (isNullish(displayValue)) {
-			value = 0;
+			value = undefined;
 			return;
 		}
 
@@ -51,6 +51,19 @@
 	};
 
 	$: displayMode, changeDirection();
+
+	const updateDisplay = () => {
+		if (nonNullish(value) && nonNullish(exchangeRate) && displayMode === 'token') {
+			const newDisplayValue = formatNumber(Number(value) * exchangeRate, 2);
+			if (Number(newDisplayValue) !== Number(displayValue)) {
+				displayValue = newDisplayValue;
+			}
+		} else if (nonNullish(value)) {
+			displayValue = Number(value);
+		}
+	}
+
+	$: value, updateDisplay();
 </script>
 
 <div
