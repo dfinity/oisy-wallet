@@ -122,7 +122,7 @@ The backend is written in Rust and you can find it under the [backend folder](./
 If you want to locally deploy the backend only, you use the following command
 
 ```
-./scripts/deploy.backend.sh
+dfx deploy backend
 ```
 
 ### Frontend
