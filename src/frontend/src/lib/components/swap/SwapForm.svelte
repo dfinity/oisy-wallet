@@ -141,6 +141,7 @@
 			<SwapSelectToken
 				token={$destinationToken}
 				amount={receiveAmount}
+				{displayMode}
 				exchangeRate={$sourceTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
