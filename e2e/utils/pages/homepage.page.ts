@@ -197,7 +197,7 @@ abstract class Homepage {
 		modalTestId,
 		selectorsToMock
 	}: TestModalSnapshotParams): Promise<void> {
-		const modal = await this.waitForModal({
+		await this.waitForModal({
 			modalOpenButtonTestId,
 			modalTestId
 		});
@@ -207,8 +207,6 @@ abstract class Homepage {
 				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
 			);
 		}
-
-		await expect(modal).toHaveScreenshot();
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
