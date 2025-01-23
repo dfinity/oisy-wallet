@@ -55,11 +55,12 @@ dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
 ### IC
 
 Ensure that you have `dfx-orbit` installed and are using the correct station:
+
 ```
 dfx-orbit station show
 ```
 
-> To perform production development, you'll need a `.env.production` file for the frontend.  Then:
+> To perform production development, you'll need a `.env.production` file for the frontend. Then:
 
 ```bash
 DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
