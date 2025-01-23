@@ -60,8 +60,6 @@ jobs:
               echo "NETWORK=staging" >> $GITHUB_ENV
             elif [ "${{ github.ref_type }}" == "tag" ]; then
               echo "NETWORK=beta" >> $GITHUB_ENV
-            elif [ "${{ github.ref_type }}" == "workflow_run" ]; then
-              echo "NETWORK=beta" >> $GITHUB_ENV
             else
               echo "Error: Unsupported ref type."
               exit 1
@@ -70,6 +68,8 @@ jobs:
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "NETWORK=${{ github.event.inputs.network }}" >> $GITHUB_ENV
             echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "workflow_run" ]; then
+            echo "NETWORK=beta" >> $GITHUB_ENV
           else
             echo "Error: Unsupported event type."
             exit 1
@@ -97,10 +97,11 @@ jobs:
 
       - name: Set Environment Variables Based on Network
         run: |
-          if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_fe_* ]]; then
+          if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_* ]]; then
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_QUICKNODE_API_KEY=${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_SOLANA_NETWORK_ENABLED=${{ secrets.VITE_SOLANA_NETWORK_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_STAGING }}" >> $GITHUB_ENV
@@ -130,6 +131,7 @@ jobs:
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_QUICKNODE_API_KEY=${{ secrets.VITE_QUICKNODE_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_SOLANA_NETWORK_ENABLED=${{ secrets.VITE_SOLANA_NETWORK_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}" >> $GITHUB_ENV
             echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_BETA }}" >> $GITHUB_ENV
@@ -204,9 +206,11 @@ jobs:
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
-                ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
+                ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
+                dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
               fi
-            else            
-              ENV=$NETWORK ./scripts/deploy.backend.sh "${DFX_DEPLOY_FLAGS[@]}"
+            else
+              ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
+              dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
             fi
           fi
