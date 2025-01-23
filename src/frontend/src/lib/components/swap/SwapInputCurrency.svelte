@@ -17,7 +17,7 @@
 
 	let displayValue: OptionAmount;
 
-	function formatNumber({ num, decimalsCount }: { num: number, decimalsCount: number }): string {
+	function formatNumber({ num, decimalsCount }: { num: number; decimalsCount: number }): string {
 		return num.toFixed(decimalsCount);
 	}
 
@@ -53,7 +53,6 @@
 			displayValue = Number(value);
 		}
 	};
-
 
 	$: displayMode, changeDirection();
 </script>
