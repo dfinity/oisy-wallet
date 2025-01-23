@@ -72,7 +72,7 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 const createDefaultTransaction = async ({
 	rpc,
 	feePayer,
-	version = 'legacy'
+	version = 0
 }: {
 	rpc: Rpc<SolanaRpcApi>;
 	feePayer: TransactionSigner;
