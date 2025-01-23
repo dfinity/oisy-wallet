@@ -11,6 +11,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnets } from '$lib/derived/testnets.derived';
+import type { CanisterIdText } from '$lib/types/canister';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -40,14 +41,11 @@ export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
 );
 
 /**
- * A flatten list of the default Icrc Ledger and Index canister Ids.
+ * A flatten list of the default ICRC Ledger canister Id.
  */
-const icrcDefaultTokensCanisterIds: Readable<string[]> = derived(
+const icrcDefaultTokensCanisterIds: Readable<CanisterIdText[]> = derived(
 	[icrcDefaultTokens],
-	([$icrcDefaultTokens]) =>
-		$icrcDefaultTokens.map(
-			({ ledgerCanisterId, indexCanisterId }) => `${ledgerCanisterId}:${indexCanisterId}`
-		)
+	([$icrcDefaultTokens]) => $icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );
 
 /**
@@ -65,18 +63,13 @@ const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 	[icrcDefaultTokens, icrcCustomTokens],
 	([$icrcDefaultTokens, $icrcUserTokens]) =>
-		$icrcDefaultTokens.map(({ ledgerCanisterId, indexCanisterId, ...rest }) => {
+		$icrcDefaultTokens.map(({ ledgerCanisterId, ...rest }) => {
 			const userToken = $icrcUserTokens.find(
-				({ ledgerCanisterId: userLedgerCanisterId, indexCanisterId: userIndexCanisterId }) =>
-					userLedgerCanisterId === ledgerCanisterId && userIndexCanisterId === indexCanisterId
+				({ ledgerCanisterId: userLedgerCanisterId }) => userLedgerCanisterId === ledgerCanisterId
 			);
 
 			return mapDefaultTokenToToggleable<IcToken>({
-				defaultToken: {
-					ledgerCanisterId,
-					indexCanisterId,
-					...rest
-				},
+				defaultToken: { ledgerCanisterId, ...rest },
 				userToken
 			});
 		})
@@ -98,8 +91,7 @@ const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokens, icrcDefaultTokensCanisterIds],
 	([$icrcCustomTokens, $icrcDefaultTokensCanisterIds]) =>
 		$icrcCustomTokens.filter(
-			({ ledgerCanisterId, indexCanisterId }) =>
-				!$icrcDefaultTokensCanisterIds.includes(`${ledgerCanisterId}:${indexCanisterId}`)
+			({ ledgerCanisterId }) => !$icrcDefaultTokensCanisterIds.includes(ledgerCanisterId)
 		)
 );
 
