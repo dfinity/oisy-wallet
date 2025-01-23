@@ -18,6 +18,10 @@ runs:
     - name: Set up docker buildx
       uses: docker/setup-buildx-action@v3
 
+    - name: Prepare docker build inputs
+      shell: bash
+      run: scripts/docker-build.pre
+
     - name: Build ${{ inputs.name }}
       uses: docker/build-push-action@v5
       with:

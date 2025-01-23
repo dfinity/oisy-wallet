@@ -8,7 +8,8 @@ EXIT=0
   rm -fr in out
   TOY_TAG="v000.000.$RANDOM"
   git tag -f "$TOY_TAG"
-  dfx build backend --ic
+  #  dfx build backend --ic
+  ./scripts/docker-build
   git tag -d "$TOY_TAG"
 
   (
