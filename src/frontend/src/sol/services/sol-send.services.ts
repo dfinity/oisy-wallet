@@ -184,8 +184,7 @@ const createSplTokenTransactionMessage = async ({
 	return pipe(
 		await createDefaultTransaction({
 			rpc,
-			feePayer: signer,
-			version: mustCreateDestinationTokenAccount ? 0 : 'legacy'
+			feePayer: signer
 		}),
 		(tx) =>
 			appendTransactionMessageInstructions(
