@@ -107,6 +107,7 @@ COPY ./in/tags in/tags
 COPY ./in/commit in/commit
 ENV DFX_NETWORK=ic
 COPY scripts/commit-metadata scripts/
+RUN touch src/*/src/lib.rs src/*/*/src/lib.rs
 RUN dfx build backend --network "$DFX_NETWORK"
 
 FROM scratch AS backend
