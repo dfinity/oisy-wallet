@@ -91,7 +91,7 @@ RUN mkdir -p src/backend/src \
     && touch src/cycles_ledger/types/src/lib.rs \
     && mkdir -p src/shared/src \
     && touch src/shared/src/lib.rs \
-    && cargo fetch --locked \
+    && scripts/build.backend.wasm.sh \
     && rm -rf src
 
 FROM deps AS build_backend
