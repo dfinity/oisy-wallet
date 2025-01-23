@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapDisplayMode } from '$lib/types/swap';
-	import { formatUSD } from '$lib/utils/format.utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	export let value: OptionAmount;
 	export let displayMode: SwapDisplayMode = 'usd';
-	export let exchangeRate: number | undefined = undefined;
+	export let exchangeRate: number | undefined;
 	export let decimals: number;
 	export let name = 'swap-amount';
 	export let disabled = false;
@@ -17,7 +16,7 @@
 
 	let displayValue: OptionAmount;
 
-	function formatNumber({ num, decimalsCount }: { num: number; decimalsCount: number }): string {
+	function formatNumber(num: number, decimalsCount: number): string {
 		return num.toFixed(decimalsCount);
 	}
 
@@ -30,9 +29,9 @@
 
 		if (nonNullish(exchangeRate)) {
 			if (displayMode === 'token') {
-				value = formatNumber({ num: Number(displayValue) / exchangeRate, decimalsCount: decimals });
+				value = formatNumber(Number(displayValue) / exchangeRate, decimals);
 			} else {
-				value = formatNumber({ num: Number(displayValue), decimalsCount: decimals });
+				value = formatNumber(Number(displayValue), decimals);
 			}
 		} else {
 			value = displayValue;
@@ -45,10 +44,7 @@
 		}
 
 		if (displayMode === 'token') {
-			displayValue = formatUSD({
-				value: Number(value) * exchangeRate,
-				options: { minFraction: 0 }
-			});
+			displayValue = formatNumber(Number(value) * exchangeRate, 2);
 		} else {
 			displayValue = Number(value);
 		}
