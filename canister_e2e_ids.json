@@ -41,7 +41,7 @@
 	"internet_identity": {
 		"local": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 	},
-	"oisy_rewards_canister": {
+	"rewards": {
 		"local": "vi6cu-aiaaa-aaaad-aad7q-cai"
 	}
 }
