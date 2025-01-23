@@ -31,4 +31,4 @@ runs:
       uses: ./.github/actions/docker-build-backend
       with:
         name: backend.wasm.gz
-        target: scratch_backend
+        target: backend

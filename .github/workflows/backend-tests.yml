@@ -35,7 +35,7 @@ jobs:
       matrix:
         include:
           - name: backend.wasm.gz
-            target: scratch_backend
+            target: backend
 
     steps:
       - name: Checkout
