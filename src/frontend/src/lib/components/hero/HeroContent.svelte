@@ -68,7 +68,7 @@
 </script>
 
 <div
-	class="relative flex h-full w-full flex-col content-center items-center justify-center overflow-hidden rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="relative flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-size-200 bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
 	class:via-interdimensional-blue={$networkICP}
 	class:to-chinese-purple={$networkICP}
@@ -125,8 +125,10 @@
 	</div>
 
 	{#if isTrumpToken}
-		<div in:fade class="absolute -right-8 bottom-0 z-0 max-h-[50%] sm:max-h-full">
-			<ImgBanner src={trumpTokenHeroImage} />
+		<div in:fade class="absolute z-0 h-full w-full overflow-hidden">
+			<div class="absolute -right-8 bottom-0 max-h-[50%] sm:max-h-full">
+				<ImgBanner src={trumpTokenHeroImage} />
+			</div>
 		</div>
 	{/if}
 </div>
