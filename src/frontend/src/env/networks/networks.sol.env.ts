@@ -25,8 +25,8 @@ export const SOLANA_RPC_HTTP_URL_TESTNET = 'https://api.testnet.solana.com';
 export const SOLANA_RPC_HTTP_URL_DEVNET = `https://solana-devnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
 export const SOLANA_RPC_HTTP_URL_LOCAL = 'http://localhost:8899';
 
-// TODO: Check when Alchemy will support WebSocket for Solana RPC, so that we use just one service instead of two
-// TODO: Last time checked Alchemy: 2024-01-22
+// TODO: Once per year at least, check when Alchemy will support WebSocket for Solana RPC, so that we use just one service instead of two
+// TODO: Last time checked Alchemy: 2025-01-22
 // TODO: https://dashboard.alchemy.com/services/smart-websockets
 export const SOLANA_RPC_WS_URL_MAINNET = `wss://burned-little-dinghy.solana-devnet.quiknode.pro/${QUICKNODE_API_KEY}`;
 export const SOLANA_RPC_WS_URL_TESTNET = 'wss://api.testnet.solana.com/';
