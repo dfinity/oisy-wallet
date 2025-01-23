@@ -11,10 +11,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { SwapDisplayMode } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { SwapDisplayMode } from '$lib/types/swap';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;

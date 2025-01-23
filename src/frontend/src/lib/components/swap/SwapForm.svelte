@@ -101,7 +101,7 @@
 		<div class="relative">
 			<SwapSelectToken
 				bind:amount={swapAmount}
-				displayMode={displayMode}
+				{displayMode}
 				exchangeRate={$sourceTokenExchangeRate}
 				bind:errorType
 				bind:amountSetToMax
@@ -122,8 +122,8 @@
 								token={$sourceToken}
 								mode={displayMode}
 								on:mode={(e) => {
-									displayMode = e.detail
-									}}
+									displayMode = e.detail;
+								}}
 							/>
 						</div>
 					{/if}
@@ -163,7 +163,7 @@
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
 									mode={displayMode}
-									on:mode={(e) => displayMode = e.detail}
+									on:mode={(e) => (displayMode = e.detail)}
 								/>
 
 								<SwapValueDifference {swapAmount} {receiveAmount} />

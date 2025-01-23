@@ -1,13 +1,13 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapDisplayMode } from '$lib/types/swap';
 	import { formatUSD } from '$lib/utils/format.utils';
-	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	export let value: OptionAmount;
 	export let displayMode: SwapDisplayMode = 'usd';
-	export let exchangeRate: number | undefined;
+	export let exchangeRate: number | undefined = undefined;
 	export let decimals: number;
 	export let name = 'swap-amount';
 	export let disabled = false;
@@ -45,7 +45,10 @@
 		}
 
 		if (displayMode === 'token') {
-			displayValue = formatUSD({value: Number(value) * exchangeRate, options: {minFraction: 0}});
+			displayValue = formatUSD({
+				value: Number(value) * exchangeRate,
+				options: { minFraction: 0 }
+			});
 		} else {
 			displayValue = Number(value);
 		}
@@ -59,17 +62,17 @@
 		let newDisplayValue;
 
 		if (displayMode === 'token') {
-			newDisplayValue = Number(value) * exchangeRate, 2;
+			(newDisplayValue = Number(value) * exchangeRate), 2;
 		} else {
-			newDisplayValue = Number(value), decimals;
+			(newDisplayValue = Number(value)), decimals;
 		}
 
 		if (newDisplayValue !== displayValue) {
 			displayValue = newDisplayValue;
 		}
-	}
+	};
 
-	$: displayMode, changeDirection()
+	$: displayMode, changeDirection();
 	// $: value, updateDisplay()
 </script>
 

@@ -22,8 +22,7 @@
 				{token.symbol}
 			</span>
 			<span class="text-sm text-tertiary">
-				<!-- todo, token should be optional? -->
-				<SwapAmountExchange {amount} {exchangeRate} token={token} />
+				<SwapAmountExchange {amount} {exchangeRate} />
 			</span>
 		</div>
 	</div>
