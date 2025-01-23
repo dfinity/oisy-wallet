@@ -37,7 +37,7 @@
 						/><ExternalLink
 							iconSize="18"
 							href={nonNullish(explorerUrl)
-								? replacePlaceholders(explorerUrl, { $args: `address/${tokenAddress}/` })
+								? replacePlaceholders(explorerUrl, { $args: `token/${tokenAddress}/` })
 								: ''}
 							ariaLabel={$i18n.tokens.alt.open_token_address_block_explorer}
 							inline
