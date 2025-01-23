@@ -178,13 +178,6 @@ const createSplTokenTransactionMessage = async ({
 		{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
 	);
 
-	console.log(
-		mustCreateDestinationTokenAccount,
-		destinationTokenAccountAddress,
-		ataInstruction,
-		calculatedDestinationTokenAccountAddress
-	);
-
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
 			[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
