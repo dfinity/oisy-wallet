@@ -31,11 +31,6 @@ function install_did_files() {
       IFS=', ' read -r -a array <<<"$line"
       canister_name="${array[0]}"
       source="${array[1]}"
-
-      if [ "$source" = "rewards.did" ]; then
-        source = "oisy_rewards_canister.did"
-      fi
-
       filename="${source##*/}"
       filename="${filename//-/_}" # dfx uses underscores rather than hyphens
       destination=".dfx/local/canisters/${array[0]}/${filename}"

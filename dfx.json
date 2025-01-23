@@ -317,7 +317,7 @@
 			"candid": "target/ic/cketh_index.did",
 			"wasm": "target/ic/cketh_index.wasm"
 		},
-		"rewards": {
+		"oisy_rewards_canister": {
 			"type": "custom",
 			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.1/oisy_rewards_canister.did",
 			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.1/oisy_rewards_canister.wasm.gz",
