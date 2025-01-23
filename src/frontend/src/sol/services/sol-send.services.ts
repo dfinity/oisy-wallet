@@ -60,19 +60,24 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 	feePayer: TransactionSigner;
 }): Promise<SolTransactionMessage> => {
 	const { getLatestBlockhash } = rpc;
-	const { value: latestBlockhash } = await getLatestBlockhash().send();
+	const { value: latestBlockhash } = await getLatestBlockhash({ commitment: 'confirmed' }).send();
+
+	const correctedLatestBlockhash = {
+		...latestBlockhash,
+		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight + 100n
+	};
 
 	return pipe(
 		transactionMessage,
 		(tx) => setFeePayerToTransaction({ transactionMessage: tx, feePayer }),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(correctedLatestBlockhash, tx)
 	);
 };
 
 const createDefaultTransaction = async ({
 	rpc,
 	feePayer,
-	version = 'legacy'
+	version = 0
 }: {
 	rpc: Rpc<SolanaRpcApi>;
 	feePayer: TransactionSigner;
