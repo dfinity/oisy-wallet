@@ -30,9 +30,9 @@
 
 	let isSourceTokenIcrc2: boolean | undefined;
 	$: isSourceTokenIcrc2 =
-		nonNullish($sourceToken) && nonNullish($kongSwapTokensStore)
-			? $kongSwapTokensStore[$sourceToken.symbol].icrc2
-			: undefined;
+		nonNullish($sourceToken) &&
+		nonNullish($kongSwapTokensStore) &&
+		$kongSwapTokensStore[$sourceToken.symbol].icrc2;
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 

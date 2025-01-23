@@ -42,12 +42,25 @@ export const swap = async ({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
 	});
-
 	const { standard, ledgerCanisterId } = sourceToken;
-	let txBlockIndex;
+	const transferParams = {
+		identity,
+		token: sourceToken,
+		amount: parsedSwapAmount,
+		to: Principal.fromText(KONG_BACKEND_CANISTER_ID).toString()
+	};
 
-	if (isSourceTokenIcrc2) {
-		await approve({
+	const txBlockIndex = !isSourceTokenIcrc2
+		? standard === 'icrc'
+			? await sendIcrc({
+					...transferParams,
+					ledgerCanisterId
+				})
+			: await sendIcp(transferParams)
+		: undefined;
+
+	isSourceTokenIcrc2 &&
+		(await approve({
 			identity,
 			ledgerCanisterId,
 			amount: parsedSwapAmount.toBigInt() + (sourceToken.fee ?? 0n),
@@ -55,23 +68,7 @@ export const swap = async ({
 			spender: {
 				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
 			}
-		});
-	} else {
-		const transferParams = {
-			identity,
-			token: sourceToken,
-			amount: parsedSwapAmount,
-			to: Principal.fromText(KONG_BACKEND_CANISTER_ID).toString()
-		};
-
-		txBlockIndex =
-			standard === 'icrc'
-				? await sendIcrc({
-						...transferParams,
-						ledgerCanisterId
-					})
-				: await sendIcp(transferParams);
-	}
+		}));
 
 	await kongSwap({
 		identity,
