@@ -142,7 +142,7 @@
 				token={$destinationToken}
 				amount={receiveAmount}
 				{displayMode}
-				exchangeRate={$sourceTokenExchangeRate}
+				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
 				on:click={() => {
