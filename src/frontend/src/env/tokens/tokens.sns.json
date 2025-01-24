@@ -170,8 +170,8 @@
 		"indexCanisterId": "efv5g-kqaaa-aaaaq-aacaa-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Gold Governance Token",
-			"symbol": "GLDGov",
+			"name": "GOLDAO",
+			"symbol": "GOLDAO",
 			"fee": {
 				"__bigint__": "100000"
 			},
