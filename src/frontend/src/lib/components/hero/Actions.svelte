@@ -31,6 +31,8 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
+	import { token } from '$lib/stores/token.store';
+	import { nonNullish } from '@dfinity/utils';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -48,10 +50,13 @@
 	$: isTransactionsPage = isRouteTransactions($page);
 
 	let swapAction = false;
-	$: swapAction = SWAP_ACTION_ENABLED && !isTransactionsPage;
+	$: swapAction = (SWAP_ACTION_ENABLED && !isTransactionsPage) || (isTransactionsPage && $networkICP);
 
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;
+
+	let buyAction = true;
+	$: buyAction = !$networkICP || nonNullish($token?.buy);
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
@@ -102,6 +107,8 @@
 			{/if}
 		{/if}
 
-		<Buy />
+		{#if buyAction}
+			<Buy />
+		{/if}
 	</HeroButtonGroup>
 </div>

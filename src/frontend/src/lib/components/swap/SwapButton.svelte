@@ -9,7 +9,7 @@
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
-<ButtonHero on:click disabled={$isBusy || $outflowActionsDisabled} ariaLabel={$i18n.swap.text.swap}>
+<ButtonHero on:click disabled={$isBusy} ariaLabel={$i18n.swap.text.swap}>
 	<IconCkConvert size="28" slot="icon" />
 
 	{$i18n.swap.text.swap}

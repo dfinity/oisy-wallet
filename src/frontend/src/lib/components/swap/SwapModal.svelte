@@ -16,9 +16,30 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { token } from '$lib/stores/token.store';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 
 	export let sourceToken: IcToken | undefined = undefined;
 	export let destinationToken: IcToken | undefined = undefined;
+
+	if (nonNullish($token)) {
+		let balance: BigNumber | undefined;
+		$: balance = $balancesStore?.[$token?.id]?.data;
+
+		let isSwapAvailable: boolean;
+		$: isSwapAvailable = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some((token) => token.id === $token.id)
+
+		if (nonNullish(balance) && isSwapAvailable) {
+			if (balance.gt(BigNumber.from(0))) {
+				sourceToken = $token;
+			} else {
+				destinationToken = $token;
+			}
+		}
+	}
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
