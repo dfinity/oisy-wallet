@@ -1,36 +1,38 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { derived, type Readable } from 'svelte/store';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
+	import { token } from '$lib/stores/token.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { token } from '$lib/stores/token.store';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 
 	export let sourceToken: IcToken | undefined = undefined;
 	export let destinationToken: IcToken | undefined = undefined;
 
 	if (nonNullish($token)) {
 		let balance: BigNumber | undefined;
-		$: balance = $balancesStore?.[$token?.id]?.data;
+		balance = $balancesStore?.[$token?.id]?.data;
 
-		let isSwapAvailable: boolean;
-		$: isSwapAvailable = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some((token) => token.id === $token.id)
+		const isSwapAvailable: Readable<boolean> = derived([token], ([$token]) =>
+			[ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some((t) => t.id === $token.id)
+		);
 
 		if (nonNullish(balance) && isSwapAvailable) {
 			if (balance.gt(BigNumber.from(0))) {

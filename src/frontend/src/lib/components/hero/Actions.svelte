@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/stores';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
@@ -28,11 +29,10 @@
 		networkSolana
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { token } from '$lib/stores/token.store';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
-	import { token } from '$lib/stores/token.store';
-	import { nonNullish } from '@dfinity/utils';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -50,7 +50,8 @@
 	$: isTransactionsPage = isRouteTransactions($page);
 
 	let swapAction = false;
-	$: swapAction = (SWAP_ACTION_ENABLED && !isTransactionsPage) || (isTransactionsPage && $networkICP);
+	$: swapAction =
+		(SWAP_ACTION_ENABLED && !isTransactionsPage) || (isTransactionsPage && $networkICP);
 
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;
