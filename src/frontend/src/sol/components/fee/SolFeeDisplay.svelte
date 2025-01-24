@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { assertNonNullish, nonNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Lamports } from '@solana/rpc-types';
-	import { getContext } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -10,6 +10,7 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -22,13 +23,17 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
-	import { getSolCreateAccountFee } from '$sol/api/solana.api';
-	import { SOLANA_TRANSACTION_FEE_IN_LAMPORTS } from '$sol/constants/sol.constants';
+	import { estimateRecentMaxPriorityFee, getSolCreateAccountFee } from '$sol/api/solana.api';
+	import {
+		MICROLAMPORTS_PER_LAMPORT,
+		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
+	} from '$sol/constants/sol.constants';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	export let showAtaFee = false;
 
-	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let solanaNativeToken: Token;
 	$: solanaNativeToken = isNetworkIdSOLTestnet($sendTokenNetworkId)
@@ -41,7 +46,7 @@
 
 	$: ({ decimals, symbol } = solanaNativeToken);
 
-	const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS;
+	let fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS;
 
 	let ataFee: Lamports | undefined = undefined;
 
@@ -64,6 +69,37 @@
 	};
 
 	$: showAtaFee, $sendTokenNetworkId, updateAtaFee();
+
+	const estimateFee = async () => {
+		const solNetwork = mapNetworkIdToNetwork($sendTokenNetworkId);
+
+		assertNonNullish(
+			solNetwork,
+			replacePlaceholders($i18n.init.error.no_solana_network, {
+				$network: $sendTokenNetworkId.description ?? ''
+			})
+		);
+
+		const addresses = isTokenSpl($sendToken) ? [$sendToken.address] : undefined;
+		const priorityFee = await estimateRecentMaxPriorityFee({ network:solNetwork ,addresses});
+		fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
+	};
+
+	const updateFee = async () => {
+		clearTimer();
+
+		await estimateFee();
+
+		timer = setInterval(estimateFee, 5000);
+	};
+
+	$: $sendTokenNetworkId, (async () => await updateFee())();
+
+	let timer: NodeJS.Timeout | undefined;
+
+	const clearTimer = () => clearInterval(timer);
+
+	onDestroy(clearTimer);
 </script>
 
 <Value ref="fee">
