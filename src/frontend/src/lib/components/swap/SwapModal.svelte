@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import { derived, type Readable } from 'svelte/store';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
@@ -22,23 +21,26 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 
 	export let sourceToken: IcToken | undefined = undefined;
 	export let destinationToken: IcToken | undefined = undefined;
 
-	if (nonNullish($token)) {
-		let balance: BigNumber | undefined;
-		balance = $balancesStore?.[$token?.id]?.data;
+	let selectedToken: IcToken;
+	if (nonNullish($token) && isIcToken($token)) {
+		selectedToken = $token;
 
-		const isSwapAvailable: Readable<boolean> = derived([token], ([$token]) =>
-			[ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some((t) => t.id === $token.id)
-		);
+		let balance: BigNumber | undefined;
+		balance = $balancesStore?.[selectedToken.id]?.data;
+
+		let isSwapAvailable: boolean;
+		isSwapAvailable = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some((t) => t.id === selectedToken.id);
 
 		if (nonNullish(balance) && isSwapAvailable) {
 			if (balance.gt(BigNumber.from(0))) {
-				sourceToken = $token;
+				sourceToken = selectedToken;
 			} else {
-				destinationToken = $token;
+				destinationToken = selectedToken;
 			}
 		}
 	}
