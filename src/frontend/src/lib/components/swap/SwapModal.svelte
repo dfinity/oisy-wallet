@@ -5,6 +5,7 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import type { IcToken } from '$icp/types/ic-token';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
@@ -21,7 +22,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { isIcToken } from '$icp/validation/ic-token.validation';
 
 	export let sourceToken: IcToken | undefined = undefined;
 	export let destinationToken: IcToken | undefined = undefined;
@@ -34,7 +34,9 @@
 		balance = $balancesStore?.[selectedToken.id]?.data;
 
 		let isSwapAvailable: boolean;
-		isSwapAvailable = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some((t) => t.id === selectedToken.id);
+		isSwapAvailable = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some(
+			(t) => t.id === selectedToken.id
+		);
 
 		if (nonNullish(balance) && isSwapAvailable) {
 			if (balance.gt(BigNumber.from(0))) {
