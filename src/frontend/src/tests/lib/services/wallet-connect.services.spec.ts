@@ -25,6 +25,7 @@ describe('wallet-connect.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
@@ -80,6 +81,7 @@ describe('wallet-connect.services', () => {
 				request: mockRequest,
 				listener: mockListener
 			});
+			expect(spyToastsShow).not.toHaveBeenCalled();
 		});
 
 		it('should show an error toast if an exception occurs in the callback', async () => {
