@@ -23,6 +23,8 @@ export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
 
 // Solana
+export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success_count';
+export const TRACK_COUNT_SOL_SEND_ERROR = 'sol_send_error_count';
 export const TRACK_COUNT_WC_SOL_SEND_SUCCESS = 'wc_sol_send_success_count';
 export const TRACK_COUNT_WC_SOL_SEND_ERROR = 'wc_sol_send_error_count';
 
