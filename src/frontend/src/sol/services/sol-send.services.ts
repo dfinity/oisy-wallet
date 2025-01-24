@@ -6,7 +6,7 @@ import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
 import { createAtaInstruction } from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -17,13 +17,16 @@ import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import {
+	getSetComputeUnitLimitInstruction,
+	getSetComputeUnitPriceInstruction
+} from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address, address as solAddress } from '@solana/addresses';
 import { pipe } from '@solana/functional';
 import type { Signature } from '@solana/keys';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import { lamports, type Commitment } from '@solana/rpc-types';
 import {
 	setTransactionMessageFeePayerSigner,
@@ -33,13 +36,17 @@ import {
 import {
 	appendTransactionMessageInstructions,
 	createTransactionMessage,
+	prependTransactionMessageInstruction,
 	setTransactionMessageLifetimeUsingBlockhash,
 	type ITransactionMessageWithFeePayer,
 	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
-import { sendTransactionWithoutConfirmingFactory } from '@solana/web3.js';
+import {
+	getComputeUnitEstimateForTransactionMessageFactory,
+	sendTransactionWithoutConfirmingFactory
+} from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -186,12 +193,10 @@ const createSplTokenTransactionMessage = async ({
 
 export const sendSignedTransaction = async ({
 	rpc,
-	rpcSubscriptions,
 	signedTransaction,
 	commitment = 'confirmed'
 }: {
 	rpc: Rpc<SolanaRpcApi>;
-	rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
 	signedTransaction: SolSignedTransaction;
 	commitment?: Commitment;
 }) => {
@@ -240,7 +245,6 @@ export const sendSol = async ({
 	);
 
 	const rpc = solanaHttpRpc(solNetwork);
-	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
 	const signer: TransactionPartialSigner = createSigner({
 		identity,
@@ -263,26 +267,20 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	progress(ProgressStepsSendSol.SIGN);
+	const getComputeUnitEstimateForTransactionMessage =
+		getComputeUnitEstimateForTransactionMessageFactory({
+			rpc
+		});
 
-	const { signedTransaction, signature } = await signTransaction(transactionMessage);
+	const computeUnitsEstimate =
+		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
 
-	progress(ProgressStepsSendSol.SEND);
+	const transactionMessageWithComputeUnitLimit = prependTransactionMessageInstruction(
+		getSetComputeUnitLimitInstruction({ units: computeUnitsEstimate }),
+		transactionMessage
+	);
 
-	const { getSignatureStatuses } = rpc;
-
-	const status1 = await getSignatureStatuses([signature]).send();
-	console.log('Status 1:', status1);
-
-	// Explicitly do not await to proceed in the background and allow the UI to continue
-	await sendSignedTransaction({
-		rpc,
-		rpcSubscriptions,
-		signedTransaction
-	});
-
-	const status2 = await getSignatureStatuses([signature]).send();
-	console.log('Status 2:', status2);
+	console.log('transactionMessageWithComputeUnitLimit:', transactionMessageWithComputeUnitLimit);
 
 	const { getRecentPrioritizationFees } = rpc;
 
@@ -292,6 +290,34 @@ export const sendSol = async ({
 		...(isTokenSpl(token) ? [address(token.address)] : [])
 	]).send();
 	console.log('fees 1:', fees);
+
+	// get the max of the fees
+	const maxFee = fees
+		.map(({ prioritizationFee }) => BigInt(prioritizationFee))
+		.reduce<bigint>((max, current) => (current > max ? current : max), 0n);
+
+	const computeUnitPrice = Number(maxFee) / computeUnitsEstimate;
+
+	console.log('computeUnitPrice:', computeUnitPrice, maxFee, computeUnitsEstimate);
+
+	const transactionMessageWithComputeUnitLimit2 = prependTransactionMessageInstruction(
+		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
+		transactionMessageWithComputeUnitLimit
+	);
+
+	console.log('transactionMessageWithComputeUnitLimit2:', transactionMessageWithComputeUnitLimit2);
+
+	const { signedTransaction, signature } = await signTransaction(
+		transactionMessageWithComputeUnitLimit2
+	);
+
+	progress(ProgressStepsSendSol.SEND);
+
+	// Explicitly do not await to proceed in the background and allow the UI to continue
+	await sendSignedTransaction({
+		rpc,
+		signedTransaction
+	});
 
 	progress(ProgressStepsSendSol.DONE);
 
