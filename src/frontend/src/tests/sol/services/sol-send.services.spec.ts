@@ -2,7 +2,7 @@ import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
 import type { SolInstruction } from '$sol/types/sol-instructions';
@@ -13,7 +13,6 @@ import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/so
 import { BigNumber } from '@ethersproject/bignumber';
 import * as solanaFunctional from '@solana/functional';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
 import { expect, type MockInstance } from 'vitest';
 
@@ -67,7 +66,6 @@ describe('sol-send.services', () => {
 				send: vi.fn(() => Promise.resolve({ value: [{ pubkey: mockSplAddress }] }))
 			}))
 		} as unknown as Rpc<SolanaRpcApi>;
-		const mockRpcSubscriptions = {} as RpcSubscriptions<SolanaRpcSubscriptionsApi>;
 
 		let spyMapNetworkIdToNetwork: MockInstance;
 		let spyPipe: MockInstance;
@@ -78,7 +76,6 @@ describe('sol-send.services', () => {
 			vi.clearAllMocks();
 
 			vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
-			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);
 			vi.mocked(signWithSchnorr).mockResolvedValue(new Uint8Array([0, 1, 2, 3]));
 			vi.mocked(sendAndConfirmTransactionFactory).mockReturnValue(() => Promise.resolve());
 

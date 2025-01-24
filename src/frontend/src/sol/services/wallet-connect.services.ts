@@ -20,7 +20,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction
@@ -211,7 +211,6 @@ export const sign = ({
 					// Plus, if it requires more signatures on the DEX's side, it will be sent again by them and it will fail with us.
 					sendSignedTransaction({
 						rpc,
-						rpcSubscriptions: solanaWebSocketRpc(solNetwork),
 						signedTransaction
 					});
 				} catch (err: unknown) {
