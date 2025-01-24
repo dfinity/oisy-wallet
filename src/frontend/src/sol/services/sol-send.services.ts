@@ -17,10 +17,7 @@ import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
-import {
-	getSetComputeUnitLimitInstruction,
-	getSetComputeUnitPriceInstruction
-} from '@solana-program/compute-budget';
+import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address, address as solAddress } from '@solana/addresses';
@@ -280,7 +277,7 @@ export const sendSol = async ({
 	// 	transactionMessage
 	// );
 
-	console.log('transactionMessageWithComputeUnitLimit:', transactionMessageWithComputeUnitLimit);
+	// console.log('transactionMessageWithComputeUnitLimit:', transactionMessageWithComputeUnitLimit);
 
 	const { getRecentPrioritizationFees } = rpc;
 
@@ -302,7 +299,7 @@ export const sendSol = async ({
 
 	const transactionMessageWithComputeUnitLimit2 = prependTransactionMessageInstruction(
 		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
-		transactionMessageWithComputeUnitLimit
+		transactionMessage
 	);
 
 	console.log('transactionMessageWithComputeUnitLimit2:', transactionMessageWithComputeUnitLimit2);
