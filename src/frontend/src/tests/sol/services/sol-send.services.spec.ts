@@ -101,7 +101,7 @@ describe('sol-send.services', () => {
 					amount: mockAmount,
 					destination: mockDestination,
 					source: mockSource,
-					onProgress: vi.fn()
+					progress: vi.fn()
 				})
 			).resolves.not.toThrow();
 
@@ -117,7 +117,7 @@ describe('sol-send.services', () => {
 					amount: mockAmount,
 					destination: mockDestination,
 					source: mockSource,
-					onProgress: vi.fn()
+					progress: vi.fn()
 				})
 			).resolves.not.toThrow();
 
@@ -133,7 +133,7 @@ describe('sol-send.services', () => {
 					amount: mockAmount,
 					destination: mockDestination,
 					source: mockSource,
-					onProgress: vi.fn()
+					progress: vi.fn()
 				})
 			).resolves.not.toThrow();
 
@@ -152,7 +152,7 @@ describe('sol-send.services', () => {
 					amount: mockAmount,
 					destination: mockDestination,
 					source: mockSource,
-					onProgress: vi.fn()
+					progress: vi.fn()
 				})
 			).rejects.toThrowError(
 				replacePlaceholders(en.init.error.no_solana_network, {
@@ -175,7 +175,7 @@ describe('sol-send.services', () => {
 					amount: mockAmount,
 					destination: mockDestination,
 					source: mockSource,
-					onProgress: vi.fn()
+					progress: vi.fn()
 				})
 			).rejects.toThrowError(
 				`Token account not found for wallet ${mockSource} and token ${DEVNET_USDC_TOKEN.address} on devnet network`

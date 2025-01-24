@@ -8,6 +8,11 @@ export const sendSteps = (i18n: I18n): ProgressSteps => [
 		state: 'in_progress'
 	},
 	{
+		step: ProgressStepsSendSol.SIGN,
+		text: i18n.send.text.signing_message,
+		state: 'next'
+	},
+	{
 		step: ProgressStepsSendSol.SEND,
 		text: i18n.send.text.sending,
 		state: 'next'
