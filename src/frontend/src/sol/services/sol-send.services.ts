@@ -1,3 +1,4 @@
+import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -210,19 +211,21 @@ export const sendSignedTransaction = ({
  */
 export const sendSol = async ({
 	identity,
+	progress,
 	token,
 	amount,
 	destination,
-	source,
-	onProgress
+	source
 }: {
 	identity: OptionIdentity;
+	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: BigNumber;
 	destination: SolAddress;
 	source: SolAddress;
-	onProgress?: () => void;
 }): Promise<Signature> => {
+	progress(ProgressStepsSendSol.INITIALIZATION);
+
 	const {
 		network: { id: networkId }
 	} = token;
@@ -260,9 +263,11 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	onProgress?.();
+	progress(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(transactionMessage);
+
+	progress(ProgressStepsSendSol.SEND);
 
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	sendSignedTransaction({
@@ -271,7 +276,7 @@ export const sendSol = async ({
 		signedTransaction
 	});
 
-	onProgress?.();
+	progress(ProgressStepsSendSol.DONE);
 
 	return signature;
 };
