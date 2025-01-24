@@ -33,7 +33,7 @@
 
 	export let showAtaFee = false;
 
-	const {sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let solanaNativeToken: Token;
 	$: solanaNativeToken = isNetworkIdSOLTestnet($sendTokenNetworkId)
@@ -81,7 +81,7 @@
 		);
 
 		const addresses = isTokenSpl($sendToken) ? [$sendToken.address] : undefined;
-		const priorityFee = await estimatePriorityFee({ network:solNetwork ,addresses});
+		const priorityFee = await estimatePriorityFee({ network: solNetwork, addresses });
 		fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
 	};
 
