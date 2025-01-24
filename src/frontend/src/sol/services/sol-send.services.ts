@@ -184,7 +184,7 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
-export const sendSignedTransaction = ({
+export const sendSignedTransaction = async ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
@@ -199,7 +199,7 @@ export const sendSignedTransaction = ({
 
 	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 
-	sendAndConfirmTransaction(signedTransaction, { commitment });
+	await sendAndConfirmTransaction(signedTransaction, { commitment });
 };
 
 /**
@@ -269,8 +269,7 @@ export const sendSol = async ({
 
 	progress(ProgressStepsSendSol.SEND);
 
-	// Explicitly do not await to proceed in the background and allow the UI to continue
-	sendSignedTransaction({
+	await sendSignedTransaction({
 		rpc,
 		rpcSubscriptions,
 		signedTransaction
