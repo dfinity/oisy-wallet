@@ -296,7 +296,7 @@ export const sendSol = async ({
 		.map(({ prioritizationFee }) => BigInt(prioritizationFee))
 		.reduce<bigint>((max, current) => (current > max ? current : max), 0n);
 
-	const computeUnitPrice = Number(maxFee) / computeUnitsEstimate;
+	const computeUnitPrice = BigInt(Math.ceil(Number(maxFee) / computeUnitsEstimate));
 
 	console.log('computeUnitPrice:', computeUnitPrice, maxFee, computeUnitsEstimate);
 
