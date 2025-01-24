@@ -136,7 +136,7 @@
 				</svelte:fragment>
 			</SwapSelectToken>
 
-			<SwapSwitchTokensButton on:icSwitchTokens={onTokensSwitch} />
+			<SwapSwitchTokensButton disabled={swapAmountsLoading} on:icSwitchTokens={onTokensSwitch} />
 
 			<SwapSelectToken
 				token={$destinationToken}
