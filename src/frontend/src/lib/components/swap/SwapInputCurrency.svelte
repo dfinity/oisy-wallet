@@ -15,13 +15,18 @@
 	export let loading = false;
 
 	let displayValue: OptionAmount;
+	let previousDisplayValue: OptionAmount;
 
 	function formatNumber(num: number, decimalsCount: number): string {
 		return num.toFixed(decimalsCount);
 	}
 
-	// Handle user input changes
 	function handleInput() {
+		if (displayValue === previousDisplayValue) {
+			return;
+		}
+		previousDisplayValue = displayValue;
+
 		if (isNullish(displayValue)) {
 			value = undefined;
 			return;
@@ -45,8 +50,10 @@
 
 		if (displayMode === 'token') {
 			displayValue = formatNumber(Number(value) * exchangeRate, 2);
+			previousDisplayValue = displayValue;
 		} else {
 			displayValue = Number(value);
+			previousDisplayValue = displayValue;
 		}
 	};
 
@@ -62,9 +69,11 @@
 			const newDisplayValue = formatNumber(Number(value) * exchangeRate, 2);
 			if (Number(newDisplayValue) !== Number(displayValue)) {
 				displayValue = newDisplayValue;
+				previousDisplayValue = displayValue;
 			}
 		} else if (nonNullish(value)) {
 			displayValue = Number(value);
+			previousDisplayValue = displayValue;
 		}
 	}
 
