@@ -275,10 +275,10 @@ export const sendSol = async ({
 	const computeUnitsEstimate =
 		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
 
-	const transactionMessageWithComputeUnitLimit = prependTransactionMessageInstruction(
-		getSetComputeUnitLimitInstruction({ units: computeUnitsEstimate }),
-		transactionMessage
-	);
+	// const transactionMessageWithComputeUnitLimit = prependTransactionMessageInstruction(
+	// 	getSetComputeUnitLimitInstruction({ units: computeUnitsEstimate }),
+	// 	transactionMessage
+	// );
 
 	console.log('transactionMessageWithComputeUnitLimit:', transactionMessageWithComputeUnitLimit);
 
