@@ -39,7 +39,7 @@ import {
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
-import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import { sendTransactionWithoutConfirmingFactory } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -197,9 +197,9 @@ export const sendSignedTransaction = async ({
 }) => {
 	assertTransactionIsFullySigned(signedTransaction);
 
-	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+	const sendTransaction = sendTransactionWithoutConfirmingFactory({ rpc });
 
-	await sendAndConfirmTransaction(signedTransaction, { commitment });
+	await sendTransaction(signedTransaction, { commitment });
 };
 
 /**
