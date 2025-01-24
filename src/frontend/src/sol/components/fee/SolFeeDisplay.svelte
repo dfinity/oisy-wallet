@@ -23,7 +23,7 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
-	import { estimateRecentMaxPriorityFee, getSolCreateAccountFee } from '$sol/api/solana.api';
+	import { estimatePriorityFee, getSolCreateAccountFee } from '$sol/api/solana.api';
 	import {
 		MICROLAMPORTS_PER_LAMPORT,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
@@ -81,7 +81,7 @@
 		);
 
 		const addresses = isTokenSpl($sendToken) ? [$sendToken.address] : undefined;
-		const priorityFee = await estimateRecentMaxPriorityFee({ network:solNetwork ,addresses});
+		const priorityFee = await estimatePriorityFee({ network:solNetwork ,addresses});
 		fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS + priorityFee / MICROLAMPORTS_PER_LAMPORT;
 	};
 

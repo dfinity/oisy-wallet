@@ -1,6 +1,6 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import {
-	estimateRecentMaxPriorityFee,
+	estimatePriorityFee,
 	getSolCreateAccountFee,
 	getSolTransactions,
 	loadSolLamportsBalance,
@@ -504,31 +504,31 @@ describe('solana.api', () => {
 		});
 	});
 
-	describe('estimateRecentMaxPriorityFee', () => {
+	describe('estimatePriorityFee', () => {
 		it('should estimate the recent max priority fee', async () => {
-			const maxFee = await estimateRecentMaxPriorityFee({ network: SolanaNetworks.mainnet });
+			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
 
-			expect(maxFee).toEqual(mockPriorityFee);
+			expect(fee).toEqual(mockPriorityFee);
 			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith(undefined);
 		});
 
 		it('should estimate the recent max priority fee if addresses are passed too', async () => {
-			const maxFee = await estimateRecentMaxPriorityFee({
+			const fee = await estimatePriorityFee({
 				network: SolanaNetworks.mainnet,
 				addresses: mockAddresses
 			});
 
-			expect(maxFee).toEqual(mockPriorityFee);
+			expect(fee).toEqual(mockPriorityFee);
 			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith(mockAddresses);
 		});
 
 		it('should handle gracefully when addresses are empty', async () => {
-			const maxFee = await estimateRecentMaxPriorityFee({
+			const fee = await estimatePriorityFee({
 				network: SolanaNetworks.mainnet,
 				addresses: []
 			});
 
-			expect(maxFee).toEqual(mockPriorityFee);
+			expect(fee).toEqual(mockPriorityFee);
 			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith([]);
 		});
 
@@ -537,9 +537,9 @@ describe('solana.api', () => {
 				send: () => Promise.resolve([])
 			});
 
-			const maxFee = await estimateRecentMaxPriorityFee({ network: SolanaNetworks.mainnet });
+			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
 
-			expect(maxFee).toEqual(0n);
+			expect(fee).toEqual(0n);
 			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledOnce();
 		});
 
@@ -548,9 +548,9 @@ describe('solana.api', () => {
 				send: () => Promise.reject(mockError)
 			});
 
-			await expect(
-				estimateRecentMaxPriorityFee({ network: SolanaNetworks.mainnet })
-			).rejects.toThrow(mockError);
+			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrow(
+				mockError
+			);
 		});
 	});
 });

@@ -285,7 +285,7 @@ export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promis
  *
  * It is useful to have an estimate of how much a transaction could cost to be processed without expiring.
  */
-export const estimateRecentMaxPriorityFee = async ({
+export const estimatePriorityFee = async ({
 	network,
 	addresses
 }: {
