@@ -80,6 +80,10 @@ abstract class Homepage {
 		await this.#page.getByTestId(testId).click();
 	}
 
+	protected async waitForByTestId(testId: string): Promise<void> {
+		await this.#page.getByTestId(testId).waitFor();
+	}
+
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
 		return await this.#page.isVisible(selector);
 	}
@@ -201,6 +205,10 @@ abstract class Homepage {
 		await this.#page.getByTestId(testId).waitFor({ state: 'detached' });
 	}
 
+	async waitForModalToDisappearByTestId(testId: string): Promise<void> {
+		await this.#page.getByTestId(testId).waitFor({ state: 'detached' });
+	}
+
 	async waitForBy({ testId }: TestIdOperationParams): Promise<void> {
 		await this.#page.getByTestId(testId).waitFor();
 	}
@@ -210,6 +218,13 @@ abstract class Homepage {
 	}
 
 	async elementExistsBy({ testId }: TestIdOperationParams): Promise<boolean> {
+		return await this.#page
+			.getByTestId(testId)
+			.isVisible()
+			.catch(() => false);
+	}
+
+	protected async elementExistsByTestId(testId: string): Promise<boolean> {
 		return await this.#page
 			.getByTestId(testId)
 			.isVisible()
@@ -231,7 +246,7 @@ abstract class Homepage {
 		await this.#page.getByTestId(testId).fill(value);
 	}
 
-	async clickCopyButton({ testId }: TestIdOperationParams): Promise<string | undefined> {
+	async clickCopyButtonByTestId(testId: string): Promise<string | undefined> {
 		if (this.#context === undefined) {
 			throw new Error('Browser context is not defined');
 		}
