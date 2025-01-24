@@ -41,3 +41,7 @@ export const TRACK_COUNT_CAROUSEL_NEXT = 'carousel_next_count';
 export const TRACK_COUNT_CAROUSEL_PREVIOUS = 'carousel_previous_count';
 export const TRACK_COUNT_CAROUSEL_CLOSE = 'carousel_close_count';
 export const TRACK_COUNT_CAROUSEL_OPEN = 'carousel_open_count';
+
+// Swap
+export const TRACK_COUNT_SWAP_SUCCESS = 'swap_success_count';
+export const TRACK_COUNT_SWAP_ERROR = 'swap_error_count';
