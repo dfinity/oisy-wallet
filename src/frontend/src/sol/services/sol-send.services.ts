@@ -19,7 +19,7 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import { address as solAddress } from '@solana/addresses';
+import { address, address as solAddress } from '@solana/addresses';
 import { pipe } from '@solana/functional';
 import type { Signature } from '@solana/keys';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
@@ -65,7 +65,7 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 
 	const correctedLatestBlockhash = {
 		...latestBlockhash,
-		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight + 100n
+		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
 	};
 
 	return pipe(
@@ -269,11 +269,29 @@ export const sendSol = async ({
 
 	progress(ProgressStepsSendSol.SEND);
 
+	const { getSignatureStatuses } = rpc;
+
+	const status1 = await getSignatureStatuses([signature]).send();
+	console.log('Status 1:', status1);
+
+	// Explicitly do not await to proceed in the background and allow the UI to continue
 	await sendSignedTransaction({
 		rpc,
 		rpcSubscriptions,
 		signedTransaction
 	});
+
+	const status2 = await getSignatureStatuses([signature]).send();
+	console.log('Status 2:', status2);
+
+	const { getRecentPrioritizationFees } = rpc;
+
+	const fees = await getRecentPrioritizationFees([
+		signer.address,
+		address(destination),
+		...(isTokenSpl(token) ? [address(token.address)] : [])
+	]).send();
+	console.log('fees 1:', fees);
 
 	progress(ProgressStepsSendSol.DONE);
 
