@@ -1,3 +1,4 @@
+import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -183,7 +184,7 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
-export const sendSignedTransaction = ({
+export const sendSignedTransaction = async ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
@@ -198,7 +199,7 @@ export const sendSignedTransaction = ({
 
 	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 
-	sendAndConfirmTransaction(signedTransaction, { commitment });
+	await sendAndConfirmTransaction(signedTransaction, { commitment });
 };
 
 /**
@@ -210,19 +211,21 @@ export const sendSignedTransaction = ({
  */
 export const sendSol = async ({
 	identity,
+	progress,
 	token,
 	amount,
 	destination,
-	source,
-	onProgress
+	source
 }: {
 	identity: OptionIdentity;
+	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: BigNumber;
 	destination: SolAddress;
 	source: SolAddress;
-	onProgress?: () => void;
 }): Promise<Signature> => {
+	progress(ProgressStepsSendSol.INITIALIZATION);
+
 	const {
 		network: { id: networkId }
 	} = token;
@@ -260,18 +263,19 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	onProgress?.();
+	progress(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(transactionMessage);
 
-	// Explicitly do not await to proceed in the background and allow the UI to continue
-	sendSignedTransaction({
+	progress(ProgressStepsSendSol.SEND);
+
+	await sendSignedTransaction({
 		rpc,
 		rpcSubscriptions,
 		signedTransaction
 	});
 
-	onProgress?.();
+	progress(ProgressStepsSendSol.DONE);
 
 	return signature;
 };

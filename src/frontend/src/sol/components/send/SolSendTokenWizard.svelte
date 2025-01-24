@@ -49,8 +49,6 @@
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const progress = (step: ProgressStepsSendSol) => (sendProgressStep = step);
-
 	let network: Network | undefined = undefined;
 	$: network = $sendToken.network;
 
@@ -109,27 +107,17 @@
 		dispatch('icNext');
 
 		try {
-			sendProgressStep = ProgressStepsSendSol.INITIALIZATION;
-
 			await sendSol({
 				identity: $authIdentity,
+				progress: (step: ProgressStepsSendSol) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
 				destination,
-				source,
-				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendSol.INITIALIZATION) {
-						progress(ProgressStepsSendSol.SEND);
-					} else if (sendProgressStep === ProgressStepsSendSol.SEND) {
-						progress(ProgressStepsSendSol.DONE);
-					}
-				}
+				source
 			});
-
-			sendProgressStep = ProgressStepsSendSol.DONE;
 
 			await trackEvent({
 				name: TRACK_COUNT_SOL_SEND_SUCCESS,
