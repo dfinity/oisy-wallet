@@ -533,7 +533,7 @@
 				"no_network": "No network is selected. This is unexpected."
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed."
 			}
 		},
 		"manage": {
