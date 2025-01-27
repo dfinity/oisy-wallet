@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
+	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -191,7 +191,7 @@
 				{indexCanisterId}
 			/>
 		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
-			<AddTokenReview
+			<EthAddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
 				contractAddress={erc20ContractAddress}
