@@ -1,8 +1,12 @@
 import { nonNullish } from '@dfinity/utils';
 
+type UserAgentData = {
+	mobile: boolean;
+};
+
 export const isMobile = () => {
 	if ('userAgentData' in navigator && nonNullish(navigator.userAgentData)) {
-		const userAgentData: any = navigator.userAgentData;
+		const userAgentData: UserAgentData = navigator.userAgentData;
 		return userAgentData.mobile;
 	}
 	const isTouchScreen = window.matchMedia('(any-pointer:coarse)').matches;
