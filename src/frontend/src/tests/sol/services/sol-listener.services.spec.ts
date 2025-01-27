@@ -68,6 +68,8 @@ describe('sol-listener', () => {
 	});
 
 	describe('syncWalletError', () => {
+		const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
 		it('should reset balanceStore on error', () => {
 			syncWallet({ data: mockPostMessage({}), tokenId });
 
@@ -90,7 +92,6 @@ describe('sol-listener', () => {
 		});
 
 		it('should log a warning if hideToast is true', () => {
-			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 			syncWalletError({ error: 'test error', tokenId, hideToast: true });
 
 			expect(consoleWarnSpy).toHaveBeenCalled();
