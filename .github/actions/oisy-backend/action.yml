@@ -2,6 +2,11 @@ name: Build Oisy Backend Canister WASM
 
 description: An action that provides Oisy backend canister WASM as an artifact
 
+inputs:
+  network:
+    description: Dfx Network
+    required: true
+
 outputs: {}
 
 runs:
@@ -32,3 +37,4 @@ runs:
       with:
         name: backend.wasm.gz
         target: backend
+        network: ${{ inputs.network }}
