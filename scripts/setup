@@ -24,14 +24,21 @@ for tool in "${@}"; do
     )
     ;;
   "cargo-install")
-    export CARGO_NET_GIT_FETCH_WITH_CLI=true
-    export GITHUB_TOKEN=$token 
-    cargo install "$tool@$(jq -r '.[env.tool].version' dev-tools.json)"
+    if [ -z "$token" ]; then
+      echo "token is not set. Skipping authentication."
+      cargo install "$tool@$(jq -r '.[env.tool].version' dev-tools.json)"
+    else
+      echo "Using token for authenticated installation."
+      cargo install "$tool@$(jq -r '.[env.tool].version' dev-tools.json)" --github-token "$token"
+
     ;;
   "cargo-binstall")
-    export CARGO_NET_GIT_FETCH_WITH_CLI=true
-    export GITHUB_TOKEN=$token 
-    cargo binstall --force --no-confirm "${tool}@$(jq -r '.[env.tool].version' dev-tools.json)"
+    if [ -z "$token" ]; then
+      echo "token is not set. Skipping authentication."
+      cargo binstall --force --no-confirm "${tool}@$(jq -r '.[env.tool].version' dev-tools.json)"
+    else
+      echo "Using token for authenticated installation."
+      cargo binstall --force --no-confirm "${tool}@$(jq -r '.[env.tool].version' dev-tools.json)" --github-token "$token"
     ;;
   "go")
     GOBIN="$HOME/.local/bin" go install "$(jq -r '.[env.tool].source' dev-tools.json)@$(jq -r '.[env.tool].version' dev-tools.json)"

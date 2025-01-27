@@ -38,7 +38,5 @@ runs:
       shell: bash
       env:
         token: ${{ inputs.token }}
-      run: |
-        ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
-        dfx canister create --all
-        dfx deploy backend
+      run: npm run deploy
+
