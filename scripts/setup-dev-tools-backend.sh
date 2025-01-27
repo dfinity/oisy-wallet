@@ -5,4 +5,4 @@ set -euo pipefail
 
 ./scripts/setup candid-extractor
 
-./scripts/setup ic-wasm  
+./scripts/setup ic-wasm
