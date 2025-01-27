@@ -343,6 +343,10 @@ impl SplTokenId {
 }
 
 impl Validate for SplTokenId {
+    /// Verifies that a Solana address is valid.
+    /// 
+    /// # References
+    /// - <https://solana.com/docs/more/exchange#basic-verification>
     fn validate(&self) -> Result<(), candid::Error> {
         if self.0.len() < 32 {
             return Err(candid::Error::msg(
