@@ -58,6 +58,10 @@ export const TESTNET_TOGGLE = 'testnet-toggle';
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
 
+
+export const SWAP_INPUT_CURRENCY = "swap-input-currency"
+export const SWAP_INPUT_CURRENCY_USD_SYMBOL = "swap-input-currency-usd-symbol"
+
 export const TOKEN_MENU_IC = 'token-menu-ic';
 export const TOKEN_MENU_IC_BUTTON = 'token-menu-ic-button';
 export const TOKEN_MENU_ETH = 'token-menu-eth';

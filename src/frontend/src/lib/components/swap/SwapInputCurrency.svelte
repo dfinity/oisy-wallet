@@ -3,6 +3,7 @@
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import { SWAP_INPUT_CURRENCY, SWAP_INPUT_CURRENCY_USD_SYMBOL } from '$lib/constants/test-ids.constants';
 
 	export let value: OptionAmount;
 	export let displayUnit: DisplayUnit = 'token';
@@ -75,9 +76,10 @@
 	class:padding={!isUSDDisplayUnit}
 	class:text-error={error}
 	class:animate-pulse={loading}
+	data-testid="swap-input-currency"
 >
 	{#if isUSDDisplayUnit}
-		<span class="pl-3 transition-colors" class:text-placeholder={isNullish(displayValue)}> $ </span>
+		<span class="pl-3 transition-colors" class:text-placeholder={isNullish(displayValue)} data-tid={SWAP_INPUT_CURRENCY_USD_SYMBOL}> $ </span>
 	{/if}
 	<InputCurrency
 		bind:value={displayValue}
@@ -88,6 +90,7 @@
 		decimals={isUSDDisplayUnit ? 2 : decimals}
 		on:focus
 		on:blur
+		testId={SWAP_INPUT_CURRENCY}
 	>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
