@@ -10,5 +10,9 @@
 	"CLOUD": {
 		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
 		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai"
+	},
+	"AAA": {
+		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai",
+		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai"
 	}
 }
