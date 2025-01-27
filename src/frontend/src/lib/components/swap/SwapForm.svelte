@@ -6,6 +6,7 @@
 	import SwapAmountExchange from '$lib/components/swap/SwapAmountExchange.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapMaxBalanceButton from '$lib/components/swap/SwapMaxBalanceButton.svelte';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapSelectToken from '$lib/components/swap/SwapSelectToken.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
@@ -28,7 +29,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
