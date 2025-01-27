@@ -26,7 +26,8 @@ grep -E '^v[0-9]' "$TAGS_FILE" >"${TAGS_FILE}.semver" || true # No match is fine
 ####
 # Builds the candid file
 mkdir -p "$(dirname "$CANDID_FILE")"
-cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
+cargo install --no-confirm candid-extractor@0.1.4
+candid-extractor --version
 candid-extractor "$BUILD_DIR/$CANISTER.wasm" >"$CANDID_FILE"
 
 ####
