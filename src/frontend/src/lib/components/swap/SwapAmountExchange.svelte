@@ -30,7 +30,7 @@
 
 	let formattedTokenAmount: string | undefined;
 	$: formattedTokenAmount = nonNullish(token)
-		? `${isNullish(amount) ? 0 : amount} ${token.symbol}`
+		? `${nonNullish(amount) ? amount : 0} ${token.symbol}`
 		: '0';
 </script>
 
