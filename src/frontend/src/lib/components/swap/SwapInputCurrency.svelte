@@ -10,7 +10,7 @@
 
 	export let value: OptionAmount;
 	export let displayUnit: DisplayUnit = 'token';
-	export let exchangeRate: number | undefined;
+	export let exchangeRate: number | undefined = undefined;
 	export let decimals: number;
 	export let name = 'swap-amount';
 	export let disabled = false;
