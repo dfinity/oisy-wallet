@@ -25,8 +25,8 @@
 		"url": "https://github.com/mikefarah/yq/releases/download/v${VERSION}/yq_linux_amd64"
 	},
 	"cargo-binstall": {
-		"method": "sh",
-		"version": "1.7.4"
+		"method": "curl",
+		"version": "1.10.22"
 	},
 	"solana": {
 		"method": "sh",
