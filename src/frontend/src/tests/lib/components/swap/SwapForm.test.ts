@@ -5,8 +5,12 @@ import {
 	SWAP_INPUT_CURRENCY,
 	SWAP_SWITCH_TOKENS_BUTTON
 } from '$lib/constants/test-ids.constants';
-import { initSwapAmountsStore, SWAP_AMOUNTS_CONTEXT_KEY, type SwapAmountsStoreData } from '$lib/stores/swap-amounts.store';
-import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import {
+	SWAP_AMOUNTS_CONTEXT_KEY,
+	initSwapAmountsStore,
+	type SwapAmountsStoreData
+} from '$lib/stores/swap-amounts.store';
+import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -32,7 +36,7 @@ describe('SwapForm', () => {
 		const mockSwapContext = {
 			...originalContext,
 			sourceTokenExchangeRate: readable(2.5),
-			destinationTokenExchangeRate: readable(2),
+			destinationTokenExchangeRate: readable(2)
 		};
 
 		mockContext.set(SWAP_CONTEXT_KEY, mockSwapContext);
@@ -108,7 +112,9 @@ describe('SwapForm', () => {
 
 		it('should display initial token and USD values correctly', () => {
 			const { getAllByTestId } = renderSwapForm();
-			const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(SWAP_AMOUNT_EXCHANGE_VALUE);
+			const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
+				SWAP_AMOUNT_EXCHANGE_VALUE
+			);
 			const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY);
 
 			expect(sourceTokenExchangeValue).toHaveTextContent('$2.50');
@@ -120,25 +126,35 @@ describe('SwapForm', () => {
 		it.each([
 			{ description: 'source', buttonIndex: 0 },
 			{ description: 'destination', buttonIndex: 1 }
-		])('should switch between USD and token values when clicking $description exchange', async ({ buttonIndex }) => {
-			const { getAllByTestId } = renderSwapForm();
-			const [sourceTokenExchangeButton, destinationTokenExchangeButton] = getAllByTestId(SWAP_AMOUNT_EXCHANGE_BUTTON);
-			const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(SWAP_AMOUNT_EXCHANGE_VALUE);
-			const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY);
+		])(
+			'should switch between USD and token values when clicking $description exchange',
+			async ({ buttonIndex }) => {
+				const { getAllByTestId } = renderSwapForm();
+				const [sourceTokenExchangeButton, destinationTokenExchangeButton] = getAllByTestId(
+					SWAP_AMOUNT_EXCHANGE_BUTTON
+				);
+				const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
+					SWAP_AMOUNT_EXCHANGE_VALUE
+				);
+				const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY);
 
-			const button = buttonIndex === 0 ? sourceTokenExchangeButton : destinationTokenExchangeButton;
+				const button =
+					buttonIndex === 0 ? sourceTokenExchangeButton : destinationTokenExchangeButton;
 
-			await fireEvent.click(button);
-			expect(sourceTokenExchangeValue).toHaveTextContent(`1 ${mockValidIcToken.symbol}`);
-			expect(destinationTokenExchangeValue).toHaveTextContent(`0.02 ${mockValidIcCkToken.symbol}`);
-			expect(sourceInput).toHaveValue('2.50');
-			expect(destinationInput).toHaveValue('0.04');
+				await fireEvent.click(button);
+				expect(sourceTokenExchangeValue).toHaveTextContent(`1 ${mockValidIcToken.symbol}`);
+				expect(destinationTokenExchangeValue).toHaveTextContent(
+					`0.02 ${mockValidIcCkToken.symbol}`
+				);
+				expect(sourceInput).toHaveValue('2.50');
+				expect(destinationInput).toHaveValue('0.04');
 
-			await fireEvent.click(button);
-			expect(sourceTokenExchangeValue).toHaveTextContent('$2.50');
-			expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
-			expect(sourceInput).toHaveValue('1');
-			expect(destinationInput).toHaveValue('0.02');
-		});
+				await fireEvent.click(button);
+				expect(sourceTokenExchangeValue).toHaveTextContent('$2.50');
+				expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
+				expect(sourceInput).toHaveValue('1');
+				expect(destinationInput).toHaveValue('0.02');
+			}
+		);
 	});
 });
