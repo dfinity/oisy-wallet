@@ -4,4 +4,5 @@
 # This is used both in command line docker builds and in CI docker builds (that are called in a different way)
 
 set -euxo pipefail
+rm -fr "./in/" "./out/"
 scripts/commit-metadata
