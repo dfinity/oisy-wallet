@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapDisplayMode } from '$lib/types/swap';
-	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	export let value: OptionAmount;
 	export let displayMode: SwapDisplayMode = 'usd';
@@ -17,14 +17,11 @@
 	let displayValue: OptionAmount;
 	let previousDisplayValue: OptionAmount;
 
-	function formatNumber(num: number, decimalsCount: number): string {
-		return num.toFixed(decimalsCount);
-	}
-
-	function handleInput() {
+	const handleInput = () => {
 		if (displayValue === previousDisplayValue) {
 			return;
 		}
+
 		previousDisplayValue = displayValue;
 
 		if (isNullish(displayValue)) {
@@ -32,32 +29,16 @@
 			return;
 		}
 
-		if (nonNullish(exchangeRate)) {
-			if (displayMode === 'token') {
-				value = formatNumber(Number(displayValue) / exchangeRate, decimals);
-			} else {
-				value = formatNumber(Number(displayValue), decimals);
-			}
-		} else {
-			value = displayValue;
-		}
-	}
+		value = nonNullish(exchangeRate) ? (displayMode === 'token' ? Number(displayValue) / exchangeRate : Number(displayValue)).toFixed(decimals) : displayValue;
+	};
 
 	const changeDirection = () => {
 		if (isNullish(exchangeRate) || isNullish(value)) {
 			return;
 		}
-
-		if (displayMode === 'token') {
-			displayValue = formatNumber(Number(value) * exchangeRate, 2);
-			previousDisplayValue = displayValue;
-		} else {
-			displayValue = Number(value);
-			previousDisplayValue = displayValue;
-		}
+		displayValue = displayMode === 'token' ? (Number(value) * exchangeRate).toFixed(2) : Number(value);
+		previousDisplayValue = displayValue;
 	};
-
-	$: displayMode, changeDirection();
 
 	const updateDisplay = () => {
 		if (isNullish(value)) {
@@ -67,18 +48,20 @@
 			return;
 		}
 
-		if (nonNullish(value) && nonNullish(exchangeRate) && displayMode === 'token') {
-			const newDisplayValue = formatNumber(Number(value) * exchangeRate, 2);
+		if (nonNullish(exchangeRate) && displayMode === 'token') {
+			const newDisplayValue = (Number(value) * exchangeRate).toFixed(2);
+
 			if (Number(newDisplayValue) !== Number(displayValue)) {
 				displayValue = newDisplayValue;
-				previousDisplayValue = displayValue;
 			}
-		} else if (nonNullish(value)) {
+		} else {
 			displayValue = Number(value);
-			previousDisplayValue = displayValue;
 		}
-	}
+		previousDisplayValue = displayValue;
 
+	};
+
+	$: displayMode, changeDirection();
 	$: value, updateDisplay();
 </script>
 
@@ -108,26 +91,26 @@
 </div>
 
 <style lang="scss">
-	:global(.swap-input-currency div.input-block) {
-		display: block;
-		height: 100%;
-		justify-content: center;
-		--padding: 0;
-		--input-width: 100%;
-	}
+  :global(.swap-input-currency div.input-block) {
+    display: block;
+    height: 100%;
+    justify-content: center;
+    --padding: 0;
+    --input-width: 100%;
+  }
 
-	:global(.swap-input-currency div.input-field input[id]) {
-		height: 100%;
-		border: none;
-		border-radius: 0;
-		padding: 0;
-	}
+  :global(.swap-input-currency div.input-field input[id]) {
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
 
-	:global(.swap-input-currency.padding div.input-field input[id]) {
-		padding: 0 0 0 0.75rem;
-	}
+  :global(.swap-input-currency.padding div.input-field input[id]) {
+    padding: 0 0 0 0.75rem;
+  }
 
-	.transition-colors {
-		transition: color var(--animation-time-short);
-	}
+  .transition-colors {
+    transition: color var(--animation-time-short);
+  }
 </style>
