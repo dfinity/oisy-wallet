@@ -162,6 +162,7 @@ pub mod token {
 /// Extendable custom user defined tokens
 pub mod custom_token {
     use crate::types::Version;
+    use crate::types::Validate;
     use candid::{CandidType, Deserialize, Principal};
     use serde::{de, Deserializer};
 
@@ -188,28 +189,14 @@ pub mod custom_token {
     #[serde(remote = "Self")]
     pub struct SplTokenId(pub String);
 
-    /// Basic verification of the Solana address.
-    ///
-    /// # References
-    /// - <https://solana.com/docs/more/exchange#basic-verification>
-    ///
+    /// Basic verification of the Solana address on deserialization.
     impl<'de> Deserialize<'de> for SplTokenId {
         fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
         where
             D: Deserializer<'de>,
         {
             let unchecked = SplTokenId::deserialize(deserializer)?;
-            if unchecked.0.len() > 32 {
-                return Err(de::Error::custom(
-                    "Minimum valid Solana address length is 32",
-                ));
-            }
-            if unchecked.0.len() > 44 {
-                return Err(de::Error::custom(
-                    "Maximum valid Solana address length is 44",
-                ));
-            }
-            Ok(unchecked)
+            unchecked.validated().map_err(de::Error::custom)
         }
     }
 
