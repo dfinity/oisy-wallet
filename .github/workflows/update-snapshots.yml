@@ -84,6 +84,8 @@ jobs:
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Prepare
         uses: ./.github/actions/prepare
