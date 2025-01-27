@@ -37,7 +37,7 @@
 
 	let ledgerCanisterId = tokenData?.ledgerCanisterId ?? '';
 	let indexCanisterId = tokenData?.indexCanisterId ?? '';
-	let erc20ContractAddress = tokenData?.contractAddress ?? '';
+	let erc20ContractAddress = tokenData?.erc20ContractAddress ?? '';
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
@@ -51,7 +51,7 @@
 						: undefined
 			};
 		} else if (isEthereumNetwork) {
-			tokenData = { contractAddress: erc20ContractAddress };
+			tokenData = { erc20ContractAddress };
 		} else {
 			tokenData = {};
 		}
