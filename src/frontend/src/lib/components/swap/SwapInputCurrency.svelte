@@ -2,10 +2,10 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { SwapDisplayMode } from '$lib/types/swap';
+	import type { DisplayUnit } from '$lib/types/swap';
 
 	export let value: OptionAmount;
-	export let displayMode: SwapDisplayMode = 'usd';
+	export let displayMode: DisplayUnit = 'usd';
 	export let exchangeRate: number | undefined;
 	export let decimals: number;
 	export let name = 'swap-amount';

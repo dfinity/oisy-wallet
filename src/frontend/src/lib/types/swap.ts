@@ -1,3 +1,3 @@
 export type SwapSelectTokenType = 'source' | 'destination';
 
-export type SwapDisplayMode = 'token' | 'usd';
+export type DisplayUnit = 'token' | 'usd';
