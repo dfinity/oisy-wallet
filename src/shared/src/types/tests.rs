@@ -25,7 +25,6 @@ mod custom_token {
             assert_eq!(*expected, result.is_ok());
         }
     }
-    //#[ignore] // This does NOT currently work for candid
     #[test]
     fn spl_token_validation_works_for_candid() {
         for (input, expected) in SPL_TEST_VECTORS.iter() {
