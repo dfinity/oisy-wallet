@@ -65,7 +65,7 @@
 			: false;
 
 	let disableSwitchTokens = false;
-	$: disableSwitchTokens = swapAmountsLoading && nonNullish(swapAmount)
+	$: disableSwitchTokens = nonNullish(swapAmount) && isNullish(receiveAmount)
 
 	const dispatch = createEventDispatcher();
 
