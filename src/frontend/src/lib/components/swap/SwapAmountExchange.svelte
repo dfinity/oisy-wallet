@@ -5,18 +5,19 @@
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import { formatUSD } from '$lib/utils/format.utils';
 
 	export let amount: OptionAmount;
 	export let exchangeRate: number | undefined;
 	export let token: IcToken | undefined = undefined;
-	export let mode: 'usd' | 'token' = 'usd';
+	export let mode: DisplayUnit = 'usd';
 
 	const dispatch = createEventDispatcher<{
-		mode: 'usd' | 'token';
+		mode: DisplayUnit;
 	}>();
 
-	const handleModeToggle = () => {
+	const handleUnitSwitch = () => {
 		const newMode = mode === 'usd' ? 'token' : 'usd';
 		dispatch('mode', newMode);
 	};
@@ -27,6 +28,9 @@
 			? Number(amount) * exchangeRate
 			: 0;
 
+	let formattedUSDAmount: string |undefined
+	$: formattedUSDAmount = nonNullish(amountUSD) ? formatUSD({ value: amountUSD }) : undefined;
+
 	let formattedTokenAmount: string | undefined;
 	$: formattedTokenAmount = nonNullish(token)
 		? mode === 'token' && nonNullish(amount)
@@ -36,12 +40,11 @@
 </script>
 
 <div class="flex items-center gap-1">
-	<!-- improve ternary -->
 	{#if nonNullish(exchangeRate)}
-		<button on:click={handleModeToggle}>
+		<button on:click={handleUnitSwitch}>
 			<IconArrowUpDown size="14" />
 		</button>
-		<span>{mode === 'usd' ? formatUSD({ value: amountUSD }) : formattedTokenAmount}</span>
+		<span>{mode === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span>
 	{:else}
 		<span>{$i18n.swap.text.exchange_is_not_available}</span>
 	{/if}
