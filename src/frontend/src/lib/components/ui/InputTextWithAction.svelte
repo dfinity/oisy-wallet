@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { onMount } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let value = '';
 	export let name: string;
@@ -12,7 +13,9 @@
 	onMount(() => {
 		if (autofocus) {
 			let component = document.querySelector(`input[name="${name}"]`);
-			component.focus();
+			if (nonNullish(component)) {
+				component.focus();
+			}
 		}
 	});
 </script>
