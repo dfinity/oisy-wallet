@@ -10,8 +10,8 @@ describe('rest.services', () => {
 		const mockOnRetry = vi.fn();
 
 		// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => undefined);
-		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 		beforeEach(() => {
 			vi.clearAllMocks();
