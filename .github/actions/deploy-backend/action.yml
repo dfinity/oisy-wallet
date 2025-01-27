@@ -30,6 +30,7 @@ runs:
       run: dfx start --background --quiet
 
     - name: Deploy the backend
+      shell: bash
       run: |
         ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
         dfx deploy backend
