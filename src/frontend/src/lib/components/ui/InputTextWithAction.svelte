@@ -12,7 +12,7 @@
 
 	onMount(() => {
 		if (autofocus) {
-			let component = document.querySelector(`input[name="${name}"]`);
+			let component = document.querySelector<HTMLInputElement>(`input[name="${name}"]`);
 			if (nonNullish(component)) {
 				component.focus();
 			}
