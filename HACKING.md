@@ -40,7 +40,7 @@ echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
 
 ```bash
 dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
-ENV=staging ./scripts/deploy.backend.sh
+dfx deploy backend --network staging
 ```
 
 ### Beta
@@ -54,11 +54,26 @@ dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
 
 ### IC
 
-> To perform production development, you'll need a `.env.production` file.
+Ensure that you have [`dfx-orbit`](https://github.com/dfinity/orbit/tree/main/tools/dfx-orbit) installed and are using the correct station:
+
+```
+dfx-orbit station show
+```
+
+> To perform production development, you'll need a `.env.production` file for the frontend. Then:
 
 ```bash
-dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
-ENV=ic ./scripts/deploy.backend.sh
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
+
+dfx-oisy request deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
+```
+
+For the backend:
+
+```bash
+scripts/docker-build
+
+dfx-orbit request canister install backend --mode upgrade --wasm out/backend.wasm.gz --arg-file out/backend.args.did
 ```
 
 ## Internationalization
