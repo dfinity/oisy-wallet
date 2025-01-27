@@ -50,7 +50,7 @@
 		previousDisplayValue = displayValue;
 	};
 
-	const updateDisplay = () => {
+	const updateDisplayValue = () => {
 		if (isNullish(value)) {
 			value = undefined;
 			displayValue = undefined;
@@ -71,7 +71,7 @@
 	};
 
 	$: displayUnit, changeDirection();
-	$: value, updateDisplay();
+	$: value, updateDisplayValue();
 </script>
 
 <div
