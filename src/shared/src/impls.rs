@@ -425,5 +425,7 @@ macro_rules! validate_on_deserialize {
     };
 }
 
+validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
+validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);

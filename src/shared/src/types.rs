@@ -176,6 +176,7 @@ pub mod custom_token {
 
     /// A Solana token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct SplToken {
         pub token_address: SplTokenId,
         pub symbol: Option<String>,
@@ -196,6 +197,7 @@ pub mod custom_token {
 
     /// User preferences for any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct CustomToken {
         pub token: Token,
         pub enabled: bool,
