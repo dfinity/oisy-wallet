@@ -69,9 +69,7 @@ jobs:
         run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 
       - name: Deploy the backend
-        run: |
-          ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
-          dfx deploy backend
+        uses: ./.github/actions/deploy-backend
 
       - name: Prepare
         uses: ./.github/actions/prepare
