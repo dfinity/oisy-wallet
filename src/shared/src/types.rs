@@ -161,10 +161,8 @@ pub mod token {
 
 /// Extendable custom user defined tokens
 pub mod custom_token {
-    use crate::types::Validate;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
-    use serde::{de, Deserializer};
 
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
@@ -188,17 +186,6 @@ pub mod custom_token {
     #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
     #[serde(remote = "Self")]
     pub struct SplTokenId(pub String);
-
-    /// Basic verification of the Solana address on deserialization.
-    impl<'de> Deserialize<'de> for SplTokenId {
-        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: Deserializer<'de>,
-        {
-            let unchecked = SplTokenId::deserialize(deserializer)?;
-            unchecked.validated().map_err(de::Error::custom)
-        }
-    }
 
     /// A variant describing any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

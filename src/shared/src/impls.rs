@@ -420,3 +420,14 @@ impl<'de> Deserialize<'de> for CustomTokenId {
         unchecked.validated().map_err(de::Error::custom)
     }
 }
+
+/// Basic verification of the Solana address on deserialization.
+impl<'de> Deserialize<'de> for SplTokenId {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let unchecked = SplTokenId::deserialize(deserializer)?;
+        unchecked.validated().map_err(de::Error::custom)
+    }
+}
