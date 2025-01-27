@@ -217,6 +217,7 @@ pub mod custom_token {
 
     /// A cross-chain token identifier.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    #[serde(remote = "Self")]
     pub enum CustomTokenId {
         /// An ICRC-1 compliant token on the Internet Computer mainnet.
         Icrc(LedgerId),

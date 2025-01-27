@@ -11,8 +11,10 @@ use crate::types::{
     ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
     Timestamp, TokenVersion, Validate, Version,
 };
+use candid::Deserialize;
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
+use serde::{de, Deserializer};
 use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(test)]
@@ -405,5 +407,16 @@ impl Validate for SplToken {
 impl Validate for IcrcToken {
     fn validate(&self) -> Result<(), candid::Error> {
         Ok(())
+    }
+}
+
+/// Verify when parsing.
+impl<'de> Deserialize<'de> for CustomTokenId {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let unchecked = CustomTokenId::deserialize(deserializer)?;
+        unchecked.validated().map_err(de::Error::custom)
     }
 }
