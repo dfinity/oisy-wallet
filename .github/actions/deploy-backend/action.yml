@@ -33,5 +33,5 @@ runs:
       shell: bash
       run: |
         ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
-        dfx canister create
+        dfx canister create --all
         dfx canister deploy backend
