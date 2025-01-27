@@ -13,6 +13,4 @@ export const isMobile = () => {
 	return isTouchScreen;
 };
 
-export const isDesktop = () => {
-	return !isMobile();
-};
+export const isDesktop = () => !isMobile();
