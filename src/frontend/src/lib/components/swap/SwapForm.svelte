@@ -26,6 +26,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
@@ -62,6 +63,10 @@
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
 			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
 			: false;
+
+	let disableSwitchTokens = false;
+	$: disableSwitchTokens =
+		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
 
 	const dispatch = createEventDispatcher();
 
@@ -125,7 +130,7 @@
 				</svelte:fragment>
 			</SwapSelectToken>
 
-			<SwapSwitchTokensButton on:icSwitchTokens={onTokensSwitch} />
+			<SwapSwitchTokensButton disabled={disableSwitchTokens} on:icSwitchTokens={onTokensSwitch} />
 
 			<SwapSelectToken
 				token={$destinationToken}
