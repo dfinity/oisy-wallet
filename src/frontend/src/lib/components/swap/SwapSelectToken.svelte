@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -18,6 +19,8 @@
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
 	export let name = 'swap-amount';
+	export let displayUnit: DisplayUnit = 'token';
+	export let exchangeRate: number | undefined;
 	export let disabled = false;
 	export let placeholder = '0';
 	export let errorType: ConvertAmountErrorType = undefined;
@@ -68,6 +71,8 @@
 			{#if token}
 				<SwapInputCurrency
 					bind:value={amount}
+					{displayUnit}
+					{exchangeRate}
 					{name}
 					{placeholder}
 					{disabled}
