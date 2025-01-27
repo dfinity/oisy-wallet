@@ -170,8 +170,7 @@
 	let network: Network | undefined = $selectedNetwork;
 	let tokenData: Partial<AddTokenData> = {};
 
-	$: tokenData,
-		({ ledgerCanisterId, indexCanisterId, contractAddress: erc20ContractAddress } = tokenData);
+	$: tokenData, ({ ledgerCanisterId, indexCanisterId, erc20ContractAddress } = tokenData);
 </script>
 
 <WizardModal
