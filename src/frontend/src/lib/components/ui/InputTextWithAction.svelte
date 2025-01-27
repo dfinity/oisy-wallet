@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { onMount } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 
 	export let value = '';
 	export let name: string;
