@@ -167,6 +167,7 @@
 			"type": "custom",
 			"candid": "target/ic/icp_ledger.did",
 			"wasm": "target/ic/icp_ledger.wasm",
+			"specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 			"remote": {
 				"id": {
 					"test_be_1": "ryjl3-tyaaa-aaaaa-aaaba-cai",
@@ -184,6 +185,7 @@
 			"type": "custom",
 			"candid": "target/ic/icp_index.did",
 			"wasm": "target/ic/icp_index.wasm",
+			"specified_id": "qhbym-qaaaa-aaaaa-aaafq-cai",
 			"remote": {
 				"id": {
 					"test_be_1": "qhbym-qaaaa-aaaaa-aaafq-cai",
@@ -201,6 +203,7 @@
 			"type": "custom",
 			"candid": "target/ic/ckbtc_minter.did",
 			"wasm": "target/ic/ckbtc_minter.wasm",
+			"specified_id": "ml52i-qqaaa-aaaar-qaaba-cai",
 			"remote": {
 				"id": {
 					"ic": "mqygn-kiaaa-aaaar-qaadq-cai",
@@ -217,6 +220,7 @@
 			"type": "custom",
 			"candid": "target/ic/ckbtc_ledger.did",
 			"wasm": "target/ic/ckbtc_ledger.wasm",
+			"specified_id": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 			"remote": {
 				"id": {
 					"ic": "mxzaz-hqaaa-aaaar-qaada-cai",
@@ -233,6 +237,7 @@
 			"type": "custom",
 			"candid": "target/ic/ckbtc_index.did",
 			"wasm": "target/ic/ckbtc_index.wasm",
+			"specified_id": "mm444-5iaaa-aaaar-qaabq-cai",
 			"remote": {
 				"id": {
 					"ic": "n5wcd-faaaa-aaaar-qaaea-cai",
@@ -249,6 +254,7 @@
 			"type": "custom",
 			"candid": "target/ic/ckbtc_kyt.did",
 			"wasm": "target/ic/ckbtc_kyt.wasm",
+			"specified_id": "pvm5g-xaaaa-aaaar-qaaia-cai",
 			"remote": {
 				"id": {
 					"ic": "pjihx-aaaaa-aaaar-qaaka-cai",
@@ -265,6 +271,7 @@
 			"type": "custom",
 			"candid": "target/ic/cketh_minter.did",
 			"wasm": "target/ic/cketh_minter.wasm",
+			"specified_id": "jzenf-aiaaa-aaaar-qaa7q-cai",
 			"remote": {
 				"id": {
 					"ic": "sv3dd-oaaaa-aaaar-qacoa-cai",
@@ -281,6 +288,7 @@
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
 			"wasm": "target/ic/cketh_ledger.wasm",
+			"specified_id": "apia6-jaaaa-aaaar-qabma-cai",
 			"remote": {
 				"id": {
 					"ic": "ss2fx-dyaaa-aaaar-qacoq-cai",
@@ -297,6 +305,7 @@
 			"type": "custom",
 			"candid": "target/ic/cketh_index.did",
 			"wasm": "target/ic/cketh_index.wasm",
+			"specified_id": "sh5u2-cqaaa-aaaar-qacna-cai",
 			"remote": {
 				"id": {
 					"ic": "s3zol-vqaaa-aaaar-qacpa-cai",
