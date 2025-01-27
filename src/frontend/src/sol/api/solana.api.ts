@@ -302,3 +302,28 @@ export const estimatePriorityFee = async ({
 		0n
 	);
 };
+
+export const getTokenDecimals = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<number> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const token = solAddress(address);
+
+	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+
+	if (nonNullish(value) && 'parsed' in value.data) {
+		const {
+			data: {
+				parsed: { info }
+			}
+		} = value;
+
+		return nonNullish(info) && 'decimals' in info ? (info.decimals as number) : 0;
+	}
+
+	return 0;
+};
