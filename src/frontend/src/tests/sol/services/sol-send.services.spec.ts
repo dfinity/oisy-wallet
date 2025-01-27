@@ -13,7 +13,6 @@ import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/so
 import { BigNumber } from '@ethersproject/bignumber';
 import * as solanaFunctional from '@solana/functional';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import {
 	getComputeUnitEstimateForTransactionMessageFactory,
 	sendAndConfirmTransactionFactory

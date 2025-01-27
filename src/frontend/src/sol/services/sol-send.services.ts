@@ -20,7 +20,7 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import { address, address as solAddress } from '@solana/addresses';
+import { address as solAddress } from '@solana/addresses';
 import { pipe } from '@solana/functional';
 import type { Signature } from '@solana/keys';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
@@ -42,8 +42,7 @@ import {
 import { assertTransactionIsFullySigned } from '@solana/transactions';
 import {
 	getComputeUnitEstimateForTransactionMessageFactory,
-	sendTransactionWithoutConfirmingFactory,
-	sendAndConfirmTransactionFactory
+	sendTransactionWithoutConfirmingFactory
 } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
