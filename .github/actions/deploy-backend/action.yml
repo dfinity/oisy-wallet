@@ -35,7 +35,11 @@ runs:
 
     - name: Install candid-extractor
       shell: bash
-      run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
+      run: scripts/setup candid-extractor
+
+    - name: Install candid-extractor
+      shell: bash
+      run: scripts/setup ic-wasm     
 
     - name: Deploy backend
       shell: bash
