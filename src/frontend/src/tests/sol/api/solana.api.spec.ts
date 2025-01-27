@@ -1,5 +1,6 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import {
+	estimatePriorityFee,
 	getSolCreateAccountFee,
 	getSolTransactions,
 	loadSolLamportsBalance,
@@ -20,7 +21,7 @@ import {
 	mockSolSignatureWithErrorResponse
 } from '$tests/mocks/sol-signatures.mock';
 import { mockSolRpcSendTransaction } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { lamports } from '@solana/rpc-types';
 import type { MockInstance } from 'vitest';
 
@@ -31,9 +32,23 @@ describe('solana.api', () => {
 	let mockGetSignaturesForAddress: MockInstance;
 	let mockGetTransaction: MockInstance;
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
+	let mockGetRecentPrioritizationFees: MockInstance;
 
+	const mockAddresses = [mockSolAddress, mockSolAddress2];
 	const mockBalance = 500000n;
 	const mockCreateAccountFee = 123n;
+	const mockPriorityFee = 100n;
+	const mockRecentPriorityFees = [
+		{
+			prioritizationFee: mockPriorityFee - 1n
+		},
+		{
+			prioritizationFee: mockPriorityFee
+		},
+		{
+			prioritizationFee: mockPriorityFee - 2n
+		}
+	];
 
 	const mockError = new Error('RPC Error');
 
@@ -56,11 +71,16 @@ describe('solana.api', () => {
 			send: () => Promise.resolve(lamports(mockCreateAccountFee))
 		});
 
+		mockGetRecentPrioritizationFees = vi.fn().mockReturnValue({
+			send: () => Promise.resolve(mockRecentPriorityFees)
+		});
+
 		const mockSolanaHttpRpc = vi.fn().mockReturnValue({
 			getBalance: mockGetBalance,
 			getSignaturesForAddress: mockGetSignaturesForAddress,
 			getTransaction: mockGetTransaction,
-			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption
+			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption,
+			getRecentPrioritizationFees: mockGetRecentPrioritizationFees
 		});
 		vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
 	});
@@ -476,11 +496,61 @@ describe('solana.api', () => {
 		});
 
 		it('should throw error when RPC call fails', async () => {
-			mockGetMinimumBalanceForRentExemption.mockReturnValue({
+			mockGetMinimumBalanceForRentExemption.mockReturnValueOnce({
 				send: () => Promise.reject(mockError)
 			});
 
 			await expect(getSolCreateAccountFee(SolanaNetworks.mainnet)).rejects.toThrow(mockError);
+		});
+	});
+
+	describe('estimatePriorityFee', () => {
+		it('should estimate the recent max priority fee', async () => {
+			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
+
+			expect(fee).toEqual(mockPriorityFee);
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith(undefined);
+		});
+
+		it('should estimate the recent max priority fee if addresses are passed too', async () => {
+			const fee = await estimatePriorityFee({
+				network: SolanaNetworks.mainnet,
+				addresses: mockAddresses
+			});
+
+			expect(fee).toEqual(mockPriorityFee);
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith(mockAddresses);
+		});
+
+		it('should handle gracefully when addresses are empty', async () => {
+			const fee = await estimatePriorityFee({
+				network: SolanaNetworks.mainnet,
+				addresses: []
+			});
+
+			expect(fee).toEqual(mockPriorityFee);
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith([]);
+		});
+
+		it('should handle gracefully the return of an empty array of fees', async () => {
+			mockGetRecentPrioritizationFees.mockReturnValueOnce({
+				send: () => Promise.resolve([])
+			});
+
+			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
+
+			expect(fee).toEqual(0n);
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledOnce();
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetRecentPrioritizationFees.mockReturnValueOnce({
+				send: () => Promise.reject(mockError)
+			});
+
+			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrow(
+				mockError
+			);
 		});
 	});
 });
