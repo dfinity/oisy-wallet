@@ -32,6 +32,7 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -143,7 +144,7 @@
 		bind:filter
 		noMatch={noTokensMatch}
 		placeholder={$i18n.tokens.placeholder.search_token}
-		autofocus={window.innerWidth >= 1024}
+		autofocus={isDesktop()}
 	/>
 </div>
 
