@@ -24,6 +24,12 @@ describe('SolSendForm', () => {
 	const ataFeeSelector = 'p[id="ataFee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(0n);
+	});
+
 	it('should render all fields', () => {
 		mockContext.set(
 			SEND_CONTEXT_KEY,
@@ -59,8 +65,6 @@ describe('SolSendForm', () => {
 
 	describe('with SPL token', () => {
 		beforeEach(() => {
-			vi.resetAllMocks();
-
 			mockContext.set(
 				SEND_CONTEXT_KEY,
 				initSendContext({
