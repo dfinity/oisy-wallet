@@ -161,8 +161,8 @@ pub mod token {
 
 /// Extendable custom user defined tokens
 pub mod custom_token {
-    use crate::types::Version;
     use crate::types::Validate;
+    use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use serde::{de, Deserializer};
 
