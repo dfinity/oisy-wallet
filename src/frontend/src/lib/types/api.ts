@@ -6,12 +6,15 @@ import type {
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
+import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
 	BtcTxOutput,
+	SchnorrKeyId,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
-import type { BtcAddress } from '$lib/types/address';
+import type { Address, BtcAddress } from '$lib/types/address';
+import type { Token } from '$lib/types/token';
 import { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
@@ -47,7 +50,33 @@ export interface SendBtcParams {
 	outputs: BtcTxOutput[];
 }
 
+export interface GetSchnorrPublicKeyParams {
+	derivationPath: string[];
+	keyId: SchnorrKeyId;
+}
+
+export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
+	message: number[];
+}
+
 export interface AddUserHiddenDappIdParams {
 	dappId: string;
 	currentUserVersion?: bigint;
+}
+
+export interface KongSwapAmountsParams {
+	sourceToken: Token;
+	destinationToken: Token;
+	sourceAmount: bigint;
+}
+
+export interface KongSwapParams {
+	destinationToken: Token;
+	maxSlippage: number;
+	sendAmount: bigint;
+	referredBy?: string;
+	receiveAmount: bigint;
+	receiveAddress?: Address;
+	sourceToken: Token;
+	payTransactionId?: TxId;
 }

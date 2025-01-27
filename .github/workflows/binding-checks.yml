@@ -11,6 +11,7 @@ jobs:
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
         id: app-token
+        continue-on-error: true
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
@@ -18,6 +19,8 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
+          echo steps.app-token.outputs.token null ${{ steps.app-token.outputs.token == null}}
+          echo steps.app-token.outputs.token empty ${{ steps.app-token.outputs.token == ''}}
           echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
 
       - name: Checkout code
@@ -68,15 +71,15 @@ jobs:
 
       - name: Install binstall
         if: steps.changes.outputs.src == 'true'
-        run: |
-          BINSTALL_VERSION="1.8.0"
-          curl -L --proto '=https' --tlsv1.2 -sSf "https://github.com/cargo-bins/cargo-binstall/releases/download/v${BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" | tar -xvzf - cargo-binstall
-          ./cargo-binstall -y --force "cargo-binstall@$BINSTALL_VERSION"
-          rm cargo-binstall
+        run: scripts/setup cargo-binstall
 
       - name: Install candid-extractor
         if: steps.changes.outputs.src == 'true'
         run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
+
+      - name: Install didc
+        if: steps.changes.outputs.src == 'true'
+        run: ./scripts/setup didc
 
       - name: Generate bindings
         if: steps.changes.outputs.src == 'true'
@@ -108,7 +111,7 @@ jobs:
           exit 1
 
   binding-checks-pass:
-    needs: [ 'generate' ]
+    needs: ['generate']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging

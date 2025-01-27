@@ -3,7 +3,12 @@
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
+	import {
+		networkBitcoin,
+		networkEthereum,
+		networkICP,
+		networkSolana
+	} from '$lib/derived/network.derived';
 	import { tokenToggleable } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -23,7 +28,15 @@
 	};
 
 	const openToken = () => {
-		const fn = $networkICP ? modalStore.openIcToken : modalStore.openToken;
+		const fn = $networkICP
+			? modalStore.openIcToken
+			: $networkEthereum
+				? modalStore.openEthToken
+				: $networkBitcoin
+					? modalStore.openBtcToken
+					: $networkSolana
+						? modalStore.openSolToken
+						: () => {};
 		fn();
 
 		visible = false;

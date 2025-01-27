@@ -1,4 +1,4 @@
-import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
+import type { Address, BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
 import type { Principal } from '@dfinity/principal';
 
 export interface IdbAddress<T extends Address> {
@@ -10,6 +10,8 @@ export interface IdbAddress<T extends Address> {
 export type IdbBtcAddress = IdbAddress<BtcAddress>;
 
 export type IdbEthAddress = IdbAddress<EthAddress>;
+
+export type IdbSolAddress = IdbAddress<SolAddress>;
 
 export interface SetIdbAddressParams<T extends Address> {
 	address: IdbAddress<T>;

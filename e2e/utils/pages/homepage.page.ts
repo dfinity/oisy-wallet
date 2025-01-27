@@ -2,11 +2,14 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	NAVIGATION_ITEM_HOMEPAGE,
+	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -65,6 +68,11 @@ abstract class Homepage {
 
 	protected async clickByTestId(testId: string): Promise<void> {
 		await this.#page.getByTestId(testId).click();
+	}
+
+	protected async isVisibleByTestId(testId: string): Promise<boolean> {
+		const element = this.#page.locator(`[data-tid="${testId}"]`);
+		return await element.isVisible();
 	}
 
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
@@ -150,8 +158,8 @@ abstract class Homepage {
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ETH-ETH`).waitFor(options);
 
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
@@ -214,6 +222,32 @@ abstract class Homepage {
 
 	async waitForLoadState() {
 		await this.#page.waitForLoadState('networkidle');
+	}
+
+	async navigateTo(testId: string): Promise<void> {
+		if (await this.isVisibleByTestId(testId)) {
+			await this.clickByTestId(testId);
+		} else {
+			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
+			await navigationMenuButton.click();
+			const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU);
+			await navigationMenu.getByTestId(testId).click();
+		}
+	}
+
+	async activateTestnetSettings(): Promise<void> {
+		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.clickByTestId(TESTNET_TOGGLE);
+		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
+	}
+
+	async takeScreenshot(): Promise<void> {
+		await expect(this.#page).toHaveScreenshot({
+			// creates a snapshot as a fullPage and not just certain parts.
+			fullPage: true,
+			// playwright can retry flaky tests in the amount of time set below.
+			timeout: 5 * 60 * 1000
+		});
 	}
 
 	abstract extendWaitForReady(): Promise<void>;

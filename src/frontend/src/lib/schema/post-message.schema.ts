@@ -8,15 +8,17 @@ import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
-import type { BtcAddress } from '$lib/types/address';
+import type { BtcAddress, SolAddress } from '$lib/types/address';
 import { CanisterIdTextSchema, type OptionCanisterIdText } from '$lib/types/canister';
 import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
+import type { SolanaNetworkType } from '$sol/types/network';
+import type { SplTokenAddress } from '$sol/types/spl';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const PostMessageRequestSchema = z.enum([
 	'startIdleTimer',
@@ -32,16 +34,22 @@ export const PostMessageRequestSchema = z.enum([
 	'startIcrcWalletTimer',
 	'triggerIcrcWalletTimer',
 	'stopBtcWalletTimer',
+	'stopSolWalletTimer',
 	'startBtcWalletTimer',
+	'startSolWalletTimer',
 	'triggerBtcWalletTimer',
+	'triggerSolWalletTimer',
 	'stopBtcStatusesTimer',
 	'startBtcStatusesTimer',
 	'triggerBtcStatusesTimer',
 	'stopCkBTCUpdateBalanceTimer',
 	'startCkBTCUpdateBalanceTimer',
-	'stopCkMinterInfoTimer',
-	'startCkMinterInfoTimer',
-	'triggerCkMinterInfoTimer'
+	'stopCkEthMinterInfoTimer',
+	'startCkEthMinterInfoTimer',
+	'triggerCkEthMinterInfoTimer',
+	'stopCkBtcMinterInfoTimer',
+	'startCkBtcMinterInfoTimer',
+	'triggerCkBtcMinterInfoTimer'
 ]);
 
 export const PostMessageDataRequestSchema = z.never();
@@ -50,7 +58,8 @@ export const PostMessageDataResponseSchema = z.object({}).strict();
 export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	// TODO: generate zod schema for Erc20ContractAddress
 	erc20Addresses: z.array(z.custom<Erc20ContractAddress>()),
-	icrcCanisterIds: z.array(CanisterIdTextSchema)
+	icrcCanisterIds: z.array(CanisterIdTextSchema),
+	splAddresses: z.array(z.custom<SplTokenAddress>())
 });
 
 export const PostMessageDataRequestIcrcSchema = IcCanistersSchema.merge(
@@ -81,9 +90,17 @@ export const PostMessageDataRequestBtcSchema = z.object({
 	minterCanisterId: z.custom<OptionCanisterIdText>().optional()
 });
 
+export const PostMessageDataRequestSolSchema = z.object({
+	// TODO: generate zod schema for CertifiedData
+	address: z.custom<CertifiedData<SolAddress>>(),
+	solanaNetwork: z.custom<SolanaNetworkType>(),
+	tokenAddress: z.custom<SolAddress>().optional()
+});
+
 export const PostMessageResponseStatusSchema = z.enum([
 	'syncIcWalletStatus',
 	'syncBtcWalletStatus',
+	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
 	'syncCkBTCUpdateBalanceStatus'
@@ -97,9 +114,11 @@ export const PostMessageResponseSchema = z.enum([
 	'syncIcpWallet',
 	'syncIcrcWallet',
 	'syncBtcWallet',
+	'syncSolWallet',
 	'syncIcpWalletError',
 	'syncIcrcWalletError',
 	'syncBtcWalletError',
+	'syncSolWalletError',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
 	'syncBtcStatuses',
@@ -122,7 +141,9 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentBtcPrice: z.custom<CoingeckoSimplePriceResponse>(),
 	currentErc20Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>(),
-	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>()
+	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>(),
+	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>()
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({

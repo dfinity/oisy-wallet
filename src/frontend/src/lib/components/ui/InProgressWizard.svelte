@@ -15,10 +15,14 @@
 	export let steps: ProgressSteps;
 	export let warningType: 'transaction' | 'manage' = 'transaction';
 
-	const startConfirmToClose = () => dirtyWizardState.set(true);
-	const stopConfirmToClose = () => dirtyWizardState.set(false);
-
-	$: confirmToCloseBrowser($dirtyWizardState);
+	const startConfirmToClose = () => {
+		dirtyWizardState.set(true);
+		confirmToCloseBrowser(true);
+	};
+	const stopConfirmToClose = () => {
+		dirtyWizardState.set(false);
+		confirmToCloseBrowser(false);
+	};
 
 	onMount(startConfirmToClose);
 	onDestroy(stopConfirmToClose);
@@ -26,6 +30,7 @@
 	// Workaround: SvelteKit does not consistently call `onDestroy`. Various issues are open regarding this on Svelte side.
 	// This is the simplest, least verbose solution to always disconnect before unload, given that this component is used in `<WizardModal />` only.
 	$: $modalStore,
+		$dirtyWizardState,
 		(() => {
 			if (nonNullish($modalStore)) {
 				return;

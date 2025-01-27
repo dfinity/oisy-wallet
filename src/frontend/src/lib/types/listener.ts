@@ -14,3 +14,7 @@ export interface TokenToListener {
 	token: Token;
 	listener: typeof BitcoinListener | typeof EthListener;
 }
+
+export interface WebSocketListener {
+	disconnect: () => Promise<void>;
+}
