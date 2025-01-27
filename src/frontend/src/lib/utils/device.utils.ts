@@ -1,8 +1,8 @@
 import { nonNullish } from '@dfinity/utils';
 
-type UserAgentData = {
+interface UserAgentData {
 	mobile?: boolean;
-};
+}
 
 export const isMobile = () => {
 	if ('userAgentData' in navigator && nonNullish(navigator.userAgentData)) {
