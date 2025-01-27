@@ -1,4 +1,4 @@
-use candid::{CandidType, Deserialize, Principal};
+use candid::{de, CandidType, Deserialize, Principal};
 use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
@@ -7,6 +7,16 @@ pub type Timestamp = u64;
 
 #[cfg(test)]
 mod tests;
+
+pub trait Validate {
+    fn validate(&self) -> Result<(), String>;
+    fn validated(self) -> Result<Self, String>
+    where
+        Self: Sized,
+    {
+        self.validate().map(|_| self)
+    }
+}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
