@@ -32,6 +32,6 @@ runs:
     - name: Deploy the backend
       shell: bash
       run: |
-#        ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
+        ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
         dfx canister create --all
         dfx deploy backend
