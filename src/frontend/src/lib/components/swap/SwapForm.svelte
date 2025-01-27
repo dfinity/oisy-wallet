@@ -28,6 +28,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -170,7 +171,10 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<SwapFees />
+			<div class="flex flex-col gap-3">
+				<SwapProvider />
+				<SwapFees />
+			</div>
 		{/if}
 	</div>
 
