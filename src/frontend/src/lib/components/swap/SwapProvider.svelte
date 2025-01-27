@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import SwapValue from '$lib/components/swap/SwapValue.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { dAppDescriptions } from '$lib/types/dapp-description';
+	import { dAppDescriptions, type OisyDappDescription } from '$lib/types/dapp-description';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let kongSwapDApp;
+	let kongSwapDApp: OisyDappDescription;
 	$: kongSwapDApp = dAppDescriptions.find((d) => d.id === 'kongswap');
 
 	let websiteURL: Option<URL>;
@@ -40,14 +39,7 @@
 			<div class="mr-auto">
 				<div class="text-lg font-bold">{kongSwapDApp.name}</div>
 				{#if nonNullish(websiteURL) && nonNullish(displayURL)}
-					<ExternalLink
-						iconVisible={false}
-						ariaLabel={replacePlaceholders($i18n.dapps.text.open_dapp, {
-							$dAppName: kongSwapDApp.name
-						})}
-						href={websiteURL.toString()}
-						styleClass="text-sm text-misty-rose">{displayURL}</ExternalLink
-					>
+					<div class="text-sm text-misty-rose">{displayURL}</div>
 				{/if}
 			</div>
 		</div>
