@@ -70,8 +70,6 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 
-const MAX_SYMBOL_LENGTH: usize = 20;
-
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())
