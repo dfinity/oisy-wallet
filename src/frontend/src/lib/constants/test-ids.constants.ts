@@ -77,3 +77,5 @@ export const SWAP_AMOUNT_EXCHANGE = 'swap-amount-exchange';
 export const SWAP_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
 export const SWAP_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
 export const SWAP_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
+
+export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
