@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+	import { assertNonNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Lamports } from '@solana/rpc-types';
 	import { getContext, onDestroy } from 'svelte';
@@ -10,7 +10,6 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
-	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
