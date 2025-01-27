@@ -42,7 +42,8 @@ import {
 import { assertTransactionIsFullySigned } from '@solana/transactions';
 import {
 	getComputeUnitEstimateForTransactionMessageFactory,
-	sendTransactionWithoutConfirmingFactory
+	sendTransactionWithoutConfirmingFactory,
+	sendAndConfirmTransactionFactory
 } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
@@ -216,6 +217,7 @@ export const sendSol = async ({
 	progress,
 	token,
 	amount,
+	prioritizationFee,
 	destination,
 	source
 }: {
@@ -223,6 +225,7 @@ export const sendSol = async ({
 	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: BigNumber;
+	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
 }): Promise<Signature> => {
@@ -272,40 +275,17 @@ export const sendSol = async ({
 	const computeUnitsEstimate =
 		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
 
-	// const transactionMessageWithComputeUnitLimit = prependTransactionMessageInstruction(
-	// 	getSetComputeUnitLimitInstruction({ units: computeUnitsEstimate }),
-	// 	transactionMessage
-	// );
+	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
 
-	// console.log('transactionMessageWithComputeUnitLimit:', transactionMessageWithComputeUnitLimit);
-
-	const { getRecentPrioritizationFees } = rpc;
-
-	const fees = await getRecentPrioritizationFees([
-		signer.address,
-		address(destination),
-		...(isTokenSpl(token) ? [address(token.address)] : [])
-	]).send();
-	console.log('fees 1:', fees);
-
-	// get the max of the fees
-	const maxFee = fees
-		.map(({ prioritizationFee }) => BigInt(prioritizationFee))
-		.reduce<bigint>((max, current) => (current > max ? current : max), 0n);
-
-	const computeUnitPrice = BigInt(Math.ceil(Number(maxFee) / computeUnitsEstimate));
-
-	console.log('computeUnitPrice:', computeUnitPrice, maxFee, computeUnitsEstimate);
-
-	const transactionMessageWithComputeUnitLimit2 = prependTransactionMessageInstruction(
+	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
 		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
 		transactionMessage
 	);
 
-	console.log('transactionMessageWithComputeUnitLimit2:', transactionMessageWithComputeUnitLimit2);
+	progress(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(
-		transactionMessageWithComputeUnitLimit2
+		prioritizationFee > 0n ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
 
 	progress(ProgressStepsSendSol.SEND);
