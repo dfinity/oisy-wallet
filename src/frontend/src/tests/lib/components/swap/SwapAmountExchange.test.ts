@@ -1,14 +1,14 @@
-import { fireEvent, render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
 import SwapAmountExchange from '$lib/components/swap/SwapAmountExchange.svelte';
-import type { OptionAmount } from '$lib/types/send';
-import type { DisplayUnit } from '$lib/types/swap';
 import {
 	SWAP_AMOUNT_EXCHANGE_BUTTON,
 	SWAP_AMOUNT_EXCHANGE_UNAVAILABLE,
 	SWAP_AMOUNT_EXCHANGE_VALUE
 } from '$lib/constants/test-ids.constants';
+import type { OptionAmount } from '$lib/types/send';
+import type { DisplayUnit } from '$lib/types/swap';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { fireEvent, render } from '@testing-library/svelte';
+import { describe, expect, it } from 'vitest';
 
 describe('SwapAmountExchange', () => {
 	const defaultProps = {
@@ -67,7 +67,7 @@ describe('SwapAmountExchange', () => {
 
 	it('handles undefined token', () => {
 		const { getByTestId } = render(SwapAmountExchange, {
-			...defaultProps,
+			...defaultProps
 		});
 		const valueElement = getByTestId(SWAP_AMOUNT_EXCHANGE_VALUE);
 		expect(valueElement).toHaveTextContent('0');
