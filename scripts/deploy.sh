@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 dfx canister create --all
-
+dfx deploy backend
 ./scripts/deploy.signer.sh
 
 mkdir -p ./target/ic
@@ -25,6 +25,5 @@ dfx deploy pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 dfx deploy rewards
-dfx deploy backend
 
 scripts/top-up-cycles-ledger-account.sh --cycles 50T
