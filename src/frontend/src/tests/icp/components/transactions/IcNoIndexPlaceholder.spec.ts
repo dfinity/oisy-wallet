@@ -56,7 +56,7 @@ describe('IcNoIndexPlaceholder', () => {
 				placeholderType: 'not-working'
 			});
 
-			const { container: iconContainer } = render(IconAlertTriangle);
+			const { container: iconContainer } = render(IconAlertTriangle, { styleClass: '' });
 
 			expect(container.innerHTML).toContain(iconContainer.innerHTML);
 		});
