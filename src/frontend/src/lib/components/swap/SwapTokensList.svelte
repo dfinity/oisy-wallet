@@ -12,8 +12,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
-	import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
