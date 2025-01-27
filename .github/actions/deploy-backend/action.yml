@@ -27,20 +27,8 @@ runs:
 
     - name: Start dfx
       shell: bash
-      run: dfx start --background --quiet
-
-    - name: Install binstall
-      shell: bash
-      run: scripts/setup cargo-binstall
-
-    - name: Install candid-extractor
-      shell: bash
-      run: scripts/setup candid-extractor
-
-    - name: Install candid-extractor
-      shell: bash
-      run: scripts/setup ic-wasm
-
+      run: dfx start --background --quiet 
+      
     - name: Deploy backend
       shell: bash
       run: npm run deploy
