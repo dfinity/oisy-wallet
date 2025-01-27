@@ -25,12 +25,12 @@ for tool in "${@}"; do
     ;;
   "cargo-install")
     export CARGO_NET_GIT_FETCH_WITH_CLI=true
-    export GITHUB_TOKEN=$token 
+    export GITHUB_TOKEN=$token
     cargo install "$tool@$(jq -r '.[env.tool].version' dev-tools.json)"
     ;;
   "cargo-binstall")
     export CARGO_NET_GIT_FETCH_WITH_CLI=true
-    export GITHUB_TOKEN=$token 
+    export GITHUB_TOKEN=$token
     cargo binstall --force --no-confirm "${tool}@$(jq -r '.[env.tool].version' dev-tools.json)"
     ;;
   "go")
