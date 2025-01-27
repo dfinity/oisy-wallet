@@ -11,20 +11,20 @@
 	export let amount: OptionAmount;
 	export let exchangeRate: number | undefined;
 	export let token: IcToken | undefined = undefined;
-	export let mode: DisplayUnit = 'token';
+	export let displayUnit: DisplayUnit = 'token';
 
 	const dispatch = createEventDispatcher<{
-		mode: DisplayUnit;
+		displayUnitChange: DisplayUnit;
 	}>();
 
 	const handleUnitSwitch = () => {
-		const newMode = mode === 'usd' ? 'token' : 'usd';
-		dispatch('mode', newMode);
+		const newMode = displayUnit === 'usd' ? 'token' : 'usd';
+		dispatch('displayUnitChange', newMode);
 	};
 
 	let amountUSD: number | undefined;
 	$: amountUSD =
-		mode === 'usd' && nonNullish(amount) && nonNullish(exchangeRate)
+		displayUnit === 'usd' && nonNullish(amount) && nonNullish(exchangeRate)
 			? Number(amount) * exchangeRate
 			: 0;
 
@@ -33,7 +33,7 @@
 
 	let formattedTokenAmount: string | undefined;
 	$: formattedTokenAmount = nonNullish(token)
-		? mode === 'token' && nonNullish(amount)
+		? displayUnit === 'token' && nonNullish(amount)
 			? `${Number(amount).toString()} ${token.symbol}`
 			: `${0} ${token.symbol}`
 		: '0';
@@ -44,7 +44,7 @@
 		<button on:click={handleUnitSwitch}>
 			<IconArrowUpDown size="14" />
 		</button>
-		<span>{mode === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span>
+		<span>{displayUnit === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span>
 	{:else}
 		<span>{$i18n.swap.text.exchange_is_not_available}</span>
 	{/if}
