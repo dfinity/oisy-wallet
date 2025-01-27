@@ -17,6 +17,7 @@ import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
@@ -33,13 +34,17 @@ import {
 import {
 	appendTransactionMessageInstructions,
 	createTransactionMessage,
+	prependTransactionMessageInstruction,
 	setTransactionMessageLifetimeUsingBlockhash,
 	type ITransactionMessageWithFeePayer,
 	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
-import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import {
+	getComputeUnitEstimateForTransactionMessageFactory,
+	sendAndConfirmTransactionFactory
+} from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -65,7 +70,7 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 
 	const correctedLatestBlockhash = {
 		...latestBlockhash,
-		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight + 100n
+		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
 	};
 
 	return pipe(
@@ -214,6 +219,7 @@ export const sendSol = async ({
 	progress,
 	token,
 	amount,
+	prioritizationFee,
 	destination,
 	source
 }: {
@@ -221,6 +227,7 @@ export const sendSol = async ({
 	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: BigNumber;
+	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
 }): Promise<Signature> => {
@@ -263,9 +270,26 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
+	const getComputeUnitEstimateForTransactionMessage =
+		getComputeUnitEstimateForTransactionMessageFactory({
+			rpc
+		});
+
+	const computeUnitsEstimate =
+		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
+
+	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
+
+	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
+		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
+		transactionMessage
+	);
+
 	progress(ProgressStepsSendSol.SIGN);
 
-	const { signedTransaction, signature } = await signTransaction(transactionMessage);
+	const { signedTransaction, signature } = await signTransaction(
+		prioritizationFee > 0n ? transactionMessageWithComputeUnitPrice : transactionMessage
+	);
 
 	progress(ProgressStepsSendSol.SEND);
 
