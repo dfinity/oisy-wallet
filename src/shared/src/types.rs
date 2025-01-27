@@ -8,6 +8,9 @@ pub type Timestamp = u64;
 #[cfg(test)]
 mod tests;
 
+/// The default maximum length of a token symbol.
+pub const MAX_SYMBOL_LENGTH: usize = 20;
+
 pub trait Validate {
     /// Verifies that an object is semantically valid.
     ///

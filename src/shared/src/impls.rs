@@ -400,6 +400,12 @@ impl Validate for Token {
 
 impl Validate for SplToken {
     fn validate(&self) -> Result<(), candid::Error> {
+        use crate::types::MAX_SYMBOL_LENGTH;
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg("Symbol too long"));
+            }
+        }
         self.token_address.validate()
     }
 }

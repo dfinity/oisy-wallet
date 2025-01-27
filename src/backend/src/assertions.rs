@@ -1,4 +1,4 @@
-use crate::MAX_SYMBOL_LENGTH;
+use shared::types::MAX_SYMBOL_LENGTH;
 use shared::types::token::UserToken;
 
 pub fn assert_token_symbol_length(token: &UserToken) -> Result<(), String> {
