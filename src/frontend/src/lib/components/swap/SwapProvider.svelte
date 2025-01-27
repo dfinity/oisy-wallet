@@ -3,11 +3,11 @@
 	import SwapValue from '$lib/components/swap/SwapValue.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { dAppDescriptions, type OisyDappDescription } from '$lib/types/dapp-description';
+	import { dAppDescriptions } from '$lib/types/dapp-description';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let kongSwapDApp: OisyDappDescription;
+	let kongSwapDApp;
 	$: kongSwapDApp = dAppDescriptions.find((d) => d.id === 'kongswap');
 
 	let websiteURL: Option<URL>;
@@ -25,6 +25,7 @@
 	}
 </script>
 
+{#if nonNullish(kongSwapDApp)}
 <SwapValue>
 	<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
@@ -45,3 +46,4 @@
 		</div>
 	</svelte:fragment>
 </SwapValue>
+{/if}
