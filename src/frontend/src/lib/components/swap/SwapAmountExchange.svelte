@@ -11,7 +11,7 @@
 	export let amount: OptionAmount;
 	export let exchangeRate: number | undefined;
 	export let token: IcToken | undefined = undefined;
-	export let mode: DisplayUnit = 'usd';
+	export let mode: DisplayUnit = 'token';
 
 	const dispatch = createEventDispatcher<{
 		mode: DisplayUnit;
