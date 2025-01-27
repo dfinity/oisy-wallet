@@ -9,12 +9,20 @@ pub type Timestamp = u64;
 mod tests;
 
 pub trait Validate {
+    /// Verifies that an object is semantically valid.
+    ///
+    /// # Errors
+    /// - If the object is invalid.
     fn validate(&self) -> Result<(), candid::Error>;
+    /// Returns the object if it is semantically valid.
+    ///
+    /// # Errors
+    /// - If the object is invalid.
     fn validated(self) -> Result<Self, candid::Error>
     where
         Self: Sized,
     {
-        self.validate().map(|_| self)
+        self.validate().map(|()| self)
     }
 }
 
@@ -184,7 +192,6 @@ pub mod custom_token {
     ///
     /// # References
     /// - <https://solana.com/docs/more/exchange#basic-verification>
-
     ///
     impl<'de> Deserialize<'de> for SplTokenId {
         fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
