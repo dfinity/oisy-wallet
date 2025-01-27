@@ -24,10 +24,14 @@ for tool in "${@}"; do
     )
     ;;
   "cargo-install")
-    cargo install "$tool@$(jq -r '.[env.tool].version' dev-tools.json)" --token "$token"
+    export CARGO_NET_GIT_FETCH_WITH_CLI=true
+    export GITHUB_TOKEN=$token 
+    cargo install "$tool@$(jq -r '.[env.tool].version' dev-tools.json)"
     ;;
   "cargo-binstall")
-    cargo binstall --force --no-confirm "${tool}@$(jq -r '.[env.tool].version' dev-tools.json)" --token "$token"
+    export CARGO_NET_GIT_FETCH_WITH_CLI=true
+    export GITHUB_TOKEN=$token 
+    cargo binstall --force --no-confirm "${tool}@$(jq -r '.[env.tool].version' dev-tools.json)"
     ;;
   "go")
     GOBIN="$HOME/.local/bin" go install "$(jq -r '.[env.tool].source' dev-tools.json)@$(jq -r '.[env.tool].version' dev-tools.json)"
