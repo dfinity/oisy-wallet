@@ -27,8 +27,8 @@ runs:
 
     - name: Start dfx
       shell: bash
-      run: dfx start --background --quiet 
-      
+      run: dfx start --background --quiet
+
     - name: Deploy backend
       shell: bash
       run: npm run deploy
