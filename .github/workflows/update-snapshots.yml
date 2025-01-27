@@ -76,6 +76,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend.wasm.gz
+          path: out/backend.wasm.gz
 
       - name: Prepare macOS
         if: runner.os == 'macOS'
