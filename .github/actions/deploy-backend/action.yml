@@ -39,7 +39,7 @@ runs:
 
     - name: Install candid-extractor
       shell: bash
-      run: scripts/setup ic-wasm     
+      run: scripts/setup ic-wasm
 
     - name: Deploy backend
       shell: bash
