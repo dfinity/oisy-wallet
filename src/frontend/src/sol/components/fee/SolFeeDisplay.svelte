@@ -11,14 +11,18 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getSolCreateAccountFee } from '$sol/api/solana.api';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
+	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 
 	export let showAtaFee = false;
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const { feeStore:fee, feeDecimalsStore: decimals, feeSymbolStore:symbol }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
+	const {
+		feeStore: fee,
+		feeDecimalsStore: decimals,
+		feeSymbolStore: symbol
+	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
 	let ataFee: Lamports | undefined = undefined;
 
