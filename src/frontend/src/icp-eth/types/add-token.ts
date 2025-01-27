@@ -1,10 +1,10 @@
 import type { Either } from '$lib/utils/ts.utils';
 
-export interface Erc20AddTokenData {
-	contractAddress: string;
+interface Erc20AddTokenData {
+	erc20ContractAddress: string;
 }
 
-export interface IcAddTokenData {
+interface IcAddTokenData {
 	ledgerCanisterId: string;
 	indexCanisterId: string | undefined;
 }
