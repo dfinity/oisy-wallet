@@ -3,24 +3,26 @@
 	import SwapValue from '$lib/components/swap/SwapValue.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { dAppDescriptions } from '$lib/types/dapp-description';
+	import { dAppDescriptions, type OisyDappDescription } from '$lib/types/dapp-description';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let kongSwapDApp;
+	let kongSwapDApp: OisyDappDescription | undefined;
 	$: kongSwapDApp = dAppDescriptions.find((d) => d.id === 'kongswap');
 
 	let websiteURL: Option<URL>;
 	let displayURL: Option<string>;
 	$: {
-		try {
-			websiteURL = new URL(kongSwapDApp.website);
-			displayURL = websiteURL.hostname.startsWith('www.')
-				? websiteURL.hostname.substring(4)
-				: websiteURL.hostname;
-		} catch (e) {
-			websiteURL = null;
-			displayURL = null;
+		if (nonNullish(kongSwapDApp)) {
+			try {
+				websiteURL = new URL(kongSwapDApp.website);
+				displayURL = websiteURL.hostname.startsWith('www.')
+					? websiteURL.hostname.substring(4)
+					: websiteURL.hostname;
+			} catch (e) {
+				websiteURL = null;
+				displayURL = null;
+			}
 		}
 	}
 </script>
