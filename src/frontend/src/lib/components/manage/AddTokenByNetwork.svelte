@@ -29,6 +29,12 @@
 			? $networks.find(({ name }) => name === networkName)
 			: undefined);
 
+	let isIcpNetwork = false;
+	$: isIcpNetwork = isNetworkIdICP(network?.id);
+
+	let isEthereumNetwork = false;
+	$: isEthereumNetwork = isNetworkIdEthereum(network?.id);
+
 	let ledgerCanisterId = tokenData?.ledgerCanisterId ?? '';
 	let indexCanisterId = tokenData?.indexCanisterId ?? '';
 	let erc20ContractAddress = tokenData?.erc20ContractAddress ?? '';
@@ -36,7 +42,7 @@
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
 	$: {
-		if (isNetworkIdICP(network?.id)) {
+		if (isIcpNetwork) {
 			tokenData = {
 				ledgerCanisterId,
 				indexCanisterId:
@@ -44,7 +50,7 @@
 						? indexCanisterId
 						: undefined
 			};
-		} else if (isNetworkIdEthereum(network?.id)) {
+		} else if (isEthereumNetwork) {
 			tokenData = { erc20ContractAddress };
 		} else {
 			tokenData = {};
@@ -60,7 +66,7 @@
 	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
 
 	let invalid = true;
-	$: invalid = isNetworkIdEthereum(network?.id) ? invalidErc20 : invalidIc;
+	$: invalid = isIcpNetwork ? invalidIc : isEthereumNetwork ? invalidErc20 : false;
 
 	let enabledNetworkSelector = true;
 	$: enabledNetworkSelector = isNullish($selectedNetwork);
@@ -91,9 +97,9 @@
 			</Value>
 		{/if}
 
-		{#if isNetworkIdICP(network?.id)}
+		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
-		{:else if isNetworkIdEthereum(network?.id)}
+		{:else if isEthereumNetwork}
 			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
