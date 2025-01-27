@@ -138,6 +138,9 @@ pub mod token {
     }
 }
 
+/// The default maximum length of a token symbol.
+pub const MAX_SYMBOL_LENGTH: usize = 20;
+
 /// Extendable custom user defined tokens
 pub mod custom_token {
     use crate::types::Version;
