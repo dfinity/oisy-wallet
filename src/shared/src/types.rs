@@ -1,4 +1,4 @@
-use candid::{de, CandidType, Deserialize, Principal};
+use candid::{CandidType, Deserialize, Principal};
 use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
@@ -9,8 +9,8 @@ pub type Timestamp = u64;
 mod tests;
 
 pub trait Validate {
-    fn validate(&self) -> Result<(), String>;
-    fn validated(self) -> Result<Self, String>
+    fn validate(&self) -> Result<(), candid::Error>;
+    fn validated(self) -> Result<Self, candid::Error>
     where
         Self: Sized,
     {
@@ -170,7 +170,7 @@ pub mod custom_token {
     /// A Solana token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct SplToken {
-        pub token_address: String,
+        pub token_address: SplTokenId,
         pub symbol: Option<String>,
         pub decimals: Option<u8>,
     }
@@ -227,7 +227,7 @@ pub mod custom_token {
         /// An ICRC-1 compliant token on the Internet Computer mainnet.
         Icrc(LedgerId),
         /// A Solana token on the Solana mainnet.
-        SolMainnet(String),
+        SolMainnet(SplTokenId),
     }
 }
 

@@ -4,7 +4,8 @@ mod custom_token {
     //! Tests for the custom_token module.
     use candid::{Decode, Encode};
 
-    use super::super::custom_token::*;
+    use crate::types::custom_token::*;
+    use crate::types::Validate;
 
     const SPL_TEST_VECTORS: [(&str, bool); 4] = [
         ("", false),
@@ -31,7 +32,7 @@ mod custom_token {
             let spl_token_id = SplTokenId(input.to_string());
 
             let candid = Encode!(&spl_token_id).unwrap();
-            let (result): Result<SplTokenId, _> = Decode!(&candid, SplTokenId);
+            let result: Result<SplTokenId, _> = Decode!(&candid, SplTokenId);
             assert_eq!(*expected, result.is_ok());
         }
     }
