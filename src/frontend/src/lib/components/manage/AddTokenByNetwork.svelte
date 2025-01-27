@@ -3,7 +3,7 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
+	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
@@ -100,7 +100,7 @@
 		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isEthereumNetwork}
-			<AddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
