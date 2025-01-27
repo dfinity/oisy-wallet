@@ -62,6 +62,8 @@
 	const updateDisplay = () => {
 		if (isNullish(value)) {
 			value = undefined;
+			displayValue = undefined;
+			previousDisplayValue = displayValue;
 			return;
 		}
 
