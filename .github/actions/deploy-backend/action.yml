@@ -22,6 +22,13 @@ runs:
     - name: Prepare
       uses: ./.github/actions/prepare
 
+    - name: Create GitHub App Token
+      uses: actions/create-github-app-token@v1
+      id: app-token
+      with:
+        app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+        private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
     - name: Install dfx
       uses: dfinity/setup-dfx@main
 
@@ -35,3 +42,5 @@ runs:
         ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
         dfx canister create --all
         dfx deploy backend
+      with:
+        token: ${{ steps.app-token.outputs.token }}
