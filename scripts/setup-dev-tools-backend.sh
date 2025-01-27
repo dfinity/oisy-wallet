@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-./scripts/setup cargo-binstall
+cargo install cargo-binstall
 
 ./scripts/setup candid-extractor
 
