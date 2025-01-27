@@ -94,6 +94,6 @@ export const themeVariables = {
 		warning: 'var(--color-warning-default)',
 		'warning-alt': 'var(--color-warning-light)',
 		error: 'var(--color-error-default)',
-		'error-alt': 'var(--color-error-light)',
+		'error-alt': 'var(--color-error-light)'
 	}
 };
