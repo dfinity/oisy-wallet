@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,13 +12,8 @@
 	export let token: IcToken | undefined = undefined;
 	export let displayUnit: DisplayUnit = 'token';
 
-	const dispatch = createEventDispatcher<{
-		displayUnitChange: DisplayUnit;
-	}>();
-
 	const handleUnitSwitch = () => {
-		const newMode = displayUnit === 'usd' ? 'token' : 'usd';
-		dispatch('displayUnitChange', newMode);
+		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
 
 	let amountUSD: number | undefined;
