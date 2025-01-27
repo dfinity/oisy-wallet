@@ -2,8 +2,8 @@
 	import { createEventDispatcher } from 'svelte';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_SWITCH_TOKENS_BUTTON } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let disabled = false;
 	const dispatch = createEventDispatcher();
