@@ -2,6 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
+	import {
+		SWAP_AMOUNT_EXCHANGE,
+		SWAP_AMOUNT_EXCHANGE_BUTTON,
+		SWAP_AMOUNT_EXCHANGE_VALUE,
+		SWAP_AMOUNT_EXCHANGE_UNAVAILABLE
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -33,13 +39,13 @@
 		: '0';
 </script>
 
-<div class="flex items-center gap-1">
+<div class="flex items-center gap-1" data-tid={SWAP_AMOUNT_EXCHANGE}>
 	{#if nonNullish(exchangeRate)}
-		<button on:click={handleUnitSwitch}>
+		<button on:click={handleUnitSwitch} data-tid={SWAP_AMOUNT_EXCHANGE_BUTTON}>
 			<IconArrowUpDown size="14" />
 		</button>
-		<span>{displayUnit === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span>
+		<span data-tid={SWAP_AMOUNT_EXCHANGE_VALUE}>{displayUnit === 'usd' ? formattedUSDAmount : formattedTokenAmount}</span>
 	{:else}
-		<span>{$i18n.swap.text.exchange_is_not_available}</span>
+		<span data-tid={SWAP_AMOUNT_EXCHANGE_UNAVAILABLE}>{$i18n.swap.text.exchange_is_not_available}</span>
 	{/if}
 </div>

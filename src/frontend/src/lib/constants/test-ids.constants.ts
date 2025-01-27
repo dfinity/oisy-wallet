@@ -62,6 +62,11 @@ export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
 export const SWAP_INPUT_CURRENCY = "swap-input-currency"
 export const SWAP_INPUT_CURRENCY_USD_SYMBOL = "swap-input-currency-usd-symbol"
 
+export const SWAP_AMOUNT_EXCHANGE = "swap-amount-exchange"
+export const SWAP_AMOUNT_EXCHANGE_BUTTON = "swap-amount-exchange-button"
+export const SWAP_AMOUNT_EXCHANGE_VALUE = "swap-amount-exchange-value"
+export const SWAP_AMOUNT_EXCHANGE_UNAVAILABLE = "swap-amount-exchange-unavailable"
+
 export const TOKEN_MENU_IC = 'token-menu-ic';
 export const TOKEN_MENU_IC_BUTTON = 'token-menu-ic-button';
 export const TOKEN_MENU_ETH = 'token-menu-eth';
