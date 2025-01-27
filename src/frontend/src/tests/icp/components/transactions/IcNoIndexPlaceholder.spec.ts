@@ -32,7 +32,7 @@ describe('IcNoIndexPlaceholder', () => {
 		it('should render the correct icon', () => {
 			const { container } = render(IcNoIndexPlaceholder, { placeholderType: 'missing' });
 
-			const { container: iconContainer } = render(IconSearchClose);
+			const { container: iconContainer } = render(IconSearchClose, { styleClass: '' });
 
 			expect(container.innerHTML).toContain(iconContainer.innerHTML);
 		});
