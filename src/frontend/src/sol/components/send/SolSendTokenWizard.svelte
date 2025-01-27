@@ -7,6 +7,10 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
+		TRACK_COUNT_SOL_SEND_ERROR,
+		TRACK_COUNT_SOL_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import {
 		solAddressDevnet,
 		solAddressLocal,
 		solAddressMainnet,
@@ -15,6 +19,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -43,8 +48,6 @@
 	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	const progress = (step: ProgressStepsSendSol) => (sendProgressStep = step);
 
 	let network: Network | undefined = undefined;
 	$: network = $sendToken.network;
@@ -104,31 +107,34 @@
 		dispatch('icNext');
 
 		try {
-			sendProgressStep = ProgressStepsSendSol.INITIALIZATION;
-
-			// TODO: add tracking
 			await sendSol({
 				identity: $authIdentity,
+				progress: (step: ProgressStepsSendSol) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
 				destination,
-				source,
-				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendSol.INITIALIZATION) {
-						progress(ProgressStepsSendSol.SEND);
-					} else if (sendProgressStep === ProgressStepsSendSol.SEND) {
-						progress(ProgressStepsSendSol.DONE);
-					}
+				source
+			});
+
+			await trackEvent({
+				name: TRACK_COUNT_SOL_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol
 				}
 			});
 
-			sendProgressStep = ProgressStepsSendSol.DONE;
-
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			await trackEvent({
+				name: TRACK_COUNT_SOL_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
+
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
 				err
