@@ -85,9 +85,6 @@ jobs:
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
-      - name: Prepare
-        uses: ./.github/actions/prepare
-
       - name: Run Playwright tests
         run: npm run e2e:snapshots
 
