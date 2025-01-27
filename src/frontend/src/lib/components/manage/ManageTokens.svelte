@@ -143,6 +143,7 @@
 		bind:filter
 		noMatch={noTokensMatch}
 		placeholder={$i18n.tokens.placeholder.search_token}
+		autofocus={window.innerWidth >= 1024}
 	/>
 </div>
 

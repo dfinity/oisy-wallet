@@ -40,6 +40,7 @@
 	bind:filter
 	noMatch={noTokensMatch}
 	placeholder={$i18n.tokens.placeholder.search_token}
+	autofocus={window.innerWidth >= 1024}
 />
 
 <div class="my-6 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
