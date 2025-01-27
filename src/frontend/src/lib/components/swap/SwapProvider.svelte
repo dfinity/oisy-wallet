@@ -26,24 +26,24 @@
 </script>
 
 {#if nonNullish(kongSwapDApp)}
-<SwapValue>
-	<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
+	<SwapValue>
+		<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
-	<svelte:fragment slot="main-value">
-		<div class="flex gap-2">
-			<div class="mt-1">
-				<Logo
-					src={kongSwapDApp.logo}
-					alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: kongSwapDApp.name })}
-				/>
+		<svelte:fragment slot="main-value">
+			<div class="flex gap-2">
+				<div class="mt-1">
+					<Logo
+						src={kongSwapDApp.logo}
+						alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: kongSwapDApp.name })}
+					/>
+				</div>
+				<div class="mr-auto">
+					<div class="text-lg font-bold">{kongSwapDApp.name}</div>
+					{#if nonNullish(websiteURL) && nonNullish(displayURL)}
+						<div class="text-sm text-misty-rose">{displayURL}</div>
+					{/if}
+				</div>
 			</div>
-			<div class="mr-auto">
-				<div class="text-lg font-bold">{kongSwapDApp.name}</div>
-				{#if nonNullish(websiteURL) && nonNullish(displayURL)}
-					<div class="text-sm text-misty-rose">{displayURL}</div>
-				{/if}
-			</div>
-		</div>
-	</svelte:fragment>
-</SwapValue>
+		</svelte:fragment>
+	</SwapValue>
 {/if}
