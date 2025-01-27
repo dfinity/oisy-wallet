@@ -9,7 +9,7 @@ import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction
 import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
 import { getSplBalanceChange } from '$sol/utils/spl-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
+import { address, assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
@@ -278,4 +278,27 @@ export const getSplTransactions = async ({
 export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promise<Lamports> => {
 	const { getMinimumBalanceForRentExemption } = solanaHttpRpc(network);
 	return await getMinimumBalanceForRentExemption(ATA_SIZE).send();
+};
+
+/**
+ * Calculates the maximum among the most recent prioritization fees in microlamports.
+ *
+ * It is useful to have an estimate of how much a transaction could cost to be processed without expiring.
+ */
+export const estimatePriorityFee = async ({
+	network,
+	addresses
+}: {
+	network: SolanaNetworkType;
+	addresses?: SolAddress[];
+}): Promise<bigint> => {
+	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
+	const fees = await getRecentPrioritizationFees(
+		nonNullish(addresses) ? addresses.map(address) : undefined
+	).send();
+
+	return fees.reduce<bigint>(
+		(max, { prioritizationFee: current }) => (BigInt(current) > max ? BigInt(current) : max),
+		0n
+	);
 };
