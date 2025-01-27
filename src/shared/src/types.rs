@@ -5,6 +5,9 @@ use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
     ProofOfUniqueness,
@@ -142,6 +145,7 @@ pub mod token {
 pub mod custom_token {
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
+    use serde::{de, Deserializer};
 
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
@@ -153,10 +157,50 @@ pub mod custom_token {
         pub index_id: Option<IndexId>,
     }
 
+    /// A Solana token
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct SplToken {
+        pub token_address: String,
+        pub symbol: Option<String>,
+        pub decimals: Option<u8>,
+    }
+
+    /// A network-specific unique Solana token identifier.
+    #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+    #[serde(remote = "Self")]
+    pub struct SplTokenId(pub String);
+
+    /// Basic verification of the Solana address.
+    ///
+    /// # References
+    /// - <https://solana.com/docs/more/exchange#basic-verification>
+
+    ///
+    impl<'de> Deserialize<'de> for SplTokenId {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let unchecked = SplTokenId::deserialize(deserializer)?;
+            if unchecked.0.len() > 32 {
+                return Err(de::Error::custom(
+                    "Minimum valid Solana address length is 32",
+                ));
+            }
+            if unchecked.0.len() > 44 {
+                return Err(de::Error::custom(
+                    "Maximum valid Solana address length is 44",
+                ));
+            }
+            Ok(unchecked)
+        }
+    }
+
     /// A variant describing any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum Token {
         Icrc(IcrcToken),
+        Spl(SplToken),
     }
 
     /// User preferences for any token
@@ -170,7 +214,10 @@ pub mod custom_token {
     /// A cross-chain token identifier.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub enum CustomTokenId {
+        /// An ICRC-1 compliant token on the Internet Computer mainnet.
         Icrc(LedgerId),
+        /// A Solana token on the Solana mainnet.
+        SolMainnet(String),
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
+use crate::types::custom_token::{CustomToken, CustomTokenId, SplToken, SplTokenId, Token};
 use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
 use crate::types::token::UserToken;
@@ -9,7 +9,7 @@ use crate::types::{
     ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
     Timestamp, TokenVersion, Version,
 };
-use candid::Principal;
+use candid::{de, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use std::collections::BTreeMap;
 use std::fmt;
@@ -20,6 +20,9 @@ impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
             Token::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
+            Token::Spl(SplToken { token_address, .. }) => {
+                CustomTokenId::SolMainnet(token_address.clone())
+            }
         }
     }
 }
@@ -330,4 +333,32 @@ fn next_matches_strum_iter() {
         next.next(),
         "Once completed, it should stay completed"
     );
+}
+
+impl SplTokenId {
+    pub const MAX_LENGTH: usize = 44;
+    pub const MIN_LENGTH: usize = 32;
+    pub fn validate(self) -> Result<Self, candid::Error> {
+        if self.0.len() < 32 {
+            return Err(candid::Error::msg(
+                "Minimum valid Solana address length is 32",
+            ));
+        }
+        if self.0.len() > 44 {
+            return Err(candid::Error::msg(
+                "Maximum valid Solana address length is 44",
+            ));
+        }
+        let parsed_maybe = bs58::decode(&self.0).into_vec();
+        if let Ok(bytes) = parsed_maybe {
+            if bytes.len() != 32 {
+                return Err(candid::Error::msg(
+                    "Invalid Solana address: not 32 bytes when decoded",
+                ));
+            }
+        } else {
+            return Err(candid::Error::msg("Invalid Solana address: not base58"));
+        }
+        Ok(self)
+    }
 }
