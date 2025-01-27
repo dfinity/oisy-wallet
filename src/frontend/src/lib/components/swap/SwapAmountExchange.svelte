@@ -16,7 +16,7 @@
 	export let amount: OptionAmount;
 	export let exchangeRate: number | undefined;
 	export let token: IcToken | undefined = undefined;
-	export let displayUnit: DisplayUnit = 'token';
+	export let displayUnit: DisplayUnit = 'usd';
 	export let disabled = false;
 
 	const handleUnitSwitch = () => {
