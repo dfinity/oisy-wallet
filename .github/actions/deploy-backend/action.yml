@@ -31,4 +31,4 @@ runs:
 
     - name: Deploy backend
       shell: bash
-      run: npm run deploy
+      run: dfx deploy backend
