@@ -39,4 +39,3 @@ runs:
       env:
         token: ${{ inputs.token }}
       run: npm run deploy
-
