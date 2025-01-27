@@ -12,8 +12,6 @@
 	export let token: IcToken | undefined = undefined;
 	export let displayUnit: DisplayUnit = 'token';
 
-	$: isUSD = displayUnit === 'usd';
-
 	const handleUnitSwitch = () => {
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
