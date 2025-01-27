@@ -63,6 +63,10 @@
 			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
 			: false;
 
+	let disableSwitchTokens = false;
+	$: disableSwitchTokens =
+		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
+
 	const dispatch = createEventDispatcher();
 
 	let invalid: boolean;
@@ -125,7 +129,7 @@
 				</svelte:fragment>
 			</SwapSelectToken>
 
-			<SwapSwitchTokensButton on:icSwitchTokens={onTokensSwitch} />
+			<SwapSwitchTokensButton disabled={disableSwitchTokens} on:icSwitchTokens={onTokensSwitch} />
 
 			<SwapSelectToken
 				token={$destinationToken}
