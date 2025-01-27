@@ -1,18 +1,21 @@
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import { SWAP_SWITCH_TOKENS_BUTTON } from '$lib/constants/test-ids.constants';
+import { initSwapAmountsStore, SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
-import { initSwapAmountsStore, SWAP_AMOUNTS_CONTEXT_KEY, type SwapAmountsStoreData } from '$lib/stores/swap-amounts.store';
-import { mockValidIcToken, mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 
 describe('SwapForm', () => {
 	const mockContext = new Map();
 
 	beforeEach(() => {
-		mockContext.set(SWAP_CONTEXT_KEY, initSwapContext({
-			sourceToken: mockValidIcToken,
-			destinationToken: mockValidIcCkToken
-		}));
+		mockContext.set(
+			SWAP_CONTEXT_KEY,
+			initSwapContext({
+				sourceToken: mockValidIcToken,
+				destinationToken: mockValidIcCkToken
+			})
+		);
 	});
 
 	it('should not disable button if no swapAmount is present', () => {
@@ -51,7 +54,7 @@ describe('SwapForm', () => {
 
 		const { getByTestId } = render(SwapForm, {
 			props: {
-				swapAmount: "2",
+				swapAmount: '2',
 				receiveAmount: 2,
 				slippageValue: undefined
 			},
@@ -75,7 +78,7 @@ describe('SwapForm', () => {
 
 		const { getByTestId } = render(SwapForm, {
 			props: {
-				swapAmount: "1",
+				swapAmount: '1',
 				receiveAmount: undefined,
 				slippageValue: undefined
 			},
@@ -104,7 +107,7 @@ describe('SwapForm', () => {
 
 		const { getByTestId } = render(SwapForm, {
 			props: {
-				swapAmount: "1",
+				swapAmount: '1',
 				receiveAmount: 2,
 				slippageValue: undefined
 			},
