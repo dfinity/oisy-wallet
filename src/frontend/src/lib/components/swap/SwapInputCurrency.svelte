@@ -5,7 +5,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 
 	export let value: OptionAmount;
-	export let displayMode: DisplayUnit = 'usd';
+	export let displayUnit: DisplayUnit = 'token';
 	export let exchangeRate: number | undefined;
 	export let decimals: number;
 	export let name = 'swap-amount';
@@ -13,6 +13,8 @@
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
+
+	$: isUSDDisplayUnit = displayUnit === 'usd';
 
 	let displayValue: OptionAmount;
 	let previousDisplayValue: OptionAmount;
@@ -29,14 +31,18 @@
 			return;
 		}
 
-		value = nonNullish(exchangeRate) ? (displayMode === 'token' ? Number(displayValue) / exchangeRate : Number(displayValue)).toFixed(decimals) : displayValue;
+		value = (
+			isUSDDisplayUnit && nonNullish(exchangeRate)
+				? Number(displayValue) / exchangeRate
+				: Number(displayValue)
+		).toFixed(decimals);
 	};
 
 	const changeDirection = () => {
 		if (isNullish(exchangeRate) || isNullish(value)) {
 			return;
 		}
-		displayValue = displayMode === 'token' ? (Number(value) * exchangeRate).toFixed(2) : Number(value);
+		displayValue = isUSDDisplayUnit ? (Number(value) * exchangeRate).toFixed(2) : Number(value);
 		previousDisplayValue = displayValue;
 	};
 
@@ -48,7 +54,7 @@
 			return;
 		}
 
-		if (nonNullish(exchangeRate) && displayMode === 'token') {
+		if (nonNullish(exchangeRate) && isUSDDisplayUnit) {
 			const newDisplayValue = (Number(value) * exchangeRate).toFixed(2);
 
 			if (Number(newDisplayValue) !== Number(displayValue)) {
@@ -58,23 +64,20 @@
 			displayValue = Number(value);
 		}
 		previousDisplayValue = displayValue;
-
 	};
 
-	$: displayMode, changeDirection();
+	$: displayUnit, changeDirection();
 	$: value, updateDisplay();
 </script>
 
 <div
-	class="swap-input-currency h-full w-full font-bold flex items-center"
-	class:padding={displayMode === 'usd'}
+	class="swap-input-currency flex h-full w-full items-center font-bold"
+	class:padding={!isUSDDisplayUnit}
 	class:text-error={error}
 	class:animate-pulse={loading}
 >
-	{#if displayMode === 'token'}
-		<span class="pl-3 transition-colors" class:text-placeholder={isNullish(displayValue)}>
-			$
-		</span>
+	{#if isUSDDisplayUnit}
+		<span class="pl-3 transition-colors" class:text-placeholder={isNullish(displayValue)}> $ </span>
 	{/if}
 	<InputCurrency
 		bind:value={displayValue}
@@ -82,7 +85,7 @@
 		{name}
 		{placeholder}
 		{disabled}
-		decimals={displayMode === 'token' ? 2 : decimals}
+		decimals={isUSDDisplayUnit ? 2 : decimals}
 		on:focus
 		on:blur
 	>
@@ -91,26 +94,26 @@
 </div>
 
 <style lang="scss">
-  :global(.swap-input-currency div.input-block) {
-    display: block;
-    height: 100%;
-    justify-content: center;
-    --padding: 0;
-    --input-width: 100%;
-  }
+	:global(.swap-input-currency div.input-block) {
+		display: block;
+		height: 100%;
+		justify-content: center;
+		--padding: 0;
+		--input-width: 100%;
+	}
 
-  :global(.swap-input-currency div.input-field input[id]) {
-    height: 100%;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-  }
+	:global(.swap-input-currency div.input-field input[id]) {
+		height: 100%;
+		border: none;
+		border-radius: 0;
+		padding: 0;
+	}
 
-  :global(.swap-input-currency.padding div.input-field input[id]) {
-    padding: 0 0 0 0.75rem;
-  }
+	:global(.swap-input-currency.padding div.input-field input[id]) {
+		padding: 0 0 0 0.75rem;
+	}
 
-  .transition-colors {
-    transition: color var(--animation-time-short);
-  }
+	.transition-colors {
+		transition: color var(--animation-time-short);
+	}
 </style>

@@ -19,7 +19,7 @@
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
 	export let name = 'swap-amount';
-	export let displayMode: DisplayUnit = 'usd';
+	export let displayUnit: DisplayUnit = 'token';
 	export let exchangeRate: number | undefined;
 	export let disabled = false;
 	export let placeholder = '0';
@@ -71,7 +71,7 @@
 			{#if token}
 				<SwapInputCurrency
 					bind:value={amount}
-					{displayMode}
+					{displayUnit}
 					{exchangeRate}
 					{name}
 					{placeholder}

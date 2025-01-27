@@ -28,6 +28,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import type { DisplayUnit } from '$lib/types/swap';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -47,7 +48,9 @@
 
 	let errorType: ConvertAmountErrorType = undefined;
 	let amountSetToMax = false;
-	let displayMode: 'usd' | 'token' = 'usd';
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	$: receiveAmount =
 		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
@@ -65,7 +68,8 @@
 			: false;
 
 	let disableSwitchTokens = false;
-	$: disableSwitchTokens = nonNullish(swapAmount) && isNullish(receiveAmount) || swapAmountsLoading;
+	$: disableSwitchTokens =
+		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
 
 	const dispatch = createEventDispatcher();
 
@@ -104,7 +108,7 @@
 		<div class="relative">
 			<SwapSelectToken
 				bind:amount={swapAmount}
-				{displayMode}
+				displayUnit={inputUnit}
 				exchangeRate={$sourceTokenExchangeRate}
 				bind:errorType
 				bind:amountSetToMax
@@ -123,10 +127,7 @@
 								amount={swapAmount}
 								exchangeRate={$sourceTokenExchangeRate}
 								token={$sourceToken}
-								mode={displayMode}
-								on:mode={(e) => {
-									displayMode = e.detail;
-								}}
+								bind:displayUnit={exchangeValueUnit}
 							/>
 						</div>
 					{/if}
@@ -144,7 +145,7 @@
 			<SwapSelectToken
 				token={$destinationToken}
 				amount={receiveAmount}
-				{displayMode}
+				displayUnit={inputUnit}
 				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
@@ -166,8 +167,7 @@
 									token={$destinationToken}
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
-									mode={displayMode}
-									on:mode={(e) => (displayMode = e.detail)}
+									bind:displayUnit={exchangeValueUnit}
 								/>
 
 								<SwapValueDifference {swapAmount} {receiveAmount} />

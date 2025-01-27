@@ -12,6 +12,8 @@
 	export let token: IcToken | undefined = undefined;
 	export let displayUnit: DisplayUnit = 'token';
 
+	$: isUSD = displayUnit === 'usd';
+
 	const handleUnitSwitch = () => {
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
@@ -22,7 +24,7 @@
 			? Number(amount) * exchangeRate
 			: 0;
 
-	let formattedUSDAmount: string |undefined
+	let formattedUSDAmount: string | undefined;
 	$: formattedUSDAmount = nonNullish(amountUSD) ? formatUSD({ value: amountUSD }) : undefined;
 
 	let formattedTokenAmount: string | undefined;
