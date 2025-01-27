@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	const dispatch = createEventDispatcher();
-	export let disabled = false
+	export let disabled = false;
 </script>
 
 <Button
