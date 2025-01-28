@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
+	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
@@ -14,13 +15,15 @@
 		<RewardGuard>
 			<LoaderEthBalances>
 				<LoaderWallets>
-					<ExchangeWorker>
-						<LoaderMetamask
-							><LoaderUserProfile>
-								<slot />
-							</LoaderUserProfile>
-						</LoaderMetamask>
-					</ExchangeWorker>
+					<CkBTCUpdateBalanceListener>
+						<ExchangeWorker>
+							<LoaderMetamask
+								><LoaderUserProfile>
+									<slot />
+								</LoaderUserProfile>
+							</LoaderMetamask>
+						</ExchangeWorker>
+					</CkBTCUpdateBalanceListener>
 				</LoaderWallets>
 			</LoaderEthBalances>
 		</RewardGuard>
