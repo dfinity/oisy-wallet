@@ -37,7 +37,7 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 		splDefaultTokensStore.reset();
 
 		toastsError({
-			msg: { text: get(i18n).init.error.spl_contract },
+			msg: { text: get(i18n).init.error.spl_tokens },
 			err
 		});
 
