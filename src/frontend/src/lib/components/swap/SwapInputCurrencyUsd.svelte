@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import SwapInputCurrency from '$lib/components/swap/SwapInputCurrency.svelte';
-	import { SWAP_INPUT_CURRENCY_USD, SWAP_INPUT_CURRENCY_USD_SYMBOL } from '$lib/constants/test-ids.constants';
+	import {
+		SWAP_INPUT_CURRENCY_USD,
+		SWAP_INPUT_CURRENCY_USD_SYMBOL
+	} from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let tokenAmount: OptionAmount;
@@ -16,12 +19,16 @@
 	let displayValue: OptionAmount;
 
 	const handleInput = () =>
-		tokenAmount = nonNullish(exchangeRate) && nonNullish(displayValue)
-			? (Number(displayValue) / exchangeRate).toFixed(tokenDecimals)
-			: undefined;
+		(tokenAmount =
+			nonNullish(exchangeRate) && nonNullish(displayValue)
+				? (Number(displayValue) / exchangeRate).toFixed(tokenDecimals)
+				: undefined);
 
 	const syncDisplayValueWithTokenAmount = () => {
-		const newDisplayValue = nonNullish(exchangeRate) && nonNullish(tokenAmount) ? (Number(tokenAmount) * exchangeRate).toFixed(2) : undefined;
+		const newDisplayValue =
+			nonNullish(exchangeRate) && nonNullish(tokenAmount)
+				? (Number(tokenAmount) * exchangeRate).toFixed(2)
+				: undefined;
 
 		if (Number(newDisplayValue) !== Number(displayValue)) {
 			displayValue = newDisplayValue;
@@ -43,11 +50,11 @@
 	on:focus
 	on:blur
 	testId={SWAP_INPUT_CURRENCY_USD}
-	styleClass='no-padding'
+	styleClass="no-padding"
 >
 	<svelte:fragment slot="prefix">
 		<span
-			class="pl-3 transition-colors duration=[var(--animation-time-short)]"
+			class="duration=[var(--animation-time-short)] pl-3 transition-colors"
 			class:text-tertiary={isNullish(displayValue)}
 			data-tid={SWAP_INPUT_CURRENCY_USD_SYMBOL}
 		>
@@ -58,7 +65,7 @@
 </SwapInputCurrency>
 
 <style lang="scss">
-  :global(.swap-input-currency.no-padding div.input-field input[id]) {
-    padding: 0;
-  }
+	:global(.swap-input-currency.no-padding div.input-field input[id]) {
+		padding: 0;
+	}
 </style>
