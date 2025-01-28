@@ -1,12 +1,12 @@
 import { saveTokens, type ManageTokensSaveParams } from '$lib/services/manage-tokens.services';
 import { saveUserTokens } from '$sol/services/spl-user-tokens.services';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
 export const saveSplUserTokens = async ({
 	tokens,
 	...rest
 }: {
-	tokens: SplTokenToggleable[];
+	tokens: SaveSplUserToken[];
 } & ManageTokensSaveParams) => {
 	await saveTokens({
 		...rest,
