@@ -77,7 +77,7 @@ describe('IcSendForm', () => {
 		});
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
-		expect(destination).toBeNull();
+		expect(destination).not.toBeNull();
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
 		expect(amount).not.toBeNull();
