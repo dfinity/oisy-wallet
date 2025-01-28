@@ -11,6 +11,7 @@ use crate::types::{
     ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
     Timestamp, TokenVersion, Validate, Version,
 };
+use crate::validate::validate_on_deserialize;
 use candid::Deserialize;
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
@@ -414,20 +415,6 @@ impl Validate for IcrcToken {
     fn validate(&self) -> Result<(), candid::Error> {
         Ok(())
     }
-}
-
-macro_rules! validate_on_deserialize {
-    ($type:ty) => {
-        impl<'de> Deserialize<'de> for $type {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                let unchecked = <$type>::deserialize(deserializer)?;
-                unchecked.validated().map_err(de::Error::custom)
-            }
-        }
-    };
 }
 
 validate_on_deserialize!(CustomToken);
