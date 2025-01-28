@@ -24,7 +24,7 @@ mod custom_token {
                 TestVector {
                     input: SplToken {
                         token_address: SplTokenId("1".repeat(32)),
-                        symbol: Some("Bouncy Castle".to_string()),
+                        symbol: Some("☃☃☃ ☃ ☃☃☃".to_string()),
                         decimals: Some(6),
                     },
                     valid: true,
