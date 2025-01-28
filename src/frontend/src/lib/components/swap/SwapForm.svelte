@@ -117,7 +117,11 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($sourceToken)}
 						<div class="text-tertiary">
-							<SwapAmountExchange amount={swapAmount} exchangeRate={$sourceTokenExchangeRate} />
+							<SwapAmountExchange
+								amount={swapAmount}
+								exchangeRate={$sourceTokenExchangeRate}
+								token={$sourceToken}
+							/>
 						</div>
 					{/if}
 				</svelte:fragment>
@@ -153,6 +157,7 @@
 								<SwapAmountExchange
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
+									token={$destinationToken}
 								/>
 
 								<SwapValueDifference {swapAmount} {receiveAmount} />

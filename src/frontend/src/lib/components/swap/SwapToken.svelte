@@ -22,7 +22,7 @@
 				{token.symbol}
 			</span>
 			<span class="text-sm text-tertiary">
-				<SwapAmountExchange {amount} {exchangeRate} />
+				<SwapAmountExchange disabled {amount} {exchangeRate} />
 			</span>
 		</div>
 	</div>
