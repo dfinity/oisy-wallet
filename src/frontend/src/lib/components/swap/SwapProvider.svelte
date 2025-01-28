@@ -4,14 +4,14 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { dAppDescriptions, type OisyDappDescription } from '$lib/types/dapp-description';
+	import type { OptionString } from '$lib/types/string';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
-	import type { OptionString } from '$lib/types/string';
 
 	let kongSwapDApp: OisyDappDescription | undefined;
-	$: kongSwapDApp = dAppDescriptions.find(({id}) => id === 'kongswap');
+	$: kongSwapDApp = dAppDescriptions.find(({ id }) => id === 'kongswap');
 
 	let websiteURL: Option<URL>;
 	let displayURL: OptionString;
