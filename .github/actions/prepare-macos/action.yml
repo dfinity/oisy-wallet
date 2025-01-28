@@ -5,7 +5,7 @@ description: 'Installs LLVM, coreutils and Bash 5 on macOS and sets up environme
 runs:
   using: composite
   steps:
-    - name: Install LLVMi, coreutils and Bash on macOS
+    - name: Install LLVM, coreutils and Bash on macOS
       shell: bash
       run: |
         brew install llvm
