@@ -154,7 +154,24 @@ mod custom_token {
             } in test_vectors()
             {
                 let result = input.validate();
-                assert_eq!(expected, result.is_ok(), "{}", description);
+                assert_eq!(
+                    expected,
+                    result.is_ok(),
+                    "Validation does not match for: {}",
+                    description
+                );
+
+                let candid = Encode!(&input).unwrap();
+                let result: Result<IcrcToken, _> = Decode!(&candid, IcrcToken);
+                assert_eq!(
+                    expected,
+                    result.is_ok(),
+                    "Candid deserialization did not match for: {}",
+                    description
+                );
+                if valid {
+                    assert_eq!(toy, result.unwrap());
+                }
             }
         }
     }
