@@ -15,6 +15,7 @@ import {
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	expect,
 	type BrowserContext,
@@ -22,7 +23,6 @@ import {
 	type Page,
 	type ViewportSize
 } from '@playwright/test';
-import { isNullish, nonNullish } from '@dfinity/utils';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
