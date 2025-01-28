@@ -1,14 +1,15 @@
-name: 'Setup LLVM and Bash on macOS'
+name: 'Setup macOS'
 
-description: 'Installs LLVM and Bash 5 on macOS and sets up environment variables for wasm32 target'
+description: 'Installs LLVM, coreutils and Bash 5 on macOS and sets up environment variables for wasm32 target'
 
 runs:
   using: composite
   steps:
-    - name: Install LLVM and Bash on macOS
+    - name: Install LLVM, coreutils and Bash on macOS
       shell: bash
       run: |
         brew install llvm
+        brew install coreutils
         brew install bash
 
     - name: Add Bash 5 to PATH on macOS

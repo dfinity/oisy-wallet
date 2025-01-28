@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
+	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -28,7 +28,7 @@
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
-	import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
+	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
 	const steps: WizardSteps = [
@@ -145,12 +145,14 @@
 
 	// TODO: implement this function in the backend
 	const saveSpl = (tokens: SplTokenToggleable[]): void => {
-		modal.set(3);
-		progress(ProgressStepsAddToken.SAVE);
-		splDefaultTokensStore.update(tokens);
-		progress(ProgressStepsAddToken.UPDATE_UI);
-		progress(ProgressStepsAddToken.DONE);
-		setTimeout(() => close(), 750);
+		saveSplUserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authIdentity
+		});
 	};
 
 	const close = () => {
@@ -168,8 +170,7 @@
 	let network: Network | undefined = $selectedNetwork;
 	let tokenData: Partial<AddTokenData> = {};
 
-	$: tokenData,
-		({ ledgerCanisterId, indexCanisterId, contractAddress: erc20ContractAddress } = tokenData);
+	$: tokenData, ({ ledgerCanisterId, indexCanisterId, erc20ContractAddress } = tokenData);
 </script>
 
 <WizardModal
@@ -190,7 +191,7 @@
 				{indexCanisterId}
 			/>
 		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
-			<AddTokenReview
+			<EthAddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
 				contractAddress={erc20ContractAddress}
