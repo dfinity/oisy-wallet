@@ -5,6 +5,9 @@ use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
     ProofOfUniqueness,
@@ -138,6 +141,9 @@ pub mod token {
     }
 }
 
+/// The default maximum length of a token symbol.
+pub const MAX_SYMBOL_LENGTH: usize = 20;
+
 /// Extendable custom user defined tokens
 pub mod custom_token {
     use crate::types::Version;
@@ -146,26 +152,34 @@ pub mod custom_token {
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
 
+    /// An ICRC-1 compliant token on the Internet Computer.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
         pub index_id: Option<IndexId>,
     }
 
+    /// A variant describing any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum Token {
         Icrc(IcrcToken),
     }
 
+    /// User preferences for any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct CustomToken {
         pub token: Token,
         pub enabled: bool,
         pub version: Option<Version>,
     }
 
+    /// A cross-chain token identifier.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    #[serde(remote = "Self")]
     pub enum CustomTokenId {
+        /// An ICRC-1 compliant token on the Internet Computer mainnet.
         Icrc(LedgerId),
     }
 }
