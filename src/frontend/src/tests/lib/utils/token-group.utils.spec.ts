@@ -253,7 +253,8 @@ describe('token-group.utils', () => {
 
 		it('should give me all token groups', () => {
 			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
-			const filteredTokenGroups = filterTokenGroups(groupedTokens, true);
+
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: true });
 
 			expect(filteredTokenGroups).toEqual(groupedTokens);
 		});
@@ -266,7 +267,7 @@ describe('token-group.utils', () => {
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 
-			const filteredTokenGroups = filterTokenGroups(groupedTokens, false);
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 
 			expect(filteredTokenGroups).toHaveLength(1);
 
@@ -284,7 +285,7 @@ describe('token-group.utils', () => {
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 
-			const filteredTokenGroups = filterTokenGroups(groupedTokens, false);
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
 
 			expect(filteredTokenGroups).toHaveLength(1);
 

@@ -12,7 +12,10 @@
 	$: groupedTokens = groupTokensByTwin($combinedDerivedSortedNetworkTokensUi);
 
 	let sortedTokensOrGroups: TokenUiOrGroupUi[];
-	$: sortedTokensOrGroups = filterTokenGroups(groupedTokens, $showZeroBalances);
+	$: sortedTokensOrGroups = filterTokenGroups({
+		groupedTokens,
+		showZeroBalances: $showZeroBalances
+	});
 
 	const updateTokensToDisplay = () => (tokens = [...sortedTokensOrGroups]);
 
