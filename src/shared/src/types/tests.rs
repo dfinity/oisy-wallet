@@ -9,7 +9,7 @@ mod custom_token {
 
     mod spl {
         //! Tests for the spl module.
-        use crate::validate::test_validate_on_deserialize;
+        use crate::{types::MAX_SYMBOL_LENGTH, validate::test_validate_on_deserialize};
 
         use super::*;
 
@@ -39,6 +39,25 @@ mod custom_token {
                     valid: true,
                     description: "SplToken without a symbol or decimals",
                 },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(99)),
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: false,
+                    description: "SplToken with a token address that is too long",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
+                        decimals: Some(6),
+                    },
+                    valid: false,
+                    description: "Too long symbol",
+                },
+
             ]
         }
         test_validate_on_deserialize!(SplToken);
