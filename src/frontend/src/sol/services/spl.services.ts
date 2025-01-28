@@ -1,9 +1,4 @@
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
-import type { ResultSuccess } from '$lib/types/utils';
-import { splDefaultTokensStore } from '$sol/stores/spl-tokens.store';
-import { get } from 'svelte/store';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -11,7 +6,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
-import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
+import { splDefaultTokensStore } from '$sol/stores/spl-tokens.store';
 import {
 	SPL_USER_TOKENS_KEY,
 	splUserTokensStore,
