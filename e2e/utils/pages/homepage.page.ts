@@ -87,6 +87,7 @@ abstract class Homepage {
 
 	protected async waitForByTestId(testId: string): Promise<void> {
 		await this.#page.getByTestId(testId).waitFor();
+	}
 
 	protected async isVisibleByTestId(testId: string): Promise<boolean> {
 		const element = this.#page.locator(`[data-tid="${testId}"]`);
