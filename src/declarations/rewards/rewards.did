@@ -1,3 +1,8 @@
+type VipStats = record {
+  total_issued: nat32;
+  total_redeemed: nat32;
+  total_rejected: nat32;
+};
 type Config = record {
     /// List of index canisters to track the user's balance
     /// (in addition to the ledger index configured in the sprinkle)
@@ -12,6 +17,8 @@ type Config = record {
     /// The interval at which the canister make progress in seconds.
     /// Trade-off between the canister's responsiveness and the cycles consumed.
     processing_interval_s: opt nat16;
+    /// The VIP configuration
+    vip_config: opt VipConfig;
 };
 
 /// Batch sizes for the processing
@@ -176,12 +183,20 @@ type PublicAirdropStatus = variant {
   };
 };
 
+type VipConfig = record {
+    code_validity_duration : nat64;
+    vips: vec principal;
+    rewards: vec TokenConfig;
+};
+
 type VipReward = record {
     /// The reward code
     code : text;
 };
 
 type NewVipRewardResponse = variant {
+    /// The VIP is not logged in.
+    Anonymous;
     /// The reward code
     VipReward: VipReward;
     /// User is not a VIP
@@ -219,4 +234,7 @@ service: (opt Config) -> {
 
     /// Requests rewards from a VIP token.
     claim_vip_reward: (VipReward) -> (ClaimVipRewardResponse);
+
+    /// Gets rewards stats
+    vip_stats: () -> (VipStats) query;
 }
