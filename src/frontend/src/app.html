@@ -140,7 +140,7 @@
 				var observer = new MutationObserver(callback);
 
 				// Here we start observing the page for changes
-				observer.observe(document.body, { childList: true, subtree: true });
+				observer.observe(document, { childList: true, subtree: true });
 			})();
 		</script>
 
