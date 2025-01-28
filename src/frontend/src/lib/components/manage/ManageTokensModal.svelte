@@ -61,8 +61,8 @@
 	let modal: WizardModal;
 
 	const saveTokens = async ({
-															detail: { icrc, erc20, spl }
-														}: CustomEvent<{
+		detail: { icrc, erc20, spl }
+	}: CustomEvent<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		spl: SplTokenToggleable[];
@@ -126,7 +126,7 @@
 		]);
 	};
 
-	const saveSplToken =  () => {
+	const saveSplToken = () => {
 		if (isNullishOrEmpty(splTokenAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_token_address }
