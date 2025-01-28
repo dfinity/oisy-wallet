@@ -31,4 +31,4 @@ runs:
 
     - name: Deploy backend
       shell: bash
-      run: npm run deploy
+      run: BACKEND_BUILD_STRATEGY=args npm run deploy

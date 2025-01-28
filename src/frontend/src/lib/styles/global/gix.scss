@@ -118,7 +118,7 @@ div.input-field input[id] {
 }
 
 div.input-field input[id]::placeholder {
-	color: rgba(0, 0, 0, 0.4);
+	color: var(--colors-neutrals-600);
 }
 
 div.modal {

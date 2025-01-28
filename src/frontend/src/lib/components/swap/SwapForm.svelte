@@ -63,6 +63,10 @@
 			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
 			: false;
 
+	let disableSwitchTokens = false;
+	$: disableSwitchTokens =
+		(nonNullish(swapAmount) && isNullish(receiveAmount)) || swapAmountsLoading;
+
 	const dispatch = createEventDispatcher();
 
 	let invalid: boolean;
@@ -113,7 +117,11 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($sourceToken)}
 						<div class="text-tertiary">
-							<SwapAmountExchange amount={swapAmount} exchangeRate={$sourceTokenExchangeRate} />
+							<SwapAmountExchange
+								amount={swapAmount}
+								exchangeRate={$sourceTokenExchangeRate}
+								token={$sourceToken}
+							/>
 						</div>
 					{/if}
 				</svelte:fragment>
@@ -125,7 +133,7 @@
 				</svelte:fragment>
 			</SwapSelectToken>
 
-			<SwapSwitchTokensButton on:icSwitchTokens={onTokensSwitch} />
+			<SwapSwitchTokensButton disabled={disableSwitchTokens} on:icSwitchTokens={onTokensSwitch} />
 
 			<SwapSelectToken
 				token={$destinationToken}
@@ -149,6 +157,7 @@
 								<SwapAmountExchange
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
+									token={$destinationToken}
 								/>
 
 								<SwapValueDifference {swapAmount} {receiveAmount} />
