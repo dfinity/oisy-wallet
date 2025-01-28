@@ -159,7 +159,7 @@ const updateCSP = (indexHtml) => {
 	const solanaAlchemyApiConnectSrc =
 		'https://solana-mainnet.g.alchemy.com wss://solana-mainnet.g.alchemy.com https://solana-testnet.g.alchemy.com wss://solana-testnet.g.alchemy.com https://solana-devnet.g.alchemy.com wss://solana-devnet.g.alchemy.com';
 	const solanaQuicknodeApiConnectSrc =
-		'wss://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-testnet.quiknode.pro wss://burned-little-dinghy.solana-devnet.quiknode.pro';
+		'https://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-testnet.quiknode.pro wss://burned-little-dinghy.solana-devnet.quiknode.pro';
 	const solanaApiConnectSrc = `${solanaRpcApiConnectSrc} ${solanaAlchemyApiConnectSrc} ${solanaQuicknodeApiConnectSrc}`;
 
 	const csp = `<meta
