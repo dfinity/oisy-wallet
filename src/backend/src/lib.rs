@@ -38,7 +38,6 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use shared::validate::Validate;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
 use std::time::Duration;
@@ -95,12 +94,6 @@ fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
 
 fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
     STATE.with(|cell| f(&mut cell.borrow_mut()))
-}
-
-fn validate_or_trap<V: Validate>(v: &V) {
-    v.validate()
-        .map_err(|err| format!("{err:?}"))
-        .unwrap_or_else(|err| ic_cdk::trap(&err));
 }
 
 /// Reads the internal canister configuration, normally set at canister install or upgrade.
@@ -314,7 +307,6 @@ pub fn list_user_tokens() -> Vec<UserToken> {
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
-    validate_or_trap(&token);
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &CustomToken| -> bool {
@@ -326,9 +318,6 @@ pub fn set_custom_token(token: CustomToken) {
 
 #[update(guard = "may_write_user_data")]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
-    for token in &tokens {
-        validate_or_trap(token);
-    }
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
