@@ -42,8 +42,13 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		);
 };
 
-const hasBalance = (token: TokenUiOrGroupUi, showZeroBalances: boolean) =>
-	Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
+const hasBalance = ({
+	token,
+	showZeroBalances
+}: {
+	token: TokenUiOrGroupUi;
+	showZeroBalances: boolean;
+}) => Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
 
 /**
  * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
@@ -63,8 +68,8 @@ export const filterTokenGroups = ({
 }) => {
 	return groupedTokens.filter((t: TokenUiOrGroupUi) =>
 		isTokenUiGroup(t)
-			? t.tokens.some((tok: TokenUi) => hasBalance(tok, showZeroBalances))
-			: hasBalance(t, showZeroBalances)
+			? t.tokens.some((tok: TokenUi) => hasBalance({ token: tok, showZeroBalances }))
+			: hasBalance({ token: t, showZeroBalances })
 	);
 };
 
