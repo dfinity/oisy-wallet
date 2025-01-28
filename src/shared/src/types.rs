@@ -5,6 +5,9 @@ use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
     ProofOfUniqueness,
@@ -146,7 +149,9 @@ pub mod custom_token {
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
 
+    /// An ICRC-1 compliant token on the Internet Computer.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
         pub index_id: Option<IndexId>,
