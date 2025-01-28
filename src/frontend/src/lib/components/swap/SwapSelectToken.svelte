@@ -83,7 +83,7 @@
 						on:blur={onBlur}
 						on:nnsInput={onInput}
 					/>
-					{:else if displayUnit === 'usd'}
+				{:else if displayUnit === 'usd'}
 					<SwapInputCurrencyUsd
 						bind:tokenAmount={amount}
 						tokenDecimals={token.decimals}

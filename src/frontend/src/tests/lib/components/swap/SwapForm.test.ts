@@ -6,13 +6,13 @@ import {
 	SWAP_SWITCH_TOKENS_BUTTON
 } from '$lib/constants/test-ids.constants';
 import {
-	initSwapAmountsStore,
 	SWAP_AMOUNTS_CONTEXT_KEY,
+	initSwapAmountsStore,
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
-import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { fireEvent, getByTestId, render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('SwapForm', () => {

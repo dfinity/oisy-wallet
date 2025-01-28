@@ -14,6 +14,7 @@
 	export let loading = false;
 
 	let displayValue: OptionAmount;
+	// we keep track of display values to avoid unwanted formating during user inputs
 	let previousDisplayValue: OptionAmount;
 
 	const handleInput = () => {

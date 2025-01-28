@@ -10,7 +10,7 @@
 	export let error = false;
 	export let loading = false;
 	export let testId: string | undefined = undefined;
-	export let styleClass = "";
+	export let styleClass = '';
 </script>
 
 <div
@@ -19,7 +19,17 @@
 	class:animate-pulse={loading}
 >
 	<slot name="prefix"></slot>
-	<InputCurrency {testId} bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur on:nnsInput>
+	<InputCurrency
+		{testId}
+		bind:value
+		{name}
+		{placeholder}
+		{disabled}
+		{decimals}
+		on:focus
+		on:blur
+		on:nnsInput
+	>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
 </div>

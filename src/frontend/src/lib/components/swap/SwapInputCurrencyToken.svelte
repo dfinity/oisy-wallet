@@ -10,11 +10,10 @@
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
-
 </script>
 
 <SwapInputCurrency
-	bind:value={value}
+	bind:value
 	{name}
 	{error}
 	{loading}
@@ -27,4 +26,3 @@
 >
 	<slot name="inner-end" slot="inner-end" />
 </SwapInputCurrency>
-
