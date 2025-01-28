@@ -2,7 +2,7 @@ import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
-import {CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds} from './vite.utils';
+import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
 // npm run dev = local
 // npm run build = local
