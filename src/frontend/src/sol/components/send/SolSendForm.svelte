@@ -9,10 +9,11 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { loadTokenAccount } from '$sol/api/solana.api';
+	import { getSolCreateAccountFee, loadTokenAccount } from '$sol/api/solana.api';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
+	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -23,14 +24,14 @@
 
 	const { sendTokenNetworkId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	const { ataFeeStore }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
+
 	let amountError: SolAmountAssertionError | undefined;
 	let invalidDestination: boolean;
 
-	let showAtaFee = false;
-
 	const updateAtaExists = async () => {
 		if (isNullishOrEmpty(destination) || !isTokenSpl($sendToken)) {
-			showAtaFee = false;
+			ataFeeStore.setFee(undefined);
 			return;
 		}
 
@@ -49,8 +50,14 @@
 			tokenAddress: $sendToken.address
 		});
 
-		// If the token account does not exist, show the ATA fee, since we are going to create one and pay for it
-		showAtaFee = isNullish(tokenAccount);
+		if (nonNullish(tokenAccount)) {
+			ataFeeStore.setFee(undefined);
+			return;
+		}
+
+		const ataFee = await getSolCreateAccountFee(solNetwork);
+
+		ataFeeStore.setFee(ataFee);
 	};
 
 	$: destination, $sendToken, updateAtaExists();
@@ -68,7 +75,7 @@
 
 	<SolSendAmount slot="amount" bind:amount bind:amountError />
 
-	<SolFeeDisplay slot="fee" {showAtaFee} />
+	<SolFeeDisplay slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>
