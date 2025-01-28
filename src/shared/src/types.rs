@@ -154,6 +154,7 @@ pub mod custom_token {
 
     /// An ICRC-1 compliant token on the Internet Computer.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
         pub index_id: Option<IndexId>,

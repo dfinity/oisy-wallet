@@ -413,12 +413,32 @@ impl Validate for SplToken {
 }
 
 impl Validate for IcrcToken {
+    /// Verifies that an ICRC token is valid.
+    ///
+    /// - Checks that the ledger principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    /// - If an index principal is present, checks that it is also the type of principal used for a canister.
     fn validate(&self) -> Result<(), candid::Error> {
+        let IcrcToken {
+            ledger_id,
+            index_id,
+        } = self;
+        // The ledger_id should be appropriate for a canister.
+        if ledger_id.as_slice().last() != Some(&1) {
+            return Err(candid::Error::msg("Ledger ID is not a canister"));
+        }
+        // Likewise for the index ID, if present:
+        if let Some(index_id) = index_id {
+            if index_id.as_slice().last() != Some(&1) {
+                return Err(candid::Error::msg("Index ID is not a canister"));
+            }
+        }
         Ok(())
     }
 }
 
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
+validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
