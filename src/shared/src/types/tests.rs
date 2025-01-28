@@ -47,7 +47,7 @@ mod custom_token {
         use super::*;
         struct TestVector {
             input: IcrcToken,
-            expected: bool,
+            valid: bool,
             description: &'static str,
         }
         fn test_vectors() -> Vec<TestVector> {
@@ -65,7 +65,7 @@ mod custom_token {
                         ledger_id: canister_id1,
                         index_id: None,
                     },
-                    expected: true,
+                    valid: true,
                     description: "IcrcToken with valid ledger_id",
                 },
                 TestVector {
@@ -73,7 +73,7 @@ mod custom_token {
                         ledger_id: canister_id2,
                         index_id: Some(canister_id1),
                     },
-                    expected: true,
+                    valid: true,
                     description: "IcrcToken with valid ledger_id and index",
                 },
                 TestVector {
@@ -81,7 +81,7 @@ mod custom_token {
                         ledger_id: Principal::anonymous(),
                         index_id: None,
                     },
-                    expected: false,
+                    valid: false,
                     description: "IcrcToken with anonymous ledger_id",
                 },
                 TestVector {
@@ -89,7 +89,7 @@ mod custom_token {
                         ledger_id: Principal::anonymous(),
                         index_id: Some(Principal::anonymous()),
                     },
-                    expected: false,
+                    valid: false,
                     description: "IcrcToken with anonymous ledger_id and index",
                 },
                 TestVector {
@@ -97,7 +97,7 @@ mod custom_token {
                         ledger_id: canister_id1,
                         index_id: Some(Principal::anonymous()),
                     },
-                    expected: false,
+                    valid: false,
                     description: "IcrcToken with valid ledger_id and anonymous index",
                 },
                 TestVector {
@@ -105,7 +105,7 @@ mod custom_token {
                         ledger_id: Principal::management_canister(),
                         index_id: Some(canister_id2),
                     },
-                    expected: false,
+                    valid: false,
                     description: "IcrcToken with the management canister as ledger_id",
                 },
                 TestVector {
@@ -113,7 +113,7 @@ mod custom_token {
                         ledger_id: Principal::management_canister(),
                         index_id: Some(Principal::anonymous()),
                     },
-                    expected: false,
+                    valid: false,
                     description:
                         "IcrcToken with the management canister as ledger_id and anonymous index",
                 },
@@ -122,7 +122,7 @@ mod custom_token {
                         ledger_id: Principal::management_canister(),
                         index_id: None,
                     },
-                    expected: false,
+                    valid: false,
                     description: "IcrcToken with the management canister as ledger_id and no index",
                 },
                 TestVector {
@@ -130,7 +130,7 @@ mod custom_token {
                         ledger_id: Principal::anonymous(),
                         index_id: Some(Principal::management_canister()),
                     },
-                    expected: false,
+                    valid: false,
                     description:
                         "IcrcToken with anonymous ledger_id and the management canister as index",
                 },
@@ -139,7 +139,7 @@ mod custom_token {
                         ledger_id: user_id,
                         index_id: None,
                     },
-                    expected: false,
+                    valid: false,
                     description: "IcrcToken with user or network principal as ledger_id",
                 },
             ]
@@ -149,13 +149,13 @@ mod custom_token {
         fn validate_icrc_token() {
             for TestVector {
                 input,
-                expected,
+                valid,
                 description,
             } in test_vectors()
             {
                 let result = input.validate();
                 assert_eq!(
-                    expected,
+                    valid,
                     result.is_ok(),
                     "Validation does not match for: {}",
                     description
@@ -164,13 +164,13 @@ mod custom_token {
                 let candid = Encode!(&input).unwrap();
                 let result: Result<IcrcToken, _> = Decode!(&candid, IcrcToken);
                 assert_eq!(
-                    expected,
+                    valid,
                     result.is_ok(),
                     "Candid deserialization did not match for: {}",
                     description
                 );
                 if valid {
-                    assert_eq!(toy, result.unwrap());
+                    assert_eq!(input, result.unwrap());
                 }
             }
         }

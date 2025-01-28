@@ -26,31 +26,64 @@ impl Validate for ToyType {
 }
 validate_on_deserialize!(ToyType);
 
-fn test_vectors() -> Vec<(ToyType, bool)> {
+struct TestVector {
+    input: ToyType,
+    valid: bool,
+    description: &'static str,
+}
+
+fn test_vectors() -> Vec<TestVector> {
     vec![
-        (
-            ToyType {
+        TestVector {
+            input: ToyType {
                 name: "a".repeat(ToyType::MAX_LEN),
             },
-            true,
-        ),
-        (
-            ToyType {
+            valid: true,
+            description: "Maximum valid length",
+        },
+        TestVector {
+            input: ToyType {
                 name: "a".repeat(ToyType::MAX_LEN + 1),
             },
-            false,
-        ),
+            valid: false,
+            description: "Too long",
+        },
     ]
 }
 
-#[test]
-fn test_validate_on_deserialize() {
-    for (toy, valid) in test_vectors() {
-        let candid = Encode!(&toy).unwrap();
-        let result: Result<ToyType, _> = Decode!(&candid, ToyType);
-        assert_eq!(valid, result.is_ok());
-        if valid {
-            assert_eq!(toy, result.unwrap());
+test_validate_on_deserialize! {ToyType}
+
+macro_rules! test_validate_on_deserialize {
+    ($type:ty) => {
+        #[test]
+        fn validates_on_deserialize() {
+            for TestVector {
+                input,
+                valid,
+                description,
+            } in test_vectors()
+            {
+                let result = input.validate();
+                assert_eq!(
+                    valid,
+                    result.is_ok(),
+                    "Validation does not match for: {}",
+                    description
+                );
+
+                let candid = Encode!(&input).unwrap();
+                let result: Result<$type, _> = Decode!(&candid, $type);
+                assert_eq!(
+                    valid,
+                    result.is_ok(),
+                    "Candid deserialization did not match for: {}",
+                    description
+                );
+                if valid {
+                    assert_eq!(input, result.unwrap());
+                }
+            }
         }
-    }
+    };
 }
+pub(crate) use test_validate_on_deserialize;
