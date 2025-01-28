@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { goto } from '$app/navigation';
+import { goto, pushState } from '$app/navigation';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -29,7 +29,9 @@ export const isRouteDappExplorer = ({ route: { id } }: Page): boolean =>
 export const isRouteActivity = ({ route: { id } }: Page): boolean =>
 	id === `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
 
-export const isRouteTokens = ({ route: { id } }: Page): boolean => id === ROUTE_ID_GROUP_APP;
+// The page of the link for WalletConnect is the same as the page where we show the Tokens list
+export const isRouteTokens = ({ route: { id } }: Page): boolean =>
+	id === ROUTE_ID_GROUP_APP || id === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 
 const tokenUrl = ({
 	token: {
@@ -51,15 +53,15 @@ export const networkParam = (networkId: NetworkId | undefined): string =>
 export const networkUrl = ({
 	path,
 	networkId,
-	isTransactionsRoute,
+	usePreviousRoute,
 	fromRoute
 }: {
 	path: AppPath;
 	networkId: Option<NetworkId>;
-	isTransactionsRoute: boolean;
+	usePreviousRoute: boolean;
 	fromRoute: NavigationTarget | null;
 }) =>
-	isTransactionsRoute
+	usePreviousRoute
 		? notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))
 			? `${path}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`
 			: path
@@ -78,6 +80,11 @@ export const back = async ({ pop }: { pop: boolean }) => {
 
 export const gotoReplaceRoot = async () => {
 	await goto('/', { replaceState: true });
+};
+
+export const removeSearchParam = ({ url, searchParam }: { url: URL; searchParam: string }) => {
+	url.searchParams.delete(searchParam);
+	pushState(url, {});
 };
 
 export interface RouteParams {

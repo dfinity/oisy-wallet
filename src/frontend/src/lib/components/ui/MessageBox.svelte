@@ -9,6 +9,7 @@
 
 	export let level: 'plain' | 'info' | 'light-warning' | 'error' = 'info';
 	export let closableKey: HideInfoKey | undefined = undefined;
+	export let testId: string | undefined = undefined;
 
 	let closable = false;
 	$: closable = nonNullish(closableKey);
@@ -35,6 +36,7 @@
 		class:bg-warning-subtle={level === 'light-warning'}
 		class:bg-error-subtle-alt={level === 'error'}
 		transition:slide={SLIDE_EASING}
+		data-tid={testId}
 	>
 		<div
 			class="min-w-5 py-0 sm:py-0.5"
@@ -48,7 +50,11 @@
 			<slot />
 		</div>
 		{#if closable}
-			<button class="p-0.5 text-tertiary" on:click={close} aria-label={$i18n.core.text.close}>
+			<button
+				class="ml-auto p-0.5 text-tertiary"
+				on:click={close}
+				aria-label={$i18n.core.text.close}
+			>
 				<IconClose />
 			</button>
 		{/if}

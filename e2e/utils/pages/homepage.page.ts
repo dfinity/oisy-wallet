@@ -3,16 +3,18 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	NAVIGATION_ITEM_HOMEPAGE,
+	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { nonNullish } from '@dfinity/utils';
 import {
 	expect,
 	type BrowserContext,
@@ -20,6 +22,8 @@ import {
 	type Page,
 	type ViewportSize
 } from '@playwright/test';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
@@ -69,6 +73,7 @@ abstract class Homepage {
 	readonly #page: Page;
 	readonly #context?: BrowserContext;
 	readonly #viewportSize?: ViewportSize;
+	private promotionCarousel?: PromotionCarousel;
 
 	protected constructor({ page, context, viewportSize }: HomepageParams) {
 		this.#page = page;
@@ -82,6 +87,10 @@ abstract class Homepage {
 
 	protected async waitForByTestId(testId: string): Promise<void> {
 		await this.#page.getByTestId(testId).waitFor();
+
+	protected async isVisibleByTestId(testId: string): Promise<boolean> {
+		const element = this.#page.locator(`[data-tid="${testId}"]`);
+		return await element.isVisible();
 	}
 
 	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
@@ -167,8 +176,8 @@ abstract class Homepage {
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ETH-ETH`).waitFor(options);
 
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
 		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
@@ -288,6 +297,45 @@ abstract class Homepage {
 		await expect(modal).toHaveScreenshot();
 	}
 
+	async setCarouselFirstSlide(): Promise<void> {
+		if (isNullish(this.promotionCarousel)) {
+			this.promotionCarousel = new PromotionCarousel(this.#page);
+		}
+
+		await this.promotionCarousel.navigateToSlide(1);
+		await this.promotionCarousel.freezeCarousel();
+	}
+
+	async waitForLoadState() {
+		await this.#page.waitForLoadState('networkidle');
+	}
+
+	async navigateTo(testId: string): Promise<void> {
+		if (await this.isVisibleByTestId(testId)) {
+			await this.clickByTestId(testId);
+		} else {
+			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
+			await navigationMenuButton.click();
+			const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU);
+			await navigationMenu.getByTestId(testId).click();
+		}
+	}
+
+	async activateTestnetSettings(): Promise<void> {
+		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.clickByTestId(TESTNET_TOGGLE);
+		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
+	}
+
+	async takeScreenshot(): Promise<void> {
+		await expect(this.#page).toHaveScreenshot({
+			// creates a snapshot as a fullPage and not just certain parts.
+			fullPage: true,
+			// playwright can retry flaky tests in the amount of time set below.
+			timeout: 5 * 60 * 1000
+		});
+	}
+
 	abstract extendWaitForReady(): Promise<void>;
 
 	abstract waitForReady(): Promise<void>;
@@ -305,6 +353,7 @@ export class HomepageLoggedOut extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
+		await this.waitForLoadState();
 	}
 }
 
@@ -385,6 +434,10 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
 		await this.waitForTokensInitialization();
+
+		await this.waitForLoadState();
+
+		await this.setCarouselFirstSlide();
 
 		await this.extendWaitForReady();
 	}

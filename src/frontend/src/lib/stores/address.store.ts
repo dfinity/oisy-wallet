@@ -1,5 +1,5 @@
 import type { StorageStoreData } from '$lib/stores/storage.store';
-import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
+import type { Address, BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
@@ -27,3 +27,8 @@ export const btcAddressTestnetStore = initAddressStore<BtcAddress>();
 export const btcAddressMainnetStore = initAddressStore<BtcAddress>();
 
 export const ethAddressStore = initAddressStore<EthAddress>();
+
+export const solAddressMainnetStore = initAddressStore<SolAddress>();
+export const solAddressTestnetStore = initAddressStore<SolAddress>();
+export const solAddressDevnetStore = initAddressStore<SolAddress>();
+export const solAddressLocalnetStore = initAddressStore<SolAddress>();

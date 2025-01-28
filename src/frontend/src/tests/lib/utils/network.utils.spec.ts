@@ -1,4 +1,4 @@
-import * as networkEnv from '$env/networks.env';
+import * as networkEnv from '$env/networks/networks.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -8,7 +8,15 @@ import {
 	ICP_NETWORK,
 	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks.env';
+} from '$env/networks/networks.env';
+import {
+	SOLANA_DEVNET_NETWORK_ID,
+	SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK_ID,
+	SOLANA_NETWORKS,
+	SOLANA_NETWORKS_IDS,
+	SOLANA_TESTNET_NETWORK_ID
+} from '$env/networks/networks.sol.env';
 import type { NetworkId } from '$lib/types/network';
 import {
 	isNetworkICP,
@@ -18,7 +26,13 @@ import {
 	isNetworkIdBitcoin,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
+	isNetworkIdSOLDevnet,
+	isNetworkIdSOLLocal,
+	isNetworkIdSOLMainnet,
+	isNetworkIdSOLTestnet,
 	isNetworkIdSepolia,
+	isNetworkIdSolana,
+	isNetworkSolana,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 
@@ -30,6 +44,16 @@ describe('network utils', () => {
 
 		it('should return false for non-ICP network', () => {
 			expect(isNetworkICP(ETHEREUM_NETWORK)).toBe(false);
+		});
+	});
+
+	describe('isNetworkSolana', () => {
+		it.each(SOLANA_NETWORKS)('should return true for Solana network $name', (network) => {
+			expect(isNetworkSolana(network)).toBe(true);
+		});
+
+		it('should return false for non-ICP network', () => {
+			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBe(false);
 		});
 	});
 
@@ -151,6 +175,70 @@ describe('network utils', () => {
 			expect(mapNetworkIdToBitcoinNetwork(ETHEREUM_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(SEPOLIA_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(ICP_NETWORK_ID)).toBeUndefined();
+		});
+	});
+
+	describe('isNetworkIdSolana', () => {
+		it.each(SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
+			expect(isNetworkIdSolana(id)).toBe(true);
+		});
+
+		it('should return false for non-Solana network IDs', () => {
+			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSolana(ETHEREUM_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSolana(BTC_MAINNET_NETWORK_ID)).toBe(false);
+		});
+
+		it('should return false for undefined network ID', () => {
+			expect(isNetworkIdSolana(undefined)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLMainnet', () => {
+		it('should return true for SOL mainnet ID', () => {
+			expect(isNetworkIdSOLMainnet(SOLANA_MAINNET_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL mainnet ID', () => {
+			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLTestnet', () => {
+		it('should return true for SOL testnet ID', () => {
+			expect(isNetworkIdSOLTestnet(SOLANA_TESTNET_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL testnet ID', () => {
+			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLTestnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLTestnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLDevnet', () => {
+		it('should return true for SOL devnet ID', () => {
+			expect(isNetworkIdSOLDevnet(SOLANA_DEVNET_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL devnet ID', () => {
+			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLDevnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLDevnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('isNetworkIdSOLLocal', () => {
+		it('should return true for SOL local ID', () => {
+			expect(isNetworkIdSOLLocal(SOLANA_LOCAL_NETWORK_ID)).toBe(true);
+		});
+
+		it('should return false for non-SOL local ID', () => {
+			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
 		});
 	});
 });

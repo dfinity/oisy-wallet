@@ -8,7 +8,10 @@
 	export let licenseAlignment: 'inherit' | 'center' = 'inherit';
 </script>
 
-<div class="flex w-full flex-col items-center md:items-start">
+<div
+	class="flex w-full flex-col items-center md:items-start"
+	class:md:items-center={licenseAlignment === 'center'}
+>
 	<ButtonAuthenticate on:click={async () => await signIn({})} {fullWidth} />
 
 	<span

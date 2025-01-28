@@ -1,7 +1,7 @@
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } from '$env/networks.env';
+import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
 import * as backendAPI from '$lib/api/backend.api';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
@@ -44,7 +44,7 @@ describe('BTC Pending Sent Transactions Services', () => {
 			expect(get(btcPendingSentTransactionsStore)[address]).toBeUndefined();
 		});
 
-		it('should return an error if the network is not a bitcoin network', async () => {
+		it('should return an error if the network is not a Bitcoin network', async () => {
 			const result = await loadBtcPendingSentTransactions({
 				address,
 				identity: mockIdentity,
@@ -53,7 +53,7 @@ describe('BTC Pending Sent Transactions Services', () => {
 
 			expect(result).toEqual({
 				success: false,
-				err: new Error('Current network (Symbol(ETH)) is not a bitcoin network.')
+				err: new Error('Current network (Symbol(ETH)) is not a Bitcoin network.')
 			});
 			expect(get(btcPendingSentTransactionsStore)[address]).toBeUndefined();
 		});

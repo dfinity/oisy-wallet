@@ -1,5 +1,5 @@
-import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
-import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
+import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
+import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { EthereumUserToken } from '$eth/types/erc20-user-token';

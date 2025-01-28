@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { BTC_CONVERT_FEE } from '$btc/constants/btc.constants';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
@@ -7,9 +6,6 @@
 	import ConvertFee from '$lib/components/convert/ConvertFee.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionAmount } from '$lib/types/send';
-
-	export let sendAmount: OptionAmount;
 
 	const { sourceToken, sourceTokenExchangeRate, destinationToken } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -20,10 +16,7 @@
 	$: kytFee = $ckBtcMinterInfoStore?.[$destinationToken.id]?.data.kyt_fee;
 
 	let satoshisFee: bigint | undefined;
-	$: satoshisFee =
-		isNullish(sendAmount) || Number(sendAmount) === 0
-			? 0n
-			: $storeUtxosFeeData?.utxosFee?.feeSatoshis;
+	$: satoshisFee = $storeUtxosFeeData?.utxosFee?.feeSatoshis;
 </script>
 
 <ConvertFee

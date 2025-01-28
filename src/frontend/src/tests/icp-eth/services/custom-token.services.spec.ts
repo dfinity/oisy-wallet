@@ -1,4 +1,7 @@
-import { IC_CKBTC_INDEX_CANISTER_ID, IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
+import {
+	IC_CKBTC_INDEX_CANISTER_ID,
+	IC_CKBTC_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import {
 	autoLoadCustomToken,
 	setCustomToken,
@@ -30,7 +33,7 @@ describe('custom-token.services', () => {
 	let spyToastsError: MockInstance;
 
 	// we mock console.error just to avoid unnecessary logs while running the tests
-	vi.spyOn(console, 'error').mockImplementation(() => undefined);
+	vi.spyOn(console, 'error').mockImplementation(() => {});
 
 	beforeEach(() => {
 		vi.clearAllMocks();

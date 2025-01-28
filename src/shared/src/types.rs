@@ -138,6 +138,9 @@ pub mod token {
     }
 }
 
+/// The default maximum length of a token symbol.
+pub const MAX_SYMBOL_LENGTH: usize = 20;
+
 /// Extendable custom user defined tokens
 pub mod custom_token {
     use crate::types::Version;
@@ -312,9 +315,62 @@ pub mod signer {
     }
 }
 
+pub mod dapp {
+    use crate::types::Version;
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappCarouselSettings {
+        pub hidden_dapp_ids: Vec<String>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappSettings {
+        pub dapp_carousel: DappCarouselSettings,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AddDappSettingsError {
+        DappIdTooLong,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AddHiddenDappIdRequest {
+        pub dapp_id: String,
+        pub current_user_version: Option<Version>,
+    }
+
+    impl AddHiddenDappIdRequest {
+        /// The maximum supported dApp ID length.
+        pub const MAX_LEN: usize = 32;
+        /// Checks whether the request is syntactically valid
+        ///
+        /// # Errors
+        /// - If the dApp ID is too long.
+        pub fn check(&self) -> Result<(), AddDappSettingsError> {
+            (self.dapp_id.len() < Self::MAX_LEN)
+                .then_some(())
+                .ok_or(AddDappSettingsError::DappIdTooLong)
+        }
+    }
+}
+
+pub mod settings {
+    use crate::types::dapp::DappSettings;
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct Settings {
+        pub dapp: DappSettings,
+    }
+}
+
 /// Types specifics to the user profile.
 pub mod user_profile {
     use super::{CredentialType, Timestamp};
+    use crate::types::settings::Settings;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use ic_verifiable_credentials::issuer_api::CredentialSpec;
@@ -330,6 +386,7 @@ pub mod user_profile {
     // Used in the endpoint
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
+        pub settings: Option<Settings>,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
@@ -338,6 +395,7 @@ pub mod user_profile {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
+        pub settings: Option<Settings>,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,

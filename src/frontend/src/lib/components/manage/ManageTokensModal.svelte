@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
+	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -28,6 +28,8 @@
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
+	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
 	const steps: WizardSteps = [
 		{
@@ -54,9 +56,13 @@
 	let modal: WizardModal;
 
 	const saveTokens = async ({
-		detail: { icrc, erc20 }
-	}: CustomEvent<{ icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] }>) => {
-		if (icrc.length === 0 && erc20.length === 0) {
+		detail: { icrc, erc20, spl }
+	}: CustomEvent<{
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
+	}>) => {
+		if (icrc.length === 0 && erc20.length === 0 && spl.length === 0) {
 			toastsShow({
 				text: $i18n.tokens.manage.info.no_changes,
 				level: 'info',
@@ -68,7 +74,8 @@
 
 		await Promise.allSettled([
 			...(icrc.length > 0 ? [saveIcrc(icrc)] : []),
-			...(erc20.length > 0 ? [saveErc20(erc20)] : [])
+			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
+			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
 	};
 
@@ -136,6 +143,18 @@
 			identity: $authIdentity
 		});
 
+	// TODO: implement this function in the backend
+	const saveSpl = (tokens: SplTokenToggleable[]): void => {
+		saveSplUserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authIdentity
+		});
+	};
+
 	const close = () => {
 		modalStore.close();
 
@@ -151,8 +170,7 @@
 	let network: Network | undefined = $selectedNetwork;
 	let tokenData: Partial<AddTokenData> = {};
 
-	$: tokenData,
-		({ ledgerCanisterId, indexCanisterId, contractAddress: erc20ContractAddress } = tokenData);
+	$: tokenData, ({ ledgerCanisterId, indexCanisterId, erc20ContractAddress } = tokenData);
 </script>
 
 <WizardModal
@@ -173,7 +191,7 @@
 				{indexCanisterId}
 			/>
 		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
-			<AddTokenReview
+			<EthAddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
 				contractAddress={erc20ContractAddress}

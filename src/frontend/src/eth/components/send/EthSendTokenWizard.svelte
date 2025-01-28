@@ -4,8 +4,8 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import SendForm from '$eth/components/send/SendForm.svelte';
-	import SendReview from '$eth/components/send/SendReview.svelte';
+	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
+	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -72,6 +72,9 @@
 
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose === 'send';
+
+	let simplifiedForm = false;
+	$: simplifiedForm = sendPurpose === 'convert-eth-to-cketh';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
@@ -245,7 +248,7 @@
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SendReview
+		<EthSendReview
 			on:icBack
 			on:icSend={send}
 			{destination}
@@ -260,7 +263,7 @@
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SendForm
+		<EthSendForm
 			on:icNext
 			on:icClose={close}
 			on:icQRCodeScan
@@ -270,6 +273,7 @@
 			{nativeEthereumToken}
 			{destinationEditable}
 			{sourceNetwork}
+			{simplifiedForm}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
@@ -278,7 +282,7 @@
 					<ButtonCancel on:click={close} />
 				{/if}
 			</svelte:fragment>
-		</SendForm>
+		</EthSendForm>
 	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 		<SendQRCodeScan
 			expectedToken={$sendToken}

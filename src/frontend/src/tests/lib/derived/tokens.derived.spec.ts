@@ -1,8 +1,19 @@
-import * as btcEnv from '$env/networks.btc.env';
-import * as ethEnv from '$env/networks.eth.env';
-import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import * as btcEnv from '$env/networks/networks.btc.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
+import * as solEnv from '$env/networks/networks.sol.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import {
+	SOLANA_DEVNET_TOKEN,
+	SOLANA_LOCAL_TOKEN,
+	SOLANA_TESTNET_TOKEN,
+	SOLANA_TOKEN
+} from '$env/tokens/tokens.sol.env';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -63,6 +74,8 @@ describe('tokens.derived', () => {
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+
+			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 		});
 
 		it('should return all the non-testnet tokens by default', () => {
@@ -77,25 +90,26 @@ describe('tokens.derived', () => {
 				ICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
+				SOLANA_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[5].id },
-				{ ...mockIcrcCustomToken, id: result[6].id }
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[6].id },
+				{ ...mockIcrcCustomToken, id: result[7].id }
 			]);
 		});
 
 		it('should return only native tokens when the other token lists are empty', () => {
-			expect(get(tokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
+			expect(get(tokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, SOLANA_TOKEN]);
 		});
 
-		it('should return only ICP when all the token lists are empty (including native tokens)', () => {
+		it('should return only ICP and SOL when all the token lists are empty (including native tokens)', () => {
 			vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 
-			expect(get(tokens)).toEqual([ICP_TOKEN]);
+			expect(get(tokens)).toEqual([ICP_TOKEN, SOLANA_TOKEN]);
 		});
 
-		it('should return all the tokens when testnets are enabled', () => {
+		it('should return testnet tokens too when testnets are enabled', () => {
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
 			expect(get(tokens)).toEqual([
@@ -103,7 +117,28 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				BTC_TESTNET_TOKEN,
 				ETHEREUM_TOKEN,
-				SEPOLIA_TOKEN
+				SEPOLIA_TOKEN,
+				SOLANA_TOKEN,
+				SOLANA_TESTNET_TOKEN,
+				SOLANA_DEVNET_TOKEN
+			]);
+		});
+
+		it('should return local tokens too when testnets are enabled and env is LOCAL', () => {
+			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+
+			expect(get(tokens)).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				BTC_TESTNET_TOKEN,
+				BTC_REGTEST_TOKEN,
+				ETHEREUM_TOKEN,
+				SEPOLIA_TOKEN,
+				SOLANA_TOKEN,
+				SOLANA_TESTNET_TOKEN,
+				SOLANA_DEVNET_TOKEN,
+				SOLANA_LOCAL_TOKEN
 			]);
 		});
 	});

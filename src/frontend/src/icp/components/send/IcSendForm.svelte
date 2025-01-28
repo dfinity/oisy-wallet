@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
@@ -10,6 +10,7 @@
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
+	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -20,6 +21,7 @@
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
+	export let simplifiedForm = false;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -32,10 +34,7 @@
 		nonNullish(amountError) ||
 		isNullishOrEmpty(destination) ||
 		isNullish(amount);
-
-	const dispatch = createEventDispatcher();
 </script>
-
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
 		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
@@ -52,3 +51,23 @@
 		</ButtonGroup>
 	</ContentWithToolbar>
 </form>
+<SendForm
+	on:icNext
+	{source}
+	token={$sendToken}
+	balance={$balance}
+	disabled={invalid}
+	hideSource={simplifiedForm}
+>
+	<div slot="destination">
+		{#if !simplifiedForm}
+			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{/if}
+	</div>
+
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+
+	<IcFeeDisplay slot="fee" {networkId} />
+
+	<slot name="cancel" slot="cancel" />
+</SendForm>

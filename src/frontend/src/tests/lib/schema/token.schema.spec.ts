@@ -1,4 +1,4 @@
-import { SEPOLIA_NETWORK } from '$env/networks.env';
+import { SEPOLIA_NETWORK } from '$env/networks/networks.env';
 import {
 	TokenAppearanceSchema,
 	TokenBuyableSchema,
@@ -47,6 +47,11 @@ describe('token.schema', () => {
 
 		it('should validate "bitcoin" as a supported token standard', () => {
 			const validStandard = 'bitcoin';
+			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
+		});
+
+		it('should validate "solana" as a supported token standard', () => {
+			const validStandard = 'solana';
 			expect(TokenStandardSchema.parse(validStandard)).toEqual(validStandard);
 		});
 

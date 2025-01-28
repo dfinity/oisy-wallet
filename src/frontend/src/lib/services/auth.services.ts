@@ -1,4 +1,8 @@
-import { deleteIdbBtcAddressMainnet, deleteIdbEthAddress } from '$lib/api/idb.api';
+import {
+	deleteIdbBtcAddressMainnet,
+	deleteIdbEthAddress,
+	deleteIdbSolAddressMainnet
+} from '$lib/api/idb.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -11,6 +15,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
+import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import type { Principal } from '@dfinity/principal';
@@ -58,7 +63,8 @@ export const signIn = async (
 	}
 };
 
-export const signOut = (): Promise<void> => logout({});
+export const signOut = ({ resetUrl = false }: { resetUrl?: boolean }): Promise<void> =>
+	logout({ resetUrl });
 
 export const errorSignOut = (text: string): Promise<void> =>
 	logout({
@@ -108,29 +114,49 @@ const emptyIdbBtcAddressMainnet = (): Promise<void> => emptyIdbAddress(deleteIdb
 
 const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddress);
 
+const emptyIdbSolAddress = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
+
 // eslint-disable-next-line require-await
 const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
 };
 
+// eslint-disable-next-line require-await
+const clearSessionStorage = async () => {
+	sessionStorage.clear();
+};
+
 const logout = async ({
 	msg = undefined,
-	clearStorages = true
+	clearStorages = true,
+	resetUrl = false
 }: {
 	msg?: ToastMsg;
 	clearStorages?: boolean;
+	resetUrl?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption()]);
+		await Promise.all([
+			emptyIdbBtcAddressMainnet(),
+			emptyIdbEthAddress(),
+			emptyIdbSolAddress(),
+			clearTestnetsOption()
+		]);
 	}
+
+	await clearSessionStorage();
 
 	await authStore.signOut();
 
 	if (msg) {
 		appendMsgToUrl(msg);
+	}
+
+	if (resetUrl) {
+		await gotoReplaceRoot();
 	}
 
 	// Auth: Delegation and identity are cleared from indexedDB by agent-js so, we do not need to clear these
