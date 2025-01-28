@@ -99,8 +99,8 @@ describe('SwapForm', () => {
 			setupSwapAmountsStore(mockSwapAmounts);
 		});
 
-		const renderSwapForm = () => {
-			return render(SwapForm, {
+		const renderSwapForm = () =>
+			render(SwapForm, {
 				props: {
 					swapAmount: '1',
 					receiveAmount: 2,
@@ -108,7 +108,6 @@ describe('SwapForm', () => {
 				},
 				context: mockContext
 			});
-		};
 
 		it('should display initial token and USD values correctly', () => {
 			const { getAllByTestId } = renderSwapForm();
