@@ -5,8 +5,8 @@
 
 LEDGER_ACCOUNT_ID=$(dfx canister id icp_ledger)
 
-dfx deploy icp_index --specified-id qhbym-qaaaa-aaaaa-aaafq-cai --argument '(record {ledger_id = principal"'${LEDGER_ACCOUNT_ID}'";})'
+dfx deploy icp_index --argument '(record {ledger_id = principal"'${LEDGER_ACCOUNT_ID}'";})'
 
-dfx canister call qhbym-qaaaa-aaaaa-aaafq-cai ledger_id '()'
+dfx canister call icp_index ledger_id '()'
 
-dfx canister call qhbym-qaaaa-aaaaa-aaafq-cai status '()'
+dfx canister call icp_index status '()'

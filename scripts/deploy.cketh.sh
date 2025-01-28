@@ -3,8 +3,8 @@
 DFX_NETWORK=local
 
 echo "Step 1: create canisters..."
-dfx canister create cketh_ledger --specified-id apia6-jaaaa-aaaar-qabma-cai --network "$DFX_NETWORK"
-dfx canister create cketh_minter --specified-id jzenf-aiaaa-aaaar-qaa7q-cai --network "$DFX_NETWORK"
+dfx canister create cketh_ledger --network "$DFX_NETWORK"
+dfx canister create cketh_minter --network "$DFX_NETWORK"
 
 MINTERID="$(dfx canister id cketh_minter --network "$DFX_NETWORK")"
 echo "$MINTERID"
@@ -16,7 +16,7 @@ echo "Step 2: deploy minter canister..."
 # ckETH minter deployed on using the smart contract address on Sepolia used by testnet.
 # We can alternatively also deploy our own contract.
 
-dfx deploy cketh_minter --specified-id jzenf-aiaaa-aaaar-qaa7q-cai --network "$DFX_NETWORK" --argument "(variant {
+dfx deploy cketh_minter --network "$DFX_NETWORK" --argument "(variant {
   InitArg = record {
        ethereum_network = variant {Sepolia};
        ecdsa_key_name = \"dfx_test_key\";
@@ -31,7 +31,7 @@ dfx deploy cketh_minter --specified-id jzenf-aiaaa-aaaar-qaa7q-cai --network "$D
 
 echo "Step 3: deploy ledger canister..."
 PRINCIPAL="$(dfx identity get-principal)"
-dfx deploy cketh_ledger --specified-id apia6-jaaaa-aaaar-qabma-cai --network "$DFX_NETWORK" --argument "(variant {
+dfx deploy cketh_ledger --network "$DFX_NETWORK" --argument "(variant {
   Init = record {
      token_symbol = \"ckSepoliaETH\";
      token_name = \"Chain key local Sepolia Ethereum\";
@@ -54,7 +54,7 @@ dfx deploy cketh_ledger --specified-id apia6-jaaaa-aaaar-qabma-cai --network "$D
 })"
 
 echo "Step 4: deploy index canister..."
-dfx deploy cketh_index --specified-id sh5u2-cqaaa-aaaar-qacna-cai --network "$DFX_NETWORK" --argument "(opt variant {
+dfx deploy cketh_index --network "$DFX_NETWORK" --argument "(opt variant {
   Init = record {
     ledger_id = principal \"$LEDGERID\";
    }

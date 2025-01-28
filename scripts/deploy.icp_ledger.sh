@@ -11,7 +11,7 @@ dfx identity use default
 
 LEDGER_ACCOUNT_ID=$(dfx ledger account-id)
 
-dfx deploy --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai icp_ledger --argument "
+dfx deploy icp_ledger --argument "
   (variant {
     Init = record {
       minting_account = \"$MINTER_ACCOUNT_ID\";
