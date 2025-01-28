@@ -9,35 +9,39 @@ mod custom_token {
 
     mod spl {
         //! Tests for the spl module.
+        use crate::validate::test_validate_on_deserialize;
+
         use super::*;
-        const SPL_TEST_VECTORS: [(&str, bool); 4] = [
-            ("", false),
-            ("1", false),
-            ("11111111111111111111111111111111", true),
-            (
-                "11111111111111111111111111111111111111111111111111111111111111111111111111111111",
-                false,
-            ),
-        ];
 
-        #[test]
-        fn spl_token_id_parsing_validation_works() {
-            for (input, expected) in SPL_TEST_VECTORS.iter() {
-                let input = SplTokenId(input.to_string());
-                let result = input.validate();
-                assert_eq!(*expected, result.is_ok());
-            }
+        struct TestVector {
+            input: SplToken,
+            valid: bool,
+            description: &'static str,
         }
-        #[test]
-        fn spl_token_validation_works_for_candid() {
-            for (input, expected) in SPL_TEST_VECTORS.iter() {
-                let spl_token_id = SplTokenId(input.to_string());
 
-                let candid = Encode!(&spl_token_id).unwrap();
-                let result: Result<SplTokenId, _> = Decode!(&candid, SplTokenId);
-                assert_eq!(*expected, result.is_ok());
-            }
+        fn test_vectors() -> Vec<TestVector> {
+            vec![
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: true,
+                    description: "Valid SplToken",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: None,
+                        decimals: None,
+                    },
+                    valid: true,
+                    description: "SplToken without a symbol or decimals",
+                },
+            ]
         }
+        test_validate_on_deserialize!(SplToken);
     }
 
     mod icrc {
