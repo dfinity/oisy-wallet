@@ -4,7 +4,6 @@ import {
 	getNewVipReward as getNewVipRewardApi,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
