@@ -60,8 +60,8 @@
 	let modal: WizardModal;
 
 	const saveTokens = async ({
-															detail: { icrc, erc20, spl }
-														}: CustomEvent<{
+		detail: { icrc, erc20, spl }
+	}: CustomEvent<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		spl: SplTokenToggleable[];
