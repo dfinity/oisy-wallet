@@ -110,14 +110,12 @@ export const loadUserTokens = async ({
 				const metadata = await getSplMetadata({ address, network: solNetwork });
 
 				return {
-					...{
-						id: parseTokenId(`user-token#${metadata.symbol}#${network.chainId}`),
-						network,
-						address,
-						standard: 'spl' as const,
-						category: 'custom' as const,
-						enabled: true
-					},
+					id: parseTokenId(`user-token#${metadata.symbol}#${network.chainId}`),
+					network,
+					address,
+					standard: 'spl' as const,
+					category: 'custom' as const,
+					enabled: true,
 					...metadata
 				};
 			})
