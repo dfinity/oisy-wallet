@@ -121,7 +121,7 @@ interface I18nWallet {
 		icp_deposits: string;
 		use_address_from_to: string;
 	};
-	alt: { open_etherscan: string; qrcode_address: string };
+	alt: { open_etherscan: string; open_solscan: string; qrcode_address: string };
 }
 
 interface I18nInit {
@@ -144,6 +144,7 @@ interface I18nInit {
 		loading_balance: string;
 		loading_balance_symbol: string;
 		erc20_contracts: string;
+		spl_contract: string;
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
 		minter_ckerc20_erc20: string;
@@ -158,6 +159,7 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_user_tokens: string;
+		spl_user_tokens: string;
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
@@ -432,6 +434,7 @@ interface I18nTokens {
 	text: {
 		title: string;
 		contract_address: string;
+		token_address: string;
 		balance: string;
 		hide_zero_balances: string;
 		hide_zeros: string;
@@ -447,6 +450,7 @@ interface I18nTokens {
 		token: string;
 		network: string;
 		contract_address_copied: string;
+		token_address_copied: string;
 		twin_token: string;
 		standard: string;
 	};
@@ -478,6 +482,7 @@ interface I18nTokens {
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
 			missing_contract_address: string;
+			missing_token_address: string;
 			no_network: string;
 		};
 		warning: { do_not_close_manage: string };
@@ -502,12 +507,18 @@ interface I18nTokens {
 		open_blockstream: string;
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
+		open_token_address_block_explorer: string;
 		token_group_number: string;
 	};
-	placeholder: { enter_contract_address: string; search_token: string };
+	placeholder: {
+		enter_contract_address: string;
+		enter_token_address: string;
+		search_token: string;
+	};
 	warning: { trust_token: string };
 	error: {
 		invalid_contract_address: string;
+		invalid_token_address: string;
 		invalid_ledger: string;
 		no_metadata: string;
 		unexpected: string;
@@ -533,6 +544,7 @@ interface I18nFee {
 		convert_btc_network_fee: string;
 		zero_fee: string;
 		total_fee: string;
+		ata_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };

@@ -113,6 +113,7 @@ describe('sol-address.services', () => {
 		});
 
 		it('should handle errors during address loading', async () => {
+			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 			const error = new Error('Failed to load address');
 			spyGetSchnorrPublicKey.mockRejectedValue(error);
 

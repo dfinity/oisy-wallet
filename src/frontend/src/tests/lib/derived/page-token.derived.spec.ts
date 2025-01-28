@@ -8,7 +8,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { pageToken } from '$lib/derived/page-token.derived';
-import { splTokens } from '$sol/derived/spl.derived';
+import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -21,7 +21,7 @@ describe('page-token.derived', () => {
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 
-		vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+		vi.spyOn(enabledSplTokens, 'subscribe').mockImplementation((fn) => {
 			fn([{ ...JUP_TOKEN, enabled: true }]);
 			return () => {};
 		});

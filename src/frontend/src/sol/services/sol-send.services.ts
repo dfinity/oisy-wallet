@@ -1,3 +1,4 @@
+import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -7,14 +8,16 @@ import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
+import { createAtaInstruction } from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
@@ -31,13 +34,17 @@ import {
 import {
 	appendTransactionMessageInstructions,
 	createTransactionMessage,
+	prependTransactionMessageInstruction,
 	setTransactionMessageLifetimeUsingBlockhash,
 	type ITransactionMessageWithFeePayer,
 	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
-import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import {
+	getComputeUnitEstimateForTransactionMessageFactory,
+	sendAndConfirmTransactionFactory
+} from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -59,19 +66,24 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 	feePayer: TransactionSigner;
 }): Promise<SolTransactionMessage> => {
 	const { getLatestBlockhash } = rpc;
-	const { value: latestBlockhash } = await getLatestBlockhash().send();
+	const { value: latestBlockhash } = await getLatestBlockhash({ commitment: 'confirmed' }).send();
+
+	const correctedLatestBlockhash = {
+		...latestBlockhash,
+		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+	};
 
 	return pipe(
 		transactionMessage,
 		(tx) => setFeePayerToTransaction({ transactionMessage: tx, feePayer }),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(correctedLatestBlockhash, tx)
 	);
 };
 
 const createDefaultTransaction = async ({
 	rpc,
 	feePayer,
-	version = 'legacy'
+	version = 0
 }: {
 	rpc: Rpc<SolanaRpcApi>;
 	feePayer: TransactionSigner;
@@ -133,31 +145,51 @@ const createSplTokenTransactionMessage = async ({
 		tokenAddress
 	});
 
+	// This should not happen since we are sending from an existing account.
+	// But we need it to return a non-nullish value.
+	assertNonNullish(
+		sourceTokenAccountAddress,
+		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
+	);
+
 	const destinationTokenAccountAddress = await loadTokenAccount({
 		address: destination,
 		network,
 		tokenAddress
 	});
 
+	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
+
+	const { ataInstruction, ataAddress: calculatedDestinationTokenAccountAddress } =
+		await createAtaInstruction({
+			signer,
+			destination,
+			tokenAddress
+		});
+
+	const transferInstruction = getTransferInstruction(
+		{
+			source: solAddress(sourceTokenAccountAddress),
+			destination: solAddress(
+				mustCreateDestinationTokenAccount
+					? calculatedDestinationTokenAccountAddress
+					: destinationTokenAccountAddress
+			),
+			authority: signer,
+			amount: amount.toBigInt()
+		},
+		{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
+	);
+
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
-			[
-				getTransferInstruction(
-					{
-						source: solAddress(sourceTokenAccountAddress),
-						destination: solAddress(destinationTokenAccountAddress),
-						authority: signer,
-						amount: amount.toBigInt()
-					},
-					{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
-				)
-			],
+			[...(mustCreateDestinationTokenAccount ? [ataInstruction] : []), transferInstruction],
 			tx
 		)
 	);
 };
 
-export const sendSignedTransaction = ({
+export const sendSignedTransaction = async ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
@@ -172,7 +204,7 @@ export const sendSignedTransaction = ({
 
 	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 
-	sendAndConfirmTransaction(signedTransaction, { commitment });
+	await sendAndConfirmTransaction(signedTransaction, { commitment });
 };
 
 /**
@@ -184,19 +216,23 @@ export const sendSignedTransaction = ({
  */
 export const sendSol = async ({
 	identity,
+	progress,
 	token,
 	amount,
+	prioritizationFee,
 	destination,
-	source,
-	onProgress
+	source
 }: {
 	identity: OptionIdentity;
+	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: BigNumber;
+	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
-	onProgress?: () => void;
 }): Promise<Signature> => {
+	progress(ProgressStepsSendSol.INITIALIZATION);
+
 	const {
 		network: { id: networkId }
 	} = token;
@@ -234,18 +270,36 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	onProgress?.();
+	const getComputeUnitEstimateForTransactionMessage =
+		getComputeUnitEstimateForTransactionMessageFactory({
+			rpc
+		});
 
-	const { signedTransaction, signature } = await signTransaction(transactionMessage);
+	const computeUnitsEstimate =
+		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
 
-	// Explicitly do not await to proceed in the background and allow the UI to continue
-	sendSignedTransaction({
+	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
+
+	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
+		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
+		transactionMessage
+	);
+
+	progress(ProgressStepsSendSol.SIGN);
+
+	const { signedTransaction, signature } = await signTransaction(
+		prioritizationFee > 0n ? transactionMessageWithComputeUnitPrice : transactionMessage
+	);
+
+	progress(ProgressStepsSendSol.SEND);
+
+	await sendSignedTransaction({
 		rpc,
 		rpcSubscriptions,
 		signedTransaction
 	});
 
-	onProgress?.();
+	progress(ProgressStepsSendSol.DONE);
 
 	return signature;
 };

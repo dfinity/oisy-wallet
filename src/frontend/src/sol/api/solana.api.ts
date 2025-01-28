@@ -1,5 +1,5 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
+import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -9,7 +9,7 @@ import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction
 import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
 import { getSplBalanceChange } from '$sol/utils/spl-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
+import { address, assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
@@ -177,7 +177,7 @@ export const loadTokenAccount = async ({
 	address: SolAddress;
 	network: SolanaNetworkType;
 	tokenAddress: SolAddress;
-}): Promise<SolAddress> => {
+}): Promise<OptionSolAddress> => {
 	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
 	const relevantTokenAddress = solAddress(tokenAddress);
@@ -190,11 +190,9 @@ export const loadTokenAccount = async ({
 		{ encoding: 'jsonParsed' }
 	).send();
 
-	// TODO: create missing token account
+	// In case of missing token account, we let the caller handle it.
 	if (response.value.length === 0) {
-		throw new Error(
-			`Token account not found for wallet ${address} and token ${tokenAddress} on ${network} network`
-		);
+		return undefined;
 	}
 
 	const { pubkey: accountAddress } = response.value[0];
@@ -280,4 +278,52 @@ export const getSplTransactions = async ({
 export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promise<Lamports> => {
 	const { getMinimumBalanceForRentExemption } = solanaHttpRpc(network);
 	return await getMinimumBalanceForRentExemption(ATA_SIZE).send();
+};
+
+/**
+ * Calculates the maximum among the most recent prioritization fees in microlamports.
+ *
+ * It is useful to have an estimate of how much a transaction could cost to be processed without expiring.
+ */
+export const estimatePriorityFee = async ({
+	network,
+	addresses
+}: {
+	network: SolanaNetworkType;
+	addresses?: SolAddress[];
+}): Promise<bigint> => {
+	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
+	const fees = await getRecentPrioritizationFees(
+		nonNullish(addresses) ? addresses.map(address) : undefined
+	).send();
+
+	return fees.reduce<bigint>(
+		(max, { prioritizationFee: current }) => (BigInt(current) > max ? BigInt(current) : max),
+		0n
+	);
+};
+
+export const getTokenDecimals = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<number> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const token = solAddress(address);
+
+	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+
+	if (nonNullish(value) && 'parsed' in value.data) {
+		const {
+			data: {
+				parsed: { info }
+			}
+		} = value;
+
+		return nonNullish(info) && 'decimals' in info ? (info.decimals as number) : 0;
+	}
+
+	return 0;
 };

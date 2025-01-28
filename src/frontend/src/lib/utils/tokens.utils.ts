@@ -191,7 +191,9 @@ export const filterTokens = ({ tokens, filter }: { tokens: Token[]; filter: stri
 		token.name.toLowerCase().includes(filter.toLowerCase()) ||
 		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
 		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
+			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase())) ||
+		token.network.name.toLowerCase().includes(filter.toLowerCase()) ||
+		(token.network.id.description ?? '').toLowerCase().includes(filter.toLowerCase());
 
 	return isNullishOrEmpty(filter)
 		? tokens

@@ -32,12 +32,12 @@ export interface Modal<T> {
 		| 'eth-token'
 		| 'btc-token'
 		| 'ic-token'
+		| 'sol-token'
 		| 'receive-bitcoin'
 		| 'about-why-oisy'
 		| 'vip-qr-code'
 		| 'dapp-details'
-		| 'successful-reward'
-		| 'failed-reward';
+		| 'reward-state';
 	data?: T;
 	id?: symbol;
 }
@@ -74,12 +74,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthToken: () => void;
 	openBtcToken: () => void;
 	openIcToken: () => void;
+	openSolToken: () => void;
 	openReceiveBitcoin: () => void;
 	openAboutWhyOisy: () => void;
 	openVipQrCode: () => void;
 	openDappDetails: <D extends T>(data: D) => void;
-	openSuccessfulReward: () => void;
-	openFailedReward: () => void;
+	openRewardState: <D extends T>(data: D) => void;
 	close: () => void;
 }
 
@@ -125,12 +125,12 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openEthToken: setType('eth-token'),
 		openBtcToken: setType('btc-token'),
 		openIcToken: setType('ic-token'),
+		openSolToken: setType('sol-token'),
 		openReceiveBitcoin: setType('receive-bitcoin'),
 		openAboutWhyOisy: setType('about-why-oisy'),
 		openVipQrCode: setType('vip-qr-code'),
 		openDappDetails: setTypeWithData('dapp-details'),
-		openSuccessfulReward: setType('successful-reward'),
-		openFailedReward: setType('failed-reward'),
+		openRewardState: setTypeWithData('reward-state'),
 		close: () => set(null),
 		subscribe
 	};
