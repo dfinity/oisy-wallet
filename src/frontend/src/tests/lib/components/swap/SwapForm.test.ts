@@ -35,7 +35,7 @@ describe('SwapForm', () => {
 
 		const mockSwapContext = {
 			...originalContext,
-			sourceTokenExchangeRate: readable(2.5),
+			sourceTokenExchangeRate: readable(10),
 			destinationTokenExchangeRate: readable(2)
 		};
 
@@ -116,7 +116,7 @@ describe('SwapForm', () => {
 			);
 			const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY_TOKEN);
 
-			expect(sourceTokenExchangeValue).toHaveTextContent('$2.50');
+			expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
 			expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
 			expect(sourceInput).toHaveValue('1');
 			expect(destinationInput).toHaveValue('0.02');
@@ -129,7 +129,7 @@ describe('SwapForm', () => {
 			'should switch between USD and token values when clicking $description exchange',
 			async ({ buttonIndex }) => {
 				const { getAllByTestId } = renderSwapForm();
-				const [sourceTokenExchangeButton, destinationTokenExchangeButton] = getAllByTestId(
+				const buttons = getAllByTestId(
 					SWAP_AMOUNT_EXCHANGE_BUTTON
 				);
 				const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
@@ -137,19 +137,18 @@ describe('SwapForm', () => {
 				);
 				const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY_TOKEN);
 
-				const button =
-					buttonIndex === 0 ? sourceTokenExchangeButton : destinationTokenExchangeButton;
+				const button = buttons[buttonIndex];
 
 				await fireEvent.click(button);
 				expect(sourceTokenExchangeValue).toHaveTextContent(`1 ${mockValidIcToken.symbol}`);
 				expect(destinationTokenExchangeValue).toHaveTextContent(
-					`0.02 ${mockValidIcCkToken.symbol}`
+					`2 ${mockValidIcCkToken.symbol}`
 				);
-				expect(sourceInput).toHaveValue('2.50');
-				expect(destinationInput).toHaveValue('0.04');
+				expect(sourceInput).toHaveValue('1');
+				expect(destinationInput).toHaveValue('0.02');
 
 				await fireEvent.click(button);
-				expect(sourceTokenExchangeValue).toHaveTextContent('$2.50');
+				expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
 				expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
 				expect(sourceInput).toHaveValue('1');
 				expect(destinationInput).toHaveValue('0.02');
