@@ -129,9 +129,7 @@ describe('SwapForm', () => {
 			'should switch between USD and token values when clicking $description exchange',
 			async ({ buttonIndex }) => {
 				const { getAllByTestId } = renderSwapForm();
-				const buttons = getAllByTestId(
-					SWAP_AMOUNT_EXCHANGE_BUTTON
-				);
+				const buttons = getAllByTestId(SWAP_AMOUNT_EXCHANGE_BUTTON);
 				const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
 					SWAP_AMOUNT_EXCHANGE_VALUE
 				);
@@ -141,9 +139,7 @@ describe('SwapForm', () => {
 
 				await fireEvent.click(button);
 				expect(sourceTokenExchangeValue).toHaveTextContent(`1 ${mockValidIcToken.symbol}`);
-				expect(destinationTokenExchangeValue).toHaveTextContent(
-					`2 ${mockValidIcCkToken.symbol}`
-				);
+				expect(destinationTokenExchangeValue).toHaveTextContent(`2 ${mockValidIcCkToken.symbol}`);
 				expect(sourceInput).toHaveValue('1');
 				expect(destinationInput).toHaveValue('0.02');
 
