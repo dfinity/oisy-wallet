@@ -3,6 +3,7 @@ import {
 	estimatePriorityFee,
 	getSolCreateAccountFee,
 	getSolTransactions,
+	getTokenDecimals,
 	loadSolLamportsBalance,
 	loadSplTokenBalance,
 	loadTokenAccount
@@ -23,7 +24,7 @@ import {
 import { mockSolRpcSendTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { lamports } from '@solana/rpc-types';
-import type { MockInstance } from 'vitest';
+import { describe, type MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers');
 
@@ -33,6 +34,7 @@ describe('solana.api', () => {
 	let mockGetTransaction: MockInstance;
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
 	let mockGetRecentPrioritizationFees: MockInstance;
+	let mockGetAccountInfo: MockInstance;
 
 	const mockAddresses = [mockSolAddress, mockSolAddress2];
 	const mockBalance = 500000n;
@@ -49,6 +51,17 @@ describe('solana.api', () => {
 			prioritizationFee: mockPriorityFee - 2n
 		}
 	];
+	const mockAccountInfo = {
+		value: {
+			data: {
+				parsed: {
+					info: {
+						decimals: 6
+					}
+				}
+			}
+		}
+	};
 
 	const mockError = new Error('RPC Error');
 
@@ -75,12 +88,17 @@ describe('solana.api', () => {
 			send: () => Promise.resolve(mockRecentPriorityFees)
 		});
 
+		mockGetAccountInfo = vi.fn().mockReturnValue({
+			send: () => Promise.resolve(mockAccountInfo)
+		});
+
 		const mockSolanaHttpRpc = vi.fn().mockReturnValue({
 			getBalance: mockGetBalance,
 			getSignaturesForAddress: mockGetSignaturesForAddress,
 			getTransaction: mockGetTransaction,
 			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption,
-			getRecentPrioritizationFees: mockGetRecentPrioritizationFees
+			getRecentPrioritizationFees: mockGetRecentPrioritizationFees,
+			getAccountInfo: mockGetAccountInfo
 		});
 		vi.mocked(solRpcProviders.solanaHttpRpc).mockImplementation(mockSolanaHttpRpc);
 	});
@@ -551,6 +569,66 @@ describe('solana.api', () => {
 			await expect(estimatePriorityFee({ network: SolanaNetworks.mainnet })).rejects.toThrow(
 				mockError
 			);
+		});
+	});
+
+	describe('getTokenDecimals', () => {
+		it('should get token decimals successfully', async () => {
+			const decimals = await getTokenDecimals({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(decimals).toEqual(6);
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			await expect(
+				getTokenDecimals({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				})
+			).rejects.toThrow(mockError);
+		});
+
+		it('should return 0 when decimals are not found', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: { data: { parsed: { info: {} } } } })
+			});
+
+			const decimals = await getTokenDecimals({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(decimals).toEqual(0);
+		});
+
+		it('should return 0 when value is nullish', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.resolve({}) });
+
+			const decimals = await getTokenDecimals({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(decimals).toEqual(0);
+		});
+
+		it('should return 0 when the value was not parsed', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: { data: [1, 2, 3] } })
+			});
+
+			const decimals = await getTokenDecimals({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(decimals).toEqual(0);
 		});
 	});
 });
