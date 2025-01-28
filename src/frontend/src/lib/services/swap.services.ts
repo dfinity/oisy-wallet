@@ -1,10 +1,15 @@
+import { toCustomToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
+import { type SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
+import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
@@ -16,12 +21,7 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
-import { type SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
-import { setCustomToken } from '$lib/api/backend.api';
-import { toCustomToken } from '$icp-eth/services/custom-token.services';
 import { get } from 'svelte/store';
-import { i18n } from '$lib/stores/i18n.store';
-import { loadCustomTokens } from '$icp/services/icrc.services';
 
 export const swap = async ({
 	identity,
@@ -97,7 +97,7 @@ export const swap = async ({
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
 
-		await loadCustomTokens({identity});
+		await loadCustomTokens({ identity });
 	}
 
 	await waitAndTriggerWallet();
