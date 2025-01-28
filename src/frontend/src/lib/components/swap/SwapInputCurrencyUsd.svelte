@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import SwapInputCurrency from '$lib/components/swap/SwapInputCurrency.svelte';
-	import {
-		SWAP_INPUT_CURRENCY_USD,
-		SWAP_INPUT_CURRENCY_USD_SYMBOL
-	} from '$lib/constants/test-ids.constants';
+	import { SWAP_INPUT_CURRENCY_USD, SWAP_INPUT_CURRENCY_USD_SYMBOL } from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
+	import { formatUSD } from '$lib/utils/format.utils';
 
 	export let tokenAmount: OptionAmount;
 	export let tokenDecimals: number;
@@ -27,7 +25,7 @@
 	const syncDisplayValueWithTokenAmount = () => {
 		const newDisplayValue =
 			nonNullish(exchangeRate) && nonNullish(tokenAmount)
-				? (Number(tokenAmount) * exchangeRate).toFixed(2)
+				? formatUSD({ value: (Number(tokenAmount) * exchangeRate), options: { symbol: false } })
 				: undefined;
 
 		if (Number(newDisplayValue) !== Number(displayValue)) {
@@ -65,7 +63,7 @@
 </SwapInputCurrency>
 
 <style lang="scss">
-	:global(.swap-input-currency.no-padding div.input-field input[id]) {
-		padding: 0;
-	}
+  :global(.swap-input-currency.no-padding div.input-field input[id]) {
+    padding: 0;
+  }
 </style>
