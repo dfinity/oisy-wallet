@@ -18,15 +18,16 @@
 	$: {
 		if (nonNullish(kongSwapDApp)) {
 			try {
-				websiteURL = new URL(
-					safeParse({
-						schema: UrlSchema,
-						value: kongSwapDApp?.website
-					})
-				);
-				displayURL = websiteURL.hostname.startsWith('www.')
-					? websiteURL.hostname.substring(4)
-					: websiteURL.hostname;
+				const validatedWebsiteUrl = safeParse({
+					schema: UrlSchema,
+					value: kongSwapDApp?.website
+				});
+				if (nonNullish(validatedWebsiteUrl)) {
+					websiteURL = new URL(validatedWebsiteUrl);
+					displayURL = websiteURL.hostname.startsWith('www.')
+						? websiteURL.hostname.substring(4)
+						: websiteURL.hostname;
+				}
 			} catch (e: unknown) {
 				websiteURL = null;
 				displayURL = null;
