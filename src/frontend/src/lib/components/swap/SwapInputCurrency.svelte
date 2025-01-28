@@ -10,15 +10,16 @@
 	export let error = false;
 	export let loading = false;
 	export let testId: string | undefined = undefined;
+	export let styleClass = "";
 </script>
 
 <div
-	class="swap-input-currency flex h-full w-full items-center font-bold"
+	class={`swap-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
 	class:text-error={error}
 	class:animate-pulse={loading}
 >
 	<slot name="prefix"></slot>
-	<InputCurrency {testId} bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
+	<InputCurrency {testId} bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur on:nnsInput>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
 </div>

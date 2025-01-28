@@ -2,17 +2,17 @@ import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import {
 	SWAP_AMOUNT_EXCHANGE_BUTTON,
 	SWAP_AMOUNT_EXCHANGE_VALUE,
-	SWAP_INPUT_CURRENCY,
+	SWAP_INPUT_CURRENCY_TOKEN,
 	SWAP_SWITCH_TOKENS_BUTTON
 } from '$lib/constants/test-ids.constants';
 import {
-	SWAP_AMOUNTS_CONTEXT_KEY,
 	initSwapAmountsStore,
+	SWAP_AMOUNTS_CONTEXT_KEY,
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { initSwapContext, SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, getByTestId, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('SwapForm', () => {
@@ -114,7 +114,7 @@ describe('SwapForm', () => {
 			const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
 				SWAP_AMOUNT_EXCHANGE_VALUE
 			);
-			const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY);
+			const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY_TOKEN);
 
 			expect(sourceTokenExchangeValue).toHaveTextContent('$2.50');
 			expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
@@ -135,7 +135,7 @@ describe('SwapForm', () => {
 				const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
 					SWAP_AMOUNT_EXCHANGE_VALUE
 				);
-				const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY);
+				const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY_TOKEN);
 
 				const button =
 					buttonIndex === 0 ? sourceTokenExchangeButton : destinationTokenExchangeButton;

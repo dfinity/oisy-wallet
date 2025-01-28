@@ -4,7 +4,7 @@ import type { OptionAmount } from '$lib/types/send';
 import { fireEvent, render } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
-describe('SwapInputCurrency', () => {
+describe('SwapInputCurrencyToken', () => {
 	const defaultProps = {
 		value: undefined as OptionAmount,
 		decimals: 6,
