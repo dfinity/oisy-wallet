@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
@@ -34,6 +34,8 @@
 		nonNullish(amountError) ||
 		isNullishOrEmpty(destination) ||
 		isNullish(amount);
+	
+	const dispatch = createEventDispatcher();
 </script>
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
