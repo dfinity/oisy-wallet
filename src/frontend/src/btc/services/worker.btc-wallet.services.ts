@@ -1,6 +1,6 @@
 import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import { STAGING } from '$lib/constants/app.constants';
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -53,9 +53,10 @@ export const initBtcWalletWorker = async ({
 					 * TODOs:
 					 * 1. Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
 					 * 2. Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
-					 * 3. Investigate why update balance call sometimes throws "ingress_expire" error and remove "isMainnetNetwork" afterwards.
+					 * 3. After the "ingress_expiry" error caused by the overloaded networks is fixed, remove "isMainnetNetwork".
 					 * **/
-					hideToast: isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING)
+					hideToast:
+						isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !(STAGING || LOCAL))
 				});
 				return;
 		}
