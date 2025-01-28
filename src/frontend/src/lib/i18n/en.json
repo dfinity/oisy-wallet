@@ -530,6 +530,7 @@
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
+				"missing_token_address": "The token address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
 			},
 			"warning": {
@@ -574,6 +575,7 @@
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
+			"enter_token_address": "Enter an SPL token address",
 			"search_token": "Search for the token"
 		},
 		"warning": {
@@ -581,12 +583,13 @@
 		},
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
+			"invalid_token_address": "Token address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
-			"no_metadata": "No metadata were fetched for the contract address.",
+			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the ERC20 contract metadata.",
+			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
