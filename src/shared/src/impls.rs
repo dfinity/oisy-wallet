@@ -9,9 +9,10 @@ use crate::types::user_profile::{
 };
 use crate::types::{
     ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
-    Timestamp, TokenVersion, Validate, Version,
+    Timestamp, TokenVersion, Version,
 };
 use crate::validate::validate_on_deserialize;
+use crate::validate::Validate;
 use candid::Deserialize;
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};

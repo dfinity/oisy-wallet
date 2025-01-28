@@ -11,24 +11,6 @@ mod tests;
 /// The default maximum length of a token symbol.
 pub const MAX_SYMBOL_LENGTH: usize = 20;
 
-pub trait Validate {
-    /// Verifies that an object is semantically valid.
-    ///
-    /// # Errors
-    /// - If the object is invalid.
-    fn validate(&self) -> Result<(), candid::Error>;
-    /// Returns the object if it is semantically valid.
-    ///
-    /// # Errors
-    /// - If the object is invalid.
-    fn validated(self) -> Result<Self, candid::Error>
-    where
-        Self: Sized,
-    {
-        self.validate().map(|()| self)
-    }
-}
-
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
     ProofOfUniqueness,

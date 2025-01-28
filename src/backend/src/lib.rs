@@ -36,8 +36,9 @@ use shared::types::user_profile::{
     ListUsersResponse, OisyUser, UserProfile,
 };
 use shared::types::{
-    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats, Validate,
+    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
+use shared::validate::Validate;
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
 use std::time::Duration;

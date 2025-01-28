@@ -5,7 +5,7 @@ mod custom_token {
     use candid::{Decode, Encode};
 
     use crate::types::custom_token::*;
-    use crate::types::Validate;
+    use crate::validate::Validate;
 
     const SPL_TEST_VECTORS: [(&str, bool); 4] = [
         ("", false),
