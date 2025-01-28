@@ -29,7 +29,7 @@
 	let amountError: SolAmountAssertionError | undefined;
 	let invalidDestination: boolean;
 
-	const updateAtaExists = async () => {
+	const updateAtaFee = async () => {
 		if (isNullishOrEmpty(destination) || !isTokenSpl($sendToken)) {
 			ataFeeStore.setFee(undefined);
 			return;
@@ -60,7 +60,7 @@
 		ataFeeStore.setFee(ataFee);
 	};
 
-	$: destination, $sendToken, updateAtaExists();
+	$: destination, $sendToken, updateAtaFee();
 
 	let invalid = true;
 	$: invalid =
