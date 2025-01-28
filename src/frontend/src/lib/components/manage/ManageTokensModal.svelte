@@ -34,6 +34,7 @@
 	import type { SaveSplUserToken } from '$sol/services/spl-user-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
 	const steps: WizardSteps = [
 		{
