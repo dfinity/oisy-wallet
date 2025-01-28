@@ -25,14 +25,14 @@ describe('eth-transactions.services', () => {
 	describe('loadEthereumTransactions', () => {
 		let spyToastsError: MockInstance;
 
-		// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => undefined);
-		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-
 		beforeEach(() => {
 			vi.resetAllMocks();
 
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
 		});
 
 		describe('when token is ERC20', () => {

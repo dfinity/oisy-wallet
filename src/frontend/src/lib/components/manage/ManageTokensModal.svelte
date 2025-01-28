@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { get } from 'svelte/store';
-	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
+	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -26,10 +26,14 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
+	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import { isNetworkIdEthereum, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
+	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
 	const steps: WizardSteps = [
 		{
@@ -121,6 +125,31 @@
 		]);
 	};
 
+	const saveSplToken = () => {
+		if (isNullishOrEmpty(splTokenAddress)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.invalid_token_address }
+			});
+			return;
+		}
+
+		if (isNullish(splMetadata)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.no_metadata }
+			});
+			return;
+		}
+
+		saveSpl([
+			{
+				address: splTokenAddress,
+				...splMetadata,
+				network: network as SolanaNetwork,
+				enabled: true
+			}
+		]);
+	};
+
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
 	const saveIcrc = (tokens: SaveCustomToken[]): Promise<void> =>
@@ -144,7 +173,7 @@
 		});
 
 	// TODO: implement this function in the backend
-	const saveSpl = (tokens: SplTokenToggleable[]): void => {
+	const saveSpl = (tokens: SaveSplUserToken[]): void => {
 		saveSplUserTokens({
 			tokens,
 			progress,
@@ -167,11 +196,14 @@
 	let erc20ContractAddress: string | undefined;
 	let erc20Metadata: Erc20Metadata | undefined;
 
+	let splTokenAddress: string | undefined;
+	let splMetadata: TokenMetadata | undefined;
+
 	let network: Network | undefined = $selectedNetwork;
 	let tokenData: Partial<AddTokenData> = {};
 
 	$: tokenData,
-		({ ledgerCanisterId, indexCanisterId, contractAddress: erc20ContractAddress } = tokenData);
+		({ ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData);
 </script>
 
 <WizardModal
@@ -192,12 +224,20 @@
 				{indexCanisterId}
 			/>
 		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
-			<AddTokenReview
+			<EthAddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
 				contractAddress={erc20ContractAddress}
 				{network}
 				bind:metadata={erc20Metadata}
+			/>
+		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
+			<SolAddTokenReview
+				on:icBack={modal.back}
+				on:icSave={saveSplToken}
+				tokenAddress={splTokenAddress}
+				{network}
+				bind:metadata={splMetadata}
 			/>
 		{/if}
 	{:else if currentStep?.name === 'Saving'}
