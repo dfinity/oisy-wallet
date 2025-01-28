@@ -270,7 +270,10 @@ describe('token-group.utils', () => {
 
 			expect(filteredTokenGroups).toHaveLength(1);
 
-			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [customReorderedTokens[3], customReorderedTokens[4]]);
+			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [
+				customReorderedTokens[3],
+				customReorderedTokens[4]
+			]);
 		});
 
 		it('should give me only token groups where at least one token has a usd balance', () => {
@@ -285,7 +288,10 @@ describe('token-group.utils', () => {
 
 			expect(filteredTokenGroups).toHaveLength(1);
 
-			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [customReorderedTokens[3], customReorderedTokens[4]]);
+			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [
+				customReorderedTokens[3],
+				customReorderedTokens[4]
+			]);
 		});
 	});
 
