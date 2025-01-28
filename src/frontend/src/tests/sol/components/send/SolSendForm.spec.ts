@@ -13,9 +13,8 @@ describe('SolSendForm', () => {
 	const mockContext = new Map([]);
 
 	const mockFeeStore = initFeeStore();
-	mockFeeStore.setFee(123n);
 	const mockPrioritizationFeeStore = initFeeStore();
-	mockPrioritizationFeeStore.setFee(3n);
+	const mockAtaFeeStore = initFeeStore();
 
 	const props = {
 		destination: mockSolAddress2,
@@ -32,15 +31,21 @@ describe('SolSendForm', () => {
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		vi.resetAllMocks();
 
 		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(0n);
+
+		mockFeeStore.setFee(123n);
+		mockPrioritizationFeeStore.setFee(3n);
+		mockAtaFeeStore.setFee(undefined);
 
 		mockContext.set(
 			SOL_FEE_CONTEXT_KEY,
 			initFeeContext({
 				feeStore: mockFeeStore,
 				prioritizationFeeStore: mockPrioritizationFeeStore,
+				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 				feeDecimalsStore: writable(SOLANA_TOKEN.decimals)
 			})
