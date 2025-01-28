@@ -3,15 +3,20 @@ import { queryAndUpdate } from '$lib/actors/query.ic';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
+import { getTokenDecimals } from '$sol/api/solana.api';
+import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import {
 	SPL_USER_TOKENS_KEY,
 	splUserTokensStore,
 	type SplAddressMap
 } from '$sol/stores/spl-user-tokens.store';
+import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -89,4 +94,28 @@ const loadUserTokenData = ({
 	response: SplUserToken[];
 }) => {
 	splUserTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
+};
+
+export const getSplMetadata = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<TokenMetadata> => {
+	const decimals = await getTokenDecimals({ address, network });
+
+	const {
+		result: {
+			content: { metadata }
+		}
+	} = await splMetadata({ tokenAddress: address });
+
+	const { name, symbol } = metadata;
+
+	return {
+		decimals,
+		name,
+		symbol
+	};
 };
