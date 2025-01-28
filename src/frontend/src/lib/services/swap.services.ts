@@ -16,6 +16,12 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
+import { type SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
+import { setCustomToken } from '$lib/api/backend.api';
+import { toCustomToken } from '$icp-eth/services/custom-token.services';
+import { get } from 'svelte/store';
+import { i18n } from '$lib/stores/i18n.store';
+import { loadCustomTokens } from '$icp/services/icrc.services';
 
 export const swap = async ({
 	identity,
@@ -81,6 +87,18 @@ export const swap = async ({
 	});
 
 	progress(ProgressStepsSwap.UPDATE_UI);
+
+	const customTokenToSave: SaveCustomToken = destinationToken as unknown as SaveCustomToken;
+	if (!customTokenToSave.enabled) {
+		customTokenToSave.enabled = true;
+		await setCustomToken({
+			token: toCustomToken(customTokenToSave),
+			identity,
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
+
+		await loadCustomTokens({identity});
+	}
 
 	await waitAndTriggerWallet();
 };
