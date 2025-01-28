@@ -1,4 +1,4 @@
-use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
+use crate::types::custom_token::{CustomToken, CustomTokenId, IcrcToken, Token};
 use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
 use crate::types::token::UserToken;
@@ -386,4 +386,3 @@ impl Validate for IcrcToken {
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
-
