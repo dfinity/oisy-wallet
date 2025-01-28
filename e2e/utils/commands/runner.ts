@@ -11,11 +11,11 @@ interface CommandRunner {
 
 class LocalCommandRunner implements CommandRunner {
 	async exec(command: Command): Promise<string> {
-		console.log("XD");
+		console.log('XD');
 		return new Promise((resolve, reject) => {
-			console.log("XD2");
+			console.log('XD2');
 			exec(command.toString(), (error, stdout, stderr) => {
-				console.log("XD3");
+				console.log('XD3');
 				if (error) {
 					reject(`Error executing command: ${stderr}`);
 				} else {
@@ -61,7 +61,7 @@ function createCommandRunner(
 		return new DockerCommandExecutor(containerName);
 	}
 	return new LocalCommandRunner();
-	}
+}
 
 export { DockerCommandExecutor, LocalCommandRunner, createCommandRunner };
 export type { Command, CommandRunner };
