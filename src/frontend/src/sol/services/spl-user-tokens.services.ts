@@ -8,16 +8,9 @@ import {
 	type SplAddressMap
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { SplUserToken } from '$sol/types/spl-user-token';
 import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
-
-export type SaveSplUserToken = Pick<
-	SplUserToken,
-	'enabled' | 'version' | 'symbol' | 'decimals' | 'address' | 'network'
-> &
-	Partial<Pick<SplUserToken, 'id'>>;
 
 // TODO: adapt this function when we have the backend ready to save the SPL user tokens
 export const saveUserTokens = async ({
