@@ -8,9 +8,6 @@ pub type Timestamp = u64;
 #[cfg(test)]
 mod tests;
 
-/// The default maximum length of a token symbol.
-pub const MAX_SYMBOL_LENGTH: usize = 20;
-
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
     ProofOfUniqueness,
@@ -143,6 +140,9 @@ pub mod token {
         pub chain_id: ChainId,
     }
 }
+
+/// The default maximum length of a token symbol.
+pub const MAX_SYMBOL_LENGTH: usize = 20;
 
 /// Extendable custom user defined tokens
 pub mod custom_token {
