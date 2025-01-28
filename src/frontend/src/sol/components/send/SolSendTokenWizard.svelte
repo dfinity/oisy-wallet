@@ -193,7 +193,7 @@
 	};
 </script>
 
-<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING}>
+<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<SolSendReview
 			on:icBack
