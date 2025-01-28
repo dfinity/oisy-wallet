@@ -125,7 +125,7 @@
 		]);
 	};
 
-	const saveSplToken = async () => {
+	const saveSplToken = () => {
 		if (isNullishOrEmpty(splTokenAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_token_address }
