@@ -13,10 +13,11 @@
 </script>
 
 <div
-	class="swap-input-currency h-full w-full font-bold"
+	class="swap-input-currency flex h-full w-full items-center font-bold"
 	class:text-error={error}
 	class:animate-pulse={loading}
 >
+	<slot name="prefix"></slot>
 	<InputCurrency {testId} bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
