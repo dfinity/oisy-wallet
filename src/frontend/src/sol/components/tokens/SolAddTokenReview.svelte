@@ -16,9 +16,9 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { splTokens } from '$sol/derived/spl.derived';
+	import { getSplMetadata } from '$sol/services/spl.services';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-	import { getSplMetadata } from '$sol/services/spl.services';
 
 	export let tokenAddress: SplTokenAddress | undefined;
 	export let metadata: TokenMetadata | undefined;
