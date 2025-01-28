@@ -42,9 +42,9 @@ mod custom_token {
 
     mod icrc {
         //! Tests for the icrc module.
-        use candid::Principal;
-
         use super::*;
+        use crate::validate::test_validate_on_deserialize;
+        use candid::Principal;
         struct TestVector {
             input: IcrcToken,
             valid: bool,
@@ -144,35 +144,6 @@ mod custom_token {
                 },
             ]
         }
-
-        #[test]
-        fn validate_icrc_token() {
-            for TestVector {
-                input,
-                valid,
-                description,
-            } in test_vectors()
-            {
-                let result = input.validate();
-                assert_eq!(
-                    valid,
-                    result.is_ok(),
-                    "Validation does not match for: {}",
-                    description
-                );
-
-                let candid = Encode!(&input).unwrap();
-                let result: Result<IcrcToken, _> = Decode!(&candid, IcrcToken);
-                assert_eq!(
-                    valid,
-                    result.is_ok(),
-                    "Candid deserialization did not match for: {}",
-                    description
-                );
-                if valid {
-                    assert_eq!(input, result.unwrap());
-                }
-            }
-        }
+        test_validate_on_deserialize! {IcrcToken}
     }
 }

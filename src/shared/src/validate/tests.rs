@@ -1,4 +1,5 @@
 //! Tests that the validation functions work as expected.
+use crate::validate::test_validate_on_deserialize;
 use crate::validate::validate_on_deserialize;
 use crate::validate::Validate;
 use candid::{CandidType, Decode, Deserialize, Encode};
@@ -52,38 +53,3 @@ fn test_vectors() -> Vec<TestVector> {
 }
 
 test_validate_on_deserialize! {ToyType}
-
-macro_rules! test_validate_on_deserialize {
-    ($type:ty) => {
-        #[test]
-        fn validates_on_deserialize() {
-            for TestVector {
-                input,
-                valid,
-                description,
-            } in test_vectors()
-            {
-                let result = input.validate();
-                assert_eq!(
-                    valid,
-                    result.is_ok(),
-                    "Validation does not match for: {}",
-                    description
-                );
-
-                let candid = Encode!(&input).unwrap();
-                let result: Result<$type, _> = Decode!(&candid, $type);
-                assert_eq!(
-                    valid,
-                    result.is_ok(),
-                    "Candid deserialization did not match for: {}",
-                    description
-                );
-                if valid {
-                    assert_eq!(input, result.unwrap());
-                }
-            }
-        }
-    };
-}
-pub(crate) use test_validate_on_deserialize;
