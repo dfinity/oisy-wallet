@@ -129,14 +129,18 @@ const extractStartScript = (htmlFile) => {
 const updateCSP = (indexHtml) => {
 	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gm;
 
+	// todo rename?
+	const simpleAnalyticsScript = `<script src="https://scripts.simpleanalyticscdn.com/latest.js"></script>`;
 	const indexHashes = [];
 
 	let m;
 	while ((m = sw.exec(indexHtml))) {
 		const content = m[1];
-
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
+
+	// Add hash for Simple Analytics script
+	indexHashes.push(`'sha256-${createHash('sha256').update(simpleAnalyticsScript).digest('base64')}'`);
 
 	const ethMainnetConnectSrc =
 		'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io';
@@ -169,7 +173,7 @@ const updateCSP = (indexHtml) => {
         img-src 'self' data: https://queue.simpleanalyticscdn.com https://simpleanalyticsbadges.com;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
-        script-src 'unsafe-inline' 'strict-dynamic' https://scripts.simpleanalyticscdn.com ${indexHashes.join(' ')};
+        script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
         base-uri 'self';
         form-action 'none';
         style-src 'self' 'unsafe-inline';
