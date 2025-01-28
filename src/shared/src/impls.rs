@@ -416,7 +416,6 @@ impl Validate for IcrcToken {
     }
 }
 
-
 macro_rules! validate_on_deserialize {
     ($type:ty) => {
         impl<'de> Deserialize<'de> for $type {
