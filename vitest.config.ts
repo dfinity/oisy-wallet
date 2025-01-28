@@ -3,7 +3,7 @@ import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
 import { type UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
-import { defineViteReplacements, readCanisterIds } from './vite.utils';
+import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
 
 process.env = {
 	...process.env,
@@ -13,6 +13,7 @@ process.env = {
 export default defineConfig(
 	(): UserConfig => ({
 		plugins: [sveltekit(), svelteTesting()],
+		...CSS_CONFIG_OPTIONS,
 		resolve: {
 			alias: [
 				{
