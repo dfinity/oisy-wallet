@@ -14,18 +14,11 @@
 	export let loading = false;
 
 	let displayValue: OptionAmount;
-	// we keep track of display values to avoid unwanted formating during user inputs
-	let previousDisplayValue: OptionAmount;
 
-	const handleInput = () => {
-		if (displayValue === previousDisplayValue) {
-			return;
-		}
-
+	const handleInput = () =>
 		tokenAmount = nonNullish(exchangeRate) && nonNullish(displayValue)
 			? (Number(displayValue) / exchangeRate).toFixed(tokenDecimals)
 			: undefined;
-	};
 
 	const syncDisplayValueWithTokenAmount = () => {
 		const newDisplayValue = nonNullish(exchangeRate) && nonNullish(tokenAmount) ? (Number(tokenAmount) * exchangeRate).toFixed(2) : undefined;
@@ -35,7 +28,6 @@
 		}
 	};
 
-	$: previousDisplayValue = displayValue;
 	$: tokenAmount, syncDisplayValueWithTokenAmount();
 </script>
 
