@@ -17,7 +17,8 @@
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
-		isNetworkIdICP
+		isNetworkIdICP,
+		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 
 	export let network: Network | undefined;
@@ -35,9 +36,13 @@
 	let isEthereumNetwork = false;
 	$: isEthereumNetwork = isNetworkIdEthereum(network?.id);
 
+	let isSolanaNetwork = false;
+	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
+
 	let ledgerCanisterId = tokenData?.ledgerCanisterId ?? '';
 	let indexCanisterId = tokenData?.indexCanisterId ?? '';
 	let erc20ContractAddress = tokenData?.erc20ContractAddress ?? '';
+	let splTokenAddress = tokenData?.splTokenAddress ?? '';
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
@@ -52,6 +57,8 @@
 			};
 		} else if (isEthereumNetwork) {
 			tokenData = { erc20ContractAddress };
+		} else if (isSolanaNetwork) {
+			tokenData = { splTokenAddress };
 		} else {
 			tokenData = {};
 		}
@@ -65,8 +72,17 @@
 	let invalidIc = true;
 	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
 
+	let invalidSpl = true;
+	$: invalidSpl = isNullishOrEmpty(splTokenAddress);
+
 	let invalid = true;
-	$: invalid = isIcpNetwork ? invalidIc : isEthereumNetwork ? invalidErc20 : false;
+	$: invalid = isIcpNetwork
+		? invalidIc
+		: isEthereumNetwork
+			? invalidErc20
+			: isSolanaNetwork
+				? invalidSpl
+				: true;
 
 	let enabledNetworkSelector = true;
 	$: enabledNetworkSelector = isNullish($selectedNetwork);
