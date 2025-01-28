@@ -65,13 +65,12 @@ export const filterTokenGroups = ({
 }: {
 	groupedTokens: TokenUiOrGroupUi[];
 	showZeroBalances: boolean;
-}) => {
-	return groupedTokens.filter((t: TokenUiOrGroupUi) =>
+}) =>
+	groupedTokens.filter((t: TokenUiOrGroupUi) =>
 		isTokenUiGroup(t)
 			? t.tokens.some((tok: TokenUi) => hasBalance({ token: tok, showZeroBalances }))
 			: hasBalance({ token: t, showZeroBalances })
 	);
-};
 
 const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
 	id: token.id,
