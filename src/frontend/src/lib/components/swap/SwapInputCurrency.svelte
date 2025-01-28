@@ -9,6 +9,7 @@
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
+	export let testId: string | undefined = undefined;
 </script>
 
 <div
@@ -16,7 +17,7 @@
 	class:text-error={error}
 	class:animate-pulse={loading}
 >
-	<InputCurrency bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
+	<InputCurrency {testId} bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
 </div>
