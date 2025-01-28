@@ -31,7 +31,6 @@
 	import { isNetworkIdEthereum, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
-	import type { SaveSplUserToken } from '$sol/services/spl-user-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
