@@ -1,3 +1,4 @@
+import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -16,6 +17,7 @@ import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
 import { address as solAddress } from '@solana/addresses';
@@ -32,13 +34,17 @@ import {
 import {
 	appendTransactionMessageInstructions,
 	createTransactionMessage,
+	prependTransactionMessageInstruction,
 	setTransactionMessageLifetimeUsingBlockhash,
 	type ITransactionMessageWithFeePayer,
 	type TransactionMessage,
 	type TransactionVersion
 } from '@solana/transaction-messages';
 import { assertTransactionIsFullySigned } from '@solana/transactions';
-import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import {
+	getComputeUnitEstimateForTransactionMessageFactory,
+	sendAndConfirmTransactionFactory
+} from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
@@ -64,7 +70,7 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 
 	const correctedLatestBlockhash = {
 		...latestBlockhash,
-		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight + 100n
+		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
 	};
 
 	return pipe(
@@ -183,7 +189,7 @@ const createSplTokenTransactionMessage = async ({
 	);
 };
 
-export const sendSignedTransaction = ({
+export const sendSignedTransaction = async ({
 	rpc,
 	rpcSubscriptions,
 	signedTransaction,
@@ -198,7 +204,7 @@ export const sendSignedTransaction = ({
 
 	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
 
-	sendAndConfirmTransaction(signedTransaction, { commitment });
+	await sendAndConfirmTransaction(signedTransaction, { commitment });
 };
 
 /**
@@ -210,19 +216,23 @@ export const sendSignedTransaction = ({
  */
 export const sendSol = async ({
 	identity,
+	progress,
 	token,
 	amount,
+	prioritizationFee,
 	destination,
-	source,
-	onProgress
+	source
 }: {
 	identity: OptionIdentity;
+	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: BigNumber;
+	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
-	onProgress?: () => void;
 }): Promise<Signature> => {
+	progress(ProgressStepsSendSol.INITIALIZATION);
+
 	const {
 		network: { id: networkId }
 	} = token;
@@ -260,18 +270,36 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	onProgress?.();
+	const getComputeUnitEstimateForTransactionMessage =
+		getComputeUnitEstimateForTransactionMessageFactory({
+			rpc
+		});
 
-	const { signedTransaction, signature } = await signTransaction(transactionMessage);
+	const computeUnitsEstimate =
+		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
 
-	// Explicitly do not await to proceed in the background and allow the UI to continue
-	sendSignedTransaction({
+	const computeUnitPrice = BigInt(Math.ceil(Number(prioritizationFee) / computeUnitsEstimate));
+
+	const transactionMessageWithComputeUnitPrice = prependTransactionMessageInstruction(
+		getSetComputeUnitPriceInstruction({ microLamports: computeUnitPrice }),
+		transactionMessage
+	);
+
+	progress(ProgressStepsSendSol.SIGN);
+
+	const { signedTransaction, signature } = await signTransaction(
+		prioritizationFee > 0n ? transactionMessageWithComputeUnitPrice : transactionMessage
+	);
+
+	progress(ProgressStepsSendSol.SEND);
+
+	await sendSignedTransaction({
 		rpc,
 		rpcSubscriptions,
 		signedTransaction
 	});
 
-	onProgress?.();
+	progress(ProgressStepsSendSol.DONE);
 
 	return signature;
 };
