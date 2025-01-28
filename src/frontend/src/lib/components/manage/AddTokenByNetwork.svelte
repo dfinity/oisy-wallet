@@ -20,6 +20,7 @@
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
+	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
@@ -117,6 +118,8 @@
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isEthereumNetwork}
 			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+		{:else if isSolanaNetwork}
+			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
