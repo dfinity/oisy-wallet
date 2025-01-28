@@ -57,7 +57,24 @@ mod custom_token {
                     valid: false,
                     description: "Too long symbol",
                 },
-
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(255),
+                    },
+                    valid: true,
+                    description: "Maximum decimals",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(0),
+                    },
+                    valid: true,
+                    description: "Minimum decimals",
+                },
             ]
         }
         test_validate_on_deserialize!(SplToken);
