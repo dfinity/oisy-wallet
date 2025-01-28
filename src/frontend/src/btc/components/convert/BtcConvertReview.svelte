@@ -30,7 +30,7 @@
 	<slot name="cancel" slot="cancel" />
 </ConvertReview>
 
-<style lang="scss">
+<style lang="postcss">
 	:global(.btc-convert-review-fees > div.contents > div.header > button.collapsible-expand-icon) {
 		justify-content: flex-end;
 	}
