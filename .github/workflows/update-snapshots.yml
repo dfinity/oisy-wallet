@@ -33,6 +33,8 @@ jobs:
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
+        with:
+          network: local
 
   update_snapshots:
     runs-on: ${{ matrix.os }}
@@ -74,6 +76,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend.wasm.gz
+          path: out/
 
       - name: Prepare macOS
         if: runner.os == 'macOS'
@@ -84,9 +87,6 @@ jobs:
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
-
-      - name: Prepare
-        uses: ./.github/actions/prepare
 
       - name: Run Playwright tests
         run: npm run e2e:snapshots
