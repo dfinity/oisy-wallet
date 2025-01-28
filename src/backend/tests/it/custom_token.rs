@@ -41,7 +41,7 @@ lazy_static! {
     static ref SPL_TOKEN: CustomToken = CustomToken {
         token: Token::Spl(SplToken{
             token_address: SPL_TOKEN_ID.clone(),
-            symbol: Some("BOOONDOGGLEFAFAFAFAFAFAFAFAFAFFAFAFAFAFAFAFAFAFFAFAFAFAFFAFAFAFAFAFAFAFAFFAFAFAFAFAFAFFAFAFAFAFAFAFAFFAF".to_string()),
+            symbol: Some("BOOONDOGGLE".to_string()),
             decimals: Some(u8::MAX),
         }),
         enabled: true,
