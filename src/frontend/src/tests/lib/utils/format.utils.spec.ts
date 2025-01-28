@@ -115,15 +115,15 @@ describe('format.utils', () => {
 
 	describe('formatSecondsToNormalizedDate', () => {
 		describe('when the current date is not provided', () => {
+			const currentDate = new Date();
+
 			it('should return "today" for the current date', () => {
-				const currentDate = new Date();
 				const currentDateTimestamp = Math.floor(currentDate.getTime() / 1000);
 
 				expect(formatSecondsToNormalizedDate({ seconds: currentDateTimestamp })).toBe('today');
 			});
 
 			it('should return "yesterday" for the previous date', () => {
-				const currentDate = new Date();
 				const yesterday = new Date(currentDate);
 				yesterday.setDate(currentDate.getDate() - 1);
 				const yesterdayTimestamp = Math.floor(yesterday.getTime() / 1000);
@@ -132,7 +132,10 @@ describe('format.utils', () => {
 			});
 
 			it('should return day and month if within the same year', () => {
+				// We mock the current date to be February 25th to guarantee that the last month is in the same year
 				const currentDate = new Date(new Date().getFullYear(), 1, 25);
+				vi.useFakeTimers().setSystemTime(currentDate);
+
 				const earlierThisYear = new Date(currentDate);
 				earlierThisYear.setMonth(currentDate.getMonth() - 1);
 				const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
@@ -143,11 +146,13 @@ describe('format.utils', () => {
 				});
 
 				expect(formatSecondsToNormalizedDate({ seconds: timestampThisYear })).toBe(expected);
+
+				vi.useRealTimers();
 			});
 
 			it('should return day, month, and year if from a different year', () => {
-				const currentDate = new Date(new Date().getFullYear(), 1, 25);
 				const lastYear = new Date(currentDate);
+				lastYear.setDate(currentDate.getDate() - 1);
 				lastYear.setFullYear(currentDate.getFullYear() - 1);
 				const timestampLastYear = Math.floor(lastYear.getTime() / 1000);
 
@@ -160,8 +165,26 @@ describe('format.utils', () => {
 				expect(formatSecondsToNormalizedDate({ seconds: timestampLastYear })).toBe(expected);
 			});
 
+			it('should return day, month, and year if we are in January', () => {
+				const currentDate = new Date(new Date().getFullYear(), 0, 25);
+				vi.useFakeTimers().setSystemTime(currentDate);
+
+				const earlierThisYear = new Date(currentDate);
+				earlierThisYear.setMonth(currentDate.getMonth() - 1);
+				const timestampThisYear = Math.floor(earlierThisYear.getTime() / 1000);
+
+				const expected = earlierThisYear.toLocaleDateString('en', {
+					day: 'numeric',
+					month: 'long',
+					year: 'numeric'
+				});
+
+				expect(formatSecondsToNormalizedDate({ seconds: timestampThisYear })).toBe(expected);
+
+				vi.useRealTimers();
+			});
+
 			it('should not give an error if the date is in the future', () => {
-				const currentDate = new Date(new Date().getFullYear(), 1, 25);
 				const futureDate = new Date(currentDate);
 				futureDate.setDate(currentDate.getDate() + 1);
 				const futureTimestamp = Math.floor(futureDate.getTime() / 1000);

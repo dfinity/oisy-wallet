@@ -54,12 +54,11 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
-    assert!(before_set.is_ok());
-    assert_eq!(before_set.unwrap().len(), 0);
+    assert_eq!(before_set, Ok(Vec::new()));
 
     let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
-    assert!(result.is_ok());
+    assert_eq!(result, Ok(()));
 
     let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 

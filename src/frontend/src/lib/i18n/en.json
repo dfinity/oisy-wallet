@@ -136,6 +136,7 @@
 		},
 		"alt": {
 			"open_etherscan": "Open your address on Etherscan",
+			"open_solscan": "Open your address on Solscan",
 			"qrcode_address": "Scan this QR code to copy the address to receive $token tokens"
 		}
 	},
@@ -532,7 +533,7 @@
 				"no_network": "No network is selected. This is unexpected."
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed."
 			}
 		},
 		"manage": {
