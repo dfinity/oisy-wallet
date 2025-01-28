@@ -6,20 +6,28 @@
 	import { dAppDescriptions, type OisyDappDescription } from '$lib/types/dapp-description';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { UrlSchema } from '$lib/validation/url.validation';
+	import { safeParse } from '$lib/validation/utils.validation';
+	import type { OptionString } from '$lib/types/string';
 
 	let kongSwapDApp: OisyDappDescription | undefined;
-	$: kongSwapDApp = dAppDescriptions.find((d) => d.id === 'kongswap');
+	$: kongSwapDApp = dAppDescriptions.find(({id}) => id === 'kongswap');
 
 	let websiteURL: Option<URL>;
-	let displayURL: Option<string>;
+	let displayURL: OptionString;
 	$: {
 		if (nonNullish(kongSwapDApp)) {
 			try {
-				websiteURL = new URL(kongSwapDApp.website);
+				websiteURL = new URL(
+					safeParse({
+						schema: UrlSchema,
+						value: kongSwapDApp?.website
+					})
+				);
 				displayURL = websiteURL.hostname.startsWith('www.')
 					? websiteURL.hostname.substring(4)
 					: websiteURL.hostname;
-			} catch (e) {
+			} catch (e: unknown) {
 				websiteURL = null;
 				displayURL = null;
 			}
