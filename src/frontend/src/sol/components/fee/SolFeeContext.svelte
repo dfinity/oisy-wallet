@@ -4,6 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		estimatePriorityFee,
 		getSolCreateAccountFee,
@@ -16,7 +17,6 @@
 	import { SOL_FEE_CONTEXT_KEY, type FeeContext } from '$sol/stores/sol-fee.store';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let observe: boolean;
 	export let destination = '';
