@@ -42,6 +42,28 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 		);
 };
 
+const hasBalance = (token: TokenUiOrGroupUi, showZeroBalances: boolean) =>
+	Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
+
+/**
+ * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
+ * one token with a balance if showZeroBalance is false.
+ *
+ * @param groupedTokens - The list of TokenUiOrGroupUi to filter.
+ * 												Groups without balance are filtered out.
+ * @param showZeroBalances - A boolean that indicates if zero balances should be shown.
+ *
+ * @returns A new list where all groups that do not have at least one token with a balance are removed
+ * 					if showZeroBalances is false.
+ */
+export const filterTokenGroups = (groupedTokens: TokenUiOrGroupUi[], showZeroBalances: boolean) => {
+	return groupedTokens.filter((t: TokenUiOrGroupUi) =>
+		isTokenUiGroup(t)
+			? t.tokens.some((tok: TokenUi) => hasBalance(tok, showZeroBalances))
+			: hasBalance(t, showZeroBalances)
+	);
+};
+
 const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
 	id: token.id,
 	nativeToken: token,
