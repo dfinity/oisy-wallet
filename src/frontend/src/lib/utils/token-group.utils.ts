@@ -49,12 +49,10 @@ const hasBalance = (token: TokenUiOrGroupUi, showZeroBalances: boolean) =>
  * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
  * one token with a balance if showZeroBalance is false.
  *
- * @param groupedTokens - The list of TokenUiOrGroupUi to filter.
- * 												Groups without balance are filtered out.
+ * @param groupedTokens - The list of TokenUiOrGroupUi to filter. Groups without balance are filtered out.
  * @param showZeroBalances - A boolean that indicates if zero balances should be shown.
  *
- * @returns A new list where all groups that do not have at least one token with a balance are removed
- * 					if showZeroBalances is false.
+ * @returns A new list where all groups that do not have at least one token with a balance are removed if showZeroBalances is false.
  */
 export const filterTokenGroups = (groupedTokens: TokenUiOrGroupUi[], showZeroBalances: boolean) => {
 	return groupedTokens.filter((t: TokenUiOrGroupUi) =>
