@@ -1,4 +1,5 @@
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import type { TokenId } from '$lib/types/token';
 import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
@@ -7,7 +8,7 @@ import {
 	type SplAddressMap
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
 
@@ -19,7 +20,7 @@ export const saveUserTokens = async ({
 }: {
 	progress: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
-	tokens: SplTokenToggleable[];
+	tokens: SaveSplUserToken[];
 }) => {
 	progress(ProgressStepsAddToken.SAVE);
 
@@ -60,7 +61,7 @@ export const saveUserTokens = async ({
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));
-	disabledTokens.forEach(({ id }) => splUserTokensStore.reset(id));
+	disabledTokens.forEach(({ id }) => splUserTokensStore.reset(id as TokenId));
 
 	// Reload all user tokens for simplicity reason.
 	await loadSplUserTokens({ identity });

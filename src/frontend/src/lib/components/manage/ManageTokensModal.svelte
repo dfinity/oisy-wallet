@@ -30,6 +30,7 @@
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
 	const steps: WizardSteps = [
 		{
@@ -144,7 +145,7 @@
 		});
 
 	// TODO: implement this function in the backend
-	const saveSpl = (tokens: SplTokenToggleable[]): void => {
+	const saveSpl = (tokens: SaveSplUserToken[]): void => {
 		saveSplUserTokens({
 			tokens,
 			progress,
