@@ -10,7 +10,8 @@ export const isMobile = () => {
 		return nonNullish(userAgentData.mobile) && userAgentData.mobile;
 	}
 	const isTouchScreen = window.matchMedia('(any-pointer:coarse)').matches;
-	return isTouchScreen;
+	const isMouseScreen = window.matchMedia('(any-pointer:fine)').matches;
+	return isTouchScreen && !isMouseScreen;
 };
 
 export const isDesktop = () => !isMobile();
