@@ -177,8 +177,8 @@ pub mod custom_token {
     /// A variant describing any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum Token {
-        Icrc(IcrcToken),
-        Spl(SplToken),
+        Icrc(IcrcToken) = 0,
+        Spl(SplToken) = 1,
     }
 
     /// User preferences for any token
@@ -198,6 +198,8 @@ pub mod custom_token {
         Icrc(LedgerId),
         /// A Solana token on the Solana mainnet.
         SolMainnet(SplTokenId),
+        /// A Solana token on the Solana devnet.
+        SolDevnet(SplTokenId),
     }
 }
 
