@@ -153,7 +153,10 @@ export const getSplMetadata = async ({
 
 	const {
 		result: {
-			content: { metadata }
+			content: {
+				metadata,
+				links: { image: icon }
+			}
 		}
 	} = await splMetadata({ tokenAddress: address });
 
@@ -162,6 +165,7 @@ export const getSplMetadata = async ({
 	return {
 		decimals,
 		name,
-		symbol
+		symbol,
+		icon
 	};
 };

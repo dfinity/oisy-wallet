@@ -1,11 +1,16 @@
 import { QUICKNODE_API_KEY, QUICKNODE_API_URL } from '$env/rest/quicknode.env';
 import type { TokenMetadata } from '$lib/types/token';
+import type { UrlSchema } from '$lib/validation/url.validation';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { z } from 'zod';
 
 interface SplMetadataResponse {
 	result: {
 		content: {
 			metadata: TokenMetadata;
+			links: {
+				image: z.infer<typeof UrlSchema>;
+			};
 		};
 	};
 }
