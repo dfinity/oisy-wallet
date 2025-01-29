@@ -6,7 +6,7 @@ import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { retry } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsErrorGeneric } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -65,10 +65,9 @@ const loadEthTransactions = async ({
 			}
 		} = get(i18n);
 
-		console.error(`${loading_transactions}:`, err);
-
-		toastsError({
-			msg: { text: loading_transactions }
+		toastsErrorGeneric({
+			msg: { text: loading_transactions },
+			err
 		});
 		return { success: false };
 	}
@@ -131,16 +130,14 @@ const loadErc20Transactions = async ({
 				error: { loading_transactions_symbol }
 			}
 		} = get(i18n);
-		const errorMsg = replacePlaceholders(loading_transactions_symbol, {
-			$symbol: token.symbol
-		});
 
-		console.error(`${errorMsg}:`, err);
-
-		toastsError({
+		toastsErrorGeneric({
 			msg: {
-				text: errorMsg
-			}
+				text: replacePlaceholders(loading_transactions_symbol, {
+					$symbol: token.symbol
+				})
+			},
+			err
 		});
 		return { success: false };
 	}

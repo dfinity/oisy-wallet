@@ -23,12 +23,12 @@ vi.mock('$eth/rest/etherscan.rest', () => ({
 
 describe('eth-transactions.services', () => {
 	describe('loadEthereumTransactions', () => {
-		let spyToastsError: MockInstance;
+		let spyToastsErrorGeneric: MockInstance;
 
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+			spyToastsErrorGeneric = vi.spyOn(toastsStore, 'toastsErrorGeneric');
 
 			// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
 			vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -69,7 +69,7 @@ describe('eth-transactions.services', () => {
 					tokenId: mockTokenId
 				});
 
-				expect(spyToastsError).toHaveBeenCalledWith({
+				expect(spyToastsErrorGeneric).toHaveBeenCalledWith({
 					msg: { text: en.init.error.eth_address_unknown }
 				});
 				expect(result).toEqual({ success: false });
@@ -81,7 +81,7 @@ describe('eth-transactions.services', () => {
 					tokenId: USDT_TOKEN_ID
 				});
 
-				expect(spyToastsError).toHaveBeenCalledWith({
+				expect(spyToastsErrorGeneric).toHaveBeenCalledWith({
 					msg: { text: en.transactions.error.no_token_loading_transaction }
 				});
 				expect(result).toEqual({ success: false });
@@ -128,7 +128,7 @@ describe('eth-transactions.services', () => {
 
 				expect(result).toEqual({ success: false });
 				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: null });
-				expect(spyToastsError).toHaveBeenCalledWith({
+				expect(spyToastsErrorGeneric).toHaveBeenCalledWith({
 					err: mockError,
 					msg: {
 						text: replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
