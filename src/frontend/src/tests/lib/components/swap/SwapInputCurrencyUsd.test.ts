@@ -44,6 +44,14 @@ describe('SwapInputCurrencyUsd', () => {
 		expect(input).toHaveValue('');
 	});
 
+	it.each(['10000', '1000', '100'])('does not format usd value %s', async (value) => {
+		const { getByTestId } = render(SwapInputCurrencyUsd, defaultProps);
+		const input = getByTestId(SWAP_INPUT_CURRENCY_USD);
+
+		await fireEvent.input(input, { target: { value } });
+		expect(input).toHaveValue(value);
+	});
+
 	it('updates display value when tokenAmount changes', async () => {
 		const props = {
 			...defaultProps,
