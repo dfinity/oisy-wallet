@@ -18,10 +18,12 @@ Following terminal commands are useful to deploy `frontend` and `backend`.
 ### Local development
 
 - To perform local development, you'll need a `.env.development` file.
+
   - For simple testing without API access for transactions & token pricing, copy the values from `.env.test`.
   - Otherwise use the values stored in our password manager.
 
 - Start the local testnet, by running this in a dedicated terminal window:
+
   ```
   dfx start --clean
   ```
@@ -43,10 +45,10 @@ echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
 ```
 
 If you have Docker installed, you can use that:
+
 ```
 BACKEND_BUILD_STRATEGY=docker npm run deploy
 ```
-
 
 - Now you can deploy the frontend:
   ```bash
