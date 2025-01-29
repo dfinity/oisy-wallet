@@ -21,7 +21,7 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 	});
 };
 
-export const toastsErrorGeneric = ({ msg, err }: ToastsErrorParams) => {
+export const toastsErrorNoTrace = ({ msg, err }: ToastsErrorParams) => {
 	console.error(`${msg.text}:`, err);
 
 	return toastsError({
