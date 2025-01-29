@@ -65,9 +65,10 @@ const loadEthTransactions = async ({
 			}
 		} = get(i18n);
 
+		console.error(`${loading_transactions}:`, err);
+
 		toastsError({
-			msg: { text: loading_transactions },
-			err
+			msg: { text: loading_transactions }
 		});
 		return { success: false };
 	}
@@ -130,14 +131,16 @@ const loadErc20Transactions = async ({
 				error: { loading_transactions_symbol }
 			}
 		} = get(i18n);
+		const errorMsg = replacePlaceholders(loading_transactions_symbol, {
+			$symbol: token.symbol
+		});
+
+		console.error(`${errorMsg}:`, err);
 
 		toastsError({
 			msg: {
-				text: replacePlaceholders(loading_transactions_symbol, {
-					$symbol: token.symbol
-				})
-			},
-			err
+				text: errorMsg
+			}
 		});
 		return { success: false };
 	}
