@@ -223,6 +223,36 @@ jobs:
 
       - name: Deploy Backend to Environment
         run: |
+          metadata() {
+              echo "Metadata $1:"
+              dfx canister metadata backend "$1" --network "$COMMIT" | sed 's/^/  /g'
+              echo ""
+          }
+          canister_info() {
+              echo '```'
+              echo "# Canister info"
+              dfx canister info frontend --network "$NETWORK"
+              echo ""
+              echo "# Canister metadata"
+              metadata git:commit
+              metadata git:tags
+              echo ""
+              echo "# Asset hash"
+              dfx canister call frontend certified_tree --network "$NETWORK" '(record {})' | sha256sum
+          }
+          deploy() {
+            {
+              echo "## Frontend upgrade"
+              echo "#### Before upgrade"
+              canister_info
+            } >> $GITHUB_STEP_SUMMARY
+                ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
+                dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
+            {
+              echo "#### After upgrade"
+              canister_info
+            } >> $GITHUB_STEP_SUMMARY
+          }
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
@@ -231,11 +261,9 @@ jobs:
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
               else
-                ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
-                dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
+                deploy
               fi
             else
-              ./scripts/setup cargo-binstall candid-extractor ic-wasm didc yq
-              dfx deploy backend --network "$NETWORK" "${DFX_DEPLOY_FLAGS[@]}"
+              deploy
             fi
           fi
