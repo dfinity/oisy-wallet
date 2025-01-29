@@ -50,7 +50,7 @@
 				</div>
 				<div class="mr-auto">
 					<div class="text-lg font-bold">{kongSwapDApp.name}</div>
-					{#if nonNullish(websiteURL) && nonNullish(displayURL)}
+					{#if nonNullish(displayURL)}
 						<div class="text-sm text-misty-rose">{displayURL}</div>
 					{/if}
 				</div>
