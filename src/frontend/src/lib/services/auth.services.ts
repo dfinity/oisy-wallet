@@ -30,6 +30,7 @@ export const signIn = async (
 	try {
 		await authStore.signIn(params);
 
+		window.sa_event(TRACK_COUNT_SIGN_IN_SUCCESS)
 		await trackEvent({
 			name: TRACK_COUNT_SIGN_IN_SUCCESS
 		});
@@ -43,6 +44,8 @@ export const signIn = async (
 			await trackEvent({
 				name: TRACK_SIGN_IN_CANCELLED_COUNT
 			});
+			window.sa_event(TRACK_SIGN_IN_CANCELLED_COUNT)
+
 
 			// We do not display an error if user explicitly cancelled the process of sign-in
 			return { success: 'cancelled' };
@@ -51,6 +54,7 @@ export const signIn = async (
 		await trackEvent({
 			name: TRACK_SIGN_IN_ERROR_COUNT
 		});
+		window.sa_event(TRACK_SIGN_IN_ERROR_COUNT)
 
 		toastsError({
 			msg: { text: get(i18n).auth.error.error_while_signing_in },
