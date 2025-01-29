@@ -14,7 +14,7 @@ import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { listUserTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -51,7 +51,7 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	} catch (err: unknown) {
 		erc20DefaultTokensStore.reset();
 
-		toastsError({
+		toastsErrorNoTrace({
 			msg: { text: get(i18n).init.error.erc20_contracts },
 			err
 		});
@@ -69,7 +69,7 @@ export const loadErc20UserTokens = ({ identity }: { identity: OptionIdentity }):
 		onCertifiedError: ({ error: err }) => {
 			erc20UserTokensStore.resetAll();
 
-			toastsError({
+			toastsErrorNoTrace({
 				msg: { text: get(i18n).init.error.erc20_user_tokens },
 				err
 			});

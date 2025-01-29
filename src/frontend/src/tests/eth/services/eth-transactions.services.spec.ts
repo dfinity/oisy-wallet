@@ -24,11 +24,13 @@ vi.mock('$eth/rest/etherscan.rest', () => ({
 describe('eth-transactions.services', () => {
 	describe('loadEthereumTransactions', () => {
 		let spyToastsError: MockInstance;
+		let spyToastsErrorNoTrace: MockInstance;
 
 		beforeEach(() => {
 			vi.resetAllMocks();
 
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+			spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
 
 			// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
 			vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -128,7 +130,7 @@ describe('eth-transactions.services', () => {
 
 				expect(result).toEqual({ success: false });
 				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: null });
-				expect(spyToastsError).toHaveBeenCalledWith({
+				expect(spyToastsErrorNoTrace).toHaveBeenCalledWith({
 					err: mockError,
 					msg: {
 						text: replacePlaceholders(en.transactions.error.loading_transactions_symbol, {
