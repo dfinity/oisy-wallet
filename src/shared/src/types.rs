@@ -176,6 +176,7 @@ pub mod custom_token {
 
     /// A variant describing any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[repr(u8)]
     pub enum Token {
         Icrc(IcrcToken) = 0,
         Spl(SplToken) = 1,
@@ -193,13 +194,14 @@ pub mod custom_token {
     /// A cross-chain token identifier.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     #[serde(remote = "Self")]
+    #[repr(u8)]
     pub enum CustomTokenId {
         /// An ICRC-1 compliant token on the Internet Computer mainnet.
-        Icrc(LedgerId),
+        Icrc(LedgerId) = 0,
         /// A Solana token on the Solana mainnet.
-        SolMainnet(SplTokenId),
+        SolMainnet(SplTokenId) = 1,
         /// A Solana token on the Solana devnet.
-        SolDevnet(SplTokenId),
+        SolDevnet(SplTokenId) = 2,
     }
 }
 
