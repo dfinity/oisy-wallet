@@ -12,6 +12,7 @@
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -21,7 +22,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { pageToken } from '$lib/derived/page-token.derived';
 
 	let sourceToken: IcToken | undefined = undefined;
 	let destinationToken: IcToken | undefined = undefined;

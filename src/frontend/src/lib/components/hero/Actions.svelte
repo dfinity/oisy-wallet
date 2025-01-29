@@ -28,11 +28,11 @@
 		networkId,
 		networkSolana
 	} from '$lib/derived/network.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
-	import { pageToken } from '$lib/derived/page-token.derived';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
