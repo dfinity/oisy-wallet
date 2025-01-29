@@ -60,6 +60,8 @@ jobs:
       - name: Build oisy-backend WASM
         if: steps.changes.outputs.src == 'true'
         uses: ./.github/actions/oisy-backend
+        with:
+          network: local
 
       - name: Prepare
         if: steps.changes.outputs.src == 'true'
