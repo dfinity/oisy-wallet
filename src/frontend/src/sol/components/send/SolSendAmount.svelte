@@ -22,7 +22,7 @@
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import { SOLANA_TRANSACTION_FEE_IN_LAMPORTS } from '$sol/constants/sol.constants';
+	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
 	export let amount: OptionAmount = undefined;
@@ -31,7 +31,7 @@
 	const { sendToken, sendBalance, sendTokenDecimals, sendTokenStandard, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const fee = SOLANA_TRANSACTION_FEE_IN_LAMPORTS;
+	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
 	let solanaNativeToken: Token;
 	$: solanaNativeToken = isNetworkIdSOLTestnet($sendTokenNetworkId)
@@ -48,7 +48,7 @@
 		}
 
 		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
-			const total = userAmount.add(fee ?? ZERO);
+			const total = userAmount.add($fee ?? ZERO);
 
 			if (total.gt($sendBalance)) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
@@ -62,7 +62,7 @@
 		}
 
 		const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO;
-		if (nonNullish(fee) && solBalance.lt(fee)) {
+		if (nonNullish($fee) && solBalance.lt($fee)) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_solana_funds_to_cover_the_fees
 			);
@@ -74,7 +74,7 @@
 			? undefined
 			: getMaxTransactionAmount({
 					balance: $sendBalance ?? ZERO,
-					fee: BigNumber.from(fee),
+					fee: BigNumber.from($fee),
 					tokenDecimals: $sendTokenDecimals,
 					tokenStandard: $sendTokenStandard
 				});
