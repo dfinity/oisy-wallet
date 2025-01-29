@@ -6,6 +6,7 @@
 	import SwapAmountExchange from '$lib/components/swap/SwapAmountExchange.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapMaxBalanceButton from '$lib/components/swap/SwapMaxBalanceButton.svelte';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapSelectToken from '$lib/components/swap/SwapSelectToken.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
@@ -26,6 +27,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
@@ -47,6 +49,9 @@
 
 	let errorType: ConvertAmountErrorType = undefined;
 	let amountSetToMax = false;
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	$: receiveAmount =
 		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
@@ -104,6 +109,8 @@
 		<div class="relative">
 			<SwapSelectToken
 				bind:amount={swapAmount}
+				displayUnit={inputUnit}
+				exchangeRate={$sourceTokenExchangeRate}
 				bind:errorType
 				bind:amountSetToMax
 				token={$sourceToken}
@@ -121,6 +128,7 @@
 								amount={swapAmount}
 								exchangeRate={$sourceTokenExchangeRate}
 								token={$sourceToken}
+								bind:displayUnit={exchangeValueUnit}
 							/>
 						</div>
 					{/if}
@@ -138,6 +146,8 @@
 			<SwapSelectToken
 				token={$destinationToken}
 				amount={receiveAmount}
+				displayUnit={inputUnit}
+				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
 				on:click={() => {
@@ -158,6 +168,7 @@
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
 									token={$destinationToken}
+									bind:displayUnit={exchangeValueUnit}
 								/>
 
 								<SwapValueDifference {swapAmount} {receiveAmount} />
@@ -179,7 +190,10 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<SwapFees />
+			<div class="flex flex-col gap-3">
+				<SwapProvider />
+				<SwapFees />
+			</div>
 		{/if}
 	</div>
 
