@@ -71,6 +71,7 @@ export enum ProgressStepsSendBtc {
 
 export enum ProgressStepsSendSol {
 	INITIALIZATION = 'initialization',
+	SIGN = 'sign',
 	SEND = 'send',
 	RELOAD = 'reload',
 	DONE = 'done'

@@ -56,9 +56,8 @@ ENV RUSTUP_HOME=/opt/rustup \
     CARGO_HOME=/cargo \
     PATH=/cargo/bin:$PATH
 
-# Copy resources
-COPY ./docker ./docker
-COPY ./rust-toolchain.toml ./rust-toolchain.toml
+# Copy resources	
+COPY ./docker ./docker	
 
 # Setup toolchain and ic-wasm
 COPY rust-toolchain.toml .
@@ -82,7 +81,7 @@ COPY src/cycles_ledger/client/Cargo.toml src/cycles_ledger/client/Cargo.toml
 COPY src/cycles_ledger/pic/Cargo.toml src/cycles_ledger/pic/Cargo.toml
 COPY src/cycles_ledger/types/Cargo.toml src/cycles_ledger/types/Cargo.toml
 COPY src/shared/Cargo.toml src/shared/Cargo.toml
-ENV CARGO_TARGET_DIR=/cargo_target
+COPY scripts/build.backend.wasm.sh scripts/
 RUN mkdir -p src/backend/src \
     && touch src/backend/src/lib.rs \
     && mkdir -p src/cycles_ledger/client/src \
@@ -92,19 +91,26 @@ RUN mkdir -p src/backend/src \
     && mkdir -p src/cycles_ledger/types/src \
     && touch src/cycles_ledger/types/src/lib.rs \
     && mkdir -p src/shared/src \
-    && touch src/shared/src/lib.rs \
-    && ./docker/build --only-dependencies \
-    && rm -rf src
+    && touch src/shared/src/lib.rs
+RUN cargo fetch
+RUN scripts/build.backend.wasm.sh
+RUN rm -rf src
 
 FROM deps AS build_backend
-
-COPY . .
-
+COPY src src
+COPY scripts/build.backend.* scripts/
+COPY scripts/build.report.sh scripts/
+# Cache the rust build, to make the dfx build fast:
+RUN scripts/build.backend.wasm.sh
+# Variables that don't affect the rust build:
+COPY dfx.json dfx.json
+COPY canister_ids.json canister_ids.json
+COPY ./in/tags in/tags
+COPY ./in/commit in/commit
+ENV DFX_NETWORK=ic
+COPY scripts/commit-metadata scripts/
 RUN touch src/*/src/lib.rs src/*/*/src/lib.rs
+RUN dfx build backend --network "$DFX_NETWORK"
 
-RUN ./docker/build --backend
-
-RUN sha256sum /backend.wasm.gz
-
-FROM scratch AS scratch_backend
-COPY --from=build_backend /backend.wasm.gz /
+FROM scratch AS backend
+COPY --from=build_backend out/ /

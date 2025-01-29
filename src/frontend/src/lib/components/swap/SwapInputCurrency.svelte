@@ -9,14 +9,27 @@
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
+	export let testId: string | undefined = undefined;
+	export let styleClass = '';
 </script>
 
 <div
-	class="swap-input-currency h-full w-full font-bold"
+	class={`swap-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
 	class:text-error={error}
 	class:animate-pulse={loading}
 >
-	<InputCurrency bind:value {name} {placeholder} {disabled} {decimals} on:focus on:blur>
+	<slot name="prefix"></slot>
+	<InputCurrency
+		{testId}
+		bind:value
+		{name}
+		{placeholder}
+		{disabled}
+		{decimals}
+		on:focus
+		on:blur
+		on:nnsInput
+	>
 		<slot name="inner-end" slot="inner-end" />
 	</InputCurrency>
 </div>
