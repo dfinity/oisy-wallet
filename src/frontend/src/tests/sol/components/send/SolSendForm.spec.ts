@@ -120,7 +120,7 @@ describe('SolSendForm', () => {
 			expect(ataFee).not.toBeNull();
 		});
 
-		it('should not render ATA creation fee if there is an ATA for the destination', async () => {
+		it('should not render ATA creation fee if it is nullish', async () => {
 			mockAtaFeeStore.setFee(123n);
 
 			const { container } = render(SolSendForm, {
