@@ -27,6 +27,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
@@ -48,6 +49,9 @@
 
 	let errorType: ConvertAmountErrorType = undefined;
 	let amountSetToMax = false;
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	$: receiveAmount =
 		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
@@ -105,6 +109,8 @@
 		<div class="relative">
 			<SwapSelectToken
 				bind:amount={swapAmount}
+				displayUnit={inputUnit}
+				exchangeRate={$sourceTokenExchangeRate}
 				bind:errorType
 				bind:amountSetToMax
 				token={$sourceToken}
@@ -122,6 +128,7 @@
 								amount={swapAmount}
 								exchangeRate={$sourceTokenExchangeRate}
 								token={$sourceToken}
+								bind:displayUnit={exchangeValueUnit}
 							/>
 						</div>
 					{/if}
@@ -139,6 +146,8 @@
 			<SwapSelectToken
 				token={$destinationToken}
 				amount={receiveAmount}
+				displayUnit={inputUnit}
+				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
 				disabled={true}
 				on:click={() => {
@@ -159,6 +168,7 @@
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
 									token={$destinationToken}
+									bind:displayUnit={exchangeValueUnit}
 								/>
 
 								<SwapValueDifference {swapAmount} {receiveAmount} />
