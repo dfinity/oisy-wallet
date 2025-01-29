@@ -140,11 +140,7 @@ const loadCustomIcrcTokensData = async ({
 		custom_token: CustomToken,
 		index: number
 	): Promise<IcrcCustomTokenWithoutId | undefined> => {
-		const {
-			enabled,
-			version: v,
-			token,
-		} = custom_token;
+		const { enabled, version: v, token } = custom_token;
 
 		if (!('Icrc' in token)) {
 			throw new Error('Token is not Icrc');
