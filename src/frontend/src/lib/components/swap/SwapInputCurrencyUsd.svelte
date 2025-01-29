@@ -6,7 +6,6 @@
 		SWAP_INPUT_CURRENCY_USD_SYMBOL
 	} from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
-	import { formatUSD } from '$lib/utils/format.utils';
 
 	export let tokenAmount: OptionAmount;
 	export let tokenDecimals: number;
@@ -28,7 +27,7 @@
 	const syncDisplayValueWithTokenAmount = () => {
 		const newDisplayValue =
 			nonNullish(exchangeRate) && nonNullish(tokenAmount)
-				? formatUSD({ value: Number(tokenAmount) * exchangeRate, options: { symbol: false } })
+				? (Number(tokenAmount) * exchangeRate).toFixed(2)
 				: undefined;
 
 		if (Number(newDisplayValue) !== Number(displayValue)) {
