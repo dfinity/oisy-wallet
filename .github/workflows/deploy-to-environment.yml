@@ -204,10 +204,11 @@ jobs:
             canister_info() {
               echo '```'
               echo "# Canister info"
-              dfx canister info frontend --network "$NETWORK"
+              dfx canister info frontend --network "$NETWORK" | grep 'Module hash:'
               echo ""
               echo "# Asset hash"
               dfx canister call frontend certified_tree --network "$NETWORK" '(record {})' | sha256sum
+              echo '```'
             }
             {
               echo "## Frontend upgrade"
