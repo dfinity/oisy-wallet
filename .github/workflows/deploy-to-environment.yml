@@ -190,10 +190,35 @@ jobs:
       - name: Pre-build
         run: npm run build
 
+      - name: Print
+        run: |
+          {
+              echo "## Candidate"
+              printf "Commit: " ; git rev-parse HEAD
+              dfx --version
+          } >> $GITHUB_STEP_SUMMARY
+
       - name: Deploy Frontend to Environment
         run: |
           if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ]; then
+            canister_info() {
+              echo '```'
+              echo "# Canister info"
+              dfx canister info frontend --network "$NETWORK"
+              echo ""
+              echo "# Asset hash"
+              dfx canister call frontend certified_tree --network "$NETWORK" '(record {})' | sha256sum
+            }
+            {
+              echo "## Frontend upgrade"
+              echo "#### Before upgrade"
+              canister_info
+            } >> $GITHUB_STEP_SUMMARY
             dfx deploy frontend --network $NETWORK --no-asset-upgrade
+            {
+              echo "#### After upgrade"
+              canister_info
+            } >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Deploy Backend to Environment
