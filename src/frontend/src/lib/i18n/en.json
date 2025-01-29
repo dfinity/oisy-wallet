@@ -458,7 +458,8 @@
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
-			"refreshing_ui": "Refreshing UI"
+			"refreshing_ui": "Refreshing UI",
+			"swap_provider": "Swap provider"
 		},
 		"error": {
 			"unexpected": "Something went wrong while swapping tokens.",
