@@ -14,7 +14,10 @@ import { BigNumber } from '@ethersproject/bignumber';
 import * as solanaFunctional from '@solana/functional';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
-import { sendAndConfirmTransactionFactory } from '@solana/web3.js';
+import {
+	getComputeUnitEstimateForTransactionMessageFactory,
+	sendAndConfirmTransactionFactory
+} from '@solana/web3.js';
 import { expect, type MockInstance } from 'vitest';
 
 vi.mock('@solana/functional', () => ({
@@ -36,6 +39,7 @@ vi.mock('@solana/transaction-messages', () => ({
 	createTransactionMessage: vi.fn(),
 	setTransactionMessageFeePayer: vi.fn(),
 	setTransactionMessageLifetimeUsingBlockhash: vi.fn(),
+	prependTransactionMessageInstruction: vi.fn(),
 	appendTransactionMessageInstructions: vi.fn()
 }));
 
@@ -44,6 +48,7 @@ vi.mock('@solana-program/system', () => ({
 }));
 
 vi.mock('@solana/web3.js', () => ({
+	getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
 	sendAndConfirmTransactionFactory: vi.fn()
 }));
 
@@ -62,6 +67,16 @@ describe('sol-send.services', () => {
 		const mockAmount = BigNumber.from('1000000');
 		const mockSource = mockSolAddress;
 		const mockDestination = mockSolAddress2;
+		const mockPrioritizationFee = 0n;
+		const mockParams = {
+			identity: mockIdentity,
+			amount: mockAmount,
+			prioritizationFee: mockPrioritizationFee,
+			source: mockSource,
+			destination: mockDestination,
+			progress: vi.fn()
+		};
+
 		const mockRpc = {
 			getTokenAccountsByOwner: vi.fn(() => ({
 				send: vi.fn(() => Promise.resolve({ value: [{ pubkey: mockSplAddress }] }))
@@ -81,6 +96,9 @@ describe('sol-send.services', () => {
 			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);
 			vi.mocked(signWithSchnorr).mockResolvedValue(new Uint8Array([0, 1, 2, 3]));
 			vi.mocked(sendAndConfirmTransactionFactory).mockReturnValue(() => Promise.resolve());
+			vi.mocked(getComputeUnitEstimateForTransactionMessageFactory).mockReturnValue(() =>
+				Promise.resolve(123)
+			);
 
 			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
 			spyPipe = vi.spyOn(solanaFunctional, 'pipe').mockImplementation(vi.fn());
@@ -96,12 +114,8 @@ describe('sol-send.services', () => {
 		it('should send SOL successfully', async () => {
 			await expect(
 				sendSol({
-					identity: mockIdentity,
-					token: SOLANA_TOKEN,
-					amount: mockAmount,
-					destination: mockDestination,
-					source: mockSource,
-					progress: vi.fn()
+					...mockParams,
+					token: SOLANA_TOKEN
 				})
 			).resolves.not.toThrow();
 
@@ -112,12 +126,8 @@ describe('sol-send.services', () => {
 		it('should send SPL tokens successfully', async () => {
 			await expect(
 				sendSol({
-					identity: mockIdentity,
-					token: DEVNET_USDC_TOKEN,
-					amount: mockAmount,
-					destination: mockDestination,
-					source: mockSource,
-					progress: vi.fn()
+					...mockParams,
+					token: DEVNET_USDC_TOKEN
 				})
 			).resolves.not.toThrow();
 
@@ -128,12 +138,8 @@ describe('sol-send.services', () => {
 		it('should send add ATA creation instructions if needed', async () => {
 			await expect(
 				sendSol({
-					identity: mockIdentity,
-					token: DEVNET_USDC_TOKEN,
-					amount: mockAmount,
-					destination: mockDestination,
-					source: mockSource,
-					progress: vi.fn()
+					...mockParams,
+					token: DEVNET_USDC_TOKEN
 				})
 			).resolves.not.toThrow();
 
@@ -147,12 +153,8 @@ describe('sol-send.services', () => {
 
 			await expect(
 				sendSol({
-					identity: mockIdentity,
-					token: SOLANA_TOKEN,
-					amount: mockAmount,
-					destination: mockDestination,
-					source: mockSource,
-					progress: vi.fn()
+					...mockParams,
+					token: SOLANA_TOKEN
 				})
 			).rejects.toThrowError(
 				replacePlaceholders(en.init.error.no_solana_network, {
@@ -168,16 +170,7 @@ describe('sol-send.services', () => {
 				}))
 			} as unknown as Rpc<SolanaRpcApi>);
 
-			await expect(
-				sendSol({
-					identity: mockIdentity,
-					token: DEVNET_USDC_TOKEN,
-					amount: mockAmount,
-					destination: mockDestination,
-					source: mockSource,
-					progress: vi.fn()
-				})
-			).rejects.toThrowError(
+			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrowError(
 				`Token account not found for wallet ${mockSource} and token ${DEVNET_USDC_TOKEN.address} on devnet network`
 			);
 		});

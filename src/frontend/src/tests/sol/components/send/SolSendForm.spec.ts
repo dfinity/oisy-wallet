@@ -3,12 +3,19 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
+import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { lamports } from '@solana/rpc-types';
 import { render } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 
 describe('SolSendForm', () => {
 	const mockContext = new Map([]);
+
+	const mockFeeStore = initFeeStore();
+	mockFeeStore.setFee(123n);
+	const mockPrioritizationFeeStore = initFeeStore();
+	mockPrioritizationFeeStore.setFee(3n);
 
 	const props = {
 		destination: mockSolAddress2,
@@ -28,6 +35,16 @@ describe('SolSendForm', () => {
 		vi.resetAllMocks();
 
 		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(0n);
+
+		mockContext.set(
+			SOL_FEE_CONTEXT_KEY,
+			initFeeContext({
+				feeStore: mockFeeStore,
+				prioritizationFeeStore: mockPrioritizationFeeStore,
+				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
+				feeDecimalsStore: writable(SOLANA_TOKEN.decimals)
+			})
+		);
 	});
 
 	it('should render all fields', () => {
