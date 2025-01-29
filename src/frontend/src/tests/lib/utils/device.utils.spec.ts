@@ -9,7 +9,7 @@ describe('device.utils', () => {
 					userAgentData: {
 						mobile: true
 					}
-				},
+				}
 			});
 
 			expect(isMobile()).toBe(true);
@@ -22,7 +22,7 @@ describe('device.utils', () => {
 					userAgentData: {
 						mobile: false
 					}
-				},
+				}
 			});
 
 			expect(isMobile()).toBe(false);
@@ -30,14 +30,14 @@ describe('device.utils', () => {
 
 		it('should return true for mobile device checking the match media', () => {
 			Object.defineProperties(window, {
-				'navigator': {
+				navigator: {
 					writable: true,
-					value: {},
+					value: {}
 				},
-				'matchMedia': {
+				matchMedia: {
 					writable: true,
 					value: vi.fn().mockImplementation((query) => ({
-						matches: query === '(any-pointer:coarse)',
+						matches: query === '(any-pointer:coarse)'
 					}))
 				}
 			});
@@ -47,14 +47,14 @@ describe('device.utils', () => {
 
 		it('should return false for desktop device checking the match media', () => {
 			Object.defineProperties(window, {
-				'navigator': {
+				navigator: {
 					writable: true,
-					value: {},
+					value: {}
 				},
-				'matchMedia': {
+				matchMedia: {
 					writable: true,
 					value: vi.fn().mockImplementation((query) => ({
-						matches: query === '(any-pointer:fine)',
+						matches: query === '(any-pointer:fine)'
 					}))
 				}
 			});
@@ -71,7 +71,7 @@ describe('device.utils', () => {
 					userAgentData: {
 						mobile: true
 					}
-				},
+				}
 			});
 
 			expect(isDesktop()).toBe(false);
@@ -84,7 +84,7 @@ describe('device.utils', () => {
 					userAgentData: {
 						mobile: false
 					}
-				},
+				}
 			});
 
 			expect(isDesktop()).toBe(true);
@@ -92,14 +92,14 @@ describe('device.utils', () => {
 
 		it('should return false for mobile device checking the match media', () => {
 			Object.defineProperties(window, {
-				'navigator': {
+				navigator: {
 					writable: true,
-					value: {},
+					value: {}
 				},
-				'matchMedia': {
+				matchMedia: {
 					writable: true,
 					value: vi.fn().mockImplementation((query) => ({
-						matches: query === '(any-pointer:coarse)',
+						matches: query === '(any-pointer:coarse)'
 					}))
 				}
 			});
@@ -109,14 +109,14 @@ describe('device.utils', () => {
 
 		it('should return true for desktop device checking the match media', () => {
 			Object.defineProperties(window, {
-				'navigator': {
+				navigator: {
 					writable: true,
-					value: {},
+					value: {}
 				},
-				'matchMedia': {
+				matchMedia: {
 					writable: true,
 					value: vi.fn().mockImplementation((query) => ({
-						matches: query === '(any-pointer:fine)',
+						matches: query === '(any-pointer:fine)'
 					}))
 				}
 			});
