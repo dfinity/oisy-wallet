@@ -51,6 +51,7 @@
 			"wasm": "out/backend.wasm.gz",
 			"init_arg_file": "out/backend.args.did",
 			"build": "scripts/build.backend.sh",
+			"specified_id": "d3nvo-aaaaa-aaaar-qagzq-cai",
 			"remote": {
 				"id": {
 					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",

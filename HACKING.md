@@ -17,11 +17,19 @@ Following terminal commands are useful to deploy `frontend` and `backend`.
 
 ### Local development
 
-> To perform local development, you'll need a `.env.development` file.
+- To perform local development, you'll need a `.env.development` file.
+  - For simple testing without API access for transactions & token pricing, copy the values from `.env.test`.
+  - Otherwise use the values stored in our password manager.
 
-```bash
-npm run deploy
-```
+- Start the local testnet, by running this in a dedicated terminal window:
+  ```
+  dfx start --clean
+  ```
+
+- Deploy all the supporting canisters:
+  ```bash
+  npm run deploy
+  ```
 
 > [!NOTE]
 > For macOS, you might need to manually install `llvm` and patch `clang` lib path. See example for `zsh` shell:
@@ -33,6 +41,19 @@ echo 'export CC=$(brew --prefix llvm)/bin/clang' >> ~/.zshrc
 echo 'export AR=$(brew --prefix llvm)/bin/llvm-ar' >> ~/.zshrc
 echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
 ```
+
+If you have Docker installed, you can use that:
+```
+BACKEND_BUILD_STRATEGY=docker npm run deploy
+```
+
+
+- Now you can deploy the frontend:
+  ```bash
+  nvm install
+  npm ci
+  dfx deploy frontend
+  ```
 
 ### Staging
 
