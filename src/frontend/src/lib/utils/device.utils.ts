@@ -4,7 +4,7 @@ interface UserAgentData {
 	mobile?: boolean;
 }
 
-export const isMobile = () => {
+export const isMobile = (): boolean => {
 	if ('userAgentData' in navigator && nonNullish(navigator.userAgentData)) {
 		const userAgentData: UserAgentData = navigator.userAgentData;
 		return nonNullish(userAgentData.mobile) && userAgentData.mobile;
