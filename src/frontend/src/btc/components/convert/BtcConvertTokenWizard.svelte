@@ -13,6 +13,10 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
+		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR,
+		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
 		btcAddressTestnet
@@ -20,6 +24,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -98,7 +103,6 @@
 		dispatch('icNext');
 
 		try {
-			// TODO: add tracking
 			await sendBtc({
 				destination: destinationAddress,
 				amount: sendAmount,
@@ -117,11 +121,19 @@
 
 			progress(ProgressStepsConvert.DONE);
 
+			await trackEvent({
+				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
+			});
+
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.convert.error.unexpected },
 				err
+			});
+
+			await trackEvent({
+				name: TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR
 			});
 
 			back();

@@ -1,12 +1,12 @@
-import { fontFamily } from 'tailwindcss/defaultTheme';
-import type { Config } from 'tailwindcss/types/config';
+import type { Config } from 'tailwindcss';
+import defaultTheme from 'tailwindcss/defaultTheme';
 import { themeVariables } from './src/frontend/src/lib/styles/tailwind/theme-variables';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
 		fontFamily: {
-			sans: ['CircularXX', 'sans-serif', ...fontFamily.sans]
+			sans: ['CircularXX', 'sans-serif', ...defaultTheme.fontFamily.sans]
 		},
 		colors: {
 			inherit: 'inherit',

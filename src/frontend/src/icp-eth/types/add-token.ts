@@ -1,12 +1,17 @@
-import type { Either } from '$lib/utils/ts.utils';
+import type { SolAddress } from '$lib/types/address';
+import type { OneOf } from '$lib/utils/ts.utils';
 
-export interface Erc20AddTokenData {
-	contractAddress: string;
+interface Erc20AddTokenData {
+	erc20ContractAddress: string;
 }
 
-export interface IcAddTokenData {
+interface IcAddTokenData {
 	ledgerCanisterId: string;
 	indexCanisterId: string | undefined;
 }
 
-export type AddTokenData = Either<Erc20AddTokenData, IcAddTokenData>;
+interface SplAddTokenData {
+	splTokenAddress: SolAddress;
+}
+
+export type AddTokenData = OneOf<[Erc20AddTokenData, IcAddTokenData, SplAddTokenData]>;
