@@ -46,6 +46,7 @@ jobs:
         with:
           name: ${{ matrix.name }}
           target: ${{ matrix.target }}
+          network: local
 
   tests:
     runs-on: ubuntu-24.04
