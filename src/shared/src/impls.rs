@@ -380,7 +380,9 @@ impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
             CustomTokenId::Icrc(_) => Ok(()), // This is a principal.  In principle we could check the exact type of principal.
-            CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => token_address.validate(),
+            CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
+                token_address.validate()
+            }
         }
     }
 }
