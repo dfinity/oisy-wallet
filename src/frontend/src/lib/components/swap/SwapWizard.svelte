@@ -6,9 +6,14 @@
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
+	import {
+		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUCCESS
+	} from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swap as swapService } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -73,11 +78,29 @@
 
 			progress(ProgressStepsSwap.DONE);
 
+			await trackEvent({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: {
+					sourceToken: $sourceToken.symbol,
+					destinationToken: $destinationToken.symbol,
+					dApp: 'KONG'
+				}
+			});
+
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected },
 				err
+			});
+
+			await trackEvent({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: {
+					sourceToken: $sourceToken.symbol,
+					destinationToken: $destinationToken.symbol,
+					dApp: 'KONG'
+				}
 			});
 
 			back();

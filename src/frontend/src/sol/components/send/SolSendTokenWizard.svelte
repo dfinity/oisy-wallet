@@ -1,11 +1,22 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { writable } from 'svelte/store';
+	import {
+		SOLANA_DEVNET_TOKEN,
+		SOLANA_LOCAL_TOKEN,
+		SOLANA_TESTNET_TOKEN,
+		SOLANA_TOKEN
+	} from '$env/tokens/tokens.sol.env';
 	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import {
+		TRACK_COUNT_SOL_SEND_ERROR,
+		TRACK_COUNT_SOL_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -15,13 +26,15 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { SolAddress } from '$lib/types/address';
+	import type { OptionSolAddress } from '$lib/types/address';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -31,10 +44,17 @@
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
+	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
 	import { sendSteps } from '$sol/constants/steps.constants';
 	import { sendSol } from '$sol/services/sol-send.services';
+	import {
+		SOL_FEE_CONTEXT_KEY,
+		type FeeContext as FeeContextType,
+		initFeeContext,
+		initFeeStore
+	} from '$sol/stores/sol-fee.store';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -44,23 +64,48 @@
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const progress = (step: ProgressStepsSendSol) => (sendProgressStep = step);
-
 	let network: Network | undefined = undefined;
 	$: network = $sendToken.network;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
 
-	let source: SolAddress;
-	$: source =
-		(isNetworkIdSOLTestnet(networkId)
-			? $solAddressTestnet
-			: isNetworkIdSOLDevnet(networkId)
-				? $solAddressDevnet
-				: isNetworkIdSOLLocal(networkId)
-					? $solAddressLocal
-					: $solAddressMainnet) ?? '';
+	let source: OptionSolAddress;
+	let solanaNativeToken: Token;
+	$: [source, solanaNativeToken] = isNetworkIdSOLTestnet(networkId)
+		? [$solAddressTestnet, SOLANA_TESTNET_TOKEN]
+		: isNetworkIdSOLDevnet(networkId)
+			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+			: isNetworkIdSOLLocal(networkId)
+				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+				: [$solAddressMainnet, SOLANA_TOKEN];
+
+	/**
+	 * Fee context store
+	 */
+
+	let feeStore = initFeeStore();
+	let prioritizationFeeStore = initFeeStore();
+
+	let feeSymbolStore = writable<string | undefined>(undefined);
+	$: feeSymbolStore.set(solanaNativeToken.symbol);
+
+	let feeDecimalsStore = writable<number | undefined>(undefined);
+	$: feeDecimalsStore.set(solanaNativeToken.decimals);
+
+	setContext<FeeContextType>(
+		SOL_FEE_CONTEXT_KEY,
+		initFeeContext({
+			feeStore,
+			prioritizationFeeStore,
+			feeSymbolStore,
+			feeDecimalsStore
+		})
+	);
+
+	/**
+	 * Send
+	 */
 
 	const dispatch = createEventDispatcher();
 
@@ -79,6 +124,9 @@
 			});
 			return;
 		}
+
+		// This should not happen, it is just a safety check for types
+		assertNonNullish(source);
 
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
@@ -104,31 +152,35 @@
 		dispatch('icNext');
 
 		try {
-			sendProgressStep = ProgressStepsSendSol.INITIALIZATION;
-
-			// TODO: add tracking
 			await sendSol({
 				identity: $authIdentity,
+				progress: (step: ProgressStepsSendSol) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}),
+				prioritizationFee: $prioritizationFeeStore ?? 0n,
 				destination,
-				source,
-				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendSol.INITIALIZATION) {
-						progress(ProgressStepsSendSol.SEND);
-					} else if (sendProgressStep === ProgressStepsSendSol.SEND) {
-						progress(ProgressStepsSendSol.DONE);
-					}
+				source
+			});
+
+			await trackEvent({
+				name: TRACK_COUNT_SOL_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol
 				}
 			});
 
-			sendProgressStep = ProgressStepsSendSol.DONE;
-
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			await trackEvent({
+				name: TRACK_COUNT_SOL_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
+
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
 				err
@@ -139,28 +191,44 @@
 	};
 </script>
 
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-	<SolSendReview on:icBack on:icSend={send} {destination} {amount} {network} {source} />
-{:else if currentStep?.name === WizardStepsSend.SENDING}
-	<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
-{:else if currentStep?.name === WizardStepsSend.SEND}
-	<SolSendForm on:icNext on:icClose bind:destination bind:amount on:icQRCodeScan {source}>
-		<svelte:fragment slot="cancel">
-			{#if formCancelAction === 'back'}
-				<ButtonBack on:click={back} />
-			{:else}
-				<ButtonCancel on:click={close} />
-			{/if}
-		</svelte:fragment>
-	</SolSendForm>
-{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-	<SendQrCodeScan
-		expectedToken={$sendToken}
-		bind:destination
-		bind:amount
-		{decodeQrCode}
-		on:icQRCodeBack
-	/>
-{:else}
-	<slot />
-{/if}
+<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING}>
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
+		<SolSendReview
+			on:icBack
+			on:icSend={send}
+			{destination}
+			{amount}
+			{network}
+			source={source ?? ''}
+		/>
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
+		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+	{:else if currentStep?.name === WizardStepsSend.SEND}
+		<SolSendForm
+			on:icNext
+			on:icClose
+			bind:destination
+			bind:amount
+			on:icQRCodeScan
+			source={source ?? ''}
+		>
+			<svelte:fragment slot="cancel">
+				{#if formCancelAction === 'back'}
+					<ButtonBack on:click={back} />
+				{:else}
+					<ButtonCancel on:click={close} />
+				{/if}
+			</svelte:fragment>
+		</SolSendForm>
+	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+		<SendQrCodeScan
+			expectedToken={$sendToken}
+			bind:destination
+			bind:amount
+			{decodeQrCode}
+			on:icQRCodeBack
+		/>
+	{:else}
+		<slot />
+	{/if}
+</SolFeeContext>

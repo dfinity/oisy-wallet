@@ -4,6 +4,7 @@ version = "0.0.2"
 edition = "2021"
 
 [dependencies]
+bs58 = { workspace = true }
 candid = { workspace = true }
 getrandom = { workspace = true }
 ic-canister-sig-creation = { workspace = true }
