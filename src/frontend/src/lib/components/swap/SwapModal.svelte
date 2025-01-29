@@ -18,17 +18,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
-	import { token } from '$lib/stores/token.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { pageToken } from '$lib/derived/page-token.derived';
 
-	export let sourceToken: IcToken | undefined = undefined;
-	export let destinationToken: IcToken | undefined = undefined;
+	let sourceToken: IcToken | undefined = undefined;
+	let destinationToken: IcToken | undefined = undefined;
 
 	let selectedToken: IcToken;
-	if (nonNullish($token) && isIcToken($token)) {
-		selectedToken = $token;
+	if (nonNullish($pageToken) && isIcToken($pageToken)) {
+		selectedToken = $pageToken;
 
 		let balance: BigNumber | undefined;
 		balance = $balancesStore?.[selectedToken.id]?.data;

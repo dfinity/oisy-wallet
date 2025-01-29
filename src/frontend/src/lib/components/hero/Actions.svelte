@@ -29,10 +29,10 @@
 		networkSolana
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { token } from '$lib/stores/token.store';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
+	import { pageToken } from '$lib/derived/page-token.derived';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -51,13 +51,13 @@
 
 	let swapAction = false;
 	$: swapAction =
-		(SWAP_ACTION_ENABLED && !isTransactionsPage) || (isTransactionsPage && $networkICP);
+		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP));
 
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;
 
 	let buyAction = true;
-	$: buyAction = !$networkICP || nonNullish($token?.buy);
+	$: buyAction = !$networkICP || nonNullish($pageToken?.buy);
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
