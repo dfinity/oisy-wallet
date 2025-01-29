@@ -51,7 +51,7 @@ case "$DFX_NETWORK" in
   # instead of 'nat8').
   test -e "in/ping.json" || {
     mkdir -p "in"
-    dfx ping "$DFX_NETWORK" > "in/ping.json"
+    dfx ping "$DFX_NETWORK" >"in/ping.json"
   }
   rootkey_did="$(jq -r '.root_key | reduce .[] as $item ("{ "; "\(.) \($item):nat8;") + " }"' "in/ping.json")"
   echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
