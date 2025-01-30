@@ -207,15 +207,10 @@ export interface SelectedUtxosFeeResponse {
 export interface Settings {
 	dapp: DappSettings;
 }
-export type SplNetwork = { Mainnet: null } | { Devnet: null };
 export interface SplToken {
-	id: SplTokenId;
 	decimals: [] | [number];
+	token_address: string;
 	symbol: [] | [string];
-}
-export interface SplTokenId {
-	network: SplNetwork;
-	address: string;
 }
 export interface Stats {
 	user_profile_count: bigint;

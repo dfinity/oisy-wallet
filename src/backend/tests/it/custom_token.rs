@@ -4,7 +4,7 @@ use crate::utils::pocketic::{setup, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::custom_token::{
-    CustomToken, CustomTokenId, IcrcToken, SplNetwork, SplToken, SplTokenAddress, SplTokenId, Token,
+    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token,
 };
 use shared::types::TokenVersion;
 
@@ -37,24 +37,18 @@ lazy_static! {
         enabled: true,
         version: None,
     };
-    static ref SPL_TOKEN_ID: SplTokenAddress =
-        SplTokenAddress("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string());
+    static ref SPL_TOKEN_ID: SplTokenId =
+        SplTokenId("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string());
     static ref SPL_TOKEN: CustomToken = CustomToken {
-        token: Token::Spl(SplToken {
-            id: SplTokenId {
-                address: SPL_TOKEN_ID.clone(),
-                network: SplNetwork::Mainnet
-            },
+        token: Token::SplMainnet(SplToken {
+            token_address: SPL_TOKEN_ID.clone(),
             symbol: Some("BOOONDOGGLE".to_string()),
             decimals: Some(u8::MAX),
         }),
         enabled: true,
         version: None,
     };
-    static ref CUSTOM_SPL_TOKEN_ID: CustomTokenId = CustomTokenId::Sol(SplTokenId {
-        address: SPL_TOKEN_ID.clone(),
-        network: SplNetwork::Mainnet
-    });
+    static ref CUSTOM_SPL_TOKEN_ID: CustomTokenId = CustomTokenId::SolMainnet(SPL_TOKEN_ID.clone());
     static ref LOTS_OF_CUSTOM_TOKENS: Vec<CustomToken> = vec![
         USER_TOKEN.clone(),
         ANOTHER_USER_TOKEN.clone(),

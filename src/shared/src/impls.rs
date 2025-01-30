@@ -1,5 +1,5 @@
 use crate::types::custom_token::{
-    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenAddress, SplTokenId, Token,
+    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token,
 };
 use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
@@ -26,7 +26,12 @@ impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
             Token::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
-            Token::Spl(SplToken { id, .. }) => CustomTokenId::Sol(id.clone()),
+            Token::SplMainnet(SplToken { token_address, .. }) => {
+                CustomTokenId::SolMainnet(token_address.clone())
+            }
+            Token::SplDevnet(SplToken { token_address, .. }) => {
+                CustomTokenId::SolDevnet(token_address.clone())
+            }
         }
     }
 }
@@ -339,12 +344,12 @@ fn next_matches_strum_iter() {
     );
 }
 
-impl SplTokenAddress {
+impl SplTokenId {
     pub const MAX_LENGTH: usize = 44;
     pub const MIN_LENGTH: usize = 32;
 }
 
-impl Validate for SplTokenAddress {
+impl Validate for SplTokenId {
     /// Verifies that a Solana address is valid.
     ///
     /// # References
@@ -374,29 +379,13 @@ impl Validate for SplTokenAddress {
     }
 }
 
-impl Validate for SplToken {
-    fn validate(&self) -> Result<(), candid::Error> {
-        use crate::types::MAX_SYMBOL_LENGTH;
-        if let Some(symbol) = &self.symbol {
-            if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg("Symbol too long"));
-            }
-        }
-        self.id.validate()
-    }
-}
-
-impl Validate for SplTokenId {
-    fn validate(&self) -> Result<(), candid::Error> {
-        self.address.validate()
-    }
-}
-
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
             CustomTokenId::Icrc(_) => Ok(()), // This is a principal.  In principle we could check the exact type of principal.
-            CustomTokenId::Sol(id) => id.validate(),
+            CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
+                token_address.validate()
+            }
         }
     }
 }
@@ -411,8 +400,20 @@ impl Validate for Token {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
             Token::Icrc(token) => token.validate(),
-            Token::Spl(token) => token.validate(),
+            Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
         }
+    }
+}
+
+impl Validate for SplToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        use crate::types::MAX_SYMBOL_LENGTH;
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg("Symbol too long"));
+            }
+        }
+        self.token_address.validate()
     }
 }
 
@@ -445,5 +446,4 @@ validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
-validate_on_deserialize!(SplTokenAddress);
 validate_on_deserialize!(SplTokenId);
