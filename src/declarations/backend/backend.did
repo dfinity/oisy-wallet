@@ -192,11 +192,13 @@ type SelectedUtxosFeeResponse = record {
   utxos : vec Utxo;
 };
 type Settings = record { dapp : DappSettings };
+type SplNetwork = variant { Mainnet; Devnet };
 type SplToken = record {
+  id : SplTokenId;
   decimals : opt nat8;
-  token_address : text;
   symbol : opt text;
 };
+type SplTokenId = record { network : SplNetwork; address : text };
 type Stats = record {
   user_profile_count : nat64;
   custom_token_count : nat64;

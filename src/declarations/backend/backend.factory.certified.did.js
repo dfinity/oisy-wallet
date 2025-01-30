@@ -205,9 +205,14 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
+	const SplNetwork = IDL.Variant({ Mainnet: IDL.Null, Devnet: IDL.Null });
+	const SplTokenId = IDL.Record({
+		network: SplNetwork,
+		address: IDL.Text
+	});
 	const SplToken = IDL.Record({
+		id: SplTokenId,
 		decimals: IDL.Opt(IDL.Nat8),
-		token_address: IDL.Text,
 		symbol: IDL.Opt(IDL.Text)
 	});
 	const IcrcToken = IDL.Record({

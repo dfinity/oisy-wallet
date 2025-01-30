@@ -164,23 +164,40 @@ pub mod custom_token {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     #[serde(remote = "Self")]
     pub struct SplToken {
-        pub token_address: SplTokenId,
+        pub id: SplTokenId,
         pub symbol: Option<String>,
         pub decimals: Option<u8>,
     }
 
-    /// A network-specific unique Solana token identifier.
+    /// A network-specific unique Solana token address.
+    ///
+    /// Note: This is a 32 byte value, base-58 encoded.  We only ever use the string form, so we store that, at the cost of a bit of addtional memory, and save ourselves development time converting between different formats.
     #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
     #[serde(remote = "Self")]
-    pub struct SplTokenId(pub String);
+    pub struct SplTokenAddress(pub String);
+
+    /// The network that a Solana token is on.
+    #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+    pub enum SplNetwork {
+        Mainnet,
+        Devnet,
+    }
+
+    #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+    #[serde(remote = "Self")]
+    pub struct SplTokenId {
+        pub address: SplTokenAddress,
+        pub network: SplNetwork,
+    }
 
     /// A variant describing any token
+    ///
+    /// To determine whether a token is on the mainnet or devnet, check the `Token::Icrc` variant.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     #[repr(u8)]
     pub enum Token {
         Icrc(IcrcToken) = 0,
-        SplMainnet(SplToken) = 1,
-        SplDevnet(SplToken) = 2,
+        Spl(SplToken) = 1,
     }
 
     /// User preferences for any token
@@ -199,10 +216,8 @@ pub mod custom_token {
     pub enum CustomTokenId {
         /// An ICRC-1 compliant token on the Internet Computer mainnet.
         Icrc(LedgerId) = 0,
-        /// A Solana token on the Solana mainnet.
-        SolMainnet(SplTokenId) = 1,
-        /// A Solana token on the Solana devnet.
-        SolDevnet(SplTokenId) = 2,
+        /// A Solana token on Solana.
+        Sol(SplTokenId) = 1,
     }
 }
 

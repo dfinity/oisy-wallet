@@ -23,7 +23,10 @@ mod custom_token {
             vec![
                 TestVector {
                     input: SplToken {
-                        token_address: SplTokenId("1".repeat(32)),
+                        id: SplTokenId {
+                            address: SplTokenAddress("1".repeat(32)),
+                            network: SplNetwork::Mainnet,
+                        },
                         symbol: Some("☃☃☃ ☃ ☃☃☃".to_string()),
                         decimals: Some(6),
                     },
@@ -32,7 +35,10 @@ mod custom_token {
                 },
                 TestVector {
                     input: SplToken {
-                        token_address: SplTokenId("1".repeat(32)),
+                        id: SplTokenId {
+                            address: SplTokenAddress("1".repeat(32)),
+                            network: SplNetwork::Mainnet,
+                        },
                         symbol: None,
                         decimals: None,
                     },
@@ -41,7 +47,10 @@ mod custom_token {
                 },
                 TestVector {
                     input: SplToken {
-                        token_address: SplTokenId("1".repeat(99)),
+                        id: SplTokenId {
+                            address: SplTokenAddress("1".repeat(99)),
+                            network: SplNetwork::Mainnet,
+                        },
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(6),
                     },
@@ -50,7 +59,10 @@ mod custom_token {
                 },
                 TestVector {
                     input: SplToken {
-                        token_address: SplTokenId("1".repeat(32)),
+                        id: SplTokenId {
+                            address: SplTokenAddress("1".repeat(32)),
+                            network: SplNetwork::Mainnet,
+                        },
                         symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
                         decimals: Some(6),
                     },
@@ -59,7 +71,10 @@ mod custom_token {
                 },
                 TestVector {
                     input: SplToken {
-                        token_address: SplTokenId("1".repeat(32)),
+                        id: SplTokenId {
+                            address: SplTokenAddress("1".repeat(32)),
+                            network: SplNetwork::Mainnet,
+                        },
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(255),
                     },
@@ -68,7 +83,10 @@ mod custom_token {
                 },
                 TestVector {
                     input: SplToken {
-                        token_address: SplTokenId("1".repeat(32)),
+                        id: SplTokenId {
+                            address: SplTokenAddress("1".repeat(32)),
+                            network: SplNetwork::Devnet,
+                        },
                         symbol: Some("Bouncy Castle".to_string()),
                         decimals: Some(0),
                     },
