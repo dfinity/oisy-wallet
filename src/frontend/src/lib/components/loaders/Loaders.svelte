@@ -15,15 +15,15 @@
 		<RewardGuard>
 			<LoaderEthBalances>
 				<LoaderWallets>
-<!--					<CkBTCUpdateBalanceListener>	-->
-						<ExchangeWorker>
-							<LoaderMetamask
-								><LoaderUserProfile>
-									<slot />
-								</LoaderUserProfile>
-							</LoaderMetamask>
-						</ExchangeWorker>
-<!--					</CkBTCUpdateBalanceListener>	-->
+					<!--					<CkBTCUpdateBalanceListener>	-->
+					<ExchangeWorker>
+						<LoaderMetamask
+							><LoaderUserProfile>
+								<slot />
+							</LoaderUserProfile>
+						</LoaderMetamask>
+					</ExchangeWorker>
+					<!--					</CkBTCUpdateBalanceListener>	-->
 				</LoaderWallets>
 			</LoaderEthBalances>
 		</RewardGuard>

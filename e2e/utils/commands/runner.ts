@@ -9,32 +9,36 @@ interface CommandRunner {
 	exec(command: Command): Promise<string>;
 }
 
-function execPromise({ command }: { command: string }): Promise<{ stdout: string; stderr: string }> {
-  return new Promise((resolve, reject) => {
-    exec(command, (error: ExecException | null, stdout: string, stderr: string) => {
-      if (error) {
-        // If there's an error, reject with the stderr so we can handle it in the caller.
-        reject(new Error(stderr));
-      } else {
-        // Otherwise, resolve with stdout and stderr.
-        resolve({ stdout, stderr });
-      }
-    });
-  });
+function execPromise({
+	command
+}: {
+	command: string;
+}): Promise<{ stdout: string; stderr: string }> {
+	return new Promise((resolve, reject) => {
+		exec(command, (error: ExecException | null, stdout: string, stderr: string) => {
+			if (error) {
+				// If there's an error, reject with the stderr so we can handle it in the caller.
+				reject(new Error(stderr));
+			} else {
+				// Otherwise, resolve with stdout and stderr.
+				resolve({ stdout, stderr });
+			}
+		});
+	});
 }
 
 class LocalCommandRunner implements CommandRunner {
-  async exec({ command }: { command: Command }): Promise<string> {
-    try {
-      // 3. Use async/await to call the helper.
-      const { stdout } = await execPromise({ command: command.toString() });
-      // Return the stdout just like your original code would do.
-      return stdout;
-    } catch (err: any) {
-      // If execPromise rejected, throw a friendlier error message
-      throw new Error(`Error executing command: ${err.message}`);
-    }
-  }
+	async exec({ command }: { command: Command }): Promise<string> {
+		try {
+			// 3. Use async/await to call the helper.
+			const { stdout } = await execPromise({ command: command.toString() });
+			// Return the stdout just like your original code would do.
+			return stdout;
+		} catch (err: any) {
+			// If execPromise rejected, throw a friendlier error message
+			throw new Error(`Error executing command: ${err.message}`);
+		}
+	}
 }
 
 class DockerCommandExecutor implements CommandRunner {

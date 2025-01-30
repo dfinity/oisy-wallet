@@ -35,9 +35,7 @@ export class FlowPage extends HomepageLoggedIn {
 			RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON
 		);
 		expect(accountId).toBeTruthy();
-		await commandRunner.exec(
-			new LedgerTransferCommand({ amount: '10', recipient: accountId })
-		);
+		await commandRunner.exec(new LedgerTransferCommand({ amount: '10', recipient: accountId }));
 		await this.clickByTestId(RECEIVE_TOKENS_MODAL_DONE_BUTTON);
 		expect(this.getBalance()).toHaveText('10 ICP', { timeout: 30_000 });
 	}
