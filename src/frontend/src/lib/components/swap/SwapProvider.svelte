@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import SwapValue from '$lib/components/swap/SwapValue.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { dAppDescriptions, type OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionString } from '$lib/types/string';
@@ -37,7 +37,7 @@
 </script>
 
 {#if nonNullish(kongSwapDApp)}
-	<SwapValue>
+	<ModalValue>
 		<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
 		<svelte:fragment slot="main-value">
@@ -56,5 +56,5 @@
 				</div>
 			</div>
 		</svelte:fragment>
-	</SwapValue>
+	</ModalValue>
 {/if}

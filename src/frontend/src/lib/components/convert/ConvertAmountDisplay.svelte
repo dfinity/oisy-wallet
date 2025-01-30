@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
-	import ConvertValue from '$lib/components/convert/ConvertValue.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 
@@ -12,7 +12,7 @@
 	export let zeroAmountLabel: string | undefined = undefined;
 </script>
 
-<ConvertValue>
+<ModalValue>
 	<slot name="label" slot="label" />
 
 	<svelte:fragment slot="main-value">
@@ -32,4 +32,4 @@
 	<svelte:fragment slot="secondary-value">
 		<ConvertAmountExchange {amount} {exchangeRate} />
 	</svelte:fragment>
-</ConvertValue>
+</ModalValue>

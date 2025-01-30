@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import SwapValue from '$lib/components/swap/SwapValue.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -62,7 +62,7 @@
 		<Collapsible>
 			<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
 			<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
-				<SwapValue>
+				<ModalValue>
 					<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
 
 					<svelte:fragment slot="main-value">
@@ -76,37 +76,37 @@
 							})}
 						{/if}
 					</svelte:fragment>
-				</SwapValue>
+				</ModalValue>
 			</div>
 
 			{#if nonNullish(sourceTokenFee)}
-				<SwapValue>
+				<ModalValue>
 					<svelte:fragment slot="label">{$i18n.swap.text.token_fee}</svelte:fragment>
 
 					<svelte:fragment slot="main-value">
 						{sourceTokenFee}
 						{$sourceToken.symbol}
 					</svelte:fragment>
-				</SwapValue>
+				</ModalValue>
 			{/if}
 
-			<SwapValue>
+			<ModalValue>
 				<svelte:fragment slot="label">{$i18n.swap.text.gas_fee}</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
 					{gasFee}
 					{$destinationToken.symbol}
 				</svelte:fragment>
-			</SwapValue>
+			</ModalValue>
 
-			<SwapValue>
+			<ModalValue>
 				<svelte:fragment slot="label">{$i18n.swap.text.lp_fee}</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
 					{liquidityProvidersFee}
 					{$destinationToken.symbol}
 				</svelte:fragment>
-			</SwapValue>
+			</ModalValue>
 		</Collapsible>
 	</div>
 {/if}
