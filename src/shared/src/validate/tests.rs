@@ -1,4 +1,5 @@
 //! Tests that the validation functions work as expected.
+use crate::validate::test_validate_on_deserialize;
 use crate::validate::validate_on_deserialize;
 use crate::validate::Validate;
 use candid::{CandidType, Decode, Deserialize, Encode};
@@ -26,31 +27,29 @@ impl Validate for ToyType {
 }
 validate_on_deserialize!(ToyType);
 
-fn test_vectors() -> Vec<(ToyType, bool)> {
+struct TestVector {
+    input: ToyType,
+    valid: bool,
+    description: &'static str,
+}
+
+fn test_vectors() -> Vec<TestVector> {
     vec![
-        (
-            ToyType {
+        TestVector {
+            input: ToyType {
                 name: "a".repeat(ToyType::MAX_LEN),
             },
-            true,
-        ),
-        (
-            ToyType {
+            valid: true,
+            description: "Maximum valid length",
+        },
+        TestVector {
+            input: ToyType {
                 name: "a".repeat(ToyType::MAX_LEN + 1),
             },
-            false,
-        ),
+            valid: false,
+            description: "Too long",
+        },
     ]
 }
 
-#[test]
-fn test_validate_on_deserialize() {
-    for (toy, valid) in test_vectors() {
-        let candid = Encode!(&toy).unwrap();
-        let result: Result<ToyType, _> = Decode!(&candid, ToyType);
-        assert_eq!(valid, result.is_ok());
-        if valid {
-            assert_eq!(toy, result.unwrap());
-        }
-    }
-}
+test_validate_on_deserialize! {ToyType}
