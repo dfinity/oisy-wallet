@@ -1,10 +1,7 @@
 #!/bin/bash
 
 dfx identity new minter
-dfx identity use minter
-MINTER_ID=$(dfx identity get-principal)
-
-dfx identity use default
+MINTER_ID=$(dfx identity get-principal --identity minter)
 
 PEM_FILE=/Users/daviddalbusco/.config/dfx/identity/default/identity.pem
 
