@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { Collapsible } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { fade } from 'svelte/transition';
+	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -58,27 +57,24 @@
 </script>
 
 {#if nonNullish($destinationToken) && nonNullish($sourceToken)}
-	<div in:fade class="swap-fees">
-		<Collapsible>
-			<!-- The width of the item below should be 100% - collapsible expand button width (1.5rem) -->
-			<div class="flex w-[calc(100%-1.5rem)] items-center" slot="header">
-				<ModalValue>
-					<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
+	<ModalExpandableValues>
+		<ModalValue slot="list-header">
+			<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
 
-					<svelte:fragment slot="main-value">
-						{#if destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
-							{`< ${formatUSD({
-								value: SWAP_TOTAL_FEE_THRESHOLD
-							})}`}
-						{:else}
-							{formatUSD({
-								value: destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD
-							})}
-						{/if}
-					</svelte:fragment>
-				</ModalValue>
-			</div>
+			<svelte:fragment slot="main-value">
+				{#if destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
+					{`< ${formatUSD({
+						value: SWAP_TOTAL_FEE_THRESHOLD
+					})}`}
+				{:else}
+					{formatUSD({
+						value: destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD
+					})}
+				{/if}
+			</svelte:fragment>
+		</ModalValue>
 
+		<svelte:fragment slot="list-items">
 			{#if nonNullish(sourceTokenFee)}
 				<ModalValue>
 					<svelte:fragment slot="label">{$i18n.swap.text.token_fee}</svelte:fragment>
@@ -107,12 +103,6 @@
 					{$destinationToken.symbol}
 				</svelte:fragment>
 			</ModalValue>
-		</Collapsible>
-	</div>
+		</svelte:fragment>
+	</ModalExpandableValues>
 {/if}
-
-<style lang="scss">
-	:global(.swap-fees > div.contents > div.header > button.collapsible-expand-icon) {
-		justify-content: flex-end;
-	}
-</style>
