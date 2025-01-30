@@ -26,7 +26,7 @@ impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
             Token::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
-            Token::Spl(SplToken { token_address, .. }) => {
+            Token::SplMainnet(SplToken { token_address, .. }) => {
                 CustomTokenId::SolMainnet(token_address.clone())
             }
             Token::SplDevnet(SplToken { token_address, .. }) => {
@@ -400,7 +400,7 @@ impl Validate for Token {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
             Token::Icrc(token) => token.validate(),
-            Token::Spl(token) | Token::SplDevnet(token) => token.validate(),
+            Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
         }
     }
 }

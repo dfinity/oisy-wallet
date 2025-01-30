@@ -179,7 +179,7 @@ pub mod custom_token {
     #[repr(u8)]
     pub enum Token {
         Icrc(IcrcToken) = 0,
-        Spl(SplToken) = 1,
+        SplMainnet(SplToken) = 1,
         SplDevnet(SplToken) = 2,
     }
 
