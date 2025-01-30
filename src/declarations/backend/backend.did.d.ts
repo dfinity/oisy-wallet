@@ -225,7 +225,7 @@ export interface SupportedCredential {
 	ii_origin: string;
 	credential_type: CredentialType;
 }
-export type Token = { Spl: SplToken } | { Icrc: IcrcToken };
+export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {

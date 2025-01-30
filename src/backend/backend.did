@@ -210,7 +210,11 @@ type SupportedCredential = record {
   ii_origin : text;
   credential_type : CredentialType;
 };
-type Token = variant { Spl : SplToken; Icrc : IcrcToken };
+type Token = variant {
+  Icrc : IcrcToken;
+  SplDevnet : SplToken;
+  SplMainnet : SplToken;
+};
 type TopUpCyclesLedgerError = variant {
   InvalidArgPercentageOutOfRange : record {
     max : nat8;
