@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-# Install ICP ledger locally as documented in:
-# https://internetcomputer.org/docs/current/developer-docs/integrations/ledger/ledger-local-setup
-
 # Ensure that a minter id exists:
 dfx identity get-principal --identity minter 2>/dev/null || dfx identity new minter
 
