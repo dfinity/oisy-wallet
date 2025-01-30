@@ -1,5 +1,5 @@
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import { getAgent } from '$lib/actors/agents.ic';
+import { agents } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -56,7 +56,7 @@ const indexNgCanister = async ({
 	identity: Identity;
 	indexCanisterId: CanisterIdText;
 }): Promise<IcrcIndexNgCanister> => {
-	const agent = await getAgent({ identity });
+	const agent = await agents.getAgent({ identity });
 
 	return IcrcIndexNgCanister.create({
 		agent,

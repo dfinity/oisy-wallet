@@ -1,6 +1,6 @@
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import { getAgent } from '$lib/actors/agents.ic';
+import { agents } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import { type Identity } from '@dfinity/agent';
@@ -163,7 +163,7 @@ const ledgerCanister = async ({
 	identity: Identity;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<IcrcLedgerCanister> => {
-	const agent = await getAgent({ identity });
+	const agent = await agents.getAgent({ identity });
 
 	return IcrcLedgerCanister.create({
 		agent,

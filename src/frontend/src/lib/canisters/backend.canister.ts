@@ -8,7 +8,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
-import { getAgent } from '$lib/actors/agents.ic';
+import { agents } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,
 	mapBtcPendingTransactionError,
@@ -31,7 +31,7 @@ export class BackendCanister extends Canister<BackendService> {
 		identity,
 		...options
 	}: CreateCanisterOptions<BackendService>): Promise<BackendCanister> {
-		const agent = await getAgent({ identity });
+		const agent = await agents.getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<BackendService>({
 			options: {

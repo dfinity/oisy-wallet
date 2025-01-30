@@ -7,7 +7,7 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
-import { getAgent } from '$lib/actors/agents.ic';
+import { agents } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
 
@@ -16,7 +16,7 @@ export class RewardCanister extends Canister<RewardService> {
 		identity,
 		...options
 	}: CreateCanisterOptions<RewardService>): Promise<RewardCanister> {
-		const agent = await getAgent({ identity });
+		const agent = await agents.getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<RewardService>({
 			options: {

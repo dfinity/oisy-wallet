@@ -1,6 +1,6 @@
 import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { getAgent } from '$lib/actors/agents.ic';
+import { agents } from '$lib/actors/agents.ic';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
@@ -53,7 +53,7 @@ export const icrc1Transfer = async ({
 };
 
 const ledgerCanister = async (identity: Identity): Promise<LedgerCanister> => {
-	const agent = await getAgent({ identity });
+	const agent = await agents.getAgent({ identity });
 
 	return LedgerCanister.create({
 		agent,
