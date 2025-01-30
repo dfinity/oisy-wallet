@@ -180,6 +180,7 @@ pub mod custom_token {
     pub enum Token {
         Icrc(IcrcToken) = 0,
         Spl(SplToken) = 1,
+        SplDevnet(SplToken) = 2,
     }
 
     /// User preferences for any token
