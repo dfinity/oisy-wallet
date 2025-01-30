@@ -1,5 +1,5 @@
 {
-	"dfx": "0.24.3",
+	"dfx": "0.23.0",
 	"canisters": {
 		"signer": {
 			"type": "custom",
