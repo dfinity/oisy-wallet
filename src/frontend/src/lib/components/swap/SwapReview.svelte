@@ -3,12 +3,12 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapReviewTokens from '$lib/components/swap/SwapReviewTokens.svelte';
-	import SwapValue from '$lib/components/swap/SwapValue.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -28,22 +28,22 @@
 		<SwapReviewTokens {swapAmount} {receiveAmount} />
 
 		{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
-			<SwapValue>
+			<ModalValue>
 				<svelte:fragment slot="label">{$i18n.swap.text.value_difference}</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
 					<SwapImpact {swapAmount} {receiveAmount} />
 				</svelte:fragment>
-			</SwapValue>
+			</ModalValue>
 		{/if}
 
-		<SwapValue>
+		<ModalValue>
 			<svelte:fragment slot="label">{$i18n.swap.text.max_slippage}</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
 				{slippageValue}%
 			</svelte:fragment>
-		</SwapValue>
+		</ModalValue>
 
 		<SwapFees />
 	</div>
