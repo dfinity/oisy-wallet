@@ -58,23 +58,21 @@
 
 {#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 	<ModalExpandableValues>
-		<svelte:fragment slot="list-header">
-			<ModalValue>
-				<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
+		<ModalValue slot="list-header">
+			<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
 
-				<svelte:fragment slot="main-value">
-					{#if destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
-						{`< ${formatUSD({
-							value: SWAP_TOTAL_FEE_THRESHOLD
-						})}`}
-					{:else}
-						{formatUSD({
-							value: destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD
-						})}
-					{/if}
-				</svelte:fragment>
-			</ModalValue>
-		</svelte:fragment>
+			<svelte:fragment slot="main-value">
+				{#if destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
+					{`< ${formatUSD({
+						value: SWAP_TOTAL_FEE_THRESHOLD
+					})}`}
+				{:else}
+					{formatUSD({
+						value: destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD
+					})}
+				{/if}
+			</svelte:fragment>
+		</ModalValue>
 
 		<svelte:fragment slot="list-items">
 			{#if nonNullish(sourceTokenFee)}
