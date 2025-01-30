@@ -263,9 +263,7 @@ abstract class Homepage {
 		await this.#context.grantPermissions(['clipboard-read', 'clipboard-write']);
 		await this.#page.getByTestId(testId).click();
 
-		return await this.#page.evaluate(async () => {
-			return await navigator.clipboard.readText();
-		});
+		return await this.#page.evaluate(async () => navigator.clipboard.readText());
 	}
 
 	async navigateToToken({ token, network }: NavigateToTokenParams): Promise<void> {

@@ -1,14 +1,14 @@
 import { type Command } from './runner';
 
-type LedgerTransferCommandParams = {
+interface LedgerTransferCommandParams {
 	amount: string;
-	recipient: string;
+	recipient: string | undefined;
 	memo?: number;
 };
 
 export class LedgerTransferCommand implements Command {
 	readonly #amount: string;
-	readonly #recipient: string;
+	readonly #recipient: string | undefined;
 	readonly #memo: number;
 
 	constructor({ amount, recipient, memo = 0 }: LedgerTransferCommandParams) {
@@ -18,9 +18,6 @@ export class LedgerTransferCommand implements Command {
 	}
 
 	toString(): string {
-		console.log(
-			`dfx ledger transfer --memo ${this.#memo} --amount ${this.#amount} ${this.#recipient}`
-		);
 		return `dfx ledger transfer --memo ${this.#memo} --amount ${this.#amount} ${this.#recipient}`;
 	}
 }

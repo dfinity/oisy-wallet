@@ -15,7 +15,7 @@
 		<RewardGuard>
 			<LoaderEthBalances>
 				<LoaderWallets>
-					<CkBTCUpdateBalanceListener>
+<!--					<CkBTCUpdateBalanceListener>	-->
 						<ExchangeWorker>
 							<LoaderMetamask
 								><LoaderUserProfile>
@@ -23,7 +23,7 @@
 								</LoaderUserProfile>
 							</LoaderMetamask>
 						</ExchangeWorker>
-					</CkBTCUpdateBalanceListener>
+<!--					</CkBTCUpdateBalanceListener>	-->
 				</LoaderWallets>
 			</LoaderEthBalances>
 		</RewardGuard>
