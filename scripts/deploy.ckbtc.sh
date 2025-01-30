@@ -6,9 +6,9 @@
 DFX_NETWORK=local
 
 echo "Step 1: create canisters..."
-dfx canister create ckbtc_ledger --specified-id mc6ru-gyaaa-aaaar-qaaaq-cai --network "$DFX_NETWORK"
-dfx canister create ckbtc_minter --specified-id ml52i-qqaaa-aaaar-qaaba-cai --network "$DFX_NETWORK"
-dfx canister create ckbtc_kyt --specified-id pvm5g-xaaaa-aaaar-qaaia-cai --network "$DFX_NETWORK"
+dfx canister create ckbtc_ledger --network "$DFX_NETWORK"
+dfx canister create ckbtc_minter --network "$DFX_NETWORK"
+dfx canister create ckbtc_kyt --network "$DFX_NETWORK"
 
 MINTERID="$(dfx canister id ckbtc_minter --network "$DFX_NETWORK")"
 echo "$MINTERID"
@@ -18,7 +18,7 @@ KYTID="$(dfx canister id ckbtc_kyt --network "$DFX_NETWORK")"
 echo "$KYTID"
 
 echo "Step 2: deploy minter canister..."
-dfx deploy ckbtc_minter --specified-id ml52i-qqaaa-aaaar-qaaba-cai --network "$DFX_NETWORK" --argument "(variant {
+dfx deploy ckbtc_minter --network "$DFX_NETWORK" --argument "(variant {
   Init = record {
        btc_network = variant { Regtest };
        ledger_id = principal \"$LEDGERID\";
@@ -34,7 +34,7 @@ dfx deploy ckbtc_minter --specified-id ml52i-qqaaa-aaaar-qaaba-cai --network "$D
 
 echo "Step 3: deploy ledger canister..."
 PRINCIPAL="$(dfx identity get-principal)"
-dfx deploy ckbtc_ledger --specified-id mc6ru-gyaaa-aaaar-qaaaq-cai --network "$DFX_NETWORK" --argument "(variant {
+dfx deploy ckbtc_ledger --network "$DFX_NETWORK" --argument "(variant {
   Init = record {
      token_symbol = \"ckBTC\";
      token_name = \"Chain key local Bitcoin\";
@@ -55,7 +55,7 @@ dfx deploy ckbtc_ledger --specified-id mc6ru-gyaaa-aaaar-qaaaq-cai --network "$D
 })"
 
 echo "Step 4: deploy kyt canister..."
-dfx deploy ckbtc_kyt --specified-id pvm5g-xaaaa-aaaar-qaaia-cai --network "$DFX_NETWORK" --argument "(variant {
+dfx deploy ckbtc_kyt --network "$DFX_NETWORK" --argument "(variant {
   InitArg = record {
     minter_id = principal \"$MINTERID\";
     maintainers = vec {};
@@ -64,7 +64,7 @@ dfx deploy ckbtc_kyt --specified-id pvm5g-xaaaa-aaaar-qaaia-cai --network "$DFX_
 })"
 
 echo "Step 5: deploy index canister..."
-dfx deploy ckbtc_index --specified-id mm444-5iaaa-aaaar-qaabq-cai --network "$DFX_NETWORK" --argument "(opt variant {
+dfx deploy ckbtc_index --network "$DFX_NETWORK" --argument "(opt variant {
   Init = record {
     ledger_id = principal \"$LEDGERID\";
    }

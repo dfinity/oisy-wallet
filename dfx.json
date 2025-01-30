@@ -321,12 +321,24 @@
 		"ckusdc_ledger": {
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
-			"wasm": "target/ic/cketh_ledger.wasm"
+			"wasm": "target/ic/cketh_ledger.wasm",
+			"specified_id": "ycvkf-paaaa-aaaar-qaelq-cai",
+			"remote": {
+				"id": {
+					"ic": "xevnm-gaaaa-aaaar-qafnq-cai"
+				}
+			}
 		},
 		"ckusdc_index": {
 			"type": "custom",
 			"candid": "target/ic/cketh_index.did",
-			"wasm": "target/ic/cketh_index.wasm"
+			"wasm": "target/ic/cketh_index.wasm",
+			"specified_id": "ycvkf-paaaa-aaaar-qaelq-cai",
+			"remote": {
+				"id": {
+					"ic": "xrs4b-hiaaa-aaaar-qafoa-cai"
+				}
+			}
 		},
 		"rewards": {
 			"type": "custom",
