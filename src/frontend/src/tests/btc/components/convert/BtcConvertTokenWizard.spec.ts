@@ -1,5 +1,6 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcSendApi from '$btc/services/btc-send.services';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
@@ -58,6 +59,8 @@ describe('BtcConvertTokenWizard', () => {
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
+	const mockSelectUtxosFeeApi = () =>
+		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
@@ -96,6 +99,7 @@ describe('BtcConvertTokenWizard', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
+		mockSelectUtxosFeeApi();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {
