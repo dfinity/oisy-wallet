@@ -4,10 +4,7 @@
 # https://internetcomputer.org/docs/current/developer-docs/integrations/ledger/ledger-local-setup
 
 dfx identity new minter
-dfx identity use minter
-MINTER_ACCOUNT_ID=$(dfx ledger account-id)
-
-dfx identity use default
+MINTER_ACCOUNT_ID=$(dfx ledger account-id --identity minter)
 
 LEDGER_ACCOUNT_ID=$(dfx ledger account-id)
 
