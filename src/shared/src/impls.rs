@@ -1,4 +1,6 @@
-use crate::types::custom_token::{CustomToken, CustomTokenId, IcrcToken, Token};
+use crate::types::custom_token::{
+    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token,
+};
 use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
 use crate::types::token::UserToken;
@@ -24,6 +26,12 @@ impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
             Token::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
+            Token::SplMainnet(SplToken { token_address, .. }) => {
+                CustomTokenId::SolMainnet(token_address.clone())
+            }
+            Token::SplDevnet(SplToken { token_address, .. }) => {
+                CustomTokenId::SolDevnet(token_address.clone())
+            }
         }
     }
 }
@@ -336,10 +344,48 @@ fn next_matches_strum_iter() {
     );
 }
 
+impl SplTokenId {
+    pub const MAX_LENGTH: usize = 44;
+    pub const MIN_LENGTH: usize = 32;
+}
+
+impl Validate for SplTokenId {
+    /// Verifies that a Solana address is valid.
+    ///
+    /// # References
+    /// - <https://solana.com/docs/more/exchange#basic-verification>
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.0.len() < 32 {
+            return Err(candid::Error::msg(
+                "Minimum valid Solana address length is 32",
+            ));
+        }
+        if self.0.len() > 44 {
+            return Err(candid::Error::msg(
+                "Maximum valid Solana address length is 44",
+            ));
+        }
+        let parsed_maybe = bs58::decode(&self.0).into_vec();
+        if let Ok(bytes) = parsed_maybe {
+            if bytes.len() != 32 {
+                return Err(candid::Error::msg(
+                    "Invalid Solana address: not 32 bytes when decoded",
+                ));
+            }
+        } else {
+            return Err(candid::Error::msg("Invalid Solana address: not base58"));
+        }
+        Ok(())
+    }
+}
+
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
             CustomTokenId::Icrc(_) => Ok(()), // This is a principal.  In principle we could check the exact type of principal.
+            CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
+                token_address.validate()
+            }
         }
     }
 }
@@ -354,7 +400,20 @@ impl Validate for Token {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
             Token::Icrc(token) => token.validate(),
+            Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
         }
+    }
+}
+
+impl Validate for SplToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        use crate::types::MAX_SYMBOL_LENGTH;
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg("Symbol too long"));
+            }
+        }
+        self.token_address.validate()
     }
 }
 
@@ -386,3 +445,5 @@ impl Validate for IcrcToken {
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
+validate_on_deserialize!(SplToken);
+validate_on_deserialize!(SplTokenId);

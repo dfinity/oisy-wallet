@@ -207,6 +207,11 @@ export interface SelectedUtxosFeeResponse {
 export interface Settings {
 	dapp: DappSettings;
 }
+export interface SplToken {
+	decimals: [] | [number];
+	token_address: string;
+	symbol: [] | [string];
+}
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
@@ -220,7 +225,7 @@ export interface SupportedCredential {
 	ii_origin: string;
 	credential_type: CredentialType;
 }
-export type Token = { Icrc: IcrcToken };
+export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {

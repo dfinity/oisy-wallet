@@ -3,7 +3,9 @@ use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{setup, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::custom_token::{CustomToken, CustomTokenId, IcrcToken, Token};
+use shared::types::custom_token::{
+    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token,
+};
 use shared::types::TokenVersion;
 
 lazy_static! {
@@ -35,16 +37,30 @@ lazy_static! {
         enabled: true,
         version: None,
     };
+    static ref SPL_TOKEN_ID: SplTokenId =
+        SplTokenId("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string());
+    static ref SPL_TOKEN: CustomToken = CustomToken {
+        token: Token::SplMainnet(SplToken {
+            token_address: SPL_TOKEN_ID.clone(),
+            symbol: Some("BOOONDOGGLE".to_string()),
+            decimals: Some(u8::MAX),
+        }),
+        enabled: true,
+        version: None,
+    };
+    static ref CUSTOM_SPL_TOKEN_ID: CustomTokenId = CustomTokenId::SolMainnet(SPL_TOKEN_ID.clone());
+    static ref LOTS_OF_CUSTOM_TOKENS: Vec<CustomToken> = vec![
+        USER_TOKEN.clone(),
+        ANOTHER_USER_TOKEN.clone(),
+        SPL_TOKEN.clone(),
+    ];
 }
 
 #[test]
-fn test_add_custom_token_with_index() {
-    test_add_custom_token(&USER_TOKEN)
-}
-
-#[test]
-fn test_add_custom_token_without_index() {
-    test_add_custom_token(&USER_TOKEN_NO_INDEX)
+fn test_add_custom_tokens() {
+    for token in LOTS_OF_CUSTOM_TOKENS.iter() {
+        test_add_custom_token(token);
+    }
 }
 
 fn test_add_custom_token(user_token: &CustomToken) {

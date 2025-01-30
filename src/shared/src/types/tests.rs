@@ -7,6 +7,79 @@ mod custom_token {
     use crate::types::custom_token::*;
     use crate::validate::Validate;
 
+    mod spl {
+        //! Tests for the spl module.
+        use crate::{types::MAX_SYMBOL_LENGTH, validate::test_validate_on_deserialize};
+
+        use super::*;
+
+        struct TestVector {
+            input: SplToken,
+            valid: bool,
+            description: &'static str,
+        }
+
+        fn test_vectors() -> Vec<TestVector> {
+            vec![
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("☃☃☃ ☃ ☃☃☃".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: true,
+                    description: "Valid SplToken",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: None,
+                        decimals: None,
+                    },
+                    valid: true,
+                    description: "SplToken without a symbol or decimals",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(99)),
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(6),
+                    },
+                    valid: false,
+                    description: "SplToken with a token address that is too long",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("B".repeat(MAX_SYMBOL_LENGTH + 1)),
+                        decimals: Some(6),
+                    },
+                    valid: false,
+                    description: "Too long symbol",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(255),
+                    },
+                    valid: true,
+                    description: "Maximum decimals",
+                },
+                TestVector {
+                    input: SplToken {
+                        token_address: SplTokenId("1".repeat(32)),
+                        symbol: Some("Bouncy Castle".to_string()),
+                        decimals: Some(0),
+                    },
+                    valid: true,
+                    description: "Minimum decimals",
+                },
+            ]
+        }
+        test_validate_on_deserialize!(SplToken);
+    }
+
     mod icrc {
         //! Tests for the icrc module.
         use super::*;

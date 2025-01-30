@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
+import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
@@ -137,16 +137,18 @@ const loadCustomIcrcTokensData = async ({
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
-		token: CustomToken,
+		custom_token: CustomToken,
 		index: number
 	): Promise<IcrcCustomTokenWithoutId | undefined> => {
+		const { enabled, version: v, token } = custom_token;
+
+		if (!('Icrc' in token)) {
+			throw new Error('Token is not Icrc');
+		}
+
 		const {
-			enabled,
-			version: v,
-			token: {
-				Icrc: { ledger_id, index_id }
-			}
-		} = token;
+			Icrc: { ledger_id, index_id }
+		} = token as { Icrc: IcrcToken };
 
 		const indexCanisterId = fromNullable(index_id);
 
