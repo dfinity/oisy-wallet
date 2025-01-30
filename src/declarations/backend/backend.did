@@ -192,6 +192,11 @@ type SelectedUtxosFeeResponse = record {
   utxos : vec Utxo;
 };
 type Settings = record { dapp : DappSettings };
+type SplToken = record {
+  decimals : opt nat8;
+  token_address : text;
+  symbol : opt text;
+};
 type Stats = record {
   user_profile_count : nat64;
   custom_token_count : nat64;
@@ -205,7 +210,11 @@ type SupportedCredential = record {
   ii_origin : text;
   credential_type : CredentialType;
 };
-type Token = variant { Icrc : IcrcToken };
+type Token = variant {
+  Icrc : IcrcToken;
+  SplDevnet : SplToken;
+  SplMainnet : SplToken;
+};
 type TopUpCyclesLedgerError = variant {
   InvalidArgPercentageOutOfRange : record {
     max : nat8;
