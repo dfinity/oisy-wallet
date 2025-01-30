@@ -4,7 +4,7 @@ interface LedgerTransferCommandParams {
 	amount: string;
 	recipient: string | undefined;
 	memo?: number;
-};
+}
 
 export class LedgerTransferCommand implements Command {
 	readonly #amount: string;
