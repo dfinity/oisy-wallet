@@ -58,6 +58,8 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.waitForModalToDisappearByTestId(IN_PROGRESS_MODAL);
 		const progressModalDoesNotExists = await this.elementExistsByTestId(IN_PROGRESS_MODAL);
 		expect(progressModalDoesNotExists).toBe(false);
-		await this.mockSelectorAll({ selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]' })
+		await this.mockSelectorAll({
+			selector: '[data-tid="receive-tokens-modal-transaction-timestamp"]'
+		});
 	}
 }

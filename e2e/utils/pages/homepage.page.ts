@@ -121,7 +121,6 @@ abstract class Homepage {
 		});
 	}
 
-
 	private async goto(): Promise<void> {
 		await this.#page.goto(HOMEPAGE_URL);
 	}

@@ -50,8 +50,8 @@
 				{#if nonNullish(timestamp)}
 					{formatSecondsToDate(timestamp)}
 				{/if}
-			</span>	
-			<TransactionStatusComponent {status}/>
+			</span>
+			<TransactionStatusComponent {status} />
 		</svelte:fragment>
 	</Card>
 </button>
