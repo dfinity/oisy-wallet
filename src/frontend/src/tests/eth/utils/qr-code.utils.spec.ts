@@ -3,6 +3,7 @@ import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
+import { testnetsStore } from '$lib/stores/settings.store';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
@@ -17,6 +18,7 @@ describe('decodeQrCode', () => {
 	const amount = 1.23;
 	const urn = 'some-urn';
 
+	testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 	const otherProps = {
 		expectedToken: token,
 		ethereumTokens: get(enabledEthereumTokens),

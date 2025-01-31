@@ -1,12 +1,12 @@
-import { fontFamily } from 'tailwindcss/defaultTheme';
-import type { Config } from 'tailwindcss/types/config';
+import type { Config } from 'tailwindcss';
+import defaultTheme from 'tailwindcss/defaultTheme';
 import { themeVariables } from './src/frontend/src/lib/styles/tailwind/theme-variables';
 
 export default {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
 		fontFamily: {
-			sans: ['CircularXX', 'sans-serif', ...fontFamily.sans]
+			sans: ['CircularXX', 'sans-serif', ...defaultTheme.fontFamily.sans]
 		},
 		colors: {
 			inherit: 'inherit',
@@ -33,10 +33,12 @@ export default {
 			'brilliant-azure': '#348afd',
 			'misty-rose': '#937993',
 			'chinese-purple': '#7014a4',
+			'lavander-indigo': '#904efa',
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
 			'bright-lilac': '#e18dff',
 			'green-crayola': '#16b364',
+			'medium-spring-green': '#1de59d',
 			'british-racing-green': '#084c2e',
 			'dartmouth-green': '#087443',
 			'rusty-red': '#dc3545',
@@ -56,6 +58,10 @@ export default {
 			borderColor: themeVariables.border,
 			ringColor: themeVariables.border,
 			textColor: themeVariables.foreground,
+			backgroundImage: {
+				'trump-token-hero-image':
+					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)'
+			},
 			backgroundSize: {
 				'size-200': '200% 200%'
 			},

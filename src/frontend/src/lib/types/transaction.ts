@@ -6,12 +6,12 @@ import type {
 	TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { FeeData } from '@ethersproject/providers';
 import type { Transaction as EthTransaction } from '@ethersproject/transactions';
-import type { ComponentType } from 'svelte';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export type Transaction = Omit<EthTransaction, 'data'> &
 	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
@@ -34,13 +34,28 @@ export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to
 	fromExplorerUrl?: string;
 };
 
-export type AnyTransactionUi = BtcTransactionUi | EthTransactionUi | IcTransactionUi;
+export type AnyTransactionUi =
+	| BtcTransactionUi
+	| EthTransactionUi
+	| IcTransactionUi
+	| SolTransactionUi;
 
-export type AllTransactionUi = AnyTransactionUi & {
+export type AnyTransactionUiWithCmp =
+	| { component: 'bitcoin'; transaction: BtcTransactionUi }
+	| { component: 'ethereum'; transaction: EthTransactionUi }
+	| { component: 'ic'; transaction: IcTransactionUi }
+	| { component: 'solana'; transaction: SolTransactionUi };
+
+export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;
-	component: ComponentType;
 };
 
-export type AllTransactionUiNonEmptyList = [AllTransactionUi, ...AllTransactionUi[]];
+export type AllTransactionUiWithCmpNonEmptyList = [
+	AllTransactionUiWithCmp,
+	...AllTransactionUiWithCmp[]
+];
 
-export type TransactionsUiDateGroup<T extends AnyTransactionUi> = Record<string, [T, ...T[]]>;
+export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
+	string,
+	[T, ...T[]]
+>;

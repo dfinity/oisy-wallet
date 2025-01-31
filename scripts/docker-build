@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+(("${BASH_VERSINFO[0]}" >= 5)) || {
+  echo "ERROR:  Please use a newer version of bash.  The minimum supported bash version is 5.  Yours appears to be '${BASH_VERSINFO[0]}'" >&2
+  exit 1
+}
+
+if test -d scripts && test -e Dockerfile; then
+  : "OK: We appear to be in the root of the repo."
+else
+  echo "ERROR: Please run from the root of the git repository." >&2
+  exit 1
+fi
+
+DFX_TARGET=backend
+OUTDIR=out
+PROGRESS="--progress=auto"
+image_name="oisy-backend"
+
+print_help() {
+  cat <<-"EOF"
+
+	Build backend.wasm.gz inside docker. This creates:
+	- An "out" directory in the project directory containing all build artefacts.
+	  Note: If the "out" directory already exists, it will be deleted and replaced.
+
+	EOF
+}
+
+print_docker_help() {
+  cat <<-"EOF"
+	Note: If the docker build fails, it may help to build from a clean cache:
+
+	  ./scripts/docker-build --no-cache
+
+	EOF
+}
+
+if [[ "${1:-}" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
+rm -fr "${OUTDIR}"
+
+scripts/docker-build.pre
+
+if DOCKER_BUILDKIT=1 docker build \
+  --target "$DFX_TARGET" \
+  "$PROGRESS" \
+  -t "$image_name" \
+  -o "$OUTDIR" . \
+  "${@+${@}}"; then
+  echo "SUCCESS: Docker build has succeeded."
+  cat out/report.txt
+else
+  set +x
+  {
+    echo "ERROR: Docker build failed."
+    print_docker_help
+    exit 1
+  } >&2
+fi
+
+echo FIN

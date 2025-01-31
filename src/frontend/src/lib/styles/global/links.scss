@@ -1,4 +1,4 @@
-@import '../theme/base-colors.scss';
+@use '../theme/base-colors.scss';
 
 a.no-underline {
 	&:hover,
@@ -8,5 +8,5 @@ a.no-underline {
 }
 
 a.blue-link {
-	color: #{$brandeis-blue};
+	color: #{base-colors.$brandeis-blue};
 }

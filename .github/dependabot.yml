@@ -4,20 +4,20 @@
 version: 2
 updates:
   - package-ecosystem: cargo
-    directory: "/"
+    directory: '/'
     schedule:
       interval: weekly
 
   - package-ecosystem: npm
-    directory: "/"
+    directory: '/'
     schedule:
       interval: weekly
     allow:
       - dependency-type: development
     ignore:
-      - dependency-name: "@dfinity/*"
-      - dependency-name: "@types/*"
-      - dependency-name: "@typescript-eslint/*"
-      - dependency-name: "eslint"
-      - dependency-name: "eslint-*"
-      - dependency-name: "typescript"
+      - dependency-name: '@dfinity/*'
+      - dependency-name: '@types/*'
+      - dependency-name: '@typescript-eslint/*'
+      - dependency-name: 'eslint'
+      - dependency-name: 'eslint-*'
+      - dependency-name: 'typescript'

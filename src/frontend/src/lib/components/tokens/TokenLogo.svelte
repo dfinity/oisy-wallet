@@ -19,7 +19,11 @@
 	export let testId: string | undefined = undefined;
 	export let badgeTestId: string | undefined = undefined;
 
-	const { icon, name, network } = data;
+	let icon: CardData['icon'];
+	let name: CardData['name'];
+	let network: CardData['network'];
+
+	$: ({ icon, name, network } = data);
 </script>
 
 <div class="relative">
@@ -34,7 +38,7 @@
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
 			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-white text-sm font-semibold text-black"
-			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: data.name })}
+			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}

@@ -1,11 +1,10 @@
-import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
 import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 
 describe('IcSendForm', () => {
 	const ethereumFeeStore = initEthereumFeeStore();
@@ -28,7 +27,7 @@ describe('IcSendForm', () => {
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
-		amount: BigNumber.from(22000000),
+		amount: 22_000_000,
 		networkId: ETHEREUM_NETWORK_ID,
 		source: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9'
 	};
@@ -55,6 +54,7 @@ describe('IcSendForm', () => {
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		expect(source).not.toBeNull();
+
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 		expect(balance).not.toBeNull();
 
@@ -69,6 +69,7 @@ describe('IcSendForm', () => {
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 		expect(toolbar).not.toBeNull();
 	});
+
 	it('should not render destination and source fields', () => {
 		const { container } = render(IcSendForm, {
 			props: { ...props, simplifiedForm: true },
@@ -83,6 +84,7 @@ describe('IcSendForm', () => {
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		expect(source).toBeNull();
+
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 		expect(balance).not.toBeNull();
 

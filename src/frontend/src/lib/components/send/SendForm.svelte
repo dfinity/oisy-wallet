@@ -12,6 +12,7 @@
 	export let disabled: boolean | undefined = false;
 	export let token: OptionToken;
 	export let balance: OptionBalance;
+	export let hideSource = false;
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -22,11 +23,11 @@
 
 		<slot name="amount" />
 
-		<SendSource {token} {balance} {source} />
+		<SendSource {token} {balance} {source} {hideSource} />
 
 		<slot name="fee" />
 
-		<ButtonGroup slot="toolbar">
+		<ButtonGroup slot="toolbar" testId="toolbar">
 			<slot name="cancel" />
 
 			<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />

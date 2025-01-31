@@ -94,7 +94,7 @@ const injectLinkPreloader = (indexHtml) => {
 const extractStartScript = (htmlFile) => {
 	const indexHtml = readFileSync(htmlFile, 'utf8');
 
-	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gm;
+	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gim;
 
 	// 1. extract SvelteKit start script to a separate main.js file
 	const [_script, _scriptStartTag, content, _scriptEndTag] = svelteKitStartScript.exec(indexHtml);
@@ -143,16 +143,29 @@ const updateCSP = (indexHtml) => {
 	const ethSepoliaConnectSrc =
 		'https://api-sepolia.etherscan.io https://sepolia.infura.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
 
+	const blockstreamApiConnectSrc = 'https://blockstream.info';
+	const blockchainApiConnectSrc = 'https://blockchain.info';
+
+	const coingeckoApiConnectSrc = 'https://pro-api.coingecko.com';
+
 	const walletConnectSrc =
 		'wss://relay.walletconnect.com wss://relay.walletconnect.org https://verify.walletconnect.com https://verify.walletconnect.org';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
 	const onramperConnectFrameSrc = 'https://buy.onramper.dev https://buy.onramper.com';
 
+	const solanaRpcApiConnectSrc =
+		'https://api.mainnet-beta.solana.com wss://api.mainnet-beta.solana.com https://api.testnet.solana.com wss://api.testnet.solana.com https://api.devnet.solana.com wss://api.devnet.solana.com';
+	const solanaAlchemyApiConnectSrc =
+		'https://solana-mainnet.g.alchemy.com wss://solana-mainnet.g.alchemy.com https://solana-testnet.g.alchemy.com wss://solana-testnet.g.alchemy.com https://solana-devnet.g.alchemy.com wss://solana-devnet.g.alchemy.com';
+	const solanaQuicknodeApiConnectSrc =
+		'https://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-testnet.quiknode.pro wss://burned-little-dinghy.solana-devnet.quiknode.pro';
+	const solanaApiConnectSrc = `${solanaRpcApiConnectSrc} ${solanaAlchemyApiConnectSrc} ${solanaQuicknodeApiConnectSrc}`;
+
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc};
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';

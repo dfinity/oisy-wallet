@@ -16,7 +16,8 @@
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
-			"copy": "Copy"
+			"copy": "Copy",
+			"clear_filter": "Clear filter"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -40,7 +41,9 @@
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"submit_ticket": "Submit a ticket"
+			"support_email": "Support",
+			"confirm_navigate": "Are you sure you want to navigate away?",
+			"vip_qr_code": "VIP QR codes"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -50,8 +53,9 @@
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"submit_ticket": "Report an issue or request a feature on GitHub",
-			"open_twitter": "Open the DFINITY X/Twitter feed"
+			"support_email": "Reach out to the team",
+			"open_twitter": "Open the DFINITY X/Twitter feed",
+			"vip_qr_code": "Generate an invitation link"
 		}
 	},
 	"auth": {
@@ -109,9 +113,10 @@
 	},
 	"footer": {
 		"text": {
-			"incubated_with": "Incubated with ❤\uFE0F by",
+			"incubated_with": "Incubated with",
+			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2024"
+			"copyright": "© 2025"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website",
@@ -131,6 +136,7 @@
 		},
 		"alt": {
 			"open_etherscan": "Open your address on Etherscan",
+			"open_solscan": "Open your address on Solscan",
 			"qrcode_address": "Scan this QR code to copy the address to receive $token tokens"
 		}
 	},
@@ -154,11 +160,14 @@
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
+			"no_solana_rpc": "No Solana RPC for network $network",
+			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading the ETH balance.",
 			"loading_balance_symbol": "Error while loading $symbol balance.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
+			"spl_tokens": "Error while loading the SPL tokens.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
 			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to Erc20.",
@@ -173,11 +182,13 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
+			"spl_user_tokens": "Error while loading the SPL user tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
-			"btc_wallet_error": "Error while loading BTC wallet information."
+			"btc_wallet_error": "Error while loading BTC wallet information.",
+			"sol_wallet_error": "Error while loading SOL wallet information."
 		}
 	},
 	"hero": {
@@ -281,6 +292,16 @@
 			"error": {
 				"unexpected_btc": "Something went wrong while checking for incoming BTC."
 			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "Solana Address",
+				"solana_testnet_address": "Solana Testnet Address",
+				"solana_devnet_address": "Solana Devnet Address",
+				"solana_local_address": "Solana Local Address",
+				"solana_address_copied": "Solana address copied to clipboard",
+				"display_solana_address_qr": "Display Solana address as QR code"
+			}
 		}
 	},
 	"send": {
@@ -336,6 +357,7 @@
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
+			"insufficient_solana_funds_to_cover_the_fees": "Insufficient Solana funds to cover the fees",
 			"not_enough_tokens_for_gas": "Not enough $symbol for gas. Balance: $balance $symbol",
 			"gas_fees_not_defined": "Gas fees are not defined.",
 			"max_gas_fee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
@@ -356,9 +378,11 @@
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
-			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
+			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
+			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
-			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
+			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
+			"unable_to_retrieve_amount": "n/a (unable to retrieve)"
 		}
 	},
 	"convert": {
@@ -406,6 +430,42 @@
 			"unexpected_missing_data": "Something went wrong while initiating a convert transaction."
 		}
 	},
+	"swap": {
+		"text": {
+			"swap": "Swap",
+			"select_destination_token": "Select token to receive",
+			"select_source_token": "Select token to pay",
+			"select_source_token_title": "You pay",
+			"select_destination_token_title": "You receive",
+			"switch_tokens_button": "Switch tokens",
+			"review": "Review transaction",
+			"review_button": "Review swap",
+			"select_token": "Select token",
+			"max_slippage": "Max slippage",
+			"max_balance": "Max",
+			"not_available": "n/a",
+			"value_difference": "Value difference",
+			"total_fee": "Total estimated fee",
+			"token_fee": "Token fee",
+			"gas_fee": "Gas fee",
+			"lp_fee": "LP fee",
+			"max_slippage_info": "Enter value between 0% and 50%",
+			"max_slippage_warning": "Risk warning: high slippage may lead to losses due to market volatility",
+			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
+			"swap_button": "Swap now",
+			"swap_is_not_offered": "This swap is currently not offered.",
+			"exchange_is_not_available": "USD value is currently not available.",
+			"executing_transaction": "Executing transaction...",
+			"initializing": "Initializing transaction...",
+			"swapping": "Swapping...",
+			"refreshing_ui": "Refreshing UI",
+			"swap_provider": "Swap provider"
+		},
+		"error": {
+			"unexpected": "Something went wrong while swapping tokens.",
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
+		}
+	},
 	"buy": {
 		"text": {
 			"buy": "Buy",
@@ -419,6 +479,7 @@
 		"text": {
 			"title": "Tokens",
 			"contract_address": "Contract address",
+			"token_address": "Token address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
@@ -434,6 +495,7 @@
 			"token": "Token",
 			"network": "Network",
 			"contract_address_copied": "Contract address copied to clipboard.",
+			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
 			"standard": "Standard"
 		},
@@ -469,10 +531,11 @@
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
+				"missing_token_address": "The token address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed."
 			}
 		},
 		"manage": {
@@ -480,7 +543,6 @@
 				"title": "Manage tokens",
 				"manage_list": "Manage list",
 				"do_not_see_import": "Don’t see your token? Import",
-				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance."
@@ -506,12 +568,15 @@
 		"alt": {
 			"context_menu": "Context menu for to the selected token",
 			"open_etherscan": "Open the details of the token on Etherscan",
+			"open_blockstream": "Open the details of the token on Blockstream",
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
+			"open_token_address_block_explorer": "Open the token address on a block explorer",
 			"token_group_number": "Total number of tokens in the group for native token $token"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
+			"enter_token_address": "Enter an SPL token address",
 			"search_token": "Search for the token"
 		},
 		"warning": {
@@ -519,12 +584,13 @@
 		},
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
+			"invalid_token_address": "Token address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
-			"no_metadata": "No metadata were fetched for the contract address.",
+			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the ERC20 contract metadata.",
+			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
@@ -542,7 +608,8 @@
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
-			"total_fee": "Total fee"
+			"total_fee": "Total fee",
+			"ata_fee": "ATA fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -582,6 +649,7 @@
 			"events": "Events",
 			"message": "Message",
 			"hex_data": "HEX Data",
+			"base64_data": "Base-64 Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message"
 		},
@@ -604,6 +672,7 @@
 			"session_ended": "WalletConnect session was ended.",
 			"connected": "WalletConnect connected.",
 			"eth_transaction_executed": "WalletConnect eth_sendTransaction request executed.",
+			"sol_transaction_executed": "WalletConnect \"$method\" request executed.",
 			"sign_executed": "WalletConnect sign request executed."
 		},
 		"error": {
@@ -642,16 +711,18 @@
 			"to_copied": "To address copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
-			"pending": "Pending...",
-			"unconfirmed": "Unconfirmed",
-			"confirmed": "Confirmed",
 			"status": "Status",
 			"confirmations": "Confirmations"
 		},
 		"status": {
+			"confirmed": "Confirmed",
 			"included": "Included",
+			"finalised": "Finalised",
+			"finalized": "Finalised",
+			"processed": "Processed",
+			"pending": "Pending...",
 			"safe": "Safe",
-			"finalised": "Finalised"
+			"unconfirmed": "Unconfirmed"
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
@@ -731,6 +802,33 @@
 			}
 		}
 	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "Take me to the wallet",
+				"title_successful": "Congratulations!",
+				"title_failed": "Invalid invitation code",
+				"reward_received": "Welcome to $oisy_short!",
+				"reward_failed": "Code is expired",
+				"reward_received_description": "You will receive your welcome gift any moment.",
+				"reward_failed_description": "Request a new one and try again"
+			},
+			"error": {
+				"loading_reward": "Error while loading a new reward code.",
+				"loading_user_data": "Failed to load user data from reward canister.",
+				"claiming_reward": "Error while claiming reward."
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "Generate invitation link",
+				"invitation_link_copied": "Invitation link copied to clipboard.",
+				"generate_new_link": "Generate new link",
+				"generating_new_code": "Generating new code",
+				"regenerate_countdown_text": "New link will be generated in $counter sec"
+			}
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -770,6 +868,9 @@
 		"consent_message": {
 			"text": {
 				"loading": "Loading consent message..."
+			},
+			"warning": {
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
 			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
@@ -831,7 +932,8 @@
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},
 		"warning": {
-			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister."
+			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister.",
+			"unavailable_index_canister": "Transaction for $token_list can not be displayed. Index canister is currently not available."
 		}
 	}
 }

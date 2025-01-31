@@ -11,18 +11,13 @@
     {
       "files": "*.svelte",
       "options": {
-        "parser": "svelte"
-      }
-    },
-    {
-      "files": "*.svelte",
-      "options": {
         "plugins": [
           "prettier-plugin-svelte",
           "prettier-plugin-organize-imports",
           "prettier-plugin-tailwindcss"
         ],
-        "parser": "svelte"
+        "parser": "svelte",
+        "htmlWhitespaceSensitivity": "strict"
       }
     }
   ]

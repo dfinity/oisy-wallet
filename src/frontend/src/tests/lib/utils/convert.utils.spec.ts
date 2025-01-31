@@ -1,6 +1,5 @@
 import { validateConvertAmount } from '$lib/utils/convert.utils';
 import { BigNumber } from 'alchemy-sdk';
-import { describe } from 'vitest';
 
 describe('validateConvertAmount', () => {
 	const userAmount = BigNumber.from(200000n);
