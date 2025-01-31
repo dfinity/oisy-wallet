@@ -1,13 +1,13 @@
-import SwapInputCurrencyUsd from '$lib/components/swap/SwapInputCurrencyUsd.svelte';
+import TokenInputCurrencyUsd from '$lib/components/tokens/TokenInputCurrencyUsd.svelte';
 import {
-	SWAP_INPUT_CURRENCY_USD,
-	SWAP_INPUT_CURRENCY_USD_SYMBOL
+	TOKEN_INPUT_CURRENCY_USD,
+	TOKEN_INPUT_CURRENCY_USD_SYMBOL
 } from '$lib/constants/test-ids.constants';
 import type { OptionAmount } from '$lib/types/send';
 import { fireEvent, render } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
-describe('SwapInputCurrencyUsd', () => {
+describe('TokenInputCurrencyUsd', () => {
 	const defaultProps = {
 		tokenAmount: undefined as OptionAmount,
 		tokenDecimals: 6,
@@ -19,8 +19,8 @@ describe('SwapInputCurrencyUsd', () => {
 	};
 
 	it('renders in USD mode with $ sign', () => {
-		const { getByTestId } = render(SwapInputCurrencyUsd, defaultProps);
-		expect(getByTestId(SWAP_INPUT_CURRENCY_USD_SYMBOL)).toHaveTextContent('$');
+		const { getByTestId } = render(TokenInputCurrencyUsd, defaultProps);
+		expect(getByTestId(TOKEN_INPUT_CURRENCY_USD_SYMBOL)).toHaveTextContent('$');
 	});
 
 	it('converts token value to USD display value', () => {
@@ -30,23 +30,23 @@ describe('SwapInputCurrencyUsd', () => {
 			exchangeRate: 2
 		};
 
-		const { getByTestId } = render(SwapInputCurrencyUsd, props);
-		const input = getByTestId(SWAP_INPUT_CURRENCY_USD);
+		const { getByTestId } = render(TokenInputCurrencyUsd, props);
+		const input = getByTestId(TOKEN_INPUT_CURRENCY_USD);
 
 		expect(input).toHaveValue('200.00');
 	});
 
 	it('handles null/undefined values', async () => {
-		const { getByTestId } = render(SwapInputCurrencyUsd, defaultProps);
-		const input = getByTestId(SWAP_INPUT_CURRENCY_USD);
+		const { getByTestId } = render(TokenInputCurrencyUsd, defaultProps);
+		const input = getByTestId(TOKEN_INPUT_CURRENCY_USD);
 
 		await fireEvent.input(input, { target: { value: '' } });
 		expect(input).toHaveValue('');
 	});
 
 	it.each(['10000', '1000', '100'])('does not format usd value %s', async (value) => {
-		const { getByTestId } = render(SwapInputCurrencyUsd, defaultProps);
-		const input = getByTestId(SWAP_INPUT_CURRENCY_USD);
+		const { getByTestId } = render(TokenInputCurrencyUsd, defaultProps);
+		const input = getByTestId(TOKEN_INPUT_CURRENCY_USD);
 
 		await fireEvent.input(input, { target: { value } });
 		expect(input).toHaveValue(value);
@@ -58,8 +58,8 @@ describe('SwapInputCurrencyUsd', () => {
 			tokenAmount: '123.456789' as OptionAmount
 		};
 
-		const { getByTestId, component } = render(SwapInputCurrencyUsd, props);
-		const input = getByTestId(SWAP_INPUT_CURRENCY_USD);
+		const { getByTestId, component } = render(TokenInputCurrencyUsd, props);
+		const input = getByTestId(TOKEN_INPUT_CURRENCY_USD);
 
 		expect(input).toHaveValue('246.91');
 

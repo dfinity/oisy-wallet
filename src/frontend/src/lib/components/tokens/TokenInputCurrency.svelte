@@ -4,7 +4,7 @@
 
 	export let value: OptionAmount;
 	export let decimals: number;
-	export let name = 'swap-amount';
+	export let name = 'token-input-currency';
 	export let disabled = false;
 	export let placeholder = '0';
 	export let error = false;

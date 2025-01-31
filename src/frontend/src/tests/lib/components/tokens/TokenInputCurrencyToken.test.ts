@@ -1,10 +1,10 @@
-import SwapInputCurrencyToken from '$lib/components/swap/SwapInputCurrencyToken.svelte';
-import { SWAP_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import type { OptionAmount } from '$lib/types/send';
 import { fireEvent, render } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
-describe('SwapInputCurrencyToken', () => {
+describe('TokenInputCurrencyToken', () => {
 	const defaultProps = {
 		value: undefined as OptionAmount,
 		decimals: 6,
@@ -15,16 +15,16 @@ describe('SwapInputCurrencyToken', () => {
 	};
 
 	it('handles input', async () => {
-		const { getByTestId } = render(SwapInputCurrencyToken, defaultProps);
-		const input = getByTestId(SWAP_INPUT_CURRENCY_TOKEN);
+		const { getByTestId } = render(TokenInputCurrencyToken, defaultProps);
+		const input = getByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		await fireEvent.input(input, { target: { value: '100' } });
 		expect(input).toHaveValue('100');
 	});
 
 	it('handles null/undefined values', async () => {
-		const { getByTestId } = render(SwapInputCurrencyToken, defaultProps);
-		const input = getByTestId(SWAP_INPUT_CURRENCY_TOKEN);
+		const { getByTestId } = render(TokenInputCurrencyToken, defaultProps);
+		const input = getByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		await fireEvent.input(input, { target: { value: '' } });
 		expect(input).toHaveValue('');
@@ -37,8 +37,8 @@ describe('SwapInputCurrencyToken', () => {
 			value: '123.456789' as OptionAmount
 		};
 
-		const { getByTestId } = render(SwapInputCurrencyToken, props);
-		const input = getByTestId(SWAP_INPUT_CURRENCY_TOKEN);
+		const { getByTestId } = render(TokenInputCurrencyToken, props);
+		const input = getByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		expect(input).toHaveValue('123.456789');
 	});

@@ -1,18 +1,18 @@
 <script lang="ts">
-	import SwapInputCurrency from '$lib/components/swap/SwapInputCurrency.svelte';
-	import { SWAP_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
+	import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let value: OptionAmount;
 	export let decimals: number;
-	export let name = 'swap-amount-token';
+	export let name = 'token-input-currency-token';
 	export let disabled = false;
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
 </script>
 
-<SwapInputCurrency
+<TokenInputCurrency
 	bind:value
 	{name}
 	{error}
@@ -22,7 +22,7 @@
 	{decimals}
 	on:focus
 	on:blur
-	testId={SWAP_INPUT_CURRENCY_TOKEN}
+	testId={TOKEN_INPUT_CURRENCY_TOKEN}
 >
 	<slot name="inner-end" slot="inner-end" />
-</SwapInputCurrency>
+</TokenInputCurrency>

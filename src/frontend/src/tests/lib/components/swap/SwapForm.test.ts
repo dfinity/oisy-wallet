@@ -2,8 +2,8 @@ import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import {
 	SWAP_AMOUNT_EXCHANGE_BUTTON,
 	SWAP_AMOUNT_EXCHANGE_VALUE,
-	SWAP_INPUT_CURRENCY_TOKEN,
-	SWAP_SWITCH_TOKENS_BUTTON
+	SWAP_SWITCH_TOKENS_BUTTON,
+	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import {
 	SWAP_AMOUNTS_CONTEXT_KEY,
@@ -114,7 +114,7 @@ describe('SwapForm', () => {
 			const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
 				SWAP_AMOUNT_EXCHANGE_VALUE
 			);
-			const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY_TOKEN);
+			const [sourceInput, destinationInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 			expect(sourceTokenExchangeValue).toHaveTextContent('$10.00');
 			expect(destinationTokenExchangeValue).toHaveTextContent('$0.04');
@@ -133,7 +133,7 @@ describe('SwapForm', () => {
 				const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
 					SWAP_AMOUNT_EXCHANGE_VALUE
 				);
-				const [sourceInput, destinationInput] = getAllByTestId(SWAP_INPUT_CURRENCY_TOKEN);
+				const [sourceInput, destinationInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 				const button = buttons[buttonIndex];
 
