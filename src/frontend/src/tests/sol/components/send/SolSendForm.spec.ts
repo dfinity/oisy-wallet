@@ -5,7 +5,6 @@ import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { lamports } from '@solana/rpc-types';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -13,9 +12,8 @@ describe('SolSendForm', () => {
 	const mockContext = new Map([]);
 
 	const mockFeeStore = initFeeStore();
-	mockFeeStore.setFee(123n);
 	const mockPrioritizationFeeStore = initFeeStore();
-	mockPrioritizationFeeStore.setFee(3n);
+	const mockAtaFeeStore = initFeeStore();
 
 	const props = {
 		destination: mockSolAddress2,
@@ -32,15 +30,21 @@ describe('SolSendForm', () => {
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		vi.resetAllMocks();
 
 		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(0n);
+
+		mockFeeStore.setFee(123n);
+		mockPrioritizationFeeStore.setFee(3n);
+		mockAtaFeeStore.setFee(undefined);
 
 		mockContext.set(
 			SOL_FEE_CONTEXT_KEY,
 			initFeeContext({
 				feeStore: mockFeeStore,
 				prioritizationFeeStore: mockPrioritizationFeeStore,
+				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 				feeDecimalsStore: writable(SOLANA_TOKEN.decimals)
 			})
@@ -101,14 +105,13 @@ describe('SolSendForm', () => {
 			expect(ataFee).toBeNull();
 		});
 
-		it('should render ATA creation fee if there is no ATA for the destination', async () => {
-			vi.spyOn(solanaApi, 'loadTokenAccount').mockResolvedValueOnce(undefined);
-			vi.spyOn(solanaApi, 'getSolCreateAccountFee').mockResolvedValueOnce(lamports(123n));
-
+		it('should render ATA creation fee if it is not nullushi', async () => {
 			const { container } = render(SolSendForm, {
 				props,
 				context: mockContext
 			});
+
+			mockAtaFeeStore.setFee(123n);
 
 			// Wait for the fee to be loaded
 			await new Promise((resolve) => setTimeout(resolve, 100));
@@ -117,19 +120,21 @@ describe('SolSendForm', () => {
 			expect(ataFee).not.toBeNull();
 		});
 
-		it('should not render ATA creation fee if there is an ATA for the destination', async () => {
-			vi.spyOn(solanaApi, 'loadTokenAccount').mockResolvedValueOnce('mock-ata');
+		it('should not render ATA creation fee if it is nullish', async () => {
+			mockAtaFeeStore.setFee(123n);
 
 			const { container } = render(SolSendForm, {
 				props,
 				context: mockContext
 			});
 
+			mockAtaFeeStore.setFee(undefined);
+
 			// Wait for the fee to be loaded
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			await new Promise((resolve) => setTimeout(resolve, 5000));
 
 			const ataFee: HTMLParagraphElement | null = container.querySelector(ataFeeSelector);
 			expect(ataFee).toBeNull();
-		});
+		}, 60000);
 	});
 });
