@@ -19,7 +19,7 @@
 
 		<h3 class={`${state}`}>{text}</h3>
 
-		<div class:line={!last} />
+		<div class:line={!last}></div>
 
 		{#if nonNullish(progressLabel) && state === 'in_progress'}
 			<span class="state">{progressLabel}</span>

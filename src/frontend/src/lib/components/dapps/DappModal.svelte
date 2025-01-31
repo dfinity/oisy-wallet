@@ -11,6 +11,7 @@
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import { TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK } from '$lib/constants/analytics.contants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
@@ -19,6 +20,7 @@
 
 	export let dAppDescription: OisyDappDescription;
 	$: ({
+		id: dappId,
 		website,
 		screenshots,
 		twitter,
@@ -48,7 +50,7 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="flex flex-col gap-4">
+		<div class="flex flex-col gap-6">
 			{#if nonNullish(screenshots) && screenshots.length > 0}
 				<div class="overflow-hidden rounded-3xl">
 					<ImgBanner
@@ -59,8 +61,10 @@
 				</div>
 			{/if}
 
-			<article class="py-5">
-				<div class="flex flex-wrap items-center justify-start gap-4 border-b border-tertiary pb-5">
+			<article>
+				<div
+					class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
+				>
 					<Logo
 						size="md"
 						src={logo}
@@ -123,7 +127,7 @@
 					</div>
 				</div>
 
-				<p class="m-0 my-5 text-sm [&_ul]:list-disc [&_ul]:pl-6">
+				<p class="m-0 my-4 text-sm [&_ul]:list-disc [&_ul]:pl-6">
 					<Html text={description} />
 				</p>
 				<DappTags {dAppName} {tags} />
@@ -138,6 +142,7 @@
 					})}
 					styleClass="as-button primary padding-sm flex-1 flex-row-reverse"
 					href={websiteURL.toString()}
+					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
 					>{callToAction ??
 						replacePlaceholders($i18n.dapps.text.open_dapp, {
 							$dAppName: dAppName

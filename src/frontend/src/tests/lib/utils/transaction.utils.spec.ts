@@ -8,7 +8,7 @@ import IconSend from '$lib/components/icons/IconSend.svelte';
 import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
 import type { ModalData } from '$lib/stores/modal.store';
-import type { AnyTransactionUi } from '$lib/types/transaction';
+import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import {
 	groupTransactionsByDate,
 	mapTransactionIcon,
@@ -16,7 +16,7 @@ import {
 } from '$lib/utils/transaction.utils';
 import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
-import { createTransactionsUi } from '$tests/mocks/transactions.mock';
+import { createTransactionsUiWithCmp } from '$tests/mocks/transactions.mock';
 
 describe('transaction.utils', () => {
 	describe('mapIcon', () => {
@@ -72,12 +72,15 @@ describe('transaction.utils', () => {
 	});
 
 	describe('groupTransactionsByDate', () => {
-		const baseTransactions: AnyTransactionUi[] = createTransactionsUi(5);
+		const baseTransactions = createTransactionsUiWithCmp(5);
 
-		const mockTransactions = baseTransactions.map((transaction, index) => ({
-			...transaction,
-			timestamp: index + 1
-		})) as AnyTransactionUi[];
+		const mockTransactions = baseTransactions.map(({ transaction, ...rest }, index) => ({
+			transaction: {
+				...transaction,
+				timestamp: index + 1
+			},
+			...rest
+		})) as AnyTransactionUiWithCmp[];
 
 		const nowInMilliseconds =
 			Math.floor(Date.now() / MILLISECONDS_IN_SECOND) * MILLISECONDS_IN_SECOND;
@@ -106,12 +109,27 @@ describe('transaction.utils', () => {
 
 		it('should group transactions by formatted date when they are not unique', () => {
 			const transactions = [
-				{ ...mockTransactions[0], timestamp: 1 },
-				{ ...mockTransactions[1], timestamp: 1 },
-				{ ...mockTransactions[2], timestamp: 1 },
-				{ ...mockTransactions[3], timestamp: 2 },
-				{ ...mockTransactions[4], timestamp: 2 }
-			] as AnyTransactionUi[];
+				{
+					transaction: { ...mockTransactions[0].transaction, timestamp: 1 },
+					component: mockTransactions[0].component
+				},
+				{
+					transaction: { ...mockTransactions[1].transaction, timestamp: 1 },
+					component: mockTransactions[1].component
+				},
+				{
+					transaction: { ...mockTransactions[2].transaction, timestamp: 1 },
+					component: mockTransactions[2].component
+				},
+				{
+					transaction: { ...mockTransactions[3].transaction, timestamp: 2 },
+					component: mockTransactions[3].component
+				},
+				{
+					transaction: { ...mockTransactions[4].transaction, timestamp: 2 },
+					component: mockTransactions[4].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': transactions.slice(0, 3),
@@ -121,7 +139,13 @@ describe('transaction.utils', () => {
 
 		it('should handle transactions without timestamps', () => {
 			const undefinedKey = en.transaction.label.no_date_available;
-			const transactions = [mockTransactions[0], { ...mockTransactions[1], timestamp: undefined }];
+			const transactions = [
+				mockTransactions[0],
+				{
+					transaction: { ...mockTransactions[1], timestamp: undefined },
+					component: mockTransactions[1].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': [transactions[0]],
@@ -136,8 +160,11 @@ describe('transaction.utils', () => {
 		it('should handle timestamps provided in nanoseconds', () => {
 			const transactions = [
 				mockTransactions[0],
-				{ ...mockTransactions[1], timestamp: nowInNanoSeconds }
-			] as AnyTransactionUi[];
+				{
+					transaction: { ...mockTransactions[1].transaction, timestamp: nowInNanoSeconds },
+					component: mockTransactions[1].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				[1]: [transactions[0]],
@@ -148,8 +175,11 @@ describe('transaction.utils', () => {
 		it('should handle timestamps provided in milliseconds', () => {
 			const transactions = [
 				mockTransactions[0],
-				{ ...mockTransactions[1], timestamp: nowInMilliseconds }
-			] as AnyTransactionUi[];
+				{
+					transaction: { ...mockTransactions[1].transaction, timestamp: nowInMilliseconds },
+					component: mockTransactions[1].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': [transactions[0]],

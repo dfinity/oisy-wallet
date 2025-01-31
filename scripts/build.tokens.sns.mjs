@@ -112,36 +112,56 @@ const mapOptionalToken = (response) => {
 	return nullishToken;
 };
 
-export const findSnses = async () => {
+// 3 === Committed
+const filterCommittedSns = ({
+	swap_state: {
+		swap: { lifecycle }
+	}
+}) => lifecycle === 3;
+
+const mapSnsMetadata = ({
+	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
+	icrc1_metadata,
+	meta: { name: alternativeName, url }
+}) => ({
+	ledgerCanisterId: ledger_canister_id,
+	indexCanisterId: index_canister_id,
+	rootCanisterId: root_canister_id,
+	metadata: {
+		...mapOptionalToken(icrc1_metadata),
+		alternativeName: alternativeName.trim(),
+		url
+	}
+});
+
+const DEPRECATED_SNES = {
+	['ibahq-taaaa-aaaaq-aadna-cai']: {
+		name: '---- (formerly CYCLES-TRANSFER-STATION)',
+		symbol: '--- (CTS)',
+		alternativeName: undefined,
+		url: undefined,
+		icon: undefined
+	}
+};
+
+const mapDeprecatedSnsMetadata = ({ metadata, rootCanisterId, ...rest }) => ({
+	metadata: {
+		...metadata,
+		...(nonNullish(DEPRECATED_SNES[rootCanisterId]) && DEPRECATED_SNES[rootCanisterId])
+	},
+	rootCanisterId,
+	...rest
+});
+
+const findSnses = async () => {
 	const data = await querySnsAggregator();
 
-	// 3 === Committed
-	const snses = data.filter(
-		({
-			swap_state: {
-				swap: { lifecycle }
-			}
-		}) => lifecycle === 3
-	);
+	const snses = data.filter(filterCommittedSns);
 
 	const { tokens, icons } = snses
-		.map(
-			({
-				canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
-				icrc1_metadata,
-				meta: { name: alternativeName, url }
-			}) => ({
-				ledgerCanisterId: ledger_canister_id,
-				indexCanisterId: index_canister_id,
-				rootCanisterId: root_canister_id,
-				metadata: {
-					...mapOptionalToken(icrc1_metadata),
-					alternativeName: alternativeName.trim(),
-					url
-				}
-			})
-		)
+		.map(mapSnsMetadata)
 		.filter(({ metadata }) => nonNullish(metadata))
+		.map(mapDeprecatedSnsMetadata)
 		.reduce(
 			(
 				{ tokens, icons },
@@ -158,11 +178,15 @@ export const findSnses = async () => {
 				],
 				icons: [
 					...icons,
-					{
-						ledgerCanisterId,
-						rootCanisterId,
-						icon
-					}
+					...(isNullish(icon)
+						? []
+						: [
+								{
+									ledgerCanisterId,
+									rootCanisterId,
+									icon
+								}
+							])
 				]
 			}),
 			{ tokens: [], icons: [] }

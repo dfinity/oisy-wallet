@@ -8,7 +8,6 @@ import { HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { expect } from 'vitest';
 
 describe('ConvertToCkBTC', () => {
 	const buttonId = 'convert-to-ckbtc-button';

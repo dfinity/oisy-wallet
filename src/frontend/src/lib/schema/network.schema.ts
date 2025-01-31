@@ -2,7 +2,7 @@ import type { NetworkBuy } from '$lib/types/network';
 import type { OnramperNetworkId } from '$lib/types/onramper';
 import type { AtLeastOne } from '$lib/types/utils';
 import { UrlSchema } from '$lib/validation/url.validation';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
 

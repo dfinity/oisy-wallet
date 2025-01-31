@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
@@ -28,6 +27,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionBalance } from '$lib/types/balance';
+	import type { WebSocketListener } from '$lib/types/listener';
 	import type { NetworkId } from '$lib/types/network';
 
 	let listener: WebSocketListener | undefined = undefined;
@@ -50,8 +50,8 @@
 			return;
 		}
 
-		const lastObservedBlockNumber = fromNullable(
-			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number ?? []
+		const lastObservedBlockNumber = fromNullishNullable(
+			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
@@ -85,7 +85,7 @@
 	}) => {
 		await listener?.disconnect();
 
-		if (isNullish(toAddress) || !notEmptyString(toAddress)) {
+		if (isNullish(toAddress) || isEmptyString(toAddress)) {
 			return;
 		}
 

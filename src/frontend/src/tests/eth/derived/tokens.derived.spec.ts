@@ -1,4 +1,4 @@
-import * as ethEnv from '$env/networks.eth.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import * as appContants from '$lib/constants/app.constants';
@@ -36,12 +36,6 @@ describe('tokens.derived', () => {
 
 		it('should return ETH and Sepolia ETH when testnets are enabled', () => {
 			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
-
-			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
-		});
-
-		it('should return ETH and Sepolia ETH when in local env', () => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => true);
 
 			expect(get(enabledEthereumTokens)).toEqual([ETHEREUM_TOKEN, SEPOLIA_TOKEN]);
 		});

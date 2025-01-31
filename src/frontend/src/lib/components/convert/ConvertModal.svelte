@@ -4,7 +4,7 @@
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 	import { convertWizardSteps } from '$lib/config/convert.config';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
-	import { WizardStepsConvert } from '$lib/enums/wizard-steps.js';
+	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import {
 		CONVERT_CONTEXT_KEY,
 		type ConvertContext,

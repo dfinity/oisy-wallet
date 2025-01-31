@@ -51,18 +51,34 @@ export const BACKEND_CANISTER_ID = LOCAL
 
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
+export const REWARDS_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_REWARDS_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_REWARDS_CANISTER_ID
+		: import.meta.env.VITE_IC_REWARDS_CANISTER_ID;
+
 export const SIGNER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_SIGNER_CANISTER_ID
 	: STAGING
 		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
 		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
 
+export const KONG_BACKEND_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_KONG_BACKEND_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_KONG_BACKEND_CANISTER_ID
+		: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
+
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
-export const AUTH_DERIVATION_ORIGIN = import.meta.env.VITE_AUTH_DERIVATION_ORIGIN;
+export const AUTH_DERIVATION_ORIGIN = BETA
+	? 'https://oisy.com'
+	: STAGING
+		? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
+		: undefined;
 
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;
@@ -103,3 +119,6 @@ export const ZERO = BigNumber.from(0n);
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+
+// VIP
+export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;

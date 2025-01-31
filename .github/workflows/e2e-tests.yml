@@ -9,7 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   check-e2e-changes:
     runs-on: ubuntu-24.04
     outputs:
@@ -43,12 +42,16 @@ jobs:
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
+        with:
+          network: local
 
   e2e:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-14]
+    env:
+      MATRIX_OS: ${{ matrix.os }}
     if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
     needs: oisy-backend-wasm
     steps:
@@ -63,7 +66,7 @@ jobs:
       - name: Prepare macOS
         if: runner.os == 'macOS'
         uses: ./.github/actions/prepare-macos
-        
+
       - name: Set Environment Variables
         run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 
@@ -78,11 +81,19 @@ jobs:
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.os }}
           path: playwright-report/
-          retention-days: 30
+          retention-days: 3
+
+      - name: Upload Playwright Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: test-results/
+          retention-days: 3
 
   may-merge-e2e:
     if: always()

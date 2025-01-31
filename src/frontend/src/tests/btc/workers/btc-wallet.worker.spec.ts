@@ -14,7 +14,7 @@ import { HttpAgent } from '@dfinity/agent';
 import { BitcoinCanister, type BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer } from '@dfinity/utils';
 import { waitFor } from '@testing-library/svelte';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('btc-wallet.worker', () => {
@@ -216,6 +216,7 @@ describe('btc-wallet.worker', () => {
 		});
 
 		it('should trigger postMessage with error', async () => {
+			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 			const err = new Error('test');
 			signerCanisterMock.getBtcBalance.mockRejectedValue(err);
 

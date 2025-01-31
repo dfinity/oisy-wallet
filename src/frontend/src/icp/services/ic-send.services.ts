@@ -18,6 +18,7 @@ import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
+import type { PartialSpecific } from '$lib/types/utils';
 import { invalidIcpAddress } from '$lib/utils/account.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -93,13 +94,14 @@ const send = async ({
 	});
 };
 
-const sendIcrc = ({
+export const sendIcrc = ({
 	to,
 	amount,
 	identity,
 	ledgerCanisterId,
 	progress
-}: IcTransferParams & Pick<IcToken, 'ledgerCanisterId'>): Promise<IcrcBlockIndex> => {
+}: PartialSpecific<IcTransferParams, 'progress'> &
+	Pick<IcToken, 'ledgerCanisterId'>): Promise<IcrcBlockIndex> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
@@ -107,7 +109,7 @@ const sendIcrc = ({
 		throw new Error(get(i18n).send.error.invalid_destination);
 	}
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	return transferIcrc({
 		identity,
@@ -117,7 +119,12 @@ const sendIcrc = ({
 	});
 };
 
-const sendIcp = ({ to, amount, identity, progress }: IcTransferParams): Promise<BlockHeight> => {
+export const sendIcp = ({
+	to,
+	amount,
+	identity,
+	progress
+}: PartialSpecific<IcTransferParams, 'progress'>): Promise<BlockHeight> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 	const validIcpAddress = !invalidIcpAddress(to);
 
@@ -126,7 +133,7 @@ const sendIcp = ({ to, amount, identity, progress }: IcTransferParams): Promise<
 		throw new Error(get(i18n).send.error.invalid_destination);
 	}
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	return validIcrcAddress
 		? icrc1TransferIcp({

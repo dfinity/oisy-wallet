@@ -17,7 +17,7 @@ export interface ExchangeWorker {
 let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
-	const ExchangeWorker = await import('$lib/workers/exchange.worker?worker');
+	const ExchangeWorker = await import('$lib/workers/workers?worker');
 	const exchangeWorker: Worker = new ExchangeWorker.default();
 
 	exchangeWorker.onmessage = ({

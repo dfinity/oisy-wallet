@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants.js';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let testId: string | undefined = undefined;
 </script>

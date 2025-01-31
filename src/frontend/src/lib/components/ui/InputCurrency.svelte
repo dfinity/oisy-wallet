@@ -22,6 +22,8 @@
 	{testId}
 	{disabled}
 	on:nnsInput
+	on:blur
+	on:focus
 >
 	<slot name="inner-end" slot="inner-end" />
 </Input>
