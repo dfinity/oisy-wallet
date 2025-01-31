@@ -1,5 +1,5 @@
-import { del, get, set as setStorage } from '$icp/utils/storage.utils';
 import type { Option } from '$lib/types/utils';
+import { del, get, set as setStorage } from '$lib/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type StorageStoreData<T> = Option<T>;

@@ -1,4 +1,5 @@
 import { PROD } from '$lib/constants/app.constants';
+import type { TrackEventParams } from '$lib/types/analytics';
 import { isNullish } from '@dfinity/utils';
 import { initOrbiter, trackEvent as trackEventOrbiter } from '@junobuild/analytics';
 
@@ -26,13 +27,7 @@ export const initAnalytics = async () => {
 	});
 };
 
-export const trackEvent = async ({
-	name,
-	metadata
-}: {
-	name: string;
-	metadata?: Record<string, string>;
-}) => {
+export const trackEvent = async ({ name, metadata }: TrackEventParams) => {
 	if (!PROD) {
 		return;
 	}

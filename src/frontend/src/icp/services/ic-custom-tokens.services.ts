@@ -4,8 +4,8 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
-import type { Identity } from '@dfinity/agent';
 import { get } from 'svelte/store';
 
 export type SaveCustomToken = Pick<
@@ -17,11 +17,7 @@ export const saveCustomTokens = async ({
 	progress,
 	identity,
 	tokens
-}: {
-	progress: (step: ProgressStepsAddToken) => void;
-	identity: Identity;
-	tokens: SaveCustomToken[];
-}) => {
+}: SaveTokensParams<SaveCustomToken>) => {
 	progress(ProgressStepsAddToken.SAVE);
 
 	await setManyCustomTokens({

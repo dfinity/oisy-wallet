@@ -4,6 +4,7 @@
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { TOKEN_MENU_IC } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 
@@ -14,7 +15,7 @@
 	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;
 </script>
 
-<TokenMenu>
+<TokenMenu testId={TOKEN_MENU_IC}>
 	{#if nonNullish(transactionsExplorerUrl)}
 		<div in:fade>
 			<ExternalLink

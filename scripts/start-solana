@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+
+print_help() {
+  cat <<-EOF
+		Starts the solana testnet in the background.
+	EOF
+}
+
+# Source the clap.bash file ---------------------------------------------------
+# shellcheck disable=SC1091
+source "$SOURCE_DIR/clap.bash"
+# Define options
+clap.define short=p long=port desc="the SOLANA RPC port" variable=RPC_PORT default="8899"
+# Source the output file ----------------------------------------------------------
+# shellcheck disable=SC1090
+source "$(clap.build)"
+
+: "Check that the solana test tool is installed"
+command -v solana-test-validator || {
+  echo "ERROR: solana-test-validator not found.  Have you added the solana bin to your PATH?"
+  exit 1
+} >&2
+
+: "The solana CLI doesn't have a --background flag so we use bash '&' to background it."
+solana-test-validator --rpc-port "$RPC_PORT" >/dev/null 2>&1 &
+
+printf "Waiting for solana to be ready..."
+for ((i = 10; i--; )); do
+  if nc -z localhost "$RPC_PORT"; then
+    printf "\n Solana ready\n"
+    break
+  elif ((i == 0)); then
+    printf "\nERROR: Timeout waiting for Solana\n"
+    exit 1
+  else
+    printf .
+    sleep 1
+  fi
+done
+
+: "Basic health checks"
+echo "== Config =="
+solana config get
+echo "== Address =="
+solana address || {
+  solana-keygen new --no-bip39-passphrase --silent && solana address
+}

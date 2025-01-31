@@ -5,7 +5,7 @@ import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
-import { processTransactionSent } from '$eth/services/transaction.services';
+import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction

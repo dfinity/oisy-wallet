@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
-	import { ICP_NETWORK } from '$env/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';

@@ -1,5 +1,5 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 import { HomepageLoggedIn, HomepageLoggedOut } from './utils/pages/homepage.page';
 
 test('should display homepage in logged out state', async ({ page }) => {
@@ -7,7 +7,7 @@ test('should display homepage in logged out state', async ({ page }) => {
 
 	await homepageLoggedOut.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await homepageLoggedOut.takeScreenshot();
 });
 
 testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
@@ -15,5 +15,5 @@ testWithII('should display homepage in logged in state', async ({ page, iiPage }
 
 	await homepageLoggedIn.waitForReady();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await homepageLoggedIn.takeScreenshot();
 });

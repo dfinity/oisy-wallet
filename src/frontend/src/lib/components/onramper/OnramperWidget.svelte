@@ -1,12 +1,18 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+	import {
+		BTC_MAINNET_NETWORK_ID,
+		ETHEREUM_NETWORK_ID,
+		ICP_NETWORK_ID
+	} from '$env/networks/networks.env';
+	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
-	import { networkBitcoin, networkEthereum } from '$lib/derived/network.derived';
+	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,7 +27,9 @@
 			? $ethereumToken.buy?.onramperId
 			: $networkBitcoin
 				? BTC_MAINNET_TOKEN.buy?.onramperId
-				: ICP_TOKEN.buy?.onramperId) ??
+				: $networkSolana
+					? SOLANA_TOKEN.buy?.onramperId
+					: ICP_TOKEN.buy?.onramperId) ??
 		ICP_TOKEN.buy?.onramperId ??
 		undefined;
 
@@ -39,7 +47,8 @@
 		walletMap: new Map([
 			[BTC_MAINNET_NETWORK_ID, $btcAddressMainnet],
 			[ETHEREUM_NETWORK_ID, $ethAddress],
-			[ICP_NETWORK_ID, $icpAccountIdentifierText]
+			[ICP_NETWORK_ID, $icpAccountIdentifierText],
+			[SOLANA_MAINNET_NETWORK_ID, $solAddressMainnet]
 		])
 	});
 
@@ -71,4 +80,4 @@
 	width="100%"
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
 	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-/>
+></iframe>

@@ -1,7 +1,9 @@
 <script lang="ts">
-	import LoaderBalances from '$icp-eth/components/core/LoaderBalances.svelte';
+	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
+	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
+	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
@@ -10,16 +12,21 @@
 
 <AddressGuard>
 	<Loader>
-		<LoaderBalances>
-			<LoaderWallets>
-				<ExchangeWorker>
-					<LoaderMetamask>
-						<LoaderUserProfile>
-							<slot />
-						</LoaderUserProfile>
-					</LoaderMetamask>
-				</ExchangeWorker>
-			</LoaderWallets>
-		</LoaderBalances>
+		<RewardGuard>
+			<LoaderEthBalances>
+				<LoaderWallets>
+					<ExchangeWorker>
+						<LoaderMetamask
+							><LoaderUserProfile>
+								<slot />
+							</LoaderUserProfile>
+						</LoaderMetamask>
+					</ExchangeWorker>
+				</LoaderWallets>
+			</LoaderEthBalances>
+		</RewardGuard>
 	</Loader>
 </AddressGuard>
+
+<!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
+<CkBTCUpdateBalanceListener />

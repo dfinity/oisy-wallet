@@ -1,4 +1,4 @@
-import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks.icrc.env';
+import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
 import {
 	hasIndexCanister,

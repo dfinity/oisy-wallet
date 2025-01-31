@@ -4,10 +4,10 @@
 	import { fade } from 'svelte/transition';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { WebSocketListener } from '$lib/types/listener';
 
 	export let blockNumber: number;
 

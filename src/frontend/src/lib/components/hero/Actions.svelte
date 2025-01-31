@@ -2,7 +2,8 @@
 	import { page } from '$app/stores';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
-	import { BTC_TO_CKBTC_EXCHANGE_ENABLED } from '$env/networks.btc.env';
+	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
+	import { BTC_TO_CKBTC_EXCHANGE_ENABLED } from '$env/networks/networks.btc.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -15,6 +16,7 @@
 	import Buy from '$lib/components/buy/Buy.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
+	import Swap from '$lib/components/swap/Swap.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import {
@@ -22,11 +24,13 @@
 		networkICP,
 		networkBitcoin,
 		pseudoNetworkChainFusion,
-		networkId
+		networkId,
+		networkSolana
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
+	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -43,6 +47,9 @@
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
 
+	let swapAction = false;
+	$: swapAction = SWAP_ACTION_ENABLED && !isTransactionsPage;
+
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;
 </script>
@@ -55,12 +62,18 @@
 			<EthReceive token={$tokenWithFallback} />
 		{:else if $networkBitcoin}
 			<BtcReceive />
+		{:else if $networkSolana}
+			<SolReceive />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
 
 		{#if sendAction}
 			<Send {isTransactionsPage} />
+		{/if}
+
+		{#if swapAction}
+			<Swap />
 		{/if}
 
 		{#if isTransactionsPage}

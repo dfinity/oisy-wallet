@@ -1,0 +1,34 @@
+<script lang="ts">
+	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
+	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
+	import SendReview from '$lib/components/send/SendReview.svelte';
+	import type { Network } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
+	import { invalidAmount } from '$lib/utils/input.utils';
+	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
+
+	export let destination = '';
+	export let amount: OptionAmount = undefined;
+	export let network: Network | undefined = undefined;
+	export let source: string;
+
+	// TODO: add checks for insufficient funds for fee, when we calculate the fee
+	let insufficientFundsForFee: boolean;
+	$: insufficientFundsForFee = false;
+
+	let disableSend: boolean;
+	$: disableSend = insufficientFundsForFee || invalid;
+
+	let invalid = true;
+	$: invalid = invalidSolAddress(destination) || invalidAmount(amount);
+</script>
+
+<SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
+	<ReviewNetwork sourceNetwork={network} slot="network" />
+
+	<svelte:fragment slot="info">
+		{#if insufficientFundsForFee}
+			<InsufficientFundsForFee testId="sol-send-form-insufficient-funds-for-fee" />
+		{/if}
+	</svelte:fragment>
+</SendReview>

@@ -1,5 +1,5 @@
 import * as appNavigation from '$app/navigation';
-import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
 import {
 	AppPath,
 	NETWORK_PARAM,
@@ -18,11 +18,11 @@ import {
 	loadRouteParams,
 	networkParam,
 	networkUrl,
+	removeSearchParam,
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
-import { describe, expect } from 'vitest';
 
 describe('nav.utils', () => {
 	const mockGoTo = vi.fn();
@@ -135,6 +135,25 @@ describe('nav.utils', () => {
 		it('should navigate to "/" with replaceState', async () => {
 			await gotoReplaceRoot();
 			expect(mockGoTo).toHaveBeenCalledWith('/', { replaceState: true });
+		});
+	});
+
+	describe('removeSearchParam', () => {
+		it('should remove search param from URL', () => {
+			const pushStateMock = vi.spyOn(appNavigation, 'pushState').mockImplementation(vi.fn());
+			const urlString = 'https://example.com/';
+			const url = new URL(urlString);
+			const searchParams = new URLSearchParams({
+				code: '123'
+			});
+			url.search = searchParams.toString();
+
+			expect(url.toString()).toBe(`${urlString}?code=123`);
+
+			removeSearchParam({ url, searchParam: 'code' });
+
+			expect(pushStateMock).toHaveBeenCalledWith(url, {});
+			expect(url.toString()).toBe(urlString);
 		});
 	});
 
@@ -296,6 +315,10 @@ describe('nav.utils', () => {
 		describe('isRouteTokens', () => {
 			it('should return true when route id matches ROUTE_ID_GROUP_APP exactly', () => {
 				expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBe(true);
+			});
+
+			it('should return true when route id matches Wallet Connect path', () => {
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))).toBe(true);
 			});
 
 			it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {

@@ -5,7 +5,7 @@ on:
     branches:
       - main
   pull_request:
-    types: [ opened, synchronize, labeled ]
+    types: [opened, synchronize, labeled]
   workflow_dispatch:
 
 concurrency:
@@ -13,13 +13,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   oisy-backend-wasm:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-24.04, macos-14]
+    runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Checkout
         if: ${{ github.event_name != 'pull_request' }}
@@ -31,21 +30,23 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
+        with:
+          network: local
 
   update_snapshots:
     runs-on: ${{ matrix.os }}
+    needs: oisy-backend-wasm
     strategy:
       matrix:
         os: [ubuntu-24.04, macos-14]
+    env:
+      MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
-    needs: oisy-backend-wasm
-    
-    steps:
 
+    steps:
       - name: Fail if branch is main
         if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
         run: |
@@ -71,21 +72,40 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
 
+      - name: Download WASM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend.wasm.gz
+          path: out/
+
       - name: Prepare macOS
         if: runner.os == 'macOS'
         uses: ./.github/actions/prepare-macos
-        
+
       - name: Set Environment Variables
         run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
-      - name: Prepare
-        uses: ./.github/actions/prepare
-
       - name: Run Playwright tests
         run: npm run e2e:snapshots
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: playwright-report/
+          retention-days: 3
+
+      - name: Upload Playwright Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: test-results/
+          retention-days: 3
 
       - name: Commit Playwright updated snapshots
         uses: EndBug/add-and-commit@v9
@@ -93,7 +113,7 @@ jobs:
         with:
           add: e2e
           default_author: github_actions
-          message: "🤖 Update E2E snapshots"
+          message: '🤖 Update E2E snapshots'
 
       - name: Stage Changes
         if: github.ref == 'refs/heads/main'
@@ -114,7 +134,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && env.CHANGES_DETECTED == 'true'
         uses: ./.github/actions/create-pr
         with:
-          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           branch: bot-e2e-update-snapshots
           title: 'chore(e2e): Update Playwright E2E Snapshots'
           body: |

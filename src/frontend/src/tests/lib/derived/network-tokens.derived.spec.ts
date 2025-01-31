@@ -1,11 +1,11 @@
-import * as btcEnv from '$env/networks.btc.env';
+import * as btcEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
 	ETHEREUM_NETWORK,
 	ICP_NETWORK,
 	SEPOLIA_NETWORK
-} from '$env/networks.env';
-import * as ethEnv from '$env/networks.eth.env';
+} from '$env/networks/networks.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
