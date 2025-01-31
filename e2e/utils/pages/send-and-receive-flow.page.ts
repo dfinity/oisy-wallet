@@ -4,6 +4,7 @@ import {
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
+	RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
 	RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
@@ -17,7 +18,7 @@ import { LedgerTransferCommand } from '../../utils/commands/ledger-transfer.comm
 import { createCommandRunner } from '../../utils/commands/runner';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
-const commandRunner = createCommandRunner({ environment: 'localhost' });
+const commandRunner = createCommandRunner();
 
 export type FlowPageParams = HomepageLoggedInParams;
 
@@ -31,8 +32,8 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.waitForByTestId(AMOUNT_DATA);
 		expect(this.getBalance()).toHaveText('0.00');
 		await this.clickByTestId(RECEIVE_TOKENS_MODAL_OPEN_BUTTON);
-		const accountId = await this.clickCopyButtonByTestId(
-			RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON
+		const accountId = await this.getAccountIdByTestId(
+			RECEIVE_TOKENS_MODAL_ADDRESS_LABEL
 		);
 		expect(accountId).toBeTruthy();
 		await commandRunner.exec({

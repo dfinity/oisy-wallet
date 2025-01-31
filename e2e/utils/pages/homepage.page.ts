@@ -256,14 +256,14 @@ abstract class Homepage {
 		await this.#page.getByTestId(testId).fill(value);
 	}
 
-	async clickCopyButtonByTestId(testId: string): Promise<string | undefined> {
-		if (this.#context === undefined) {
-			throw new Error('Browser context is not defined');
+	async getAccountIdByTestId(testId: string): Promise<string> {
+		const container = this.#page.locator('#icp-account-id');
+		const addressLocator = container.getByTestId(testId);
+		const addressText = await addressLocator.textContent();
+		if (!addressText) {
+			throw new Error('No address text found in container icp-account-id');
 		}
-		await this.#context.grantPermissions(['clipboard-read', 'clipboard-write']);
-		await this.#page.getByTestId(testId).click();
-
-		return await this.#page.evaluate(() => navigator.clipboard.readText());
+		return addressText.trim();
 	}
 
 	async navigateToToken({ token, network }: NavigateToTokenParams): Promise<void> {
