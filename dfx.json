@@ -165,9 +165,11 @@
 		},
 		"icp_ledger": {
 			"type": "custom",
+			"build": "scripts/build.icp_ledger.sh",
 			"candid": "target/ic/icp_ledger.did",
 			"wasm": "target/ic/icp_ledger.wasm",
 			"specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+			"init_arg_file": "target/ic/icp_ledger.args.did",
 			"remote": {
 				"id": {
 					"test_be_1": "ryjl3-tyaaa-aaaaa-aaaba-cai",
