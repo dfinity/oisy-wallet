@@ -11,7 +11,6 @@ export const initFeeStore = (): FeeStore => {
 
 	return {
 		subscribe,
-
 		setFee(data: bigint | undefined) {
 			set(data);
 		}
@@ -21,6 +20,7 @@ export const initFeeStore = (): FeeStore => {
 export interface FeeContext {
 	feeStore: FeeStore;
 	prioritizationFeeStore: FeeStore;
+	ataFeeStore: FeeStore;
 	feeSymbolStore: Writable<string | undefined>;
 	feeDecimalsStore: Writable<number | undefined>;
 }
