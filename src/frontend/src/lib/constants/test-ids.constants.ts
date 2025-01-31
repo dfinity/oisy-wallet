@@ -73,9 +73,9 @@ export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
-export const SWAP_INPUT_CURRENCY_TOKEN = 'swap-input-currency-token';
-export const SWAP_INPUT_CURRENCY_USD = 'swap-input-currency-usd';
-export const SWAP_INPUT_CURRENCY_USD_SYMBOL = 'swap-input-currency-usd-symbol';
+export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
+export const TOKEN_INPUT_CURRENCY_USD = 'token-input-currency-usd';
+export const TOKEN_INPUT_CURRENCY_USD_SYMBOL = 'token-input-currency-usd-symbol';
 
 export const SWAP_AMOUNT_EXCHANGE = 'swap-amount-exchange';
 export const SWAP_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
