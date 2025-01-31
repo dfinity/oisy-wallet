@@ -24,6 +24,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { SaveCustomToken } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -33,7 +34,6 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
-	import type { SaveCustomToken } from '$lib/types/custom-token';
 
 	const steps: WizardSteps = [
 		{
@@ -77,7 +77,7 @@
 		}
 
 		await Promise.allSettled([
-			...(icrc.length > 0 ? [saveIcrc(icrc.map((t)=>({...t, networkKey:'Icrc'})))] : []),
+			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
 			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
 			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
@@ -94,7 +94,7 @@
 		await saveIcrc([
 			{
 				enabled: true,
-				networkKey:'Icrc',
+				networkKey: 'Icrc',
 				ledgerCanisterId,
 				indexCanisterId
 			}
