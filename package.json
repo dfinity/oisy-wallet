@@ -29,6 +29,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "tsc --project tsconfig.spec.json --noEmit && vitest",
 		"test:coverage": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage",
+		"test:debug": "ALLOW_LOGGING_FOR_DEBUGGING=true npm run test",
 		"cargo:test": "./scripts/test.backend.sh",
 		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
