@@ -112,6 +112,16 @@ abstract class Homepage {
 		}
 	}
 
+	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
+		const elementsLocator = this.#page.locator(selector);
+		await elementsLocator.evaluateAll((elements) => {
+			for (const element of elements) {
+				(element as HTMLElement).innerHTML = 'placeholder';
+			}
+		});
+	}
+
+
 	private async goto(): Promise<void> {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
