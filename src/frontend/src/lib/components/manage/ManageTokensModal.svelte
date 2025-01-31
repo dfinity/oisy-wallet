@@ -8,7 +8,6 @@
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
-	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import {
 		saveErc20UserTokens,
@@ -34,6 +33,7 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
+	import type { SaveCustomToken } from '$lib/types/custom-token';
 
 	const steps: WizardSteps = [
 		{
@@ -77,7 +77,7 @@
 		}
 
 		await Promise.allSettled([
-			...(icrc.length > 0 ? [saveIcrc(icrc)] : []),
+			...(icrc.length > 0 ? [saveIcrc(icrc.map((t)=>({...t, networkKey:'Icrc'})))] : []),
 			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
 			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
@@ -94,6 +94,7 @@
 		await saveIcrc([
 			{
 				enabled: true,
+				networkKey:'Icrc',
 				ledgerCanisterId,
 				indexCanisterId
 			}
