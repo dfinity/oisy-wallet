@@ -18,6 +18,8 @@ describe('extendCarouselSliderFrame', () => {
 			slideWidth
 		});
 
+		console.warn(11111);
+
 		expect(sliderFrame).toBeUndefined();
 	});
 
