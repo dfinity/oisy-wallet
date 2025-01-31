@@ -1,7 +1,8 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
-import type { GetSignaturesForAddressApi, GetTransactionApi } from '@solana/rpc';
+import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import type { GetSignaturesForAddressApi } from '@solana/rpc';
 import type { Commitment } from '@solana/rpc-types';
 import type {
 	FullySignedTransaction,
@@ -21,7 +22,11 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	fee?: bigint;
 }
 
-export type SolRpcTransaction = NonNullable<ReturnType<GetTransactionApi['getTransaction']>> & {
+export type SolRpcTransactionRaw = NonNullable<
+	Awaited<ReturnType<typeof fetchTransactionDetailForSignature>>
+>;
+
+export type SolRpcTransaction = SolRpcTransactionRaw & {
 	id: string;
 	confirmationStatus: Commitment | null;
 };
