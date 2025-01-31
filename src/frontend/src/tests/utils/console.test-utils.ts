@@ -41,7 +41,7 @@ export const failTestsThatLogToConsole = () => {
 	});
 };
 
-// Use this only when debugging but don't commit.
-export const allowLoggingInOneTestForDebugging = () => {
+// Use this only when debugging.
+export const allowLoggingForDebugging = () => {
 	isLoggingAllowed = true;
 };

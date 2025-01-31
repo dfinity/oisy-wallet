@@ -1,5 +1,8 @@
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { failTestsThatLogToConsole } from '$tests/utils/console.test-utils';
+import {
+	allowLoggingForDebugging,
+	failTestsThatLogToConsole
+} from '$tests/utils/console.test-utils';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
@@ -10,6 +13,10 @@ vi.mock('$app/stores', () => ({
 }));
 
 failTestsThatLogToConsole();
+
+if (process.env.ALLOW_LOGGING_FOR_DEBUGGING) {
+	allowLoggingForDebugging();
+}
 
 configure({
 	testIdAttribute: 'data-tid'
