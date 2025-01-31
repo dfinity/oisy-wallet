@@ -93,8 +93,7 @@
 
 <div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
 	<div class="menu flex flex-col gap-3">
-		<div
-			class="slider h-full rounded-xl bg-white text-brand-primary hover:bg-brand-subtle-alt"
+		<div class="slider h-full rounded-xl bg-white text-brand-primary hover:bg-brand-subtle-alt"
 		></div>
 
 		<NavigationItem
