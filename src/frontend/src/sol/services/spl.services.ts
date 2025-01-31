@@ -84,11 +84,10 @@ export const loadUserTokens = async ({
 			[SplUserToken[], SplTokenAddress[]]
 		>(
 			([accExisting, accUser], address) => {
-				const existingTokens = SPL_TOKENS.filter((token) => contracts.includes(token.address)).map(
-					(token) => ({
-						...token,
-						enabled: true
-					})
+				const existingTokens = SPL_TOKENS.reduce<SplUserToken[]>(
+					(acc, token) =>
+						contracts.includes(token.address) ? [...acc, { ...token, enabled: true }] : acc,
+					[]
 				);
 
 				return existingTokens.length > 0
