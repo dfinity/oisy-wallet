@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { Readable } from 'svelte/store';
-	import BtcConvertFeeTotal from '$btc/components/convert/BtcConvertFeeTotal.svelte';
 	import BtcConvertFees from '$btc/components/convert/BtcConvertFees.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import {
@@ -13,7 +12,6 @@
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
@@ -66,13 +64,7 @@
 		{/if}
 	</svelte:fragment>
 
-	<svelte:fragment slot="fee">
-		<BtcConvertFees />
-
-		<Hr spacing="md" />
-
-		<BtcConvertFeeTotal bind:totalFee />
-	</svelte:fragment>
+	<BtcConvertFees bind:totalFee slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </ConvertForm>
