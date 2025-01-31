@@ -1,6 +1,6 @@
 <script lang="ts">
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
-	//import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
+	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
