@@ -1,13 +1,5 @@
-import {
-	IC_CKBTC_INDEX_CANISTER_ID,
-	IC_CKBTC_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
-import {
-	autoLoadCustomToken,
-	setCustomToken,
-	toCustomToken
-} from '$icp-eth/services/custom-token.services';
-import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
+import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as agent from '$lib/actors/agents.ic';
@@ -275,37 +267,6 @@ describe('custom-token.services', () => {
 				}
 			);
 		});
-	});
-
-	describe('toCustomToken', () => {
-		describe.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
-			'with index ID %s',
-			(indexCanisterId) => {
-				it.each([undefined, 2n])('should convert to CustomToken with version %s', (version) => {
-					const input: SaveCustomToken = {
-						enabled: true,
-						version,
-						ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
-						indexCanisterId
-					};
-
-					const result = toCustomToken(input);
-
-					expect(result).toEqual({
-						enabled: input.enabled,
-						version: toNullable(version),
-						token: {
-							Icrc: {
-								ledger_id: Principal.fromText(input.ledgerCanisterId),
-								index_id: toNullable(
-									isNullish(indexCanisterId) ? undefined : Principal.fromText(indexCanisterId)
-								)
-							}
-						}
-					});
-				});
-			}
-		);
 	});
 
 	describe('setCustomToken', () => {
