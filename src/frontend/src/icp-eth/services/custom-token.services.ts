@@ -1,6 +1,4 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setCustomToken as setCustomTokenApi } from '$lib/api/backend.api';
@@ -8,9 +6,9 @@ import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.ser
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
-import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const assertErc20SendTokenData = (sendToken: Erc20Token): AutoLoadTokenResult | undefined => {
@@ -60,24 +58,6 @@ export const autoLoadCustomToken = async ({
 		loadTokens: loadCustomTokens,
 		errorMessage: get(i18n).init.error.icrc_custom_token
 	});
-
-export const toCustomToken = ({
-	enabled,
-	version,
-	ledgerCanisterId,
-	indexCanisterId
-}: SaveCustomToken): CustomToken => ({
-	enabled,
-	version: toNullable(version),
-	token: {
-		Icrc: {
-			ledger_id: Principal.fromText(ledgerCanisterId),
-			index_id: toNullable(
-				nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
-			)
-		}
-	}
-});
 
 export const setCustomToken = async ({
 	token,

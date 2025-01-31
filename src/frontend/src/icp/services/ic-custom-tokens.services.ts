@@ -1,4 +1,3 @@
-import { toCustomToken } from '$icp-eth/services/custom-token.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -6,6 +5,7 @@ import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { get } from 'svelte/store';
 
 export type SaveCustomToken = Pick<
