@@ -5,8 +5,9 @@ export type CustomTokenNetworkKeys = 'Icrc';
 
 export type IcrcSaveCustomToken = Pick<IcrcCustomToken, 'ledgerCanisterId' | 'indexCanisterId'>;
 
-export type IcrcSaveCustomTokenWithKey = IcrcSaveCustomToken & {
-	networkKey: Extract<CustomTokenNetworkKeys, 'Icrc'>;
-};
+export type SaveCustomToken = UserTokenState & IcrcSaveCustomToken;
 
-export type SaveCustomToken = UserTokenState & IcrcSaveCustomTokenWithKey;
+export type SaveCustomTokenWithKey = UserTokenState &
+	(IcrcSaveCustomToken & {
+		networkKey: Extract<CustomTokenNetworkKeys, 'Icrc'>;
+	});

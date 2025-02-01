@@ -1,5 +1,5 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import type { IcrcSaveCustomToken, SaveCustomToken } from '$lib/types/custom-token';
+import type { IcrcSaveCustomToken, SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
 
@@ -13,7 +13,11 @@ const toIcrcCustomToken = ({
 	)
 });
 
-export const toCustomToken = ({ enabled, version, ...rest }: SaveCustomToken): CustomToken => ({
+export const toCustomToken = ({
+	enabled,
+	version,
+	...rest
+}: SaveCustomTokenWithKey): CustomToken => ({
 	enabled,
 	version: toNullable(version),
 	token: { Icrc: toIcrcCustomToken(rest as IcrcSaveCustomToken) }
