@@ -24,7 +24,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import type { SaveCustomToken } from '$lib/types/custom-token';
+	import type { SaveCustomToken, SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -77,7 +77,7 @@
 		}
 
 		await Promise.allSettled([
-			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
+			...(icrc.length > 0 ? [ saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
 			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
 			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
@@ -153,7 +153,7 @@
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
-	const saveIcrc = (tokens: SaveCustomToken[]): Promise<void> =>
+	const saveIcrc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
 		saveIcrcCustomTokens({
 			tokens,
 			progress,

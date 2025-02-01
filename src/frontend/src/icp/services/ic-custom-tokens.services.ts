@@ -4,7 +4,7 @@ import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
-import type { SaveCustomToken } from '$lib/types/custom-token';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { get } from 'svelte/store';
 
@@ -12,7 +12,7 @@ export const saveCustomTokens = async ({
 	progress,
 	identity,
 	tokens
-}: SaveTokensParams<SaveCustomToken>) => {
+}: SaveTokensParams<SaveCustomTokenWithKey>) => {
 	progress(ProgressStepsAddToken.SAVE);
 
 	await setManyCustomTokens({
