@@ -77,7 +77,7 @@
 		}
 
 		await Promise.allSettled([
-			...(icrc.length > 0 ? [ saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
+			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
 			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
 			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
