@@ -3,6 +3,7 @@ import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type {
 	MappedSolTransaction,
+	ParsedAccounts,
 	SolRpcTransaction,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
@@ -32,7 +33,9 @@ export const getSolBalanceChange = ({ transaction, address }: TransactionWithAdd
 		meta
 	} = transaction;
 
-	const accountIndex = accountKeys.indexOf(solAddress(address));
+	const parsedAccountKeys = accountKeys as ParsedAccounts;
+
+	const accountIndex = parsedAccountKeys.findIndex(({ pubkey }) => pubkey === solAddress(address));
 	const { preBalances, postBalances } = meta ?? {};
 
 	return (postBalances?.[accountIndex] ?? 0n) - (preBalances?.[accountIndex] ?? 0n);
@@ -55,15 +58,19 @@ export const mapSolTransactionUi = ({
 		meta
 	} = transaction;
 
-	const nonSystemAccountKeys = accountKeys.filter((key) => !SYSTEM_ACCOUNT_KEYS.includes(key));
+	const parsedAccountKeys = accountKeys as ParsedAccounts;
 
-	const from = accountKeys[0];
+	const nonSystemAccountKeys = parsedAccountKeys.filter(
+		({ pubkey }) => !SYSTEM_ACCOUNT_KEYS.includes(pubkey)
+	);
+
+	const from = parsedAccountKeys[0];
 	//edge-case: transaction from my wallet, to my wallet
-	const to = nonSystemAccountKeys.length === 1 ? nonSystemAccountKeys[0] : accountKeys[1];
+	const to = nonSystemAccountKeys.length === 1 ? nonSystemAccountKeys[0] : parsedAccountKeys[1];
 
 	const { fee } = meta ?? {};
 
-	const relevantFee = from === address ? (fee ?? 0n) : 0n;
+	const relevantFee = from.pubkey === address ? (fee ?? 0n) : 0n;
 
 	const amount = getSolBalanceChange({ transaction, address }) + relevantFee;
 
@@ -72,8 +79,8 @@ export const mapSolTransactionUi = ({
 	return {
 		id,
 		timestamp: blockTime ?? 0n,
-		from,
-		to,
+		from: from.pubkey,
+		to: to?.pubkey,
 		type,
 		status,
 		value: amount,
