@@ -23,19 +23,26 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	fee?: bigint;
 }
 
-export type SolRpcTransactionRaw = NonNullable<
+export type SolRpcTransactionRawWithBug = NonNullable<
 	Awaited<ReturnType<typeof fetchTransactionDetailForSignature>>
 >;
 
 // This is a temporary type that we are using to cast the parsed account keys of an RPC Solana Transaction.
 // We need to do this, because in the current version of @solana/web3.js (v2.0.0) there is a bug: https://github.com/anza-xyz/solana-web3.js/issues/80
 // TODO: Remove this type and its usage when the bug is fixed and released.
-export type ParsedAccounts = {
+type ParsedAccounts = {
 	pubkey: Address;
 	signer: boolean;
 	source: string;
 	writable: boolean;
 }[];
+export type SolRpcTransactionRaw = Omit<SolRpcTransactionRawWithBug, 'transaction'> & {
+	transaction: Omit<SolRpcTransactionRawWithBug['transaction'], 'message'> & {
+		message: Omit<SolRpcTransactionRawWithBug['transaction']['message'], 'accountKeys'> & {
+			accountKeys: ParsedAccounts;
+		};
+	};
+};
 
 export type SolRpcTransaction = SolRpcTransactionRaw & {
 	id: string;

@@ -1,10 +1,6 @@
 import type { SolAddress } from '$lib/types/address';
 import { SYSTEM_ACCOUNT_KEYS } from '$sol/constants/sol.constants';
-import type {
-	ParsedAccounts,
-	SolRpcTransaction,
-	SolTransactionUi
-} from '$sol/types/sol-transaction';
+import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 
 interface SplInfo {
 	transaction: SolRpcTransaction;
@@ -54,15 +50,13 @@ export const mapSplTransactionUi = ({
 		meta
 	} = transaction;
 
-	const parsedAccountKeys = accountKeys as ParsedAccounts;
-
-	const nonSystemAccountKeys = parsedAccountKeys.filter(
+	const nonSystemAccountKeys = accountKeys.filter(
 		({ pubkey }) => !SYSTEM_ACCOUNT_KEYS.includes(pubkey)
 	);
 
-	const from = parsedAccountKeys[0];
+	const from = accountKeys[0];
 	//edge-case: transaction from my wallet, to my wallet
-	const to = nonSystemAccountKeys.length === 1 ? nonSystemAccountKeys[0] : parsedAccountKeys[1];
+	const to = nonSystemAccountKeys.length === 1 ? nonSystemAccountKeys[0] : accountKeys[1];
 
 	const { fee } = meta ?? {};
 	const relevantFee = from.pubkey === address ? (fee ?? 0n) : 0n;
