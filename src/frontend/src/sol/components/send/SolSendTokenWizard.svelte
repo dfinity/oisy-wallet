@@ -86,6 +86,7 @@
 
 	let feeStore = initFeeStore();
 	let prioritizationFeeStore = initFeeStore();
+	let ataFeeStore = initFeeStore();
 
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
@@ -98,6 +99,7 @@
 		initFeeContext({
 			feeStore,
 			prioritizationFeeStore,
+			ataFeeStore,
 			feeSymbolStore,
 			feeDecimalsStore
 		})
@@ -191,7 +193,7 @@
 	};
 </script>
 
-<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING}>
+<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<SolSendReview
 			on:icBack

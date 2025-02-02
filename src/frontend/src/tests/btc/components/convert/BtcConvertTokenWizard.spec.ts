@@ -1,5 +1,6 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcSendApi from '$btc/services/btc-send.services';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
@@ -25,6 +26,10 @@ import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
+
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
 
 describe('BtcConvertTokenWizard', () => {
 	const sendAmount = 0.001;
@@ -58,6 +63,8 @@ describe('BtcConvertTokenWizard', () => {
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
+	const mockSelectUtxosFeeApi = () =>
+		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
@@ -96,6 +103,7 @@ describe('BtcConvertTokenWizard', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
+		mockSelectUtxosFeeApi();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {
