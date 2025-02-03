@@ -3,15 +3,15 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import SwapAmountExchange from '$lib/components/swap/SwapAmountExchange.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapMaxBalanceButton from '$lib/components/swap/SwapMaxBalanceButton.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
-	import SwapTokenBalance from '$lib/components/swap/SwapTokenBalance.svelte';
 	import SwapValueDifference from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -124,7 +124,7 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($sourceToken)}
 						<div class="text-tertiary">
-							<SwapAmountExchange
+							<TokenInputAmountExchange
 								amount={swapAmount}
 								exchangeRate={$sourceTokenExchangeRate}
 								token={$sourceToken}
@@ -164,7 +164,7 @@
 							>
 						{:else}
 							<div class="flex gap-3 text-tertiary">
-								<SwapAmountExchange
+								<TokenInputAmountExchange
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
 									token={$destinationToken}
@@ -179,7 +179,7 @@
 
 				<svelte:fragment slot="balance">
 					{#if nonNullish($destinationToken)}
-						<SwapTokenBalance token={$destinationToken} balance={$destinationTokenBalance} />
+						<TokenInputBalance token={$destinationToken} balance={$destinationTokenBalance} />
 					{/if}
 				</svelte:fragment>
 			</TokenInput>
