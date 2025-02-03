@@ -24,7 +24,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import type { SaveCustomToken, SaveCustomTokenWithKey } from '$lib/types/custom-token';
+	import type {  SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
