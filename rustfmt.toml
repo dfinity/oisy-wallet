@@ -1,1 +1,5 @@
 edition = "2021"
+wrap_comments = true
+comment_width = 120
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
