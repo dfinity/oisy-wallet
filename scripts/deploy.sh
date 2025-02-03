@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
+set -euxo pipefail
 
-dfx canister create internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
-dfx canister create pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
-
+dfx canister create --all
+dfx deploy backend
 ./scripts/deploy.signer.sh
-./scripts/deploy.backend.sh
 
 mkdir -p ./target/ic
 
 ./scripts/download.icp.sh
-./scripts/deploy.icp_ledger.sh
+dfx deploy icp_ledger
 ./scripts/deploy.icp_index.sh
 
 ./scripts/download.ckbtc.sh

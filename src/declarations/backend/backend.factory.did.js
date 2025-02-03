@@ -209,7 +209,16 @@ export const idlFactory = ({ IDL }) => {
 		ledger_id: IDL.Principal,
 		index_id: IDL.Opt(IDL.Principal)
 	});
-	const Token = IDL.Variant({ Icrc: IcrcToken });
+	const SplToken = IDL.Record({
+		decimals: IDL.Opt(IDL.Nat8),
+		token_address: IDL.Text,
+		symbol: IDL.Opt(IDL.Text)
+	});
+	const Token = IDL.Variant({
+		Icrc: IcrcToken,
+		SplDevnet: SplToken,
+		SplMainnet: SplToken
+	});
 	const CustomToken = IDL.Record({
 		token: Token,
 		version: IDL.Opt(IDL.Nat64),
