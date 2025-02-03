@@ -54,11 +54,8 @@ const querySnsAggregator = async (page = 0) => {
 };
 
 const saveLogos = async (logos) => {
-	const writeLogo = async ({ icon, ledgerCanisterId, rootCanisterId }) => {
-		// Use ledger icon and fallback on Sns icon if not existing
-		const response = await fetch(
-			nonNullish(icon) ? icon : `${AGGREGATOR_URL}/root/${rootCanisterId}/logo.png`
-		);
+	const writeLogo = async ({ icon, ledgerCanisterId }) => {
+		const response = await fetch(icon);
 
 		const blob = await response.blob();
 

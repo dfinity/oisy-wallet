@@ -15,17 +15,18 @@
 		<RewardGuard>
 			<LoaderEthBalances>
 				<LoaderWallets>
-					<CkBTCUpdateBalanceListener>
-						<ExchangeWorker>
-							<LoaderMetamask
-								><LoaderUserProfile>
-									<slot />
-								</LoaderUserProfile>
-							</LoaderMetamask>
-						</ExchangeWorker>
-					</CkBTCUpdateBalanceListener>
+					<ExchangeWorker>
+						<LoaderMetamask
+							><LoaderUserProfile>
+								<slot />
+							</LoaderUserProfile>
+						</LoaderMetamask>
+					</ExchangeWorker>
 				</LoaderWallets>
 			</LoaderEthBalances>
 		</RewardGuard>
 	</Loader>
 </AddressGuard>
+
+<!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
+<CkBTCUpdateBalanceListener />
