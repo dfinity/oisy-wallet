@@ -12,7 +12,7 @@ import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { type ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -23,15 +23,6 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	return {
 		...actual,
 		LOCAL: false
-	};
-});
-
-vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
 	};
 });
 

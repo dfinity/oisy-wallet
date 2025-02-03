@@ -6,19 +6,10 @@ import type {
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { fromNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
-
-vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
-	};
-});
 
 describe('reward.canister', () => {
 	const createRewardCanister = ({

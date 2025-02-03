@@ -14,7 +14,7 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { mock } from 'vitest-mock-extended';
 
@@ -23,15 +23,6 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	return {
 		...actual,
 		LOCAL: false
-	};
-});
-
-vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
 	};
 });
 

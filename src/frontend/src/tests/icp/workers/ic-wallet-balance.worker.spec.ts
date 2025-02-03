@@ -1,10 +1,8 @@
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
-import * as agent from '$lib/actors/agents.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -67,8 +65,6 @@ describe('ic-wallet-balance.worker', () => {
 		vi.useFakeTimers();
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
-
-		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 	});
 
 	afterEach(() => {
