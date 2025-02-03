@@ -2,8 +2,8 @@
 	import { Collapsible, IconExpandMore, IconWarning } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import SwapInputContainer from '$lib/components/swap/SwapInputContainer.svelte';
-	import SwapInputCurrency from '$lib/components/swap/SwapInputCurrency.svelte';
+	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
+	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
 		SWAP_SLIPPAGE_INVALID_VALUE,
@@ -73,8 +73,8 @@
 
 <Collapsible expandButton={false} externalToggle={true} bind:toggleContent>
 	<div class="flex items-center">
-		<SwapInputContainer {focused} error={slippageValueError} styleClass="h-12">
-			<SwapInputCurrency
+		<TokenInputContainer {focused} error={slippageValueError} styleClass="h-12">
+			<TokenInputCurrency
 				{name}
 				decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
 				error={slippageValueError}
@@ -83,8 +83,8 @@
 				on:blur={onBlur}
 			>
 				<span class="text-tertiary" slot="inner-end">%</span>
-			</SwapInputCurrency>
-		</SwapInputContainer>
+			</TokenInputCurrency>
+		</TokenInputContainer>
 
 		{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue}
 			<Button
