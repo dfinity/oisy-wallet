@@ -11,7 +11,6 @@
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
-	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
@@ -55,9 +54,7 @@
 	disabled={invalid}
 >
 	<svelte:fragment slot="message">
-		{#if insufficientFundsForFee}
-			<InsufficientFundsForFee testId="btc-convert-form-insufficient-funds-for-fee" />
-		{:else if nonNullish($hasPendingTransactionsStore)}
+		{#if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
 				<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
 			</div>
