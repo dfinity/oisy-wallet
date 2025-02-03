@@ -6,6 +6,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -15,6 +16,11 @@
 	export let insufficientFundsForFee: boolean;
 
 	const dispatch = createEventDispatcher();
+
+	let exchangeValueUnit: DisplayUnit = 'usd';
+
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 </script>
 
 <ContentWithToolbar>
@@ -23,10 +29,12 @@
 		bind:receiveAmount
 		bind:insufficientFunds
 		bind:insufficientFundsForFee
+		bind:exchangeValueUnit
+		{inputUnit}
 		{totalFee}
 	/>
 
-	<div class="mt-16 pb-5">
+	<div class="mt-6">
 		<slot name="message" />
 
 		<slot name="fee" />
