@@ -11,10 +11,9 @@ const selectedSwappableToken = derived(
 	[pageToken, allKongSwapCompatibleIcrcTokens],
 	([$pageToken, $allKongSwapCompatibleIcrcTokens]) => {
 		if (nonNullish($pageToken) && isIcToken($pageToken)) {
-			let selectedToken = $pageToken;
+			const selectedToken = $pageToken;
 
-			let isSwapAvailable: boolean;
-			isSwapAvailable = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some(
+			const isSwapAvailable: boolean = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some(
 				(t) => t.id === selectedToken.id
 			);
 
@@ -30,13 +29,12 @@ const selectedSwappableToken = derived(
 export const sourceToken = derived(
 	[balancesStore, selectedSwappableToken],
 	([$balancesStore, $selectedSwappableToken]) => {
-		let selectedToken = $selectedSwappableToken;
+		const selectedToken = $selectedSwappableToken;
 		if (isNullish(selectedToken)) {
 			return undefined;
 		}
 
-		let balance: BigNumber | undefined;
-		balance = $balancesStore?.[selectedToken.id]?.data;
+		const balance: BigNumber | undefined = $balancesStore?.[selectedToken.id]?.data;
 
 		if (nonNullish(balance) && balance.gt(BigNumber.from(0))) {
 			return selectedToken;
@@ -49,13 +47,12 @@ export const sourceToken = derived(
 export const destinationToken = derived(
 	[balancesStore, selectedSwappableToken],
 	([$balancesStore, $selectedSwappableToken]) => {
-		let selectedToken = $selectedSwappableToken;
+		const selectedToken = $selectedSwappableToken;
 		if (isNullish(selectedToken)) {
 			return undefined;
 		}
 
-		let balance: BigNumber | undefined;
-		balance = $balancesStore?.[selectedToken.id]?.data;
+		const balance: BigNumber | undefined = $balancesStore?.[selectedToken.id]?.data;
 
 		if (nonNullish(balance) && balance.lte(BigNumber.from(0))) {
 			return selectedToken;
