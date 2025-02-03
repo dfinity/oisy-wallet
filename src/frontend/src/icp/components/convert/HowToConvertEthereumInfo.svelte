@@ -46,8 +46,8 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="mb-4 mt-2 rounded-lg bg-brand-subtle p-4">
-			<p class="break-normal font-bold">
+		<div class="bg-brand-subtle mt-2 mb-4 rounded-lg p-4">
+			<p class="font-bold break-normal">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
 				})}
@@ -59,7 +59,7 @@
 				})}
 			</p>
 
-			<p class="break-normal pt-4">
+			<p class="pt-4 break-normal">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
 						value: $ckEthereumNativeTokenBalance ?? ZERO,
@@ -74,11 +74,11 @@
 	<div class="mt-4 grid grid-cols-[1fr_auto] gap-x-4">
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
+				class="text-misty-rose inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold"
 				>1</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="bg-misty-rose h-full w-[1.5px]"></div>
 		</div>
 
 		<ReceiveAddress
@@ -101,11 +101,11 @@
 
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
+				class="text-misty-rose inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold"
 				>2</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="bg-misty-rose h-full w-[1.5px]"></div>
 		</div>
 
 		<div>
@@ -129,7 +129,7 @@
 
 		<div class="flex justify-center">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
+				class="text-misty-rose inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold"
 				>3</span
 			>
 		</div>

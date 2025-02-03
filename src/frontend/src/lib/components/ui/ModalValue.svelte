@@ -8,13 +8,13 @@
 </script>
 
 <div class="mb-2 flex w-full justify-between last:mb-0 md:items-center">
-	<label for={ref} class="mr-1 text-sm text-tertiary sm:mr-2"><slot name="label" /></label>
+	<label for={ref} class="text-tertiary mr-1 text-sm sm:mr-2"><slot name="label" /></label>
 
 	<div class="flex flex-col items-end sm:flex-row sm:items-center">
 		<span class={`mb-1 text-sm font-bold sm:mb-0 ${secondaryValue ? 'sm:mr-2' : ''}`}
 			><slot name="main-value" /></span
 		>
 
-		<span class="text-sm text-tertiary"><slot name="secondary-value" /></span>
+		<span class="text-tertiary text-sm"><slot name="secondary-value" /></span>
 	</div>
 </div>

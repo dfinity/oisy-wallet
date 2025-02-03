@@ -5,7 +5,7 @@
 </script>
 
 <div
-	class={`flex w-full items-center rounded-lg border border-solid bg-primary shadow-inner ${styleClass ?? ''}`}
+	class={`bg-primary flex w-full items-center rounded-lg border border-solid shadow-inner ${styleClass ?? ''}`}
 	class:border-brand-primary={focused && !error}
 	class:border-tertiary={!focused && !error}
 	class:border-error-solid={error}

@@ -10,7 +10,7 @@
 	export let exchangeRate: number | undefined;
 </script>
 
-<div class="mb-1 text-tertiary"><slot name="title" /></div>
+<div class="text-tertiary mb-1"><slot name="title" /></div>
 
 {#if nonNullish(token)}
 	<div class="flex items-center">
@@ -21,7 +21,7 @@
 				{amount}
 				{token.symbol}
 			</span>
-			<span class="text-sm text-tertiary">
+			<span class="text-tertiary text-sm">
 				<SwapAmountExchange disabled {amount} {exchangeRate} />
 			</span>
 		</div>

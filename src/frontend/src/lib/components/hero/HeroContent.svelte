@@ -66,7 +66,7 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="bg-brand-primary from-brand-primary via-absolute-blue bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-gradient-to-b p-6 text-center text-white transition-all duration-500 ease-in-out"
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
 	class:bg-cover={isTrumpToken}
 	class:bg-size-200={!isTrumpToken}
