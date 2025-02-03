@@ -18,6 +18,7 @@
 	let tokens: TokenUiOrGroupUi[] | undefined;
 
 	let animating = false;
+	let shake = false;
 
 	const handleAnimationStart = () => {
 		animating = true;
@@ -27,7 +28,10 @@
 		debouncedHandleAnimationEnd();
 	};
 
-	const handleAnimationEnd = () => (animating = false);
+	const handleAnimationEnd = () => {
+		animating = false;
+		shake = false;
+	};
 
 	const debouncedHandleAnimationEnd = debounce(() => {
 		if (animating) {
@@ -35,26 +39,31 @@
 		}
 	}, 250);
 
+	const onClick = () => {
+		if (animating) {
+			shake = true;
+		}
+	};
+
 	let loading: boolean;
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
 </script>
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		<div class="mb-3 flex flex-col gap-3">
+		<div class="mb-3 flex flex-col gap-3" class:shake>
 			{#each tokens ?? [] as token (token.id)}
 				<div
 					transition:fade
-					animate:flip={{ duration: 250 }}
+					animate:flip={{ duration: 2000 }}
 					on:animationstart={handleAnimationStart}
 					on:animationend={handleAnimationEnd}
-					class:pointer-events-none={animating}
 				>
 					{#if isTokenUiGroup(token)}
 						<TokenGroupCard tokenGroup={token} />
 					{:else}
 						<Listener {token}>
-							<TokenCardWithUrl {token}>
+							<TokenCardWithUrl {token} disabled={animating} on:click={onClick}>
 								<TokenCardContent data={token} />
 							</TokenCardWithUrl>
 						</Listener>
@@ -72,3 +81,36 @@
 		{/if}
 	</TokensSkeletons>
 </TokensDisplayHandler>
+
+<style>
+	@keyframes shake {
+		0% {
+			transform: translateX(0px);
+		}
+		20% {
+			transform: translateX(10px);
+		}
+		40% {
+			transform: translateX(-10px);
+		}
+		60% {
+			transform: translateX(5px);
+		}
+		80% {
+			transform: translateX(-5px);
+		}
+		90% {
+			transform: translateX(1px);
+		}
+		95% {
+			transform: translateX(-1px);
+		}
+		100% {
+			transform: translateX(0px);
+		}
+	}
+
+	.shake {
+		animation: shake 0.3s ease;
+	}
+</style>
