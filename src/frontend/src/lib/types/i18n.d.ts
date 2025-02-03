@@ -421,6 +421,7 @@ interface I18nSwap {
 		initializing: string;
 		swapping: string;
 		refreshing_ui: string;
+		swap_provider: string;
 	};
 	error: { unexpected: string; unexpected_missing_data: string };
 }

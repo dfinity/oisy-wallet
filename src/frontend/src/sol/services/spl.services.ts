@@ -84,10 +84,14 @@ export const loadUserTokens = async ({
 			[SplUserToken[], SplTokenAddress[]]
 		>(
 			([accExisting, accUser], address) => {
-				const existingToken = SPL_TOKENS.find((token) => token.address === address);
+				const existingTokens = SPL_TOKENS.reduce<SplUserToken[]>(
+					(acc, token) =>
+						contracts.includes(token.address) ? [...acc, { ...token, enabled: true }] : acc,
+					[]
+				);
 
-				return nonNullish(existingToken)
-					? [[...accExisting, { ...existingToken, enabled: true }], accUser]
+				return existingTokens.length > 0
+					? [[...accExisting, ...existingTokens], accUser]
 					: [accExisting, [...accUser, address]];
 			},
 			[[], []]
@@ -148,7 +152,10 @@ export const getSplMetadata = async ({
 
 	const {
 		result: {
-			content: { metadata }
+			content: {
+				metadata,
+				links: { image: icon }
+			}
 		}
 	} = await splMetadata({ tokenAddress: address });
 
@@ -157,6 +164,7 @@ export const getSplMetadata = async ({
 	return {
 		decimals,
 		name,
-		symbol
+		symbol,
+		icon
 	};
 };
