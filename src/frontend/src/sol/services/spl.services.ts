@@ -230,8 +230,6 @@ export const loadUserTokens = async ({
 			})
 		);
 
-		console.log('userTokens', existingTokens, userTokens);
-
 		return [...existingTokens, ...userTokens];
 	};
 

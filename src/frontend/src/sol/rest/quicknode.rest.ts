@@ -1,7 +1,8 @@
 import {
 	QUICKNODE_API_KEY,
 	QUICKNODE_API_URL_DEVNET,
-	QUICKNODE_API_URL_MAINNET
+	QUICKNODE_API_URL_MAINNET,
+	QUICKNODE_API_URL_TESTNET
 } from '$env/rest/quicknode.env';
 import type { TokenMetadata } from '$lib/types/token';
 import type { UrlSchema } from '$lib/validation/url.validation';
@@ -53,7 +54,12 @@ const fetchQuicknodeApi = async <T>({
 	body?: Record<string, unknown>;
 	network?: SolanaNetworkType;
 }): Promise<T> => {
-	const API_URL = network === 'devnet' ? QUICKNODE_API_URL_DEVNET : QUICKNODE_API_URL_MAINNET;
+	const API_URL =
+		network === 'devnet'
+			? QUICKNODE_API_URL_DEVNET
+			: network === 'testnet'
+				? QUICKNODE_API_URL_TESTNET
+				: QUICKNODE_API_URL_MAINNET;
 
 	const response = await fetch(`${API_URL}${QUICKNODE_API_KEY}`, {
 		method: 'POST',
