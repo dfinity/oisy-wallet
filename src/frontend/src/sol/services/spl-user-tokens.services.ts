@@ -1,5 +1,8 @@
+import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import type { TokenId } from '$lib/types/token';
+import { i18n } from '$lib/stores/i18n.store';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
@@ -8,11 +11,10 @@ import {
 	type SplAddressMap
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
-// TODO: adapt this function when we have the backend ready to save the SPL user tokens
 export const saveUserTokens = async ({
 	progress,
 	identity,
@@ -20,7 +22,7 @@ export const saveUserTokens = async ({
 }: {
 	progress: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
-	tokens: SaveSplUserToken[];
+	tokens: SaveCustomTokenWithKey[];
 }) => {
 	progress(ProgressStepsAddToken.SAVE);
 
@@ -33,10 +35,13 @@ export const saveUserTokens = async ({
 	const [enabledNewAddresses, disabledNewAddresses] = tokens.reduce<
 		[SplTokenAddress[], SplTokenAddress[]]
 	>(
-		([accEnabled, accDisabled], { address, enabled }) => [
-			[...accEnabled, ...(enabled ? [address] : [])],
-			[...accDisabled, ...(!enabled ? [address] : [])]
-		],
+		([accEnabled, accDisabled], token) =>
+			token.networkKey === 'SplMainnet'
+				? [
+						[...accEnabled, ...(token.enabled ? [token.address] : [])],
+						[...accDisabled, ...(!token.enabled ? [token.address] : [])]
+					]
+				: [accEnabled, accDisabled],
 		[[], []]
 	);
 
@@ -57,11 +62,32 @@ export const saveUserTokens = async ({
 		}
 	});
 
+	await setManyCustomTokens({
+		identity,
+		tokens: tokens.map(toCustomToken),
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
 	progress(ProgressStepsAddToken.UPDATE_UI);
 
 	// Hide tokens that have been disabled
-	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));
-	disabledTokens.forEach(({ id }) => splUserTokensStore.reset(id as TokenId));
+	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
+	const splUserTokens = get(splUserTokensStore);
+	if (nonNullish(splUserTokens)) {
+		disabledTokens.forEach((token) => {
+			if (token.networkKey !== 'SplMainnet') {
+				return;
+			}
+
+			const existingToken = splUserTokens.find(
+				({ data: { address } }) => address === token.address
+			)?.data;
+
+			if (nonNullish(existingToken)) {
+				splUserTokensStore.reset(existingToken.id);
+			}
+		});
+	}
 
 	// Reload all user tokens for simplicity reason.
 	await loadSplUserTokens({ identity });

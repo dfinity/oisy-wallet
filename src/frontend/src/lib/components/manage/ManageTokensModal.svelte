@@ -174,7 +174,7 @@
 		});
 
 	// TODO: implement this function in the backend
-	const saveSpl = (tokens: SaveSplUserToken[]): void => {
+	const saveSpl = (tokens: SaveCustomTokenWithKey[]): void => {
 		saveSplUserTokens({
 			tokens,
 			progress,
