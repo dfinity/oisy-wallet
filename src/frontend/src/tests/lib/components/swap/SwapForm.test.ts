@@ -1,8 +1,8 @@
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import {
-	SWAP_AMOUNT_EXCHANGE_BUTTON,
-	SWAP_AMOUNT_EXCHANGE_VALUE,
 	SWAP_SWITCH_TOKENS_BUTTON,
+	TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON,
+	TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import {
@@ -112,7 +112,7 @@ describe('SwapForm', () => {
 		it('should display initial token and USD values correctly', () => {
 			const { getAllByTestId } = renderSwapForm();
 			const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
-				SWAP_AMOUNT_EXCHANGE_VALUE
+				TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE
 			);
 			const [sourceInput, destinationInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
@@ -129,9 +129,9 @@ describe('SwapForm', () => {
 			'should switch between USD and token values when clicking $description exchange',
 			async ({ buttonIndex }) => {
 				const { getAllByTestId } = renderSwapForm();
-				const buttons = getAllByTestId(SWAP_AMOUNT_EXCHANGE_BUTTON);
+				const buttons = getAllByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON);
 				const [sourceTokenExchangeValue, destinationTokenExchangeValue] = getAllByTestId(
-					SWAP_AMOUNT_EXCHANGE_VALUE
+					TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE
 				);
 				const [sourceInput, destinationInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 

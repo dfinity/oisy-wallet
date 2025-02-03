@@ -77,9 +77,9 @@ export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
 export const TOKEN_INPUT_CURRENCY_USD = 'token-input-currency-usd';
 export const TOKEN_INPUT_CURRENCY_USD_SYMBOL = 'token-input-currency-usd-symbol';
 
-export const SWAP_AMOUNT_EXCHANGE = 'swap-amount-exchange';
-export const SWAP_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
-export const SWAP_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
-export const SWAP_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE = 'swap-amount-exchange';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
