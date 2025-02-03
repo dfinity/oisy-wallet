@@ -1,23 +1,18 @@
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { SaveTokensParams } from '$lib/services/manage-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
+import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { get } from 'svelte/store';
-
-export type SaveCustomToken = Pick<
-	IcrcCustomToken,
-	'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'
->;
 
 export const saveCustomTokens = async ({
 	progress,
 	identity,
 	tokens
-}: SaveTokensParams<SaveCustomToken>) => {
+}: SaveTokensParams<SaveCustomTokenWithKey>) => {
 	progress(ProgressStepsAddToken.SAVE);
 
 	await setManyCustomTokens({

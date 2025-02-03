@@ -70,5 +70,5 @@ export const setCustomToken = async ({
 }) =>
 	await setCustomTokenApi({
 		identity,
-		token: toCustomToken({ ...token, enabled })
+		token: toCustomToken({ ...token, enabled, networkKey: 'Icrc' })
 	});
