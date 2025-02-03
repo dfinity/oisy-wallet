@@ -1,57 +1,28 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import type { IcToken } from '$icp/types/ic-token';
-	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
-	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
-	import { pageToken } from '$lib/derived/page-token.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
-
-	let sourceToken: IcToken | undefined = undefined;
-	let destinationToken: IcToken | undefined = undefined;
-
-	let selectedToken: IcToken;
-	if (nonNullish($pageToken) && isIcToken($pageToken)) {
-		selectedToken = $pageToken;
-
-		let balance: BigNumber | undefined;
-		balance = $balancesStore?.[selectedToken.id]?.data;
-
-		let isSwapAvailable: boolean;
-		isSwapAvailable = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some(
-			(t) => t.id === selectedToken.id
-		);
-
-		if (nonNullish(balance) && isSwapAvailable) {
-			if (balance.gt(BigNumber.from(0))) {
-				sourceToken = selectedToken;
-			} else {
-				destinationToken = selectedToken;
-			}
-		}
-	}
+	import { destinationToken, sourceToken } from '$lib/derived/swap.derived';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
 		initSwapContext({
-			sourceToken,
-			destinationToken
+			sourceToken: $sourceToken,
+			destinationToken: $destinationToken
 		})
 	);
 
