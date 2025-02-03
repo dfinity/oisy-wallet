@@ -174,7 +174,7 @@
 		});
 
 	// TODO: implement this function in the backend
-	const saveSpl = (tokens: SaveSplUserToken[]): void => {
+	const saveSpl = (tokens: SaveSplUserToken[]): Promise<void> =>
 		saveSplUserTokens({
 			tokens,
 			progress,
@@ -183,7 +183,6 @@
 			onError: () => modal.set(0),
 			identity: $authIdentity
 		});
-	};
 
 	const close = () => {
 		modalStore.close();
