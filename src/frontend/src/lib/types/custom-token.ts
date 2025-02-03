@@ -19,9 +19,7 @@ export type SplSaveCustomTokenWithKey = SplSaveCustomToken & {
 export type SaveCustomToken = UserTokenState &
 	(IcrcSaveCustomTokenWithKey | SplSaveCustomTokenWithKey);
 
-
 export type SaveCustomTokenWithKey = UserTokenState &
 	(IcrcSaveCustomToken & {
 		networkKey: Extract<CustomTokenNetworkKeys, 'Icrc'>;
 	});
-

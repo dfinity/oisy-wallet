@@ -1,12 +1,9 @@
-
 import type { CustomToken, IcrcToken, SplToken } from '$declarations/backend/backend.did';
 import type {
 	IcrcSaveCustomToken,
-	SaveCustomToken,
+	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
-import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import type { IcrcSaveCustomToken, SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
 
@@ -19,7 +16,6 @@ const toIcrcCustomToken = ({
 		nonNullish(indexCanisterId) ? Principal.fromText(indexCanisterId) : undefined
 	)
 });
-
 
 const toSplCustomToken = ({
 	address: token_address,
@@ -45,5 +41,4 @@ export const toCustomToken = ({
 			: networkKey === 'SplMainnet'
 				? { SplMainnet: toSplCustomToken(rest as SplSaveCustomToken) }
 				: { SplDevnet: toSplCustomToken(rest as SplSaveCustomToken) }
-
 });

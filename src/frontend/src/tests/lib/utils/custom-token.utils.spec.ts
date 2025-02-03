@@ -2,7 +2,6 @@ import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
 
-
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
 		const mockParams = {
@@ -89,12 +88,11 @@ describe('custom-token.utils', () => {
 						token_address: 'mock-token-address',
 						decimals: [8],
 						symbol: ['mock-symbol']
-            					}
+					}
 				}
 			});
 		});
 
-    
 		it('should convert to CustomToken with nullish version', () => {
 			expect(
 				toCustomToken({

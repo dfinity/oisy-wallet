@@ -1,10 +1,3 @@
-
-import {
-	IC_CKBTC_INDEX_CANISTER_ID,
-	IC_CKBTC_LEDGER_CANISTER_ID
-} from '$env/networks/networks.icrc.env';
-import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-token.services';
-import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { IC_CKBTC_INDEX_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { autoLoadCustomToken, setCustomToken } from '$icp-eth/services/custom-token.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -13,7 +6,6 @@ import * as agent from '$lib/actors/agents.ic';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
