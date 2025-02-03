@@ -1,3 +1,4 @@
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { nullishSignOut } from '$lib/services/auth.services';
@@ -7,7 +8,9 @@ import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { getTokenDecimals } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -19,7 +22,8 @@ import {
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -33,7 +37,7 @@ const loadDefaultSplTokens = (): ResultSuccess => {
 		splDefaultTokensStore.reset();
 
 		toastsError({
-			msg: { text: get(i18n).init.error.spl_contract },
+			msg: { text: get(i18n).init.error.spl_tokens },
 			err
 		});
 
@@ -65,10 +69,10 @@ export const loadUserTokens = async ({
 	identity: OptionIdentity;
 }): Promise<SplUserToken[]> => {
 	// TODO: use the backend method when we add the SPL tokens to the backend, similar to ERC20
-	const loadUserContracts = async (): Promise<SplTokenAddress[]> => {
+	const loadUserContracts = async (): Promise<SplUserToken[]> => {
 		if (isNullish(identity)) {
 			await nullishSignOut();
-			return await Promise.resolve([]);
+			return [];
 		}
 
 		const contractsMap: SplAddressMap =
@@ -76,14 +80,55 @@ export const loadUserTokens = async ({
 		const principal = identity.getPrincipal().toString();
 		const contracts = nonNullish(principal) ? (contractsMap[principal] ?? []) : [];
 
-		return await Promise.resolve(contracts);
+		const [existingTokens, userTokenAddresses] = contracts.reduce<
+			[SplUserToken[], SplTokenAddress[]]
+		>(
+			([accExisting, accUser], address) => {
+				const existingTokens = SPL_TOKENS.reduce<SplUserToken[]>(
+					(acc, token) =>
+						contracts.includes(token.address) ? [...acc, { ...token, enabled: true }] : acc,
+					[]
+				);
+
+				return existingTokens.length > 0
+					? [[...accExisting, ...existingTokens], accUser]
+					: [accExisting, [...accUser, address]];
+			},
+			[[], []]
+		);
+
+		const userTokens = await Promise.all(
+			userTokenAddresses.map(async (address) => {
+				// TODO: add checks for the network, when we have the backend
+				const network = SOLANA_MAINNET_NETWORK;
+
+				const solNetwork = mapNetworkIdToNetwork(network.id);
+
+				assertNonNullish(
+					solNetwork,
+					replacePlaceholders(get(i18n).init.error.no_solana_network, {
+						$network: network.id.description ?? ''
+					})
+				);
+
+				const metadata = await getSplMetadata({ address, network: solNetwork });
+
+				return {
+					id: parseTokenId(`user-token#${metadata.symbol}#${network.chainId}`),
+					network,
+					address,
+					standard: 'spl' as const,
+					category: 'custom' as const,
+					enabled: true,
+					...metadata
+				};
+			})
+		);
+
+		return [...existingTokens, ...userTokens];
 	};
 
-	const contracts = await loadUserContracts();
-	return SPL_TOKENS.filter((token) => contracts.includes(token.address)).map((token) => ({
-		...token,
-		enabled: true
-	}));
+	return await loadUserContracts();
 };
 
 const loadUserTokenData = ({
@@ -107,7 +152,10 @@ export const getSplMetadata = async ({
 
 	const {
 		result: {
-			content: { metadata }
+			content: {
+				metadata,
+				links: { image: icon }
+			}
 		}
 	} = await splMetadata({ tokenAddress: address });
 
@@ -116,6 +164,7 @@ export const getSplMetadata = async ({
 	return {
 		decimals,
 		name,
-		symbol
+		symbol,
+		icon
 	};
 };

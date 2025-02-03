@@ -19,7 +19,5 @@
 		initFn={initCkBTCUpdateBalanceWorker}
 		token={ckBtcToken}
 		twinToken={ckBtcToken.twinToken}
-	>
-		<slot />
-	</IcCkListener>
+	/>
 {/if}

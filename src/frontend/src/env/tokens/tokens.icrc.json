@@ -14,5 +14,9 @@
 	"AAA": {
 		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai",
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai"
+	},
+	"GLDT": {
+		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
+		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai"
 	}
 }
