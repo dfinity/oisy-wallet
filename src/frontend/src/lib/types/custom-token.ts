@@ -8,18 +8,15 @@ export type IcrcSaveCustomToken = Pick<IcrcCustomToken, 'ledgerCanisterId' | 'in
 
 export type SplSaveCustomToken = Pick<SplToken, 'address' | 'decimals' | 'symbol'>;
 
-export type IcrcSaveCustomTokenWithKey = IcrcSaveCustomToken & {
+export type SaveCustomToken = UserTokenState & (IcrcSaveCustomToken | SplSaveCustomToken);
+
+type IcrcSaveCustomTokenWithKey = IcrcSaveCustomToken & {
 	networkKey: Extract<CustomTokenNetworkKeys, 'Icrc'>;
 };
 
-export type SplSaveCustomTokenWithKey = SplSaveCustomToken & {
+type SplSaveCustomTokenWithKey = SplSaveCustomToken & {
 	networkKey: Extract<CustomTokenNetworkKeys, 'SplMainnet' | 'SplDevnet'>;
 };
 
-export type SaveCustomToken = UserTokenState &
-	(IcrcSaveCustomTokenWithKey | SplSaveCustomTokenWithKey);
-
 export type SaveCustomTokenWithKey = UserTokenState &
-	(IcrcSaveCustomToken & {
-		networkKey: Extract<CustomTokenNetworkKeys, 'Icrc'>;
-	});
+	(IcrcSaveCustomTokenWithKey | SplSaveCustomTokenWithKey);
