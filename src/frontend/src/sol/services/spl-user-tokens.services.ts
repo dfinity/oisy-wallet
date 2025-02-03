@@ -1,5 +1,10 @@
+import type { CustomToken } from '$declarations/backend/backend.did';
+import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import { i18n } from '$lib/stores/i18n.store';
 import type { TokenId } from '$lib/types/token';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
@@ -11,8 +16,8 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
-// TODO: adapt this function when we have the backend ready to save the SPL user tokens
 export const saveUserTokens = async ({
 	progress,
 	identity,
@@ -55,6 +60,19 @@ export const saveUserTokens = async ({
 			...oldValues,
 			[identity.getPrincipal().toText()]: tokenAddresses
 		}
+	});
+
+	const customTokens: CustomToken[] = tokens.map((token) =>
+		toCustomToken({
+			...token,
+			networkKey: isNetworkIdSOLDevnet(token.network.id) ? 'SplDevnet' : 'SplMainnet'
+		})
+	);
+
+	await setManyCustomTokens({
+		identity,
+		tokens: customTokens,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
 	progress(ProgressStepsAddToken.UPDATE_UI);
