@@ -102,6 +102,9 @@ describe('icrc.services', () => {
 					({ data: { ledgerCanisterId: tokenLedgerId } }) => tokenLedgerId === ledgerCanisterId
 				);
 
+				// This is just for type safety, since we created the mock with the token field
+				assert('Icrc' in mockCustomToken.token);
+
 				expect(token).not.toBeNull();
 				expect(token).toEqual({
 					certified: true,
