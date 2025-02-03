@@ -1,6 +1,7 @@
 import {
 	RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
-	RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
+	RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+	RECEIVE_TOKENS_MODAL_TRANSACTION_TIMESTAMP
 } from '$lib/constants/test-ids.constants';
 
 /**
@@ -37,4 +38,14 @@ export const getReceiveTokensModalQrCodeButtonSelector = ({
 	getNestedSelector({
 		parentSelector: sectionSelector,
 		innerSelector: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON
+	});
+
+export const getReceiveTokensModalTimestampSelector = ({
+	sectionSelector
+}: {
+	sectionSelector: string;
+}): string =>
+	getNestedSelector({
+		parentSelector: sectionSelector,
+		innerSelector: RECEIVE_TOKENS_MODAL_TRANSACTION_TIMESTAMP
 	});
