@@ -8,6 +8,7 @@ import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
 import { vi } from 'vitest';
+import { mock } from 'vitest-mock-extended';
 
 vi.mock('$app/stores', () => ({
 	page: mockPage
