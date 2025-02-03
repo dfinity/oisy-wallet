@@ -18,9 +18,6 @@
 	const dispatch = createEventDispatcher();
 
 	let exchangeValueUnit: DisplayUnit = 'usd';
-
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 </script>
 
 <ContentWithToolbar>
@@ -30,7 +27,6 @@
 		bind:insufficientFunds
 		bind:insufficientFundsForFee
 		bind:exchangeValueUnit
-		{inputUnit}
 		{totalFee}
 	/>
 

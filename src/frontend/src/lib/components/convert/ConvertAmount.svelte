@@ -11,7 +11,9 @@
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
-	export let inputUnit: DisplayUnit = 'token';
+
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 </script>
 
 <div class="relative">
