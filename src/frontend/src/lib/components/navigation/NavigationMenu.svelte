@@ -55,7 +55,6 @@
 			selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
 			testId={NAVIGATION_ITEM_TOKENS}
 		>
-
 			<IconWallet />
 			{$i18n.navigation.text.tokens}
 		</NavigationItem>
