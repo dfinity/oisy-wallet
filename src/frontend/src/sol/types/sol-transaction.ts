@@ -23,7 +23,7 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	fee?: bigint;
 }
 
-export type SolRpcTransactionRawWithBug = NonNullable<
+type SolRpcTransactionRawWithBug = NonNullable<
 	Awaited<ReturnType<typeof fetchTransactionDetailForSignature>>
 >;
 
