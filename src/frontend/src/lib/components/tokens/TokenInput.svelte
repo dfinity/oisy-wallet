@@ -27,6 +27,7 @@
 	export let errorType: ConvertAmountErrorType = undefined;
 	export let amountSetToMax = false;
 	export let loading = false;
+	export let isSelectable = true;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
 
 	const dispatch = createEventDispatcher();
@@ -106,7 +107,7 @@
 
 		<div class="h-3/4 w-[1px] bg-disabled" />
 
-		<button class="flex h-full gap-1 px-3" on:click>
+		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
 				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
@@ -119,7 +120,9 @@
 				</span>
 			{/if}
 
-			<IconExpandMore />
+			{#if isSelectable}
+				<IconExpandMore />
+			{/if}
 		</button>
 	</TokenInputContainer>
 
