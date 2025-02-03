@@ -230,6 +230,8 @@ export const loadUserTokens = async ({
 			})
 		);
 
+		console.log('userTokens', existingTokens, userTokens);
+
 		return [...existingTokens, ...userTokens];
 	};
 
@@ -262,7 +264,7 @@ export const getSplMetadata = async ({
 				links: { image: icon }
 			}
 		}
-	} = await splMetadata({ tokenAddress: address });
+	} = await splMetadata({ tokenAddress: address, network });
 
 	const { name, symbol } = metadata;
 
