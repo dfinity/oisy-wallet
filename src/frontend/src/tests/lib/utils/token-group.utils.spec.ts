@@ -10,6 +10,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import {
+	filterTokenGroups,
 	groupMainToken,
 	groupSecondaryToken,
 	groupTokens,
@@ -240,6 +241,58 @@ describe('token-group.utils', () => {
 
 			expect(groupedTokens[0]).toHaveProperty('tokens', [reorderedTokens[1], reorderedTokens[2]]);
 			expect(groupedTokens[1]).toHaveProperty('tokens', [reorderedTokens[0], reorderedTokens[3]]);
+		});
+	});
+
+	describe('filterTokenGroups', () => {
+		const reorderedTokens = [
+			{ ...tokens[0], balance: ZERO, usdBalance: 0 }, // BTC
+			{ ...tokens[4], balance: ZERO, usdBalance: 0 }, // ICP
+			{ ...tokens[1], balance: ZERO, usdBalance: 0 } // ckBTC
+		];
+
+		it('should give me all token groups', () => {
+			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
+
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: true });
+
+			expect(filteredTokenGroups).toEqual(groupedTokens);
+		});
+
+		it('should give me only token groups where at least one token has a balance', () => {
+			const customReorderedTokens = [
+				...reorderedTokens,
+				{ ...tokens[2], balance: bn2, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: ZERO, usdBalance: 0 } // ckETH
+			];
+			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
+
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
+
+			expect(filteredTokenGroups).toHaveLength(1);
+
+			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [
+				customReorderedTokens[3],
+				customReorderedTokens[4]
+			]);
+		});
+
+		it('should give me only token groups where at least one token has a usd balance', () => {
+			const customReorderedTokens = [
+				...reorderedTokens,
+				{ ...tokens[2], balance: ZERO, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: ZERO, usdBalance: 1 } // ckETH
+			];
+			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
+
+			const filteredTokenGroups = filterTokenGroups({ groupedTokens, showZeroBalances: false });
+
+			expect(filteredTokenGroups).toHaveLength(1);
+
+			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [
+				customReorderedTokens[3],
+				customReorderedTokens[4]
+			]);
 		});
 	});
 
