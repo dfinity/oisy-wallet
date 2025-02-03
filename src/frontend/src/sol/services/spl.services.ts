@@ -1,5 +1,6 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { listCustomTokens, setManyCustomTokens } from '$lib/api/backend.api';
@@ -27,7 +28,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -155,32 +156,61 @@ export const loadUserTokens = async ({
 
 		const splCustomTokens = await loadSplCustomTokens({ identity, certified: true });
 
-		const contracts = await saveCachedUserTokensToBackend({
-			identity,
-			savedTokens: splCustomTokens
-		});
+		await saveCachedUserTokensToBackend({ identity, savedTokens: splCustomTokens });
 
-		const [existingTokens, userTokenAddresses] = contracts.reduce<
-			[SplUserToken[], SplTokenAddress[]]
+		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
+			[SplUserToken[], SplUserToken[]]
 		>(
-			([accExisting, accUser], address) => {
-				const existingTokens = SPL_TOKENS.reduce<SplUserToken[]>(
-					(acc, token) =>
-						contracts.includes(token.address) ? [...acc, { ...token, enabled: true }] : acc,
-					[]
+			([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
+				if (!('SplMainnet' in token || 'SplDevnet' in token)) {
+					return [accExisting, accNonExisting];
+				}
+
+				const version = fromNullable(versionNullable);
+
+				const {
+					network: tokenNetwork,
+					symbol,
+					decimals,
+					token_address: tokenAddress
+				} = 'SplDevnet' in token
+					? { ...token.SplDevnet, network: SOLANA_DEVNET_NETWORK }
+					: { ...token.SplMainnet, network: SOLANA_MAINNET_NETWORK };
+
+				const existingToken = SPL_TOKENS.find(
+					({ address, network: { id: networkId } }) =>
+						address === tokenAddress && networkId === tokenNetwork.id
 				);
 
-				return existingTokens.length > 0
-					? [[...accExisting, ...existingTokens], accUser]
-					: [accExisting, [...accUser, address]];
+				if (nonNullish(existingToken)) {
+					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
+				}
+
+				return [
+					accExisting,
+					[
+						...accNonExisting,
+						{
+							id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
+							name: tokenAddress,
+							address: tokenAddress,
+							network: tokenNetwork,
+							symbol: fromNullable(symbol) ?? '',
+							decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
+							standard: 'spl' as const,
+							category: 'custom' as const,
+							enabled,
+							version
+						}
+					]
+				];
 			},
 			[[], []]
 		);
 
-		const userTokens = await Promise.all(
-			userTokenAddresses.map(async (address) => {
-				// TODO: add checks for the network, when we have the backend
-				const network = SOLANA_MAINNET_NETWORK;
+		const userTokens: SplUserToken[] = await Promise.all(
+			nonExistingTokens.map(async (token) => {
+				const { network, address } = token;
 
 				const solNetwork = mapNetworkIdToNetwork(network.id);
 
@@ -194,12 +224,7 @@ export const loadUserTokens = async ({
 				const metadata = await getSplMetadata({ address, network: solNetwork });
 
 				return {
-					id: parseTokenId(`user-token#${metadata.symbol}#${network.chainId}`),
-					network,
-					address,
-					standard: 'spl' as const,
-					category: 'custom' as const,
-					enabled: true,
+					...token,
 					...metadata
 				};
 			})
