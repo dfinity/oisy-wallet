@@ -10,12 +10,11 @@
 	export let testId: string | undefined = undefined;
 	export let autofocus = false;
 
+	let inputElement;
+
 	onMount(() => {
-		if (autofocus) {
-			let component = document.querySelector<HTMLInputElement>(`input[name="${name}"]`);
-			if (nonNullish(component)) {
-				component.focus();
-			}
+		if (autofocus && nonNullish(inputElement)) {
+			inputElement.focus();
 		}
 	});
 </script>
@@ -30,6 +29,7 @@
 	autocomplete="off"
 	{testId}
 	on:nnsInput
+	bind:inputElement={inputElement}
 >
 	<slot name="inner-end" slot="inner-end" />
 </Input>
