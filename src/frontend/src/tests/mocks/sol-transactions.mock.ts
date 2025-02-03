@@ -1,4 +1,8 @@
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import {
+	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type {
@@ -40,10 +44,6 @@ export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 		err: null,
 		fee: lamports(5000n),
 		innerInstructions: [],
-		loadedAddresses: {
-			readonly: [],
-			writable: []
-		},
 		logMessages: [
 			'Program 11111111111111111111111111111111 invoke [1]',
 			'Program 11111111111111111111111111111111 success'
@@ -60,22 +60,34 @@ export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 	slot: 352454651n,
 	transaction: {
 		message: {
-			addressTableLookups: [],
 			accountKeys: [
-				address('devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv'),
-				address(mockSolAddress),
-				address('11111111111111111111111111111111')
+				{
+					pubkey: address('devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv'),
+					signer: false,
+					source: 'program',
+					writable: false
+				},
+				{
+					pubkey: address(mockSolAddress),
+					signer: true,
+					source: 'external',
+					writable: true
+				},
+				{
+					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
+					signer: false,
+					source: 'program',
+					writable: false
+				}
 			],
-			header: {
-				numReadonlySignedAccounts: 0,
-				numReadonlyUnsignedAccounts: 1,
-				numRequiredSignatures: 1
-			},
 			instructions: [
 				{
-					accounts: [0, 1],
+					accounts: [
+						address('devwuNsNYACyiEYxRNqMNseBpNnGfnd4ZwNHL7sphqv'),
+						address(mockSolAddress)
+					],
 					data: '3Bxs411qCLLRMUsZ' as Base58EncodedBytes,
-					programIdIndex: 2,
+					programId: address(SYSTEM_PROGRAM_ADDRESS),
 					stackHeight: undefined
 				}
 			],
@@ -97,10 +109,6 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 		err: null,
 		fee: lamports(14900n),
 		innerInstructions: [],
-		loadedAddresses: {
-			readonly: [],
-			writable: []
-		},
 		logMessages: [
 			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
 			'Program ComputeBudget111111111111111111111111111111 success',
@@ -121,35 +129,52 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 	slot: 352452048n,
 	transaction: {
 		message: {
-			addressTableLookups: [],
 			accountKeys: [
-				address(mockSolAddress),
-				address('4DAtqyYPYCj2WK4RpPQwCNxz3xYLm5G9vTuZqnP2ZzcQ'),
-				address('11111111111111111111111111111111'),
-				address('ComputeBudget111111111111111111111111111111')
+				{
+					pubkey: address(mockSolAddress),
+					signer: true,
+					source: 'external',
+					writable: true
+				},
+				{
+					pubkey: address('4DAtqyYPYCj2WK4RpPQwCNxz3xYLm5G9vTuZqnP2ZzcQ'),
+					signer: false,
+					source: 'external',
+					writable: true
+				},
+				{
+					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
+					signer: false,
+					source: 'program',
+					writable: false
+				},
+				{
+					pubkey: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
+					signer: false,
+					source: 'program',
+					writable: false
+				}
 			],
-			header: {
-				numReadonlySignedAccounts: 0,
-				numReadonlyUnsignedAccounts: 2,
-				numRequiredSignatures: 1
-			},
 			instructions: [
 				{
 					accounts: [],
 					data: '3DVGviTXKAPH' as Base58EncodedBytes,
-					programIdIndex: 3,
+					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
 					stackHeight: undefined
 				},
 				{
 					accounts: [],
 					data: 'LCQ37u' as Base58EncodedBytes,
-					programIdIndex: 3,
+					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
 					stackHeight: undefined
 				},
 				{
-					accounts: [0, 1],
+					accounts: [
+						address(mockSolAddress),
+						address('4DAtqyYPYCj2WK4RpPQwCNxz3xYLm5G9vTuZqnP2ZzcQ')
+					],
 					data: '3Bxs4NQNnDSisSzK' as Base58EncodedBytes,
-					programIdIndex: 2,
+					programId: address(SYSTEM_PROGRAM_ADDRESS),
 					stackHeight: undefined
 				}
 			],
@@ -171,10 +196,6 @@ export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
 		err: null,
 		fee: lamports(14900n),
 		innerInstructions: [],
-		loadedAddresses: {
-			readonly: [],
-			writable: []
-		},
 		logMessages: [
 			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
 			'Program ComputeBudget111111111111111111111111111111 success',
@@ -195,34 +216,43 @@ export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
 	slot: 352647164n,
 	transaction: {
 		message: {
-			addressTableLookups: [],
 			accountKeys: [
-				address(mockSolAddress),
-				address('11111111111111111111111111111111'),
-				address('ComputeBudget111111111111111111111111111111')
+				{
+					pubkey: address(mockSolAddress),
+					signer: true,
+					source: 'external',
+					writable: true
+				},
+				{
+					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
+					signer: false,
+					source: 'program',
+					writable: false
+				},
+				{
+					pubkey: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
+					signer: false,
+					source: 'program',
+					writable: false
+				}
 			],
-			header: {
-				numReadonlySignedAccounts: 0,
-				numReadonlyUnsignedAccounts: 2,
-				numRequiredSignatures: 1
-			},
 			instructions: [
 				{
 					accounts: [],
 					data: '3DVGviTXKAPH' as Base58EncodedBytes,
-					programIdIndex: 2,
+					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
 					stackHeight: undefined
 				},
 				{
 					accounts: [],
 					data: 'LCQ37u' as Base58EncodedBytes,
-					programIdIndex: 2,
+					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
 					stackHeight: undefined
 				},
 				{
-					accounts: [0, 1],
+					accounts: [address(mockSolAddress), address(SYSTEM_PROGRAM_ADDRESS)],
 					data: '3Bxs3zzLZLuLQEYX' as Base58EncodedBytes,
-					programIdIndex: 1,
+					programId: address(SYSTEM_PROGRAM_ADDRESS),
 					stackHeight: undefined
 				}
 			],

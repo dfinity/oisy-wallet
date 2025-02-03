@@ -50,14 +50,16 @@ export const mapSplTransactionUi = ({
 		meta
 	} = transaction;
 
-	const nonSystemAccountKeys = accountKeys.filter((key) => !SYSTEM_ACCOUNT_KEYS.includes(key));
+	const nonSystemAccountKeys = accountKeys.filter(
+		({ pubkey }) => !SYSTEM_ACCOUNT_KEYS.includes(pubkey)
+	);
 
 	const from = accountKeys[0];
 	//edge-case: transaction from my wallet, to my wallet
 	const to = nonSystemAccountKeys.length === 1 ? nonSystemAccountKeys[0] : accountKeys[1];
 
 	const { fee } = meta ?? {};
-	const relevantFee = from === address ? (fee ?? 0n) : 0n;
+	const relevantFee = from.pubkey === address ? (fee ?? 0n) : 0n;
 
 	const amount = getSplBalanceChange({ transaction, address, tokenAddress }) + relevantFee;
 
@@ -66,8 +68,8 @@ export const mapSplTransactionUi = ({
 	return {
 		id,
 		timestamp: blockTime ?? 0n,
-		from,
-		to,
+		from: from.pubkey,
+		to: to?.pubkey,
 		type,
 		status,
 		value: amount,
