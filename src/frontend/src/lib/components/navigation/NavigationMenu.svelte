@@ -10,7 +10,7 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
-		NAVIGATION_ITEM_ACTIVITY,
+		NAVIGATION_ITEM_ACTIVITY, NAVIGATION_ITEM_AIRDROPS,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
@@ -18,13 +18,15 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
-		isRouteActivity,
+		isRouteActivity, isRouteAirdrops,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import { AIRDROPS_ENABLED } from '$env/airdrops.env';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -73,6 +75,23 @@
 			<IconActivity />
 			{$i18n.navigation.text.activity}
 		</NavigationItem>
+
+		{#if AIRDROPS_ENABLED}
+			<NavigationItem
+				href={networkUrl({
+				path: AppPath.Airdrops,
+				networkId: $networkId,
+				usePreviousRoute: isTransactionsRoute,
+				fromRoute
+			})}
+				ariaLabel={$i18n.navigation.alt.airdrops}
+				selected={isRouteAirdrops(pageData)}
+				testId={NAVIGATION_ITEM_AIRDROPS}
+			>
+				<IconSend />
+				{$i18n.navigation.text.airdrops}
+			</NavigationItem>
+		{/if}
 
 		<NavigationItem
 			href={networkUrl({
