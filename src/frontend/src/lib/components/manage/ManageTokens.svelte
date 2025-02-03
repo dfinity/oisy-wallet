@@ -25,6 +25,7 @@
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
@@ -143,6 +144,7 @@
 		bind:filter
 		noMatch={noTokensMatch}
 		placeholder={$i18n.tokens.placeholder.search_token}
+		autofocus={isDesktop()}
 	/>
 </div>
 
