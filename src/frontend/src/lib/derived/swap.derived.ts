@@ -1,11 +1,11 @@
-import { derived } from 'svelte/store';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { isIcToken } from '$icp/validation/ic-token.validation';
+import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { isIcToken } from '$icp/validation/ic-token.validation';
 import { BigNumber } from '@ethersproject/bignumber';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
+import { derived } from 'svelte/store';
 
 const selectedSwappableToken = derived(
 	[pageToken, allKongSwapCompatibleIcrcTokens],
@@ -24,7 +24,8 @@ const selectedSwappableToken = derived(
 		}
 
 		return undefined;
-	});
+	}
+);
 
 export const sourceToken = derived(
 	[balancesStore, selectedSwappableToken],
@@ -42,7 +43,8 @@ export const sourceToken = derived(
 		}
 
 		return undefined;
-	});
+	}
+);
 
 export const destinationToken = derived(
 	[balancesStore, selectedSwappableToken],
@@ -60,4 +62,5 @@ export const destinationToken = derived(
 		}
 
 		return undefined;
-	});
+	}
+);
