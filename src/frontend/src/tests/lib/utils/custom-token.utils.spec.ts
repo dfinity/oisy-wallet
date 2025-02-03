@@ -1,7 +1,7 @@
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@dfinity/principal';
-import { expect } from 'vitest';
+
 
 describe('custom-token.utils', () => {
 	describe('toCustomToken', () => {
@@ -89,6 +89,28 @@ describe('custom-token.utils', () => {
 						token_address: 'mock-token-address',
 						decimals: [8],
 						symbol: ['mock-symbol']
+            					}
+				}
+			});
+		});
+
+    
+		it('should convert to CustomToken with nullish version', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					version: undefined,
+					networkKey: 'Icrc',
+					ledgerCanisterId: mockLedgerCanisterId,
+					indexCanisterId: mockIndexCanisterId
+				})
+			).toEqual({
+				...partialExpected,
+				version: [],
+				token: {
+					Icrc: {
+						ledger_id: Principal.fromText(mockLedgerCanisterId),
+						index_id: [Principal.fromText(mockIndexCanisterId)]
 					}
 				}
 			});
