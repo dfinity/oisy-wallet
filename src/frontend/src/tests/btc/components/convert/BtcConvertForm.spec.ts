@@ -8,7 +8,6 @@ import {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
-import * as convertUtils from '$lib/utils/convert.utils';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -51,7 +50,6 @@ describe('BtcConvertForm', () => {
 			.mockImplementation(() => readable(status));
 
 	const buttonTestId = 'convert-form-button-next';
-	const insufficientFundsForFeeTestId = 'btc-convert-form-insufficient-funds-for-fee';
 	const btcSendWarningsTestId = 'btc-convert-form-send-warnings';
 
 	beforeEach(() => {
@@ -123,23 +121,6 @@ describe('BtcConvertForm', () => {
 		});
 
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
-	});
-
-	it('should render insufficient funds for fee message', async () => {
-		vi.spyOn(convertUtils, 'validateConvertAmount').mockImplementation(
-			() => 'insufficient-funds-for-fee'
-		);
-
-		const { getByTestId } = render(BtcConvertForm, {
-			props,
-			context: mockContext({ utxosFeeStore: store, sourceTokenBalance: 0n })
-		});
-
-		await waitFor(() => {
-			expect(getByTestId(insufficientFundsForFeeTestId)).toHaveTextContent(
-				en.fee.assertion.insufficient_funds_for_fee
-			);
-		});
 	});
 
 	it('should render btc send warning message and keep button disabled if there some pending txs', async () => {

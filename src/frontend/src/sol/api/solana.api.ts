@@ -9,7 +9,7 @@ import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction
 import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
 import { getSplBalanceChange } from '$sol/utils/spl-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
+import { address, assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
@@ -144,17 +144,18 @@ const fetchSignatures = async ({
 	return await fetchSignaturesBatch(before);
 };
 
-const fetchTransactionDetailForSignature = async ({
+export const fetchTransactionDetailForSignature = async ({
 	signature: { signature, confirmationStatus },
 	network
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
-}): Promise<SolRpcTransaction | null> => {
+}) => {
 	const { getTransaction } = solanaHttpRpc(network);
 
 	const rpcTransaction = await getTransaction(signature, {
-		maxSupportedTransactionVersion: 0
+		maxSupportedTransactionVersion: 0,
+		encoding: 'jsonParsed'
 	}).send();
 
 	if (isNullish(rpcTransaction)) {
@@ -278,4 +279,52 @@ export const getSplTransactions = async ({
 export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promise<Lamports> => {
 	const { getMinimumBalanceForRentExemption } = solanaHttpRpc(network);
 	return await getMinimumBalanceForRentExemption(ATA_SIZE).send();
+};
+
+/**
+ * Calculates the maximum among the most recent prioritization fees in microlamports.
+ *
+ * It is useful to have an estimate of how much a transaction could cost to be processed without expiring.
+ */
+export const estimatePriorityFee = async ({
+	network,
+	addresses
+}: {
+	network: SolanaNetworkType;
+	addresses?: SolAddress[];
+}): Promise<bigint> => {
+	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
+	const fees = await getRecentPrioritizationFees(
+		nonNullish(addresses) ? addresses.map(address) : undefined
+	).send();
+
+	return fees.reduce<bigint>(
+		(max, { prioritizationFee: current }) => (BigInt(current) > max ? BigInt(current) : max),
+		0n
+	);
+};
+
+export const getTokenDecimals = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<number> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const token = solAddress(address);
+
+	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+
+	if (nonNullish(value) && 'parsed' in value.data) {
+		const {
+			data: {
+				parsed: { info }
+			}
+		} = value;
+
+		return nonNullish(info) && 'decimals' in info ? (info.decimals as number) : 0;
+	}
+
+	return 0;
 };

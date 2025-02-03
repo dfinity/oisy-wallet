@@ -5,13 +5,11 @@ import { nonNullish } from '@dfinity/utils';
 
 export const toastsShow = (msg: ToastMsg): symbol => toastsStore.show(msg);
 
-export const toastsError = ({
-	msg: { text, ...rest },
-	err
-}: {
+interface ToastsErrorParams {
 	msg: Omit<ToastMsg, 'level'>;
 	err?: unknown;
-}): symbol => {
+}
+export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams): symbol => {
 	if (nonNullish(err)) {
 		console.error(err);
 	}
@@ -20,6 +18,14 @@ export const toastsError = ({
 		text: `${text}${nonNullish(err) ? ` / ${errorDetailToString(err)}` : ''}`,
 		...rest,
 		level: 'error'
+	});
+};
+
+export const toastsErrorNoTrace = ({ msg, err }: ToastsErrorParams) => {
+	console.error(`${msg.text}:`, err);
+
+	return toastsError({
+		msg
 	});
 };
 
