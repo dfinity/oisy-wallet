@@ -173,7 +173,6 @@
 			identity: $authIdentity
 		});
 
-	// TODO: implement this function in the backend
 	const saveSpl = (tokens: SaveSplUserToken[]): Promise<void> =>
 		saveSplUserTokens({
 			tokens,
