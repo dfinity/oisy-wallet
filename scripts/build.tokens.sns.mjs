@@ -54,8 +54,11 @@ const querySnsAggregator = async (page = 0) => {
 };
 
 const saveLogos = async (logos) => {
-	const writeLogo = async ({ icon, ledgerCanisterId }) => {
-		const response = await fetch(icon);
+	const writeLogo = async ({ icon, ledgerCanisterId, rootCanisterId }) => {
+		// Use ledger icon and fallback on Sns icon if not existing
+		const response = await fetch(
+			nonNullish(icon) ? icon : `${AGGREGATOR_URL}/root/${rootCanisterId}/logo.png`
+		);
 
 		const blob = await response.blob();
 
@@ -65,7 +68,11 @@ const saveLogos = async (logos) => {
 		);
 	};
 
-	await Promise.all(logos.map(writeLogo));
+	const activeSnsLogos = logos.filter(({ rootCanisterId }) =>
+		isNullish(DEPRECATED_SNES[rootCanisterId])
+	);
+
+	await Promise.all(activeSnsLogos.map(writeLogo));
 };
 
 const mapOptionalToken = (response) => {
@@ -175,15 +182,11 @@ const findSnses = async () => {
 				],
 				icons: [
 					...icons,
-					...(isNullish(icon)
-						? []
-						: [
-								{
-									ledgerCanisterId,
-									rootCanisterId,
-									icon
-								}
-							])
+					{
+						ledgerCanisterId,
+						rootCanisterId,
+						icon
+					}
 				]
 			}),
 			{ tokens: [], icons: [] }
