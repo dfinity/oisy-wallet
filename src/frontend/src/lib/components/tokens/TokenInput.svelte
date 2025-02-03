@@ -4,20 +4,24 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher } from 'svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
-	import SwapInputContainer from '$lib/components/swap/SwapInputContainer.svelte';
-	import SwapInputCurrency from '$lib/components/swap/SwapInputCurrency.svelte';
+	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
+	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
+	import TokenInputCurrencyUsd from '$lib/components/tokens/TokenInputCurrencyUsd.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
-	export let name = 'swap-amount';
+	export let name = 'token-input';
+	export let displayUnit: DisplayUnit = 'token';
+	export let exchangeRate: number | undefined = undefined;
 	export let disabled = false;
 	export let placeholder = '0';
 	export let errorType: ConvertAmountErrorType = undefined;
@@ -63,21 +67,37 @@
 >
 	<div class="mb-2 text-sm font-bold"><slot name="title" /></div>
 
-	<SwapInputContainer {focused} styleClass="h-14 text-3xl" error={nonNullish(errorType)}>
+	<TokenInputContainer {focused} styleClass="h-14 text-3xl" error={nonNullish(errorType)}>
 		<div class="flex h-full w-full items-center">
 			{#if token}
-				<SwapInputCurrency
-					bind:value={amount}
-					{name}
-					{placeholder}
-					{disabled}
-					{loading}
-					decimals={token.decimals}
-					error={nonNullish(errorType)}
-					on:focus={onFocus}
-					on:blur={onBlur}
-					on:nnsInput={onInput}
-				/>
+				{#if displayUnit === 'token'}
+					<TokenInputCurrencyToken
+						bind:value={amount}
+						{name}
+						{placeholder}
+						{disabled}
+						{loading}
+						decimals={token.decimals}
+						error={nonNullish(errorType)}
+						on:focus={onFocus}
+						on:blur={onBlur}
+						on:nnsInput={onInput}
+					/>
+				{:else if displayUnit === 'usd'}
+					<TokenInputCurrencyUsd
+						bind:tokenAmount={amount}
+						tokenDecimals={token.decimals}
+						{exchangeRate}
+						{name}
+						{placeholder}
+						{disabled}
+						{loading}
+						error={nonNullish(errorType)}
+						on:focus={onFocus}
+						on:blur={onBlur}
+						on:nnsInput={onInput}
+					/>
+				{/if}
 			{:else}
 				<button on:click class="h-full w-full pl-3 text-base">{$i18n.swap.text.select_token}</button
 				>
@@ -101,7 +121,7 @@
 
 			<IconExpandMore />
 		</button>
-	</SwapInputContainer>
+	</TokenInputContainer>
 
 	<div class="mt-2 flex min-h-6 items-center justify-between text-sm">
 		<slot name="amount-info" />
