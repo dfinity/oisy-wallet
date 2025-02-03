@@ -21,7 +21,8 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 		...actual,
 		agents: {
 			...actual.agents,
-			getAgent: mock<HttpAgent>()
+			// eslint-disable-next-line require-await
+			getAgent: async () => mock<HttpAgent>()
 		} as unknown as AgentManager
 	};
 });
