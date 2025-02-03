@@ -12,3 +12,4 @@ src/frontend/src/env/tokens/tokens.*.json
 src/frontend/src/env/tokens/tokens-erc20/
 src/frontend/static/icons/sns/*
 src/frontend/src/**/*.svelte
+src/frontend/src/tests/**/*.spec.ts
