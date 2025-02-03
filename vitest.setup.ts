@@ -4,6 +4,7 @@ import {
 	failTestsThatLogToConsole
 } from '$tests/utils/console.test-utils';
 import { HttpAgent } from '@dfinity/agent';
+import { AgentManager } from '@dfinity/utils';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
 import 'fake-indexeddb/auto';
@@ -18,8 +19,10 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
+		agents: {
+			...actual.agents,
+			getAgent: mock<HttpAgent>()
+		} as unknown as AgentManager
 	};
 });
 
