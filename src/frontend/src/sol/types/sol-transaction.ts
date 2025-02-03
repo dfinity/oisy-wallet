@@ -2,6 +2,7 @@ import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import type { SplTokenAddress } from '$sol/types/spl';
 import type { Address } from '@solana/addresses';
 import type { GetSignaturesForAddressApi } from '@solana/rpc';
 import type { Commitment } from '@solana/rpc-types';
@@ -17,6 +18,7 @@ export type SolTransactionType = Extract<
 
 export interface SolTransactionUi extends TransactionUiCommon {
 	id: string;
+	signature: string;
 	type: SolTransactionType;
 	status: Commitment | null;
 	value?: bigint;
@@ -49,6 +51,11 @@ export type SolRpcTransaction = SolRpcTransactionRaw & {
 	confirmationStatus: Commitment | null;
 };
 
+export type SolRpcInstruction =
+	NonNullable<SolRpcTransactionRaw>['transaction']['message']['instructions'][number] & {
+		programAddress: Address;
+	};
+
 export type SolSignature = ReturnType<
 	GetSignaturesForAddressApi['getSignaturesForAddress']
 >[number];
@@ -60,4 +67,11 @@ export interface MappedSolTransaction {
 	payer?: SolAddress;
 	source?: SolAddress;
 	destination?: SolAddress;
+}
+
+export interface MappedSolTransactionNew {
+	value: bigint | undefined;
+	from: SolAddress;
+	to: SolAddress;
+	tokenAddress?: SplTokenAddress;
 }

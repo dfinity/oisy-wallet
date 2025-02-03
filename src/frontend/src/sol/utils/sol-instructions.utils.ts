@@ -1,8 +1,12 @@
+import type { SolAddress } from '$lib/types/address';
 import {
+	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import type { SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolInstruction,
 	SolParsedComputeBudgetInstruction,
@@ -10,7 +14,13 @@ import type {
 	SolParsedSystemInstruction,
 	SolParsedTokenInstruction
 } from '$sol/types/sol-instructions';
-import type { MappedSolTransaction } from '$sol/types/sol-transaction';
+import type {
+	MappedSolTransaction,
+	MappedSolTransactionNew,
+	SolRpcInstruction
+} from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	ComputeBudgetInstruction,
 	identifyComputeBudgetInstruction,
@@ -66,6 +76,7 @@ import {
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction
 } from '@solana-program/token';
+import { address } from '@solana/addresses';
 import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/instructions';
 
 const parseSolComputeBudgetInstruction = (
@@ -103,6 +114,141 @@ const parseSolComputeBudgetInstruction = (
 		default:
 			return instruction;
 	}
+};
+
+export const mapSolParsedInstruction = async ({
+	instruction,
+	network,
+	innerInstructions
+}: {
+	instruction: SolRpcInstruction;
+	network: SolanaNetworkType;
+	innerInstructions?: SolRpcInstruction[];
+}): Promise<MappedSolTransactionNew | undefined> => {
+	if (!('parsed' in instruction)) {
+		return;
+	}
+
+	const {
+		parsed: { type, info },
+		programAddress
+	} = instruction;
+
+	if (isNullish(info)) {
+		return;
+	}
+
+	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
+		if (type === 'transfer') {
+			// We need to cast the type since it is not implied
+			const {
+				destination: to,
+				lamports: value,
+				source: from
+			} = info as {
+				destination: SolAddress;
+				lamports: bigint;
+				source: SolAddress;
+			};
+
+			return { value, from, to };
+		}
+	}
+
+	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
+		if (type === 'transfer') {
+			// We need to cast the type since it is not implied
+			const {
+				destination,
+				amount: value,
+				authority: from,
+				source
+			} = info as {
+				destination: SolAddress;
+				amount: string;
+				authority: SolAddress;
+				source: SolAddress;
+			};
+
+			const { getAccountInfo } = solanaHttpRpc(network);
+
+			const { value: sourceResult } = await getAccountInfo(address(source), {
+				encoding: 'jsonParsed'
+			}).send();
+
+			const { value: destinationResult } = await getAccountInfo(address(destination), {
+				encoding: 'jsonParsed'
+			}).send();
+
+			if (
+				nonNullish(sourceResult) &&
+				'parsed' in sourceResult.data &&
+				nonNullish(destinationResult) &&
+				'parsed' in destinationResult.data
+			) {
+				const {
+					data: {
+						parsed: { info: sourceAccoutInfo }
+					}
+				} = sourceResult;
+
+				const { mint: tokenAddress, owner: from } = sourceAccoutInfo as {
+					mint: SplTokenAddress;
+					owner: SolAddress;
+				};
+
+				const {
+					data: {
+						parsed: { info: destinationAccoutInfo }
+					}
+				} = destinationResult;
+
+				const { owner: to } = destinationAccoutInfo as {
+					owner: SolAddress;
+				};
+
+				return { value: BigInt(value), from, to, tokenAddress };
+			}
+
+			return;
+		}
+	}
+
+	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
+		if (type === 'create' || type === 'createIdempotent') {
+			if (isNullish(innerInstructions) || innerInstructions.length < 0) {
+				return;
+			}
+
+			const valueInnerInstruction = innerInstructions.find(
+				(instruction) => 'parsed' in instruction && instruction.parsed.type === 'createAccount'
+			);
+
+			if (isNullish(valueInnerInstruction) || !('parsed' in valueInnerInstruction)) {
+				return;
+			}
+
+			// We need to cast the type since it is not implied
+			const {
+				source: from,
+				newAccount: to,
+				lamports: value
+			} = valueInnerInstruction.parsed.info as {
+				source: SolAddress;
+				newAccount: SolAddress;
+				lamports: bigint;
+			};
+
+			return { value, from, to };
+		}
+	}
+
+	// It is useful to receive feedback when we are not able to map an instruction
+	console.warn(
+		`Could not map Solana instruction of type ${type} for program ${programAddress}: ${JSON.stringify(instruction)}`
+	);
+
+	return;
 };
 
 const parseSolSystemInstruction = (
@@ -349,20 +495,24 @@ export const parseSolInstruction = (
 	return instruction;
 };
 
-const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+const mapSolSystemInstruction = (
+	instruction: SolParsedInstruction
+): MappedSolTransaction | undefined => {
 	const { instructionType } = instruction;
 
 	if (instructionType === SystemInstruction.CreateAccount) {
 		const {
 			data: { lamports },
 			accounts: {
-				payer: { address: payer }
+				payer: { address: source },
+				newAccount: { address: destination }
 			}
 		} = instruction;
 
 		return {
 			amount: lamports,
-			payer
+			source,
+			destination
 		};
 	}
 
@@ -375,23 +525,40 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 			}
 		} = instruction;
 
-		return {
-			amount,
-			source,
-			destination
-		};
+		return { amount, source, destination };
 	}
 
-	return { amount: undefined };
+	return;
 };
 
-// TODO: find a way to map correctly all the transaction message instructions
+const mapSolTokenInstruction = (
+	instruction: SolParsedInstruction
+): MappedSolTransaction | undefined => {
+	const { instructionType } = instruction;
+
+	if (instructionType === TokenInstruction.Transfer) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return { amount, source, destination };
+	}
+
+	return;
+};
+
 // TODO: create tests
-export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+export const mapSolInstruction = (
+	instruction: SolInstruction
+): MappedSolTransaction | undefined => {
 	const parsedInstruction = parseSolInstruction(instruction);
 
 	if (!('instructionType' in parsedInstruction)) {
-		return { amount: undefined };
+		return;
 	}
 
 	const { programAddress } = parsedInstruction;
@@ -400,5 +567,9 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolSystemInstruction(parsedInstruction);
 	}
 
-	return { amount: undefined };
+	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
+		return mapSolTokenInstruction(parsedInstruction);
+	}
+
+	return;
 };

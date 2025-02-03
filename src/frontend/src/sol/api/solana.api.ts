@@ -3,11 +3,10 @@ import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import { fetchSolTransactions } from '$sol/services/sol-transactions.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
-import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
-import { getSplBalanceChange } from '$sol/utils/spl-transactions.utils';
+import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address, assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
@@ -79,7 +78,7 @@ export const getSolTransactions = async ({
 	network,
 	before,
 	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams): Promise<SolRpcTransaction[]> => {
+}: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
 	const wallet = solAddress(address);
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
 	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
@@ -87,16 +86,10 @@ export const getSolTransactions = async ({
 	const transactions = await signatures.reduce(
 		async (accPromise, signature) => {
 			const acc = await accPromise;
-			const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
-			if (
-				nonNullish(transactionDetail) &&
-				getSolBalanceChange({ transaction: transactionDetail, address })
-			) {
-				acc.push(transactionDetail);
-			}
-			return acc;
+			const parsedTransactions = await fetchSolTransactions({ signature, network, address });
+			return [...acc, ...parsedTransactions];
 		},
-		Promise.resolve([] as SolRpcTransaction[])
+		Promise.resolve([] as SolTransactionUi[])
 	);
 
 	return transactions.slice(0, limit);
@@ -216,55 +209,22 @@ export const getSplTransactions = async ({
 }): Promise<SolRpcTransaction[]> => {
 	assertIsAddress(tokenAddress);
 
-	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
-	const relevantTokenAddress = solAddress(tokenAddress);
 	const wallet = solAddress(address);
-
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
-
-	const tokenAccounts = await getTokenAccountsByOwner(
-		wallet,
-		{
-			mint: relevantTokenAddress
-		},
-		{ encoding: 'jsonParsed' }
-	).send();
-
-	const signatures = (
-		await Promise.all(
-			tokenAccounts.value.map(({ pubkey }) =>
-				fetchSignatures({
-					network,
-					wallet: solAddress(pubkey),
-					before: beforeSignature,
-					limit
-				})
-			)
-		)
-	).flat();
+	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
 
 	const transactions = await signatures.reduce(
-		async (accPromise, sig) => {
+		async (accPromise, signature) => {
 			const acc = await accPromise;
-			const transactionDetail = await fetchTransactionDetailForSignature({
-				signature: sig,
-				network
+			const parsedTransactions = await fetchSolTransactions({
+				signature,
+				network,
+				address,
+				tokenAddress
 			});
-
-			if (
-				nonNullish(transactionDetail) &&
-				//TODO handle self sending
-				getSplBalanceChange({
-					transaction: transactionDetail,
-					tokenAddress,
-					address
-				}) > 0
-			) {
-				acc.push(transactionDetail);
-			}
-			return acc;
+			return [...acc, ...parsedTransactions];
 		},
-		Promise.resolve([] as SolRpcTransaction[])
+		Promise.resolve([] as SolTransactionUi[])
 	);
 
 	return transactions.slice(0, limit);
