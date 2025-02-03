@@ -3,7 +3,6 @@
 	import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
 	import IconMoveDown from '$lib/components/icons/lucide/IconMoveDown.svelte';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { DisplayUnit } from '$lib/types/swap';
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
