@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token } from '$lib/types/token';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -40,6 +41,7 @@
 	bind:filter
 	noMatch={noTokensMatch}
 	placeholder={$i18n.tokens.placeholder.search_token}
+	autofocus={isDesktop()}
 />
 
 <div class="my-6 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
