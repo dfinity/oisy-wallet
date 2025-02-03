@@ -1,7 +1,6 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
-import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { listCustomTokens, setManyCustomTokens } from '$lib/api/backend.api';
@@ -30,7 +29,6 @@ import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -39,7 +37,6 @@ export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }):
 
 const loadDefaultSplTokens = (): ResultSuccess => {
 	try {
-    
 		splDefaultTokensStore.set(SPL_TOKENS);
 	} catch (err: unknown) {
 		splDefaultTokensStore.reset();
