@@ -2,23 +2,22 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
-	import ConvertInputAmount from '$lib/components/convert/ConvertInputAmount.svelte';
-	import ConvertInputsContainer from '$lib/components/convert/ConvertInputsContainer.svelte';
-	import ConvertToken from '$lib/components/convert/ConvertToken.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import { validateConvertAmount } from '$lib/utils/convert.utils';
-	import { formatUSD } from '$lib/utils/format.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let sendAmount: OptionAmount = undefined;
 	export let totalFee: bigint | undefined;
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
+	export let exchangeValueUnit: DisplayUnit = 'usd';
+	export let inputUnit: DisplayUnit = 'token';
 
 	let errorType: ConvertAmountErrorType = undefined;
 
@@ -69,42 +68,35 @@
 		debounce(() => setMax(), 500)();
 	};
 	$: totalFee, debounceSetMax();
-
-	let convertAmountUSD: number;
-	$: convertAmountUSD =
-		nonNullish(sendAmount) && nonNullish($sourceTokenExchangeRate)
-			? Number(sendAmount) * $sourceTokenExchangeRate
-			: 0;
 </script>
 
-<ConvertInputsContainer>
-	<ConvertToken slot="token-info" token={$sourceToken} />
-	<ConvertInputAmount
-		slot="amount"
-		token={$sourceToken}
-		bind:amount={sendAmount}
-		{customValidate}
-		disabled={isZeroBalance}
-		bind:errorType
-		bind:amountSetToMax
-	/>
-
-	<div slot="amount-info" data-tid="convert-amount-source-amount-info">
-		{#if insufficientFunds}
-			<div transition:slide={SLIDE_DURATION} class="text-sm text-error">
-				{$i18n.convert.assertion.insufficient_funds}
-			</div>
-		{:else}
-			<div transition:slide={SLIDE_DURATION}>
-				{formatUSD({ value: convertAmountUSD })}
-			</div>
-		{/if}
+<TokenInput
+	bind:amount={sendAmount}
+	displayUnit={inputUnit}
+	exchangeRate={$sourceTokenExchangeRate}
+	bind:errorType
+	bind:amountSetToMax
+	token={$sourceToken}
+	isSelectable={false}
+	{customValidate}
+>
+	<div slot="amount-info" class="text-tertiary">
+		<TokenInputAmountExchange
+			amount={sendAmount}
+			exchangeRate={$sourceTokenExchangeRate}
+			token={$sourceToken}
+			bind:displayUnit={exchangeValueUnit}
+		/>
 	</div>
 
 	<button
-		slot="balance"
-		class={`rounded px-2 py-0.5 transition-all ${isZeroBalance ? 'bg-error-subtle-alt text-error' : isNullish(maxAmount) ? 'animate-pulse bg-disabled text-tertiary' : 'bg-brand-subtle text-brand-primary'}`}
 		on:click|preventDefault={setMax}
+		slot="balance"
+		class="font-semibold transition-all"
+		class:text-brand-primary={!isZeroBalance && isNullish(errorType) && nonNullish(maxAmount)}
+		class:text-error={isZeroBalance || nonNullish(errorType)}
+		class:text-tertiary={isNullish(maxAmount)}
+		class:animate-pulse={isNullish(maxAmount)}
 		data-tid="convert-amount-source-balance"
 	>
 		{$i18n.convert.text.max_balance}:
@@ -112,4 +104,4 @@
 			? `${maxAmount} ${$sourceToken.symbol}`
 			: $i18n.convert.text.calculating_max_amount}
 	</button>
-</ConvertInputsContainer>
+</TokenInput>
