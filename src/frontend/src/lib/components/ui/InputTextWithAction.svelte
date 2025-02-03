@@ -29,7 +29,7 @@
 	autocomplete="off"
 	{testId}
 	on:nnsInput
-	bind:inputElement={inputElement}
+	bind:inputElement
 >
 	<slot name="inner-end" slot="inner-end" />
 </Input>
