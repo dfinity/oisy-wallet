@@ -1,5 +1,9 @@
-import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
-import type { IcrcSaveCustomToken, SaveCustomTokenWithKey } from '$lib/types/custom-token';
+import type { CustomToken, IcrcToken, SplToken } from '$declarations/backend/backend.did';
+import type {
+	IcrcSaveCustomToken,
+	SaveCustomTokenWithKey,
+	SplSaveCustomToken
+} from '$lib/types/custom-token';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
 
@@ -13,12 +17,28 @@ const toIcrcCustomToken = ({
 	)
 });
 
+const toSplCustomToken = ({
+	address: token_address,
+	decimals,
+	symbol
+}: SplSaveCustomToken): SplToken => ({
+	token_address,
+	decimals: toNullable(decimals),
+	symbol: toNullable(symbol)
+});
+
 export const toCustomToken = ({
 	enabled,
 	version,
+	networkKey,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => ({
 	enabled,
 	version: toNullable(version),
-	token: { Icrc: toIcrcCustomToken(rest as IcrcSaveCustomToken) }
+	token:
+		networkKey === 'Icrc'
+			? { Icrc: toIcrcCustomToken(rest as IcrcSaveCustomToken) }
+			: networkKey === 'SplMainnet'
+				? { SplMainnet: toSplCustomToken(rest as SplSaveCustomToken) }
+				: { SplDevnet: toSplCustomToken(rest as SplSaveCustomToken) }
 });

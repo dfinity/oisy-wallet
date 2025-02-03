@@ -14,6 +14,27 @@ describe('custom-token.utils', () => {
 			version: [1n]
 		};
 
+		it('should convert to CustomToken with nullish version', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					version: undefined,
+					networkKey: 'Icrc',
+					ledgerCanisterId: mockLedgerCanisterId,
+					indexCanisterId: mockIndexCanisterId
+				})
+			).toEqual({
+				...partialExpected,
+				version: [],
+				token: {
+					Icrc: {
+						ledger_id: Principal.fromText(mockLedgerCanisterId),
+						index_id: [Principal.fromText(mockIndexCanisterId)]
+					}
+				}
+			});
+		});
+
 		it('should return correct type for Icrc network', () => {
 			const networkKey = 'Icrc';
 
@@ -51,22 +72,43 @@ describe('custom-token.utils', () => {
 			});
 		});
 
-		it('should convert to CustomToken with nullish version', () => {
+		it('should return correct type for SplMainnet network', () => {
 			expect(
 				toCustomToken({
 					...mockParams,
-					version: undefined,
-					networkKey: 'Icrc',
-					ledgerCanisterId: mockLedgerCanisterId,
-					indexCanisterId: mockIndexCanisterId
+					networkKey: 'SplMainnet',
+					address: 'mock-token-address',
+					decimals: 8,
+					symbol: 'mock-symbol'
 				})
 			).toEqual({
 				...partialExpected,
-				version: [],
 				token: {
-					Icrc: {
-						ledger_id: Principal.fromText(mockLedgerCanisterId),
-						index_id: [Principal.fromText(mockIndexCanisterId)]
+					SplMainnet: {
+						token_address: 'mock-token-address',
+						decimals: [8],
+						symbol: ['mock-symbol']
+					}
+				}
+			});
+		});
+
+		it('should return correct type for SplDevnet network', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'SplDevnet',
+					address: 'mock-token-address',
+					decimals: 8,
+					symbol: 'mock-symbol'
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					SplDevnet: {
+						token_address: 'mock-token-address',
+						decimals: [8],
+						symbol: ['mock-symbol']
 					}
 				}
 			});
