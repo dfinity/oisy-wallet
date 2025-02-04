@@ -33,7 +33,7 @@ export const isRouteActivity = ({ route: { id } }: Page): boolean =>
 export const isRouteTokens = ({ route: { id } }: Page): boolean =>
 	id === ROUTE_ID_GROUP_APP || id === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 
-export const isRouteAirdrops = ({ route: {id}}: Page): boolean =>
+export const isRouteAirdrops = ({ route: { id } }: Page): boolean =>
 	id === `${ROUTE_ID_GROUP_APP}${AppPath.Airdrops}`;
 
 const tokenUrl = ({

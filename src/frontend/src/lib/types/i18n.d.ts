@@ -111,9 +111,7 @@ interface I18nAirdrops {
 	text: {
 		title: string;
 	};
-	alt: {
-
-	};
+	alt: {};
 }
 
 interface I18nFooter {
