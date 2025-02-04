@@ -5,9 +5,15 @@ import { pageToken } from '$lib/derived/page-token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { derived } from 'svelte/store';
+import { derived, type Readable } from 'svelte/store';
+import type { IcToken } from '$icp/types/ic-token';
 
-const selectedSwappableToken = derived(
+export interface SwappableTokens {
+	sourceToken: IcToken | undefined;
+	destinationToken: IcToken | undefined;
+}
+
+const selectedSwappableToken: Readable<IcToken | undefined> = derived(
 	[pageToken, allKongSwapCompatibleIcrcTokens],
 	([$pageToken, $allKongSwapCompatibleIcrcTokens]) => {
 		if (nonNullish($pageToken) && isIcToken($pageToken)) {
@@ -26,7 +32,7 @@ const selectedSwappableToken = derived(
 	}
 );
 
-export const swappableTokens = derived(
+export const swappableTokens: Readable<SwappableTokens> = derived(
 	[balancesStore, selectedSwappableToken],
 	([$balancesStore, $selectedSwappableToken]) => {
 		const selectedToken = $selectedSwappableToken;
