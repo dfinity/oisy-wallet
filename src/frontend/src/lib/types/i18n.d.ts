@@ -402,7 +402,6 @@ interface I18nSwap {
 		switch_tokens_button: string;
 		review: string;
 		review_button: string;
-		select_token: string;
 		max_slippage: string;
 		max_balance: string;
 		not_available: string;
@@ -416,7 +415,6 @@ interface I18nSwap {
 		max_slippage_error: string;
 		swap_button: string;
 		swap_is_not_offered: string;
-		exchange_is_not_available: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
@@ -445,6 +443,8 @@ interface I18nTokens {
 		updating_ui: string;
 		show_token: string;
 		hide_token: string;
+		select_token: string;
+		exchange_is_not_available: string;
 	};
 	details: {
 		title: string;

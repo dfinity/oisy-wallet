@@ -440,7 +440,6 @@
 			"switch_tokens_button": "Switch tokens",
 			"review": "Review transaction",
 			"review_button": "Review swap",
-			"select_token": "Select token",
 			"max_slippage": "Max slippage",
 			"max_balance": "Max",
 			"not_available": "n/a",
@@ -454,7 +453,6 @@
 			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
 			"swap_button": "Swap now",
 			"swap_is_not_offered": "This swap is currently not offered.",
-			"exchange_is_not_available": "USD value is currently not available.",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
@@ -488,7 +486,9 @@
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
 			"show_token": "Show token",
-			"hide_token": "Hide token"
+			"hide_token": "Hide token",
+			"select_token": "Select token",
+			"exchange_is_not_available": "USD value is currently not available."
 		},
 		"details": {
 			"title": "Token details",
