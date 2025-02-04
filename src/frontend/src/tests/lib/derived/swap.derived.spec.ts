@@ -1,10 +1,10 @@
-import { describe } from 'vitest';
-import { swappableTokens } from '$lib/derived/swap.derived';
-import { get } from 'svelte/store';
-import { mockPage } from '$tests/mocks/page.store.mock';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { BigNumber } from 'alchemy-sdk';
+import { swappableTokens } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { mockPage } from '$tests/mocks/page.store.mock';
+import { BigNumber } from 'alchemy-sdk';
+import { get } from 'svelte/store';
+import { describe } from 'vitest';
 
 describe('swap.derived', () => {
 	describe('swappableTokens', () => {

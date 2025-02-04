@@ -1,4 +1,5 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
@@ -6,7 +7,6 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
-import type { IcToken } from '$icp/types/ic-token';
 
 export interface SwappableTokens {
 	sourceToken: IcToken | undefined;
