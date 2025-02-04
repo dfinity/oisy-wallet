@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
-	import SwapReviewTokens from '$lib/components/swap/SwapReviewTokens.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
+	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -19,13 +19,20 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sourceTokenExchangeRate, destinationTokenExchangeRate } =
+	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
 	<div slot="outer-content" class="mx-6 mb-12">
-		<SwapReviewTokens {swapAmount} {receiveAmount} />
+		<TokensReview
+			sendAmount={swapAmount}
+			{receiveAmount}
+			sourceToken={$sourceToken}
+			destinationToken={$destinationToken}
+			sourceTokenExchangeRate={$sourceTokenExchangeRate}
+			destinationTokenExchangeRate={$destinationTokenExchangeRate}
+		/>
 
 		{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 			<ModalValue>
