@@ -435,8 +435,6 @@
 			"swap": "Swap",
 			"select_destination_token": "Select token to receive",
 			"select_source_token": "Select token to pay",
-			"select_source_token_title": "You pay",
-			"select_destination_token_title": "You receive",
 			"switch_tokens_button": "Switch tokens",
 			"review": "Review transaction",
 			"review_button": "Review swap",
@@ -488,7 +486,9 @@
 			"show_token": "Show token",
 			"hide_token": "Hide token",
 			"select_token": "Select token",
-			"exchange_is_not_available": "USD value is currently not available."
+			"exchange_is_not_available": "USD value is currently not available.",
+			"source_token_title": "You pay",
+			"destination_token_title": "You receive"
 		},
 		"details": {
 			"title": "Token details",

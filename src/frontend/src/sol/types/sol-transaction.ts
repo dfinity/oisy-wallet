@@ -69,7 +69,7 @@ export interface MappedSolTransaction {
 	destination?: SolAddress;
 }
 
-export interface MappedSolTransactionNew {
+export interface SolMappedTransaction {
 	value: bigint | undefined;
 	from: SolAddress;
 	to: SolAddress;
