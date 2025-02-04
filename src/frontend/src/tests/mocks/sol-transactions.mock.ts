@@ -13,6 +13,7 @@ import type {
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
+import { signature } from '@solana/keys';
 import {
 	blockhash,
 	lamports,
@@ -22,11 +23,19 @@ import {
 } from '@solana/rpc-types';
 import type { TransactionMessageBytes } from '@solana/transactions';
 
+const mockSignature =
+	'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM';
+const mockSignature2 =
+	'4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc';
+const mockSignature3 =
+	'2cg1qDf4swkfKiZDJTDGxHaiN2LBLLeVM7E87yLjUTpAcCp2rq8mxR2mtvjMU97JcmkiTE8QkB8vNWN1mtrTT2bc';
+
 export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
 	Array.from({ length: n }, () => createMockSolTransactionUi(`txn-${n}`));
 
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
+	signature: signature(mockSignature),
 	timestamp: 0n,
 	type: 'send',
 	value: BigInt(100),
@@ -38,7 +47,8 @@ export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 	blockTime: 1736257946n as UnixTimestamp,
 	confirmationStatus: 'finalized',
-	id: '4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM',
+	id: mockSignature,
+	signature: signature(mockSignature),
 	meta: {
 		computeUnitsConsumed: 150n,
 		err: null,
@@ -93,9 +103,7 @@ export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 			],
 			recentBlockhash: blockhash('ARU13JbajMAevpuyAdaUEg2Fx4eb7H46wMqga2w5F6me')
 		},
-		signatures: [
-			'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM'
-		] as Base58EncodedBytes[]
+		signatures: [mockSignature] as Base58EncodedBytes[]
 	},
 	version: 'legacy'
 };
@@ -103,7 +111,8 @@ export const mockSolRpcReceiveTransaction: SolRpcTransaction = {
 export const mockSolRpcSendTransaction: SolRpcTransaction = {
 	blockTime: 1736256974n as UnixTimestamp,
 	confirmationStatus: 'finalized',
-	id: '4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc',
+	id: mockSignature2,
+	signature: signature(mockSignature2),
 	meta: {
 		computeUnitsConsumed: 450n,
 		err: null,
@@ -180,9 +189,7 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 			],
 			recentBlockhash: blockhash('Hz2ewskR9apeDBd9i38tYLATZgHujbjnp9AuRDSQuZB7')
 		},
-		signatures: [
-			'4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc'
-		] as Base58EncodedBytes[]
+		signatures: [mockSignature2] as Base58EncodedBytes[]
 	},
 	version: 'legacy'
 };
@@ -190,7 +197,8 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
 	blockTime: 1736329927n as UnixTimestamp,
 	confirmationStatus: 'finalized',
-	id: '2cg1qDf4swkfKiZDJTDGxHaiN2LBLLeVM7E87yLjUTpAcCp2rq8mxR2mtvjMU97JcmkiTE8QkB8vNWN1mtrTT2bc',
+	id: mockSignature3,
+	signature: signature(mockSignature3),
 	meta: {
 		computeUnitsConsumed: 450n,
 		err: null,
@@ -258,9 +266,7 @@ export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
 			],
 			recentBlockhash: blockhash('Cp5CeDEfmtwQKKenDaiewY2wNuZJmEAJvSMV5kpFoFm3')
 		},
-		signatures: [
-			'2cg1qDf4swkfKiZDJTDGxHaiN2LBLLeVM7E87yLjUTpAcCp2rq8mxR2mtvjMU97JcmkiTE8QkB8vNWN1mtrTT2bc'
-		] as Base58EncodedBytes[]
+		signatures: [mockSignature3] as Base58EncodedBytes[]
 	},
 	version: 'legacy'
 };
