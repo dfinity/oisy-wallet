@@ -47,6 +47,7 @@ export const mapSolTransactionUi = ({
 }: TransactionWithAddress): SolTransactionUi => {
 	const {
 		id,
+		signature,
 		blockTime,
 		confirmationStatus: status,
 		transaction: {
@@ -73,6 +74,7 @@ export const mapSolTransactionUi = ({
 
 	return {
 		id,
+		signature,
 		timestamp: blockTime ?? 0n,
 		from: from.pubkey,
 		to: to?.pubkey,

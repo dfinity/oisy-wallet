@@ -42,6 +42,7 @@ export const mapSplTransactionUi = ({
 }: SplInfo): SolTransactionUi => {
 	const {
 		id,
+		signature,
 		blockTime,
 		confirmationStatus: status,
 		transaction: {
@@ -67,6 +68,7 @@ export const mapSplTransactionUi = ({
 
 	return {
 		id,
+		signature,
 		timestamp: blockTime ?? 0n,
 		from: from.pubkey,
 		to: to?.pubkey,
