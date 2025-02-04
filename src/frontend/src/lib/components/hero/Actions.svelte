@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/stores';
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
@@ -27,6 +28,7 @@
 		networkId,
 		networkSolana
 	} from '$lib/derived/network.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
@@ -48,10 +50,14 @@
 	$: isTransactionsPage = isRouteTransactions($page);
 
 	let swapAction = false;
-	$: swapAction = SWAP_ACTION_ENABLED && !isTransactionsPage;
+	$: swapAction =
+		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP));
 
 	let sendAction = true;
 	$: sendAction = !$allBalancesZero || isTransactionsPage;
+
+	let buyAction = true;
+	$: buyAction = !$networkICP || nonNullish($pageToken?.buy);
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10">
@@ -102,6 +108,8 @@
 			{/if}
 		{/if}
 
-		<Buy />
+		{#if buyAction}
+			<Buy />
+		{/if}
 	</HeroButtonGroup>
 </div>
