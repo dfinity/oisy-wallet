@@ -4,7 +4,6 @@
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
-	import { BTC_TO_CKBTC_EXCHANGE_ENABLED } from '$env/networks/networks.btc.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -44,7 +43,7 @@
 	$: convertCkBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = BTC_TO_CKBTC_EXCHANGE_ENABLED && isNetworkIdBTCMainnet($networkId);
+	$: convertBtc = isNetworkIdBTCMainnet($networkId);
 
 	let isTransactionsPage = false;
 	$: isTransactionsPage = isRouteTransactions($page);
