@@ -15,11 +15,11 @@ import type {
 	SolParsedTokenInstruction,
 	SolRpcInstruction
 } from '$sol/types/sol-instructions';
-import type {MappedSolTransaction,
+import type {
+	MappedSolTransaction,
 	MappedSolTransactionNew,
-	SolRpcInstruction
+	SolMappedTransaction
 } from '$sol/types/sol-transaction';
-import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
