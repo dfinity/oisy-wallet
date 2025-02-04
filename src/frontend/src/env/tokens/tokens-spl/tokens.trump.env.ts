@@ -19,5 +19,8 @@ export const TRUMP_TOKEN: RequiredSplToken = {
 	symbol: TRUMP_SYMBOL,
 	decimals: TRUMP_DECIMALS,
 	icon: trump,
-	address: '6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN'
+	address: '6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN',
+	buy: {
+		onramperId: 'trump_solana'
+	}
 };
