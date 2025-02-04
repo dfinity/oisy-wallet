@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Publish Release Notes
-        if: {{ github.ref_type == 'tag' }}
+        if: { { github.ref_type == 'tag' } }
         uses: .github/actions/release-notes
         with:
           tag: github.ref_name
