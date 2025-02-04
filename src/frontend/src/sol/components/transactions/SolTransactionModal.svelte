@@ -24,7 +24,7 @@
 	let explorerUrl: string | undefined;
 	$: explorerUrl = isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined;
 
-	$: ({ from, value, timestamp, id, blockNumber, to, type, status } = transaction);
+	$: ({ from, value, timestamp, signature: id, blockNumber, to, type, status } = transaction);
 
 	let txExplorerUrl: string | undefined;
 	$: txExplorerUrl = nonNullish(explorerUrl)
