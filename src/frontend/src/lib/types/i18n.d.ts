@@ -397,8 +397,6 @@ interface I18nSwap {
 		swap: string;
 		select_destination_token: string;
 		select_source_token: string;
-		select_source_token_title: string;
-		select_destination_token_title: string;
 		switch_tokens_button: string;
 		review: string;
 		review_button: string;
@@ -445,6 +443,8 @@ interface I18nTokens {
 		hide_token: string;
 		select_token: string;
 		exchange_is_not_available: string;
+		source_token_title: string;
+		destination_token_title: string;
 	};
 	details: {
 		title: string;
