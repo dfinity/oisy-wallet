@@ -3,11 +3,12 @@ import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
-import { isNetworkIdSOLDevnet, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
+import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
-	SPL_USER_TOKENS_KEY,splUserTokensStore,
+	SPL_USER_TOKENS_KEY,
+	splUserTokensStore,
 	type SplAddressMap
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
