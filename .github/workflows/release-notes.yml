@@ -21,3 +21,5 @@ jobs:
         uses: ./.github/actions/release-notes
         with:
           tag: github.ref_name
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
