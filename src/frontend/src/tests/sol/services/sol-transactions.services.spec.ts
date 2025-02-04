@@ -1,7 +1,10 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as solanaApi from '$sol/api/solana.api';
-import * as solTransactionsServices from '$sol/services/sol-transactions.services';
-import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
+import * as solSignaturesServices from '$sol/services/sol-signatures.services';
+import {
+	fetchSolTransactionsForSignature,
+	loadNextSolTransactions
+} from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type {
@@ -11,7 +14,6 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
-import * as solTransactionsUtils from '$sol/utils/sol-transactions.utils';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
 	mockSolCertifiedTransactions,
@@ -20,18 +22,23 @@ import {
 } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { get } from 'svelte/store';
-import { vi, type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 describe('sol-transactions.services', () => {
+	let spyGetTransactions: MockInstance;
+	const signalEnd = vi.fn();
+
+	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction];
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.resetAllMocks();
-		vi.restoreAllMocks();
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
+		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
 	});
 
-	describe('fetchSolTransactionsForSignature', async () => {
+	describe('fetchSolTransactionsForSignature', () => {
 		const network: SolanaNetworkType = 'mainnet';
 		const mockSignature: SolSignature = mockSolSignatureResponse();
 		const mockParams = {
@@ -190,46 +197,6 @@ describe('sol-transactions.services', () => {
 	});
 
 	describe('loadNextSolTransactions', () => {
-		let spyMapSolTransactionUi: MockInstance;
-		let spyFetchTransactionDetailForSignature: MockInstance;
-		let spyGetTransactions: MockInstance;
-
-		const signalEnd = vi.fn();
-
-		const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction];
-
-		const mockSolTransactionUi: SolTransactionUi = {
-			id: mockSolRpcSendTransaction.signature,
-			signature: mockSolRpcSendTransaction.signature,
-			timestamp: mockSolRpcSendTransaction.blockTime ?? 0n,
-			value: 123n,
-			from: mockSolAddress,
-			to: mockSolAddress2,
-			type: 'send',
-			status: mockSolRpcSendTransaction.confirmationStatus
-		};
-
-		beforeEach(() => {
-			spyMapSolTransactionUi = vi
-				.spyOn(solTransactionsUtils, 'mapSolTransactionUi')
-				.mockResolvedValueOnce(mockSolTransactionUi)
-				.mockResolvedValueOnce({
-					...mockSolTransactionUi,
-					id: mockSolRpcReceiveTransaction.signature,
-					signature: mockSolRpcReceiveTransaction.signature,
-					value: 456n,
-					from: mockSolAddress2,
-					to: mockSolAddress,
-					type: 'receive'
-				});
-
-			spyGetTransactions = vi
-				.spyOn(solTransactionsServices, 'getSolTransactions')
-				.mockImplementation(vi.fn());
-
-			// ({ loadNextSolTransactions } = solTransactionsServices);
-		});
-
 		it('should load and return transactions successfully', async () => {
 			spyGetTransactions.mockResolvedValue(mockTransactions);
 
@@ -282,7 +249,7 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should append transactions to the store', async () => {
-			spyGetTransactions.mockReturnValue(mockTransactions);
+			spyGetTransactions.mockResolvedValue(mockTransactions);
 
 			await loadNextSolTransactions({
 				address: mockSolAddress,
