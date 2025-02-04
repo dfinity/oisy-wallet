@@ -144,17 +144,18 @@ const fetchSignatures = async ({
 	return await fetchSignaturesBatch(before);
 };
 
-const fetchTransactionDetailForSignature = async ({
+export const fetchTransactionDetailForSignature = async ({
 	signature: { signature, confirmationStatus },
 	network
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
-}): Promise<SolRpcTransaction | null> => {
+}) => {
 	const { getTransaction } = solanaHttpRpc(network);
 
 	const rpcTransaction = await getTransaction(signature, {
-		maxSupportedTransactionVersion: 0
+		maxSupportedTransactionVersion: 0,
+		encoding: 'jsonParsed'
 	}).send();
 
 	if (isNullish(rpcTransaction)) {
@@ -165,7 +166,8 @@ const fetchTransactionDetailForSignature = async ({
 		...rpcTransaction,
 		version: rpcTransaction.version,
 		confirmationStatus,
-		id: signature.toString()
+		id: signature.toString(),
+		signature
 	};
 };
 
