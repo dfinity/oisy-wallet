@@ -4,7 +4,7 @@ import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { TokenId } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
-import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
+import { isNetworkIdSOLDevnet, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
@@ -38,10 +38,13 @@ export const saveUserTokens = async ({
 	const [enabledNewAddresses, disabledNewAddresses] = tokens.reduce<
 		[SplTokenAddress[], SplTokenAddress[]]
 	>(
-		([accEnabled, accDisabled], { address, enabled }) => [
-			[...accEnabled, ...(enabled ? [address] : [])],
-			[...accDisabled, ...(!enabled ? [address] : [])]
-		],
+		([accEnabled, accDisabled], { address, enabled, network: { id: networkId } }) =>
+			isNetworkIdSOLMainnet(networkId)
+				? [
+						[...accEnabled, ...(enabled ? [address] : [])],
+						[...accDisabled, ...(!enabled ? [address] : [])]
+					]
+				: [accEnabled, accDisabled],
 		[[], []]
 	);
 
