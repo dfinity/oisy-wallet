@@ -65,7 +65,7 @@
 </TokenInputCurrency>
 
 <style lang="scss">
-	:global(.swap-input-currency.no-padding div.input-field input[id]) {
+	:global(.token-input-currency.no-padding div.input-field input[id]) {
 		padding: 0;
 	}
 </style>

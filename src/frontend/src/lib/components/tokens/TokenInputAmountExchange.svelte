@@ -49,7 +49,7 @@
 		>
 	{:else}
 		<span data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE}
-			>{$i18n.swap.text.exchange_is_not_available}</span
+			>{$i18n.tokens.text.exchange_is_not_available}</span
 		>
 	{/if}
 </div>
