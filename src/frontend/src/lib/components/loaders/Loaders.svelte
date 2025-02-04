@@ -8,22 +8,25 @@
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
+	import AirdropGuard from '$lib/components/guard/AirdropGuard.svelte';
 </script>
 
 <AddressGuard>
 	<Loader>
 		<RewardGuard>
-			<LoaderEthBalances>
-				<LoaderWallets>
-					<ExchangeWorker>
-						<LoaderMetamask
-							><LoaderUserProfile>
-								<slot />
-							</LoaderUserProfile>
-						</LoaderMetamask>
-					</ExchangeWorker>
-				</LoaderWallets>
-			</LoaderEthBalances>
+			<AirdropGuard>
+				<LoaderEthBalances>
+					<LoaderWallets>
+						<ExchangeWorker>
+							<LoaderMetamask
+								><LoaderUserProfile>
+									<slot />
+								</LoaderUserProfile>
+							</LoaderMetamask>
+						</ExchangeWorker>
+					</LoaderWallets>
+				</LoaderEthBalances>
+			</AirdropGuard>
 		</RewardGuard>
 	</Loader>
 </AddressGuard>

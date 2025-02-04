@@ -38,7 +38,8 @@ export interface Modal<T> {
 		| 'vip-qr-code'
 		| 'dapp-details'
 		| 'reward-state'
-		| 'airdrop-details';
+		| 'airdrop-details'
+		| 'airdrop-state';
 	data?: T;
 	id?: symbol;
 }
@@ -82,6 +83,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openDappDetails: <D extends T>(data: D) => void;
 	openRewardState: <D extends T>(data: D) => void;
 	openAirdropDetails: <D extends T>(data: D) => void;
+	openAirdropState: () => void;
 	close: () => void;
 }
 
@@ -134,6 +136,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openDappDetails: setTypeWithData('dapp-details'),
 		openRewardState: setTypeWithData('reward-state'),
 		openAirdropDetails: setTypeWithData('airdrop-details'),
+		openAirdropState: setType('airdrop-state'),
 		close: () => set(null),
 		subscribe
 	};
