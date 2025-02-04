@@ -5,7 +5,7 @@ import type {
 } from '$declarations/kong_backend/kong_backend.did';
 import { idlFactory as idlCertifiedFactoryKongBackend } from '$declarations/kong_backend/kong_backend.factory.certified.did';
 import { idlFactory as idlFactoryKongBackend } from '$declarations/kong_backend/kong_backend.factory.did';
-import { agents } from '$lib/actors/agents.ic';
+import { getAgent } from '$lib/actors/agents.ic';
 import { mapKongBackendCanisterError } from '$lib/canisters/kong_backend.errors';
 import type { KongSwapAmountsParams, KongSwapParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -16,7 +16,7 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 		identity,
 		...options
 	}: CreateCanisterOptions<KongBackendService>): Promise<KongBackendCanister> {
-		const agent = await agents.getAgent({ identity });
+		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<KongBackendService>({
 			options: {

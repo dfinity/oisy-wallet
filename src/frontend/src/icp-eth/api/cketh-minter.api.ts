@@ -1,4 +1,4 @@
-import { agents } from '$lib/actors/agents.ic';
+import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
@@ -28,7 +28,7 @@ export const ckEthMinterCanister = async ({
 	identity: Identity;
 	minterCanisterId: CanisterIdText;
 }): Promise<CkETHMinterCanister> => {
-	const agent = await agents.getAgent({ identity });
+	const agent = await getAgent({ identity });
 
 	return CkETHMinterCanister.create({
 		agent,

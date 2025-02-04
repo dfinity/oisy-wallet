@@ -10,7 +10,7 @@ import type {
 } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
-import { agents } from '$lib/actors/agents.ic';
+import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
@@ -32,7 +32,7 @@ export class SignerCanister extends Canister<SignerService> {
 		identity,
 		...options
 	}: CreateCanisterOptions<SignerService>): Promise<SignerCanister> {
-		const agent = await agents.getAgent({ identity });
+		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<SignerService>({
 			options: {
