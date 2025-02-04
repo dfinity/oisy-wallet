@@ -17,7 +17,6 @@ import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
@@ -152,7 +151,7 @@ const loadSolTransactions = async ({
 		});
 
 		const certifiedTransactions = transactions.map((transaction) => ({
-			data: mapSolTransactionUi({ transaction, address }),
+			data: transaction,
 			certified: false
 		}));
 
