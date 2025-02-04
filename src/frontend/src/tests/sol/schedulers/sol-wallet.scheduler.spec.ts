@@ -4,6 +4,7 @@ import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
+import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -93,7 +94,7 @@ describe('sol-wallet.scheduler', () => {
 			.spyOn(solanaApi, 'loadSplTokenBalance')
 			.mockResolvedValue(mockSplBalance);
 		spyLoadSolTransactions = vi
-			.spyOn(solanaApi, 'getSolTransactions')
+			.spyOn(solSignaturesServices, 'getSolTransactions')
 			.mockResolvedValue(mockSolTransactions);
 		spyLoadSplTransactions = vi
 			.spyOn(solanaApi, 'getSplTransactions')

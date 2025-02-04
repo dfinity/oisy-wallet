@@ -6,7 +6,6 @@ import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
-import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
 import { getSplBalanceChange } from '$sol/utils/spl-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address, assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
@@ -72,40 +71,9 @@ export const loadSplTokenBalance = async ({
 };
 
 /**
- * Fetches transactions without an error for a given wallet address.
- */
-export const getSolTransactions = async ({
-	address,
-	network,
-	before,
-	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams): Promise<SolRpcTransaction[]> => {
-	const wallet = solAddress(address);
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
-	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
-
-	const transactions = await signatures.reduce(
-		async (accPromise, signature) => {
-			const acc = await accPromise;
-			const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
-			if (
-				nonNullish(transactionDetail) &&
-				getSolBalanceChange({ transaction: transactionDetail, address })
-			) {
-				acc.push(transactionDetail);
-			}
-			return acc;
-		},
-		Promise.resolve([] as SolRpcTransaction[])
-	);
-
-	return transactions.slice(0, limit);
-};
-
-/**
  * Fetches signatures without an error for a given wallet address.
  */
-const fetchSignatures = async ({
+export const fetchSignatures = async ({
 	network,
 	wallet,
 	before,
