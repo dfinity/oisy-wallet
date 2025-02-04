@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import IconCircleArrowDown from '$lib/components/icons/lucide/IconCircleArrowDown.svelte';
 	import SwapToken from '$lib/components/swap/SwapToken.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 
-	export let swapAmount: OptionAmount;
+	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
-
-	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	export let sourceToken: Token | undefined = undefined;
+	export let destinationToken: Token | undefined = undefined;
+	export let sourceTokenExchangeRate: number | undefined;
+	export let destinationTokenExchangeRate: number | undefined;
 </script>
 
 <div class="mb-6 rounded-lg border border-solid border-tertiary bg-primary p-4 shadow">
-	<SwapToken token={$sourceToken} amount={swapAmount} exchangeRate={$sourceTokenExchangeRate}>
-		<span slot="title">{$i18n.swap.text.select_source_token_title}</span>
+	<SwapToken token={sourceToken} amount={sendAmount} exchangeRate={sourceTokenExchangeRate}>
+		<span slot="title">{$i18n.tokens.text.source_token_title}</span>
 	</SwapToken>
 
 	<div class="my-2 flex w-full items-center justify-between text-tertiary-inverted">
@@ -25,10 +25,10 @@
 	</div>
 
 	<SwapToken
-		token={$destinationToken}
+		token={destinationToken}
 		amount={receiveAmount}
-		exchangeRate={$destinationTokenExchangeRate}
+		exchangeRate={destinationTokenExchangeRate}
 	>
-		<span slot="title">{$i18n.swap.text.select_destination_token_title}</span>
+		<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
 	</SwapToken>
 </div>
