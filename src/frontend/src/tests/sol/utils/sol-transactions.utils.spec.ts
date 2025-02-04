@@ -26,6 +26,7 @@ describe('sol-transactions.utils', () => {
 
 			expect(result).toEqual({
 				id: signatures[0],
+				signature: signatures[0],
 				fee: meta?.fee,
 				from: accountKeys[0].pubkey,
 				to: accountKeys[1].pubkey,
@@ -53,6 +54,7 @@ describe('sol-transactions.utils', () => {
 
 			expect(result).toEqual({
 				id: signatures[0],
+				signature: signatures[0],
 				fee: meta?.fee,
 				from: accountKeys[0].pubkey,
 				to: accountKeys[1].pubkey,
@@ -82,6 +84,7 @@ describe('sol-transactions.utils', () => {
 
 			expect(result).toEqual({
 				id: signatures[0],
+				signature: signatures[0],
 				fee: meta?.fee,
 				from: myAddress.pubkey,
 				to: myAddress.pubkey,
