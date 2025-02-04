@@ -1,5 +1,6 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as solanaApi from '$sol/api/solana.api';
+import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
 	fetchSolTransactionsForSignature,
 	loadNextSolTransactions
@@ -34,7 +35,7 @@ describe('sol-transactions.services', () => {
 		vi.resetAllMocks();
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
-		spyGetTransactions = vi.spyOn(solanaApi, 'getSolTransactions');
+		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
 	});
 
 	describe('fetchSolTransactionsForSignature', () => {
