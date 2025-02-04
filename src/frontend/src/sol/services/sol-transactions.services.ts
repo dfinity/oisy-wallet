@@ -15,13 +15,19 @@ import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcInstruction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import type { SolRpcInstruction } from '$sol/types/sol-instructions';
+import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
+import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import { mapSolTransactionUi 
+       } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
 	signalEnd: () => void;
 }
 
-export const fetchSolTransactions = async ({
+export const fetchSolTransactionsForSignature = async ({
 	signature,
 	network,
 	address,
@@ -49,13 +55,15 @@ export const fetchSolTransactions = async ({
 
 	return await instructions.reduce(
 		async (acc, instruction, idx) => {
-			const innerInstructions: SolRpcInstruction[] = [
-				...(meta?.innerInstructions?.find((innerInstruction) => innerInstruction.index === idx)
-					?.instructions ?? [])
-			].map((innerInstruction) => ({
-				...innerInstruction,
-				programAddress: innerInstruction.programId
-			}));
+			const innerInstructionsRaw =
+				meta?.innerInstructions?.find(({ index }) => index === idx)?.instructions ?? [];
+
+			const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map(
+				(innerInstruction) => ({
+					...innerInstruction,
+					programAddress: innerInstruction.programId
+				})
+			);
 
 			const mappedTransaction = await mapSolParsedInstruction({
 				instruction: {
