@@ -26,38 +26,23 @@ const selectedSwappableToken = derived(
 	}
 );
 
-export const sourceToken = derived(
+export const swappableTokens = derived(
 	[balancesStore, selectedSwappableToken],
 	([$balancesStore, $selectedSwappableToken]) => {
 		const selectedToken = $selectedSwappableToken;
 		if (isNullish(selectedToken)) {
-			return undefined;
+			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
 		const balance: BigNumber | undefined = $balancesStore?.[selectedToken.id]?.data;
-
-		if (nonNullish(balance) && balance.gt(BigNumber.from(0))) {
-			return selectedToken;
+		if (isNullish(balance)) {
+			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
-		return undefined;
-	}
-);
-
-export const destinationToken = derived(
-	[balancesStore, selectedSwappableToken],
-	([$balancesStore, $selectedSwappableToken]) => {
-		const selectedToken = $selectedSwappableToken;
-		if (isNullish(selectedToken)) {
-			return undefined;
+		if (balance.gt(BigNumber.from(0))) {
+			return { sourceToken: selectedToken, destinationToken: undefined };
+		} else {
+			return { sourceToken: undefined, destinationToken: selectedToken };
 		}
-
-		const balance: BigNumber | undefined = $balancesStore?.[selectedToken.id]?.data;
-
-		if (nonNullish(balance) && balance.lte(BigNumber.from(0))) {
-			return selectedToken;
-		}
-
-		return undefined;
 	}
 );

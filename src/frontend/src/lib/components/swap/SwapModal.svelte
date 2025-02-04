@@ -8,7 +8,7 @@
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
-	import { destinationToken, sourceToken } from '$lib/derived/swap.derived';
+	import { swappableTokens } from '$lib/derived/swap.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,8 +21,8 @@
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
 		initSwapContext({
-			sourceToken: $sourceToken,
-			destinationToken: $destinationToken
+			sourceToken: $swappableTokens.sourceToken,
+			destinationToken: $swappableTokens.destinationToken
 		})
 	);
 
