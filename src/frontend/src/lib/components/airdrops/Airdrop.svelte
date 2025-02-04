@@ -30,7 +30,7 @@
 		let hours = Math.floor((dateDiff / (1000 * 60 * 60)) % 24);
 		let days = Math.floor(dateDiff / (1000 * 60 * 60 * 24));
 
-		dateText = `Starts in: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+		dateText = `Ends in: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
 	};
 </script>
 
@@ -38,7 +38,7 @@
 	<button class={`contents`} on:click>
 		<AirdropCard>
 			<div slot="icon">
-				<IconSend />
+				<IconSend size="55" />
 			</div>
 
 			<div slot="title">

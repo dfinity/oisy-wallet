@@ -10,7 +10,7 @@
 </script>
 
 {#if airdrops.length > 0}
-	<div class="mb-5 flex flex-col gap-4">
+	<div class="mb-5 flex flex-col gap-6">
 		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{title}</span>
 
 		{#each airdrops as d}

@@ -2,7 +2,7 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<div class="flex items-center gap-4" data-tid={testId}>
+<div class="flex items-center gap-2.5" data-tid={testId}>
 	<slot name="icon" />
 
 	<div class="flex flex-1 flex-col justify-center">
