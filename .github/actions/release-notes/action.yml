@@ -6,6 +6,12 @@ inputs:
   tag:
     description: Name of the tag
     required: true
+  app-id:
+    description: Please see actions/create-github-app-token@v1
+    required: true
+  private-key:
+    description: Please see actions/create-github-app-token@v1
+    required: true
 
 runs:
   using: composite
@@ -14,8 +20,8 @@ runs:
       uses: actions/create-github-app-token@v1
       id: app-token
       with:
-        app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
-        private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
 
     - name: Publish Release Notes
       id: publish_release
