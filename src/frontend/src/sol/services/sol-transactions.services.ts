@@ -5,7 +5,8 @@ import {
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
 import type { SolAddress } from '$lib/types/address';
-import { fetchTransactionDetailForSignature, getSolTransactions } from '$sol/api/solana.api';
+import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
