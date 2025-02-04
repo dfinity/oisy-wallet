@@ -1,7 +1,9 @@
 import type { SolAddress } from '$lib/types/address';
+import type { SolRpcTransactionRaw } from '$sol/types/sol-transaction';
 import type { ParsedComputeBudgetInstruction } from '@solana-program/compute-budget';
 import type { ParsedSystemInstruction } from '@solana-program/system';
 import type { ParsedTokenInstruction } from '@solana-program/token';
+import type { Address } from '@solana/addresses';
 import type { CompilableTransactionMessage } from '@solana/transaction-messages';
 
 export type SolParsedComputeBudgetInstruction = ParsedComputeBudgetInstruction<SolAddress>;
@@ -14,3 +16,8 @@ export type SolParsedInstruction =
 	| SolParsedTokenInstruction;
 
 export type SolInstruction = CompilableTransactionMessage['instructions'][number];
+
+export type SolRpcInstruction =
+	NonNullable<SolRpcTransactionRaw>['transaction']['message']['instructions'][number] & {
+		programAddress: Address;
+	};
