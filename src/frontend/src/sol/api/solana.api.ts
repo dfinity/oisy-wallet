@@ -6,10 +6,7 @@ import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { fetchSolTransactions } from '$sol/services/sol-transactions.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolRpcTransaction, SolSignature, SolTransactionUi
-            } from '$sol/types/sol-transaction';
-import type { SolRpcTransaction, SolSignature } from '$sol/types/sol-transaction';
-import { getSplBalanceChange } from '$sol/utils/spl-transactions.utils';
+import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address, assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
 import { signature, type Signature } from '@solana/keys';
