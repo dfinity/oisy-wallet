@@ -376,9 +376,6 @@ interface I18nConvert {
 		swap_to_token: string;
 		review: string;
 		max_balance: string;
-		review_tokens_info_title: string;
-		amount_to_convert: string;
-		amount_to_receive: string;
 		source_network: string;
 		destination_network: string;
 		conversion_may_take: string;
