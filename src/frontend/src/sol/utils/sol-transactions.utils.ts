@@ -80,7 +80,7 @@ export const mapSolTransactionUi = ({
 		to: to?.pubkey,
 		type,
 		status,
-		value: amount,
+		value: amount < 0n ? -amount : amount,
 		fee
 	};
 };
