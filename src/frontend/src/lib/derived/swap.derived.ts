@@ -47,8 +47,7 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 
 		if (balance.gt(BigNumber.from(0))) {
 			return { sourceToken: selectedToken, destinationToken: undefined };
-		} else {
-			return { sourceToken: undefined, destinationToken: selectedToken };
 		}
+		return { sourceToken: undefined, destinationToken: selectedToken };
 	}
 );
