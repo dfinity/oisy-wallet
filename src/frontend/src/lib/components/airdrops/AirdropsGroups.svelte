@@ -2,6 +2,7 @@
 	import { slide } from 'svelte/transition';
 	import Airdrop from '$lib/components/airdrops/Airdrop.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	export let title: string;
 
@@ -13,9 +14,11 @@
 		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{title}</span>
 
 		{#each airdrops as d}
-
 			<div in:slide={SLIDE_DURATION}>
-				<Airdrop />
+				<Airdrop
+					on:click={() => modalStore.openAirdropDetails({airdrop: d})}
+					airdrop={d}
+				/>
 			</div>
 		{/each}
 	</div>

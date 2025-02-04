@@ -2,13 +2,10 @@
 	import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { onDestroy, onMount } from 'svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
-	import SkeletonCard from '$lib/components/ui/SkeletonCard.svelte';
-	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
+	import { nonNullish } from '@dfinity/utils';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
 
+	export let airdrop;
 
 	let upcomingDate = new Date(Date.now())
 	upcomingDate.setDate(upcomingDate.getDate() + 1);
@@ -47,7 +44,7 @@
 			</div>
 
 			<div slot="title">
-				title
+				{airdrop}
 			</div>
 
 			<div slot="description">

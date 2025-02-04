@@ -7,7 +7,6 @@
 	<slot name="icon" />
 
 	<div class="flex flex-1 flex-col justify-center">
-
 		<span class="inline-flex items-center text-left">
 			<slot name="title" />
 		</span>
@@ -16,5 +15,4 @@
 			<slot name="description" />
 		</span>
 	</div>
-
 </div>
