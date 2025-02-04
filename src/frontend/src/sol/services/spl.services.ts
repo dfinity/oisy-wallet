@@ -140,7 +140,7 @@ const loadSplCustomTokens = async (params: {
 	});
 
 	// We filter the custom tokens that are Spl (the backend "Custom Token" potentially supports other types).
-	return tokens.filter(({ token }) => 'SplMainnet' in token);
+	return tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
 };
 
 export const loadUserTokens = async ({
