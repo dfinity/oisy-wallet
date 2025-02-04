@@ -58,7 +58,7 @@ describe('sol-transactions.utils', () => {
 				to: accountKeys[1].pubkey,
 				type: 'send',
 				status: 'finalized',
-				value: -150000000n,
+				value: 150000000n,
 				timestamp: blockTime
 			});
 		});
