@@ -35,3 +35,5 @@ jobs:
         uses: ./.github/actions/release-notes
         with:
           tag: 'v${{ steps.get_version.outputs.version }}'
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
