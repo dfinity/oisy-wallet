@@ -3,11 +3,11 @@ import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { isNetworkIdSOLDevnet, isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
 import { get as getStorage, set as setStorage } from '$lib/utils/storage.utils';
 import { loadSplUserTokens, loadUserTokens } from '$sol/services/spl.services';
 import {
-	SPL_USER_TOKENS_KEY,
-	splUserTokensStore,
+	SPL_USER_TOKENS_KEY,splUserTokensStore,
 	type SplAddressMap
 } from '$sol/stores/spl-user-tokens.store';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -35,11 +35,11 @@ export const saveUserTokens = async ({
 	const [enabledNewAddresses, disabledNewAddresses] = tokens.reduce<
 		[SplTokenAddress[], SplTokenAddress[]]
 	>(
-		([accEnabled, accDisabled], token) =>
-			token.networkKey === 'SplMainnet'
+		([accEnabled, accDisabled], { address, enabled, network: { id: networkId } }) =>
+			isNetworkIdSOLMainnet(networkId)
 				? [
-						[...accEnabled, ...(token.enabled ? [token.address] : [])],
-						[...accDisabled, ...(!token.enabled ? [token.address] : [])]
+						[...accEnabled, ...(enabled ? [address] : [])],
+						[...accDisabled, ...(!enabled ? [address] : [])]
 					]
 				: [accEnabled, accDisabled],
 		[[], []]
