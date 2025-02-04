@@ -9,7 +9,10 @@
 	$: selectedAirdrop = $modalStore?.data;
 </script>
 
-<AirdropsGroups title="Ongoing" airdrops={['Oisy Sprinkles', 'The OISY Giveaway Season 1 - Episode 1']} />
+<AirdropsGroups
+	title="Ongoing"
+	airdrops={['Oisy Sprinkles', 'The OISY Giveaway Season 1 - Episode 1']}
+/>
 
 {#if $modalAirdropDetails && nonNullish(selectedAirdrop)}
 	<AirdropModal airdrop={selectedAirdrop} />

@@ -1,9 +1,8 @@
 <script lang="ts">
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-
 </script>
 
-<div class="flex flex-col gap-2 text-center bg-black text-white py-2">
+<div class="flex flex-col gap-2 bg-black py-2 text-center text-white">
 	<div class="flex justify-center">
 		<IconSend size="40" />
 	</div>
