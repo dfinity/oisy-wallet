@@ -261,7 +261,7 @@ export const getSplMetadata = async ({
 				links: { image: icon }
 			}
 		}
-	} = await splMetadata({ tokenAddress: address });
+	} = await splMetadata({ tokenAddress: address, network });
 
 	const { name, symbol } = metadata;
 
