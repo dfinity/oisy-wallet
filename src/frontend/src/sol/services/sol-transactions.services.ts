@@ -15,12 +15,6 @@ import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcInstruction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
-import type { SolRpcInstruction } from '$sol/types/sol-instructions';
-import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
-import type { SplTokenAddress } from '$sol/types/spl';
-import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
-import { mapSolTransactionUi 
-       } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
