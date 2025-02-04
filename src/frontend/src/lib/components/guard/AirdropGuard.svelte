@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { modalAirdropState } from '$lib/derived/modal.derived';
-	import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { onMount } from 'svelte';
+	import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
+	import { modalAirdropState } from '$lib/derived/modal.derived';
+	import { modalStore } from '$lib/stores/modal.store';
 
-	onMount(async () => {
-		const initialLoading = sessionStorage.getItem('initialLoading')
+	onMount(() => {
+		const initialLoading = sessionStorage.getItem('initialLoading');
 		if (isNullish(initialLoading)) {
-
 			// TODO check if airdrops received
 			if (true) {
 				modalStore.openAirdropState();

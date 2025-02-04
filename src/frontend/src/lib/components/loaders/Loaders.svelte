@@ -3,12 +3,12 @@
 	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
+	import AirdropGuard from '$lib/components/guard/AirdropGuard.svelte';
 	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
-	import AirdropGuard from '$lib/components/guard/AirdropGuard.svelte';
 </script>
 
 <AddressGuard>
