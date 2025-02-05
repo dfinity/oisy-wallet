@@ -1,7 +1,7 @@
+import { DEFAULT_THEME_NAME } from '$lib/constants/app.constants';
+import type { Themes } from '$lib/enums/themes';
 import { hideZeroBalancesStore, testnetsStore, themeStore } from '$lib/stores/settings.store';
 import { derived, type Readable } from 'svelte/store';
-import type { Themes } from '$lib/enums/themes';
-import { DEFAULT_THEME_NAME } from '$lib/constants/app.constants';
 
 export const testnetsEnabled: Readable<boolean> = derived(
 	[testnetsStore],

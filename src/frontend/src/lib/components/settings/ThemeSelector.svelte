@@ -13,7 +13,12 @@
 
 <div class="flex flex-row">
 	{#each Object.values(Themes) as theme}
-		<ThemeSelectorCard label={$i18n.settings.text["appearance_" + theme]} selected={selected === theme} on:click={selectTheme(theme)} tabindex="1">
+		<ThemeSelectorCard
+			label={$i18n.settings.text['appearance_' + theme]}
+			selected={selected === theme}
+			on:click={selectTheme(theme)}
+			tabindex="1"
+		>
 			{#await import(`$lib/assets/${theme}-theme.png`) then { default: src }}
 				<img {src} alt={theme} />
 			{/await}

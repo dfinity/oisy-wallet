@@ -1,7 +1,7 @@
+import { Themes } from '$lib/enums/themes';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { Themes } from '$lib/enums/themes';
 
 export const APP_VERSION = VITE_APP_VERSION;
 

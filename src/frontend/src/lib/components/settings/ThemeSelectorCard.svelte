@@ -4,13 +4,21 @@
 	export let tabindex: string;
 </script>
 
-<div class="mr-4 cursor-pointer" on:click role="radio" aria-checked={selected} tabindex={tabindex}>
-	<div class="mb-2 rounded-xl sm:rounded-2xl transition-all duration-250 border-4" class:border-primary={selected} class:border-transparent={!selected}>
-		<div class="relative shadow rounded-lg sm:rounded-xl overflow-hidden">
+<div class="mr-4 cursor-pointer" on:click role="radio" aria-checked={selected} {tabindex}>
+	<div
+		class="duration-250 mb-2 rounded-xl border-4 transition-all sm:rounded-2xl"
+		class:border-primary={selected}
+		class:border-transparent={!selected}
+	>
+		<div class="relative overflow-hidden rounded-lg shadow sm:rounded-xl">
 			<slot />
 
-			<span class="absolute rounded-full border-4 p-1 bg-white bottom-2 right-2 shadow" class:border-primary={selected} class:border-white={!selected}></span>
+			<span
+				class="absolute bottom-2 right-2 rounded-full border-4 bg-white p-1 shadow"
+				class:border-primary={selected}
+				class:border-white={!selected}
+			></span>
 		</div>
 	</div>
-	<div class="text-center text-primary">{label}</div>
+	<div class="text-primary text-center">{label}</div>
 </div>
