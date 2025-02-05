@@ -2,12 +2,13 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import type { IcToken } from '$icp/types/ic-token';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
+	import { swappableTokens } from '$lib/derived/swap.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -17,14 +18,11 @@
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
 
-	export let sourceToken: IcToken | undefined = undefined;
-	export let destinationToken: IcToken | undefined = undefined;
-
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
 		initSwapContext({
-			sourceToken,
-			destinationToken
+			sourceToken: $swappableTokens.sourceToken,
+			destinationToken: $swappableTokens.destinationToken
 		})
 	);
 
@@ -51,7 +49,7 @@
 		selectTokenType = undefined;
 	};
 
-	const selectToken = ({ detail: token }: CustomEvent<IcToken>) => {
+	const selectToken = ({ detail: token }: CustomEvent<IcTokenToggleable>) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 		} else if (selectTokenType === 'destination') {
