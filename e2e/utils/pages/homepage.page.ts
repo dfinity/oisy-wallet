@@ -220,27 +220,8 @@ abstract class Homepage {
 		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
 	}
 
-	async waitForModalToDisappear({ testId }: TestIdOperationParams): Promise<void> {
-		await this.#page.getByTestId(testId).waitFor({ state: 'detached' });
-	}
-
 	async waitForModalToDisappearByTestId(testId: string): Promise<void> {
 		await this.#page.getByTestId(testId).waitFor({ state: 'detached' });
-	}
-
-	async waitForBy({ testId }: TestIdOperationParams): Promise<void> {
-		await this.#page.getByTestId(testId).waitFor();
-	}
-
-	async clickBy({ testId }: TestIdOperationParams): Promise<void> {
-		await this.#page.getByTestId(testId).click();
-	}
-
-	async elementExistsBy({ testId }: TestIdOperationParams): Promise<boolean> {
-		return await this.#page
-			.getByTestId(testId)
-			.isVisible()
-			.catch(() => false);
 	}
 
 	protected async elementExistsByTestId(testId: string): Promise<boolean> {
