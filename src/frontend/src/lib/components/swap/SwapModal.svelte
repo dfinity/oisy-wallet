@@ -17,6 +17,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapSelectTokenType } from '$lib/types/swap';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
@@ -49,7 +50,7 @@
 		selectTokenType = undefined;
 	};
 
-	const selectToken = ({ detail: token }: CustomEvent<IcToken>) => {
+	const selectToken = ({ detail: token }: CustomEvent<IcrcCustomToken>) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 		} else if (selectTokenType === 'destination') {
