@@ -1,6 +1,4 @@
-import { toCustomToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
-import { type SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
@@ -15,8 +13,10 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import type { SaveCustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
