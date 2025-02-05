@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+[[ "${1:-}" != "--help" ]] || {
+  cat <<-EOF
+
+	Populates the icp_index Wasm file.
+
+	EOF
+  exit 0
+}
 set -euo pipefail
 
 WASM_FILE="$(jq -re .canisters.icp_index.wasm dfx.json)"

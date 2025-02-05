@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-[[ "${0:-}" != "--help" ]] || {
+[[ "${1:-}" != "--help" ]] || {
   cat <<-EOF
+
 	Populates the icp_index init args file.
 
 	# Prerequisites
 	This is expected to be run via dfx, and in particular that
 	environment variables provided by dfx are set.
+
 	EOF
   exit 0
 }
