@@ -194,6 +194,10 @@ interface I18nSettings {
 		pouh_credential_description: string;
 		present_pouh_credential: string;
 		pouh_credential_verified: string;
+		appearance: string;
+		appearance_light: string;
+		appearance_dark: string;
+		appearance_system: string;
 	};
 	alt: { testnets_toggle: string; github_release: string };
 	error: { loading_profile: string };
