@@ -1,0 +1,26 @@
+[
+  {
+    "title": "The OISY Giveaway Season 1 - Episode 1",
+    "description": "Oisy rewards users on their ICP ecosystem usage",
+    "tasks": [
+      "SWAP on KongSwap",
+      "Receive transactions",
+      "Send transactions"
+    ],
+    "logo": "/images/dapps/kong-swap-logo.svg",
+    "startDate": "2025-02-05T14:28:02.288Z",
+    "endDate": "2025-02-12T14:28:02.288Z"
+  },
+  {
+    "title": "OISY Sprinkles",
+    "description": "WUPPPI",
+    "tasks": [
+      "SWAP on KongSwap",
+      "Receive transactions",
+      "Send transactions"
+    ],
+    "logo": "/images/dapps/kong-swap-logo.svg",
+    "startDate": "2025-02-12T14:28:02.288Z",
+    "endDate": "2025-02-15T14:28:02.288Z"
+  }
+]

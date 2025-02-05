@@ -4,8 +4,9 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { AirdropDescription } from '$lib/types/airdrop-events';
 
-	export let airdrop;
+	export let airdrop: AirdropDescription;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -13,18 +14,18 @@
 		<div class="flex flex-col gap-4">
 			<AirdropStatusCard />
 
-			<span class="text-2xl first-letter:capitalize">{airdrop.airdrop}</span>
+			<span class="text-2xl first-letter:capitalize">{airdrop.title}</span>
 
 			<div class="text-tertiary">
-				<span
-					>Oisy rewards users on their ICP ecosystem usage <br /> THE MORE YOU SEND THE BETTER</span
-				>
+				<span>{airdrop.description}</span>
 
-				<ul class="ml-6 list-disc">
-					<li>SWAP on KongSwap</li>
-					<li>Receive transactions</li>
-					<li>Send transactions</li>
-				</ul>
+				{#if airdrop.tasks.length > 0}
+					<ul class="ml-6 list-disc">
+						{#each airdrop.tasks as task}
+							<li>{task}</li>
+						{/each}
+					</ul>
+				{/if}
 			</div>
 		</div>
 		<ButtonCloseModal slot="toolbar" />

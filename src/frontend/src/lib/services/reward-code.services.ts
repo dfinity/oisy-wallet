@@ -78,17 +78,20 @@ const queryAirdrops = async (params: {
  * @param {Identity} params.identity - The user's identity for authentication.
  * @returns {Promise<RewardInfo[]>} - Resolves with the received airdrops of the user.
  *
- * @throws {Error} Displays an error toast and logs the error if the query fails.
+ * @throws {Error} Displays an error toast and returns an empty list if the query fails.
  */
 export const getAirdrops = async(params: {identity: Identity}): Promise<RewardInfo[]> => {
 	try {
 		return await queryAirdrops({...params, certified: false});
 	} catch (err: unknown) {
+		const { vip } = get(i18n);
 		toastsError({
 			msg: { text: vip.reward.error.loading_user_data },
 			err
 		});
 	}
+
+	return [];
 }
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
