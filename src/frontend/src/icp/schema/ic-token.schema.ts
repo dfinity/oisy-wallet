@@ -39,7 +39,7 @@ export const IcTokenSchema = TokenSchema.merge(IcFeeSchema).merge(IcInterfaceSch
 
 export const IcTokenToggleableSchema = IcTokenSchema.extend({
 	enabled: boolean()
-})
+});
 
 export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
 

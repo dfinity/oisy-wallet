@@ -1,7 +1,8 @@
 import {
 	IcCanistersStrictSchema,
 	IcCkTokenSchema,
-	IcTokenSchema, IcTokenToggleableSchema
+	IcTokenSchema,
+	IcTokenToggleableSchema
 } from '$icp/schema/ic-token.schema';
 import type { IcCanistersStrict, IcCkToken, IcToken } from '$icp/types/ic-token';
 import type { Token } from '$lib/types/token';
@@ -39,4 +40,4 @@ export const hasNoIndexCanister = (token: IcToken): boolean => !hasIndexCanister
 export const isToggleableIcToken = (token: IcToken) => {
 	const { success } = IcTokenToggleableSchema.safeParse(token);
 	return success;
-}
+};
