@@ -1,6 +1,7 @@
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
+import { Themes } from '$lib/enums/themes';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -122,3 +123,6 @@ export const WALLET_PAGINATION = 10n;
 
 // VIP
 export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+
+// THEMES
+export const DEFAULT_THEME_NAME = Themes.SYSTEM;
