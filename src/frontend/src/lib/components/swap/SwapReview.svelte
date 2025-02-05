@@ -24,7 +24,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div slot="outer-content" class="mx-6 mb-12">
+	<div class="mx-6">
 		<TokensReview
 			sendAmount={swapAmount}
 			{receiveAmount}
