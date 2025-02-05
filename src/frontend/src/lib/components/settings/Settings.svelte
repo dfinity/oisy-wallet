@@ -21,6 +21,9 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
+	import { defaultThemeName, themeStore } from '$lib/stores/settings.store';
+	import { onMount } from 'svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -41,6 +44,16 @@
 			}
 		}
 	};
+
+	let theme
+	$: theme = defaultThemeName;
+
+	onMount(() => {
+		userProfileStore.subscribe((state) => console.log(state))
+		themeStore.subscribe((state) => {
+			theme = state?.name;
+		});
+	});
 </script>
 
 <KeyValuePairInfo>
@@ -131,5 +144,12 @@
 		</div>
 	</div>
 {/if}
+
+
+
+<div class="mt-10">
+	<h2 class="mb-4 pb-1 text-base">{$i18n.settings.text.appearance}:</h2>
+	<ThemeSelector />
+</div>
 
 <SettingsVersion />

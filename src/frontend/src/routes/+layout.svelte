@@ -19,6 +19,8 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { defaultThemeName, themeStore, type ThemeType } from '$lib/stores/settings.store';
+	import {Themes} from "$lib/enums/themes";
 
 	/**
 	 * Init dApp
@@ -83,6 +85,38 @@
 		const spinner = document.querySelector('body > #app-spinner');
 		spinner?.remove();
 	})();
+
+	const setThemeHtmlProperty = (theme: Themes) => {
+		console.log("THEME SET TO", theme)
+		document.getElementsByTagName("html")[0].setAttribute("theme", theme);
+	}
+
+	const applyTheme = () => {
+		themeStore.subscribe((state) => {
+			const themeSetting = state?.name ?? defaultThemeName;
+			if (themeSetting === 'system') {
+				if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					setThemeHtmlProperty(Themes.DARK);
+				} else {
+					setThemeHtmlProperty(Themes.LIGHT);
+				}
+			} else {
+				setThemeHtmlProperty(themeSetting);
+			}
+		});
+	}
+
+	onMount(() => {
+		// apply initial color theme
+		applyTheme();
+
+		// apply color theme on OS theme change
+		if (window.matchMedia) {
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+				applyTheme();
+			})
+		}
+	})
 </script>
 
 <svelte:window on:storage={syncAuthStore} />
