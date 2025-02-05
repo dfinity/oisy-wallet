@@ -1,15 +1,10 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
-import { fetchSignatures } from '$sol/api/solana.api';
+import { fetchSignatures, fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import { fetchSignatures, 
-        fetchTransactionDetailForSignature } from '$sol/api/solana.api';
-import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolRpcTransaction } from '$sol/types/sol-transaction';
-import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
+import type { SolRpcTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import { getSplBalanceChange } from '$sol/utils/spl-transactions.utils';
 import { nonNullish } from '@dfinity/utils';
 import { assertIsAddress, address as solAddress } from '@solana/addresses';
