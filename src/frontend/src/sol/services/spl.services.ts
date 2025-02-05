@@ -255,6 +255,16 @@ export const getSplMetadata = async ({
 }): Promise<TokenMetadata> => {
 	const decimals = await getTokenDecimals({ address, network });
 
+	const foo = await splMetadata({ tokenAddress: address, network });
+
+	if (!('content' in (foo?.result ?? {}))) {
+		return {
+			decimals,
+			name: '',
+			symbol: ''
+		};
+	}
+
 	const {
 		result: {
 			content: {

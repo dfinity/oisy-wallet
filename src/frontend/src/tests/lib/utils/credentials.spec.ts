@@ -21,7 +21,7 @@ describe('credentials utils', () => {
 				],
 				version: [0n]
 			};
-			expect(hasPouhCredential(profile)).toBe(true);
+			expect(hasPouhCredential(profile)).toBeTruthy();
 		});
 
 		it('should return false if the user has credential but not verified', () => {
@@ -36,7 +36,7 @@ describe('credentials utils', () => {
 				],
 				version: [0n]
 			};
-			expect(hasPouhCredential(profile)).toBe(false);
+			expect(hasPouhCredential(profile)).toBeFalsy();
 		});
 
 		it('should return false if the user has no credentials', () => {
@@ -44,7 +44,7 @@ describe('credentials utils', () => {
 				...mockUserProfile,
 				version: [0n]
 			};
-			expect(hasPouhCredential(profile)).toBe(false);
+			expect(hasPouhCredential(profile)).toBeFalsy();
 		});
 	});
 });

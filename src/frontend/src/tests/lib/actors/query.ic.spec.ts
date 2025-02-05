@@ -178,7 +178,7 @@ describe('query.ic', () => {
 		});
 		await new Promise((resolve) => setTimeout(resolve, 10));
 
-		expect(queryDone).toBe(true);
+		expect(queryDone).toBeTruthy();
 		expect(request).toBeCalledTimes(2);
 		expect(onLoad).toBeCalledTimes(1);
 		expect(onError).not.toBeCalled();
@@ -204,15 +204,15 @@ describe('query.ic', () => {
 		);
 		const onLoad = vi.fn();
 
-		expect(updateDone).toBe(false);
-		expect(queryDone).toBe(false);
+		expect(updateDone).toBeFalsy();
+		expect(queryDone).toBeFalsy();
 		await queryAndUpdate<number, unknown>({
 			request,
 			onLoad,
 			identity
 		});
 		expect(updateDone).toBeTruthy();
-		expect(queryDone).toBe(false);
+		expect(queryDone).toBeFalsy();
 	});
 
 	it('should not resolve promise when the first response is done', async () => {
@@ -235,8 +235,8 @@ describe('query.ic', () => {
 		);
 		const onLoad = vi.fn();
 
-		expect(updateDone).toBe(false);
-		expect(queryDone).toBe(false);
+		expect(updateDone).toBeFalsy();
+		expect(queryDone).toBeFalsy();
 		await queryAndUpdate<number, unknown>({
 			request,
 			onLoad,

@@ -422,7 +422,7 @@ describe('backend.canister', () => {
 			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
 				btcAddPendingTransactionEndpointParams
 			);
-			expect(res).toEqual(true);
+			expect(res).toBeTruthy();
 		});
 
 		it('should throw an error if btc_add_pending_transaction returns an internal error', async () => {

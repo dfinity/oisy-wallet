@@ -64,7 +64,7 @@ describe('request-pouh-credential.services', () => {
 
 			const result = await requestPouhCredential({ identity });
 
-			expect(result.success).toBe(true);
+			expect(result.success).toBeTruthy();
 			expect(addUserCredentialMock).toBeCalledTimes(1);
 			expect(addUserCredentialMock).toBeCalledWith({
 				identity,
@@ -89,7 +89,7 @@ describe('request-pouh-credential.services', () => {
 
 			const result = await requestPouhCredential({ identity });
 
-			expect(result.success).toBe(true);
+			expect(result.success).toBeTruthy();
 			expect(addUserCredentialMock).toBeCalledTimes(1);
 			expect(addUserCredentialMock).toBeCalledWith({
 				identity,

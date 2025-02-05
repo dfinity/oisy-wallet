@@ -12,7 +12,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isMobile()).toBe(true);
+			expect(isMobile()).toBeTruthy();
 		});
 
 		it('should return false for desktop device checking the navigator', () => {
@@ -25,7 +25,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isMobile()).toBe(false);
+			expect(isMobile()).toBeFalsy();
 		});
 
 		it('should return true for mobile device checking the match media', () => {
@@ -42,7 +42,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isMobile()).toBe(true);
+			expect(isMobile()).toBeTruthy();
 		});
 
 		it('should return false for desktop device checking the match media', () => {
@@ -59,7 +59,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isMobile()).toBe(false);
+			expect(isMobile()).toBeFalsy();
 		});
 	});
 
@@ -74,7 +74,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isDesktop()).toBe(false);
+			expect(isDesktop()).toBeFalsy();
 		});
 
 		it('should return true for desktop device checking the navigator', () => {
@@ -87,7 +87,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isDesktop()).toBe(true);
+			expect(isDesktop()).toBeTruthy();
 		});
 
 		it('should return false for mobile device checking the match media', () => {
@@ -104,7 +104,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isDesktop()).toBe(false);
+			expect(isDesktop()).toBeFalsy();
 		});
 
 		it('should return true for desktop device checking the match media', () => {
@@ -121,7 +121,7 @@ describe('device.utils', () => {
 				}
 			});
 
-			expect(isDesktop()).toBe(true);
+			expect(isDesktop()).toBeTruthy();
 		});
 	});
 });
