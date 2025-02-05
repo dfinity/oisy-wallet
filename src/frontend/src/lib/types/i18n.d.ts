@@ -349,6 +349,7 @@ interface I18nSend {
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
+		solana_transaction_expired: string;
 	};
 }
 
@@ -376,9 +377,6 @@ interface I18nConvert {
 		swap_to_token: string;
 		review: string;
 		max_balance: string;
-		review_tokens_info_title: string;
-		amount_to_convert: string;
-		amount_to_receive: string;
 		source_network: string;
 		destination_network: string;
 		conversion_may_take: string;

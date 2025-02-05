@@ -28,9 +28,11 @@ describe('SwapForm', () => {
 	};
 
 	beforeEach(() => {
+		const mockToken = { ...mockValidIcToken, enabled: true };
+
 		const originalContext = initSwapContext({
-			sourceToken: mockValidIcToken,
-			destinationToken: mockValidIcToken
+			sourceToken: mockToken,
+			destinationToken: mockToken
 		});
 
 		const mockSwapContext = {
