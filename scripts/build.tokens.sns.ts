@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { EnvSnsTokenSchema } from '$env/schema/env-sns-token.schema';
+import type { EnvIcrcTokenMetadata } from '$env/types/env-icrc-token';
+import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import {
@@ -14,7 +15,6 @@ import { UrlSchema } from '@dfinity/zod-schemas';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
-import { EnvIcrcTokenMetadataSchema } from '../src/frontend/src/env/schema/env-icrc-token.schema';
 import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
@@ -39,8 +39,8 @@ interface ResponseData {
 	};
 }
 
-type SnsMetadata = z.infer<typeof EnvSnsTokenSchema> & {
-	metadata: z.infer<typeof EnvIcrcTokenMetadataSchema> & { icon?: string };
+type SnsMetadata = EnvSnsToken & {
+	metadata: EnvIcrcTokenMetadata & { icon?: string };
 };
 
 type TokenMetadata = SnsMetadata['metadata'];
