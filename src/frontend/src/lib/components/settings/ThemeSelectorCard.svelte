@@ -8,7 +8,7 @@
 	class="mr-4 cursor-pointer"
 	on:click
 	on:keydown
-	role="button"
+	role="radio"
 	aria-checked={selected}
 	{tabindex}
 >

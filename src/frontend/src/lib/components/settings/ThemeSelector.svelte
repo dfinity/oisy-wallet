@@ -18,7 +18,7 @@
 			selected={selected === theme}
 			on:click={selectTheme(theme)}
 			on:keydown={selectTheme(theme)}
-			tabindex="1"
+			tabindex={-1}
 		>
 			{#await import(`$lib/assets/${theme}-theme.png`) then { default: src }}
 				<img {src} alt={theme} />
