@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/errors';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
@@ -183,8 +184,12 @@
 				}
 			});
 
+			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
+				? $i18n.send.error.solana_transaction_expired
+				: $i18n.send.error.unexpected;
+
 			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
+				msg: { text: errorMsg },
 				err
 			});
 
