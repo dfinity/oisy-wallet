@@ -5,6 +5,7 @@ import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { isSaveCustomToken } from '$icp/validation/custom-token.validation';
 import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
@@ -22,7 +23,6 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { isSaveCustomToken } from '$icp/validation/custom-token.validation';
 
 export const swap = async ({
 	identity,
