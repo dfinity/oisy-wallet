@@ -97,7 +97,7 @@ describe('sol-wallet.scheduler', () => {
 			.spyOn(solSignaturesServices, 'getSolTransactions')
 			.mockResolvedValue(mockSolTransactions);
 		spyLoadSplTransactions = vi
-			.spyOn(solanaApi, 'getSplTransactions')
+			.spyOn(solSignaturesServices, 'getSplTransactions')
 			//TODO add spl mock txns
 			.mockResolvedValue([]);
 

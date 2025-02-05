@@ -1,5 +1,5 @@
 import { parseTokenId } from '$lib/validation/token.validation';
-import { getSplTransactions } from '$sol/api/solana.api';
+import { getSplTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction

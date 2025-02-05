@@ -7,12 +7,8 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
-import {
-	getSplTransactions,
-	loadSolLamportsBalance,
-	loadSplTokenBalance
-} from '$sol/api/solana.api';
-import { getSolTransactions } from '$sol/services/sol-signatures.services';
+import { loadSolLamportsBalance, loadSplTokenBalance } from '$sol/api/solana.api';
+import { getSolTransactions, getSplTransactions } from '$sol/services/sol-signatures.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
