@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import type { EnvIcrcTokenMetadata } from '$env/types/env-icrc-token';
+import type { EnvSnsToken } from '$env/types/env-sns-token';
+import type { CanisterIdText } from '$lib/types/canister';
 import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import {
 	candidNumberArrayToBigInt,
@@ -8,8 +11,10 @@ import {
 	jsonReplacer,
 	nonNullish
 } from '@dfinity/utils';
+import { UrlSchema } from '@dfinity/zod-schemas';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { z } from 'zod';
 import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
@@ -21,6 +26,32 @@ const AGGREGATOR_URL = `${SNS_AGGREGATOR_CANISTER_URL}/${AGGREGATOR_CANISTER_VER
 const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
 const STATIC_FOLDER = join(process.cwd(), 'src', 'frontend', 'static', 'icons', 'sns');
 
+interface ResponseData {
+	canister_ids: {
+		ledger_canister_id: CanisterIdText;
+		index_canister_id: CanisterIdText;
+		root_canister_id: CanisterIdText;
+	};
+	icrc1_metadata: [[string, { Text: string } | { Nat: [number] }]];
+	meta: { name: string; url: z.infer<typeof UrlSchema> };
+	swap_state: {
+		swap: { lifecycle: number };
+	};
+}
+
+type SnsToken = Omit<EnvSnsToken, 'metadata'> & {
+	metadata: EnvIcrcTokenMetadata & { icon?: string };
+};
+
+type SnsTokenWithOptionalMetadata = Omit<EnvSnsToken, 'metadata'> &
+	Partial<Pick<SnsToken, 'metadata'>>;
+
+type SnsMetadata = SnsToken['metadata'];
+
+type OptionalSnsMetadata = Partial<SnsMetadata>;
+
+type Logo = Pick<SnsToken, 'ledgerCanisterId' | 'rootCanisterId'> & Pick<SnsMetadata, 'icon'>;
+
 if (!existsSync(DATA_FOLDER)) {
 	mkdirSync(DATA_FOLDER, { recursive: true });
 }
@@ -29,9 +60,9 @@ if (!existsSync(STATIC_FOLDER)) {
 	mkdirSync(STATIC_FOLDER, { recursive: true });
 }
 
-const aggregatorPageUrl = (page) => `list/page/${page}/slow.json`;
+const aggregatorPageUrl = (page: number): string => `list/page/${page}/slow.json`;
 
-const querySnsAggregator = async (page = 0) => {
+const querySnsAggregator = async (page = 0): Promise<ResponseData[]> => {
 	const response = await fetch(`${AGGREGATOR_URL}/${aggregatorPageUrl(page)}`);
 
 	if (!response.ok) {
@@ -53,8 +84,8 @@ const querySnsAggregator = async (page = 0) => {
 	return data;
 };
 
-const saveLogos = async (logos) => {
-	const writeLogo = async ({ icon, ledgerCanisterId, rootCanisterId }) => {
+const saveLogos = async (logos: Logo[]) => {
+	const writeLogo = async ({ icon, ledgerCanisterId, rootCanisterId }: Logo) => {
 		// Use ledger icon and fallback on Sns icon if not existing
 		const response = await fetch(
 			nonNullish(icon) ? icon : `${AGGREGATOR_URL}/root/${rootCanisterId}/logo.png`
@@ -75,8 +106,8 @@ const saveLogos = async (logos) => {
 	await Promise.all(activeSnsLogos.map(writeLogo));
 };
 
-const mapOptionalToken = (response) => {
-	const nullishToken = response.reduce((acc, [key, value]) => {
+const mapOptionalToken = (response: ResponseData['icrc1_metadata']): SnsMetadata | undefined => {
+	const nullishToken = response.reduce<OptionalSnsMetadata>((acc, [key, value]) => {
 		switch (key) {
 			case IcrcMetadataResponseEntries.SYMBOL:
 				acc = { ...acc, ...('Text' in value && { symbol: value.Text }) };
@@ -104,16 +135,19 @@ const mapOptionalToken = (response) => {
 		return acc;
 	}, {});
 
-	if (
-		isNullish(nullishToken.symbol) ||
-		isNullish(nullishToken.name) ||
-		isNullish(nullishToken.fee) ||
-		isNullish(nullishToken.decimals)
-	) {
+	const { symbol, name, fee, decimals, ...rest } = nullishToken;
+
+	if (isNullish(symbol) || isNullish(name) || isNullish(fee) || isNullish(decimals)) {
 		return undefined;
 	}
 
-	return nullishToken;
+	return {
+		decimals,
+		name,
+		symbol,
+		fee,
+		...rest
+	};
 };
 
 // 3 === Committed
@@ -121,13 +155,13 @@ const filterCommittedSns = ({
 	swap_state: {
 		swap: { lifecycle }
 	}
-}) => lifecycle === 3;
+}: ResponseData) => lifecycle === 3;
 
 const mapSnsMetadata = ({
 	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
 	icrc1_metadata,
 	meta: { name: alternativeName, url }
-}) => {
+}: ResponseData): SnsTokenWithOptionalMetadata => {
 	const tokenMetadata = mapOptionalToken(icrc1_metadata);
 
 	return {
@@ -144,7 +178,10 @@ const mapSnsMetadata = ({
 	};
 };
 
-const DEPRECATED_SNES = {
+const filterNonNullishMetadata = (token: SnsTokenWithOptionalMetadata): token is SnsToken =>
+	nonNullish(token.metadata);
+
+const DEPRECATED_SNES: Record<string, OptionalSnsMetadata> = {
 	['ibahq-taaaa-aaaaq-aadna-cai']: {
 		name: '---- (formerly CYCLES-TRANSFER-STATION)',
 		symbol: '--- (CTS)',
@@ -154,7 +191,7 @@ const DEPRECATED_SNES = {
 	}
 };
 
-const mapDeprecatedSnsMetadata = ({ metadata, rootCanisterId, ...rest }) => ({
+const mapDeprecatedSnsMetadata = ({ metadata, rootCanisterId, ...rest }: SnsToken): SnsToken => ({
 	metadata: {
 		...metadata,
 		...(nonNullish(DEPRECATED_SNES[rootCanisterId]) && DEPRECATED_SNES[rootCanisterId])
@@ -170,9 +207,9 @@ const findSnses = async () => {
 
 	const { tokens, icons } = snses
 		.map(mapSnsMetadata)
-		.filter(({ metadata }) => nonNullish(metadata))
+		.filter(filterNonNullishMetadata)
 		.map(mapDeprecatedSnsMetadata)
-		.reduce(
+		.reduce<{ tokens: SnsToken[]; icons: Logo[] }>(
 			(
 				{ tokens, icons },
 				{ metadata: { icon, ...metadata }, ledgerCanisterId, rootCanisterId, ...rest }

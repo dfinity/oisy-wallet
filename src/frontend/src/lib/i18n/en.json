@@ -217,8 +217,11 @@
 			"pouh_credential_verified": "Verified ✅",
 			"appearance": "Appearance",
 			"appearance_light": "Light",
+			"appearance_light_description": "Enabled light mode",
 			"appearance_dark": "Dark",
-			"appearance_system": "System"
+			"appearance_dark_description": "Enables dark mode",
+			"appearance_system": "System",
+			"appearance_system_description": "Enables your operating systems color mode"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
