@@ -50,7 +50,9 @@ export default {
 			cobalt: '#004abe',
 			zumthor: '#e8f1ff',
 			beer: '#f7931a',
-			fulvous: '#de7900'
+			fulvous: '#de7900',
+			'bright-gold': '#cca055',
+			'golden-sap': '#ebd27f'
 		},
 		extend: {
 			backgroundColor: themeVariables.background,
