@@ -2,7 +2,9 @@ import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import type { SplTokenAddress } from '$sol/types/spl';
 import type { Address } from '@solana/addresses';
+import type { Signature } from '@solana/keys';
 import type { GetSignaturesForAddressApi } from '@solana/rpc';
 import type { Commitment } from '@solana/rpc-types';
 import type {
@@ -17,6 +19,7 @@ export type SolTransactionType = Extract<
 
 export interface SolTransactionUi extends TransactionUiCommon {
 	id: string;
+	signature: Signature;
 	type: SolTransactionType;
 	status: Commitment | null;
 	value?: bigint;
@@ -46,6 +49,7 @@ export type SolRpcTransactionRaw = Omit<SolRpcTransactionRawWithBug, 'transactio
 
 export type SolRpcTransaction = SolRpcTransactionRaw & {
 	id: string;
+	signature: Signature;
 	confirmationStatus: Commitment | null;
 };
 
@@ -60,4 +64,11 @@ export interface MappedSolTransaction {
 	payer?: SolAddress;
 	source?: SolAddress;
 	destination?: SolAddress;
+}
+
+export interface SolMappedTransaction {
+	value: bigint | undefined;
+	from: SolAddress;
+	to: SolAddress;
+	tokenAddress?: SplTokenAddress;
 }

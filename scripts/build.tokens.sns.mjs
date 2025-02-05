@@ -54,8 +54,11 @@ const querySnsAggregator = async (page = 0) => {
 };
 
 const saveLogos = async (logos) => {
-	const writeLogo = async ({ icon, ledgerCanisterId }) => {
-		const response = await fetch(icon);
+	const writeLogo = async ({ icon, ledgerCanisterId, rootCanisterId }) => {
+		// Use ledger icon and fallback on Sns icon if not existing
+		const response = await fetch(
+			nonNullish(icon) ? icon : `${AGGREGATOR_URL}/root/${rootCanisterId}/logo.png`
+		);
 
 		const blob = await response.blob();
 
@@ -65,7 +68,11 @@ const saveLogos = async (logos) => {
 		);
 	};
 
-	await Promise.all(logos.map(writeLogo));
+	const activeSnsLogos = logos.filter(({ rootCanisterId }) =>
+		isNullish(DEPRECATED_SNES[rootCanisterId])
+	);
+
+	await Promise.all(activeSnsLogos.map(writeLogo));
 };
 
 const mapOptionalToken = (response) => {
@@ -120,16 +127,22 @@ const mapSnsMetadata = ({
 	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
 	icrc1_metadata,
 	meta: { name: alternativeName, url }
-}) => ({
-	ledgerCanisterId: ledger_canister_id,
-	indexCanisterId: index_canister_id,
-	rootCanisterId: root_canister_id,
-	metadata: {
-		...mapOptionalToken(icrc1_metadata),
-		alternativeName: alternativeName.trim(),
-		url
-	}
-});
+}) => {
+	const tokenMetadata = mapOptionalToken(icrc1_metadata);
+
+	return {
+		ledgerCanisterId: ledger_canister_id,
+		indexCanisterId: index_canister_id,
+		rootCanisterId: root_canister_id,
+		...(nonNullish(tokenMetadata) && {
+			metadata: {
+				...tokenMetadata,
+				alternativeName: alternativeName.trim(),
+				url
+			}
+		})
+	};
+};
 
 const DEPRECATED_SNES = {
 	['ibahq-taaaa-aaaaq-aadna-cai']: {
@@ -175,15 +188,11 @@ const findSnses = async () => {
 				],
 				icons: [
 					...icons,
-					...(isNullish(icon)
-						? []
-						: [
-								{
-									ledgerCanisterId,
-									rootCanisterId,
-									icon
-								}
-							])
+					{
+						ledgerCanisterId,
+						rootCanisterId,
+						icon
+					}
 				]
 			}),
 			{ tokens: [], icons: [] }

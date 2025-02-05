@@ -1,8 +1,6 @@
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { balance } from '$icp/api/icrc-ledger.api';
-import * as agent from '$lib/actors/agents.ic';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { mock } from 'vitest-mock-extended';
 
@@ -13,7 +11,6 @@ describe('icrc-ledger.api', () => {
 		vi.clearAllMocks();
 
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
-		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 	});
 
 	describe('balance', () => {
