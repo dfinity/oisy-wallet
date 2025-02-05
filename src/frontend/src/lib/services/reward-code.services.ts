@@ -59,7 +59,7 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 const queryAirdrops = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<ResultSuccess> => {
+}): Promise<RewardInfo[]> => {
 	const userData = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
