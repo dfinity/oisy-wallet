@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { selectedTheme } from '$lib/derived/settings.derived';
 	import { Themes } from '$lib/enums/themes';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -17,10 +18,10 @@
 			selected={selected === theme}
 			on:click={selectTheme(theme)}
 			on:keydown={selectTheme(theme)}
-			tabindex={-1}
+			tabindex={Object.values(Themes).indexOf(theme)}
 		>
 			{#await import(`$lib/assets/${theme}-theme.png`) then { default: src }}
-				<img {src} alt={theme} />
+				<Img {src} alt={$i18n.settings.text[`appearance_${theme}_description`]} />
 			{/await}
 		</ThemeSelectorCard>
 	{/each}
