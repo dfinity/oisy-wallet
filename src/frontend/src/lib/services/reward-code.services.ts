@@ -25,6 +25,37 @@ const queryVipUser = async (params: {
 	return { success: fromNullable(userData.is_vip) === true };
 }
 
+/**
+ * Checks if a user is a VIP user.
+ *
+ * This function performs **always** a query (not certified) to determine the VIP status of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to check VIP status.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<ResultSuccess>} - Resolves with the result indicating if the user is a VIP.
+ *
+ * @throws {Error} Displays an error toast and logs the error if the query fails.
+ */
+export const isVipUser = async (params: { identity: Identity }): Promise<ResultSuccess> => {
+	try {
+		return await queryVipUser({ ...params, certified: false });
+	} catch (err: unknown) {
+		const { vip } = get(i18n);
+		// TODO Remove this temporary fix as soon as we do run the rewards canister locally
+		if (LOCAL) {
+			console.error(vip.reward.error.loading_user_data, err);
+		} else {
+			toastsError({
+				msg: { text: vip.reward.error.loading_user_data },
+				err
+			});
+		}
+
+		return { success: false, err };
+	}
+};
+
 const queryAirdrops = async (params: {
 	identity: Identity;
 	certified: boolean;
@@ -59,37 +90,6 @@ export const getAirdrops = async(params: {identity: Identity}): Promise<RewardIn
 		});
 	}
 }
-
-/**
- * Checks if a user is a VIP user.
- *
- * This function performs **always** a query (not certified) to determine the VIP status of a user.
- *
- * @async
- * @param {Object} params - The parameters required to check VIP status.
- * @param {Identity} params.identity - The user's identity for authentication.
- * @returns {Promise<ResultSuccess>} - Resolves with the result indicating if the user is a VIP.
- *
- * @throws {Error} Displays an error toast and logs the error if the query fails.
- */
-export const isVipUser = async (params: { identity: Identity }): Promise<ResultSuccess> => {
-	try {
-		return await queryVipUser({ ...params, certified: false });
-	} catch (err: unknown) {
-		const { vip } = get(i18n);
-		// TODO Remove this temporary fix as soon as we do run the rewards canister locally
-		if (LOCAL) {
-			console.error(vip.reward.error.loading_user_data, err);
-		} else {
-			toastsError({
-				msg: { text: vip.reward.error.loading_user_data },
-				err
-			});
-		}
-
-		return { success: false, err };
-	}
-};
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
