@@ -1,4 +1,4 @@
-import type { VipReward } from '$declarations/rewards/rewards.did';
+import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
@@ -23,7 +23,42 @@ const queryVipUser = async (params: {
 	});
 
 	return { success: fromNullable(userData.is_vip) === true };
-};
+}
+
+const queryAirdrops = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<ResultSuccess> => {
+	const userData = await getUserInfoApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	return userData.airdrops;
+}
+
+/**
+ * Gets the airdrops the user received.
+ *
+ * This function performs **always** a query (not certified) to get the airdrops of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to check VIP status.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<RewardInfo[]>} - Resolves with the received airdrops of the user.
+ *
+ * @throws {Error} Displays an error toast and logs the error if the query fails.
+ */
+export const getAirdrops = async(params: {identity: Identity}): Promise<RewardInfo[]> => {
+	try {
+		return await queryAirdrops({...params, certified: false});
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
+	}
+}
 
 /**
  * Checks if a user is a VIP user.
