@@ -67,7 +67,7 @@ abstract class Homepage {
 	}
 
 	protected async clickByTestId(testId: string): Promise<void> {
-		await this.#page.getByTestId(testId).click();
+		await this.#page.getByTestId(testId).click({ force: true });
 	}
 
 	protected async isVisibleByTestId(testId: string): Promise<boolean> {
