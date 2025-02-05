@@ -4,7 +4,14 @@
 	export let tabindex: number;
 </script>
 
-<div class="mr-4 cursor-pointer" on:click on:keydown role="button" aria-checked={selected} {tabindex}>
+<div
+	class="mr-4 cursor-pointer"
+	on:click
+	on:keydown
+	role="button"
+	aria-checked={selected}
+	{tabindex}
+>
 	<div
 		class="duration-250 mb-2 rounded-xl border-4 transition-all sm:rounded-2xl"
 		class:border-primary={selected}
