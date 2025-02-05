@@ -6,9 +6,8 @@ import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import { SolanaNetworks } from '$sol/types/network';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/rpc-types';
@@ -24,13 +23,10 @@ describe('sol-wallet.scheduler', () => {
 
 	const mockSolBalance = lamports(100n);
 	const mockSplBalance = BigInt(123);
-	const mockSolTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
+	const mockSolTransactions = createMockSolTransactionsUi(2);
 
 	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({
-		data: mapSolTransactionUi({
-			transaction,
-			address: mockSolAddress
-		}),
+		data: transaction,
 		certified: false
 	}));
 
