@@ -3,7 +3,6 @@ import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import * as z from 'zod';
-import { boolean } from 'zod';
 
 export const IcFeeSchema = z.object({
 	fee: z.bigint()
@@ -36,10 +35,6 @@ export const IcCkMetadataSchema = IcCkLinkedAssetsSchema.partial().extend({
 export const IcInterfaceSchema = IcCanistersSchema.merge(IcAppMetadataSchema);
 
 export const IcTokenSchema = TokenSchema.merge(IcFeeSchema).merge(IcInterfaceSchema);
-
-export const IcTokenToggleableSchema = IcTokenSchema.extend({
-	enabled: boolean()
-});
 
 export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
 

@@ -1,10 +1,8 @@
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
-import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { isToggleableIcToken } from '$icp/validation/ic-token.validation';
 import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
@@ -36,8 +34,8 @@ export const swap = async ({
 }: {
 	identity: OptionIdentity;
 	progress: (step: ProgressStepsSwap) => void;
-	sourceToken: IcToken;
-	destinationToken: IcToken;
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
 	swapAmount: Amount;
 	receiveAmount: bigint;
 	slippageValue: Amount;
@@ -89,17 +87,13 @@ export const swap = async ({
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
-	if (isToggleableIcToken(destinationToken)) {
-		const toggleableToken: IcTokenToggleable = destinationToken as IcTokenToggleable;
-		if (!toggleableToken.enabled) {
-			await setCustomToken({
-				token: toCustomToken({ ...toggleableToken, enabled: true, networkKey: 'Icrc' }),
-				identity,
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			});
-
-			await loadCustomTokens({ identity });
-		}
+	if (!destinationToken.enabled) {
+		await setCustomToken({
+			token: toCustomToken({ ...destinationToken, enabled: true, networkKey: 'Icrc' }),
+			identity,
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
+		await loadCustomTokens({ identity });
 	}
 
 	await waitAndTriggerWallet();
