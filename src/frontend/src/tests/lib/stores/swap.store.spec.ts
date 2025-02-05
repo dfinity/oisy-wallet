@@ -18,13 +18,16 @@ const ckBtcToken = {
 } as IcToken;
 
 describe('swapStore', () => {
+	const mockToken1 = { ...ckBtcToken, enabled: true };
+	const mockToken2 = { ...ICP_TOKEN, enabled: false };
+
 	beforeEach(() => {
 		mockPage.reset();
 
 		vi.spyOn(exchanges, 'exchanges', 'get').mockImplementation(() =>
 			readable({
-				[ckBtcToken.id]: { usd: ckBtcExchangeValue },
-				[ICP_TOKEN.id]: { usd: icpExchangeValue }
+				[mockToken1.id]: { usd: ckBtcExchangeValue },
+				[mockToken2.id]: { usd: icpExchangeValue }
 			})
 		);
 	});
@@ -32,8 +35,8 @@ describe('swapStore', () => {
 	it('should ensure derived stores update at most once when the store changes', async () => {
 		await testDerivedUpdates(() =>
 			initSwapContext({
-				destinationToken: ckBtcToken,
-				sourceToken: ICP_TOKEN
+				destinationToken: mockToken1,
+				sourceToken: mockToken2
 			})
 		);
 	});
@@ -47,23 +50,23 @@ describe('swapStore', () => {
 			destinationTokenBalance,
 			destinationToken
 		} = initSwapContext({
-			destinationToken: ckBtcToken,
-			sourceToken: ICP_TOKEN
+			destinationToken: mockToken1,
+			sourceToken: mockToken2
 		});
 		const ckBtcBalance = BigNumber.from(1n);
 		const icpBalance = BigNumber.from(2n);
 
 		balancesStore.set({
-			tokenId: ckBtcToken.id,
+			tokenId: mockToken1.id,
 			data: { data: ckBtcBalance, certified: true }
 		});
 		balancesStore.set({
-			tokenId: ICP_TOKEN.id,
+			tokenId: mockToken2.id,
 			data: { data: icpBalance, certified: true }
 		});
 
-		expect(get(sourceToken)).toBe(ICP_TOKEN);
-		expect(get(destinationToken)).toBe(ckBtcToken);
+		expect(get(sourceToken)).toBe(mockToken2);
+		expect(get(destinationToken)).toBe(mockToken1);
 
 		expect(get(sourceTokenBalance)).toStrictEqual(icpBalance);
 		expect(get(destinationTokenBalance)).toStrictEqual(ckBtcBalance);
@@ -74,32 +77,32 @@ describe('swapStore', () => {
 
 	it('should set tokens correctly', () => {
 		const { sourceToken, destinationToken, setSourceToken, setDestinationToken } = initSwapContext({
-			destinationToken: ckBtcToken,
-			sourceToken: ICP_TOKEN
+			destinationToken: mockToken1,
+			sourceToken: mockToken2
 		});
 
-		expect(get(sourceToken)).toBe(ICP_TOKEN);
-		expect(get(destinationToken)).toBe(ckBtcToken);
+		expect(get(sourceToken)).toBe(mockToken2);
+		expect(get(destinationToken)).toBe(mockToken1);
 
-		setSourceToken(ckBtcToken);
-		setDestinationToken(ICP_TOKEN);
+		setSourceToken(mockToken1);
+		setDestinationToken(mockToken2);
 
-		expect(get(sourceToken)).toBe(ckBtcToken);
-		expect(get(destinationToken)).toBe(ICP_TOKEN);
+		expect(get(sourceToken)).toBe(mockToken1);
+		expect(get(destinationToken)).toBe(mockToken2);
 	});
 
 	it('should switch tokens correctly', () => {
 		const { sourceToken, destinationToken, switchTokens } = initSwapContext({
-			destinationToken: ckBtcToken,
-			sourceToken: ICP_TOKEN
+			destinationToken: mockToken1,
+			sourceToken: mockToken2
 		});
 
-		expect(get(sourceToken)).toBe(ICP_TOKEN);
-		expect(get(destinationToken)).toBe(ckBtcToken);
+		expect(get(sourceToken)).toBe(mockToken2);
+		expect(get(destinationToken)).toBe(mockToken1);
 
 		switchTokens();
 
-		expect(get(sourceToken)).toBe(ckBtcToken);
-		expect(get(destinationToken)).toBe(ICP_TOKEN);
+		expect(get(sourceToken)).toBe(mockToken1);
+		expect(get(destinationToken)).toBe(mockToken2);
 	});
 });

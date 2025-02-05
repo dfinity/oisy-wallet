@@ -24,7 +24,7 @@ describe('swap.derived', () => {
 			});
 
 			const tokens = get(swappableTokens);
-			expect(tokens.sourceToken).toBe(ICP_TOKEN);
+			expect(tokens.sourceToken).toEqual({ ...ICP_TOKEN, enabled: true });
 			expect(tokens.destinationToken).toBeUndefined();
 		});
 
@@ -39,7 +39,7 @@ describe('swap.derived', () => {
 
 			const tokens = get(swappableTokens);
 			expect(tokens.sourceToken).toBeUndefined();
-			expect(tokens.destinationToken).toBe(ICP_TOKEN);
+			expect(tokens.destinationToken).toEqual({ ...ICP_TOKEN, enabled: true });
 		});
 	});
 });
