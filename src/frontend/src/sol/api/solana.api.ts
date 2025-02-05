@@ -1,15 +1,16 @@
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import { fetchSolTransactions } from '$sol/services/sol-transactions.services';
+import { fetchSolTransactions 
+       } from '$sol/services/sol-transactions.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolSignature } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address, assertIsAddress, address as solAddress, type Address } from '@solana/addresses';
-import { signature, type Signature } from '@solana/keys';
+import { address, address as solAddress, type Address } from '@solana/addresses';
+import { type Signature } from '@solana/keys';
 import type { Lamports } from '@solana/rpc-types';
 import type { Writeable } from 'zod';
 
@@ -168,42 +169,6 @@ export const loadTokenAccount = async ({
 	const { pubkey: accountAddress } = response.value[0];
 
 	return accountAddress;
-};
-
-/**
- * Fetches SPL token transactions for a given wallet address and token mint.
- */
-//TODO add unit tests
-export const getSplTransactions = async ({
-	address,
-	network,
-	tokenAddress,
-	before,
-	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams & {
-	tokenAddress: SolAddress;
-}): Promise<SolRpcTransaction[]> => {
-	assertIsAddress(tokenAddress);
-
-	const wallet = solAddress(address);
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
-	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
-
-	const transactions = await signatures.reduce(
-		async (accPromise, signature) => {
-			const acc = await accPromise;
-			const parsedTransactions = await fetchSolTransactions({
-				signature,
-				network,
-				address,
-				tokenAddress
-			});
-			return [...acc, ...parsedTransactions];
-		},
-		Promise.resolve([] as SolTransactionUi[])
-	);
-
-	return transactions.slice(0, limit);
 };
 
 /**
