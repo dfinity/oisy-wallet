@@ -7,6 +7,15 @@
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { goto } from '$app/navigation';
+	import { networkUrl } from '$lib/utils/nav.utils';
+	import { AppPath } from '$lib/constants/routes.constants';
+	import { networkId } from '$lib/derived/network.derived';
+
+	const navigateToAirdrops = async () => {
+		await goto(networkUrl({path: AppPath.Airdrops, networkId: $networkId}));
+	}
+
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -22,7 +31,7 @@
 
 		<ButtonGroup slot="toolbar">
 			<ButtonCloseModal />
-			<Button on:click={() => console.log("Hmm")}>
+			<Button on:click={() => navigateToAirdrops()}>
 				see airdrops
 			</Button>
 		</ButtonGroup>
