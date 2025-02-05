@@ -25,7 +25,9 @@
 	};
 
 	let ongoingEvents: AirdropDescription[];
-	$: ongoingEvents = airdropEvents.filter((airdrop) => isOngoingEvent(airdrop.startDate, airdrop.endDate));
+	$: ongoingEvents = airdropEvents.filter((airdrop) =>
+		isOngoingEvent(airdrop.startDate, airdrop.endDate)
+	);
 
 	let upcomingEvents: AirdropDescription[];
 	$: upcomingEvents = airdropEvents.filter((airdrop) => isUpcomingEvent(airdrop.startDate));
