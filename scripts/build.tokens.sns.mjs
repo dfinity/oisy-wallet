@@ -127,16 +127,22 @@ const mapSnsMetadata = ({
 	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
 	icrc1_metadata,
 	meta: { name: alternativeName, url }
-}) => ({
-	ledgerCanisterId: ledger_canister_id,
-	indexCanisterId: index_canister_id,
-	rootCanisterId: root_canister_id,
-	metadata: {
-		...mapOptionalToken(icrc1_metadata),
-		alternativeName: alternativeName.trim(),
-		url
-	}
-});
+}) => {
+	const tokenMetadata = mapOptionalToken(icrc1_metadata);
+
+	return {
+		ledgerCanisterId: ledger_canister_id,
+		indexCanisterId: index_canister_id,
+		rootCanisterId: root_canister_id,
+		...(nonNullish(tokenMetadata) && {
+			metadata: {
+				...tokenMetadata,
+				alternativeName: alternativeName.trim(),
+				url
+			}
+		})
+	};
+};
 
 const DEPRECATED_SNES = {
 	['ibahq-taaaa-aaaaq-aadna-cai']: {
