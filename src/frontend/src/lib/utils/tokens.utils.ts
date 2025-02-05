@@ -79,23 +79,23 @@ export const sortTokens = <T extends Token>({
  * @returns The sorted list of tokens.
  *
  */
-export const pinTokensWithBalanceAtTop = ({
+export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$tokens,
 	$balances,
 	$exchanges
 }: {
-	$tokens: Token[];
+	$tokens: T[];
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): TokenUi[] => {
+}): TokenUi<T>[] => {
 	// If balances data are nullish, there is no need to sort.
 	if (isNullish($balances)) {
 		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
 	}
 
-	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
+	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi<T>[], TokenUi<T>[]]>(
 		(acc, token) => {
-			const tokenUI: TokenUi = mapTokenUi({
+			const tokenUI: TokenUi<T> = mapTokenUi<T>({
 				token,
 				$balances,
 				$exchanges
