@@ -1,5 +1,5 @@
-import type { IcCkToken } from '$icp/types/ic-token';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -186,7 +186,13 @@ export const pinEnabledTokensAtTop = <T extends Token>(
  * @param filter - filter keyword.
  * @returns Filtered list of tokens.
  * */
-export const filterTokens = ({ tokens, filter }: { tokens: Token[]; filter: string }): Token[] => {
+export const filterTokens = <T extends Token>({
+	tokens,
+	filter
+}: {
+	tokens: T[];
+	filter: string;
+}): T[] => {
 	const matchingToken = (token: Token) =>
 		token.name.toLowerCase().includes(filter.toLowerCase()) ||
 		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
@@ -198,7 +204,7 @@ export const filterTokens = ({ tokens, filter }: { tokens: Token[]; filter: stri
 	return isNullishOrEmpty(filter)
 		? tokens
 		: tokens.filter((token) => {
-				const twinToken = (token as IcCkToken).twinToken;
+				const twinToken = isIcCkToken(token) ? token.twinToken : undefined;
 				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
 			});
 };
