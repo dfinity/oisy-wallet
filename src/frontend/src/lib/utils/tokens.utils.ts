@@ -45,7 +45,7 @@ export const sortTokens = <T extends Token>({
 	return [
 		...pinnedTokens,
 		...otherTokens.sort((a, b) => {
-			// TODO: Create a constant for the deprecated SNSs that can be used in the dapp and the `build.tokens.sns.mjs` script. This requires converting the script to TypeScript. Once created, this constant can be used to identify deprecated SNSes instead of using an optimistic checks on ----.
+			// TODO: Create a constant for the deprecated SNSs that can be used in the dapp and the `build.tokens.sns.ts` script. This requires converting the script to TypeScript. Once created, this constant can be used to identify deprecated SNSes instead of using an optimistic checks on ----.
 			// Deprecated SNSes such as CTS starts with ----
 			if (a.name.startsWith('----')) {
 				return 1;
