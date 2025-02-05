@@ -21,10 +21,16 @@ export const idlFactory = ({ IDL }) => {
 		start_timestamp_ns: IDL.Nat64,
 		token_configs: IDL.Vec(TokenConfig)
 	});
+	const VipConfig = IDL.Record({
+		code_validity_duration: IDL.Nat64,
+		vips: IDL.Vec(IDL.Principal),
+		rewards: IDL.Vec(TokenConfig)
+	});
 	const Config = IDL.Record({
 		batch_sizes: IDL.Opt(BatchSizes),
 		airdrop_config: IDL.Opt(AirDropConfig),
 		index_canisters: IDL.Vec(IDL.Principal),
+		vip_config: IDL.Opt(VipConfig),
 		processing_interval_s: IDL.Opt(IDL.Nat16),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)
@@ -36,6 +42,7 @@ export const idlFactory = ({ IDL }) => {
 		InvalidCode: IDL.Null
 	});
 	const NewVipRewardResponse = IDL.Variant({
+		Anonymous: IDL.Null,
 		NotImportantPerson: IDL.Null,
 		VipReward: VipReward
 	});
@@ -57,6 +64,48 @@ export const idlFactory = ({ IDL }) => {
 		airdrop: IDL.Opt(PublicAirdropStatus),
 		last_sprinkle: IDL.Opt(PublicSprinkleInfo)
 	});
+	const TransactionType = IDL.Variant({
+		Send: IDL.Null,
+		Receive: IDL.Null
+	});
+	const Transaction_Icrc = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: IDL.Principal,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_Icrc = IDL.Record({
+		decimals: IDL.Nat8,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_Icrc),
+		account: IDL.Principal,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const Transaction_Spl = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: IDL.Text,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_Spl = IDL.Record({
+		decimals: IDL.Nat8,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_Spl),
+		account: IDL.Text,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshotFor = IDL.Variant({
+		Icrc: AccountSnapshot_Icrc,
+		SplDevnet: AccountSnapshot_Spl,
+		SplMainnet: AccountSnapshot_Spl
+	});
+	const UserSnapshot = IDL.Record({ accounts: IDL.Vec(AccountSnapshotFor) });
 	const LedgerConfig = IDL.Record({
 		ledger_index: IDL.Principal,
 		ledger: IDL.Principal,
@@ -96,14 +145,22 @@ export const idlFactory = ({ IDL }) => {
 		is_vip: IDL.Opt(IDL.Bool),
 		sprinkles: IDL.Vec(RewardInfo)
 	});
+	const VipStats = IDL.Record({
+		total_rejected: IDL.Nat32,
+		total_redeemed: IDL.Nat32,
+		total_issued: IDL.Nat32
+	});
 	return IDL.Service({
 		claim_vip_reward: IDL.Func([VipReward], [ClaimVipRewardResponse], []),
 		config: IDL.Func([], [Config], ['query']),
+		configure_vip: IDL.Func([VipConfig], [], []),
 		new_vip_reward: IDL.Func([], [NewVipRewardResponse], []),
 		public_rewards_info: IDL.Func([], [PublicRewardsInfo], ['query']),
+		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		set_sprinkle_timestamp: IDL.Func([SetSprinkleTimestampArg], [], []),
 		status: IDL.Func([], [StatusResponse], ['query']),
-		user_info: IDL.Func([], [UserData], ['query'])
+		user_info: IDL.Func([], [UserData], ['query']),
+		vip_stats: IDL.Func([], [VipStats], ['query'])
 	});
 };
 // @ts-ignore
@@ -129,10 +186,16 @@ export const init = ({ IDL }) => {
 		start_timestamp_ns: IDL.Nat64,
 		token_configs: IDL.Vec(TokenConfig)
 	});
+	const VipConfig = IDL.Record({
+		code_validity_duration: IDL.Nat64,
+		vips: IDL.Vec(IDL.Principal),
+		rewards: IDL.Vec(TokenConfig)
+	});
 	const Config = IDL.Record({
 		batch_sizes: IDL.Opt(BatchSizes),
 		airdrop_config: IDL.Opt(AirDropConfig),
 		index_canisters: IDL.Vec(IDL.Principal),
+		vip_config: IDL.Opt(VipConfig),
 		processing_interval_s: IDL.Opt(IDL.Nat16),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)
