@@ -144,7 +144,7 @@ interface I18nInit {
 		loading_balance: string;
 		loading_balance_symbol: string;
 		erc20_contracts: string;
-		spl_contract: string;
+		spl_tokens: string;
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
 		minter_ckerc20_erc20: string;
@@ -376,9 +376,6 @@ interface I18nConvert {
 		swap_to_token: string;
 		review: string;
 		max_balance: string;
-		review_tokens_info_title: string;
-		amount_to_convert: string;
-		amount_to_receive: string;
 		source_network: string;
 		destination_network: string;
 		conversion_may_take: string;
@@ -397,12 +394,9 @@ interface I18nSwap {
 		swap: string;
 		select_destination_token: string;
 		select_source_token: string;
-		select_source_token_title: string;
-		select_destination_token_title: string;
 		switch_tokens_button: string;
 		review: string;
 		review_button: string;
-		select_token: string;
 		max_slippage: string;
 		max_balance: string;
 		not_available: string;
@@ -416,11 +410,11 @@ interface I18nSwap {
 		max_slippage_error: string;
 		swap_button: string;
 		swap_is_not_offered: string;
-		exchange_is_not_available: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
 		refreshing_ui: string;
+		swap_provider: string;
 	};
 	error: { unexpected: string; unexpected_missing_data: string };
 }
@@ -444,6 +438,10 @@ interface I18nTokens {
 		updating_ui: string;
 		show_token: string;
 		hide_token: string;
+		select_token: string;
+		exchange_is_not_available: string;
+		source_token_title: string;
+		destination_token_title: string;
 	};
 	details: {
 		title: string;
@@ -482,6 +480,7 @@ interface I18nTokens {
 			invalid_ledger_id: string;
 			missing_ledger_id: string;
 			missing_contract_address: string;
+			missing_token_address: string;
 			no_network: string;
 		};
 		warning: { do_not_close_manage: string };
@@ -509,10 +508,15 @@ interface I18nTokens {
 		open_token_address_block_explorer: string;
 		token_group_number: string;
 	};
-	placeholder: { enter_contract_address: string; search_token: string };
+	placeholder: {
+		enter_contract_address: string;
+		enter_token_address: string;
+		search_token: string;
+	};
 	warning: { trust_token: string };
 	error: {
 		invalid_contract_address: string;
+		invalid_token_address: string;
 		invalid_ledger: string;
 		no_metadata: string;
 		unexpected: string;
