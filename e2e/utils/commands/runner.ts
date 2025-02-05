@@ -1,4 +1,5 @@
 import { exec, type ExecException } from 'child_process';
+import { promisify } from 'util';
 
 // Example Command + CommandRunner types
 export interface Command {
@@ -9,21 +10,17 @@ export interface CommandRunner {
 	exec(args: { command: Command }): Promise<string>;
 }
 
-// 1) Wrap 'exec' in a promise
+const execAsync = promisify(exec);
+
+// 1) Wrap 'exec' in a promise using promisify
 function execPromise({
 	command
 }: {
 	command: string;
 }): Promise<{ stdout: string; stderr: string }> {
-	return new Promise((resolve, reject) => {
-		// eslint-disable-next-line local-rules/prefer-object-params
-		exec(command, (error: ExecException | null, stdout: string, stderr: string) => {
-			if (error) {
-				reject(new Error(stderr));
-			} else {
-				resolve({ stdout, stderr });
-			}
-		});
+	return execAsync(command).catch((err: ExecException & { stdout: string; stderr: string }) => {
+		// Mimic the original error handling: reject with new Error(stderr)
+		throw new Error(err.stderr);
 	});
 }
 
