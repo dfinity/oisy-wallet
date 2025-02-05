@@ -137,15 +137,15 @@ export const calculateTokenUsdBalance = ({
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The token UI.
  */
-export const mapTokenUi = ({
+export const mapTokenUi = <T extends Token>({
 	token,
 	$balances,
 	$exchanges
 }: {
-	token: Token;
+	token: T;
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): TokenUi => ({
+}): TokenUi<T> => ({
 	...token,
 	// There is a difference between undefined and null for the balance.
 	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
