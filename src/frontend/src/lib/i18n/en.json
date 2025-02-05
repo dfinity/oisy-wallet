@@ -382,7 +382,8 @@
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
-			"unable_to_retrieve_amount": "n/a (unable to retrieve)"
+			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
+			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again."
 		}
 	},
 	"convert": {

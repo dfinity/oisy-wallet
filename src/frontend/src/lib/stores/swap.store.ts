@@ -1,4 +1,4 @@
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { nonNullish } from '@dfinity/utils';
@@ -6,8 +6,8 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface SwapData {
-	sourceToken?: IcToken;
-	destinationToken?: IcToken;
+	sourceToken?: IcTokenToggleable;
+	destinationToken?: IcTokenToggleable;
 }
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
@@ -44,12 +44,12 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		destinationTokenBalance,
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
-		setSourceToken: (token: IcToken) =>
+		setSourceToken: (token: IcTokenToggleable) =>
 			update((state) => ({
 				...state,
 				sourceToken: token
 			})),
-		setDestinationToken: (token: IcToken) =>
+		setDestinationToken: (token: IcTokenToggleable) =>
 			update((state) => ({
 				...state,
 				destinationToken: token
@@ -63,14 +63,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 };
 
 export interface SwapContext {
-	sourceToken: Readable<IcToken | undefined>;
-	destinationToken: Readable<IcToken | undefined>;
+	sourceToken: Readable<IcTokenToggleable | undefined>;
+	destinationToken: Readable<IcTokenToggleable | undefined>;
 	sourceTokenBalance: Readable<BigNumber | undefined>;
 	destinationTokenBalance: Readable<BigNumber | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
-	setSourceToken: (token: IcToken) => void;
-	setDestinationToken: (token: IcToken) => void;
+	setSourceToken: (token: IcTokenToggleable) => void;
+	setDestinationToken: (token: IcTokenToggleable) => void;
 	switchTokens: () => void;
 }
 

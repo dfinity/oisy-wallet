@@ -184,9 +184,12 @@
 			}
 		},
 		"icp_index": {
+			"dependencies": ["icp_ledger"],
 			"type": "custom",
+			"build": "scripts/build.icp_index.sh",
 			"candid": "target/ic/icp_index.did",
 			"wasm": "target/ic/icp_index.wasm",
+			"init_arg_file": "target/ic/icp_index.args.did",
 			"specified_id": "qhbym-qaaaa-aaaaa-aaafq-cai",
 			"remote": {
 				"id": {
