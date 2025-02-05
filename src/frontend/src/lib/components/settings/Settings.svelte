@@ -22,8 +22,6 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
-	import { defaultThemeName, themeStore } from '$lib/stores/settings.store';
-	import { onMount } from 'svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -44,16 +42,6 @@
 			}
 		}
 	};
-
-	let theme
-	$: theme = defaultThemeName;
-
-	onMount(() => {
-		userProfileStore.subscribe((state) => console.log(state))
-		themeStore.subscribe((state) => {
-			theme = state?.name;
-		});
-	});
 </script>
 
 <KeyValuePairInfo>

@@ -19,8 +19,9 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { defaultThemeName, themeStore, type ThemeType } from '$lib/stores/settings.store';
-	import {Themes} from "$lib/enums/themes";
+	import { Themes } from '$lib/enums/themes';
+	import { DEFAULT_THEME_NAME } from '$lib/constants/app.constants';
+	import { selectedTheme } from '$lib/derived/settings.derived';
 
 	/**
 	 * Init dApp
@@ -86,15 +87,15 @@
 		spinner?.remove();
 	})();
 
+
 	const setThemeHtmlProperty = (theme: Themes) => {
-		console.log("THEME SET TO", theme)
 		document.getElementsByTagName("html")[0].setAttribute("theme", theme);
 	}
 
 	const applyTheme = () => {
-		themeStore.subscribe((state) => {
-			const themeSetting = state?.name ?? defaultThemeName;
-			if (themeSetting === 'system') {
+		selectedTheme.subscribe((themeName) => {
+			const themeSetting = themeName ?? DEFAULT_THEME_NAME;
+			if (themeSetting === Themes.SYSTEM) {
 				if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
 					setThemeHtmlProperty(Themes.DARK);
 				} else {
