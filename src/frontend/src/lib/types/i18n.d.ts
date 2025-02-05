@@ -356,6 +356,7 @@ interface I18nSend {
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
+		solana_transaction_expired: string;
 	};
 }
 

@@ -4,10 +4,10 @@ import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
+import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import { SolanaNetworks } from '$sol/types/network';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/rpc-types';
@@ -23,13 +23,10 @@ describe('sol-wallet.scheduler', () => {
 
 	const mockSolBalance = lamports(100n);
 	const mockSplBalance = BigInt(123);
-	const mockSolTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
+	const mockSolTransactions = createMockSolTransactionsUi(2);
 
 	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({
-		data: mapSolTransactionUi({
-			transaction,
-			address: mockSolAddress
-		}),
+		data: transaction,
 		certified: false
 	}));
 
@@ -93,10 +90,10 @@ describe('sol-wallet.scheduler', () => {
 			.spyOn(solanaApi, 'loadSplTokenBalance')
 			.mockResolvedValue(mockSplBalance);
 		spyLoadSolTransactions = vi
-			.spyOn(solanaApi, 'getSolTransactions')
+			.spyOn(solSignaturesServices, 'getSolTransactions')
 			.mockResolvedValue(mockSolTransactions);
 		spyLoadSplTransactions = vi
-			.spyOn(solanaApi, 'getSplTransactions')
+			.spyOn(solSignaturesServices, 'getSplTransactions')
 			//TODO add spl mock txns
 			.mockResolvedValue([]);
 

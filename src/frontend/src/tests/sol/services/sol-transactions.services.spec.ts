@@ -1,5 +1,6 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as solanaApi from '$sol/api/solana.api';
+import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
 	fetchSolTransactionsForSignature,
 	loadNextSolTransactions
@@ -15,8 +16,7 @@ import type {
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
-	mockSolCertifiedTransactions,
-	mockSolRpcReceiveTransaction,
+	createMockSolTransactionsUi,
 	mockSolRpcSendTransaction
 } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
@@ -27,14 +27,19 @@ describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
 	const signalEnd = vi.fn();
 
-	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction];
+	const mockTransactions = createMockSolTransactionsUi(2);
+
+	const mockCertifiedTransactions = mockTransactions.map((transaction) => ({
+		data: transaction,
+		certified: false
+	}));
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.resetAllMocks();
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
-		spyGetTransactions = vi.spyOn(solanaApi, 'getSolTransactions');
+		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
 	});
 
 	describe('fetchSolTransactionsForSignature', () => {
@@ -205,7 +210,7 @@ describe('sol-transactions.services', () => {
 				signalEnd
 			});
 
-			expect(transactions).toEqual(mockSolCertifiedTransactions);
+			expect(transactions).toEqual(mockCertifiedTransactions);
 			expect(signalEnd).not.toHaveBeenCalled();
 			expect(spyGetTransactions).toHaveBeenCalledWith({
 				address: mockSolAddress,
@@ -257,7 +262,7 @@ describe('sol-transactions.services', () => {
 			});
 
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
-			expect(storeData).toEqual(mockSolCertifiedTransactions);
+			expect(storeData).toEqual(mockCertifiedTransactions);
 		});
 
 		it('should handle errors and reset store', async () => {
