@@ -126,3 +126,4 @@ export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // THEMES
 export const DEFAULT_THEME_NAME = Themes.SYSTEM;
+export const THEME_VALUES = Object.values(Themes);
