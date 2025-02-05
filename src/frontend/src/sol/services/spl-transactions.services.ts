@@ -5,7 +5,6 @@ import {
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import type { GetSplTransactionsParams } from '$sol/types/sol-api';
-import { mapSplTransactionUi } from '$sol/utils/spl-transactions.utils';
 
 interface LoadNextSolTransactionsParams extends GetSplTransactionsParams {
 	signalEnd: () => void;
@@ -54,7 +53,7 @@ const loadSplTransactions = async ({
 		});
 
 		const certifiedTransactions = transactions.map((transaction) => ({
-			data: mapSplTransactionUi({ transaction, address, tokenAddress }),
+			data: transaction,
 			certified: false
 		}));
 
