@@ -1,11 +1,11 @@
 <script lang="ts">
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { THEME_VALUES } from '$lib/constants/app.constants';
 	import { selectedTheme } from '$lib/derived/settings.derived';
 	import { Themes } from '$lib/enums/themes';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { themeStore } from '$lib/stores/settings.store';
-	import { THEME_VALUES } from '$lib/constants/app.constants';
 	$: selected = $selectedTheme;
 	const selectTheme = (name: Themes) => () => {
 		themeStore.set({ key: 'theme', value: { name } });
