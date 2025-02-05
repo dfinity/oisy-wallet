@@ -106,7 +106,7 @@ const saveLogos = async (logos: Logo[]) => {
 	await Promise.all(activeSnsLogos.map(writeLogo));
 };
 
-const mapOptionalToken = (response: ResponseData['icrc1_metadata']): SnsMetadata => {
+const mapOptionalToken = (response: ResponseData['icrc1_metadata']): SnsMetadata | undefined => {
 	const nullishToken = response.reduce<OptionalSnsMetadata>((acc, [key, value]) => {
 		switch (key) {
 			case IcrcMetadataResponseEntries.SYMBOL:
@@ -138,7 +138,7 @@ const mapOptionalToken = (response: ResponseData['icrc1_metadata']): SnsMetadata
 	const { symbol, name, fee, decimals, ...rest } = nullishToken;
 
 	if (isNullish(symbol) || isNullish(name) || isNullish(fee) || isNullish(decimals)) {
-		throw new Error(`Missing token metadata: ${JSON.stringify(response)}`);
+		return undefined;
 	}
 
 	return {
