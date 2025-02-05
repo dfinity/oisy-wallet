@@ -2,11 +2,7 @@ import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import { fetchSolTransactions 
-       } from '$sol/services/sol-transactions.services';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SolSignature } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address, address as solAddress, type Address } from '@solana/addresses';
