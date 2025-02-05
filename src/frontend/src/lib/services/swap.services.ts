@@ -3,7 +3,6 @@ import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { isSaveCustomToken } from '$icp/validation/custom-token.validation';
 import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
@@ -13,7 +12,6 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
-import type { SaveCustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
@@ -23,6 +21,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 
 export const swap = async ({
 	identity,
@@ -89,18 +88,15 @@ export const swap = async ({
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
-	if (isSaveCustomToken(destinationToken)) {
-		const customTokenToSave: SaveCustomToken = destinationToken as unknown as SaveCustomToken;
-		if (!customTokenToSave.enabled) {
-			customTokenToSave.enabled = true;
-			await setCustomToken({
-				token: toCustomToken(customTokenToSave),
-				identity,
-				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			});
+	const toggleableToken: IcTokenToggleable = destinationToken as IcTokenToggleable;
+	if (!toggleableToken.enabled) {
+		await setCustomToken({
+			token: toCustomToken({...toggleableToken, enabled: true, networkKey: 'Icrc' }),
+			identity,
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
 
-			await loadCustomTokens({ identity });
-		}
+		await loadCustomTokens({ identity });
 	}
 
 	await waitAndTriggerWallet();
