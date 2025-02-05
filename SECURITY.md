@@ -2,7 +2,10 @@
 
 DFINITY takes the security of our software products seriously, which includes all source code repositories under the [DFINITY](https://github.com/dfinity) GitHub organization.
 
-> [!IMPORTANT] > [DFINITY Foundation](https://dfinity.org) has a [Internet Computer (ICP) Bug Bounty program](https://dfinity.org/bug-bounty/) that rewards researchers for finding and reporting vulnerabilities in the Internet Computer. Please check the scope and eligibility criteria outlined in the policy to see if the vulnerability you found qualifies for a reward.
+<!-- prettier-ignore-start -->
+> [!IMPORTANT]  
+> [DFINITY Foundation](https://dfinity.org) has a [Internet Computer (ICP) Bug Bounty program](https://dfinity.org/bug-bounty/) that rewards researchers for finding and reporting vulnerabilities in the Internet Computer. Please check the scope and eligibility criteria outlined in the policy to see if the vulnerability you found qualifies for a reward.
+<!-- prettier-ignore-end -->
 
 ## How to report a vulnerability
 
