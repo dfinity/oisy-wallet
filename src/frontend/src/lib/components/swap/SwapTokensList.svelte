@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -14,7 +15,6 @@
 	import type { Token, TokenUi } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
