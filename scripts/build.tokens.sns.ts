@@ -39,9 +39,12 @@ interface ResponseData {
 	};
 }
 
-type SnsToken = EnvSnsToken & {
+type SnsToken = Omit<EnvSnsToken, 'metadata'> & {
 	metadata: EnvIcrcTokenMetadata & { icon?: string };
 };
+
+type SnsTokenWithOptionalMetadata = Omit<EnvSnsToken, 'metadata'> &
+	Partial<Pick<SnsToken, 'metadata'>>;
 
 type SnsMetadata = SnsToken['metadata'];
 
@@ -158,7 +161,7 @@ const mapSnsMetadata = ({
 	canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
 	icrc1_metadata,
 	meta: { name: alternativeName, url }
-}: ResponseData): SnsToken => {
+}: ResponseData): SnsTokenWithOptionalMetadata => {
 	const tokenMetadata = mapOptionalToken(icrc1_metadata);
 
 	return {
@@ -174,6 +177,9 @@ const mapSnsMetadata = ({
 		})
 	};
 };
+
+const filterNonNullishMetadata = (token: SnsTokenWithOptionalMetadata): token is SnsToken =>
+	nonNullish(token.metadata);
 
 const DEPRECATED_SNES: Record<string, OptionalSnsMetadata> = {
 	['ibahq-taaaa-aaaaq-aadna-cai']: {
@@ -201,7 +207,7 @@ const findSnses = async () => {
 
 	const { tokens, icons } = snses
 		.map(mapSnsMetadata)
-		.filter(({ metadata }) => nonNullish(metadata))
+		.filter(filterNonNullishMetadata)
 		.map(mapDeprecatedSnsMetadata)
 		.reduce<{ tokens: SnsToken[]; icons: Logo[] }>(
 			(
