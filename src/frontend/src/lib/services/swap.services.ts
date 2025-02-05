@@ -2,6 +2,7 @@ import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
@@ -21,7 +22,6 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 
 export const swap = async ({
 	identity,
@@ -91,7 +91,7 @@ export const swap = async ({
 	const toggleableToken: IcTokenToggleable = destinationToken as IcTokenToggleable;
 	if (!toggleableToken.enabled) {
 		await setCustomToken({
-			token: toCustomToken({...toggleableToken, enabled: true, networkKey: 'Icrc' }),
+			token: toCustomToken({ ...toggleableToken, enabled: true, networkKey: 'Icrc' }),
 			identity,
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
