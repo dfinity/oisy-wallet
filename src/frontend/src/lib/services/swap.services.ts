@@ -22,6 +22,7 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { isToggleableIcToken } from '$icp/validation/ic-token.validation';
 
 export const swap = async ({
 	identity,
@@ -88,15 +89,17 @@ export const swap = async ({
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
-	const toggleableToken: IcTokenToggleable = destinationToken as IcTokenToggleable;
-	if (!toggleableToken.enabled) {
-		await setCustomToken({
-			token: toCustomToken({ ...toggleableToken, enabled: true, networkKey: 'Icrc' }),
-			identity,
-			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-		});
+	if (isToggleableIcToken(destinationToken)) {
+		const toggleableToken: IcTokenToggleable = destinationToken as IcTokenToggleable;
+		if (!toggleableToken.enabled) {
+			await setCustomToken({
+				token: toCustomToken({ ...toggleableToken, enabled: true, networkKey: 'Icrc' }),
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			});
 
-		await loadCustomTokens({ identity });
+			await loadCustomTokens({ identity });
+		}
 	}
 
 	await waitAndTriggerWallet();
