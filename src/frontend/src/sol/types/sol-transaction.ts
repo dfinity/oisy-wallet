@@ -53,11 +53,6 @@ export type SolRpcTransaction = SolRpcTransactionRaw & {
 	confirmationStatus: Commitment | null;
 };
 
-export type SolRpcInstruction =
-	NonNullable<SolRpcTransactionRaw>['transaction']['message']['instructions'][number] & {
-		programAddress: Address;
-	};
-
 export type SolSignature = ReturnType<
 	GetSignaturesForAddressApi['getSignaturesForAddress']
 >[number];
