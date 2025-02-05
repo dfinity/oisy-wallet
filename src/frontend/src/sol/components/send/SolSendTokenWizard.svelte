@@ -185,7 +185,7 @@
 			});
 
 			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
-				? ''
+				? $i18n.send.error.solana_transaction_expired
 				: $i18n.send.error.unexpected;
 
 			toastsError({
