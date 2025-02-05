@@ -214,7 +214,11 @@
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅"
+			"pouh_credential_verified": "Verified ✅",
+			"appearance": "Appearance",
+			"appearance_light": "Light",
+			"appearance_dark": "Dark",
+			"appearance_system": "System"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
