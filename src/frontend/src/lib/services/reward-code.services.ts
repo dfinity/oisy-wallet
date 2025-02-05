@@ -23,7 +23,7 @@ const queryVipUser = async (params: {
 	});
 
 	return { success: fromNullable(userData.is_vip) === true };
-}
+};
 
 /**
  * Checks if a user is a VIP user.
@@ -66,7 +66,7 @@ const queryAirdrops = async (params: {
 	});
 
 	return userData.airdrops;
-}
+};
 
 /**
  * Gets the airdrops the user received.
@@ -80,9 +80,9 @@ const queryAirdrops = async (params: {
  *
  * @throws {Error} Displays an error toast and returns an empty list if the query fails.
  */
-export const getAirdrops = async(params: {identity: Identity}): Promise<RewardInfo[]> => {
+export const getAirdrops = async (params: { identity: Identity }): Promise<RewardInfo[]> => {
 	try {
-		return await queryAirdrops({...params, certified: false});
+		return await queryAirdrops({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -92,7 +92,7 @@ export const getAirdrops = async(params: {identity: Identity}): Promise<RewardIn
 	}
 
 	return [];
-}
+};
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({

@@ -1,5 +1,5 @@
-import * as z from 'zod';
 import airdropEventsJson from '$env/airdrop-events.json';
+import * as z from 'zod';
 
 const AirdropEventsSchema = z.object({
 	title: z.string(),
@@ -7,7 +7,7 @@ const AirdropEventsSchema = z.object({
 	tasks: z.array(z.string()),
 	logo: z.string(),
 	startDate: z.string().transform((val) => new Date(val)),
-	endDate: z.string().transform((val) => new Date(val)),
+	endDate: z.string().transform((val) => new Date(val))
 });
 
 export type AirdropDescription = z.infer<typeof AirdropEventsSchema>;

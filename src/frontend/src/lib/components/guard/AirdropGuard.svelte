@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
-	import { modalAirdropState } from '$lib/derived/modal.derived';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { getAirdrops } from '$lib/services/reward-code.services';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { RewardInfo } from '$declarations/rewards/rewards.did';
+	import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalAirdropState } from '$lib/derived/modal.derived';
+	import { getAirdrops } from '$lib/services/reward-code.services';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	onMount(async () => {
 		const initialLoading = sessionStorage.getItem('initialLoading');
 		if (isNullish(initialLoading)) {
-			const airdrops: RewardInfo[] = await getAirdrops({identity: $authIdentity});
+			const airdrops: RewardInfo[] = await getAirdrops({ identity: $authIdentity });
 			if (airdrops.length > 0) {
 				modalStore.openAirdropState();
 			}

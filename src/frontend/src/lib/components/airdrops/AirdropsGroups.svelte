@@ -16,7 +16,7 @@
 
 		{#each airdrops as airdrop}
 			<div in:slide={SLIDE_DURATION}>
-				<Airdrop on:click={() => modalStore.openAirdropDetails(airdrop)} airdrop={airdrop} />
+				<Airdrop on:click={() => modalStore.openAirdropDetails(airdrop)} {airdrop} />
 			</div>
 		{/each}
 	</div>

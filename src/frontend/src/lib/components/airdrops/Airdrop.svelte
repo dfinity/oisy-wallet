@@ -2,9 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
-	import Img from '$lib/components/ui/Img.svelte';
 
 	export let airdrop: AirdropDescription;
 
@@ -46,12 +46,7 @@
 	<button class={`contents`} on:click>
 		<AirdropCard>
 			<div slot="icon">
-				<Img
-					height="55"
-					width="55"
-					rounded
-					src={airdrop.logo}
-				/>
+				<Img height="55" width="55" rounded src={airdrop.logo} />
 			</div>
 
 			<div slot="title">

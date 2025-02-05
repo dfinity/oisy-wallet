@@ -15,38 +15,28 @@
 		let endDiff = endDate.getTime() - currentDate.getTime();
 
 		return startDiff <= 0 && endDiff > 0;
-	}
+	};
 
 	const isUpcomingEvent = (startDate: Date) => {
 		const currentDate = new Date(Date.now());
 		let startDiff = startDate.getTime() - currentDate.getTime();
 
 		return startDiff > 0;
-	}
+	};
 
 	let ongoingEvents: AirdropDescription[];
-	$: ongoingEvents = airdropEvents.filter((airdrop) => {
-		return isOngoingEvent(airdrop.startDate, airdrop.endDate);
-	});
+	$: ongoingEvents = airdropEvents.filter((airdrop) => isOngoingEvent(airdrop.startDate, airdrop.endDate));
 
 	let upcomingEvents: AirdropDescription[];
-	$: upcomingEvents = airdropEvents.filter((airdrop) => {
-		return isUpcomingEvent(airdrop.startDate);
-	});
+	$: upcomingEvents = airdropEvents.filter((airdrop) => isUpcomingEvent(airdrop.startDate));
 </script>
 
 {#if ongoingEvents.length > 0}
-	<AirdropsGroups
-		title="Ongoing"
-		airdrops={ongoingEvents}
-	/>
+	<AirdropsGroups title="Ongoing" airdrops={ongoingEvents} />
 {/if}
 
 {#if upcomingEvents.length > 0}
-	<AirdropsGroups
-		title="Upcoming"
-		airdrops={upcomingEvents}
-	/>
+	<AirdropsGroups title="Upcoming" airdrops={upcomingEvents} />
 {/if}
 
 {#if $modalAirdropDetails && nonNullish(selectedAirdrop)}
