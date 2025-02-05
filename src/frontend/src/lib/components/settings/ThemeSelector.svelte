@@ -4,9 +4,8 @@
 	import { Themes } from '$lib/enums/themes';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { themeStore } from '$lib/stores/settings.store';
-	let checked: boolean;
 	$: selected = $selectedTheme;
-	const selectTheme = (name: Themes) => async () => {
+	const selectTheme = (name: Themes) => () => {
 		themeStore.set({ key: 'theme', value: { name } });
 	};
 </script>
