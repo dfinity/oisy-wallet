@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -15,11 +14,12 @@
 	import type { Token, TokenUi } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher<{
-		icSelectToken: IcrcCustomToken;
+		icSelectToken: IcTokenToggleable;
 		icCloseTokensList: void;
 	}>();
 
@@ -28,7 +28,7 @@
 	let noTokensMatch = false;
 	$: noTokensMatch = filteredTokens.length === 0;
 
-	let tokens: TokenUi<IcrcCustomToken>[];
+	let tokens: TokenUi<IcTokenToggleable>[];
 	$: tokens = pinTokensWithBalanceAtTop({
 		$tokens: [{ ...ICP_TOKEN, enabled: true }, ...$allKongSwapCompatibleIcrcTokens].filter(
 			(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
@@ -37,7 +37,7 @@
 		$balances: $balancesStore
 	});
 
-	let filteredTokens: TokenUi<IcrcCustomToken>[] = [];
+	let filteredTokens: TokenUi<IcTokenToggleable>[] = [];
 	$: filteredTokens = filterTokens({ tokens, filter });
 </script>
 
