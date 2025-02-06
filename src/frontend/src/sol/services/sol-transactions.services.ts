@@ -49,10 +49,19 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
-	return await instructions.reduce(
+	const putativeInnerInstructions = meta?.innerInstructions ?? [];
+
+	// Inside the instructions there could be some that we are unable to decode, but that may have
+	// simpler (and decoded) inner instructions. We should try to map those as well.
+	const allInstructions = [
+		...instructions,
+		...putativeInnerInstructions.flatMap(({ instructions }) => instructions)
+	];
+
+	return await allInstructions.reduce(
 		async (acc, instruction, idx) => {
 			const innerInstructionsRaw =
-				meta?.innerInstructions?.find(({ index }) => index === idx)?.instructions ?? [];
+				putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
 
 			const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map(
 				(innerInstruction) => ({
