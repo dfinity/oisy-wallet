@@ -38,9 +38,7 @@ const nonAppleProjects = [
 	},
 	{
 		name: 'Firefox',
-		use: {
-			...devices['Desktop Firefox']
-		}
+		use: devices['Desktop Firefox']
 	},
 	{
 		name: 'Pixel 5',
