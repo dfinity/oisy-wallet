@@ -166,6 +166,29 @@ describe('sol-instructions.utils', () => {
 				});
 			});
 
+			it('should map a valid `closeAccount` instruction', async () => {
+				const result = await mapSolParsedInstruction({
+					instruction: {
+						...mockTokenInstruction,
+						parsed: {
+							type: 'closeAccount',
+							info: {
+								destination: mockSolAddress2,
+								account: mockSolAddress
+							}
+						}
+					},
+					network
+				});
+
+				expect(result).toEqual({
+					value: 0n,
+					from: mockSolAddress,
+					to: mockSolAddress2,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
 					instruction: { ...mockTokenInstruction, parsed: { type: 'other-type', info: {} } },
