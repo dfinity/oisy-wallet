@@ -1,4 +1,5 @@
 import {
+	AMOUNT_DATA,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -38,9 +39,15 @@ interface TestIdOperationParams {
 	testId: string;
 }
 
+interface NavigateToTokenParams {
+	token: string;
+	network: string;
+}
+
 interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
+	state?: 'detached';
 }
 
 type TestModalSnapshotParams = {
@@ -70,6 +77,10 @@ abstract class Homepage {
 		await this.#page.getByTestId(testId).click();
 	}
 
+	protected async waitForByTestId(testId: string): Promise<void> {
+		await this.#page.getByTestId(testId).waitFor();
+	}
+
 	protected async isVisibleByTestId(testId: string): Promise<boolean> {
 		const element = this.#page.locator(`[data-tid="${testId}"]`);
 		return await element.isVisible();
@@ -91,6 +102,15 @@ abstract class Homepage {
 		if (await this.isSelectorVisible({ selector })) {
 			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
 		}
+	}
+
+	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
+		const elementsLocator = this.#page.locator(selector);
+		await elementsLocator.evaluateAll((elements) => {
+			for (const element of elements) {
+				(element as HTMLElement).innerHTML = 'placeholder';
+			}
+		});
 	}
 
 	private async goto(): Promise<void> {
@@ -135,12 +155,17 @@ abstract class Homepage {
 
 	protected async waitForModal({
 		modalOpenButtonTestId,
-		modalTestId
+		modalTestId,
+		state
 	}: WaitForModalParams): Promise<Locator> {
-		await this.clickByTestId(modalOpenButtonTestId);
+		
 		const modal = this.#page.getByTestId(modalTestId);
+		if (state === 'detached') {
+			await modal.waitFor({ state: 'detached' });
+			return modal
+		}
+		await this.clickByTestId(modalOpenButtonTestId);
 		await modal.waitFor();
-
 		return modal;
 	}
 
@@ -190,6 +215,34 @@ abstract class Homepage {
 
 	async waitForLoggedInIndicator(): Promise<void> {
 		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
+	}
+
+	protected async elementExistsByTestId(testId: string): Promise<boolean> {
+		return await this.#page
+			.getByTestId(testId)
+			.isVisible()
+			.catch(() => false);
+	}
+
+	getBalance(): Locator {
+		return this.#page.getByTestId(AMOUNT_DATA);
+	}
+
+	async setInputValueByTestId({
+		testId,
+		value
+	}: TestIdOperationParams & { value: string }): Promise<void> {
+		await this.#page.getByTestId(testId).fill(value);
+	}
+
+	async getAccountIdByTestId(testId: string): Promise<string> {
+		const container = this.#page.locator('#icp-account-id');
+		const addressLocator = container.getByTestId(testId);
+		const addressText = await addressLocator.textContent();
+		if (!addressText) {
+			throw new Error('No address text found in container icp-account-id');
+		}
+		return addressText.trim();
 	}
 
 	async testModalSnapshot({
