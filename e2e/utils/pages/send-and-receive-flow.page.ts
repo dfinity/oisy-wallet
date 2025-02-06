@@ -55,7 +55,7 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.clickByTestId({ testId: REVIEW_FORM_SEND_BUTTON });
 		const progressModalExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
 		expect(progressModalExists).toBe(true);
-		await this.waitForModal({ modalTestId: IN_PROGRESS_MODAL, state: 'detached'});
+		await this.waitForModal({ modalTestId: IN_PROGRESS_MODAL, state: 'detached' });
 		const progressModalDoesNotExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
 		expect(progressModalDoesNotExists).toBe(false);
 		await this.mockSelectorAll({
