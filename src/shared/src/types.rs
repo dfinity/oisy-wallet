@@ -390,13 +390,62 @@ pub mod dapp {
     }
 }
 
+pub mod theme {
+    use crate::types::Version;
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub enum Theme {
+        Light,
+        Dark,
+        #[default]
+        System
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct ThemeSettings {
+        pub selected_theme: Theme,
+    }
+
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum SaveSelectedThemeError {
+        InvalidTheme,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct SaveSelectedThemeRequest {
+        pub theme: Theme,
+        pub current_user_version: Option<Version>,
+    }
+
+    impl SaveSelectedThemeRequest {
+        /// Checks whether the theme is valid
+        ///
+        /// # Errors
+        /// - If the theme is not among the supported themes.
+        pub fn check(&self) -> Result<(), SaveSelectedThemeError> {
+            match self.theme {
+                Theme::Light | Theme::Dark | Theme::System => Ok(()),
+                _ => Err(SaveSelectedThemeError::InvalidTheme),
+            }
+        }
+    }
+}
+
+
+
 pub mod settings {
     use crate::types::dapp::DappSettings;
     use candid::{CandidType, Deserialize};
+    use crate::types::theme::ThemeSettings;
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct Settings {
         pub dapp: DappSettings,
+        pub theme: ThemeSettings,
     }
 }
 

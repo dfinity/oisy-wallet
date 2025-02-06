@@ -4,6 +4,7 @@ use crate::utils::{
 };
 use candid::Principal;
 use shared::types::dapp::{AddDappSettingsError, AddHiddenDappIdRequest};
+use shared::types::theme::{SaveSelectedThemeError, SaveSelectedThemeRequest, Theme};
 use shared::types::user_profile::{GetUserProfileError, UserProfile};
 
 #[test]
@@ -338,5 +339,191 @@ fn test_add_user_hidden_dapp_id_does_not_allow_long_ids() {
             .hidden_dapp_ids
             .len(),
         0
+    );
+}
+
+
+
+#[test]
+fn test_save_user_selected_theme_saves_the_selected_theme() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let create_profile_response =
+        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+
+    let profile = create_profile_response.expect("Create failed");
+    assert_eq!(
+        profile
+            .settings
+            .unwrap()
+            .theme.selected_theme,
+        Theme::System
+    );
+
+    let save_selected_theme_arg = SaveSelectedThemeRequest {
+        theme: Theme::Light,
+        current_user_version: profile.version,
+    };
+
+    let save_selected_theme_response = pic_setup.update::<Result<(), SaveSelectedThemeError>>(
+        caller,
+        "save_user_selected_theme",
+        save_selected_theme_arg,
+    );
+
+    assert_eq!(save_selected_theme_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings.theme.selected_theme, Theme::Light);
+}
+
+
+#[test]
+fn test_save_user_selected_theme_saves_multiple_times() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let create_profile_response =
+        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+
+    let initial_profile = create_profile_response.expect("Create failed");
+    assert_eq!(
+        initial_profile
+            .settings
+            .unwrap()
+            .theme.selected_theme,
+        Theme::System
+    );
+
+    let save_selected_theme_arg = SaveSelectedThemeRequest {
+        theme: Theme::Light,
+        current_user_version: initial_profile.version,
+    };
+
+    let save_selected_theme_response = pic_setup.update::<Result<(), SaveSelectedThemeError>>(
+        caller,
+        "save_user_selected_theme",
+        save_selected_theme_arg.clone(),
+    );
+
+    assert_eq!(save_selected_theme_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let save_selected_theme_arg = SaveSelectedThemeRequest {
+        theme: Theme::Dark,
+        current_user_version: user_profile.version,
+    };
+
+    let save_selected_theme_response = pic_setup.update::<Result<(), SaveSelectedThemeError>>(
+        caller,
+        "save_user_selected_theme",
+        save_selected_theme_arg,
+    );
+
+    assert_eq!(save_selected_theme_response, Ok(Ok(())));
+
+    let get_final_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let final_user_profile = get_final_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = final_user_profile.settings.unwrap();
+
+    assert_eq!(settings.theme.selected_theme, Theme::Dark);
+}
+
+
+
+#[test]
+fn test_save_user_selected_theme_cannot_update_wrong_version() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let create_profile_response =
+        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+
+    let profile = create_profile_response.expect("Create failed");
+    assert_eq!(
+        profile
+            .settings
+            .unwrap()
+            .theme.selected_theme,
+        Theme::System
+    );
+
+    let save_selected_theme_arg = SaveSelectedThemeRequest {
+        theme: Theme::Light,
+        current_user_version: profile.version,
+    };
+
+    let save_selected_theme_response = pic_setup.update::<Result<(), SaveSelectedThemeError>>(
+        caller,
+        "save_user_selected_theme",
+        save_selected_theme_arg,
+    );
+
+    assert_eq!(save_selected_theme_response, Ok(Ok(())));
+
+    let save_selected_theme_arg = SaveSelectedThemeRequest {
+        theme: Theme::Dark,
+        current_user_version: profile.version,
+    };
+
+    let save_selected_theme_response = pic_setup.update::<Result<(), SaveSelectedThemeError>>(
+        caller,
+        "save_user_selected_theme",
+        save_selected_theme_arg,
+    );
+
+    assert_eq!(
+        save_selected_theme_response,
+        Ok(Err(SaveSelectedThemeError::VersionMismatch))
+    );
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    assert_eq!(
+        get_profile_response
+            .expect("Call to get profile failed")
+            .expect("Get profile failed")
+            .settings
+            .unwrap()
+            .theme
+            .selected_theme
+            ,
+        Theme::Light
     );
 }

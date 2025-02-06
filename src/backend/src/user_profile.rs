@@ -5,6 +5,7 @@ use shared::types::{
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     CredentialType, Version,
 };
+use shared::types::theme::{SaveSelectedThemeError, Theme};
 
 pub fn find_profile(
     principal: StoredPrincipal,
@@ -76,6 +77,35 @@ pub fn add_hidden_dapp_id(
         .map_err(|_| AddDappSettingsError::UserNotFound)?;
     let now = time();
     let new_profile = user_profile.add_hidden_dapp_id(profile_version, now, dapp_id)?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+
+
+/// Saves the selected theme in the user's settings.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `selected_theme` - The theme to save.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the theme was set successfully, or if it was already set.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn save_selected_theme(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    selected_theme: Theme,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), SaveSelectedThemeError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| SaveSelectedThemeError::UserNotFound)?;
+    let now = time();
+    let new_profile = user_profile.save_selected_theme(profile_version, now, selected_theme)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }

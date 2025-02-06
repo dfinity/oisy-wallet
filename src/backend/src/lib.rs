@@ -1,7 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use crate::user_profile::add_hidden_dapp_id;
+use crate::user_profile::{add_hidden_dapp_id, save_selected_theme};
 use bitcoin_utils::estimate_fee;
 use candid::Principal;
 use config::find_credential_config;
@@ -41,6 +41,7 @@ use shared::types::{
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
 use std::time::Duration;
+use shared::types::theme::{SaveSelectedThemeError, SaveSelectedThemeRequest};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -543,6 +544,37 @@ pub fn add_user_hidden_dapp_id(
             stored_principal,
             request.current_user_version,
             request.dapp_id,
+            &mut user_profile_model,
+        )
+    })
+}
+
+
+/// Saves the selected theme in the user's settings.
+///
+/// # Arguments
+/// * `request` - The request to save the selected theme.
+///
+/// # Returns
+/// - Returns `Ok(())` if the theme was added successfully, or if it was already saved.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn save_user_selected_theme(
+    request: SaveSelectedThemeRequest,
+) -> Result<(), SaveSelectedThemeError> {
+    request.check()?;
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        save_selected_theme(
+            stored_principal,
+            request.current_user_version,
+            request.theme,
             &mut user_profile_model,
         )
     })

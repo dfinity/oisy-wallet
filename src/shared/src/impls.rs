@@ -21,6 +21,7 @@ use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(test)]
 use strum::IntoEnumIterator;
+use crate::types::theme::{SaveSelectedThemeError, Theme};
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -211,6 +212,41 @@ impl StoredUserProfile {
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
         new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;
         new_settings.dapp = new_dapp_settings;
+        new_profile.settings = Some(new_settings);
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch or if the theme is already selected.
+    pub fn save_selected_theme(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        theme: Theme,
+    ) -> Result<StoredUserProfile, SaveSelectedThemeError> {
+        if profile_version != self.version {
+            return Err(SaveSelectedThemeError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        if settings
+            .theme.selected_theme == theme.clone()
+        {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
+        let mut new_theme_settings = new_settings.theme.clone();
+        let mut new_selected_theme = new_theme_settings.selected_theme.clone();
+
+        new_selected_theme = theme.clone();
+        new_theme_settings.selected_theme = new_selected_theme;
+        new_settings.theme = new_theme_settings;
         new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
         Ok(new_profile)
