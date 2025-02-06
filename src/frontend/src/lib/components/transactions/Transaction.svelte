@@ -46,10 +46,11 @@
 		</svelte:fragment>
 
 		<svelte:fragment slot="description">
-			{#if nonNullish(timestamp)}
-				{formatSecondsToDate(timestamp)}
-			{/if}
-
+			<span data-tid="receive-tokens-modal-transaction-timestamp">
+				{#if nonNullish(timestamp)}
+					{formatSecondsToDate(timestamp)}
+				{/if}
+			</span>
 			<TransactionStatusComponent {status} />
 		</svelte:fragment>
 	</Card>

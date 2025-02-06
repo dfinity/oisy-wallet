@@ -13,7 +13,8 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import {
 		RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON,
-		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
@@ -74,5 +75,5 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
 	</ReceiveAddress>
 
-	<ButtonDone on:click={close} slot="toolbar" />
+	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} on:click={close} slot="toolbar" />
 </ContentWithToolbar>

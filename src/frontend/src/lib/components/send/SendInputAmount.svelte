@@ -5,6 +5,7 @@
 	import { slide } from 'svelte/transition';
 	import MaxButton from '$lib/components/common/MaxButton.svelte';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
+	import { AMOUNT_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -62,7 +63,7 @@
 	bind:value={amount}
 	decimals={tokenDecimals}
 	{placeholder}
-	testId="amount-input"
+	testId={AMOUNT_INPUT}
 	on:nnsInput={onInput}
 >
 	<MaxButton slot="inner-end" on:click={onMax} disabled={isNullish(calculateMax)} />
