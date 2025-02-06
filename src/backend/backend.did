@@ -161,6 +161,10 @@ type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
+type Result_10 = variant {
+  Ok : TopUpCyclesLedgerResponse;
+  Err : TopUpCyclesLedgerError;
+};
 type Result_2 = variant { Ok; Err : AllowSigningError };
 type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
 type Result_4 = variant {
@@ -174,9 +178,15 @@ type Result_5 = variant {
 type Result_6 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_7 = variant { Ok : MigrationReport; Err : text };
 type Result_8 = variant { Ok; Err : text };
-type Result_9 = variant {
-  Ok : TopUpCyclesLedgerResponse;
-  Err : TopUpCyclesLedgerError;
+type Result_9 = variant { Ok; Err : SaveSelectedThemeError };
+type SaveSelectedThemeError = variant {
+  InvalidTheme;
+  VersionMismatch;
+  UserNotFound;
+};
+type SaveSelectedThemeRequest = record {
+  theme : Theme;
+  current_user_version : opt nat64;
 };
 type SelectedUtxosFeeError = variant {
   PendingTransactions;
@@ -191,7 +201,7 @@ type SelectedUtxosFeeResponse = record {
   fee_satoshis : nat64;
   utxos : vec Utxo;
 };
-type Settings = record { dapp : DappSettings };
+type Settings = record { theme : ThemeSettings; dapp : DappSettings };
 type SplToken = record {
   decimals : opt nat8;
   token_address : text;
@@ -210,6 +220,8 @@ type SupportedCredential = record {
   ii_origin : text;
   credential_type : CredentialType;
 };
+type Theme = variant { Light; System; Dark };
+type ThemeSettings = record { selected_theme : Theme };
 type Token = variant {
   Icrc : IcrcToken;
   SplDevnet : SplToken;
@@ -277,6 +289,7 @@ service : (Arg) -> {
   migration : () -> (opt MigrationReport) query;
   migration_stop_timer : () -> (Result_8);
   remove_user_token : (UserTokenId) -> ();
+  save_user_selected_theme : (SaveSelectedThemeRequest) -> (Result_9);
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
@@ -284,5 +297,5 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_9);
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_10);
 }

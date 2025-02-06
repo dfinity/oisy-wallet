@@ -154,11 +154,20 @@ export const idlFactory = ({ IDL }) => {
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
+	const Theme = IDL.Variant({
+		Light: IDL.Null,
+		System: IDL.Null,
+		Dark: IDL.Null
+	});
+	const ThemeSettings = IDL.Record({ selected_theme: Theme });
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
 	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
-	const Settings = IDL.Record({ dapp: DappSettings });
+	const Settings = IDL.Record({
+		theme: ThemeSettings,
+		dapp: DappSettings
+	});
 	const UserProfile = IDL.Record({
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
@@ -286,6 +295,19 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
+	const SaveSelectedThemeRequest = IDL.Record({
+		theme: Theme,
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
+	const SaveSelectedThemeError = IDL.Variant({
+		InvalidTheme: IDL.Null,
+		VersionMismatch: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const Result_9 = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SaveSelectedThemeError
+	});
 	const TopUpCyclesLedgerRequest = IDL.Record({
 		threshold: IDL.Opt(IDL.Nat),
 		percentage: IDL.Opt(IDL.Nat8)
@@ -307,7 +329,7 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_9 = IDL.Variant({
+	const Result_10 = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
@@ -331,6 +353,7 @@ export const idlFactory = ({ IDL }) => {
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
 		migration_stop_timer: IDL.Func([], [Result_8], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
+		save_user_selected_theme: IDL.Func([SaveSelectedThemeRequest], [Result_9], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
@@ -338,7 +361,7 @@ export const idlFactory = ({ IDL }) => {
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_9], [])
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_10], [])
 	});
 };
 // @ts-ignore

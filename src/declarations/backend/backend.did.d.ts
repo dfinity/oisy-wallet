@@ -182,6 +182,7 @@ export interface PendingTransaction {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AddDappSettingsError };
+export type Result_10 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
 export type Result_2 = { Ok: null } | { Err: AllowSigningError };
 export type Result_3 = { Ok: null } | { Err: BtcAddPendingTransactionError };
 export type Result_4 =
@@ -191,7 +192,15 @@ export type Result_5 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFe
 export type Result_6 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_7 = { Ok: MigrationReport } | { Err: string };
 export type Result_8 = { Ok: null } | { Err: string };
-export type Result_9 = { Ok: TopUpCyclesLedgerResponse } | { Err: TopUpCyclesLedgerError };
+export type Result_9 = { Ok: null } | { Err: SaveSelectedThemeError };
+export type SaveSelectedThemeError =
+	| { InvalidTheme: null }
+	| { VersionMismatch: null }
+	| { UserNotFound: null };
+export interface SaveSelectedThemeRequest {
+	theme: Theme;
+	current_user_version: [] | [bigint];
+}
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -205,6 +214,7 @@ export interface SelectedUtxosFeeResponse {
 	utxos: Array<Utxo>;
 }
 export interface Settings {
+	theme: ThemeSettings;
 	dapp: DappSettings;
 }
 export interface SplToken {
@@ -224,6 +234,10 @@ export interface SupportedCredential {
 	issuer_canister_id: Principal;
 	ii_origin: string;
 	credential_type: CredentialType;
+}
+export type Theme = { Light: null } | { System: null } | { Dark: null };
+export interface ThemeSettings {
+	selected_theme: Theme;
 }
 export type Token = { Icrc: IcrcToken } | { SplDevnet: SplToken } | { SplMainnet: SplToken };
 export type TopUpCyclesLedgerError =
@@ -299,6 +313,7 @@ export interface _SERVICE {
 	migration: ActorMethod<[], [] | [MigrationReport]>;
 	migration_stop_timer: ActorMethod<[], Result_8>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
+	save_user_selected_theme: ActorMethod<[SaveSelectedThemeRequest], Result_9>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
@@ -306,7 +321,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
-	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_9>;
+	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], Result_10>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
