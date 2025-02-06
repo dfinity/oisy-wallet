@@ -160,6 +160,35 @@ const mapTokenParsedInstruction = async ({
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
 	}
+
+	if (type === 'closeAccount') {
+		// We need to cast the type since it is not implied
+		const { destination: to, account: from } = info as {
+			destination: SolAddress;
+			account: SolAddress;
+		};
+
+		const { getAccountInfo } = solanaHttpRpc(network);
+
+		const { value: result } = await getAccountInfo(address(from), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (nonNullish(result) && 'parsed' in result.data) {
+			const {
+				data: {
+					parsed: { info }
+				}
+			} = result;
+
+			const { mint: tokenAddress } = info as {
+				mint: SplTokenAddress;
+			};
+
+			// TODO: find a way to get the amount redeemed in the close account instruction
+			return { value: 0n, from, to, tokenAddress };
+		}
+	}
 };
 
 const mapAssociatedTokenAccountInstruction = ({
