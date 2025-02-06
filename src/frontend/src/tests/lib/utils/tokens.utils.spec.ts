@@ -7,6 +7,7 @@ import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -122,7 +123,7 @@ describe('sortTokens', () => {
 	it('should sort deprecated sns tokens at the end', () => {
 		const mockDeprecatedTokenName = {
 			...mockValidToken,
-			name: '---- Deprecated'
+			ledgerCanisterId: Object.keys(DEPRECATED_SNES)[0]
 		};
 
 		const mockTokensWithDeprecated = [mockDeprecatedTokenName, ...mockTokens];
