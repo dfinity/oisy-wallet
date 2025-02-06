@@ -9,6 +9,7 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
+		// TODO: check a better way to make the select network visible in the network switcher dropdown, otherwise the test will fail, since the network cannot be clicked
 		viewportSize: !isMobile
 			? {
 					width: MODALS_VIEWPORT_WIDTH,
