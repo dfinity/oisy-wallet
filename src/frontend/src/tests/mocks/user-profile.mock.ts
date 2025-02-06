@@ -1,7 +1,10 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { toNullable } from '@dfinity/utils';
 
-export const mockUserSettings = { dapp: { dapp_carousel: { hidden_dapp_ids: [] } } };
+export const mockUserSettings = {
+	dapp: { dapp_carousel: { hidden_dapp_ids: [] } },
+	theme: { selected_theme: { System: null } }
+};
 
 export const mockUserProfile: UserProfile = {
 	credentials: [],
