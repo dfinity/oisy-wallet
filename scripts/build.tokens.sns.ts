@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -16,7 +17,6 @@ import { UrlSchema } from '@dfinity/zod-schemas';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
-import { DEPRECATED_SNES } from '../src/frontend/src/env/tokens/tokens.sns.deprecated.env';
 import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
