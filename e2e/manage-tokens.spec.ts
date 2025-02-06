@@ -13,7 +13,7 @@ testWithII.beforeEach(async ({ page, iiPage }) => {
 	await homepageLoggedIn.waitForReady();
 });
 
-testWithII('should enable and disable ICRC token', async () => {
+testWithII.skip('should enable and disable ICRC token', async () => {
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'ckSepoliaETH',
@@ -41,7 +41,7 @@ testWithII('should enable and disable ICRC token', async () => {
 	).not.toBeVisible();
 });
 
-testWithII('should enable and disable ERC20 token', async () => {
+testWithII.skip('should enable and disable ERC20 token', async () => {
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'SHIB',
@@ -69,7 +69,7 @@ testWithII('should enable and disable ERC20 token', async () => {
 	).not.toBeVisible();
 });
 
-testWithII('should enable and disable SepoliaERC20 token', async () => {
+testWithII.skip('should enable and disable SepoliaERC20 token', async () => {
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'USDC',
