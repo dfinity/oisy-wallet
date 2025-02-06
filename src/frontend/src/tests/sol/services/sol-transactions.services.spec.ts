@@ -122,7 +122,7 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
-		it('should use inner instructions if presents and required', async () => {
+		it('should use inner instructions if presents and/or required', async () => {
 			const innerInstructions = [
 				{ index: 0, instructions: [mockInstructions[0]] },
 				{ index: 1, instructions: [mockInstructions[1]] },
@@ -134,7 +134,15 @@ describe('sol-transactions.services', () => {
 				meta: { innerInstructions }
 			});
 
-			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(expectedResults);
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
+				...expectedResults,
+				...innerInstructions
+					.flatMap(({ instructions }) => instructions)
+					.map((instruction) => ({
+						...expected,
+						id: `${expected.id}-${instruction.programId}`
+					}))
+			]);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
 				instruction: { ...mockInstructions[0], programAddress: mockInstructions[0].programId },
