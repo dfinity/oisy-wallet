@@ -97,13 +97,13 @@ pub fn add_hidden_dapp_id(
 pub fn save_selected_theme(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
-    selected_theme: Theme,
+    theme: Theme,
     user_profile_model: &mut UserProfileModel,
 ) -> Result<(), SaveSelectedThemeError> {
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| SaveSelectedThemeError::UserNotFound)?;
     let now = time();
-    let new_profile = user_profile.save_selected_theme(profile_version, now, selected_theme)?;
+    let new_profile = user_profile.save_selected_theme(profile_version, now, theme)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }
