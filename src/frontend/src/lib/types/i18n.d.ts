@@ -196,13 +196,16 @@ interface I18nSettings {
 		pouh_credential_verified: string;
 		appearance: string;
 		appearance_light: string;
-		appearance_light_description: string;
 		appearance_dark: string;
-		appearance_dark_description: string;
 		appearance_system: string;
-		appearance_system_description: string;
 	};
-	alt: { testnets_toggle: string; github_release: string };
+	alt: {
+		testnets_toggle: string;
+		github_release: string;
+		appearance_light: string;
+		appearance_dark: string;
+		appearance_system: string;
+	};
 	error: { loading_profile: string };
 }
 
