@@ -29,7 +29,7 @@ export class FlowPage extends HomepageLoggedIn {
 	async receiveTokens(): Promise<void> {
 		await this.clickByTestId(TOKEN_CARD_ICP);
 		await this.waitForByTestId(AMOUNT_DATA);
-		expect(this.getBalance()).toHaveText('0.00');
+		expect(this.getBalanceLocator()).toHaveText('0.00');
 		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON });
 		const accountId = await this.getAccountIdByTestId(RECEIVE_TOKENS_MODAL_ADDRESS_LABEL);
 		expect(accountId).toBeTruthy();
@@ -37,7 +37,7 @@ export class FlowPage extends HomepageLoggedIn {
 			command: new LedgerTransferCommand({ amount: '10', recipient: accountId })
 		});
 		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_DONE_BUTTON });
-		expect(this.getBalance()).toHaveText('10 ICP', { timeout: 30_000 });
+		expect(this.getBalanceLocator()).toHaveText('10 ICP', { timeout: 30_000 });
 	}
 
 	async sendTokens(): Promise<void> {
