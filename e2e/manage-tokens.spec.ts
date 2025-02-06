@@ -1,13 +1,20 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { expect } from '@playwright/test';
+import { MODAL_VIEWPORT_HEIGHT, MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
 
 let homepageLoggedIn: HomepageLoggedIn;
 
-testWithII.beforeEach(async ({ page, iiPage }) => {
+testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
-		iiPage
+		iiPage,
+		viewportSize: !isMobile
+			? {
+					width: MODALS_VIEWPORT_WIDTH,
+					height: MODAL_VIEWPORT_HEIGHT
+				}
+			: undefined
 	});
 
 	await homepageLoggedIn.waitForReady();
