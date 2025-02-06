@@ -54,6 +54,10 @@ export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 
 export const AMOUNT_DATA = 'amount-data';
+export const AMOUNT_INPUT = 'amount-input';
+export const DESTINATION_INPUT = 'destination-input';
+
+export const IN_PROGRESS_MODAL = 'in-progress-modal';
 
 export const TESTNET_TOGGLE = 'testnet-toggle';
 
