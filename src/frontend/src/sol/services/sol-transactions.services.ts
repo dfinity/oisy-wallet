@@ -82,6 +82,10 @@ export const fetchSolTransactionsForSignature = async ({
 			if (nonNullish(mappedTransaction) && mappedTransaction.tokenAddress === tokenAddress) {
 				const { value, from, to } = mappedTransaction;
 
+				if (from !== address && to !== address) {
+					return acc;
+				}
+
 				const newTransaction: SolTransactionUi = {
 					id: `${signature.signature}-${instruction.programId}`,
 					signature: signature.signature,
