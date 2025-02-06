@@ -18,7 +18,7 @@ import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
-import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
+import { ACCOUNT_ID_ICP, HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
@@ -237,7 +237,7 @@ abstract class Homepage {
 			.catch(() => false);
 	}
 
-	getBalance(): Locator {
+	getBalanceLocator(): Locator {
 		return this.#page.getByTestId(AMOUNT_DATA);
 	}
 
@@ -249,7 +249,7 @@ abstract class Homepage {
 	}
 
 	async getAccountIdByTestId(testId: string): Promise<string> {
-		const container = this.#page.locator('#icp-account-id');
+		const container = this.#page.locator(ACCOUNT_ID_ICP);
 		const addressLocator = container.getByTestId(testId);
 		const addressText = await addressLocator.textContent();
 		if (!addressText) {
