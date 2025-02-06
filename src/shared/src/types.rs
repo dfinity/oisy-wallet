@@ -427,7 +427,7 @@ pub mod theme {
         /// - If the theme is not among the supported themes.
         pub fn check(&self) -> Result<(), SaveSelectedThemeError> {
             match self.theme {
-                Theme::Light | Theme::Dark | Theme::System => Ok(())
+                Theme::Light | Theme::Dark | Theme::System => Ok(()),
             }
         }
     }
