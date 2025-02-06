@@ -239,10 +239,8 @@ impl StoredUserProfile {
         let mut new_profile = self.clone_with_incremented_version();
         let mut new_settings = new_profile.settings.clone().unwrap_or_default();
         let mut new_theme_settings = new_settings.theme.clone();
-        let mut new_selected_theme = new_theme_settings.selected_theme.clone();
 
-        new_selected_theme = theme.clone();
-        new_theme_settings.selected_theme = new_selected_theme;
+        new_theme_settings.selected_theme = theme.clone();
         new_settings.theme = new_theme_settings;
         new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
