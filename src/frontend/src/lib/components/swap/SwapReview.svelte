@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -12,7 +13,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
