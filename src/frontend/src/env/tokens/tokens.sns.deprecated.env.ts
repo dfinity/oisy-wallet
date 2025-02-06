@@ -3,7 +3,7 @@ import type { LedgerCanisterIdText } from '$icp/types/canister';
 
 export const DEPRECATED_SNES: Record<
 	LedgerCanisterIdText,
-	Partial<EnvIcrcTokenMetadataWithIcon>
+	Omit<EnvIcrcTokenMetadataWithIcon, 'decimals' | 'fee'>
 > = {
 	['itgqj-7qaaa-aaaaq-aadoa-cai']: {
 		name: '---- (formerly CYCLES-TRANSFER-STATION)',
