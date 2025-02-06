@@ -131,6 +131,8 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
+			console.log('parsedTransactionMessage', parsedTransactionMessage);
+
 			const { amount, destination } = mapSolTransactionMessage(parsedTransactionMessage);
 
 			// TODO: add assertions checks about amount, payer, source and destination when we will able to properly parse them for ALL the transactions

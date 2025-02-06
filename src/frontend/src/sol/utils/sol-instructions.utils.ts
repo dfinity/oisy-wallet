@@ -591,6 +591,8 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	const parsedInstruction = parseSolInstruction(instruction);
 
+	console.log('parsedInstruction', parsedInstruction, instruction);
+
 	if (!('instructionType' in parsedInstruction)) {
 		return { amount: undefined };
 	}
