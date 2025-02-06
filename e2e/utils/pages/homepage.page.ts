@@ -89,10 +89,7 @@ abstract class Homepage {
 	protected async waitForByTestId({
 		testId,
 		options
-	}: {
-		testId: string;
-		options?: WaitForLocatorOptions;
-	}): Promise<void> {
+	}: TestIdOperationParams & { options?: WaitForLocatorOptions }): Promise<void> {
 		await this.#page.getByTestId(testId).waitFor(options);
 	}
 
