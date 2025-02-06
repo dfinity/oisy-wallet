@@ -18,8 +18,6 @@ describe('sol-wallet.scheduler', () => {
 	let spyLoadTransactions: MockInstance;
 	let spyLoadSolBalance: MockInstance;
 	let spyLoadSplBalance: MockInstance;
-	let spyLoadSolTransactions: MockInstance;
-	let spyLoadSplTransactions: MockInstance;
 
 	const mockSolBalance = lamports(100n);
 	const mockSplBalance = BigInt(123);
@@ -59,7 +57,7 @@ describe('sol-wallet.scheduler', () => {
 					data: isSpl ? mockSplBalance : mockSolBalance
 				},
 				...(withTransactions && {
-					newTransactions: JSON.stringify(isSpl ? [] : expectedSoLTransactions, jsonReplacer)
+					newTransactions: JSON.stringify(expectedSoLTransactions, jsonReplacer)
 				})
 			}
 		}
@@ -89,13 +87,9 @@ describe('sol-wallet.scheduler', () => {
 		spyLoadSplBalance = vi
 			.spyOn(solanaApi, 'loadSplTokenBalance')
 			.mockResolvedValue(mockSplBalance);
-		spyLoadSolTransactions = vi
+		spyLoadTransactions = vi
 			.spyOn(solSignaturesServices, 'getSolTransactions')
 			.mockResolvedValue(mockSolTransactions);
-		spyLoadSplTransactions = vi
-			.spyOn(solSignaturesServices, 'getSplTransactions')
-			//TODO add spl mock txns
-			.mockResolvedValue([]);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
@@ -115,7 +109,6 @@ describe('sol-wallet.scheduler', () => {
 
 		beforeEach(() => {
 			spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
-			spyLoadTransactions = isSpl ? spyLoadSplTransactions : spyLoadSolTransactions;
 		});
 
 		afterEach(() => {

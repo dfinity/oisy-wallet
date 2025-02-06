@@ -8,7 +8,7 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
 import { loadSolLamportsBalance, loadSplTokenBalance } from '$sol/api/solana.api';
-import { getSolTransactions, getSplTransactions } from '$sol/services/sol-signatures.services';
+import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
@@ -75,13 +75,11 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		solanaNetwork,
 		tokenAddress
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
-		const transactions = nonNullish(tokenAddress)
-			? await getSplTransactions({
-					network: solanaNetwork,
-					address,
-					tokenAddress
-				})
-			: await getSolTransactions({ network: solanaNetwork, address });
+		const transactions = await getSolTransactions({
+			network: solanaNetwork,
+			address,
+			tokenAddress
+		});
 
 		const transactionsUi = transactions.map((transaction) => ({
 			data: transaction,
