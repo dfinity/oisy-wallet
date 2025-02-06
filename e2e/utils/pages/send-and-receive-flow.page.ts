@@ -27,8 +27,8 @@ export class FlowPage extends HomepageLoggedIn {
 	}
 
 	async receiveTokens(): Promise<void> {
-		await this.clickByTestId(`${TOKEN_CARD}-ICP-ICP`);
-		await this.waitForByTestId(AMOUNT_DATA);
+		await this.clickByTestId({ testId: `${TOKEN_CARD}-ICP-ICP` });
+		await this.waitForByTestId({ testId: AMOUNT_DATA });
 		expect(this.getBalanceLocator()).toHaveText('0.00');
 		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON });
 		const accountId = await this.getAccountIdByTestId(RECEIVE_TOKENS_MODAL_ADDRESS_LABEL);
