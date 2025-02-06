@@ -34,9 +34,9 @@
 				: $solAddressMainnet;
 
 	const onIntersect = async () => {
-		const lastId = last($solTransactions)?.id;
+		const lastSignature = last($solTransactions)?.signature;
 
-		if (isNullish(lastId)) {
+		if (isNullish(lastSignature)) {
 			// No transactions, we do nothing here and wait for the worker to post the first transactions
 			return;
 		}
@@ -55,7 +55,7 @@
 		await loadNextSolTransactions({
 			network: network,
 			address: address,
-			before: lastId,
+			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 	};
