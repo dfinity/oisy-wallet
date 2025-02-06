@@ -3,7 +3,7 @@ use crate::types::custom_token::{
 };
 use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
-use crate::types::theme::{SaveSelectedThemeError, Theme};
+use crate::types::theme::{SaveSelectedThemeError, Theme, ThemeSettings};
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
@@ -141,6 +141,9 @@ impl StoredUserProfile {
                     hidden_dapp_ids: Vec::new(),
                 },
             },
+            theme: ThemeSettings {
+                selected_theme: Theme::System,
+            }
         };
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
