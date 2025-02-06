@@ -39,11 +39,6 @@ interface TestIdOperationParams {
 	testId: string;
 }
 
-interface NavigateToTokenParams {
-	token: string;
-	network: string;
-}
-
 interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
