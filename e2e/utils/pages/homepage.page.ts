@@ -30,7 +30,7 @@ import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
 interface HomepageParams {
 	page: Page;
-	context?: BrowserContext;
+	context?: BrowserContext; //not needed anymore
 	viewportSize?: ViewportSize;
 }
 
