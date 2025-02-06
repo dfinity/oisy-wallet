@@ -1,5 +1,5 @@
 import { parseTokenId } from '$lib/validation/token.validation';
-import { getSplTransactions } from '$sol/services/sol-signatures.services';
+import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
@@ -44,7 +44,7 @@ const loadSplTransactions = async ({
 }: GetSplTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	const tokenId = parseTokenId(tokenAddress);
 	try {
-		const transactions = await getSplTransactions({
+		const transactions = await getSolTransactions({
 			address,
 			network,
 			before,
