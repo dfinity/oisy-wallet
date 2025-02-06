@@ -227,7 +227,7 @@ impl StoredUserProfile {
         &self,
         profile_version: Option<Version>,
         now: Timestamp,
-        theme: &Theme,
+        theme: Theme,
     ) -> Result<StoredUserProfile, SaveSelectedThemeError> {
         if profile_version != self.version {
             return Err(SaveSelectedThemeError::VersionMismatch);
@@ -235,7 +235,7 @@ impl StoredUserProfile {
 
         let settings = self.settings.clone().unwrap_or_default();
 
-        if settings.theme.selected_theme == *theme {
+        if settings.theme.selected_theme == theme {
             return Ok(self.clone());
         }
 
@@ -243,7 +243,7 @@ impl StoredUserProfile {
         let mut new_settings = new_profile.settings.clone().unwrap_or_default();
         let mut new_theme_settings = new_settings.theme.clone();
 
-        new_theme_settings.selected_theme = *theme;
+        new_theme_settings.selected_theme = theme;
         new_settings.theme = new_theme_settings;
         new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
