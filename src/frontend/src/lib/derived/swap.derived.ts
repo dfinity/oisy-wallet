@@ -1,5 +1,5 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
@@ -9,22 +9,26 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 export interface SwappableTokens {
-	sourceToken: IcToken | undefined;
-	destinationToken: IcToken | undefined;
+	sourceToken: IcTokenToggleable | undefined;
+	destinationToken: IcTokenToggleable | undefined;
 }
 
-const selectedSwappableToken: Readable<IcToken | undefined> = derived(
+const selectedSwappableToken: Readable<IcTokenToggleable | undefined> = derived(
 	[pageToken, allKongSwapCompatibleIcrcTokens],
 	([$pageToken, $allKongSwapCompatibleIcrcTokens]) => {
 		if (nonNullish($pageToken) && isIcToken($pageToken)) {
 			const selectedToken = $pageToken;
 
-			const isSwapAvailable: boolean = [ICP_TOKEN, ...$allKongSwapCompatibleIcrcTokens].some(
-				(t) => t.id === selectedToken.id
-			);
+			const swappableToken: IcTokenToggleable | undefined = [
+				{ ...ICP_TOKEN, enabled: true },
+				...$allKongSwapCompatibleIcrcTokens
+			].find((t) => t.id === selectedToken.id);
 
-			if (isSwapAvailable) {
-				return selectedToken;
+			if (nonNullish(swappableToken)) {
+				return {
+					...selectedToken,
+					...swappableToken
+				};
 			}
 		}
 

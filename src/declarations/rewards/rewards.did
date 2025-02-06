@@ -1,3 +1,8 @@
+type VipStats = record {
+  total_issued: nat32;
+  total_redeemed: nat32;
+  total_rejected: nat32;
+};
 type Config = record {
     /// List of index canisters to track the user's balance
     /// (in addition to the ledger index configured in the sprinkle)
@@ -12,6 +17,8 @@ type Config = record {
     /// The interval at which the canister make progress in seconds.
     /// Trade-off between the canister's responsiveness and the cycles consumed.
     processing_interval_s: opt nat16;
+    /// The VIP configuration
+    vip_config: opt VipConfig;
 };
 
 /// Batch sizes for the processing
@@ -176,12 +183,20 @@ type PublicAirdropStatus = variant {
   };
 };
 
+type VipConfig = record {
+    code_validity_duration : nat64;
+    vips: vec principal;
+    rewards: vec TokenConfig;
+};
+
 type VipReward = record {
     /// The reward code
     code : text;
 };
 
 type NewVipRewardResponse = variant {
+    /// The VIP is not logged in.
+    Anonymous;
     /// The reward code
     VipReward: VipReward;
     /// User is not a VIP
@@ -195,6 +210,46 @@ type ClaimVipRewardResponse = variant {
     InvalidCode;
     /// The code has been claimed already
     AlreadyClaimed;
+};
+
+type UserSnapshot = record { accounts : vec AccountSnapshotFor };
+type AccountSnapshotFor = variant {
+  Icrc : AccountSnapshot_Icrc;
+  SplDevnet : AccountSnapshot_Spl;
+  SplMainnet : AccountSnapshot_Spl;
+};
+type AccountSnapshot_Icrc = record {
+  decimals : nat8;
+  network : record {};
+  approx_usd_per_token : float64;
+  last_transactions : vec Transaction_Icrc;
+  account : principal;
+  timestamp : nat64;
+  amount : nat64;
+};
+type AccountSnapshot_Spl = record {
+  decimals : nat8;
+  network : record {};
+  approx_usd_per_token : float64;
+  last_transactions : vec Transaction_Spl;
+  account : text;
+  timestamp : nat64;
+  amount : nat64;
+};
+type TransactionType = variant { Send; Receive };
+type Transaction_Icrc = record {
+  transaction_type : TransactionType;
+  network : record {};
+  counterparty : principal;
+  timestamp : nat64;
+  amount : nat64;
+};
+type Transaction_Spl = record {
+  transaction_type : TransactionType;
+  network : record {};
+  counterparty : text;
+  timestamp : nat64;
+  amount : nat64;
 };
 
 service: (opt Config) -> {
@@ -214,9 +269,18 @@ service: (opt Config) -> {
     /// POV) or if the canister already has a sprinkle event ongoing or planned.
     set_sprinkle_timestamp: (SetSprinkleTimestampArg) -> ();
 
+    /// Configures VIP rewards
+    configure_vip: (VipConfig) -> ();
+
     /// Gets a VIP reward token.
     new_vip_reward: () -> (NewVipRewardResponse);
 
     /// Requests rewards from a VIP token.
     claim_vip_reward: (VipReward) -> (ClaimVipRewardResponse);
+
+    /// Gets rewards stats
+    vip_stats: () -> (VipStats) query;
+
+    /// Provides a user's account IDs for airdrop.
+    register_airdrop_recipient : (UserSnapshot) -> ();
 }
