@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -51,7 +52,7 @@
 				{slippageValue}%
 			</svelte:fragment>
 		</ModalValue>
-
+		<SwapProvider />
 		<SwapFees />
 	</div>
 
