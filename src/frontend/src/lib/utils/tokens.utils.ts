@@ -1,5 +1,6 @@
+import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
-import { isIcCkToken } from '$icp/validation/ic-token.validation';
+import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -45,13 +46,12 @@ export const sortTokens = <T extends Token>({
 	return [
 		...pinnedTokens,
 		...otherTokens.sort((a, b) => {
-			// TODO: Create a constant for the deprecated SNSs that can be used in the dapp and the `build.tokens.sns.ts` script. This requires converting the script to TypeScript. Once created, this constant can be used to identify deprecated SNSes instead of using an optimistic checks on ----.
-			// Deprecated SNSes such as CTS starts with ----
-			if (a.name.startsWith('----')) {
+			// Deprecated SNSes such as CTS
+			if (isIcToken(a) && a.ledgerCanisterId in DEPRECATED_SNES) {
 				return 1;
 			}
 
-			if (b.name.startsWith('----')) {
+			if (isIcToken(b) && b.ledgerCanisterId in DEPRECATED_SNES) {
 				return -1;
 			}
 
