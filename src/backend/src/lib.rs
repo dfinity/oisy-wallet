@@ -573,7 +573,7 @@ pub fn save_user_selected_theme(
         save_selected_theme(
             stored_principal,
             request.current_user_version,
-            request.theme,
+            &request.theme,
             &mut user_profile_model,
         )
     })
