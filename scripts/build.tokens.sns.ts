@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import type { EnvIcrcTokenMetadata } from '$env/types/env-icrc-token';
-import type { EnvSnsToken } from '$env/types/env-sns-token';
+import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
+import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
 import type { CanisterIdText } from '$lib/types/canister';
+import type { PartialSpecific } from '$lib/types/utils';
 import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import {
 	candidNumberArrayToBigInt,
@@ -39,18 +40,9 @@ interface ResponseData {
 	};
 }
 
-type SnsToken = Omit<EnvSnsToken, 'metadata'> & {
-	metadata: EnvIcrcTokenMetadata & { icon?: string };
-};
+type SnsTokenWithOptionalMetadata = PartialSpecific<EnvSnsTokenWithIcon, 'metadata'>;
 
-type SnsTokenWithOptionalMetadata = Omit<EnvSnsToken, 'metadata'> &
-	Partial<Pick<SnsToken, 'metadata'>>;
-
-type SnsMetadata = SnsToken['metadata'];
-
-type OptionalSnsMetadata = Partial<SnsMetadata>;
-
-type Logo = Pick<SnsToken, 'ledgerCanisterId' | 'rootCanisterId'> & Pick<SnsMetadata, 'icon'>;
+type Logo = Pick<EnvSnsTokenWithIcon, 'ledgerCanisterId' | 'rootCanisterId'> & EnvIcrcTokenIcon;
 
 if (!existsSync(DATA_FOLDER)) {
 	mkdirSync(DATA_FOLDER, { recursive: true });
@@ -106,34 +98,39 @@ const saveLogos = async (logos: Logo[]) => {
 	await Promise.all(activeSnsLogos.map(writeLogo));
 };
 
-const mapOptionalToken = (response: ResponseData['icrc1_metadata']): SnsMetadata | undefined => {
-	const nullishToken = response.reduce<OptionalSnsMetadata>((acc, [key, value]) => {
-		switch (key) {
-			case IcrcMetadataResponseEntries.SYMBOL:
-				acc = { ...acc, ...('Text' in value && { symbol: value.Text }) };
-				break;
-			case IcrcMetadataResponseEntries.NAME:
-				acc = { ...acc, ...('Text' in value && { name: value.Text }) };
-				break;
-			case IcrcMetadataResponseEntries.FEE:
-				acc = {
-					...acc,
-					...('Nat' in value &&
-						nonNullish(fromNullable(value.Nat)) && { fee: candidNumberArrayToBigInt(value.Nat) })
-				};
-				break;
-			case IcrcMetadataResponseEntries.DECIMALS:
-				acc = {
-					...acc,
-					...('Nat' in value && { decimals: Number(value.Nat) })
-				};
-				break;
-			case IcrcMetadataResponseEntries.LOGO:
-				acc = { ...acc, ...('Text' in value && { icon: value.Text }) };
-		}
+const mapOptionalToken = (
+	response: ResponseData['icrc1_metadata']
+): EnvIcrcTokenMetadataWithIcon | undefined => {
+	const nullishToken = response.reduce<Partial<EnvIcrcTokenMetadataWithIcon>>(
+		(acc, [key, value]) => {
+			switch (key) {
+				case IcrcMetadataResponseEntries.SYMBOL:
+					acc = { ...acc, ...('Text' in value && { symbol: value.Text }) };
+					break;
+				case IcrcMetadataResponseEntries.NAME:
+					acc = { ...acc, ...('Text' in value && { name: value.Text }) };
+					break;
+				case IcrcMetadataResponseEntries.FEE:
+					acc = {
+						...acc,
+						...('Nat' in value &&
+							nonNullish(fromNullable(value.Nat)) && { fee: candidNumberArrayToBigInt(value.Nat) })
+					};
+					break;
+				case IcrcMetadataResponseEntries.DECIMALS:
+					acc = {
+						...acc,
+						...('Nat' in value && { decimals: Number(value.Nat) })
+					};
+					break;
+				case IcrcMetadataResponseEntries.LOGO:
+					acc = { ...acc, ...('Text' in value && { icon: value.Text }) };
+			}
 
-		return acc;
-	}, {});
+			return acc;
+		},
+		{}
+	);
 
 	const { symbol, name, fee, decimals, ...rest } = nullishToken;
 
@@ -178,10 +175,11 @@ const mapSnsMetadata = ({
 	};
 };
 
-const filterNonNullishMetadata = (token: SnsTokenWithOptionalMetadata): token is SnsToken =>
-	nonNullish(token.metadata);
+const filterNonNullishMetadata = (
+	token: SnsTokenWithOptionalMetadata
+): token is EnvSnsTokenWithIcon => nonNullish(token.metadata);
 
-const DEPRECATED_SNES: Record<string, OptionalSnsMetadata> = {
+const DEPRECATED_SNES: Record<string, Partial<EnvIcrcTokenMetadataWithIcon>> = {
 	['ibahq-taaaa-aaaaq-aadna-cai']: {
 		name: '---- (formerly CYCLES-TRANSFER-STATION)',
 		symbol: '--- (CTS)',
@@ -191,7 +189,11 @@ const DEPRECATED_SNES: Record<string, OptionalSnsMetadata> = {
 	}
 };
 
-const mapDeprecatedSnsMetadata = ({ metadata, rootCanisterId, ...rest }: SnsToken): SnsToken => ({
+const mapDeprecatedSnsMetadata = ({
+	metadata,
+	rootCanisterId,
+	...rest
+}: EnvSnsTokenWithIcon): EnvSnsTokenWithIcon => ({
 	metadata: {
 		...metadata,
 		...(nonNullish(DEPRECATED_SNES[rootCanisterId]) && DEPRECATED_SNES[rootCanisterId])
@@ -209,7 +211,7 @@ const findSnses = async () => {
 		.map(mapSnsMetadata)
 		.filter(filterNonNullishMetadata)
 		.map(mapDeprecatedSnsMetadata)
-		.reduce<{ tokens: SnsToken[]; icons: Logo[] }>(
+		.reduce<{ tokens: EnvSnsTokenWithIcon[]; icons: Logo[] }>(
 			(
 				{ tokens, icons },
 				{ metadata: { icon, ...metadata }, ledgerCanisterId, rootCanisterId, ...rest }
