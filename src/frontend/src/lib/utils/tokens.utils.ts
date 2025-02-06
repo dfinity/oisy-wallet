@@ -47,11 +47,11 @@ export const sortTokens = <T extends Token>({
 		...pinnedTokens,
 		...otherTokens.sort((a, b) => {
 			// Deprecated SNSes such as CTS
-			if (isIcToken(a) && nonNullish(DEPRECATED_SNES[a.ledgerCanisterId])) {
+			if (isIcToken(a) && a.ledgerCanisterId in DEPRECATED_SNES) {
 				return 1;
 			}
 
-			if (isIcToken(b) && nonNullish(DEPRECATED_SNES[b.ledgerCanisterId])) {
+			if (isIcToken(b) && b.ledgerCanisterId in DEPRECATED_SNES) {
 				return -1;
 			}
 
