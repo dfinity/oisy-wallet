@@ -5,7 +5,7 @@ export const DEPRECATED_SNES: Record<
 	LedgerCanisterIdText,
 	Partial<EnvIcrcTokenMetadataWithIcon>
 > = {
-	['ibahq-taaaa-aaaaq-aadna-cai']: {
+	['itgqj-7qaaa-aaaaq-aadoa-cai']: {
 		name: '---- (formerly CYCLES-TRANSFER-STATION)',
 		symbol: '--- (CTS)',
 		alternativeName: undefined,
