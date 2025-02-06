@@ -19,54 +19,32 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 const MATRIX_OS = process.env.MATRIX_OS ?? '';
 const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
-//temporary hotfix for scrolling issue
-const DESKTOP_SCREEN = { width: 1920, height: 1080 };
-const DESKTOP_VIEWPORT = { width: 1920, height: 1080 };
 
 const appleProjects = [
 	{
 		name: 'Safari',
-		use: {
-			...devices['Desktop Safari'],
-			screen: DESKTOP_SCREEN,
-			viewport: DESKTOP_VIEWPORT
-		}
+		use: devices['Desktop Safari']
 	},
 	{
 		name: 'iPhone SE',
-		use: {
-			...devices['iPhone SE'],
-			screen: { width: 375, height: 667 },
-			viewport: { width: 375, height: 667 }
-		}
+		use: devices['iPhone SE']
 	}
 ];
 
 const nonAppleProjects = [
 	{
 		name: 'Google Chrome',
-		use: {
-			...devices['Desktop Chrome'],
-			channel: 'chrome',
-			screen: DESKTOP_SCREEN,
-			viewport: DESKTOP_VIEWPORT
-		}
+		use: devices['Desktop Chrome']
 	},
 	{
 		name: 'Firefox',
 		use: {
-			...devices['Desktop Firefox'],
-			screen: DESKTOP_SCREEN,
-			viewport: DESKTOP_VIEWPORT
+			...devices['Desktop Firefox']
 		}
 	},
 	{
-		name: 'Pixel 7',
-		use: {
-			...devices['Pixel 7'],
-			screen: { width: 412, height: 915 },
-			viewport: { width: 412, height: 915 }
-		}
+		name: 'Pixel 5',
+		use: devices['Pixel 5']
 	}
 ];
 
