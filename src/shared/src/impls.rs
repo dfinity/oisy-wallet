@@ -227,7 +227,7 @@ impl StoredUserProfile {
         &self,
         profile_version: Option<Version>,
         now: Timestamp,
-        theme: Theme,
+        theme: &Theme,
     ) -> Result<StoredUserProfile, SaveSelectedThemeError> {
         if profile_version != self.version {
             return Err(SaveSelectedThemeError::VersionMismatch);

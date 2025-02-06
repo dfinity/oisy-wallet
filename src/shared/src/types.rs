@@ -394,7 +394,7 @@ pub mod theme {
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
 
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    #[derive(CandidType, Deserialize, Clone, Copy, Debug, Eq, PartialEq, Default)]
     pub enum Theme {
         Light,
         Dark,
