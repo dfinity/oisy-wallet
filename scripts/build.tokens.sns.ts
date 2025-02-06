@@ -3,7 +3,6 @@
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { PartialSpecific } from '$lib/types/utils';
 import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
