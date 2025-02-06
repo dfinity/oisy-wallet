@@ -206,6 +206,18 @@ describe('sol-transactions.services', () => {
 				...expectedResults.slice(1)
 			]);
 		});
+
+		it('should ignore transactions that do not involve the address', async () => {
+			spyMapSolParsedInstruction.mockResolvedValueOnce({
+				...mockMappedTransaction,
+				from: mockSolAddress2,
+				to: mockSolAddress2
+			});
+
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(
+				expectedResults.slice(1)
+			);
+		});
 	});
 
 	describe('loadNextSolTransactions', () => {
