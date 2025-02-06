@@ -3,6 +3,7 @@ use crate::types::custom_token::{
 };
 use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
 use crate::types::settings::Settings;
+use crate::types::theme::{SaveSelectedThemeError, Theme};
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
@@ -21,7 +22,6 @@ use std::collections::BTreeMap;
 use std::fmt;
 #[cfg(test)]
 use strum::IntoEnumIterator;
-use crate::types::theme::{SaveSelectedThemeError, Theme};
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -217,7 +217,6 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
-
     /// # Errors
     ///
     /// Will return Err if there is a version mismatch or if the theme is already selected.
@@ -233,9 +232,7 @@ impl StoredUserProfile {
 
         let settings = self.settings.clone().unwrap_or_default();
 
-        if settings
-            .theme.selected_theme == theme.clone()
-        {
+        if settings.theme.selected_theme == theme.clone() {
             return Ok(self.clone());
         }
 

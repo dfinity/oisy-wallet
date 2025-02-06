@@ -342,8 +342,6 @@ fn test_add_user_hidden_dapp_id_does_not_allow_long_ids() {
     );
 }
 
-
-
 #[test]
 fn test_save_user_selected_theme_saves_the_selected_theme() {
     let pic_setup = setup();
@@ -355,10 +353,7 @@ fn test_save_user_selected_theme_saves_the_selected_theme() {
 
     let profile = create_profile_response.expect("Create failed");
     assert_eq!(
-        profile
-            .settings
-            .unwrap()
-            .theme.selected_theme,
+        profile.settings.unwrap().theme.selected_theme,
         Theme::System
     );
 
@@ -390,7 +385,6 @@ fn test_save_user_selected_theme_saves_the_selected_theme() {
     assert_eq!(settings.theme.selected_theme, Theme::Light);
 }
 
-
 #[test]
 fn test_save_user_selected_theme_saves_multiple_times() {
     let pic_setup = setup();
@@ -402,10 +396,7 @@ fn test_save_user_selected_theme_saves_multiple_times() {
 
     let initial_profile = create_profile_response.expect("Create failed");
     assert_eq!(
-        initial_profile
-            .settings
-            .unwrap()
-            .theme.selected_theme,
+        initial_profile.settings.unwrap().theme.selected_theme,
         Theme::System
     );
 
@@ -460,8 +451,6 @@ fn test_save_user_selected_theme_saves_multiple_times() {
     assert_eq!(settings.theme.selected_theme, Theme::Dark);
 }
 
-
-
 #[test]
 fn test_save_user_selected_theme_cannot_update_wrong_version() {
     let pic_setup = setup();
@@ -473,10 +462,7 @@ fn test_save_user_selected_theme_cannot_update_wrong_version() {
 
     let profile = create_profile_response.expect("Create failed");
     assert_eq!(
-        profile
-            .settings
-            .unwrap()
-            .theme.selected_theme,
+        profile.settings.unwrap().theme.selected_theme,
         Theme::System
     );
 
@@ -522,8 +508,7 @@ fn test_save_user_selected_theme_cannot_update_wrong_version() {
             .settings
             .unwrap()
             .theme
-            .selected_theme
-            ,
+            .selected_theme,
         Theme::Light
     );
 }

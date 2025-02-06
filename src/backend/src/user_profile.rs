@@ -1,11 +1,11 @@
 use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
 use ic_cdk::api::time;
 use shared::types::dapp::AddDappSettingsError;
+use shared::types::theme::{SaveSelectedThemeError, Theme};
 use shared::types::{
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     CredentialType, Version,
 };
-use shared::types::theme::{SaveSelectedThemeError, Theme};
 
 pub fn find_profile(
     principal: StoredPrincipal,
@@ -80,8 +80,6 @@ pub fn add_hidden_dapp_id(
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }
-
-
 
 /// Saves the selected theme in the user's settings.
 ///

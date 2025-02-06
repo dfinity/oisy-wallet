@@ -30,6 +30,7 @@ use shared::types::bitcoin::{
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::dapp::{AddDappSettingsError, AddHiddenDappIdRequest};
 use shared::types::signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult};
+use shared::types::theme::{SaveSelectedThemeError, SaveSelectedThemeRequest};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
@@ -41,7 +42,6 @@ use shared::types::{
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use std::cell::RefCell;
 use std::time::Duration;
-use shared::types::theme::{SaveSelectedThemeError, SaveSelectedThemeRequest};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -548,7 +548,6 @@ pub fn add_user_hidden_dapp_id(
         )
     })
 }
-
 
 /// Saves the selected theme in the user's settings.
 ///

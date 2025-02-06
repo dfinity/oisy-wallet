@@ -399,14 +399,13 @@ pub mod theme {
         Light,
         Dark,
         #[default]
-        System
+        System,
     }
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct ThemeSettings {
         pub selected_theme: Theme,
     }
-
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum SaveSelectedThemeError {
@@ -435,12 +434,10 @@ pub mod theme {
     }
 }
 
-
-
 pub mod settings {
     use crate::types::dapp::DappSettings;
-    use candid::{CandidType, Deserialize};
     use crate::types::theme::ThemeSettings;
+    use candid::{CandidType, Deserialize};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct Settings {
