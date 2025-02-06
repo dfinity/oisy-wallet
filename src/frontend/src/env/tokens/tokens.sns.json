@@ -17,7 +17,17 @@
 	{
 		"ledgerCanisterId": "2ouva-viaaa-aaaaq-aaamq-cai",
 		"rootCanisterId": "3e3x2-xyaaa-aaaaq-aaalq-cai",
-		"indexCanisterId": "2awyi-oyaaa-aaaaq-aaanq-cai"
+		"indexCanisterId": "2awyi-oyaaa-aaaaq-aaanq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "CHAT",
+			"symbol": "CHAT",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "OpenChat",
+			"url": "https://oc.app"
+		}
 	},
 	{
 		"ledgerCanisterId": "73mez-iiaaa-aaaaq-aaasq-cai",
@@ -126,6 +136,8 @@
 	},
 	{
 		"ledgerCanisterId": "rxdbk-dyaaa-aaaaq-aabtq-cai",
+		"rootCanisterId": "rzbmc-yiaaa-aaaaq-aabsq-cai",
+		"indexCanisterId": "q5mdq-biaaa-aaaaq-aabuq-cai",
 		"metadata": {
 			"decimals": 8,
 			"name": "Nuance",
@@ -247,7 +259,7 @@
 		"rootCanisterId": "gyito-zyaaa-aaaaq-aacpq-cai",
 		"indexCanisterId": "dnqcx-eyaaa-aaaaq-aacrq-cai",
 		"metadata": {
-			"decimals": 123456,
+			"decimals": 8,
 			"name": "OpenFPL",
 			"symbol": "FPL",
 			"fee": {
@@ -383,6 +395,7 @@
 		"indexCanisterId": "i5e5b-eaaaa-aaaaq-aadpa-cai",
 		"metadata": {
 			"decimals": 8,
+			"name": "---- (formerly CYCLES-TRANSFER-STATION)",
 			"symbol": "--- (CTS)",
 			"fee": {
 				"__bigint__": "1000000000000000000"
