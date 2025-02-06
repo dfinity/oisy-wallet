@@ -16,6 +16,7 @@ import { UrlSchema } from '@dfinity/zod-schemas';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
+import { DEPRECATED_SNES } from '../src/frontend/src/env/tokens/tokens.sns.deprecated.env';
 import { SNS_JSON_FILE } from './constants.mjs';
 
 const AGGREGATOR_PAGE_SIZE = 10;
@@ -178,16 +179,6 @@ const mapSnsMetadata = ({
 const filterNonNullishMetadata = (
 	token: SnsTokenWithOptionalMetadata
 ): token is EnvSnsTokenWithIcon => nonNullish(token.metadata);
-
-const DEPRECATED_SNES: Record<string, Partial<EnvIcrcTokenMetadataWithIcon>> = {
-	['ibahq-taaaa-aaaaq-aadna-cai']: {
-		name: '---- (formerly CYCLES-TRANSFER-STATION)',
-		symbol: '--- (CTS)',
-		alternativeName: undefined,
-		url: undefined,
-		icon: undefined
-	}
-};
 
 const mapDeprecatedSnsMetadata = ({
 	metadata,
