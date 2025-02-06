@@ -88,8 +88,11 @@ abstract class Homepage {
 		await locator.dispatchEvent('click');
 	}
 
-	protected async waitForByTestId(testId: string): Promise<void> {
-		await this.#page.getByTestId(testId).waitFor();
+	protected async waitForByTestId({
+		testId,
+		options
+	}: TestIdOperationParams & { options?: WaitForLocatorOptions }): Promise<void> {
+		await this.#page.getByTestId(testId).waitFor(options);
 	}
 
 	protected async isVisibleByTestId(testId: string): Promise<boolean> {
@@ -133,11 +136,11 @@ abstract class Homepage {
 	}
 
 	private async waitForNavigationMenu(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(NAVIGATION_MENU).waitFor(options);
+		await this.waitForByTestId({ testId: NAVIGATION_MENU, options });
 	}
 
 	protected async waitForLoginButton(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(LOGIN_BUTTON).waitFor(options);
+		await this.waitForByTestId({ testId: LOGIN_BUTTON, options });
 	}
 
 	private async getCanvasAsDataURL({
@@ -169,11 +172,10 @@ abstract class Homepage {
 		modalTestId,
 		state
 	}: WaitForModalParams): Promise<Locator> {
-    
 		const modal = this.#page.getByTestId(modalTestId);
 		if (state === 'detached') {
 			await modal.waitFor({ state: 'detached' });
-			return modal
+			return modal;
 		}
 		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
 		await modal.waitFor();
@@ -190,15 +192,15 @@ abstract class Homepage {
 	}
 
 	protected async waitForLoaderModal(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
+		await this.waitForByTestId({ testId: LOADER_MODAL, options });
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_CARD}-ETH-ETH`).waitFor(options);
+		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ICP-ICP`, options });
+		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ETH-ETH`, options });
 
-		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
+		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ICP`, options });
+		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ETH`, options });
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
@@ -225,7 +227,7 @@ abstract class Homepage {
 	}
 
 	async waitForLoggedInIndicator(): Promise<void> {
-		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
+		await this.waitForByTestId({ testId: NAVIGATION_MENU_BUTTON });
 	}
 
 	protected async elementExistsByTestId(testId: string): Promise<boolean> {

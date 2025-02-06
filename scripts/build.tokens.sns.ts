@@ -2,6 +2,7 @@
 
 import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { PartialSpecific } from '$lib/types/utils';
 import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
@@ -91,8 +92,8 @@ const saveLogos = async (logos: Logo[]) => {
 		);
 	};
 
-	const activeSnsLogos = logos.filter(({ rootCanisterId }) =>
-		isNullish(DEPRECATED_SNES[rootCanisterId])
+	const activeSnsLogos = logos.filter(({ ledgerCanisterId }) =>
+		isNullish(DEPRECATED_SNES[ledgerCanisterId])
 	);
 
 	await Promise.all(activeSnsLogos.map(writeLogo));
@@ -179,8 +180,8 @@ const filterNonNullishMetadata = (
 	token: SnsTokenWithOptionalMetadata
 ): token is EnvSnsTokenWithIcon => nonNullish(token.metadata);
 
-const DEPRECATED_SNES: Record<string, Partial<EnvIcrcTokenMetadataWithIcon>> = {
-	['ibahq-taaaa-aaaaq-aadna-cai']: {
+const DEPRECATED_SNES: Record<LedgerCanisterIdText, Partial<EnvIcrcTokenMetadataWithIcon>> = {
+	['itgqj-7qaaa-aaaaq-aadoa-cai']: {
 		name: '---- (formerly CYCLES-TRANSFER-STATION)',
 		symbol: '--- (CTS)',
 		alternativeName: undefined,
@@ -191,14 +192,14 @@ const DEPRECATED_SNES: Record<string, Partial<EnvIcrcTokenMetadataWithIcon>> = {
 
 const mapDeprecatedSnsMetadata = ({
 	metadata,
-	rootCanisterId,
+	ledgerCanisterId,
 	...rest
 }: EnvSnsTokenWithIcon): EnvSnsTokenWithIcon => ({
 	metadata: {
 		...metadata,
-		...(nonNullish(DEPRECATED_SNES[rootCanisterId]) && DEPRECATED_SNES[rootCanisterId])
+		...(nonNullish(DEPRECATED_SNES[ledgerCanisterId]) && DEPRECATED_SNES[ledgerCanisterId])
 	},
-	rootCanisterId,
+	ledgerCanisterId,
 	...rest
 });
 
