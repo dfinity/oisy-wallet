@@ -1,17 +1,23 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
+	import {
+		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUCCESS
+	} from '$lib/constants/analytics.contants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swap as swapService } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 	import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -26,6 +32,13 @@
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let isSourceTokenIcrc2: boolean;
+	$: isSourceTokenIcrc2 =
+		nonNullish($sourceToken) &&
+		nonNullish($kongSwapTokensStore) &&
+		nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
+		$kongSwapTokensStore[$sourceToken.symbol].icrc2;
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
@@ -60,16 +73,35 @@
 				destinationToken: $destinationToken,
 				swapAmount,
 				receiveAmount: $swapAmountsStore.swapAmounts.receiveAmount,
-				slippageValue
+				slippageValue,
+				isSourceTokenIcrc2
 			});
 
 			progress(ProgressStepsSwap.DONE);
+
+			await trackEvent({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: {
+					sourceToken: $sourceToken.symbol,
+					destinationToken: $destinationToken.symbol,
+					dApp: 'KONG'
+				}
+			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected },
 				err
+			});
+
+			await trackEvent({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: {
+					sourceToken: $sourceToken.symbol,
+					destinationToken: $destinationToken.symbol,
+					dApp: 'KONG'
+				}
 			});
 
 			back();

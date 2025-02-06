@@ -136,6 +136,7 @@
 		},
 		"alt": {
 			"open_etherscan": "Open your address on Etherscan",
+			"open_solscan": "Open your address on Solscan",
 			"qrcode_address": "Scan this QR code to copy the address to receive $token tokens"
 		}
 	},
@@ -166,6 +167,7 @@
 			"loading_balance": "Error while loading the ETH balance.",
 			"loading_balance_symbol": "Error while loading $symbol balance.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
+			"spl_tokens": "Error while loading the SPL tokens.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
 			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to Erc20.",
@@ -180,6 +182,7 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
+			"spl_user_tokens": "Error while loading the SPL user tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
@@ -211,11 +214,18 @@
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅"
+			"pouh_credential_verified": "Verified ✅",
+			"appearance": "Appearance",
+			"appearance_light": "Light",
+			"appearance_dark": "Dark",
+			"appearance_system": "System"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
-			"github_release": "$oisy_short release notes on GitHub"
+			"github_release": "$oisy_short release notes on GitHub",
+			"appearance_light": "Enabled light mode",
+			"appearance_dark": "Enables dark mode",
+			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
@@ -378,7 +388,9 @@
 			"no_btc_network_id": "Current network ($networkId) is not a Bitcoin network.",
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
-			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
+			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
+			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
+			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again."
 		}
 	},
 	"convert": {
@@ -405,9 +417,6 @@
 			"swap_to_token": "Convert $sourceToken → $destinationToken",
 			"review": "Review transaction",
 			"max_balance": "Max",
-			"review_tokens_info_title": "You're converting",
-			"amount_to_convert": "Amount to convert",
-			"amount_to_receive": "Amount to receive",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
 			"conversion_may_take": "Conversion may take up to 1 hour",
@@ -431,12 +440,9 @@
 			"swap": "Swap",
 			"select_destination_token": "Select token to receive",
 			"select_source_token": "Select token to pay",
-			"select_source_token_title": "You pay",
-			"select_destination_token_title": "You receive",
 			"switch_tokens_button": "Switch tokens",
 			"review": "Review transaction",
 			"review_button": "Review swap",
-			"select_token": "Select token",
 			"max_slippage": "Max slippage",
 			"max_balance": "Max",
 			"not_available": "n/a",
@@ -450,11 +456,11 @@
 			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
 			"swap_button": "Swap now",
 			"swap_is_not_offered": "This swap is currently not offered.",
-			"exchange_is_not_available": "USD value is currently not available.",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
-			"refreshing_ui": "Refreshing UI"
+			"refreshing_ui": "Refreshing UI",
+			"swap_provider": "Swap provider"
 		},
 		"error": {
 			"unexpected": "Something went wrong while swapping tokens.",
@@ -474,6 +480,7 @@
 		"text": {
 			"title": "Tokens",
 			"contract_address": "Contract address",
+			"token_address": "Token address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
 			"hide_zeros": "Hide zeros",
@@ -482,13 +489,18 @@
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
 			"show_token": "Show token",
-			"hide_token": "Hide token"
+			"hide_token": "Hide token",
+			"select_token": "Select token",
+			"exchange_is_not_available": "USD value is currently not available.",
+			"source_token_title": "You pay",
+			"destination_token_title": "You receive"
 		},
 		"details": {
 			"title": "Token details",
 			"token": "Token",
 			"network": "Network",
 			"contract_address_copied": "Contract address copied to clipboard.",
+			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
 			"standard": "Standard"
 		},
@@ -524,10 +536,11 @@
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
+				"missing_token_address": "The token address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
 			},
 			"warning": {
-				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab util it's completed."
+				"do_not_close_manage": "$oisy_name is preparing and securing the new tokens. Please don't close this tab until it's completed."
 			}
 		},
 		"manage": {
@@ -563,10 +576,12 @@
 			"open_blockstream": "Open the details of the token on Blockstream",
 			"open_dashboard": "Open the details of the token on the ICP Dashboard",
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer",
+			"open_token_address_block_explorer": "Open the token address on a block explorer",
 			"token_group_number": "Total number of tokens in the group for native token $token"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
+			"enter_token_address": "Enter an SPL token address",
 			"search_token": "Search for the token"
 		},
 		"warning": {
@@ -574,12 +589,13 @@
 		},
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
+			"invalid_token_address": "Token address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
-			"no_metadata": "No metadata were fetched for the contract address.",
+			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the ERC20 contract metadata.",
+			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
@@ -597,7 +613,8 @@
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
-			"total_fee": "Total fee"
+			"total_fee": "Total fee",
+			"ata_fee": "ATA fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -660,6 +677,7 @@
 			"session_ended": "WalletConnect session was ended.",
 			"connected": "WalletConnect connected.",
 			"eth_transaction_executed": "WalletConnect eth_sendTransaction request executed.",
+			"sol_transaction_executed": "WalletConnect \"$method\" request executed.",
 			"sign_executed": "WalletConnect sign request executed."
 		},
 		"error": {
@@ -919,8 +937,8 @@
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},
 		"warning": {
-			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister.",
-			"unavailable_index_canister": "Transaction for $token_list can not be displayed. Index canister is currently not available."
+			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
+			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
 		}
 	}
 }
