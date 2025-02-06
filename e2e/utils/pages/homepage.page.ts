@@ -66,8 +66,24 @@ abstract class Homepage {
 		this.#viewportSize = viewportSize;
 	}
 
-	protected async clickByTestId(testId: string): Promise<void> {
-		await this.#page.getByTestId(testId).click();
+	protected async clickByTestId({
+		testId,
+		scrollIntoView = true
+	}: {
+		testId: string;
+		scrollIntoView?: boolean;
+	}): Promise<void> {
+		const locator = this.#page.getByTestId(testId);
+
+		if (scrollIntoView) {
+			// Method `click` auto-scrolls into view if needed.
+			await locator.click();
+			return;
+		}
+
+		// Since the method `click` auto-scrolls into view, we could prefer to avoid it.
+		// That is because it could potentially have different screenshot outputs if it takes more time to load and scrolls more.
+		await locator.dispatchEvent('click');
 	}
 
 	protected async isVisibleByTestId(testId: string): Promise<boolean> {
@@ -137,7 +153,7 @@ abstract class Homepage {
 		modalOpenButtonTestId,
 		modalTestId
 	}: WaitForModalParams): Promise<Locator> {
-		await this.clickByTestId(modalOpenButtonTestId);
+		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
 		const modal = this.#page.getByTestId(modalTestId);
 		await modal.waitFor();
 
@@ -166,10 +182,10 @@ abstract class Homepage {
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
-		await this.clickByTestId(NAVIGATION_MENU_BUTTON);
+		await this.clickByTestId({ testId: NAVIGATION_MENU_BUTTON });
 		await this.waitForNavigationMenu();
 
-		await this.clickByTestId(menuItemTestId);
+		await this.clickByTestId({ testId: menuItemTestId });
 	}
 
 	protected async clickSelector({ selector }: SelectorOperationParams): Promise<void> {
@@ -226,7 +242,7 @@ abstract class Homepage {
 
 	async navigateTo(testId: string): Promise<void> {
 		if (await this.isVisibleByTestId(testId)) {
-			await this.clickByTestId(testId);
+			await this.clickByTestId({ testId });
 		} else {
 			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
 			await navigationMenuButton.click();
@@ -237,8 +253,8 @@ abstract class Homepage {
 
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId(TESTNET_TOGGLE);
-		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
+		await this.clickByTestId({ testId: TESTNET_TOGGLE });
+		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
 	async takeScreenshot(): Promise<void> {
