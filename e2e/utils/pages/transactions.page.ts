@@ -18,7 +18,8 @@ export class TransactionsPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.clickByTestId(`${TOKEN_CARD}-${this.#tokenSymbol}-${this.#networkId}`);
+		const testId = `${TOKEN_CARD}-${this.#tokenSymbol}-${this.#networkId}`;
+		await this.clickByTestId({ testId });
 		await this.waitForLoadState();
 	}
 }

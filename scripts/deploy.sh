@@ -9,7 +9,7 @@ mkdir -p ./target/ic
 
 ./scripts/download.icp.sh
 dfx deploy icp_ledger
-./scripts/deploy.icp_index.sh
+dfx deploy icp_index
 
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh
