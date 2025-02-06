@@ -14,42 +14,15 @@ import { signature } from '@solana/keys';
 export const getSolTransactions = async ({
 	address,
 	network,
-	before,
-	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
-	const wallet = solAddress(address);
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
-	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
-
-	return await signatures.reduce(
-		async (accPromise, signature) => {
-			const acc = await accPromise;
-			const parsedTransactions = await fetchSolTransactionsForSignature({
-				signature,
-				network,
-				address
-			});
-
-			return [...acc, ...parsedTransactions];
-		},
-		Promise.resolve([] as SolTransactionUi[])
-	);
-};
-
-/**
- * Fetches SPL token transactions for a given wallet address and token mint.
- */
-//TODO add unit tests
-export const getSplTransactions = async ({
-	address,
-	network,
 	tokenAddress,
 	before,
 	limit = Number(WALLET_PAGINATION)
 }: GetSolTransactionsParams & {
-	tokenAddress: SolAddress;
+	tokenAddress?: SolAddress;
 }): Promise<SolTransactionUi[]> => {
-	assertIsAddress(tokenAddress);
+	if (nonNullish(tokenAddress)) {
+		assertIsAddress(tokenAddress);
+	}
 
 	const wallet = solAddress(address);
 
