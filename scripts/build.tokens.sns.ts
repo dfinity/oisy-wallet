@@ -2,6 +2,7 @@
 
 import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { PartialSpecific } from '$lib/types/utils';
 import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
@@ -179,7 +180,7 @@ const filterNonNullishMetadata = (
 	token: SnsTokenWithOptionalMetadata
 ): token is EnvSnsTokenWithIcon => nonNullish(token.metadata);
 
-const DEPRECATED_SNES: Record<CanisterIdText, Partial<EnvIcrcTokenMetadataWithIcon>> = {
+const DEPRECATED_SNES: Record<LedgerCanisterIdText, Partial<EnvIcrcTokenMetadataWithIcon>> = {
 	['itgqj-7qaaa-aaaaq-aadoa-cai']: {
 		name: '---- (formerly CYCLES-TRANSFER-STATION)',
 		symbol: '--- (CTS)',
