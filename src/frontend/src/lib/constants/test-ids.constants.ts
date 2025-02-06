@@ -60,7 +60,6 @@ export const DESTINATION_INPUT = 'destination-input';
 
 export const IN_PROGRESS_MODAL = 'in-progress-modal';
 export const AMOUNT_DATA = 'amount-data';
-export const TOKEN_CARD_ICP = 'token-card-ICP-ICP';
 export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
