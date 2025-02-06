@@ -143,7 +143,7 @@ impl StoredUserProfile {
             },
             theme: ThemeSettings {
                 selected_theme: Theme::System,
-            }
+            },
         };
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
