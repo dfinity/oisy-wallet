@@ -10,11 +10,11 @@ import {
 	REVIEW_FORM_SEND_BUTTON,
 	SEND_FORM_NEXT_BUTTON,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
-	TOKEN_CARD_ICP
+	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
-import { LedgerTransferCommand } from '../../utils/commands/ledger-transfer.command';
-import { createCommandRunner } from '../../utils/commands/runner';
+import { LedgerTransferCommand } from '../commands/ledger-transfer.command';
+import { createCommandRunner } from '../commands/runner';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 const commandRunner = createCommandRunner();
@@ -27,7 +27,7 @@ export class FlowPage extends HomepageLoggedIn {
 	}
 
 	async receiveTokens(): Promise<void> {
-		await this.clickByTestId(TOKEN_CARD_ICP);
+		await this.clickByTestId(`${TOKEN_CARD}-ICP-ICP`);
 		await this.waitForByTestId(AMOUNT_DATA);
 		expect(this.getBalanceLocator()).toHaveText('0.00');
 		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON });
