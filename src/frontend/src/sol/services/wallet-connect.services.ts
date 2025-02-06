@@ -73,6 +73,8 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
+	console.log('parsedTransactionMessage', parsedTransactionMessage);
+
 	return mapSolTransactionMessage(parsedTransactionMessage);
 };
 
