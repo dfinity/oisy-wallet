@@ -18,9 +18,12 @@ import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
-import { ACCOUNT_ID_ICP, HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
+import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
-import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
+import {
+	getReceiveTokensModalAddressLabelSelector,
+	getReceiveTokensModalQrCodeButtonSelector
+} from '../selectors.utils';
 
 interface HomepageParams {
 	page: Page;
@@ -249,9 +252,10 @@ abstract class Homepage {
 	}
 
 	async getAccountIdByTestId(testId: string): Promise<string> {
-		const container = this.#page.locator(ACCOUNT_ID_ICP);
-		const addressLocator = container.getByTestId(testId);
-		const addressText = await addressLocator.textContent();
+		const addressLocator = getReceiveTokensModalAddressLabelSelector({
+			sectionSelector: testId
+		});
+		const addressText = await this.#page.locator(addressLocator).innerHTML();
 		if (!addressText) {
 			throw new Error('No address text found in container icp-account-id');
 		}
