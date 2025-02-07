@@ -12,6 +12,9 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
+	import { DEFAULT_THEME_NAME } from '$lib/constants/app.constants';
+	import { selectedTheme } from '$lib/derived/settings.derived';
+	import { Themes } from '$lib/enums/themes';
 	import { initAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
@@ -19,9 +22,6 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { Themes } from '$lib/enums/themes';
-	import { DEFAULT_THEME_NAME } from '$lib/constants/app.constants';
-	import { selectedTheme } from '$lib/derived/settings.derived';
 
 	/**
 	 * Init dApp
@@ -87,8 +87,8 @@
 		spinner?.remove();
 	})();
 	const setThemeHtmlProperty = (theme: Themes) => {
-		document.getElementsByTagName("html")[0].setAttribute("theme", theme);
-	}
+		document.getElementsByTagName('html')[0].setAttribute('theme', theme);
+	};
 	const applyTheme = () => {
 		selectedTheme.subscribe((themeName) => {
 			const themeSetting = themeName ?? DEFAULT_THEME_NAME;
@@ -102,15 +102,15 @@
 				setThemeHtmlProperty(themeSetting);
 			}
 		});
-	}
+	};
 	onMount(() => {
 		// apply initial color theme
 		applyTheme();
 		// apply color theme on OS theme change
 		if (window.matchMedia) {
-			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme)
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 		}
-	})
+	});
 </script>
 
 <svelte:window on:storage={syncAuthStore} />
