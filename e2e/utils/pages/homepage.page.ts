@@ -1,4 +1,5 @@
 import {
+	AMOUNT_DATA,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
@@ -19,7 +20,10 @@ import { expect, type Locator, type Page, type ViewportSize } from '@playwright/
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
-import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
+import {
+	getReceiveTokensModalAddressLabelSelector,
+	getReceiveTokensModalQrCodeButtonSelector
+} from '../selectors.utils';
 
 interface HomepageParams {
 	page: Page;
@@ -41,6 +45,7 @@ interface TestIdOperationParams {
 interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
+	state?: 'detached';
 }
 
 type TestModalSnapshotParams = {
@@ -116,6 +121,15 @@ abstract class Homepage {
 		}
 	}
 
+	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
+		const elementsLocator = this.#page.locator(selector);
+		await elementsLocator.evaluateAll((elements) => {
+			for (const element of elements) {
+				(element as HTMLElement).innerHTML = 'placeholder';
+			}
+		});
+	}
+
 	private async goto(): Promise<void> {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
@@ -158,12 +172,16 @@ abstract class Homepage {
 
 	protected async waitForModal({
 		modalOpenButtonTestId,
-		modalTestId
+		modalTestId,
+		state
 	}: WaitForModalParams): Promise<Locator> {
-		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
 		const modal = this.#page.getByTestId(modalTestId);
+		if (state === 'detached') {
+			await modal.waitFor({ state });
+			return modal;
+		}
+		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
 		await modal.waitFor();
-
 		return modal;
 	}
 
@@ -213,6 +231,35 @@ abstract class Homepage {
 
 	async waitForLoggedInIndicator(): Promise<void> {
 		await this.waitForByTestId({ testId: NAVIGATION_MENU_BUTTON });
+	}
+
+	protected async elementExistsByTestId(testId: string): Promise<boolean> {
+		return await this.#page
+			.getByTestId(testId)
+			.isVisible()
+			.catch(() => false);
+	}
+
+	getBalanceLocator(): Locator {
+		return this.#page.getByTestId(AMOUNT_DATA);
+	}
+
+	async setInputValueByTestId({
+		testId,
+		value
+	}: TestIdOperationParams & { value: string }): Promise<void> {
+		await this.#page.getByTestId(testId).fill(value);
+	}
+
+	async getAccountIdByTestId(testId: string): Promise<string> {
+		const addressLocator = getReceiveTokensModalAddressLabelSelector({
+			sectionSelector: testId
+		});
+		const addressText = await this.#page.locator(addressLocator).innerHTML();
+		if (!addressText) {
+			throw new Error('No address text found in container icp-account-id');
+		}
+		return addressText.trim();
 	}
 
 	async testModalSnapshot({
