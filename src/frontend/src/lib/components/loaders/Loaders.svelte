@@ -16,8 +16,8 @@
 			<LoaderEthBalances>
 				<LoaderWallets>
 					<ExchangeWorker>
-						<LoaderMetamask
-							><LoaderUserProfile>
+						<LoaderMetamask>
+							<LoaderUserProfile>
 								<slot />
 							</LoaderUserProfile>
 						</LoaderMetamask>

@@ -7,7 +7,7 @@ import {
 import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import type { Token } from '$lib/types/token';
 
-export const [DEFAULT_ETHEREUM_TOKEN, _rest] = SUPPORTED_ETHEREUM_TOKENS;
+export const [DEFAULT_ETHEREUM_TOKEN] = SUPPORTED_ETHEREUM_TOKENS;
 
 // The following tokens are used as fallback for any Bitcoin token defined in the token store.
 // That means that the order of the tokens in the array is important, to have a correct fallback chain.
