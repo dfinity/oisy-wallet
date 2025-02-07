@@ -134,15 +134,15 @@ jobs:
         with:
           name: snapshot-status-${{ matrix.os }}
           path: snapshot_status.txt
-          retention-days: 30
+          retention-days: 3
 
       - name: Save changed snapshots
-        if: env.NO_CHANGES == 'false'
+        if: env.CHANGES == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: snapshots-${{ matrix.os }}
           path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.os_suffix.outputs.os_suffix }}.png
-          retention-days: 30
+          retention-days: 3
 
   finalize_snapshots_update:
     name: Finalize Snapshots Update
@@ -212,25 +212,25 @@ jobs:
       - name: Check for Final Changes
         run: |
           if [ -n "$(git status --porcelain e2e)" ]; then
-            echo "FINAL_NO_CHANGES=false" >> $GITHUB_ENV
+            echo "FINAL_CHANGES=true" >> $GITHUB_ENV
           else
-            echo "FINAL_NO_CHANGES=true" >> $GITHUB_ENV
+            echo "FINAL_CHANGES=false" >> $GITHUB_ENV
           fi
 
       - name: Commit and push updates
         uses: EndBug/add-and-commit@v9
-        if: env.FINAL_NO_CHANGES == 'false' && github.ref != 'refs/heads/main'
+        if: env.FINAL_CHANGES == 'true' && github.ref != 'refs/heads/main'
         with:
           add: e2e
           default_author: github_actions
           message: '🤖 Update E2E snapshots'
 
       - name: Stage Changes on main
-        if: env.FINAL_NO_CHANGES == 'false' && github.ref == 'refs/heads/main'
+        if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
         run: git add e2e
 
       - name: Set CHANGES_DETECTED env var
-        if: env.FINAL_NO_CHANGES == 'false' && github.ref == 'refs/heads/main'
+        if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
         run: |
           MODIFIED_FILES=$(git diff --cached --name-only)
           echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
