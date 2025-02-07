@@ -90,31 +90,29 @@
 		document.getElementsByTagName('html')[0].setAttribute('theme', theme);
 	};
 	let theme = DEFAULT_THEME_NAME;
-	const applyTheme = (name: Themes) => {
-		const themeSetting = name;
-		if (themeSetting === Themes.SYSTEM) {
+	const applyTheme = () => {
+		if (theme === Themes.SYSTEM) {
 			if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
 				setThemeHtmlProperty(Themes.DARK);
 			} else {
 				setThemeHtmlProperty(Themes.LIGHT);
 			}
 		} else {
-			setThemeHtmlProperty(themeSetting);
+			setThemeHtmlProperty(theme);
 		}
 	};
-	selectedTheme.subscribe((themeName) => {
-		theme = themeName;
-		// apply color theme on settings change
-		applyTheme(themeName);
-	});
 	onMount(() => {
 		// apply initial color theme
-		applyTheme(theme);
+		selectedTheme.subscribe((themeName) => {
+			theme = themeName;
+			// apply color theme on settings change
+			applyTheme();
+		});
 		// apply color theme on OS theme change
 		if (window.matchMedia) {
 			window
 				.matchMedia('(prefers-color-scheme: dark)')
-				.addEventListener('change', () => applyTheme(theme));
+				.addEventListener('change', applyTheme);
 		}
 	});
 </script>
