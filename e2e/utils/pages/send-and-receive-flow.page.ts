@@ -4,8 +4,8 @@ import {
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
-	RECEIVE_TOKENS_MODAL_ADDRESS_LABEL,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+	RECEIVE_TOKENS_MODAL_ICP_SECTION,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	REVIEW_FORM_SEND_BUTTON,
 	SEND_FORM_NEXT_BUTTON,
@@ -32,7 +32,7 @@ export class FlowPage extends HomepageLoggedIn {
 		await expect(this.getBalanceLocator()).toHaveText('0.00');
 
 		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON });
-		const accountId = await this.getAccountIdByTestId(RECEIVE_TOKENS_MODAL_ADDRESS_LABEL);
+		const accountId = await this.getAccountIdByTestId(RECEIVE_TOKENS_MODAL_ICP_SECTION);
 		expect(accountId).toBeTruthy();
 
 		await commandRunner.exec({
