@@ -277,9 +277,9 @@ abstract class Homepage {
 		networkName: string;
 	}): Promise<void> {
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
-		await this.#page.click(`[data-tid^="${NETWORKS_SWITCHER_SELECTOR}-${networkName}"]`);
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkName}` });
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
-		await this.#page.click(`[data-tid^="${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}"]`);
+		await this.clickByTestId({ testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}` });
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
 	}
 
