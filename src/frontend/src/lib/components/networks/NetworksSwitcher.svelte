@@ -6,6 +6,7 @@
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
@@ -24,7 +25,12 @@
 	);
 </script>
 
-<Dropdown bind:this={dropdown} ariaLabel={$i18n.networks.title} {disabled}>
+<Dropdown
+	bind:this={dropdown}
+	ariaLabel={$i18n.networks.title}
+	testId={NETWORKS_SWITCHER_DROPDOWN}
+	{disabled}
+>
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
 	<div slot="items">

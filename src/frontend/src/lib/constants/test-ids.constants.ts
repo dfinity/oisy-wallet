@@ -90,3 +90,10 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
 export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
+
+export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
+export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
+export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
+
+export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
+export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';

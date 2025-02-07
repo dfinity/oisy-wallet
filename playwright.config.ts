@@ -27,7 +27,11 @@ const appleProjects = [
 	},
 	{
 		name: 'iPhone SE',
-		use: devices['iPhone SE']
+		use: {
+			...devices['iPhone SE'],
+			screen: { width: 375, height: 667 },
+			viewport: { width: 375, height: 667 }
+		}
 	}
 ];
 
@@ -41,8 +45,12 @@ const nonAppleProjects = [
 		use: devices['Desktop Firefox']
 	},
 	{
-		name: 'Pixel 5',
-		use: devices['Pixel 5']
+		name: 'Pixel 7',
+		use: {
+			...devices['Pixel 7'],
+			screen: { width: 412, height: 915 },
+			viewport: { width: 412, height: 915 }
+		}
 	}
 ];
 
