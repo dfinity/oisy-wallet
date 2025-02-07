@@ -3,6 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import QRButton from '$lib/components/common/QRButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -26,7 +27,7 @@
 	name="destination"
 	bind:value={destination}
 	placeholder={inputPlaceholder}
-	testId="destination-input"
+	testId={DESTINATION_INPUT}
 	on:nnsInput
 >
 	<svelte:fragment slot="inner-end">

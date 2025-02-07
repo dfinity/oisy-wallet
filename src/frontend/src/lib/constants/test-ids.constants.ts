@@ -42,6 +42,7 @@ export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON =
 	'receive-tokens-modal-copy-icp-account-id-button';
 
 export const SEND_TOKENS_MODAL_OPEN_BUTTON = 'send-tokens-modal-open-button';
+export const SEND_TOKENS_MODAL = 'send-tokens-modal';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
@@ -52,6 +53,12 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
+
+export const AMOUNT_DATA = 'amount-data';
+export const AMOUNT_INPUT = 'amount-input';
+export const DESTINATION_INPUT = 'destination-input';
+
+export const IN_PROGRESS_MODAL = 'in-progress-modal';
 
 export const TESTNET_TOGGLE = 'testnet-toggle';
 

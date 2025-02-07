@@ -217,15 +217,15 @@
 			"pouh_credential_verified": "Verified ✅",
 			"appearance": "Appearance",
 			"appearance_light": "Light",
-			"appearance_light_description": "Enabled light mode",
 			"appearance_dark": "Dark",
-			"appearance_dark_description": "Enables dark mode",
-			"appearance_system": "System",
-			"appearance_system_description": "Enables your operating systems color mode"
+			"appearance_system": "System"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
-			"github_release": "$oisy_short release notes on GitHub"
+			"github_release": "$oisy_short release notes on GitHub",
+			"appearance_light": "Enabled light mode",
+			"appearance_dark": "Enables dark mode",
+			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."

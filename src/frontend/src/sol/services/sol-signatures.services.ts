@@ -1,10 +1,12 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { fetchSignatures } from '$sol/api/solana.api';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
+import { findAssociatedTokenPda } from '@solana-program/token';
 import { assertIsAddress, address as solAddress } from '@solana/addresses';
 import { signature } from '@solana/keys';
 
@@ -14,44 +16,25 @@ import { signature } from '@solana/keys';
 export const getSolTransactions = async ({
 	address,
 	network,
-	before,
-	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
-	const wallet = solAddress(address);
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
-	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
-
-	return await signatures.reduce(
-		async (accPromise, signature) => {
-			const acc = await accPromise;
-			const parsedTransactions = await fetchSolTransactionsForSignature({
-				signature,
-				network,
-				address
-			});
-
-			return [...acc, ...parsedTransactions];
-		},
-		Promise.resolve([] as SolTransactionUi[])
-	);
-};
-
-/**
- * Fetches SPL token transactions for a given wallet address and token mint.
- */
-//TODO add unit tests
-export const getSplTransactions = async ({
-	address,
-	network,
 	tokenAddress,
 	before,
 	limit = Number(WALLET_PAGINATION)
 }: GetSolTransactionsParams & {
-	tokenAddress: SolAddress;
+	tokenAddress?: SolAddress;
 }): Promise<SolTransactionUi[]> => {
-	assertIsAddress(tokenAddress);
+	if (nonNullish(tokenAddress)) {
+		assertIsAddress(tokenAddress);
+	}
 
-	const wallet = solAddress(address);
+	const [relevantAddress] = nonNullish(tokenAddress)
+		? await findAssociatedTokenPda({
+				owner: solAddress(address),
+				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
+				mint: solAddress(tokenAddress)
+			})
+		: [address];
+
+	const wallet = solAddress(relevantAddress);
 
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
 

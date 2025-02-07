@@ -1,13 +1,20 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as solanaApi from '$sol/api/solana.api';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress } from '$tests/mocks/sol.mock';
+import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
+import * as solProgramToken from '@solana-program/token';
+import { address } from '@solana/addresses';
 import { type MockInstance } from 'vitest';
+
+vi.mock('@solana-program/token', () => ({
+	findAssociatedTokenPda: vi.fn()
+}));
 
 describe('sol-transactions.services', () => {
 	beforeEach(() => {
@@ -21,6 +28,7 @@ describe('sol-transactions.services', () => {
 	describe('getSolTransactions', () => {
 		let spyFetchSignatures: MockInstance;
 		let spyFetchTransactionsForSignature: MockInstance;
+		let spyFindAssociatedTokenPda: MockInstance;
 
 		const mockError = new Error('Mock Error');
 
@@ -37,6 +45,8 @@ describe('sol-transactions.services', () => {
 				'fetchSolTransactionsForSignature'
 			);
 			spyFetchTransactionsForSignature.mockResolvedValue(mockSolTransactions);
+
+			spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
 		});
 
 		it('should fetch transactions successfully', async () => {
@@ -46,8 +56,24 @@ describe('sol-transactions.services', () => {
 			});
 
 			expect(transactions).toHaveLength(mockSignatures.length * mockSolTransactions.length);
-			expect(spyFetchSignatures).toHaveBeenCalledTimes(1);
+			expect(spyFetchSignatures).toHaveBeenCalledOnce();
 			expect(spyFetchTransactionsForSignature).toHaveBeenCalledTimes(2);
+		});
+
+		it('should correctly handle a token address', async () => {
+			spyFindAssociatedTokenPda.mockResolvedValueOnce([mockSplAddress]);
+
+			await getSolTransactions({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				tokenAddress: mockSplAddress
+			});
+
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledWith({
+				owner: mockSolAddress,
+				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
+				mint: mockSplAddress
+			});
 		});
 
 		it('should handle before parameter', async () => {
