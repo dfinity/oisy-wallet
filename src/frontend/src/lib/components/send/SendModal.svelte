@@ -5,6 +5,7 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -15,7 +16,6 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import {  SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
