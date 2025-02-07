@@ -1,4 +1,5 @@
 import { ICP_NETWORK } from '$env/networks/networks.env';
+import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
 import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -114,3 +115,9 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 			}
 		: {})
 });
+
+export const isDeprecatedSns = ({ ledgerCanisterId }: Pick<IcToken, 'ledgerCanisterId'>): boolean =>
+	ledgerCanisterId in DEPRECATED_SNES;
+
+export const isNotDeprecated = ({ ledgerCanisterId }: Pick<IcToken, 'ledgerCanisterId'>): boolean =>
+	!isDeprecatedSns({ ledgerCanisterId });
