@@ -5,7 +5,7 @@ import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
-import { isNotDeprecated } from '$icp/utils/icrc.utils';
+import { isNotDeprecatedSns } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
@@ -78,5 +78,5 @@ const mapIcrcCustomToken = ({
 	fee,
 	alternativeName,
 	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
-	...(isNotDeprecated({ ledgerCanisterId }) && { icon: `/icons/sns/${ledgerCanisterId}.png` })
+	...(isNotDeprecatedSns({ ledgerCanisterId }) && { icon: `/icons/sns/${ledgerCanisterId}.png` })
 });
