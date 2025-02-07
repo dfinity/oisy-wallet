@@ -5,6 +5,7 @@
 	export let button: HTMLButtonElement | undefined = undefined;
 	export let ariaLabel: string;
 	export let opened = false;
+	export let testId: string | undefined = undefined;
 </script>
 
 <button
@@ -12,6 +13,7 @@
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
+	data-tid={testId}
 	{disabled}
 	class:opacity-50={disabled}
 	class:border-brand-primary={opened}
