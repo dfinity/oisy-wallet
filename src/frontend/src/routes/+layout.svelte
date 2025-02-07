@@ -89,26 +89,32 @@
 	const setThemeHtmlProperty = (theme: Themes) => {
 		document.getElementsByTagName('html')[0].setAttribute('theme', theme);
 	};
-	const applyTheme = () => {
-		selectedTheme.subscribe((themeName) => {
-			const themeSetting = themeName ?? DEFAULT_THEME_NAME;
-			if (themeSetting === Themes.SYSTEM) {
-				if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-					setThemeHtmlProperty(Themes.DARK);
-				} else {
-					setThemeHtmlProperty(Themes.LIGHT);
-				}
+	let theme = DEFAULT_THEME_NAME;
+	const applyTheme = (name: Themes) => {
+		const themeSetting = name;
+		if (themeSetting === Themes.SYSTEM) {
+			if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+				setThemeHtmlProperty(Themes.DARK);
 			} else {
-				setThemeHtmlProperty(themeSetting);
+				setThemeHtmlProperty(Themes.LIGHT);
 			}
-		});
+		} else {
+			setThemeHtmlProperty(themeSetting);
+		}
 	};
+	selectedTheme.subscribe((themeName) => {
+		theme = themeName;
+		// apply color theme on settings change
+		applyTheme(themeName);
+	});
 	onMount(() => {
 		// apply initial color theme
-		applyTheme();
+		applyTheme(theme);
 		// apply color theme on OS theme change
 		if (window.matchMedia) {
-			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+			window
+				.matchMedia('(prefers-color-scheme: dark)')
+				.addEventListener('change', () => applyTheme(theme));
 		}
 	});
 </script>
