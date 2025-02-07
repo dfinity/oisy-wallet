@@ -174,7 +174,7 @@ abstract class Homepage {
 	}: WaitForModalParams): Promise<Locator> {
 		const modal = this.#page.getByTestId(modalTestId);
 		if (state === 'detached') {
-			await modal.waitFor({ state: 'detached' });
+			await modal.waitFor({ state });
 			return modal;
 		}
 		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
