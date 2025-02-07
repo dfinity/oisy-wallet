@@ -152,13 +152,23 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: Check if snapshots changed
+        run: |
+          if [ -n "$(git status --porcelain e2e)" ]; then
+            echo "NO_CHANGES=false" >> $GITHUB_ENV
+          else
+            echo "NO_CHANGES=true" >> $GITHUB_ENV
+          fi
+
       - name: Download Ubuntu Snapshots
+        if: env.NO_CHANGES == 'false'
         uses: actions/download-artifact@v4
         with:
           name: snapshots-ubuntu-24.04
           path: e2e
 
       - name: Download macOS Snapshots
+        if: env.NO_CHANGES == 'false'
         uses: actions/download-artifact@v4
         with:
           name: snapshots-macos-14
