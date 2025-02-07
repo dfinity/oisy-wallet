@@ -44,7 +44,7 @@ export const themeVariables = {
 		basic: 'var(--colors-neutrals-white)',
 		primary: 'var(--colors-neutrals-200)',
 		'primary-inverted': 'var(--colors-neutrals-900)',
-		secondary: 'var(--colors-neutrals-300)',
+		secondary: 'var(--color-border-secondary)',
 		'secondary-inverted': 'var(--colors-neutrals-800)',
 		tertiary: 'var(--colors-neutrals-400)',
 		'tertiary-inverted': 'var(--colors-neutrals-500)',
@@ -84,7 +84,7 @@ export const themeVariables = {
 		disabled: 'var(--colors-neutrals-400)',
 		brand: {
 			primary: 'var(--color-brand-base)',
-			'primary-alt': 'var(--color-brand-100)',
+			'primary-alt': 'var(--color-foreground-primary-alt)',
 			secondary: 'var(--color-brand-500)',
 			'secondary-alt': 'var(--color-brand-200)',
 			tertiary: 'var(--color-brand-600)',

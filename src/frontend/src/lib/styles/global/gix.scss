@@ -24,8 +24,8 @@
 	--progress-color-contrast: var(--color-white);
 	--progress-color-rgb: var(--color-primary-rgb);
 
-	--overlay-background: var(--color-white);
-	--overlay-background-contrast: var(--color-secondary);
+	--overlay-background: var(--color-background-primary);
+	--overlay-background-contrast: var(--color-foreground-primary);
 
 	--dropdown-background: var(--overlay-background);
 	--dropdown-border-size: 1.5px;
@@ -39,12 +39,13 @@
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
 	// Input
-	--input-background: var(--color-white);
-	--focus-background: var(--color-white);
-	--input-border-color: var(--color-grey);
+	--input-background: var(--color-background-primary);
+	--focus-background: var(--color-background-primary);
+	--focus-border-color: var(--color-brand-base);
+	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
-	--secondary: var(--color-dark-blue);
+	--secondary: var(--color-brand-base);
 
 	// Toast message max height is calculated based on the font-size.
 	--font-size-standard: 1rem;
@@ -232,6 +233,11 @@ div.toggle {
 
 	--card-background-contrast: var(--color-background-tertiary);
 	--card-background: var(--color-white);
+
+	// todo: solve properly
+	&>label {
+		outline: 1px solid var(--color-border-primary);
+	}
 
 	&:has(input[type='checkbox']:checked) {
 		--card-background-contrast: var(--color-blue-ribbon);

@@ -104,7 +104,8 @@ a.as-button {
 	}
 
 	&.secondary:not([disabled]):not(.disabled):not(.loading) {
-		@apply text-brand-primary bg-brand-subtle;
+		background: var(--color-background-secondary);
+		@apply text-brand-primary;
 
 		&:hover {
 			@apply bg-brand-subtle-alt;
@@ -116,7 +117,8 @@ a.as-button {
 	}
 
 	&.tertiary:not([disabled]):not(.disabled):not(.loading) {
-		background: var(--color-white);
+		background: var(--color-background-tertiary);
+		@apply text-brand-primary-alt;
 
 		&:hover {
 			@apply text-brand-primary;
@@ -124,7 +126,6 @@ a.as-button {
 
 		&:active {
 			@apply bg-brand-subtle-alt;
-			color: currentColor;
 		}
 
 		&.link {

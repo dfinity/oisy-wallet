@@ -30,14 +30,6 @@ html[theme="light"]:root {
 	--alpha-base-10: #{$a-dark-10};
 	--alpha-base-5: #{$a-dark-5};
 
-	--color-background-page: #{$oisy-blue-100};
-	--color-background-primary: var(--colors-neutrals-white);
-	--color-background-primary-inverted: var(--colors-neutrals-black);
-	--color-background-tertiary: var(--colors-neutrals-100);
-	--color-background-surface: var(--colors-neutrals-white);
-	--color-foreground-page: var(--colors-neutrals-black);
-	--color-foreground-primary: var(--colors-neutrals-black);
-
 	--color-brand-base: #{$oisy-blue-600};
 	--color-brand-100: #{$oisy-blue-100};
 	--color-brand-200: #{$oisy-blue-200};
@@ -45,6 +37,18 @@ html[theme="light"]:root {
 	--color-brand-400: #{$oisy-blue-400};
 	--color-brand-500: #{$oisy-blue-500};
 	--color-brand-600: #{$oisy-blue-600};
+
+	--color-background-page: #{$oisy-blue-100};
+	--color-background-primary: var(--colors-neutrals-white);
+	--color-background-primary-inverted: var(--colors-neutrals-black);
+	--color-background-secondary: var(--colors-neutrals-50);
+	--color-background-tertiary: var(--colors-neutrals-50);
+	--color-background-surface: var(--colors-neutrals-white);
+	--color-foreground-page: var(--colors-neutrals-black);
+	--color-foreground-primary: var(--colors-neutrals-black);
+	--color-foreground-primary-alt: var(--color-brand-600);
+	--color-border-primary: var(--alpha-base-5);
+	--color-border-secondary: var(--alpha-base-20);
 
 	--color-warning-lightest: #{$a-sunset-10};
 	--color-warning-lighter: #{$a-sunset-20};
