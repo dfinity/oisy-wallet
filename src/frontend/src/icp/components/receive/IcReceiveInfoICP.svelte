@@ -14,7 +14,8 @@
 	import {
 		RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON,
 		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON,
-		RECEIVE_TOKENS_MODAL_DONE_BUTTON
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_ICP_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
@@ -58,6 +59,7 @@
 		labelRef="icp-account-id"
 		address={$icpAccountIdentifierText ?? ''}
 		network={ICP_NETWORK}
+		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.receive.icp.text.display_account_id_qr
