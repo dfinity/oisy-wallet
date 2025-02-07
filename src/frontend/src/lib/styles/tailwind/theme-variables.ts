@@ -79,7 +79,7 @@ export const themeVariables = {
 	},
 	foreground: {
 		primary: 'var(--color-foreground-primary)',
-		tertiary: 'var(--colors-neutrals-600)',
+		tertiary: 'var(--color-foreground-tertiary)',
 		'tertiary-inverted': 'var(--colors-neutrals-500)',
 		disabled: 'var(--colors-neutrals-400)',
 		brand: {
