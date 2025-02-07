@@ -1,5 +1,4 @@
-import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
-import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { icTokenIcrcCustomToken, isDeprecatedSns } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -47,11 +46,11 @@ export const sortTokens = <T extends Token>({
 		...pinnedTokens,
 		...otherTokens.sort((a, b) => {
 			// Deprecated SNSes such as CTS
-			if (isIcToken(a) && a.ledgerCanisterId in DEPRECATED_SNES) {
+			if (isIcToken(a) && isDeprecatedSns(a)) {
 				return 1;
 			}
 
-			if (isIcToken(b) && b.ledgerCanisterId in DEPRECATED_SNES) {
+			if (isIcToken(b) && isDeprecatedSns(b)) {
 				return -1;
 			}
 
