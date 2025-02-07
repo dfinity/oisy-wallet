@@ -4,6 +4,7 @@ import {
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
+	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_DONE_BUTTON,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
@@ -31,7 +32,10 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.waitForByTestId({ testId: AMOUNT_DATA });
 		await expect(this.getBalanceLocator()).toHaveText('0.00');
 
-		await this.clickByTestId({ testId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON });
+		await this.waitForModal({
+			modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+			modalTestId: RECEIVE_TOKENS_MODAL
+		});
 		const accountId = await this.getAccountIdByTestId(RECEIVE_TOKENS_MODAL_ICP_SECTION);
 		expect(accountId).toBeTruthy();
 
