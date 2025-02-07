@@ -72,7 +72,13 @@ html[theme="dark"]:root {
   --color-success-dark: #{$emerald-700};
   --color-success-darker: #{$emerald-800};
 
+  // invert logo image, easier than fidgeting with svg colors
   #oisy-wallet-logo {
     filter: brightness(0) invert(1);
+  }
+
+  // soften background, easier than fidgeting with svg colors
+  #app-background {
+    filter: brightness(0.3);
   }
 }

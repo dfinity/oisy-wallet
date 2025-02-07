@@ -1,6 +1,7 @@
 export const themeVariables = {
 	background: {
 		page: 'var(--color-background-page)',
+		surface: 'var(--color-background-surface)',
 		primary: 'var(--color-background-primary)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
 		secondary: 'var(--colors-neutrals-100)',
