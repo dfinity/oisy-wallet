@@ -65,7 +65,6 @@ export class FlowPage extends HomepageLoggedIn {
 		await this.clickByTestId({ testId: SEND_FORM_NEXT_BUTTON });
 		await this.clickByTestId({ testId: REVIEW_FORM_SEND_BUTTON });
 		const progressModalExists = await this.isVisibleByTestId(IN_PROGRESS_MODAL);
-
 		expect(progressModalExists).toBeTruthy();
 
 		await this.waitForByTestId({
