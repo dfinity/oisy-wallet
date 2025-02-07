@@ -1,10 +1,12 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { fetchSignatures } from '$sol/api/solana.api';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
+import { findAssociatedTokenPda } from '@solana-program/token';
 import { assertIsAddress, address as solAddress } from '@solana/addresses';
 import { signature } from '@solana/keys';
 
@@ -24,7 +26,15 @@ export const getSolTransactions = async ({
 		assertIsAddress(tokenAddress);
 	}
 
-	const wallet = solAddress(address);
+	const [relevantAddress] = nonNullish(tokenAddress)
+		? await findAssociatedTokenPda({
+				owner: solAddress(address),
+				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
+				mint: solAddress(tokenAddress)
+			})
+		: [address];
+
+	const wallet = solAddress(relevantAddress);
 
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
 
