@@ -118,3 +118,6 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 
 export const isDeprecatedSns = ({ ledgerCanisterId }: Pick<IcToken, 'ledgerCanisterId'>): boolean =>
 	ledgerCanisterId in DEPRECATED_SNES;
+
+export const isNotDeprecated = ({ ledgerCanisterId }: Pick<IcToken, 'ledgerCanisterId'>): boolean =>
+	!isDeprecatedSns({ ledgerCanisterId });
