@@ -10,6 +10,7 @@ import {
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	REVIEW_FORM_SEND_BUTTON,
 	SEND_FORM_NEXT_BUTTON,
+	SEND_TOKENS_MODAL,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -48,6 +49,10 @@ export class FlowPage extends HomepageLoggedIn {
 
 	async sendTokens(): Promise<void> {
 		await this.clickByTestId({ testId: SEND_TOKENS_MODAL_OPEN_BUTTON });
+		await this.waitForModal({
+			modalOpenButtonTestId: SEND_TOKENS_MODAL_OPEN_BUTTON,
+			modalTestId: SEND_TOKENS_MODAL
+		});
 		await this.clickByTestId({ testId: MAX_BUTTON });
 		await this.setInputValueByTestId({
 			testId: DESTINATION_INPUT,

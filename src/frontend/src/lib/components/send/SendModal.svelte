@@ -15,6 +15,7 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import {  SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
@@ -78,6 +79,7 @@
 	bind:this={modal}
 	on:nnsClose={close}
 	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
+	testId={SEND_TOKENS_MODAL}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
