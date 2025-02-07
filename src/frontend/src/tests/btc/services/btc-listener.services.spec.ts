@@ -40,7 +40,7 @@ describe('btc-listener', () => {
 	});
 
 	// mock console.warn to avoid unnecessary logs
-	const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+	const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 	beforeEach(() => {
 		vi.clearAllMocks();

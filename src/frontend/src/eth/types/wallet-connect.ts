@@ -1,5 +1,7 @@
 import type { TypedDataDomain, TypedDataField } from 'ethers';
 
+export type WalletConnectEthApproveRequestMessage = string;
+
 export interface WalletConnectEthSendTransactionParams {
 	from: string;
 	to?: string;

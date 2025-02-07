@@ -8,7 +8,10 @@ import {
 } from '$eth/constants/wallet-connect.constants';
 import { WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
 import type { EthAddress, OptionSolAddress } from '$lib/types/address';
-import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import type {
+	WalletConnectApproveRequestMessage,
+	WalletConnectListener
+} from '$lib/types/wallet-connect';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -160,7 +163,7 @@ export const initWalletConnect = async ({
 	}: {
 		id: number;
 		topic: string;
-		message: string;
+		message: WalletConnectApproveRequestMessage;
 	}) =>
 		await respond({
 			topic,

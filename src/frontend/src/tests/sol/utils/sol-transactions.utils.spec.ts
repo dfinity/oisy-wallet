@@ -26,9 +26,10 @@ describe('sol-transactions.utils', () => {
 
 			expect(result).toEqual({
 				id: signatures[0],
+				signature: signatures[0],
 				fee: meta?.fee,
-				from: accountKeys[0],
-				to: accountKeys[1],
+				from: accountKeys[0].pubkey,
+				to: accountKeys[1].pubkey,
 				type: 'receive',
 				status: 'finalized',
 				value: 5000000000n,
@@ -53,12 +54,13 @@ describe('sol-transactions.utils', () => {
 
 			expect(result).toEqual({
 				id: signatures[0],
+				signature: signatures[0],
 				fee: meta?.fee,
-				from: accountKeys[0],
-				to: accountKeys[1],
+				from: accountKeys[0].pubkey,
+				to: accountKeys[1].pubkey,
 				type: 'send',
 				status: 'finalized',
-				value: -150000000n,
+				value: 150000000n,
 				timestamp: blockTime
 			});
 		});
@@ -77,14 +79,15 @@ describe('sol-transactions.utils', () => {
 
 			const result = mapSolTransactionUi({
 				transaction: mockSolRpcSendToMyselfTransaction,
-				address: myAddress
+				address: myAddress.pubkey
 			});
 
 			expect(result).toEqual({
 				id: signatures[0],
+				signature: signatures[0],
 				fee: meta?.fee,
-				from: myAddress,
-				to: myAddress,
+				from: myAddress.pubkey,
+				to: myAddress.pubkey,
 				type: 'send',
 				status: 'finalized',
 				value: 0n,
