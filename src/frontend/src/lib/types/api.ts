@@ -9,6 +9,7 @@ import type {
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
 	BtcTxOutput,
+	SchnorrKeyId,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
@@ -49,6 +50,15 @@ export interface SendBtcParams {
 	outputs: BtcTxOutput[];
 }
 
+export interface GetSchnorrPublicKeyParams {
+	derivationPath: string[];
+	keyId: SchnorrKeyId;
+}
+
+export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
+	message: number[];
+}
+
 export interface AddUserHiddenDappIdParams {
 	dappId: string;
 	currentUserVersion?: bigint;
@@ -66,7 +76,7 @@ export interface KongSwapParams {
 	sendAmount: bigint;
 	referredBy?: string;
 	receiveAmount: bigint;
-	destinationAddress: Address;
+	receiveAddress?: Address;
 	sourceToken: Token;
-	payTransactionId: TxId;
+	payTransactionId?: TxId;
 }

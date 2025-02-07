@@ -3,7 +3,9 @@ import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 
 const scheduler: SolWalletScheduler = new SolWalletScheduler();
 
-onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestSol>>) => {
+export const onSolWalletMessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequestSol>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {

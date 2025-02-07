@@ -1,3 +1,6 @@
+import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
+import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
+import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -5,6 +8,7 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -41,12 +45,22 @@ export const sortTokens = <T extends Token>({
 
 	return [
 		...pinnedTokens,
-		...otherTokens.sort(
-			(a, b) =>
+		...otherTokens.sort((a, b) => {
+			// Deprecated SNSes such as CTS
+			if (isIcToken(a) && a.ledgerCanisterId in DEPRECATED_SNES) {
+				return 1;
+			}
+
+			if (isIcToken(b) && b.ledgerCanisterId in DEPRECATED_SNES) {
+				return -1;
+			}
+
+			return (
 				($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
-		)
+			);
+		})
 	];
 };
 
@@ -65,23 +79,23 @@ export const sortTokens = <T extends Token>({
  * @returns The sorted list of tokens.
  *
  */
-export const pinTokensWithBalanceAtTop = ({
+export const pinTokensWithBalanceAtTop = <T extends Token>({
 	$tokens,
 	$balances,
 	$exchanges
 }: {
-	$tokens: Token[];
+	$tokens: T[];
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): TokenUi[] => {
+}): TokenUi<T>[] => {
 	// If balances data are nullish, there is no need to sort.
 	if (isNullish($balances)) {
 		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
 	}
 
-	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
+	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi<T>[], TokenUi<T>[]]>(
 		(acc, token) => {
-			const tokenUI: TokenUi = mapTokenUi({
+			const tokenUI: TokenUi<T> = mapTokenUi<T>({
 				token,
 				$balances,
 				$exchanges
@@ -165,3 +179,32 @@ export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
 export const pinEnabledTokensAtTop = <T extends Token>(
 	$tokens: TokenToggleable<T>[]
 ): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));
+
+/** Filters provided tokens list according to a filter keyword
+ *
+ * @param tokens - The list of tokens.
+ * @param filter - filter keyword.
+ * @returns Filtered list of tokens.
+ * */
+export const filterTokens = <T extends Token>({
+	tokens,
+	filter
+}: {
+	tokens: T[];
+	filter: string;
+}): T[] => {
+	const matchingToken = (token: Token) =>
+		token.name.toLowerCase().includes(filter.toLowerCase()) ||
+		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
+		(icTokenIcrcCustomToken(token) &&
+			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase())) ||
+		token.network.name.toLowerCase().includes(filter.toLowerCase()) ||
+		(token.network.id.description ?? '').toLowerCase().includes(filter.toLowerCase());
+
+	return isNullishOrEmpty(filter)
+		? tokens
+		: tokens.filter((token) => {
+				const twinToken = isIcCkToken(token) ? token.twinToken : undefined;
+				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
+			});
+};

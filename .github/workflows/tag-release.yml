@@ -1,4 +1,4 @@
-name: Tag and Release on Merge from Release Branch
+name: Tag on Merge from Release Branch
 
 on:
   pull_request:
@@ -13,21 +13,27 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Prepare
-      uses: ./.github/actions/prepare
+      - name: Prepare
+        uses: ./.github/actions/prepare
 
-    - name: Get version from package.json
-      id: get_version
-      run: |
-        version=$(node -p "require('./package.json').version")
-        echo "Version from package.json: $version"
-        echo "version=$version" >> $GITHUB_OUTPUT
-  
-    - name: Create Git tag
-      run: |
-        git tag "v${{ steps.get_version.outputs.version }}"
-        git push origin "v${{ steps.get_version.outputs.version }}"
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "Version from package.json: $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Create Git tag
+        run: |
+          git tag "v${{ steps.get_version.outputs.version }}"
+          git push origin "v${{ steps.get_version.outputs.version }}"
+
+      - name: Publish Release Notes
+        uses: ./.github/actions/release-notes
+        with:
+          tag: 'v${{ steps.get_version.outputs.version }}'
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}

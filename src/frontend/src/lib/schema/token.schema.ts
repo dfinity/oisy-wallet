@@ -2,7 +2,7 @@ import { NetworkSchema } from '$lib/schema/network.schema';
 import type { OnramperId } from '$lib/types/onramper';
 import type { TokenBuy } from '$lib/types/token';
 import type { AtLeastOne } from '$lib/types/utils';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
 
@@ -12,7 +12,8 @@ export const TokenStandardSchema = z.enum([
 	'icp',
 	'icrc',
 	'bitcoin',
-	'solana'
+	'solana',
+	'spl'
 ]);
 
 export const TokenCategorySchema = z.enum(['default', 'custom']);

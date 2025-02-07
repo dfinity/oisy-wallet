@@ -7,6 +7,7 @@ import type {
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
 
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse | null> =>
@@ -53,12 +54,23 @@ export const exchangeRateICRCToUsd = (
 		include_market_cap: true
 	});
 
+export const exchangeRateSPLToUsd = (
+	tokenAddresses: SplTokenAddress[]
+): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+	simpleTokenPrice({
+		id: 'solana',
+		vs_currencies: 'usd',
+		contract_addresses: tokenAddresses.map((tokenAddresses) => tokenAddresses.toLowerCase()),
+		include_market_cap: true
+	});
+
 export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
 	exchangeStore.set([
 		...(nonNullish(data) ? [data.currentEthPrice] : []),
 		...(nonNullish(data) ? [data.currentBtcPrice] : []),
 		...(nonNullish(data) ? [data.currentIcpPrice] : []),
+		...(nonNullish(data) ? [data.currentSolPrice] : []),
 		...(nonNullish(data) ? [data.currentErc20Prices] : []),
 		...(nonNullish(data) ? [data.currentIcrcPrices] : []),
-		...(nonNullish(data) ? [data.currentSolPrice] : [])
+		...(nonNullish(data) ? [data.currentSplPrices] : [])
 	]);

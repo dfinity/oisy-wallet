@@ -3,6 +3,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { IN_PROGRESS_MODAL } from '$lib/constants/test-ids.constants';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -30,6 +31,7 @@
 	// Workaround: SvelteKit does not consistently call `onDestroy`. Various issues are open regarding this on Svelte side.
 	// This is the simplest, least verbose solution to always disconnect before unload, given that this component is used in `<WizardModal />` only.
 	$: $modalStore,
+		$dirtyWizardState,
 		(() => {
 			if (nonNullish($modalStore)) {
 				return;
@@ -39,7 +41,7 @@
 		})();
 </script>
 
-<div class="stretch">
+<div class="stretch" data-tid={IN_PROGRESS_MODAL}>
 	<MessageBox level="light-warning">
 		<span>
 			{replaceOisyPlaceholders(

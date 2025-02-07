@@ -1,3 +1,4 @@
+import { Themes } from '$lib/enums/themes';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -74,7 +75,11 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
-export const AUTH_DERIVATION_ORIGIN = import.meta.env.VITE_AUTH_DERIVATION_ORIGIN;
+export const AUTH_DERIVATION_ORIGIN = BETA
+	? 'https://oisy.com'
+	: STAGING
+		? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
+		: undefined;
 
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;
@@ -118,3 +123,7 @@ export const WALLET_PAGINATION = 10n;
 
 // VIP
 export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+
+// THEMES
+export const DEFAULT_THEME_NAME = Themes.SYSTEM;
+export const THEME_VALUES = Object.values(Themes);

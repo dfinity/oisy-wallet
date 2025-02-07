@@ -7,17 +7,17 @@ import {
 } from '$lib/utils/network.utils';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 
-export const mapNetworkIdToNetwork = (networkSymbol: NetworkId): SolanaNetworkType | undefined => {
-	if (isNetworkIdSOLMainnet(networkSymbol)) {
+export const mapNetworkIdToNetwork = (networkId: NetworkId): SolanaNetworkType | undefined => {
+	if (isNetworkIdSOLMainnet(networkId)) {
 		return SolanaNetworks.mainnet;
 	}
-	if (isNetworkIdSOLTestnet(networkSymbol)) {
+	if (isNetworkIdSOLTestnet(networkId)) {
 		return SolanaNetworks.testnet;
 	}
-	if (isNetworkIdSOLDevnet(networkSymbol)) {
+	if (isNetworkIdSOLDevnet(networkId)) {
 		return SolanaNetworks.devnet;
 	}
-	if (isNetworkIdSOLLocal(networkSymbol)) {
+	if (isNetworkIdSOLLocal(networkId)) {
 		return SolanaNetworks.local;
 	}
 };

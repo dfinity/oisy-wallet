@@ -56,6 +56,7 @@ describe('EthSendForm', () => {
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		expect(source).not.toBeNull();
+
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 		expect(balance).not.toBeNull();
 
@@ -70,6 +71,7 @@ describe('EthSendForm', () => {
 		const toolbar: HTMLDivElement | null = container.querySelector(toolbarSelector);
 		expect(toolbar).not.toBeNull();
 	});
+
 	it('should not render source field', () => {
 		const { container } = render(EthSendForm, {
 			props: { ...props, simplifiedForm: true },
@@ -84,6 +86,7 @@ describe('EthSendForm', () => {
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		expect(source).toBeNull();
+
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 		expect(balance).not.toBeNull();
 

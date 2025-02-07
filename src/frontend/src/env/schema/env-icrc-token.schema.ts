@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const EnvIcrcTokenMetadataSchema = z.object({
 	decimals: z.number(),
@@ -7,6 +7,10 @@ export const EnvIcrcTokenMetadataSchema = z.object({
 	fee: z.bigint(),
 	alternativeName: z.optional(z.string()),
 	url: z.optional(z.string().url())
+});
+
+export const EnvIcrcTokenIconSchema = z.object({
+	icon: z.string().optional()
 });
 
 export const EnvIcTokenSchema = z.object({

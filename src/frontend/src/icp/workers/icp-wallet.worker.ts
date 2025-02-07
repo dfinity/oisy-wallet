@@ -53,7 +53,9 @@ export const initIcpWalletScheduler = (
 
 let scheduler: IcWalletScheduler<PostMessageDataRequest> | undefined;
 
-onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+export const onIcpWalletMessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {

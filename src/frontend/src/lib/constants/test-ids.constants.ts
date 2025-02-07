@@ -53,7 +53,13 @@ export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 
-export const BTC_TESTNET_TOGGLE = 'btc-testnet-toggle';
+export const AMOUNT_DATA = 'amount-data';
+export const AMOUNT_INPUT = 'amount-input';
+export const DESTINATION_INPUT = 'destination-input';
+
+export const IN_PROGRESS_MODAL = 'in-progress-modal';
+
+export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
@@ -64,6 +70,22 @@ export const TOKEN_MENU_ETH = 'token-menu-eth';
 export const TOKEN_MENU_ETH_BUTTON = 'token-menu-eth-button';
 export const TOKEN_MENU_BTC = 'token-menu-btc';
 export const TOKEN_MENU_BTC_BUTTON = 'token-menu-btc-button';
+export const TOKEN_MENU_SOL = 'token-menu-sol';
+export const TOKEN_MENU_SOL_BUTTON = 'token-menu-sol-button';
+export const TOKEN_MENU_SOL_EXPLORER_LINK = 'sol-explorer-link';
 
 export const VIP_QR_CODE_COPY_BUTTON = 'vip-qr-code-copy-button';
 export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
+
+export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
+
+export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
+export const TOKEN_INPUT_CURRENCY_USD = 'token-input-currency-usd';
+export const TOKEN_INPUT_CURRENCY_USD_SYMBOL = 'token-input-currency-usd-symbol';
+
+export const TOKEN_INPUT_AMOUNT_EXCHANGE = 'swap-amount-exchange';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
+
+export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';

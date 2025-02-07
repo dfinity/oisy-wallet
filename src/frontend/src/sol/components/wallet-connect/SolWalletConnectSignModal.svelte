@@ -1,0 +1,163 @@
+<script lang="ts">
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { onMount } from 'svelte';
+	import {
+		SOLANA_DEVNET_TOKEN,
+		SOLANA_LOCAL_TOKEN,
+		SOLANA_TESTNET_TOKEN,
+		SOLANA_TOKEN
+	} from '$env/tokens/tokens.sol.env';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import {
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressMainnet,
+		solAddressTestnet
+	} from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
+	import { WizardStepsSign } from '$lib/enums/wizard-steps';
+	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionSolAddress } from '$lib/types/address';
+	import type { NetworkId } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
+	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import {
+		isNetworkIdSOLDevnet,
+		isNetworkIdSOLLocal,
+		isNetworkIdSOLTestnet
+	} from '$lib/utils/network.utils';
+	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
+	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
+	import {
+		sign as signService,
+		decode as decodeService
+	} from '$sol/services/wallet-connect.services';
+	import type { SolanaNetwork } from '$sol/types/network';
+
+	export let listener: OptionWalletConnectListener;
+	export let request: Web3WalletTypes.SessionRequest;
+	export let network: SolanaNetwork;
+
+	/**
+	 * Transaction
+	 */
+
+	let networkId: NetworkId;
+	$: ({ id: networkId } = network);
+
+	let address: OptionSolAddress;
+	let token: Token;
+	$: [address, token] = isNetworkIdSOLTestnet(networkId)
+		? [$solAddressTestnet, SOLANA_TESTNET_TOKEN]
+		: isNetworkIdSOLDevnet(networkId)
+			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+			: isNetworkIdSOLLocal(networkId)
+				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+				: [$solAddressMainnet, SOLANA_TOKEN];
+
+	let signWithSending = false;
+	let data: string;
+	let amount: bigint | undefined;
+	let destination: OptionSolAddress;
+
+	onMount(async () => {
+		const {
+			params: {
+				request: {
+					method,
+					params: { transaction }
+				}
+			}
+		} = request;
+
+		signWithSending = method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION;
+		data = transaction;
+
+		({ amount, destination } = await decodeService({
+			base64EncodedTransactionMessage: data,
+			networkId
+		}));
+	});
+
+	/**
+	 * Modal
+	 */
+
+	const steps: WizardSteps = [
+		{
+			name: WizardStepsSign.REVIEW,
+			title: $i18n.send.text.review
+		},
+		{
+			name: WizardStepsSign.SIGNING,
+			title: $i18n.send.text.signing
+		}
+	];
+
+	let currentStep: WizardStep | undefined;
+	let modal: WizardModal;
+
+	const close = () => modalStore.close();
+
+	/**
+	 * WalletConnect
+	 */
+
+	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
+
+	/**
+	 * Reject a transaction
+	 */
+
+	const reject = async () => {
+		await rejectServices({ listener, request });
+
+		close();
+	};
+
+	/**
+	 * Sign
+	 */
+
+	const sign = async () => {
+		const { success } = await signService({
+			request,
+			listener,
+			address,
+			modalNext: modal.next,
+			token,
+			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
+			identity: $authIdentity
+		});
+
+		setTimeout(() => close(), success ? 750 : 0);
+	};
+</script>
+
+<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
+	<WalletConnectModalTitle slot="title"
+		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
+	>
+
+	{#if currentStep?.name === WizardStepsSign.SIGNING}
+		<InProgressWizard
+			progressStep={signProgressStep}
+			steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
+		/>
+	{:else}
+		<SolWalletConnectSignReview
+			{amount}
+			destination={destination ?? ''}
+			{data}
+			{token}
+			on:icApprove={sign}
+			on:icReject={reject}
+		/>
+	{/if}
+</WizardModal>

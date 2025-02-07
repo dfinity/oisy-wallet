@@ -23,7 +23,8 @@ import {
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 
-import { z, type ZodType } from 'zod';
+import type { ZodType } from 'zod';
+import * as z from 'zod';
 
 export type PostMessageRequest = z.infer<typeof PostMessageRequestSchema>;
 

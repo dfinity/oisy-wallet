@@ -14,11 +14,13 @@ import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
+	isNetworkIdSOLMainnet,
 	isNetworkIdSOLTestnet
 } from '$lib/utils/network.utils';
 import { syncWallet, syncWalletError } from '$sol/services/sol-listener.services';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -28,9 +30,10 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 		network: { id: networkId }
 	} = token;
 
-	const WalletWorker = await import('$sol/workers/sol-wallet.worker?worker');
+	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
+	const isMainnetNetwork = isNetworkIdSOLMainnet(networkId);
 	const isTestnetNetwork = isNetworkIdSOLTestnet(networkId);
 	const isDevnetNetwork = isNetworkIdSOLDevnet(networkId);
 	const isLocalNetwork = isNetworkIdSOLLocal(networkId);
@@ -50,7 +53,8 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 				syncWalletError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error,
-					hideToast: isTestnetNetwork || isDevnetNetwork || isLocalNetwork
+					// TODO: Remove "isMainnetNetwork" after the issue with SOL wallet is investigated and fixed
+					hideToast: isTestnetNetwork || isDevnetNetwork || isLocalNetwork || isMainnetNetwork
 				});
 				return;
 		}
@@ -71,7 +75,11 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const network = mapNetworkIdToNetwork(token.network.id);
 	assertNonNullish(network, 'No Solana network provided to start Solana wallet worker.');
 
-	const data: PostMessageDataRequestSol = { address, solanaNetwork: network };
+	// If the token is an SPL token, we need to pass the token address to the worker.
+	// Otherwise, we pass undefined, which will be considered as the native SOLANA token.
+	const tokenAddress = isTokenSpl(token) ? token.address : undefined;
+
+	const data: PostMessageDataRequestSol = { address, solanaNetwork: network, tokenAddress };
 
 	return {
 		start: () => {

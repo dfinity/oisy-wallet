@@ -109,7 +109,9 @@ export const initIcrcWalletScheduler = (
 
 let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc> | undefined;
 
-onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
+export const onIcrcWalletMessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {

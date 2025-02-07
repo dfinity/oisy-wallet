@@ -317,6 +317,10 @@ describe('nav.utils', () => {
 				expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBe(true);
 			});
 
+			it('should return true when route id matches Wallet Connect path', () => {
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))).toBe(true);
+			});
+
 			it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {
 				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
 

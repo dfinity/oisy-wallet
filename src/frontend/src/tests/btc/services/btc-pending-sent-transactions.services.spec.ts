@@ -44,7 +44,7 @@ describe('BTC Pending Sent Transactions Services', () => {
 			expect(get(btcPendingSentTransactionsStore)[address]).toBeUndefined();
 		});
 
-		it('should return an error if the network is not a bitcoin network', async () => {
+		it('should return an error if the network is not a Bitcoin network', async () => {
 			const result = await loadBtcPendingSentTransactions({
 				address,
 				identity: mockIdentity,
@@ -53,7 +53,7 @@ describe('BTC Pending Sent Transactions Services', () => {
 
 			expect(result).toEqual({
 				success: false,
-				err: new Error('Current network (Symbol(ETH)) is not a bitcoin network.')
+				err: new Error('Current network (Symbol(ETH)) is not a Bitcoin network.')
 			});
 			expect(get(btcPendingSentTransactionsStore)[address]).toBeUndefined();
 		});

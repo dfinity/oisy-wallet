@@ -3,9 +3,11 @@ import {
 	ETHEREUM_NETWORK_ID,
 	ICP_NETWORK_ID
 } from '$env/networks/networks.env';
+import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -15,6 +17,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	filterEnabledTokens,
+	filterTokens,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
@@ -23,7 +26,8 @@ import {
 } from '$lib/utils/tokens.utils';
 import { bn1, bn2, bn3, certified, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
-import { mockTokens } from '$tests/mocks/tokens.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
@@ -114,6 +118,27 @@ describe('sortTokens', () => {
 			$tokensToPin: tokensToPin
 		});
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, ICP_TOKEN]);
+	});
+
+	it('should sort deprecated sns tokens at the end', () => {
+		const mockDeprecatedTokenName = {
+			...mockValidToken,
+			ledgerCanisterId: Object.keys(DEPRECATED_SNES)[0]
+		};
+
+		const mockTokensWithDeprecated = [mockDeprecatedTokenName, ...mockTokens];
+
+		const sortedTokens = sortTokens({
+			$tokens: mockTokensWithDeprecated,
+			$exchanges: {},
+			$tokensToPin: []
+		});
+		expect(sortedTokens).toEqual([
+			BTC_MAINNET_TOKEN,
+			ETHEREUM_TOKEN,
+			ICP_TOKEN,
+			mockDeprecatedTokenName
+		]);
 	});
 });
 
@@ -392,5 +417,34 @@ describe('pinEnabledTokensAtTop', () => {
 		const result = pinEnabledTokensAtTop(tokens);
 
 		expect(result).toEqual(tokens);
+	});
+});
+
+describe('filterTokens', () => {
+	it('should filter tokens by symbol correctly when filter is provided', () => {
+		expect(filterTokens({ tokens: mockTokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
+		expect(filterTokens({ tokens: mockTokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+		expect(filterTokens({ tokens: mockTokens, filter: 'PEPE' })).toStrictEqual([]);
+	});
+
+	it('should filter tokens by name correctly when filter is provided', () => {
+		expect(filterTokens({ tokens: mockTokens, filter: 'Bit' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+		expect(filterTokens({ tokens: mockTokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
+	});
+
+	it('should filter tokens by twin token symbol correctly when filter is provided', () => {
+		expect(
+			filterTokens({ tokens: [...mockTokens, mockValidIcCkToken], filter: 'STK' })
+		).toStrictEqual([mockValidIcCkToken]);
+	});
+
+	it('should filter tokens correctly when filter is not provided', () => {
+		expect(filterTokens({ tokens: mockTokens, filter: '' })).toStrictEqual(mockTokens);
+	});
+
+	it('should filter correctly by network', () => {
+		expect(filterTokens({ tokens: [...mockTokens, PEPE_TOKEN], filter: 'ethereum' })).toStrictEqual(
+			[ETHEREUM_TOKEN, PEPE_TOKEN]
+		);
 	});
 });
