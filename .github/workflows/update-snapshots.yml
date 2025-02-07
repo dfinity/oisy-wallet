@@ -122,10 +122,19 @@ jobs:
       - name: Check if snapshots changed
         run: |
           if [ -n "$(git status --porcelain e2e)" ]; then
-            echo "NO_CHANGES=false" >> $GITHUB_ENV
+            echo "CHANGES=true" >> $GITHUB_ENV
+            echo "CHANGES=true" > snapshot_status.txt
           else
-            echo "NO_CHANGES=true" >> $GITHUB_ENV
+            echo "CHANGES=false" >> $GITHUB_ENV
+            echo "CHANGES=false" > snapshot_status.txt
           fi
+
+      - name: Upload snapshot status
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-status-${{ matrix.os }}
+          path: snapshot_status.txt
+          retention-days: 30
 
       - name: Save changed snapshots
         if: env.NO_CHANGES == 'false'
@@ -152,23 +161,49 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Check if snapshots changed
+      - name: Download Ubuntu Snapshot Status
+        uses: actions/download-artifact@v4
+        with:
+          name: snapshot-status-ubuntu-24.04
+          path: snapshot-status
+
+      - name: Download macOS Snapshot Status
+        uses: actions/download-artifact@v4
+        with:
+          name: snapshot-status-macos-14
+          path: snapshot-status
+
+      - name: Check snapshot status for Ubuntu
+        id: check_ubuntu_status
         run: |
-          if [ -n "$(git status --porcelain e2e)" ]; then
-            echo "NO_CHANGES=false" >> $GITHUB_ENV
+          if [ -f snapshot-status/snapshot_status.txt ]; then
+            status=$(cut -d'=' -f2 snapshot-status/snapshot_status.txt)
+            echo "Ubuntu snapshot status: $status"
+            echo "ubuntu_status=$status" >> $GITHUB_ENV
           else
-            echo "NO_CHANGES=true" >> $GITHUB_ENV
+            echo "ubuntu_status=false" >> $GITHUB_ENV
+          fi
+
+      - name: Check snapshot status for macOS
+        id: check_macos_status
+        run: |
+          if [ -f snapshot-status/snapshot_status.txt ]; then
+            status=$(cut -d'=' -f2 snapshot-status/snapshot_status.txt)
+            echo "macOS snapshot status: $status"
+            echo "macos_status=$status" >> $GITHUB_ENV
+          else
+            echo "macos_status=false" >> $GITHUB_ENV
           fi
 
       - name: Download Ubuntu Snapshots
-        if: env.NO_CHANGES == 'false'
+        if: env.ubuntu_status == 'true'
         uses: actions/download-artifact@v4
         with:
           name: snapshots-ubuntu-24.04
           path: e2e
 
       - name: Download macOS Snapshots
-        if: env.NO_CHANGES == 'false'
+        if: env.macos_status == 'true'
         uses: actions/download-artifact@v4
         with:
           name: snapshots-macos-14
