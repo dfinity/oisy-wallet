@@ -122,10 +122,10 @@ div.input-field input[id]::placeholder {
 }
 
 div.modal {
-	--overlay-background: var(--colors-neutrals-white);
-	--overlay-background-contrast: var(--color-secondary);
-	--overlay-content-background: var(--colors-neutrals-white);
-	--overlay-content-background-contrast: var(--color-secondary);
+	--overlay-background: var(--color-background-surface);
+	--overlay-background-contrast: var(--color-foreground-primary);
+	--overlay-content-background: var(--color-background-surface);
+	--overlay-content-background-contrast: var(--color-foreground-primary);
 
 	color: var(--color-secondary);
 
@@ -230,7 +230,7 @@ div.popover {
 div.toggle {
 	zoom: 1.45;
 
-	--card-background-contrast: var(--color-dust);
+	--card-background-contrast: var(--color-background-tertiary);
 	--card-background: var(--color-white);
 
 	&:has(input[type='checkbox']:checked) {

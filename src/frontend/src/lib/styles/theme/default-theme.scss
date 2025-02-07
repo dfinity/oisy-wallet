@@ -1,45 +1,69 @@
 @use 'base-colors' as *;
 
 html[theme="light"]:root {
-	--color-brand-100: #{$alice-blue};
-	--color-brand-200: #{$water};
-	--color-brand-300: #{$pale-cornflower-blue};
-	--color-brand-400: #{$french-sky-blue};
-	--color-brand-500: #{$cobalt};
-	--color-brand-base: #{$brandeis-blue};
-	--color-brand-600: #{$catalina-blue};
-	--color-brand-text: #{$black};
+	--value-color: $base-black;
 
-	--color-warning-lightest: #{$warning-orange};
-	--color-warning-lighter: #{$peach-orange};
-	--color-warning-light: #{$rajah};
-	--color-warning-default: #{$american-orange};
-	--color-warning-dark: #{$mustard-brown};
-	--color-warning-darker: #{$philippine-bronze};
+	--colors-neutrals-black: #{$base-black};
+	--colors-neutrals-900: #{$gray-iron-900};
+	--colors-neutrals-800: #{$gray-iron-800};
+	--colors-neutrals-700: #{$gray-iron-700};
+	--colors-neutrals-600: #{$gray-iron-600};
+	--colors-neutrals-500: #{$gray-iron-500};
+	--colors-neutrals-400: #{$gray-iron-400};
+	--colors-neutrals-300: #{$gray-iron-300};
+	--colors-neutrals-200: #{$gray-iron-200};
+	--colors-neutrals-100: #{$gray-iron-100};
+	--colors-neutrals-50: #{$gray-iron-50};
+	--colors-neutrals-25: #{$gray-iron-25};
+	--colors-neutrals-white: #{$base-white};
 
-	--color-error-lightest: #{$snow};
-	--color-error-lighter: #{$pale-pink};
-	--color-error-light: #{$amaranth-pink};
-	--color-error-default: #{$rusty-red};
-	--color-error-dark: #{$upsdell-red};
-	--color-error-darker: #{$chocolate-cosmos};
+	--alpha-base-100: #{$a-dark-100};
+	--alpha-base-95: #{$a-dark-95};
+	--alpha-base-90: #{$a-dark-90};
+	--alpha-base-80: #{$a-dark-80};
+	--alpha-base-70: #{$a-dark-70};
+	--alpha-base-60: #{$a-dark-60};
+	--alpha-base-50: #{$a-dark-50};
+	--alpha-base-40: #{$a-dark-40};
+	--alpha-base-30: #{$a-dark-30};
+	--alpha-base-20: #{$a-dark-20};
+	--alpha-base-10: #{$a-dark-10};
+	--alpha-base-5: #{$a-dark-5};
 
-	--color-success-lightest: #{$aero-blue};
-	--color-success-lighter: #{$sea-foam-green};
-	--color-success-light: #{$medium-aquamarine};
-	--color-success-default: #{$green-crayola};
-	--color-success-dark: #{$dartmouth-green};
-	--color-success-darker: #{$british-racing-green};
+	--color-background-page: #{$oisy-blue-100};
+	--color-background-primary: var(--colors-neutrals-white);
+	--color-background-primary-inverted: var(--colors-neutrals-black);
+	--color-background-tertiary: var(--colors-neutrals-100);
+	--color-background-surface: var(--colors-neutrals-white);
+	--color-foreground-page: var(--colors-neutrals-black);
+	--color-foreground-primary: var(--colors-neutrals-black);
 
-	--colors-neutrals-black: #{$black};
-	--colors-neutrals-900: #{$dark-gunmetal};
-	--colors-neutrals-800: #{$onyx};
-	--colors-neutrals-700: #{$davys-grey};
-	--colors-neutrals-600: #{$auro-metal-saurus};
-	--colors-neutrals-500: #{$cadet-blue};
-	--colors-neutrals-400: #{$light-grey};
-	--colors-neutrals-300: #{$platinum};
-	--colors-neutrals-200: #{$bright-grey};
-	--colors-neutrals-100: #{$ghost-white};
-	--colors-neutrals-white: #{$white};
+	--color-brand-base: #{$oisy-blue-600};
+	--color-brand-100: #{$oisy-blue-100};
+	--color-brand-200: #{$oisy-blue-200};
+	--color-brand-300: #{$oisy-blue-300};
+	--color-brand-400: #{$oisy-blue-400};
+	--color-brand-500: #{$oisy-blue-500};
+	--color-brand-600: #{$oisy-blue-600};
+
+	--color-warning-lightest: #{$a-sunset-10};
+	--color-warning-lighter: #{$a-sunset-20};
+	--color-warning-light: #{$a-sunset-35};
+	--color-warning-default: #{$sunset-500};
+	--color-warning-dark: #{$sunset-700};
+	--color-warning-darker: #{$sunset-800};
+
+	--color-error-lightest: #{$a-salmon-10};
+	--color-error-lighter: #{$a-salmon-20};
+	--color-error-light: #{$a-salmon-35};
+	--color-error-default: #{$salmon-500};
+	--color-error-dark: #{$salmon-700};
+	--color-error-darker: #{$salmon-800};
+
+	--color-success-lightest: #{$a-emerald-10};
+	--color-success-lighter: #{$a-emerald-20};
+	--color-success-light: #{$a-emerald-35};
+	--color-success-default: #{$emerald-500};
+	--color-success-dark: #{$emerald-700};
+	--color-success-darker: #{$emerald-800};
 }

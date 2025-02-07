@@ -8,5 +8,5 @@ a.no-underline {
 }
 
 a.blue-link {
-	color: #{base-colors.$brandeis-blue};
+	color: var(--color-brand-base);
 }
