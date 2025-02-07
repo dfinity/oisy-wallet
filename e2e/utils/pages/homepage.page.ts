@@ -318,15 +318,17 @@ abstract class Homepage {
 
 	async toggleTokenInList({
 		tokenSymbol,
-		networkName
+		networkSymbol
 	}: {
 		tokenSymbol: string;
-		networkName: string;
+		networkSymbol: string;
 	}): Promise<void> {
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
-		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkName}` });
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
-		await this.clickByTestId({ testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}` });
+		await this.clickByTestId({
+			testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}-${networkSymbol}`
+		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
 	}
 

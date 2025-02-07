@@ -25,7 +25,7 @@ testWithII('should enable and disable ICRC token', async () => {
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'ckSepoliaETH',
-		networkName: 'Internet Computer'
+		networkSymbol: 'ICP'
 	});
 	await expect(
 		homepageLoggedIn.getTokenCardLocator({
@@ -39,7 +39,7 @@ testWithII('should enable and disable ICRC token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'ckSepoliaETH',
-		networkName: 'Internet Computer'
+		networkSymbol: 'ICP'
 	});
 	await expect(
 		homepageLoggedIn.getTokenCardLocator({
@@ -53,7 +53,7 @@ testWithII('should enable and disable ERC20 token', async () => {
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'SHIB',
-		networkName: 'Ethereum'
+		networkSymbol: 'ETH'
 	});
 	await expect(
 		homepageLoggedIn.getTokenCardLocator({
@@ -67,7 +67,7 @@ testWithII('should enable and disable ERC20 token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'SHIB',
-		networkName: 'Ethereum'
+		networkSymbol: 'ETH'
 	});
 	await expect(
 		homepageLoggedIn.getTokenCardLocator({
@@ -81,7 +81,7 @@ testWithII('should enable and disable SepoliaERC20 token', async () => {
 	await homepageLoggedIn.activateTestnetSettings();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'USDC',
-		networkName: 'Sepolia'
+		networkSymbol: 'SepoliaETH'
 	});
 	await expect(
 		homepageLoggedIn.getTokenCardLocator({
@@ -95,7 +95,7 @@ testWithII('should enable and disable SepoliaERC20 token', async () => {
 	await homepageLoggedIn.takeScreenshot();
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'USDC',
-		networkName: 'Sepolia'
+		networkSymbol: 'SepoliaETH'
 	});
 	await expect(
 		homepageLoggedIn.getTokenCardLocator({
