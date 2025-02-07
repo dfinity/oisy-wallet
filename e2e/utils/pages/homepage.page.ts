@@ -81,8 +81,31 @@ abstract class Homepage {
 		this.#viewportSize = viewportSize;
 	}
 
-	protected async clickByTestId(testId: string): Promise<void> {
-		await this.#page.getByTestId(testId).click();
+	protected async clickByTestId({
+		testId,
+		scrollIntoView = true
+	}: {
+		testId: string;
+		scrollIntoView?: boolean;
+	}): Promise<void> {
+		const locator = this.#page.getByTestId(testId);
+
+		if (scrollIntoView) {
+			// Method `click` auto-scrolls into view if needed.
+			await locator.click();
+			return;
+		}
+
+		// Since the method `click` auto-scrolls into view, we could prefer to avoid it.
+		// That is because it could potentially have different screenshot outputs if it takes more time to load and scrolls more.
+		await locator.dispatchEvent('click');
+	}
+
+	protected async waitForByTestId({
+		testId,
+		options
+	}: TestIdOperationParams & { options?: WaitForLocatorOptions }): Promise<void> {
+		await this.#page.getByTestId(testId).waitFor(options);
 	}
 
 	protected async waitForByTestId(testId: string): Promise<void> {
@@ -130,11 +153,11 @@ abstract class Homepage {
 	}
 
 	private async waitForNavigationMenu(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(NAVIGATION_MENU).waitFor(options);
+		await this.waitForByTestId({ testId: NAVIGATION_MENU, options });
 	}
 
 	protected async waitForLoginButton(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(LOGIN_BUTTON).waitFor(options);
+		await this.waitForByTestId({ testId: LOGIN_BUTTON, options });
 	}
 
 	private async getCanvasAsDataURL({
@@ -165,7 +188,7 @@ abstract class Homepage {
 		modalOpenButtonTestId,
 		modalTestId
 	}: WaitForModalParams): Promise<Locator> {
-		await this.clickByTestId(modalOpenButtonTestId);
+		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
 		const modal = this.#page.getByTestId(modalTestId);
 		await modal.waitFor();
 
@@ -182,22 +205,22 @@ abstract class Homepage {
 	}
 
 	protected async waitForLoaderModal(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(LOADER_MODAL).waitFor(options);
+		await this.waitForByTestId({ testId: LOADER_MODAL, options });
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
-		await this.#page.getByTestId(`${TOKEN_CARD}-ICP-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_CARD}-ETH-ETH`).waitFor(options);
+		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ICP-ICP`, options });
+		await this.waitForByTestId({ testId: `${TOKEN_CARD}-ETH-ETH`, options });
 
-		await this.#page.getByTestId(`${TOKEN_BALANCE}-ICP`).waitFor(options);
-		await this.#page.getByTestId(`${TOKEN_BALANCE}-ETH`).waitFor(options);
+		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ICP`, options });
+		await this.waitForByTestId({ testId: `${TOKEN_BALANCE}-ETH`, options });
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
-		await this.clickByTestId(NAVIGATION_MENU_BUTTON);
+		await this.clickByTestId({ testId: NAVIGATION_MENU_BUTTON });
 		await this.waitForNavigationMenu();
 
-		await this.clickByTestId(menuItemTestId);
+		await this.clickByTestId({ testId: menuItemTestId });
 	}
 
 	protected async clickSelector({ selector }: SelectorOperationParams): Promise<void> {
@@ -217,7 +240,7 @@ abstract class Homepage {
 	}
 
 	async waitForLoggedInIndicator(): Promise<void> {
-		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
+		await this.waitForByTestId({ testId: NAVIGATION_MENU_BUTTON });
 	}
 
 	async waitForModalToDisappear({ testId }: TestIdOperationParams): Promise<void> {
@@ -320,7 +343,7 @@ abstract class Homepage {
 
 	async navigateTo(testId: string): Promise<void> {
 		if (await this.isVisibleByTestId(testId)) {
-			await this.clickByTestId(testId);
+			await this.clickByTestId({ testId });
 		} else {
 			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
 			await navigationMenuButton.click();
@@ -331,8 +354,8 @@ abstract class Homepage {
 
 	async activateTestnetSettings(): Promise<void> {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
-		await this.clickByTestId(TESTNET_TOGGLE);
-		await this.clickByTestId(NAVIGATION_ITEM_HOMEPAGE);
+		await this.clickByTestId({ testId: TESTNET_TOGGLE });
+		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
 	async takeScreenshot(): Promise<void> {
@@ -441,6 +464,10 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
+		await this.waitForContentReady();
+	}
+
+	async waitForContentReady(): Promise<void> {
 		await this.waitForTokensInitialization();
 
 		await this.waitForLoadState();
