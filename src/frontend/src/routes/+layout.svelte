@@ -110,9 +110,7 @@
 		});
 		// apply color theme on OS theme change
 		if (window.matchMedia) {
-			window
-				.matchMedia('(prefers-color-scheme: dark)')
-				.addEventListener('change', applyTheme);
+			window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
 		}
 	});
 </script>
