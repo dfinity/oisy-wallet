@@ -14,6 +14,7 @@
 	export let name: string;
 	export let icon: string | undefined;
 	export let usdBalance: number | undefined = undefined;
+	export let testId: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -29,7 +30,7 @@
 	};
 </script>
 
-<button class="flex w-full items-start justify-between" on:click={onClick}>
+<button data-tid={testId} class="flex w-full items-start justify-between" on:click={onClick}>
 	<TextWithLogo
 		{name}
 		{icon}
