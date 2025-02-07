@@ -103,6 +103,22 @@ jobs:
       - name: Run Playwright tests
         run: npm run e2e:snapshots
 
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.os }}
+          path: playwright-report/
+          retention-days: 3
+
+      - name: Upload Playwright Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: test-results/
+          retention-days: 3
+
       - name: Check if snapshots changed
         run: |
           if [ -n "$(git status --porcelain e2e)" ]; then
@@ -111,7 +127,7 @@ jobs:
             echo "NO_CHANGES=true" >> $GITHUB_ENV
           fi
 
-      - name: Upload Snapshots Artifact
+      - name: Save changed snapshots
         if: env.NO_CHANGES == 'false'
         uses: actions/upload-artifact@v4
         with:
