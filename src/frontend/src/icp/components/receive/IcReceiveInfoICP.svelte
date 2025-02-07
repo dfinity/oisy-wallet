@@ -35,7 +35,6 @@
 		labelRef="wallet-address"
 		address={$icrcAccountIdentifierText ?? ''}
 		network={ICP_NETWORK}
-		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.wallet.text.display_wallet_address_qr
@@ -59,6 +58,7 @@
 		labelRef="icp-account-id"
 		address={$icpAccountIdentifierText ?? ''}
 		network={ICP_NETWORK}
+		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.receive.icp.text.display_account_id_qr
