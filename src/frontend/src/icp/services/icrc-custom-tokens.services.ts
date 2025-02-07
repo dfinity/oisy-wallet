@@ -1,11 +1,11 @@
 import { SNS_EXPLORER_URL } from '$env/explorers.env';
 import { ICP_NETWORK } from '$env/networks/networks.env';
 import { EnvSnsTokenSchema, EnvSnsTokensSchema } from '$env/schema/env-sns-token.schema';
-import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import snsTokens from '$env/tokens/tokens.sns.json';
 import type { EnvSnsToken } from '$env/types/env-sns-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
+import { isNotDeprecated } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
@@ -78,5 +78,5 @@ const mapIcrcCustomToken = ({
 	fee,
 	alternativeName,
 	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
-	...(!(ledgerCanisterId in DEPRECATED_SNES) && { icon: `/icons/sns/${ledgerCanisterId}.png` })
+	...(isNotDeprecated({ ledgerCanisterId }) && { icon: `/icons/sns/${ledgerCanisterId}.png` })
 });
