@@ -10,6 +10,8 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { page } from '$app/stores';
+	$: isHomePage = $page.url.pathname === '/';
 </script>
 
 <footer
@@ -27,7 +29,7 @@
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
 	>
-		<div class="pointer-events-auto flex flex-row items-center gap-4">
+		<div class={`pointer-events-auto flex flex-row items-center gap-4 ${isHomePage ? '' : 'hidden md:flex'}`}>
 			<ExternalLinkIcon
 				href={OISY_TWITTER_URL}
 				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
