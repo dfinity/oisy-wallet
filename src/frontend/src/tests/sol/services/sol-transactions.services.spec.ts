@@ -195,7 +195,6 @@ describe('sol-transactions.services', () => {
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
-				{ ...expectedResults[0], from: mockSolAddress, to: mockSolAddress },
 				{
 					...expected,
 					id: `${expected.id}-${mockInstructions[0].programId}-self`,
@@ -203,6 +202,7 @@ describe('sol-transactions.services', () => {
 					from: mockSolAddress,
 					to: mockSolAddress
 				},
+				{ ...expectedResults[0], from: mockSolAddress, to: mockSolAddress },
 				...expectedResults.slice(1)
 			]);
 		});
