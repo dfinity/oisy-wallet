@@ -11,7 +11,9 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	$: isHomePage = $page.url.pathname === '/';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
+
+	$: isHomePage = isRouteTokens($page);
 </script>
 
 <footer
