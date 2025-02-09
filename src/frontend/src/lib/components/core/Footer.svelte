@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
+	import { page } from '$app/stores';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
@@ -10,6 +11,9 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
+
+	$: isHomePage = isRouteTokens($page);
 </script>
 
 <footer
@@ -27,7 +31,9 @@
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
 	>
-		<div class="pointer-events-auto flex flex-row items-center gap-4">
+		<div
+			class={`pointer-events-auto flex flex-row items-center gap-4 ${isHomePage ? '' : 'hidden md:flex'}`}
+		>
 			<ExternalLinkIcon
 				href={OISY_TWITTER_URL}
 				ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
