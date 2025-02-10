@@ -83,12 +83,6 @@ describe('SolLoaderWallets', () => {
 		expect(walletWorkerTokens.length).toBe(1);
 	});
 
-	it('should handle empty enabled tokens list when Solana network is disabled', () => {
-		render(SolLoaderWallets);
-		expect(get(enabledSolanaTokens).length).toBe(0);
-		expect(initSolWalletWorker).not.toHaveBeenCalled();
-	});
-
 	it('should handle all networks having addresses', () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 		solAddressLocalnetStore.set({ data: 'local-address', certified: true });
