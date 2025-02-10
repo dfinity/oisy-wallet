@@ -42,12 +42,13 @@
 	</article>
 </div>
 
-<AirdropsGroups title="Active campaigns" airdrops={ongoingEvents} />
+<AirdropsGroups title="Active campaigns" airdrops={ongoingEvents} testId="active-airdrop-campaigns-container" />
 
 <AirdropsGroups
 	title="Upcoming campaigns"
 	airdrops={upcomingEvents}
 	altText="Stay tuned for the upcoming airdrops - subscribe to OISY on X and follow recent updates."
+	testId="upcoming-airdrop-campaigns-container"
 />
 
 {#if $modalAirdropDetails && nonNullish(selectedAirdrop)}

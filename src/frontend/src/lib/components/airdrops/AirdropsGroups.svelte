@@ -9,9 +9,10 @@
 	export let title: string;
 	export let airdrops: AirdropDescription[];
 	export let altText: string | undefined = undefined;
+	export let testId: string | undefined = undefined;
 </script>
 
-<div class="mb-10 flex flex-col gap-4">
+<div class="mb-10 flex flex-col gap-4" data-tid={testId}>
 	<span class="text-lg font-bold first-letter:capitalize">{title}</span>
 
 	{#each airdrops as airdrop}

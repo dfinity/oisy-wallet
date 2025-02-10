@@ -109,7 +109,6 @@ interface I18nDapps {
 
 interface I18nAirdrops {
 	text: { title: string };
-	alt: {};
 }
 
 interface I18nFooter {
