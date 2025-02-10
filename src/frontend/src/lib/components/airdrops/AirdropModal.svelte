@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { IconCheckCircle, Modal } from '@dfinity/gix-components';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
-	import Button from '$lib/components/ui/Button.svelte';
-	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 
 	export let airdrop: AirdropDescription;
 </script>
@@ -30,11 +30,11 @@
 		{#if airdrop.requirements.length > 0}
 			<Hr spacing="md" />
 
-			<span class="m-0 text-md font-semibold">Requirements</span>
+			<span class="text-md m-0 font-semibold">Requirements</span>
 
 			<ul class="list-none">
 				{#each airdrop.requirements as requirement}
-					<li class="flex gap-2 mt-2">
+					<li class="mt-2 flex gap-2">
 						<IconCheckCircle />
 						<span>{requirement}</span>
 					</li>
@@ -42,13 +42,7 @@
 			</ul>
 		{/if}
 
-		<Button
-			paddingSmall
-			type="button"
-			fullWidth
-			on:click={modalStore.close}
-			slot="toolbar"
-		>
+		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
 			Got it
 		</Button>
 	</ContentWithToolbar>

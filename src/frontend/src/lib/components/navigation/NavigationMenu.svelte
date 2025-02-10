@@ -3,6 +3,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { AIRDROPS_ENABLED } from '$env/airdrops.env';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -28,7 +29,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import IconGift from '$lib/components/icons/IconGift.svelte';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually

@@ -1,19 +1,14 @@
 <script lang="ts">
+	import AirdropDateTag from '$lib/components/airdrops/AirdropDateTag.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
-	import AirdropDateTag from '$lib/components/airdrops/AirdropDateTag.svelte';
 
 	export let airdrop: AirdropDescription;
 </script>
 
 <button on:click class="relative h-44 w-full flex-1 rounded-lg bg-white p-4 pt-12 shadow">
 	<span class="absolute -top-5 left-4">
-		<Logo
-			src={airdrop.logo}
-			size="xl"
-			ring
-			color="white"
-		/>
+		<Logo src={airdrop.logo} size="xl" ring color="white" />
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">
 		<section>

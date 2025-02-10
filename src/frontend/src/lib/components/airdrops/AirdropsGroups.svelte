@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { slide } from 'svelte/transition';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { nonNullish } from '@dfinity/utils';
+	import type { AirdropDescription } from '$lib/types/airdrop-events';
 
 	export let title: string;
 	export let airdrops: AirdropDescription[];
@@ -16,7 +16,7 @@
 
 	{#each airdrops as airdrop}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
-			<AirdropCard on:click={() => modalStore.openAirdropDetails(airdrop)} airdrop={airdrop} />
+			<AirdropCard on:click={() => modalStore.openAirdropDetails(airdrop)} {airdrop} />
 		</div>
 	{/each}
 
@@ -24,4 +24,3 @@
 		<span class="text-misty-rose">{altText}</span>
 	{/if}
 </div>
-
