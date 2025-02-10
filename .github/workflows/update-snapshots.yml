@@ -134,7 +134,6 @@ jobs:
         with:
           name: snapshot-status-${{ matrix.os }}
           path: snapshot_status.txt
-          retention-days: 3
 
       - name: Save changed snapshots
         if: env.CHANGES == 'true'
@@ -165,19 +164,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: snapshot-status-ubuntu-24.04
-          path: snapshot-status
+          path: snapshot-status-ubuntu
 
       - name: Download macOS Snapshot Status
         uses: actions/download-artifact@v4
         with:
           name: snapshot-status-macos-14
-          path: snapshot-status
+          path: snapshot-status-macos
 
       - name: Check snapshot status for Ubuntu
         id: check_ubuntu_status
         run: |
-          if [ -f snapshot-status/snapshot_status.txt ]; then
-            status=$(cut -d'=' -f2 snapshot-status/snapshot_status.txt)
+          if [ -f snapshot-status-ubuntu/snapshot_status.txt ]; then
+            status=$(cut -d'=' -f2 snapshot-status-ubuntu/snapshot_status.txt)
             echo "Ubuntu snapshot status: $status"
             echo "ubuntu_status=$status" >> $GITHUB_ENV
           else
@@ -187,8 +186,8 @@ jobs:
       - name: Check snapshot status for macOS
         id: check_macos_status
         run: |
-          if [ -f snapshot-status/snapshot_status.txt ]; then
-            status=$(cut -d'=' -f2 snapshot-status/snapshot_status.txt)
+          if [ -f snapshot-status-macos/snapshot_status.txt ]; then
+            status=$(cut -d'=' -f2 snapshot-status-macos/snapshot_status.txt)
             echo "macOS snapshot status: $status"
             echo "macos_status=$status" >> $GITHUB_ENV
           else
