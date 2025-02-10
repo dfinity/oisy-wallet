@@ -49,6 +49,17 @@ export const formatTokenBigintToNumber = ({
 		})
 	);
 
+export const formatTokenAmount = ({
+	value,
+	...restParams
+}: Omit<FormatTokenParams, 'value'> & {
+	value: bigint;
+}): string =>
+	formatToken({
+		value: BigNumber.from(value),
+		...restParams
+	});
+
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
  * @param text

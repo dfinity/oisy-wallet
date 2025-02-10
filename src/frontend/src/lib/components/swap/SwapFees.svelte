@@ -10,40 +10,49 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
+	import { formatTokenAmount, formatUSD } from '$lib/utils/format.utils';
 
 	const { destinationToken, destinationTokenExchangeRate, sourceToken, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let liquidityProvidersFee: number;
-	$: liquidityProvidersFee = nonNullish($destinationToken)
-		? formatTokenBigintToNumber({
+	let liquidityProvidersFeeDisplay: string;
+	$: liquidityProvidersFeeDisplay = nonNullish($destinationToken)
+		? formatTokenAmount({
 				value: $swapAmountsStore?.swapAmounts?.liquidityProvidersFee ?? 0n,
 				displayDecimals: $destinationToken.decimals,
 				unitName: $destinationToken.decimals
 			})
-		: 0;
+		: '0';
 
-	let gasFee: number;
-	$: gasFee = nonNullish($destinationToken)
-		? formatTokenBigintToNumber({
+	let liquidityProvidersFee: number;
+	$: liquidityProvidersFee = Number(liquidityProvidersFeeDisplay);
+
+	let gasFeeDisplay: string;
+	$: gasFeeDisplay = nonNullish($destinationToken)
+		? formatTokenAmount({
 				value: $swapAmountsStore?.swapAmounts?.gasFee ?? 0n,
 				displayDecimals: $destinationToken.decimals,
 				unitName: $destinationToken.decimals
 			})
-		: 0;
+		: '0';
 
-	let sourceTokenFee: number;
-	$: sourceTokenFee =
+	let gasFee: number;
+	$: gasFee = Number(gasFeeDisplay);
+
+	let sourceTokenFeeDisplay: string;
+	$: sourceTokenFeeDisplay =
 		nonNullish($sourceToken) && nonNullish($sourceToken.fee)
-			? formatTokenBigintToNumber({
+			? formatTokenAmount({
 					value: $sourceToken.fee,
 					displayDecimals: $sourceToken.decimals,
 					unitName: $sourceToken.decimals
 				})
-			: 0;
+			: '0';
+
+	let sourceTokenFee: number;
+	$: sourceTokenFee = Number(sourceTokenFeeDisplay);
 
 	let destinationTokenTotalFeeUSD: number;
 	$: destinationTokenTotalFeeUSD = nonNullish($destinationTokenExchangeRate)
@@ -80,7 +89,7 @@
 					<svelte:fragment slot="label">{$i18n.swap.text.token_fee}</svelte:fragment>
 
 					<svelte:fragment slot="main-value">
-						{sourceTokenFee}
+						{sourceTokenFeeDisplay}
 						{$sourceToken.symbol}
 					</svelte:fragment>
 				</ModalValue>
@@ -90,7 +99,7 @@
 				<svelte:fragment slot="label">{$i18n.swap.text.gas_fee}</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
-					{gasFee}
+					{gasFeeDisplay}
 					{$destinationToken.symbol}
 				</svelte:fragment>
 			</ModalValue>
@@ -99,7 +108,7 @@
 				<svelte:fragment slot="label">{$i18n.swap.text.lp_fee}</svelte:fragment>
 
 				<svelte:fragment slot="main-value">
-					{liquidityProvidersFee}
+					{liquidityProvidersFeeDisplay}
 					{$destinationToken.symbol}
 				</svelte:fragment>
 			</ModalValue>
