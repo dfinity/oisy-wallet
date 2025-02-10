@@ -27,9 +27,11 @@ import {
 import { testnetsStore } from '$lib/stores/settings.store';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splTokens } from '$sol/derived/spl.derived';
+import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { get } from 'svelte/store';
 
 describe('all-tokens.derived', () => {
@@ -47,11 +49,16 @@ describe('all-tokens.derived', () => {
 	};
 
 	const mockErc20Token: Erc20TokenToggleable = {
-		...mockValidToken,
+		...mockValidErc20Token,
 		id: parseTokenId('DUM'),
 		address: mockEthAddress,
 		exchange: 'erc20',
 		enabled: false
+	};
+
+	const mockSplToken: SplTokenToggleable = {
+		...mockValidSplToken,
+		enabled: true
 	};
 
 	beforeEach(() => {
@@ -93,7 +100,7 @@ describe('all-tokens.derived', () => {
 			});
 
 			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
-				fn([]);
+				fn([mockSplToken]);
 				return () => {};
 			});
 
@@ -109,14 +116,21 @@ describe('all-tokens.derived', () => {
 				SOLANA_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockIcrcToken2.id.description,
-				mockIcrcToken.id.description
+				mockIcrcToken.id.description,
+				mockSplToken.id.description
 			]);
 		});
 
-		it('should also include disabled ERC20 tokens', () => {
+		it('should also include disabled tokens', () => {
 			const disabledErc20Token = { ...mockErc20Token, enabled: false };
 			vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
 				fn([disabledErc20Token]);
+				return () => {};
+			});
+
+			const disabledSplToken = { ...mockSplToken, enabled: false };
+			vi.spyOn(splTokens, 'subscribe').mockImplementation((fn) => {
+				fn([disabledSplToken]);
 				return () => {};
 			});
 
@@ -124,6 +138,7 @@ describe('all-tokens.derived', () => {
 			const tokenSymbols = tokens.map((token) => token.id.description);
 
 			expect(tokenSymbols).toContain(disabledErc20Token.id.description);
+			expect(tokenSymbols).toContain(disabledSplToken.id.description);
 		});
 
 		it('should not include duplicate tokens with same ledger canister ID', () => {
