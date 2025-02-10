@@ -3,10 +3,15 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	MANAGE_TOKENS_MODAL_BUTTON,
+	MANAGE_TOKENS_MODAL_SAVE,
+	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
 	NAVIGATION_ITEM_HOMEPAGE,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
+	NETWORKS_SWITCHER_DROPDOWN,
+	NETWORKS_SWITCHER_SELECTOR,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
@@ -309,6 +314,32 @@ abstract class Homepage {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
 		await this.clickByTestId({ testId: TESTNET_TOGGLE });
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
+	}
+
+	async toggleTokenInList({
+		tokenSymbol,
+		networkSymbol
+	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Promise<void> {
+		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
+		await this.clickByTestId({
+			testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}-${networkSymbol}`
+		});
+		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
+	}
+
+	getTokenCardLocator({
+		tokenSymbol,
+		networkSymbol
+	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Locator {
+		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
 	async takeScreenshot(): Promise<void> {
