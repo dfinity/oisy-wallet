@@ -211,7 +211,7 @@
 	</ButtonGroup>
 {/if}
 
-<style lang="css">
+<style lang="scss">
 	.tokens {
 		padding: var(--padding-1_5x) 0;
 	}

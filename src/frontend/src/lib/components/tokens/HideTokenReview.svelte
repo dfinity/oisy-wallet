@@ -44,7 +44,7 @@
 	</ButtonGroup>
 </ContentWithToolbar>
 
-<style lang="css">
+<style lang="scss">
 	.icon {
 		min-height: calc(64px + var(--padding-4x));
 	}

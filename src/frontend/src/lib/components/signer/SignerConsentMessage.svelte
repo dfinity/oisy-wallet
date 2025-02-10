@@ -144,7 +144,7 @@
 	</form>
 {/if}
 
-<style lang="css">
+<style lang="scss">
 	// We are using global selector because we try to style a Markdown section that is generated on the fly when the consent message can be successfully fetched.
 	.msg {
 		:global(p) {

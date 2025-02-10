@@ -15,7 +15,7 @@
 	<IconAstronautArrow />
 </button>
 
-<style lang="css">
+<style lang="scss">
 	button.login-button:hover {
 		:global(.svg-arrow-go path),
 		:global(.svg-arrow-go line) {

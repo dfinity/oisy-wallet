@@ -44,7 +44,7 @@
 		</div>
 	</div>
 	{#if action}
-		<div class="flex min-w-14 flex-shrink">
+		<div class="flex min-w-14 shrink">
 			<slot name="action" />
 		</div>
 	{/if}

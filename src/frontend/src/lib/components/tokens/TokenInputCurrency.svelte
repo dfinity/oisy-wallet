@@ -34,7 +34,7 @@
 	</InputCurrency>
 </div>
 
-<style lang="css">
+<style lang="scss">
 	:global(.token-input-currency div.input-block) {
 		display: block;
 		height: 100%;

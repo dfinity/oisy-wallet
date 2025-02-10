@@ -18,7 +18,7 @@
 	</div>
 {/if}
 
-<style lang="css">
+<style lang="scss">
 	div {
 		position: fixed;
 		top: 0;

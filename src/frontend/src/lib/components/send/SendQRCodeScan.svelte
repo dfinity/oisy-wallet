@@ -82,7 +82,7 @@
 	<ButtonBack on:click={back} />
 </ButtonGroup>
 
-<style lang="css">
+<style lang="scss">
 	.qr-code-wrapper {
 		--primary-rgb: 50, 20, 105;
 		color: rgba(var(--primary-rgb), 0.6);

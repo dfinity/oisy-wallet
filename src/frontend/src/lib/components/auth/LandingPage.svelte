@@ -10,7 +10,7 @@
 </script>
 
 <div
-	class="m-auto h-full min-h-96 w-full max-w-screen-2.5xl items-start gap-12 px-5 md:grid md:grid-cols-2 md:grid-rows-1 md:gap-8 md:overflow-visible"
+	class="m-auto h-full min-h-96 w-full max-w-[theme(screens.2.5xl)] items-start gap-12 px-5 md:grid md:grid-cols-2 md:grid-rows-1 md:gap-8 md:overflow-visible"
 >
 	<div class="w-full content-center md:h-full md:flex-1 md:pl-8 md:pt-12">
 		<HeroSignIn />

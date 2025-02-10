@@ -96,7 +96,7 @@
 	</ButtonGroup>
 </ContentWithToolbar>
 
-<style lang="css">
+<style lang="scss">
 	.qr-code {
 		position: relative;
 

@@ -14,7 +14,7 @@
 	</Collapsible>
 </div>
 
-<style lang="css">
+<style lang="scss">
 	:global(.modal-expandable-values > div.contents > div.header > button.collapsible-expand-icon) {
 		justify-content: flex-end;
 	}

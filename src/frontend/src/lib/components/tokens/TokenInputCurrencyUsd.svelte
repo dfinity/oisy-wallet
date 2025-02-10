@@ -64,7 +64,7 @@
 	<slot name="inner-end" slot="inner-end" />
 </TokenInputCurrency>
 
-<style lang="css">
+<style lang="scss">
 	:global(.token-input-currency.no-padding div.input-field input[id]) {
 		padding: 0;
 	}

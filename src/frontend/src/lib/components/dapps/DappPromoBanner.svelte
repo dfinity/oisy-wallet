@@ -18,7 +18,7 @@
 			/>
 		</div>
 	{/if}
-	<div class="absolute start-0 w-full flex-1 bg-black/30 px-4 py-4 backdrop-blur-sm">
+	<div class="absolute start-0 w-full flex-1 bg-black/30 px-4 py-4 backdrop-blur-xs">
 		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img
@@ -31,7 +31,7 @@
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 
-			<Button paddingSmall styleClass="flex-grow-0 text-sm" colorStyle="secondary" on:click>
+			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="secondary" on:click>
 				{$i18n.core.text.view}
 			</Button>
 		</div>

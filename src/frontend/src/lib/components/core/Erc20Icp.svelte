@@ -14,7 +14,7 @@
 	<span class="pl-1">{$i18n.hero.text.learn_more_about_erc20_icp}</span>
 </a>
 
-<style lang="css">
+<style lang="scss">
 	@use '../../styles/mixins/media';
 
 	a {

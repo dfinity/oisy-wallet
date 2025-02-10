@@ -10,7 +10,7 @@
 	</span>
 </MessageBox>
 
-<style lang="css">
+<style lang="scss">
 	span {
 		:global(a) {
 			&:active,

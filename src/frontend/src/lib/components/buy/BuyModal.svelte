@@ -18,7 +18,7 @@
 	</div>
 </Modal>
 
-<style lang="css">
+<style lang="scss">
 	.stretch {
 		--stretch-padding-bottom: var(--padding-3x);
 	}

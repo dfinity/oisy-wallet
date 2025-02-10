@@ -27,7 +27,7 @@
 	</div>
 {/each}
 
-<style lang="css">
+<style lang="scss">
 	.step {
 		display: grid;
 		grid-template-columns: max-content auto;

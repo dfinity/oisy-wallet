@@ -82,7 +82,7 @@
 	</g>
 </svg>
 
-<style lang="css">
+<style lang="scss">
 	.button__icon {
 		width: 1.4em;
 		height: 1.4em;

@@ -18,7 +18,7 @@
 	<slot />
 </button>
 
-<style lang="css">
+<style lang="scss">
 	button {
 		border-radius: var(--border-radius-sm-1_5x);
 
