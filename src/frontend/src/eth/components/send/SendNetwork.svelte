@@ -86,7 +86,7 @@
 	</Dropdown>
 </div>
 
-<style lang="scss">
+<style lang="css">
 	.hidden {
 		display: none;
 	}

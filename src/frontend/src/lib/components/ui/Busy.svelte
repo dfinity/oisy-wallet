@@ -52,7 +52,7 @@
 	</div>
 {/if}
 
-<style lang="scss">
+<style lang="css">
 	.busy {
 		z-index: calc(var(--z-index) + 1000);
 

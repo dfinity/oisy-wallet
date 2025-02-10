@@ -1,0 +1,9 @@
+@use '../mixins/text';
+
+.truncate {
+	@include text.truncate;
+}
+
+.clamp-4 {
+	@include text.clamp(2);
+}

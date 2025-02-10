@@ -18,7 +18,7 @@
 	</g>
 </svg>
 
-<style lang="scss">
+<style lang="css">
 	@keyframes moveInnerArea {
 		0% {
 			transform: translateX(0);

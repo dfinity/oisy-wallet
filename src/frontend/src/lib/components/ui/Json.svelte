@@ -123,7 +123,7 @@
 	>
 {/if}
 
-<style lang="scss">
+<style lang="css">
 	.root,
 	.root ~ ul,
 	.root ~ span {
