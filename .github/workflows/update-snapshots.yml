@@ -142,7 +142,7 @@ jobs:
           name: snapshot-status-${{ matrix.os }}
           path: snapshot_status.txt
           retention-days: 0
-        
+
       - name: Save Changed Snapshots
         if: env.CHANGES == 'true'
         uses: actions/upload-artifact@v4
