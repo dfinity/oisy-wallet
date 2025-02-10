@@ -4,7 +4,7 @@ import { fetchSignatures } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { assertIsAddress, address as solAddress } from '@solana/addresses';
@@ -26,21 +26,38 @@ export const getSolTransactions = async ({
 		assertIsAddress(tokenAddress);
 	}
 
-	const [relevantAddress] = nonNullish(tokenAddress)
+	const wallet = solAddress(address);
+
+	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
+
+	const signatures: SolSignature[] = await fetchSignatures({
+		network,
+		wallet,
+		before: beforeSignature,
+		limit
+	});
+
+	// Fetch signatures for the associated token address if provided, since they may be not included in the wallet signatures.
+	const [ataAddress] = nonNullish(tokenAddress)
 		? await findAssociatedTokenPda({
 				owner: solAddress(address),
 				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
 				mint: solAddress(tokenAddress)
 			})
-		: [address];
+		: [undefined];
 
-	const wallet = solAddress(relevantAddress);
+	const tokenSignatures: SolSignature[] = nonNullish(ataAddress)
+		? await fetchSignatures({
+				network,
+				wallet: solAddress(ataAddress),
+				before: beforeSignature,
+				limit
+			})
+		: [];
 
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
+	const allSignatures: SolSignature[] = Array.from(new Set([...signatures, ...tokenSignatures]));
 
-	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
-
-	return await signatures.reduce(
+	return await allSignatures.reduce(
 		async (accPromise, signature) => {
 			const acc = await accPromise;
 			const parsedTransactions = await fetchSolTransactionsForSignature({
