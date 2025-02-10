@@ -1,3 +1,4 @@
+import { Themes } from '$lib/enums/themes';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -91,14 +92,13 @@ export const AUTH_TIMER_INTERVAL = 1000;
 // From FI team:
 // On mainnet, the index runs its indexing function every second. The time to see a new transaction in the index is <=1 second plus the time required by the indexing function
 // (however)
-// ICP Index has not been upgraded yet so right know for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second and we want to change the ICP one too eventually. We just didn't get to work on it yet
+// ICP Index has not been upgraded yet so right now for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
 export const INDEX_RELOAD_DELAY = 2000;
 
 // Date and time
 export const SECONDS_IN_MINUTE = 60;
 export const MINUTES_IN_HOUR = 60;
 export const HOURS_IN_DAY = 24;
-export const DAYS_IN_NON_LEAP_YEAR = 365;
 
 export const SECONDS_IN_HOUR = SECONDS_IN_MINUTE * MINUTES_IN_HOUR;
 export const SECONDS_IN_DAY = SECONDS_IN_HOUR * HOURS_IN_DAY;
@@ -122,3 +122,7 @@ export const WALLET_PAGINATION = 10n;
 
 // VIP
 export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+
+// THEMES
+export const DEFAULT_THEME_NAME = Themes.SYSTEM;
+export const THEME_VALUES = Object.values(Themes);

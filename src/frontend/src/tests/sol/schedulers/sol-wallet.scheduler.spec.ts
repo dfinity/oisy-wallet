@@ -6,9 +6,8 @@ import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import { SolanaNetworks } from '$sol/types/network';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSolRpcReceiveTransaction } from '$tests/mocks/sol-transactions.mock';
+import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { lamports } from '@solana/rpc-types';
@@ -19,18 +18,13 @@ describe('sol-wallet.scheduler', () => {
 	let spyLoadTransactions: MockInstance;
 	let spyLoadSolBalance: MockInstance;
 	let spyLoadSplBalance: MockInstance;
-	let spyLoadSolTransactions: MockInstance;
-	let spyLoadSplTransactions: MockInstance;
 
 	const mockSolBalance = lamports(100n);
 	const mockSplBalance = BigInt(123);
-	const mockSolTransactions = [mockSolRpcReceiveTransaction, mockSolRpcReceiveTransaction];
+	const mockSolTransactions = createMockSolTransactionsUi(2);
 
 	const expectedSoLTransactions = mockSolTransactions.map((transaction) => ({
-		data: mapSolTransactionUi({
-			transaction,
-			address: mockSolAddress
-		}),
+		data: transaction,
 		certified: false
 	}));
 
@@ -63,7 +57,7 @@ describe('sol-wallet.scheduler', () => {
 					data: isSpl ? mockSplBalance : mockSolBalance
 				},
 				...(withTransactions && {
-					newTransactions: JSON.stringify(isSpl ? [] : expectedSoLTransactions, jsonReplacer)
+					newTransactions: JSON.stringify(expectedSoLTransactions, jsonReplacer)
 				})
 			}
 		}
@@ -93,13 +87,9 @@ describe('sol-wallet.scheduler', () => {
 		spyLoadSplBalance = vi
 			.spyOn(solanaApi, 'loadSplTokenBalance')
 			.mockResolvedValue(mockSplBalance);
-		spyLoadSolTransactions = vi
+		spyLoadTransactions = vi
 			.spyOn(solSignaturesServices, 'getSolTransactions')
 			.mockResolvedValue(mockSolTransactions);
-		spyLoadSplTransactions = vi
-			.spyOn(solanaApi, 'getSplTransactions')
-			//TODO add spl mock txns
-			.mockResolvedValue([]);
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
@@ -119,7 +109,6 @@ describe('sol-wallet.scheduler', () => {
 
 		beforeEach(() => {
 			spyLoadBalance = isSpl ? spyLoadSplBalance : spyLoadSolBalance;
-			spyLoadTransactions = isSpl ? spyLoadSplTransactions : spyLoadSolTransactions;
 		});
 
 		afterEach(() => {

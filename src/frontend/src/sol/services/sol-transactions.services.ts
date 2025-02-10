@@ -17,7 +17,6 @@ import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
@@ -50,10 +49,19 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
-	return await instructions.reduce(
+	const putativeInnerInstructions = meta?.innerInstructions ?? [];
+
+	// Inside the instructions there could be some that we are unable to decode, but that may have
+	// simpler (and decoded) inner instructions. We should try to map those as well.
+	const allInstructions = [
+		...instructions,
+		...putativeInnerInstructions.flatMap(({ instructions }) => instructions)
+	];
+
+	return await allInstructions.reduce(
 		async (acc, instruction, idx) => {
 			const innerInstructionsRaw =
-				meta?.innerInstructions?.find(({ index }) => index === idx)?.instructions ?? [];
+				putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
 
 			const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map(
 				(innerInstruction) => ({
@@ -73,6 +81,10 @@ export const fetchSolTransactionsForSignature = async ({
 
 			if (nonNullish(mappedTransaction) && mappedTransaction.tokenAddress === tokenAddress) {
 				const { value, from, to } = mappedTransaction;
+
+				if (from !== address && to !== address) {
+					return acc;
+				}
 
 				const newTransaction: SolTransactionUi = {
 					id: `${signature.signature}-${instruction.programId}`,
@@ -152,7 +164,7 @@ const loadSolTransactions = async ({
 		});
 
 		const certifiedTransactions = transactions.map((transaction) => ({
-			data: mapSolTransactionUi({ transaction, address }),
+			data: transaction,
 			certified: false
 		}));
 

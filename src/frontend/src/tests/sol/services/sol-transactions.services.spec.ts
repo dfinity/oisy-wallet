@@ -16,8 +16,7 @@ import type {
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
-	mockSolCertifiedTransactions,
-	mockSolRpcReceiveTransaction,
+	createMockSolTransactionsUi,
 	mockSolRpcSendTransaction
 } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
@@ -28,7 +27,12 @@ describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
 	const signalEnd = vi.fn();
 
-	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction];
+	const mockTransactions = createMockSolTransactionsUi(2);
+
+	const mockCertifiedTransactions = mockTransactions.map((transaction) => ({
+		data: transaction,
+		certified: false
+	}));
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -118,7 +122,7 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
-		it('should use inner instructions if presents and required', async () => {
+		it('should use inner instructions if presents and/or required', async () => {
 			const innerInstructions = [
 				{ index: 0, instructions: [mockInstructions[0]] },
 				{ index: 1, instructions: [mockInstructions[1]] },
@@ -130,7 +134,15 @@ describe('sol-transactions.services', () => {
 				meta: { innerInstructions }
 			});
 
-			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(expectedResults);
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
+				...expectedResults,
+				...innerInstructions
+					.flatMap(({ instructions }) => instructions)
+					.map((instruction) => ({
+						...expected,
+						id: `${expected.id}-${instruction.programId}`
+					}))
+			]);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
 				instruction: { ...mockInstructions[0], programAddress: mockInstructions[0].programId },
@@ -194,6 +206,18 @@ describe('sol-transactions.services', () => {
 				...expectedResults.slice(1)
 			]);
 		});
+
+		it('should ignore transactions that do not involve the address', async () => {
+			spyMapSolParsedInstruction.mockResolvedValueOnce({
+				...mockMappedTransaction,
+				from: mockSolAddress2,
+				to: mockSolAddress2
+			});
+
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(
+				expectedResults.slice(1)
+			);
+		});
 	});
 
 	describe('loadNextSolTransactions', () => {
@@ -206,7 +230,7 @@ describe('sol-transactions.services', () => {
 				signalEnd
 			});
 
-			expect(transactions).toEqual(mockSolCertifiedTransactions);
+			expect(transactions).toEqual(mockCertifiedTransactions);
 			expect(signalEnd).not.toHaveBeenCalled();
 			expect(spyGetTransactions).toHaveBeenCalledWith({
 				address: mockSolAddress,
@@ -258,7 +282,7 @@ describe('sol-transactions.services', () => {
 			});
 
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
-			expect(storeData).toEqual(mockSolCertifiedTransactions);
+			expect(storeData).toEqual(mockCertifiedTransactions);
 		});
 
 		it('should handle errors and reset store', async () => {
