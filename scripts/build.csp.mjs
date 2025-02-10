@@ -123,7 +123,7 @@ const extractStartScript = (htmlFile) => {
  *
  * Note about script-src and 'strict-dynamic':
  * Chrome 40+ / Firefox 31+ / Safari 15.4+ / Edge 15+ supports 'strict-dynamic'.
- * Safari 15.4 has been released recently - March 15, 2022 - that's why we add 'unsafe-inline' to the rules for backwards compatibility.
+ * Safari 15.4 (March 15, 2022) previously required 'unsafe-inline' for compatibility. It has now been removed to improve security, so versions older than 15.4 are not supported anymore.
  * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
