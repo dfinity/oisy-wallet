@@ -106,7 +106,7 @@
 			{/if}
 		</div>
 
-		<div class="h-3/4 w-[1px] bg-disabled" />
+		<div class="bg-disabled h-3/4 w-[1px]" />
 
 		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
 			{#if token}
@@ -114,7 +114,7 @@
 				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
 			{:else}
 				<span
-					class="flex items-center justify-center rounded-full bg-brand-primary text-white"
+					class="bg-brand-primary flex items-center justify-center rounded-full text-white"
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
 				>
 					<IconPlus />

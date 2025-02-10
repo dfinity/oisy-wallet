@@ -13,7 +13,7 @@
 	{tabindex}
 >
 	<div
-		class="duration-250 mb-2 rounded-xl border-4 transition-all sm:rounded-2xl"
+		class="mb-2 rounded-xl border-4 transition-all duration-250 sm:rounded-2xl"
 		class:border-brand-primary={selected}
 		class:border-transparent={!selected}
 	>
@@ -21,7 +21,7 @@
 			<slot />
 
 			<span
-				class="absolute bottom-2 right-2 rounded-full border-4 p-1 shadow-sm"
+				class="absolute right-2 bottom-2 rounded-full border-4 p-1 shadow-sm"
 				class:border-brand-primary={selected}
 				class:border-page={!selected}
 				class:bg-white={selected}

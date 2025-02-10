@@ -31,7 +31,7 @@
 			})}</svelte:fragment
 		>
 
-		<p class="break-normal py-2 text-misty-rose">
+		<p class="text-misty-rose py-2 break-normal">
 			{replacePlaceholders(
 				replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
 				{

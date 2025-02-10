@@ -27,7 +27,7 @@
 	/>
 
 	<div
-		class="absolute bottom-0 left-0 right-0 top-0 m-auto flex h-9 w-9 items-center justify-center rounded-lg border border-solid border-secondary bg-white shadow-sm"
+		class="border-secondary absolute top-0 right-0 bottom-0 left-0 m-auto flex h-9 w-9 items-center justify-center rounded-lg border border-solid bg-white shadow-sm"
 	>
 		<IconMoveDown />
 	</div>
