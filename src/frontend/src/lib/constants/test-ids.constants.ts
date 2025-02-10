@@ -98,3 +98,7 @@ export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggl
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
+
+export const AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-airdrop-campaigns-container'
+export const AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-airdrop-campaigns-container'
+export const AIRDROPS_BANNER = 'airdrops-banner'

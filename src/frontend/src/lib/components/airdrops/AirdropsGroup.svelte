@@ -17,7 +17,7 @@
 
 	{#each airdrops as airdrop}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
-			<AirdropCard on:click={() => modalStore.openAirdropDetails(airdrop)} {airdrop} />
+			<AirdropCard on:click={() => modalStore.openAirdropDetails(airdrop)} {airdrop} testId={nonNullish(testId) ? `${testId}-${airdrop.id}` : undefined} />
 		</div>
 	{/each}
 

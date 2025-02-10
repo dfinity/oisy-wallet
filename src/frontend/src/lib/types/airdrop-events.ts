@@ -1,7 +1,8 @@
 import airdropEventsJson from '$env/airdrop-events.json';
 import * as z from 'zod';
 
-const AirdropEventsSchema = z.object({
+export const AirdropEventsSchema = z.object({
+	id: z.string(),
 	title: z.string(),
 	oneLiner: z.string(),
 	description: z.string(),

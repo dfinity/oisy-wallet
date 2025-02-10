@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte';
-	import AirdropsGroups from '$lib/components/airdrops/AirdropsGroups.svelte';
+	import AirdropsGroups from '$lib/components/airdrops/AirdropsGroup.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type AirdropDescription, airdropEvents } from '$lib/types/airdrop-events';
+	import {
+		AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER, AIRDROPS_BANNER,
+		AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER
+	} from '$lib/constants/test-ids.constants';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
@@ -34,25 +38,23 @@
 	$: upcomingEvents = airdropEvents.filter((airdrop) => isUpcomingEvent(airdrop.startDate));
 </script>
 
-<div class="mb-6 md:mb-10">
-	<article class="relative flex items-end overflow-hidden rounded-2xl">
-		<div class="max-h-64">
-			<ImgBanner src={'/images/dapps/kong-swap.webp'} />
-		</div>
-	</article>
+<div class="mb-6 md:mb-10 relative flex items-end overflow-hidden rounded-2xl">
+	<div class="max-h-64">
+		<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_BANNER} />
+	</div>
 </div>
 
 <AirdropsGroups
 	title="Active campaigns"
 	airdrops={ongoingEvents}
-	testId="active-airdrop-campaigns-container"
+	testId={AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER}
 />
 
 <AirdropsGroups
 	title="Upcoming campaigns"
 	airdrops={upcomingEvents}
 	altText="Stay tuned for the upcoming airdrops - subscribe to OISY on X and follow recent updates."
-	testId="upcoming-airdrop-campaigns-container"
+	testId={AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER}
 />
 
 {#if $modalAirdropDetails && nonNullish(selectedAirdrop)}
