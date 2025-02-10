@@ -69,7 +69,6 @@ describe('auth utils', () => {
 			beforeEach(() => {
 				vi.resetModules();
 				vi.stubEnv('VITE_AUTH_ALTERNATIVE_ORIGINS', alternativeOrigins.join(','));
-				vi.stubEnv('VITE_AUTH_DERIVATION_ORIGIN', '');
 			});
 
 			afterEach(() => {

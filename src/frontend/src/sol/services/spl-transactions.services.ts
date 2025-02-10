@@ -1,11 +1,10 @@
 import { parseTokenId } from '$lib/validation/token.validation';
-import { getSplTransactions } from '$sol/api/solana.api';
+import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import type { GetSplTransactionsParams } from '$sol/types/sol-api';
-import { mapSplTransactionUi } from '$sol/utils/spl-transactions.utils';
 
 interface LoadNextSolTransactionsParams extends GetSplTransactionsParams {
 	signalEnd: () => void;
@@ -45,7 +44,7 @@ const loadSplTransactions = async ({
 }: GetSplTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	const tokenId = parseTokenId(tokenAddress);
 	try {
-		const transactions = await getSplTransactions({
+		const transactions = await getSolTransactions({
 			address,
 			network,
 			before,
@@ -54,7 +53,7 @@ const loadSplTransactions = async ({
 		});
 
 		const certifiedTransactions = transactions.map((transaction) => ({
-			data: mapSplTransactionUi({ transaction, address, tokenAddress }),
+			data: transaction,
 			certified: false
 		}));
 

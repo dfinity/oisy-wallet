@@ -51,11 +51,6 @@ export const ckEthereumTwinToken: Readable<Token> = derived(
 	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
 );
 
-export const ckEthereumTwinTokenId: Readable<TokenId> = derived(
-	[ckEthereumTwinToken],
-	([{ id }]) => id
-);
-
 export const ckEthereumTwinTokenStandard: Readable<TokenStandard> = derived(
 	[ckEthereumTwinToken],
 	([{ standard }]) => standard
