@@ -1,20 +1,12 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { goto } from '$app/navigation';
 	import successfulReward from '$lib/assets/successful-reward.svg';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
-	import { networkId } from '$lib/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { networkUrl } from '$lib/utils/nav.utils';
-
-	const navigateToAirdrops = async () => {
-		await goto(networkUrl({ path: AppPath.Airdrops, networkId: $networkId }));
-	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -30,7 +22,7 @@
 
 		<ButtonGroup slot="toolbar">
 			<ButtonCloseModal />
-			<Button on:click={() => navigateToAirdrops()}>see airdrops</Button>
+			<Button on:click={modalStore.close}>Take me to the wallet</Button>
 		</ButtonGroup>
 	</ContentWithToolbar>
 </Modal>

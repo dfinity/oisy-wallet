@@ -8,7 +8,7 @@
 
 	export let title: string;
 	export let airdrops: AirdropDescription[];
-	export let altText: string | undefined;
+	export let altText: string | undefined = undefined;
 </script>
 
 <div class="mb-10 flex flex-col gap-4">
