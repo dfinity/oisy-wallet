@@ -8,7 +8,7 @@
 	import { type AirdropDescription, airdropEvents } from '$lib/types/airdrop-events';
 
 	let selectedAirdrop: AirdropDescription;
-	$: selectedAirdrop = $modalStore?.data;
+	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
 
 	const isOngoingEvent = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 		const currentDate = new Date(Date.now());
@@ -49,7 +49,7 @@
 <AirdropsGroups
 	title="Upcoming campaigns"
 	airdrops={upcomingEvents}
-	altText="Stay tuned for the upcoming airdrops."
+	altText="Stay tuned for the upcoming airdrops - subscribe to OISY on X and follow recent updates."
 />
 
 {#if $modalAirdropDetails && nonNullish(selectedAirdrop)}
