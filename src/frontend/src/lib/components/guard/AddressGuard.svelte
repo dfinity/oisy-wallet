@@ -32,7 +32,7 @@
 		await Promise.allSettled([
 			validateEthAddress($ethAddressStore),
 			validateBtcAddressMainnet($btcAddressMainnetStore),
-				validateSolAddressMainnet($solAddressMainnetStore)
+			validateSolAddressMainnet($solAddressMainnetStore)
 		]);
 	};
 

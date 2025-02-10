@@ -98,22 +98,20 @@
 				debounceLoadBtcAddressTestnet();
 			}
 
+			if (isNullish($solAddressTestnet)) {
+				debounceLoadSolAddressTestnet();
+			}
 
-				if (isNullish($solAddressTestnet)) {
-					debounceLoadSolAddressTestnet();
-				}
-
-				if (isNullish($solAddressDevnet)) {
-					debounceLoadSolAddressDevnet();
-				}
-
+			if (isNullish($solAddressDevnet)) {
+				debounceLoadSolAddressDevnet();
+			}
 
 			if (LOCAL) {
 				if (isNullish($btcAddressRegtest)) {
 					debounceLoadBtcAddressRegtest();
 				}
 
-				if (isNullish($solAddressLocal) ) {
+				if (isNullish($solAddressLocal)) {
 					debounceLoadSolAddressLocal();
 				}
 			}
