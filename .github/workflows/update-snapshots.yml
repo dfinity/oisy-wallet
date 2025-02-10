@@ -142,13 +142,24 @@ jobs:
           name: snapshot-status-${{ matrix.os }}
           path: snapshot_status.txt
           retention-days: 0
+
+      - name: Copy Changed Snapshots to Temporary Folder
+        if: env.CHANGES == 'true'
+        run: |
+          mkdir -p changed_snapshots
+          IFS=',' read -r -a files <<< "${{ steps.snapshot_changes.outputs.changed_files }}"
+          for file in "${files[@]}"; do
+            echo "Copying $file"
+            cp --parents "$file" changed_snapshots/
+          done
+        shell: bash
         
-      - name: Save Changed Snapshots
+      - name: Upload Changed Snapshots
         if: env.CHANGES == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: snapshots-${{ matrix.os }}
-          path: ${{ steps.snapshot_changes.outputs.changed_files }}
+          path: changed_snapshots/
           retention-days: 0
 
   finalize_snapshots_update:
