@@ -17,11 +17,11 @@
 		class:border-brand-primary={selected}
 		class:border-transparent={!selected}
 	>
-		<div class="relative overflow-hidden rounded-lg shadow sm:rounded-xl">
+		<div class="relative overflow-hidden rounded-lg shadow-sm sm:rounded-xl">
 			<slot />
 
 			<span
-				class="absolute bottom-2 right-2 rounded-full border-4 p-1 shadow"
+				class="absolute bottom-2 right-2 rounded-full border-4 p-1 shadow-sm"
 				class:border-brand-primary={selected}
 				class:border-page={!selected}
 				class:bg-white={selected}

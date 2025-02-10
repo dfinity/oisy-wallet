@@ -14,7 +14,7 @@
 </script>
 
 <span
-	class="inline-flex h-fit w-full items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
+	class="inline-flex h-fit w-full items-center gap-1 rounded-sm px-2 py-0.5 text-xs font-semibold {variantClassNames[
 		variant
 	]} {styleClass ?? ''}"
 >
