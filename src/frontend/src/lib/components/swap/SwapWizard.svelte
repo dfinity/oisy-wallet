@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
@@ -17,7 +17,6 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swap as swapService } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 	import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -29,16 +28,10 @@
 	export let swapProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 
-	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceToken, destinationToken, isSourceTokenIcrc2 } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
-
-	let isSourceTokenIcrc2: boolean;
-	$: isSourceTokenIcrc2 =
-		nonNullish($sourceToken) &&
-		nonNullish($kongSwapTokensStore) &&
-		nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
-		$kongSwapTokensStore[$sourceToken.symbol].icrc2;
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
@@ -74,7 +67,7 @@
 				swapAmount,
 				receiveAmount: $swapAmountsStore.swapAmounts.receiveAmount,
 				slippageValue,
-				isSourceTokenIcrc2
+				isSourceTokenIcrc2: $isSourceTokenIcrc2
 			});
 
 			progress(ProgressStepsSwap.DONE);
