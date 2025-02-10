@@ -4,7 +4,6 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
@@ -99,7 +98,7 @@
 				debounceLoadBtcAddressTestnet();
 			}
 
-			if (SOLANA_NETWORK_ENABLED) {
+
 				if (isNullish($solAddressTestnet)) {
 					debounceLoadSolAddressTestnet();
 				}
@@ -107,14 +106,14 @@
 				if (isNullish($solAddressDevnet)) {
 					debounceLoadSolAddressDevnet();
 				}
-			}
+
 
 			if (LOCAL) {
 				if (isNullish($btcAddressRegtest)) {
 					debounceLoadBtcAddressRegtest();
 				}
 
-				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
+				if (isNullish($solAddressLocal) ) {
 					debounceLoadSolAddressLocal();
 				}
 			}

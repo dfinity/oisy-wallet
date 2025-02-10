@@ -33,8 +33,6 @@ describe('SolLoaderWallets', () => {
 		solAddressMainnetStore.reset();
 		testnetsStore.reset({ key: 'testnets' });
 
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
-
 		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 	});
 

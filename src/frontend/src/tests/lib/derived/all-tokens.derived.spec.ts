@@ -1,6 +1,5 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_REGTEST_TOKEN,
@@ -58,7 +57,6 @@ describe('all-tokens.derived', () => {
 	beforeEach(() => {
 		vi.resetAllMocks();
 
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);

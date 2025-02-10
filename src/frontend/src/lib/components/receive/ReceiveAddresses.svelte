@@ -13,7 +13,6 @@
 		SOLANA_TESTNET_NETWORK,
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
-		SOLANA_NETWORK_ENABLED
 	} from '$env/networks/networks.sol.env';
 	import {
 		BTC_MAINNET_TOKEN,
@@ -174,7 +173,6 @@
 			label: $i18n.receive.solana.text.solana_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: SOLANA_NETWORK_ENABLED
 		},
 		{
 			labelRef: 'solAddressTestnet',
@@ -186,7 +184,7 @@
 			label: $i18n.receive.solana.text.solana_testnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: SOLANA_NETWORK_ENABLED && $testnets
+			condition:  $testnets
 		},
 		{
 			labelRef: 'solAddressDevnet',
@@ -198,7 +196,7 @@
 			label: $i18n.receive.solana.text.solana_devnet_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: SOLANA_NETWORK_ENABLED && $testnets
+			condition: $testnets
 		},
 		{
 			labelRef: 'solAddressLocal',
@@ -210,7 +208,7 @@
 			label: $i18n.receive.solana.text.solana_local_address,
 			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: SOLANA_NETWORK_ENABLED && $testnets && LOCAL
+			condition:  $testnets && LOCAL
 		}
 	];
 
