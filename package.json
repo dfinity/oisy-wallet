@@ -48,8 +48,13 @@
 		"e2e:snapshots:dev": "npm run playwright:install && NODE_ENV=development npx playwright test --update-snapshots --reporter=list",
 		"e2e:report": "npx playwright show-report",
 		"erc20:check": "vite-node scripts/check.tokens.erc20.ts",
-		"update:agent:ic-js": "npm rm @dfinity/agent @dfinity/auth-client @dfinity/candid @dfinity/ckbtc @dfinity/cketh @dfinity/ic-management @dfinity/ledger-icp @dfinity/ledger-icrc @dfinity/principal @dfinity/utils @dfinity/identity-secp256k1 && npm i @dfinity/principal @dfinity/agent @dfinity/auth-client @dfinity/candid @dfinity/ckbtc @dfinity/cketh @dfinity/ic-management @dfinity/ledger-icp @dfinity/ledger-icrc @dfinity/utils && npm i @dfinity/identity-secp256k1 -D",
-		"update:agent:ic-js:next": "npm rm @dfinity/agent @dfinity/auth-client @dfinity/candid @dfinity/ckbtc @dfinity/cketh @dfinity/ic-management @dfinity/ledger-icp @dfinity/ledger-icrc @dfinity/principal @dfinity/utils @dfinity/identity-secp256k1 && npm i @dfinity/principal @dfinity/agent @dfinity/auth-client @dfinity/candid @dfinity/ckbtc@next @dfinity/cketh@next @dfinity/ic-management@next @dfinity/ledger-icp@next @dfinity/ledger-icrc@next @dfinity/utils@next && npm i @dfinity/identity-secp256k1 -D"
+		"update:agent": "npm rm @dfinity/{agent,auth-client,candid,principal,identity-secp256k1} && npm i @dfinity/{agent,auth-client,candid,principal} && npm i @dfinity/identity-secp256k1 -D",
+		"update:ic-js": "npm rm @dfinity/{ckbtc,cketh,ic-management,ledger-icp,ledger-icrc,utils} && npm i @dfinity/{ckbtc,cketh,ledger-icp,ledger-icrc,utils} && npm i @dfinity/ic-management -D",
+		"update:ic-js:next": "npm rm @dfinity/{ckbtc,cketh,ic-management,ledger-icp,ledger-icrc,utils} && npm i @dfinity/{ckbtc,cketh,ledger-icp,ledger-icrc,utils}@next && npm i @dfinity/ic-management@next -D",
+		"update:signer": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer",
+		"update:signer:next": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer@next",
+		"update:agent:ic-js": "npm run update:ic-js && npm run update:agent",
+		"update:agent:ic-js:next": "npm run update:ic-js:next && npm run update:agent"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^2.1.2",
