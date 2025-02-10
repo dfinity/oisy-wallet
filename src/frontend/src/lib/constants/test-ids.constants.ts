@@ -101,4 +101,5 @@ export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
 
 export const AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-airdrop-campaigns-container';
 export const AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-airdrop-campaigns-container';
+export const AIRDROPS_MODAL_IMAGE_BANNER = 'airdrop-modal-image-banner';
 export const AIRDROPS_BANNER = 'airdrops-banner';

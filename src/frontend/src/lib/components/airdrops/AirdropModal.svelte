@@ -6,6 +6,7 @@
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 
 	export let airdrop: AirdropDescription;
 </script>
@@ -17,21 +18,18 @@
 		<div class="mb-5">
 			<article class="relative flex items-end overflow-hidden rounded-2xl">
 				<div class="max-h-60">
-					<ImgBanner src={'/images/dapps/kong-swap.webp'} />
+					<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
 				</div>
 			</article>
 		</div>
 
 		<span class="m-0 text-lg font-semibold">How to participate</span>
-		<p class="m-0 mt-2">
-			Some short description for the Airdrop. Some short description for the Airdrop.
-		</p>
+		<p class="m-0 mt-2">{airdrop.description}</p>
 
 		{#if airdrop.requirements.length > 0}
 			<Hr spacing="md" />
 
 			<span class="text-md m-0 font-semibold">Requirements</span>
-
 			<ul class="list-none">
 				{#each airdrop.requirements as requirement}
 					<li class="mt-2 flex gap-2">
