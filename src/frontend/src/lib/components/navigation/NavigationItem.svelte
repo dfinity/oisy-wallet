@@ -7,10 +7,8 @@
 
 <a
 	{href}
-	class="flex w-full flex-row gap-3 rounded-xl p-3 text-left no-underline transition-colors duration-700 hover:text-brand-primary"
-	class:text-brand-primary={selected}
-	class:bg-primary={selected}
-	class:hover:bg-brand-subtle-alt={selected}
+	class="nav-item flex w-full flex-row gap-3 rounded-xl p-3 text-left no-underline transition-colors duration-700"
+	class:selected={selected}
 	aria-label={ariaLabel}
 	data-tid={testId}
 >

@@ -263,23 +263,23 @@ div.step.completed {
 div.checkbox {
 	input[type='checkbox'] {
 		--secondary: var(--color-primary);
-		--focus-background: var(--color-white);
+		--focus-background: var(--color-background-primary);
 
 		&:focus {
 			--secondary: var(--color-primary);
-			--focus-background: var(--color-white);
+			--focus-background: var(--color-background-primary);
 		}
 
 		&:checked {
 			--secondary: var(--color-primary);
-			--focus-background: var(--color-cobalt);
-			--input-custom-border-color: var(--color-primary);
-			--input-background: var(--color-primary);
+			--focus-background: var(--color-background-brand-primary-alt);
+			--input-custom-border-color: var(--color-background-brand-primary-alt);
+			--input-background: var(--color-background-brand-primary-alt);
 
-			&:focus {
-				--secondary: var(--color-cobalt);
-				--focus-background: var(--color-cobalt);
-				--input-custom-border-color: var(--color-cobalt);
+			&:hover:not(:active), &:focus:not(:active) {
+				--secondary: var(--color-background-brand-secondary);
+				--focus-background: var(--color-background-brand-secondary);
+				--input-custom-border-color: var(--color-background-brand-secondary);
 			}
 		}
 
