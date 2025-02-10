@@ -101,7 +101,24 @@ jobs:
           fi
 
       - name: Run Playwright tests
-        run: npm run e2e:snapshots
+        run: npm run e2e:snapshots 2>&1 | tee playwright.log
+
+      - name: Determine Snapshot Changes from Log
+        id: snapshot_changes
+        run: |
+          changed_files=$(grep "is re-generated, writing actual" playwright.log | awk '{print $1}')
+          echo "Changed snapshot files:"
+          echo "$changed_files"
+          if [ -n "$changed_files" ]; then
+            echo "CHANGES=true" >> $GITHUB_ENV
+            echo "CHANGES=true" > snapshot_status.txt
+          else
+            echo "CHANGES=false" >> $GITHUB_ENV
+            echo "CHANGES=false" > snapshot_status.txt
+          fi
+          changed_files_csv=$(echo "$changed_files" | paste -sd, -)
+          echo "Changed files (CSV): $changed_files_csv"
+          echo "changed_files=${changed_files_csv}" >> $GITHUB_OUTPUT
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
@@ -119,30 +136,20 @@ jobs:
           path: test-results/
           retention-days: 3
 
-      - name: Check if snapshots changed
-        run: |
-          if [ -n "$(git status --porcelain e2e)" ]; then
-            echo "CHANGES=true" >> $GITHUB_ENV
-            echo "CHANGES=true" > snapshot_status.txt
-          else
-            echo "CHANGES=false" >> $GITHUB_ENV
-            echo "CHANGES=false" > snapshot_status.txt
-          fi
-
-      - name: Upload snapshot status
+      - name: Upload Snapshot Status
         uses: actions/upload-artifact@v4
         with:
           name: snapshot-status-${{ matrix.os }}
           path: snapshot_status.txt
-          retention-days: 3
-
-      - name: Save changed snapshots
+          retention-days: 0
+        
+      - name: Save Changed Snapshots
         if: env.CHANGES == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: snapshots-${{ matrix.os }}
-          path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.os_suffix.outputs.os_suffix }}.png
-          retention-days: 3
+          path: ${{ steps.snapshot_changes.outputs.changed_files }}
+          retention-days: 0
 
   finalize_snapshots_update:
     name: Finalize Snapshots Update
