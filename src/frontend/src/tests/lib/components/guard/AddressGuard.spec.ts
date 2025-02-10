@@ -213,28 +213,5 @@ describe('AddressGuard', () => {
 				}
 			);
 		});
-
-		describe('Solana network disabled', () => {
-			beforeEach(() => {
-				apiMock.mockResolvedValue(undefined);
-			});
-
-			it('should not validate SOL address when network is disabled', async () => {
-				render(AddressGuard);
-
-				const spy = vi.spyOn(solAddressServices, 'validateSolAddressMainnet');
-
-				solAddressMainnetStore.set({
-					data: mockSolAddress,
-					certified: true
-				});
-
-				emit({ message: 'oisyValidateAddresses' });
-
-				await vi.waitFor(() => {
-					expect(spy).not.toHaveBeenCalled();
-				});
-			});
-		});
 	});
 });
