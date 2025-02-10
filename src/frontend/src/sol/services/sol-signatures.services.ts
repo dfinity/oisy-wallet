@@ -26,7 +26,15 @@ export const getSolTransactions = async ({
 		assertIsAddress(tokenAddress);
 	}
 
-	const wallet = solAddress(address);
+	const [relevantAddress] = nonNullish(tokenAddress)
+		? await findAssociatedTokenPda({
+				owner: solAddress(address),
+				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
+				mint: solAddress(tokenAddress)
+			})
+		: [address];
+
+	const wallet = solAddress(relevantAddress);
 
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
 
@@ -37,27 +45,7 @@ export const getSolTransactions = async ({
 		limit
 	});
 
-	// Fetch signatures for the associated token address if provided, since they may be not included in the wallet signatures.
-	const [ataAddress] = nonNullish(tokenAddress)
-		? await findAssociatedTokenPda({
-				owner: solAddress(address),
-				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
-				mint: solAddress(tokenAddress)
-			})
-		: [undefined];
-
-	const tokenSignatures: SolSignature[] = nonNullish(ataAddress)
-		? await fetchSignatures({
-				network,
-				wallet: solAddress(ataAddress),
-				before: beforeSignature,
-				limit
-			})
-		: [];
-
-	const allSignatures: SolSignature[] = Array.from(new Set([...signatures, ...tokenSignatures]));
-
-	return await allSignatures.reduce(
+	return await signatures.reduce(
 		async (accPromise, signature) => {
 			const acc = await accPromise;
 			const parsedTransactions = await fetchSolTransactionsForSignature({

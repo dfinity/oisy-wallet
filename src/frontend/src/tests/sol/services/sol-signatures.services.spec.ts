@@ -66,15 +66,9 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should correctly handle a token address', async () => {
-			// Mocking the signatures for the token address
-			const mockNewSignatures: SolSignature[] = mockSolSignatureResponses(13);
-			spyFetchSignatures
-				.mockReturnValueOnce(mockSignatures)
-				.mockReturnValueOnce([...mockSignatures, ...mockNewSignatures]);
-
 			spyFindAssociatedTokenPda.mockResolvedValueOnce([mockSplAddress]);
 
-			const transactions = await getSolTransactions({
+			await getSolTransactions({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				tokenAddress: mockSplAddress
@@ -85,14 +79,6 @@ describe('sol-transactions.services', () => {
 				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
 				mint: mockSplAddress
 			});
-
-			expect(transactions).toHaveLength(
-				(mockSignatures.length + mockNewSignatures.length) * mockSolTransactions.length
-			);
-			expect(spyFetchSignatures).toHaveBeenCalledTimes(2);
-			expect(spyFetchTransactionsForSignature).toHaveBeenCalledTimes(
-				mockSignatures.length + mockNewSignatures.length
-			);
 		});
 
 		it('should handle before parameter', async () => {
