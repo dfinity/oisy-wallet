@@ -90,14 +90,14 @@
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="mb-6 rounded-lg border border-brand-subtle bg-brand-subtle p-6">
-			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
+		<div class="border-brand-subtle bg-brand-subtle mb-6 rounded-lg border p-6">
+			<p class="font-bold break-normal">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
 				{#each scopes as scope}
 					{@const { icon, label } = listItems[scope.scope.method]}
 
-					<li class="flex items-center gap-2 break-normal pb-1.5">
+					<li class="flex items-center gap-2 pb-1.5 break-normal">
 						<svelte:component this={icon} size="24" />
 						{label}
 					</li>
@@ -106,7 +106,7 @@
 		</div>
 
 		{#if requestAccountsPermissions}
-			<div class="mb-10 flex gap-4 rounded-lg border border-dust bg-white p-4">
+			<div class="border-dust mb-10 flex gap-4 rounded-lg border bg-white p-4">
 				<IconAstronautHelmet />
 
 				<div>

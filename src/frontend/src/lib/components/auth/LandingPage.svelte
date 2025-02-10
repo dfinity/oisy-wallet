@@ -10,9 +10,9 @@
 </script>
 
 <div
-	class="m-auto h-full min-h-96 w-full max-w-screen-2.5xl items-start gap-12 px-5 md:grid md:grid-cols-2 md:grid-rows-1 md:gap-8 md:overflow-visible"
+	class="max-w-screen-2.5xl m-auto h-full min-h-96 w-full items-start gap-12 px-5 md:grid md:grid-cols-2 md:grid-rows-1 md:gap-8 md:overflow-visible"
 >
-	<div class="w-full content-center md:h-full md:flex-1 md:pl-8 md:pt-12">
+	<div class="w-full content-center md:h-full md:flex-1 md:pt-12 md:pl-8">
 		<HeroSignIn />
 	</div>
 
@@ -20,7 +20,7 @@
 	<div
 		class="ml-auto min-w-[1127px] pt-12 md:m-0 md:flex md:h-full md:content-center md:items-center"
 	>
-		<div class="w-full md:h-md:mt-auto">
+		<div class="md:h-md:mt-auto w-full">
 			<Img src={preview} alt={ariaLabel} />
 		</div>
 	</div>
