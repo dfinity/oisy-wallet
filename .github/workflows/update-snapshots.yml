@@ -134,7 +134,6 @@ jobs:
         with:
           name: snapshot-status-${{ matrix.os }}
           path: snapshot_status.txt
-          retention-days: 3
 
       - name: Save changed snapshots
         if: env.CHANGES == 'true'
