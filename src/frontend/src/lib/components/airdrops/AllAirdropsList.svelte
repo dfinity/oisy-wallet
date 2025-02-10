@@ -18,10 +18,20 @@
 		return startDiff <= 0 && endDiff > 0;
 	}
 
+	const isUpcomingEvent = (startDate: Date) => {
+		const currentDate = new Date(Date.now());
+		let startDiff = startDate.getTime() - currentDate.getTime();
+
+		return startDiff > 0;
+	};
+
 	let ongoingEvents: AirdropDescription[];
 	$: ongoingEvents = airdropEvents.filter((airdrop) => {
 		return isOngoingEvent(airdrop.startDate, airdrop.endDate);
 	});
+
+	let upcomingEvents: AirdropDescription[];
+	$: upcomingEvents = airdropEvents.filter((airdrop) => isUpcomingEvent(airdrop.startDate));
 </script>
 
 <div class="mb-6 md:mb-10">
@@ -41,7 +51,7 @@
 
 <AirdropsGroups
 	title="Upcoming campaigns"
-	airdrops={[]}
+	airdrops={upcomingEvents}
 	altText="Stay tuned for the upcoming airdrops."
 />
 
