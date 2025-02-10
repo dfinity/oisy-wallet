@@ -24,3 +24,6 @@ export const mockSolSignatureWithErrorResponse = () => ({
 	err: 'Some error',
 	confirmationStatus: 'finalized'
 });
+
+export const mockSolSignatureResponses = (n: number): SolSignature[] =>
+	Array.from({ length: n }, () => mockSolSignatureResponse());

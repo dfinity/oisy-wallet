@@ -106,7 +106,7 @@
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
 		"postcss": "^8.5.1",
-		"prettier": "^3.4.2",
+		"prettier": "^3.5.0",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.10",
@@ -117,7 +117,7 @@
 		"tslib": "^2.8.1",
 		"typescript": "^5.4.5",
 		"vite": "^5.4.14",
-		"vite-node": "^3.0.4",
+		"vite-node": "^3.0.5",
 		"vitest": "^2.1.9",
 		"vitest-mock-extended": "^2.0.2"
 	},
