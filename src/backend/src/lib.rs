@@ -560,6 +560,7 @@ pub fn add_user_hidden_dapp_id(
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "may_write_user_data")]
+#[allow(clippy::needless_pass_by_value)]
 pub fn save_user_selected_theme(
     request: SaveSelectedThemeRequest,
 ) -> Result<(), SaveSelectedThemeError> {
