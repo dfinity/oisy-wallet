@@ -29,6 +29,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -90,7 +91,7 @@
 				selected={isRouteAirdrops(pageData)}
 				testId={NAVIGATION_ITEM_AIRDROPS}
 			>
-				<IconSend />
+				<IconGift />
 				{$i18n.navigation.text.airdrops}
 			</NavigationItem>
 		{/if}

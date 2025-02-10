@@ -50,6 +50,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import IconTrophy from '$lib/components/icons/IconTrophy.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -152,7 +153,7 @@
 				ariaLabel={$i18n.navigation.alt.airdrops}
 				on:click={goToAirdrops}
 			>
-				<IconSend size="20" />
+				<IconTrophy size="20" />
 				{$i18n.navigation.text.airdrops}
 			</ButtonMenu>
 		{/if}

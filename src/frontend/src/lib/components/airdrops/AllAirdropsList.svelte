@@ -5,6 +5,7 @@
 	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type AirdropDescription, airdropEvents } from '$lib/types/airdrop-events';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data;
@@ -15,31 +16,34 @@
 		let endDiff = endDate.getTime() - currentDate.getTime();
 
 		return startDiff <= 0 && endDiff > 0;
-	};
-
-	const isUpcomingEvent = (startDate: Date) => {
-		const currentDate = new Date(Date.now());
-		let startDiff = startDate.getTime() - currentDate.getTime();
-
-		return startDiff > 0;
-	};
+	}
 
 	let ongoingEvents: AirdropDescription[];
-	$: ongoingEvents = airdropEvents.filter((airdrop) =>
-		isOngoingEvent(airdrop.startDate, airdrop.endDate)
-	);
-
-	let upcomingEvents: AirdropDescription[];
-	$: upcomingEvents = airdropEvents.filter((airdrop) => isUpcomingEvent(airdrop.startDate));
+	$: ongoingEvents = airdropEvents.filter((airdrop) => {
+		return isOngoingEvent(airdrop.startDate, airdrop.endDate);
+	});
 </script>
 
+<div class="mb-6 md:mb-10">
+	<article class="relative flex items-end overflow-hidden rounded-2xl">
+		<div class="max-h-64">
+			<ImgBanner src={'/images/dapps/kong-swap.webp'} />
+		</div>
+	</article>
+</div>
+
 {#if ongoingEvents.length > 0}
-	<AirdropsGroups title="Ongoing" airdrops={ongoingEvents} />
+	<AirdropsGroups
+		title="Active campaigns"
+		airdrops={ongoingEvents}
+	/>
 {/if}
 
-{#if upcomingEvents.length > 0}
-	<AirdropsGroups title="Upcoming" airdrops={upcomingEvents} />
-{/if}
+<AirdropsGroups
+	title="Upcoming campaigns"
+	airdrops={[]}
+	altText="Stay tuned for the upcoming airdrops."
+/>
 
 {#if $modalAirdropDetails && nonNullish(selectedAirdrop)}
 	<AirdropModal airdrop={selectedAirdrop} />

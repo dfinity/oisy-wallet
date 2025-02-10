@@ -1,33 +1,55 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
-	import AirdropStatusCard from '$lib/components/airdrops/AirdropStatusCard.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import { IconCheckCircle, Modal } from '@dfinity/gix-components';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 
 	export let airdrop: AirdropDescription;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
+	<span class="text-center text-xl" slot="title">{airdrop.title}</span>
+
 	<ContentWithToolbar>
-		<div class="flex flex-col gap-4">
-			<AirdropStatusCard />
-
-			<span class="text-2xl first-letter:capitalize">{airdrop.title}</span>
-
-			<div class="text-tertiary">
-				<span>{airdrop.description}</span>
-
-				{#if airdrop.tasks.length > 0}
-					<ul class="ml-6 list-disc">
-						{#each airdrop.tasks as task}
-							<li>{task}</li>
-						{/each}
-					</ul>
-				{/if}
-			</div>
+		<div class="mb-5">
+			<article class="relative flex items-end overflow-hidden rounded-2xl">
+				<div class="max-h-60">
+					<ImgBanner src={'/images/dapps/kong-swap.webp'} />
+				</div>
+			</article>
 		</div>
-		<ButtonCloseModal slot="toolbar" />
+
+		<span class="m-0 text-lg font-semibold">How to participate</span>
+		<p class="m-0 mt-2">
+			Some short description for the Airdrop. Some short description for the Airdrop.
+		</p>
+
+		{#if airdrop.requirements.length > 0}
+			<Hr spacing="md" />
+
+			<span class="m-0 text-md font-semibold">Requirements</span>
+
+			<ul class="list-none">
+				{#each airdrop.requirements as requirement}
+					<li class="flex gap-2 mt-2">
+						<IconCheckCircle />
+						<span>{requirement}</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+
+		<Button
+			paddingSmall
+			type="button"
+			fullWidth
+			on:click={modalStore.close}
+			slot="toolbar"
+		>
+			Got it
+		</Button>
 	</ContentWithToolbar>
 </Modal>

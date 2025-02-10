@@ -1,23 +1,27 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
-	import Airdrop from '$lib/components/airdrops/Airdrop.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalStore } from '$lib/stores/modal.store';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { slide } from 'svelte/transition';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let title: string;
-
 	export let airdrops: AirdropDescription[];
+	export let altText: string | undefined;
 </script>
 
-{#if airdrops.length > 0}
-	<div class="mb-5 flex flex-col gap-6">
-		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{title}</span>
+<div class="mb-10 flex flex-col gap-4">
+	<span class="text-lg font-bold first-letter:capitalize">{title}</span>
 
-		{#each airdrops as airdrop}
-			<div in:slide={SLIDE_DURATION}>
-				<Airdrop on:click={() => modalStore.openAirdropDetails(airdrop)} {airdrop} />
-			</div>
-		{/each}
-	</div>
-{/if}
+	{#each airdrops as airdrop}
+		<div in:slide={SLIDE_DURATION} class="mt-4">
+			<AirdropCard on:click={() => modalStore.openAirdropDetails(airdrop)} airdrop={airdrop} />
+		</div>
+	{/each}
+
+	{#if nonNullish(altText) && airdrops.length === 0}
+		<span class="text-misty-rose">{altText}</span>
+	{/if}
+</div>
+
