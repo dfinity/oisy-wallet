@@ -198,6 +198,7 @@
 	</div>
 
 	<button
+		data-tid="import-token-button"
 		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>

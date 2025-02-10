@@ -28,6 +28,7 @@ testWithII('import ERC20 token manually', async () => {
 		modalTestId: RECEIVE_TOKENS_MODAL,
 		selectorsToMock: getReceiveTokensModalAddressLabelSelectors([
 			// TODO: Add Testcode that imports the token manually
+			// TRON: 0x50327c6c5a14dcade707abad2e27eb517df87ab5
 		])
 	});
 });
@@ -38,6 +39,7 @@ testWithII('import ICRC token manually', async () => {
 		modalTestId: RECEIVE_TOKENS_MODAL,
 		selectorsToMock: getReceiveTokensModalAddressLabelSelectors([
 			// TODO: Add Testcode that imports the token manually
+			// BOB: 7pail-xaaaa-aaaas-aabmq-cai
 		])
 	});
 });
