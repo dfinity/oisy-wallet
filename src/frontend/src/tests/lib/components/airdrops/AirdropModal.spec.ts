@@ -1,7 +1,7 @@
-import { render } from '@testing-library/svelte';
-import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte'
-import { mockAirdropEvents } from '$tests/mocks/airdrop-events.mock';
+import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte';
 import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
+import { mockAirdropEvents } from '$tests/mocks/airdrop-events.mock';
+import { render } from '@testing-library/svelte';
 
 describe('AirdropModal', () => {
 	const imageBannerSelector = `img[data-tid="${AIRDROPS_MODAL_IMAGE_BANNER}"]`;
@@ -12,7 +12,7 @@ describe('AirdropModal', () => {
 		const requirements = ['step 1', 'step 2'];
 		const mockedAirdrop = { ...mockAirdropEvents[0], title, description, requirements };
 
-		const {container, getByText} = render(AirdropModal, {
+		const { container, getByText } = render(AirdropModal, {
 			props: {
 				airdrop: mockedAirdrop
 			}
@@ -20,7 +20,7 @@ describe('AirdropModal', () => {
 
 		expect(getByText(title)).toBeInTheDocument();
 		expect(getByText(description)).toBeInTheDocument();
-		requirements.forEach(requirement => {
+		requirements.forEach((requirement) => {
 			expect(getByText(requirement)).toBeInTheDocument();
 		});
 
