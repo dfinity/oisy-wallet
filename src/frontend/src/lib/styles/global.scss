@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+@use 'sass:meta';
+@use 'tailwindcss';
 
 @config '../../../../../tailwind.config.ts';
 
@@ -19,8 +20,6 @@
 		border-color: var(--color-gray-200, currentColor);
 	}
 }
-
-@use 'sass:meta';
 
 @include meta.load-css('global/font-faces');
 @include meta.load-css('global/fonts');
