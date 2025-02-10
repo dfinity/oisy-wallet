@@ -3,7 +3,6 @@
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
 	import AirdropDateTag from '$lib/components/airdrops/AirdropDateTag.svelte';
 
-	export let testId: string | undefined = undefined;
 	export let airdrop: AirdropDescription;
 </script>
 

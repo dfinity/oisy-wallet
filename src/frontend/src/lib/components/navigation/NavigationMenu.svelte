@@ -3,7 +3,6 @@
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { AIRDROPS_ENABLED } from '$env/airdrops.env';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';

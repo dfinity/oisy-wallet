@@ -10,7 +10,7 @@
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data;
 
-	const isOngoingEvent = (startDate: Date, endDate: Date) => {
+	const isOngoingEvent = ({startDate, endDate} : {startDate: Date, endDate: Date}) => {
 		const currentDate = new Date(Date.now());
 		let startDiff = startDate.getTime() - currentDate.getTime();
 		let endDiff = endDate.getTime() - currentDate.getTime();
@@ -27,7 +27,7 @@
 
 	let ongoingEvents: AirdropDescription[];
 	$: ongoingEvents = airdropEvents.filter((airdrop) => {
-		return isOngoingEvent(airdrop.startDate, airdrop.endDate);
+		return isOngoingEvent({startDate: airdrop.startDate, endDate: airdrop.endDate});
 	});
 
 	let upcomingEvents: AirdropDescription[];
