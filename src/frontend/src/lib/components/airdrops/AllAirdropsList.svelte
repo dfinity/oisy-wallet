@@ -42,7 +42,11 @@
 	</article>
 </div>
 
-<AirdropsGroups title="Active campaigns" airdrops={ongoingEvents} testId="active-airdrop-campaigns-container" />
+<AirdropsGroups
+	title="Active campaigns"
+	airdrops={ongoingEvents}
+	testId="active-airdrop-campaigns-container"
+/>
 
 <AirdropsGroups
 	title="Upcoming campaigns"
