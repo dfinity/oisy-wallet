@@ -1,4 +1,3 @@
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_TOKEN,
 	SOLANA_TESTNET_TOKEN,
@@ -85,7 +84,6 @@ describe('SolLoaderWallets', () => {
 	});
 
 	it('should handle empty enabled tokens list when Solana network is disabled', () => {
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
 		render(SolLoaderWallets);
 		expect(get(enabledSolanaTokens).length).toBe(0);
 		expect(initSolWalletWorker).not.toHaveBeenCalled();
