@@ -25,7 +25,8 @@
 		networkBitcoin,
 		networkEthereum,
 		networkICP,
-		networkSolana
+		networkSolana,
+		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -70,20 +71,22 @@
 </script>
 
 <div
-	class="bg-brand-primary from-brand-primary via-absolute-blue bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-linear-to-b p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="bg-brand-primary bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-linear-to-b p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class:from-brand-primary={$pseudoNetworkChainFusion}
+	class:to-absolute-blue={$pseudoNetworkChainFusion}
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
 	class:bg-cover={isTrumpToken}
 	class:bg-size-200={!isTrumpToken}
-	class:via-interdimensional-blue={$networkICP && !isGLDTToken}
+	class:from-interdimensional-blue={$networkICP && !isGLDTToken}
 	class:to-chinese-purple={$networkICP && !isGLDTToken}
-	class:via-bright-gold={isGLDTToken}
+	class:from-bright-gold={isGLDTToken}
 	class:to-golden-sap={isGLDTToken}
-	class:via-beer={$networkBitcoin}
+	class:from-beer={$networkBitcoin}
 	class:to-fulvous={$networkBitcoin}
-	class:via-united-nations-blue={$networkEthereum}
+	class:from-united-nations-blue={$networkEthereum}
 	class:to-bright-lilac={$networkEthereum}
 	class:bg-gradient-to-r={($networkSolana && !isTrumpToken) || isGLDTToken}
-	class:via-lavander-indigo={$networkSolana && !isTrumpToken}
+	class:from-lavander-indigo={$networkSolana && !isTrumpToken}
 	class:to-medium-spring-green={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
 >
