@@ -174,6 +174,8 @@
 
 	<FeeContext
 		amount={amount.toString()}
+		sendToken={$sendToken}
+		sendTokenId={$sendTokenId}
 		{destination}
 		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}
