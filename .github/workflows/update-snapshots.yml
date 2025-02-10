@@ -153,7 +153,7 @@ jobs:
             cp --parents "$file" changed_snapshots/
           done
         shell: bash
-        
+
       - name: Upload Changed Snapshots
         if: env.CHANGES == 'true'
         uses: actions/upload-artifact@v4
