@@ -1,11 +1,17 @@
 import {
+	AMOUNT_DATA,
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	MANAGE_TOKENS_MODAL_BUTTON,
+	MANAGE_TOKENS_MODAL_SAVE,
+	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
 	NAVIGATION_ITEM_HOMEPAGE,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
+	NETWORKS_SWITCHER_DROPDOWN,
+	NETWORKS_SWITCHER_SELECTOR,
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
@@ -19,7 +25,10 @@ import { expect, type Locator, type Page, type ViewportSize } from '@playwright/
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
-import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
+import {
+	getReceiveTokensModalAddressLabelSelector,
+	getReceiveTokensModalQrCodeButtonSelector
+} from '../selectors.utils';
 
 interface HomepageParams {
 	page: Page;
@@ -41,6 +50,7 @@ interface TestIdOperationParams {
 interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
+	state?: 'detached';
 }
 
 type TestModalSnapshotParams = {
@@ -116,6 +126,15 @@ abstract class Homepage {
 		}
 	}
 
+	protected async mockSelectorAll({ selector }: SelectorOperationParams): Promise<void> {
+		const elementsLocator = this.#page.locator(selector);
+		await elementsLocator.evaluateAll((elements) => {
+			for (const element of elements) {
+				(element as HTMLElement).innerHTML = 'placeholder';
+			}
+		});
+	}
+
 	private async goto(): Promise<void> {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
@@ -158,12 +177,16 @@ abstract class Homepage {
 
 	protected async waitForModal({
 		modalOpenButtonTestId,
-		modalTestId
+		modalTestId,
+		state
 	}: WaitForModalParams): Promise<Locator> {
-		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
 		const modal = this.#page.getByTestId(modalTestId);
+		if (state === 'detached') {
+			await modal.waitFor({ state });
+			return modal;
+		}
+		await this.clickByTestId({ testId: modalOpenButtonTestId, scrollIntoView: false });
 		await modal.waitFor();
-
 		return modal;
 	}
 
@@ -215,6 +238,35 @@ abstract class Homepage {
 		await this.waitForByTestId({ testId: NAVIGATION_MENU_BUTTON });
 	}
 
+	protected async elementExistsByTestId(testId: string): Promise<boolean> {
+		return await this.#page
+			.getByTestId(testId)
+			.isVisible()
+			.catch(() => false);
+	}
+
+	getBalanceLocator(): Locator {
+		return this.#page.getByTestId(AMOUNT_DATA);
+	}
+
+	async setInputValueByTestId({
+		testId,
+		value
+	}: TestIdOperationParams & { value: string }): Promise<void> {
+		await this.#page.getByTestId(testId).fill(value);
+	}
+
+	async getAccountIdByTestId(testId: string): Promise<string> {
+		const addressLocator = getReceiveTokensModalAddressLabelSelector({
+			sectionSelector: testId
+		});
+		const addressText = await this.#page.locator(addressLocator).innerHTML();
+		if (!addressText) {
+			throw new Error('No address text found in container icp-account-id');
+		}
+		return addressText.trim();
+	}
+
 	async testModalSnapshot({
 		modalOpenButtonTestId,
 		modalTestId,
@@ -262,6 +314,32 @@ abstract class Homepage {
 		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
 		await this.clickByTestId({ testId: TESTNET_TOGGLE });
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
+	}
+
+	async toggleTokenInList({
+		tokenSymbol,
+		networkSymbol
+	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Promise<void> {
+		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
+		await this.clickByTestId({
+			testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}-${networkSymbol}`
+		});
+		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
+	}
+
+	getTokenCardLocator({
+		tokenSymbol,
+		networkSymbol
+	}: {
+		tokenSymbol: string;
+		networkSymbol: string;
+	}): Locator {
+		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
 	async takeScreenshot(): Promise<void> {
