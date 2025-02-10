@@ -42,9 +42,7 @@
 	</article>
 </div>
 
-{#if ongoingEvents.length > 0}
-	<AirdropsGroups title="Active campaigns" airdrops={ongoingEvents} />
-{/if}
+<AirdropsGroups title="Active campaigns" airdrops={ongoingEvents} />
 
 <AirdropsGroups
 	title="Upcoming campaigns"
