@@ -1,9 +1,10 @@
-import { render } from '@testing-library/svelte';
-import AllAirdropsList from '$lib/components/airdrops/AllAirdropsList.svelte'
+import AllAirdropsList from '$lib/components/airdrops/AllAirdropsList.svelte';
 import {
-	AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER, AIRDROPS_BANNER,
+	AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER,
+	AIRDROPS_BANNER,
 	AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER
 } from '$lib/constants/test-ids.constants';
+import { render } from '@testing-library/svelte';
 
 describe('AllAirdropsList', () => {
 	const activeCampaignContainerSelector = `div[data-tid="${AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER}"]`;
@@ -13,10 +14,14 @@ describe('AllAirdropsList', () => {
 	it('should render image banner and campaigns', () => {
 		const { container } = render(AllAirdropsList);
 
-		const activeCampaignContainer: HTMLDivElement | null = container.querySelector(activeCampaignContainerSelector);
+		const activeCampaignContainer: HTMLDivElement | null = container.querySelector(
+			activeCampaignContainerSelector
+		);
 		expect(activeCampaignContainer).toBeInTheDocument();
 
-		const upcomingCampaignContainer: HTMLDivElement | null = container.querySelector(upcomingCampaignContainerSelector);
+		const upcomingCampaignContainer: HTMLDivElement | null = container.querySelector(
+			upcomingCampaignContainerSelector
+		);
 		expect(upcomingCampaignContainer).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);

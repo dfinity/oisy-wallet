@@ -1,16 +1,26 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import AirdropDateTag from '$lib/components/airdrops/AirdropDateTag.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
-	import { nonNullish } from '@dfinity/utils';
 
 	export let airdrop: AirdropDescription;
 	export let testId: string | undefined = undefined;
 </script>
 
-<button on:click class="relative h-44 w-full flex-1 rounded-lg bg-white p-4 pt-12 shadow" data-tid={testId}>
+<button
+	on:click
+	class="relative h-44 w-full flex-1 rounded-lg bg-white p-4 pt-12 shadow"
+	data-tid={testId}
+>
 	<span class="absolute -top-5 left-4">
-		<Logo src={airdrop.logo} size="xl" ring color="white" testId={nonNullish(testId) ? `${testId}-logo` : undefined} />
+		<Logo
+			src={airdrop.logo}
+			size="xl"
+			ring
+			color="white"
+			testId={nonNullish(testId) ? `${testId}-logo` : undefined}
+		/>
 	</span>
 	<article class="flex h-full flex-col justify-between gap-y-4 md:gap-y-2">
 		<section>
@@ -20,7 +30,10 @@
 			</p>
 		</section>
 		<section class="absolute bottom-4 left-4 right-4 max-h-6 min-h-6 overflow-hidden md:max-h-14">
-			<AirdropDateTag endDate={airdrop.endDate} testId={nonNullish(testId) ? `${testId}-tag` : undefined} />
+			<AirdropDateTag
+				endDate={airdrop.endDate}
+				testId={nonNullish(testId) ? `${testId}-tag` : undefined}
+			/>
 		</section>
 	</article>
 </button>

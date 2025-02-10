@@ -1,6 +1,6 @@
-import { render } from '@testing-library/svelte';
 import AirdropsGroup from '$lib/components/airdrops/AirdropsGroup.svelte';
 import { mockAirdropEvents } from '$tests/mocks/airdrop-events.mock';
+import { render } from '@testing-library/svelte';
 
 describe('AirdropsGroups', () => {
 	const title = 'Active campaigns';
@@ -8,7 +8,7 @@ describe('AirdropsGroups', () => {
 	const activeGroupSelector = `button[data-tid="${groupTitle}-active"]`;
 
 	it('should render campaigns', () => {
-		const {container, getByText} = render(AirdropsGroup, {
+		const { container, getByText } = render(AirdropsGroup, {
 			props: {
 				title,
 				airdrops: mockAirdropEvents,
@@ -25,7 +25,7 @@ describe('AirdropsGroups', () => {
 	it('should render alternative text', () => {
 		const altText = 'Stay tuned';
 
-		const {container, getByText} = render(AirdropsGroup, {
+		const { container, getByText } = render(AirdropsGroup, {
 			props: {
 				title,
 				airdrops: [],
@@ -44,7 +44,7 @@ describe('AirdropsGroups', () => {
 	it('should render campaigns even if alternative text is defined', () => {
 		const altText = 'Stay tuned';
 
-		const {container, queryByText} = render(AirdropsGroup, {
+		const { container, queryByText } = render(AirdropsGroup, {
 			props: {
 				title,
 				airdrops: mockAirdropEvents,

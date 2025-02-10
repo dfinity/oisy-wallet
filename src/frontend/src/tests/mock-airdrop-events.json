@@ -1,30 +1,30 @@
 [
-  {
-    "id": "active",
-    "title": "OISY Airdrop",
-    "oneLiner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
-    "description": "Some short description for the Airdrop. Some short description for the Airdrop.",
-    "requirements": [
-      "Login 1x in last 7 days",
-      "Complete 2 transactions in last 7 days",
-      "Hold $20 USD at the time of issuance"
-    ],
-    "logo": "/images/airdrops/oisy-airdrop-logo.svg",
-    "startDate": "2025-02-05T14:28:02.288Z",
-    "endDate": "2025-03-04T00:00:00.000Z"
-  },
-  {
-    "id": "upcoming",
-    "title": "OISY Airdrop",
-    "oneLiner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
-    "description": "Some short description for the Airdrop. Some short description for the Airdrop.",
-    "requirements": [
-      "Login 1x in last 7 days",
-      "Complete 2 transactions in last 7 days",
-      "Hold $20 USD at the time of issuance"
-    ],
-    "logo": "/images/airdrops/oisy-airdrop-logo.svg",
-    "startDate": "2029-02-05T14:28:02.288Z",
-    "endDate": "2029-03-04T00:00:00.000Z"
-  }
+	{
+		"id": "active",
+		"title": "OISY Airdrop",
+		"oneLiner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
+		"description": "Some short description for the Airdrop. Some short description for the Airdrop.",
+		"requirements": [
+			"Login 1x in last 7 days",
+			"Complete 2 transactions in last 7 days",
+			"Hold $20 USD at the time of issuance"
+		],
+		"logo": "/images/airdrops/oisy-airdrop-logo.svg",
+		"startDate": "2025-02-05T14:28:02.288Z",
+		"endDate": "2025-03-04T00:00:00.000Z"
+	},
+	{
+		"id": "upcoming",
+		"title": "OISY Airdrop",
+		"oneLiner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
+		"description": "Some short description for the Airdrop. Some short description for the Airdrop.",
+		"requirements": [
+			"Login 1x in last 7 days",
+			"Complete 2 transactions in last 7 days",
+			"Hold $20 USD at the time of issuance"
+		],
+		"logo": "/images/airdrops/oisy-airdrop-logo.svg",
+		"startDate": "2029-02-05T14:28:02.288Z",
+		"endDate": "2029-03-04T00:00:00.000Z"
+	}
 ]

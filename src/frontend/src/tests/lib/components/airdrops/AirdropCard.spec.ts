@@ -1,12 +1,12 @@
-import { render } from '@testing-library/svelte';
 import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
 import { mockAirdropEvents } from '$tests/mocks/airdrop-events.mock';
+import { render } from '@testing-library/svelte';
 
 describe('AirdropCard', () => {
 	it('should render airdrop card content', () => {
 		const title = 'myTitle';
 		const oneLiner = 'my onLiner';
-		const mockedAirdrop = {...mockAirdropEvents[0], title, oneLiner}
+		const mockedAirdrop = { ...mockAirdropEvents[0], title, oneLiner };
 
 		const testId = 'testId';
 		const logoSelector = `div[data-tid="${testId}-logo"]`;
