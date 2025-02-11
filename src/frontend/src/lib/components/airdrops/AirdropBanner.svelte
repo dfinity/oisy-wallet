@@ -14,9 +14,9 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isMobile } from '$lib/utils/device.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatUSD } from '$lib/utils/format.utils';
-	import { isMobile } from '$lib/utils/device.utils';
 
 	const token = ICP_TOKEN;
 
@@ -54,9 +54,9 @@
 	</div>
 
 	<div
-		class="absolute flex h-full w-full flex-col items-center justify-center gap-2 sm:gap-4 text-center text-white"
+		class="absolute flex h-full w-full flex-col items-center justify-center gap-2 text-center text-white sm:gap-4"
 	>
-		<div class="text-3xl sm:text-5xl font-semibold">
+		<div class="text-3xl font-semibold sm:text-5xl">
 			{#if nonNullish(balance)}
 				<Amount amount={balance} decimals={token.decimals} symbol={token.symbol} />
 			{:else}
@@ -76,7 +76,9 @@
 			<Button colorStyle="tertiary" link paddingSmall>
 				<div class="flex items-center justify-center gap-2">
 					<IconCoins />
-					<span class="text-lg">{isMobile() ? 'Check activity': $i18n.airdrops.text.activity_button_text}</span>
+					<span class="text-lg"
+						>{isMobile() ? 'Check activity' : $i18n.airdrops.text.activity_button_text}</span
+					>
 				</div>
 			</Button>
 		</div>

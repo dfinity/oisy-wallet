@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import airdropBanner from '$lib/assets/airdrops-banner.svg';
 	import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte';
 	import AirdropsGroups from '$lib/components/airdrops/AirdropsGroup.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
@@ -12,7 +13,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type AirdropDescription, airdropEvents } from '$lib/types/airdrop-events';
-	import airdropBanner from '$lib/assets/airdrops-banner.svg';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
