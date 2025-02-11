@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IconShare from '$lib/components/icons/IconShare.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import IconShare from '$lib/components/icons/IconShare.svelte';
 
 	export let text: string;
 	export let href: string;
@@ -11,7 +11,7 @@
 
 <a
 	{href}
-	target='_blank'
+	target="_blank"
 	class:text-brand-primary={color === 'blue'}
 	class:hover:text-inherit={color === 'blue'}
 	class:active:text-inherit={color === 'blue'}
@@ -19,7 +19,7 @@
 	data-tid={testId}
 >
 	{text}
-	<div class='mt-0.5'>
+	<div class="mt-0.5">
 		<IconShare />
 	</div>
 </a>
