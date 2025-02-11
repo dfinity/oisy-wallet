@@ -22,12 +22,11 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -37,10 +36,10 @@
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 	export let nativeEthereumToken: Token;
+	export let sendToken: Token;
+	export let sendTokenId: TokenId;
 
 	const { feeStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
-
-	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -59,9 +58,9 @@
 				from: mapAddressStartsWith0x($ethAddress!)
 			};
 
-			const { getFeeData } = infuraProviders($sendToken.network.id);
+			const { getFeeData } = infuraProviders(sendToken.network.id);
 
-			if (isSupportedEthTokenId($sendTokenId)) {
+			if (isSupportedEthTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
 					gas: getEthFeeData({
@@ -76,13 +75,13 @@
 			}
 
 			const erc20GasFeeParams = {
-				contract: $sendToken as Erc20Token,
+				contract: sendToken as Erc20Token,
 				amount: parseToken({ value: `${amount ?? '1'}` }),
 				sourceNetwork,
 				...params
 			};
 
-			if (isSupportedErc20TwinTokenId($sendTokenId)) {
+			if (isSupportedErc20TwinTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
 					gas: await getCkErc20FeeData({
