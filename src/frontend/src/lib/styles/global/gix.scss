@@ -1,15 +1,18 @@
 @use '../mixins/media';
 
 :root {
-	--positive-emphasis: var(--color-green-crayola);
+	--positive-emphasis: var(--color-background-success-primary);
 	--positive-emphasis-rgb: 48, 175, 145;
 
-	--warning-emphasis-shade: var(--color-goldenrod);
+	--warning-emphasis-shade: var(--color-background-warning-primary);
 
-	--negative-emphasis: var(--color-cyclamen);
+	--negative-emphasis: var(--color-background-error-primary);
 
-	--primary: var(--color-blue-ribbon);
-	--primary-contrast: var(--color-white);
+	--color-primary: var(--color-foreground-primary-inverted);
+	--color-secondary: var(--color-foreground-primary);
+
+	--primary: var(--color-background-brand-primary);
+	--primary-contrast: var(--color-foreground-primary);
 	--tertiary: var(--color-secondary);
 
 	--value-color: var(--color-secondary);
@@ -21,8 +24,7 @@
 	--animation-time-normal: 0.2s;
 
 	--progress-color: var(--color-primary);
-	--progress-color-contrast: var(--color-white);
-	--progress-color-rgb: var(--color-primary-rgb);
+	--progress-color-contrast: var(--color-foreground-primary-inverted);
 
 	--overlay-background: var(--color-background-primary);
 	--overlay-background-contrast: var(--color-foreground-primary);
@@ -45,7 +47,7 @@
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
-	--secondary: var(--color-brand-base);
+	--secondary: var(--color-background-brand-primary);
 
 	// Toast message max height is calculated based on the font-size.
 	--font-size-standard: 1rem;
@@ -119,7 +121,7 @@ div.input-field input[id] {
 }
 
 div.input-field input[id]::placeholder {
-	color: var(--colors-neutrals-600);
+	color: var(--color-foreground-tertiary);
 }
 
 div.modal {
@@ -232,7 +234,7 @@ div.toggle {
 	zoom: 1.45;
 
 	--card-background-contrast: var(--color-background-tertiary);
-	--card-background: var(--color-white);
+	--card-background: var(--color-background-surface);
 
 	// todo: solve properly
 	&>label {
@@ -240,13 +242,13 @@ div.toggle {
 	}
 
 	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--color-blue-ribbon);
+		--card-background-contrast: var(--color-primary);
 	}
 }
 
 div.segment-button {
 	button.selected {
-		color: var(--color-white);
+		color: var(--color-foreground-primary-inverted);
 	}
 }
 
@@ -284,7 +286,7 @@ div.checkbox {
 		}
 
 		&:checked:after {
-			--background-contrast: var(--color-white);
+			--background-contrast: var(--color-foreground-primary-inverted);
 		}
 	}
 }

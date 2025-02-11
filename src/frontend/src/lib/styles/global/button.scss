@@ -44,7 +44,7 @@ a.as-button {
 		}
 
 		&.loading {
-			background: var(--color-grey);
+			background: var(--color-background-disabled);
 		}
 	}
 
@@ -58,14 +58,14 @@ a.as-button {
 
 		&[disabled],
 		&.disabled {
-			background: var(--color-grey);
-			color: var(--color-white);
+			background: var(--color-background-disabled);
+			color: var(--color-foreground-disabled);
 			opacity: 1;
 			cursor: not-allowed;
 
 			&.tertiary {
-				background: var(--color-white);
-				color: var(--color-grey);
+				background: var(--color-background-disabled);
+				color: var(--color-foreground-disabled);
 			}
 		}
 
