@@ -2,12 +2,12 @@
 	import IconAstronautWithEyes from '$lib/components/icons/IconAstronautWithEyes.svelte';
 </script>
 
-<span class="relative flex aspect-square w-20">
+<span class="w-20 relative flex aspect-square">
 	<span
-		class="bg-brand-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+		class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"
 	></span>
 	<span
-		class="bg-brand-primary text-brand-primary relative inline-flex h-20 w-20 items-center justify-center rounded-full"
+		class="h-20 w-20 relative inline-flex items-center justify-center rounded-full bg-brand-primary text-brand-primary"
 		><IconAstronautWithEyes /></span
 	>
 </span>

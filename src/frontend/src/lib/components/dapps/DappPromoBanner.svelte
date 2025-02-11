@@ -9,17 +9,17 @@
 	export let dAppDescription: FeaturedOisyDappDescription;
 </script>
 
-<article class="relative flex items-end overflow-hidden rounded-2xl">
+<article class="rounded-2xl relative flex items-end overflow-hidden">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="bg-brand-subtle-alt max-h-64">
+		<div class="max-h-64 bg-brand-subtle-alt">
 			<ImgBanner
 				src={dAppDescription.screenshots[0]}
 				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
 			/>
 		</div>
 	{/if}
-	<div class="absolute start-0 w-full flex-1 bg-black/30 px-4 py-4 backdrop-blur-xs">
-		<div class="flex items-center gap-x-2">
+	<div class="start-0 px-4 py-4 backdrop-blur-xs absolute w-full flex-1 bg-black/30">
+		<div class="gap-x-2 flex items-center">
 			<div class="h-12 w-12 rounded-full">
 				<Img
 					src={dAppDescription.logo}
@@ -27,7 +27,7 @@
 				/>
 			</div>
 			<div class="flex-1">
-				<h6 class="text-info-blue text-sm font-bold">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-sm font-bold text-info-blue">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-white">{dAppDescription.name}</h4>
 			</div>
 

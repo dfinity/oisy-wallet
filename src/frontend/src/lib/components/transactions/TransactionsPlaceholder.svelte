@@ -8,7 +8,7 @@
 </script>
 
 <div class="py-12" data-tid="no-transactions-placeholder">
-	<div class="mb-5 flex justify-center p-2">
+	<div class="mb-5 p-2 flex justify-center">
 		<span class="-mr-3.5">
 			<RoundedIcon icon={IconReceive} />
 		</span>
@@ -24,7 +24,7 @@
 	</div>
 
 	<div class="space-y-4">
-		<p class="m-0 text-center text-lg font-bold">{$i18n.transactions.text.transaction_history}</p>
+		<p class="m-0 text-lg font-bold text-center">{$i18n.transactions.text.transaction_history}</p>
 		<p class="m-0 text-center text-black opacity-50">
 			{$i18n.transactions.text.buy_or_receive}
 		</p>

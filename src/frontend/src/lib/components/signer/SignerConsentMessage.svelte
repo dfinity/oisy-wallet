@@ -131,7 +131,7 @@
 
 		<SignerConsentMessageWarning {consentInfo} />
 
-		<div class="msg border-dust mb-6 rounded-lg border px-8 py-4">
+		<div class="msg mb-6 rounded-lg px-8 py-4 border border-dust">
 			<Markdown text={content} />
 		</div>
 

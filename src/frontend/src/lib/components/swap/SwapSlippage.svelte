@@ -47,10 +47,10 @@
 </script>
 
 <div class="mt-6 mb-2 flex items-center">
-	<span class="text-tertiary text-sm">{$i18n.swap.text.max_slippage}</span>
+	<span class="text-sm text-tertiary">{$i18n.swap.text.max_slippage}</span>
 
 	<button
-		class="hover:bg-brand-subtle-alt ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold"
+		class="ml-2 gap-1 rounded-md px-2 py-0.5 text-sm font-bold flex hover:bg-brand-subtle-alt"
 		aria-label={$i18n.swap.text.max_slippage}
 		on:click={extendedToggleContent}
 		class:bg-brand-subtle={!slippageValueError && !slippageValueWarning}
@@ -99,7 +99,7 @@
 	</div>
 
 	<div
-		class="text-tertiary mt-2 text-sm"
+		class="mt-2 text-sm text-tertiary"
 		class:text-tertiary={!slippageValueError && !slippageValueWarning}
 		class:text-warning={slippageValueWarning}
 		class:text-error={slippageValueError}
@@ -107,7 +107,7 @@
 		{#if slippageValueError}
 			<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
 		{:else if slippageValueWarning}
-			<div in:fade class="flex gap-1">
+			<div in:fade class="gap-1 flex">
 				<IconWarning />
 				<span>{$i18n.swap.text.max_slippage_warning}</span>
 			</div>

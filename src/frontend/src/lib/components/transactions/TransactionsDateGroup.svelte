@@ -12,8 +12,8 @@
 </script>
 
 {#if transactions.length > 0}
-	<div class="mb-5 flex flex-col gap-4">
-		<span class="text-tertiary text-lg font-medium first-letter:capitalize">{date}</span>
+	<div class="mb-5 gap-4 flex flex-col">
+		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{date}</span>
 
 		{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${index}`)}
 			{@const { component, token, transaction } = transactionUi}

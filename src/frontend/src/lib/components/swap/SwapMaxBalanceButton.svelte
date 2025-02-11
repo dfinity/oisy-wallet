@@ -51,7 +51,7 @@
 </script>
 
 <button
-	class="text-brand-primary font-semibold transition-all"
+	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
 	class:text-error={isZeroBalance || nonNullish(errorType)}
 	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
