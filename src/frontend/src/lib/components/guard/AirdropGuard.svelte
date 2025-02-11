@@ -29,5 +29,5 @@
 <slot />
 
 {#if $modalAirdropState}
-	<AirdropStateModal />
+	<AirdropStateModal jackpot={false} />
 {/if}
