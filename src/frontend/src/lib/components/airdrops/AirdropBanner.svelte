@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { onMount } from 'svelte';
 	import type { RewardInfo } from '$declarations/rewards/rewards.did';
 	import IconCoins from '$lib/components/icons/IconCoins.svelte';
@@ -11,7 +12,6 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import { formatUSD } from '$lib/utils/format.utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 
 	let airdrops: RewardInfo[] | undefined;
 	let balance: BigNumber | undefined;
@@ -26,7 +26,10 @@
 	});
 
 	$: balance = nonNullish(airdrops)
-		? airdrops?.reduce((total, airdrop) => total.add(BigNumber.from(airdrop.amount)), BigNumber.from(0))
+		? airdrops?.reduce(
+				(total, airdrop) => total.add(BigNumber.from(airdrop.amount)),
+				BigNumber.from(0)
+			)
 		: undefined;
 
 	// TODO calculate usdBalance and display
