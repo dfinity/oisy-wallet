@@ -85,7 +85,7 @@ describe('sol-transactions.services', () => {
 			{ ...expected, id: `${expected.id}-${mockInstructions[0].programId}` },
 			{ ...expected, id: `${expected.id}-${mockInstructions[1].programId}` },
 			{ ...expected, id: `${expected.id}-${mockInstructions[2].programId}` }
-		];
+		].reverse();
 
 		let spyFetchTransactionDetailForSignature: MockInstance;
 		let spyMapSolParsedInstruction: MockInstance;
@@ -144,17 +144,21 @@ describe('sol-transactions.services', () => {
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
-				...expectedResults,
 				...innerInstructions
 					.flatMap(({ instructions }) => instructions)
 					.map((instruction) => ({
 						...expected,
 						id: `${expected.id}-${instruction.programId}`
 					}))
+					.reverse(),
+				...expectedResults
 			]);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
-				instruction: { ...mockInstructions[0], programAddress: mockInstructions[0].programId },
+				instruction: {
+					...mockInstructions[mockInstructions.length - 1],
+					programAddress: mockInstructions[mockInstructions.length - 1].programId
+				},
 				innerInstructions: innerInstructions[0].instructions.map((innerInstruction) => ({
 					...innerInstruction,
 					programAddress: innerInstruction.programId
@@ -205,14 +209,14 @@ describe('sol-transactions.services', () => {
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
-				{ ...expectedResults[0], from: mockSolAddress, to: mockSolAddress },
 				{
 					...expected,
-					id: `${expected.id}-${mockInstructions[0].programId}-self`,
+					id: `${expected.id}-${mockInstructions[mockInstructions.length - 1].programId}-self`,
 					type: 'receive',
 					from: mockSolAddress,
 					to: mockSolAddress
 				},
+				{ ...expectedResults[0], from: mockSolAddress, to: mockSolAddress },
 				...expectedResults.slice(1)
 			]);
 		});
