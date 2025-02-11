@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import { isMobile } from '$lib/utils/device.utils';
 
 	const token = ICP_TOKEN;
 
@@ -53,26 +54,29 @@
 	</div>
 
 	<div
-		class="absolute flex h-full w-full flex-col items-center justify-center gap-4 text-center text-white"
+		class="absolute flex h-full w-full flex-col items-center justify-center gap-2 sm:gap-4 text-center text-white"
 	>
-		<div class="text-5xl font-semibold">
+		<div class="text-3xl sm:text-5xl font-semibold">
 			{#if nonNullish(balance)}
 				<Amount amount={balance} decimals={token.decimals} symbol={token.symbol} />
 			{:else}
 				<span class="animate-pulse">{'-'}</span>
 			{/if}
 		</div>
-		{#if nonNullish(usdBalance)}
-			<span class="text-xl">{formatUSD({ value: usdBalance })}</span>
-		{:else}
-			<span class="animate-pulse text-xl">{'-'}</span>
-		{/if}
+
+		<div class="text-lg sm:text-xl">
+			{#if nonNullish(usdBalance)}
+				<span>{formatUSD({ value: usdBalance })}</span>
+			{:else}
+				<span class="animate-pulse">{'-'}</span>
+			{/if}
+		</div>
 
 		<div class="flex w-3/5 items-center">
 			<Button colorStyle="tertiary" link paddingSmall>
-				<div class="flex flex-col items-center justify-center gap-2 lg:flex-row">
+				<div class="flex items-center justify-center gap-2">
 					<IconCoins />
-					<span class="text-lg">{$i18n.airdrops.text.activity_button_text}</span>
+					<span class="text-lg">{isMobile() ? 'Check activity': $i18n.airdrops.text.activity_button_text}</span>
 				</div>
 			</Button>
 		</div>
