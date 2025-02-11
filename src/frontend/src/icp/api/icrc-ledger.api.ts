@@ -43,6 +43,31 @@ export const metadata = async ({
 };
 
 /**
+ * Retrieves ledger transaction fee for the ICRC token.
+ *
+ * @param {Object} params - The parameters for fetching transaction fee.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @param {QueryParams} params.rest - Additional query parameters.
+ * @returns {Promise<IcrcTokenMetadataResponse>} The metadata response for the ICRC token.
+ */
+export const transactionFee = async ({
+	certified = true,
+	identity,
+	...rest
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<bigint> => {
+	assertNonNullish(identity);
+
+	const { transactionFee } = await ledgerCanister({ identity, ...rest });
+
+	return transactionFee({ certified });
+};
+
+/**
  * Retrieves the balance of ICRC tokens for a specified owner.
  *
  * @param {Object} params - The parameters for fetching the balance.
