@@ -5,7 +5,7 @@
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
-	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
+	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
