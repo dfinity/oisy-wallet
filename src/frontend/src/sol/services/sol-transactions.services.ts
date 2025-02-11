@@ -58,7 +58,13 @@ export const fetchSolTransactionsForSignature = async ({
 		...putativeInnerInstructions.flatMap(({ instructions }) => instructions)
 	];
 
-	return await allInstructions.reduce(
+	// The instructions are received in the order they were executed, meaning the first instruction
+	// in the list was executed first, and the last instruction was executed last.
+	// However, since they all share the same timestamp, we want to display them in reverse
+	// order—from the last executed instruction to the first. This ensures that when shown,
+	// the most recently executed instruction appears first, maintaining a more intuitive,
+	// backward-looking view of execution history.
+	return await allInstructions.reverse().reduce(
 		async (acc, instruction, idx) => {
 			const innerInstructionsRaw =
 				putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
