@@ -2,7 +2,6 @@ import {
 	loadBtcAddressMainnet,
 	loadIdbBtcAddressMainnet
 } from '$btc/services/btc-address.services';
-import * as solEnv from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
@@ -23,7 +22,6 @@ describe('addresses.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 
 		vi.mocked(loadBtcAddressMainnet).mockResolvedValue(mockSuccess);
 		vi.mocked(loadEthAddress).mockResolvedValue(mockSuccess);
@@ -43,18 +41,6 @@ describe('addresses.services', () => {
 			expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
 			expect(loadEthAddress).toHaveBeenCalledOnce();
 			expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
-		});
-
-		it('should skip SOL address loading when Solana network is disabled', async () => {
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
-			const tokenIds = [BTC_MAINNET_TOKEN_ID, ETHEREUM_TOKEN_ID, SOLANA_TOKEN_ID];
-
-			const result = await loadAddresses(tokenIds);
-
-			expect(result).toEqual({ success: true });
-			expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
-			expect(loadEthAddress).toHaveBeenCalledOnce();
-			expect(loadSolAddressMainnet).not.toHaveBeenCalled();
 		});
 
 		it('should load addresses only for provided token IDs', async () => {
@@ -77,17 +63,6 @@ describe('addresses.services', () => {
 			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
 			expect(loadIdbEthAddress).toHaveBeenCalledOnce();
 			expect(loadIdbSolAddressMainnet).toHaveBeenCalledOnce();
-		});
-
-		it('should skip SOL address loading in IndexedDB when Solana network is disabled', async () => {
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
-
-			const result = await loadIdbAddresses();
-
-			expect(result).toEqual({ success: true });
-			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
-			expect(loadIdbEthAddress).toHaveBeenCalledOnce();
-			expect(loadIdbSolAddressMainnet).not.toHaveBeenCalled();
 		});
 
 		it('should handle failure when one network fails during IndexedDB loading', async () => {

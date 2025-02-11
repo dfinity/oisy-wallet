@@ -4,7 +4,6 @@
 	import { getSdkError } from '@walletconnect/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
@@ -95,7 +94,7 @@
 
 		try {
 			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
-			if (isNullish($ethAddress) || (SOLANA_NETWORK_ENABLED && isNullish($solAddressMainnet))) {
+			if (isNullish($ethAddress) || isNullish($solAddressMainnet)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});

@@ -6,10 +6,23 @@ import {
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import {
+	SOLANA_DEVNET_NETWORK,
+	SOLANA_MAINNET_NETWORK,
+	SOLANA_TESTNET_NETWORK
+} from '$env/networks/networks.sol.env';
+import { SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
+import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import {
+	SOLANA_DEVNET_TOKEN,
+	SOLANA_TESTNET_TOKEN,
+	SOLANA_TOKEN
+} from '$env/tokens/tokens.sol.env';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -17,6 +30,9 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { testnetsStore } from '$lib/stores/settings.store';
+import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
+import { splUserTokensStore } from '$sol/stores/spl-user-tokens.store';
+import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { get } from 'svelte/store';
 
@@ -36,6 +52,8 @@ describe('network-tokens.derived', () => {
 			erc20UserTokensStore.resetAll();
 			icrcDefaultTokensStore.resetAll();
 			icrcCustomTokensStore.resetAll();
+			splDefaultTokensStore.reset();
+			splUserTokensStore.resetAll();
 
 			testnetsStore.reset({ key: 'testnets' });
 
@@ -44,12 +62,32 @@ describe('network-tokens.derived', () => {
 		});
 
 		it('should return all non-testnet tokens when no network is selected and testnets are disabled', () => {
-			expect(get(enabledNetworkTokens)).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN]);
+			expect(get(enabledNetworkTokens)).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				ETHEREUM_TOKEN,
+				SOLANA_TOKEN
+			]);
 		});
 
 		describe('when testnets are enabled', () => {
 			const mockErc20UserToken: Erc20UserToken = {
 				...PEPE_TOKEN,
+				...toggleProps
+			};
+
+			const mockErc20SepoliaUserToken: Erc20UserToken = {
+				...SEPOLIA_LINK_TOKEN,
+				...toggleProps
+			};
+
+			const mockSplUserToken: SplUserToken = {
+				...BONK_TOKEN,
+				...toggleProps
+			};
+
+			const mockSplDevnetUserToken: SplUserToken = {
+				...DEVNET_EURC_TOKEN,
 				...toggleProps
 			};
 
@@ -68,14 +106,33 @@ describe('network-tokens.derived', () => {
 				},
 				{
 					network: SEPOLIA_NETWORK,
-					tokens: [SEPOLIA_TOKEN]
+					tokens: [SEPOLIA_TOKEN, mockErc20SepoliaUserToken]
+				},
+				{
+					network: SOLANA_MAINNET_NETWORK,
+					tokens: [SOLANA_TOKEN, mockSplUserToken]
+				},
+				{
+					network: SOLANA_TESTNET_NETWORK,
+					tokens: [SOLANA_TESTNET_TOKEN]
+				},
+				{
+					network: SOLANA_DEVNET_NETWORK,
+					tokens: [SOLANA_DEVNET_TOKEN, mockSplDevnetUserToken]
 				}
 			];
 
 			beforeEach(() => {
 				testnetsStore.set({ key: 'testnets', value: { enabled: true } });
 
-				erc20UserTokensStore.setAll([{ data: mockErc20UserToken, certified: false }]);
+				erc20UserTokensStore.setAll([
+					{ data: mockErc20UserToken, certified: false },
+					{ data: mockErc20SepoliaUserToken, certified: false }
+				]);
+				splUserTokensStore.setAll([
+					{ data: mockSplUserToken, certified: false },
+					{ data: mockSplDevnetUserToken, certified: false }
+				]);
 			});
 
 			it('should not return testnet tokens when no network is selected', () => {
@@ -83,7 +140,9 @@ describe('network-tokens.derived', () => {
 					ICP_TOKEN,
 					BTC_MAINNET_TOKEN,
 					ETHEREUM_TOKEN,
-					mockErc20UserToken
+					SOLANA_TOKEN,
+					mockErc20UserToken,
+					mockSplUserToken
 				]);
 			});
 

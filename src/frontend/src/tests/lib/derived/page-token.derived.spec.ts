@@ -1,5 +1,4 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
-import * as solEnv from '$env/networks/networks.sol.env';
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -19,7 +18,6 @@ describe('page-token.derived', () => {
 		vi.resetAllMocks();
 		mockPage.reset();
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 
 		vi.spyOn(enabledSplTokens, 'subscribe').mockImplementation((fn) => {
 			fn([{ ...JUP_TOKEN, enabled: true }]);
