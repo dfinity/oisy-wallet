@@ -166,6 +166,60 @@ describe('sol-instructions.utils', () => {
 				});
 			});
 
+			it('should map a valid `transferChecked` instruction', async () => {
+				const mockTransferCheckedInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'transferChecked',
+						info: {
+							destination: mockSolAddress2,
+							tokenAmount: {
+								amount: '50'
+							},
+							source: mockSolAddress,
+							mint: mockTokenAddress
+						}
+					}
+				};
+
+				const result = await mapSolParsedInstruction({
+					instruction: mockTransferCheckedInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 50n,
+					from: `${mockSolAddress}-owner`,
+					to: `${mockSolAddress2}-owner`,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `closeAccount` instruction', async () => {
+				const mockCloseAccountInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'closeAccount',
+						info: {
+							destination: mockSolAddress2,
+							account: mockSolAddress
+						}
+					}
+				};
+
+				const result = await mapSolParsedInstruction({
+					instruction: mockCloseAccountInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 0n,
+					from: mockSolAddress,
+					to: mockSolAddress2,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
 					instruction: { ...mockTokenInstruction, parsed: { type: 'other-type', info: {} } },

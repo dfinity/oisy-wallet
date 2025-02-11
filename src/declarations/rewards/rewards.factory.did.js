@@ -64,6 +64,48 @@ export const idlFactory = ({ IDL }) => {
 		airdrop: IDL.Opt(PublicAirdropStatus),
 		last_sprinkle: IDL.Opt(PublicSprinkleInfo)
 	});
+	const TransactionType = IDL.Variant({
+		Send: IDL.Null,
+		Receive: IDL.Null
+	});
+	const Transaction_Icrc = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: IDL.Principal,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_Icrc = IDL.Record({
+		decimals: IDL.Nat8,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_Icrc),
+		account: IDL.Principal,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const Transaction_Spl = IDL.Record({
+		transaction_type: TransactionType,
+		network: IDL.Record({}),
+		counterparty: IDL.Text,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshot_Spl = IDL.Record({
+		decimals: IDL.Nat8,
+		network: IDL.Record({}),
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_Spl),
+		account: IDL.Text,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat64
+	});
+	const AccountSnapshotFor = IDL.Variant({
+		Icrc: AccountSnapshot_Icrc,
+		SplDevnet: AccountSnapshot_Spl,
+		SplMainnet: AccountSnapshot_Spl
+	});
+	const UserSnapshot = IDL.Record({ accounts: IDL.Vec(AccountSnapshotFor) });
 	const LedgerConfig = IDL.Record({
 		ledger_index: IDL.Principal,
 		ledger: IDL.Principal,
@@ -111,8 +153,10 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		claim_vip_reward: IDL.Func([VipReward], [ClaimVipRewardResponse], []),
 		config: IDL.Func([], [Config], ['query']),
+		configure_vip: IDL.Func([VipConfig], [], []),
 		new_vip_reward: IDL.Func([], [NewVipRewardResponse], []),
 		public_rewards_info: IDL.Func([], [PublicRewardsInfo], ['query']),
+		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		set_sprinkle_timestamp: IDL.Func([SetSprinkleTimestampArg], [], []),
 		status: IDL.Func([], [StatusResponse], ['query']),
 		user_info: IDL.Func([], [UserData], ['query']),

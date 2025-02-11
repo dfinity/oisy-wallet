@@ -212,6 +212,46 @@ type ClaimVipRewardResponse = variant {
     AlreadyClaimed;
 };
 
+type UserSnapshot = record { accounts : vec AccountSnapshotFor };
+type AccountSnapshotFor = variant {
+  Icrc : AccountSnapshot_Icrc;
+  SplDevnet : AccountSnapshot_Spl;
+  SplMainnet : AccountSnapshot_Spl;
+};
+type AccountSnapshot_Icrc = record {
+  decimals : nat8;
+  network : record {};
+  approx_usd_per_token : float64;
+  last_transactions : vec Transaction_Icrc;
+  account : principal;
+  timestamp : nat64;
+  amount : nat64;
+};
+type AccountSnapshot_Spl = record {
+  decimals : nat8;
+  network : record {};
+  approx_usd_per_token : float64;
+  last_transactions : vec Transaction_Spl;
+  account : text;
+  timestamp : nat64;
+  amount : nat64;
+};
+type TransactionType = variant { Send; Receive };
+type Transaction_Icrc = record {
+  transaction_type : TransactionType;
+  network : record {};
+  counterparty : principal;
+  timestamp : nat64;
+  amount : nat64;
+};
+type Transaction_Spl = record {
+  transaction_type : TransactionType;
+  network : record {};
+  counterparty : text;
+  timestamp : nat64;
+  amount : nat64;
+};
+
 service: (opt Config) -> {
     /// Retrieves the current configuration of the canister.
     config: () -> (Config) query;
@@ -229,6 +269,9 @@ service: (opt Config) -> {
     /// POV) or if the canister already has a sprinkle event ongoing or planned.
     set_sprinkle_timestamp: (SetSprinkleTimestampArg) -> ();
 
+    /// Configures VIP rewards
+    configure_vip: (VipConfig) -> ();
+
     /// Gets a VIP reward token.
     new_vip_reward: () -> (NewVipRewardResponse);
 
@@ -237,4 +280,7 @@ service: (opt Config) -> {
 
     /// Gets rewards stats
     vip_stats: () -> (VipStats) query;
+
+    /// Provides a user's account IDs for airdrop.
+    register_airdrop_recipient : (UserSnapshot) -> ();
 }
