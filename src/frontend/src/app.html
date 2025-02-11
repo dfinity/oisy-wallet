@@ -55,6 +55,27 @@
 		<meta content="#FFFFFF" name="theme-color" />
 		%sveltekit.head%
 
+		<!-- Init theme as fast as possible -->
+		<script theme-loader>
+			try {
+				const isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+				const currentTheme =
+					localStorage.nnsTheme === null ||
+					localStorage.nnsTheme === undefined ||
+					localStorage.nnsTheme === ''
+						? undefined
+						: JSON.parse(localStorage.nnsTheme);
+
+				document.documentElement.setAttribute(
+					'theme',
+					currentTheme ?? (isDarkPreferred ? 'dark' : 'light')
+				);
+			} catch (error) {
+				console.error('Error initializing theme', error);
+			}
+		</script>
+
 		<!-- ROUTE_STYLE -->
 
 		<style>
