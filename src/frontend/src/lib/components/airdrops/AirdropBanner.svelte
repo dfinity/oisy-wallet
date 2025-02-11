@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { formatUSD } from '$lib/utils/format.utils';
-	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
-	import Amount from '$lib/components/ui/Amount.svelte';
-	import IconCoins from '$lib/components/icons/IconCoins.svelte';
-	import type { RewardInfo } from '$declarations/rewards/rewards.did';
-	import Button from '$lib/components/ui/Button.svelte';
 	import { onMount } from 'svelte';
+	import type { RewardInfo } from '$declarations/rewards/rewards.did';
+	import IconCoins from '$lib/components/icons/IconCoins.svelte';
+	import Amount from '$lib/components/ui/Amount.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
+	import { formatUSD } from '$lib/utils/format.utils';
 
 	let airdrops: RewardInfo[] | undefined;
 	let balance: bigint | undefined;
@@ -25,9 +25,9 @@
 		airdrops = await getAirdrops({ identity: $authIdentity });
 	});
 
-	$: balance = nonNullish(airdrops) ? airdrops?.reduce((total, airdrop) => {
-		return BigInt(total) + BigInt(airdrop.amount);
-	}, BigInt(0)) : undefined;
+	$: balance = nonNullish(airdrops)
+		? airdrops?.reduce((total, airdrop) => BigInt(total) + BigInt(airdrop.amount), BigInt(0))
+		: undefined;
 
 	// TODO calculate usdBalance and display
 </script>
@@ -37,7 +37,9 @@
 		<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
 	</div>
 
-	<div class="absolute w-full h-full text-center flex flex-col items-center justify-center gap-4 text-white">
+	<div
+		class="absolute flex h-full w-full flex-col items-center justify-center gap-4 text-center text-white"
+	>
 		<div class="text-5xl font-semibold">
 			{#if nonNullish(balance)}
 				<Amount amount={balance} decimals={3} symbol="ICP" />
@@ -46,12 +48,12 @@
 			{/if}
 		</div>
 		{#if nonNullish(airdrops)}
-			<span class="text-xl">{formatUSD({ value: 1.00 })}</span>
+			<span class="text-xl">{formatUSD({ value: 1.0 })}</span>
 		{:else}
-			<span class="text-xl animate-pulse">{'-'}</span>
+			<span class="animate-pulse text-xl">{'-'}</span>
 		{/if}
 
-		<div class="w-3/5 flex items-center">
+		<div class="flex w-3/5 items-center">
 			<Button colorStyle="tertiary" link paddingSmall>
 				<div class="flex flex-col items-center justify-center gap-2 lg:flex-row">
 					<IconCoins />
