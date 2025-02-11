@@ -28,6 +28,7 @@ describe('Menu', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
 			airdrops: [],
+			usage_awards: [],
 			sprinkles: []
 		};
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
@@ -55,6 +56,7 @@ describe('Menu', () => {
 		const mockedUserData: UserData = {
 			is_vip: [false],
 			airdrops: [],
+			usage_awards: [],
 			sprinkles: []
 		};
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
