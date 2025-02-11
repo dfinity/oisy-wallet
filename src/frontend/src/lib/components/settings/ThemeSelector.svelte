@@ -11,7 +11,7 @@
 		// Since gix-components does not support System theme, a good solution is to delete the cached theme when the user selects the System theme.
 		if (theme === SystemTheme.SYSTEM) {
 			// TODO: use variable exposed from gix-components when it will be exposed.
-			localStorage.setItem('nnsTheme', JSON.stringify(null));
+			localStorage.removeItem('nnsTheme');
 			return;
 		}
 

@@ -7,7 +7,7 @@ import { fireEvent, render } from '@testing-library/svelte';
 
 describe('ThemeSelector', () => {
 	beforeEach(() => {
-		vi.spyOn(themeStore, 'select').mockImplementation(vi.fn());
+		vi.spyOn(themeStore, 'select');
 	});
 
 	it('should render all theme options', () => {
@@ -33,9 +33,12 @@ describe('ThemeSelector', () => {
 	it('should save "null" to localStorage when selecting system theme', async () => {
 		const { getByTestId } = render(ThemeSelector);
 
+		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
+
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${SystemTheme.SYSTEM}`));
 
-		expect(localStorage.getItem('nnsTheme')).toBe(JSON.stringify(null));
+		// TODO: use variable exposed from gix-components when it will be exposed.
+		expect(localStorage.getItem('nnsTheme')).toBeNull();
 	});
 
 	it('should set correct tabindex for each theme option', () => {
@@ -46,5 +49,21 @@ describe('ThemeSelector', () => {
 		expect(
 			getByTestId(`${THEME_SELECTOR_CARD}-${SystemTheme.SYSTEM}`).getAttribute('tabindex')
 		).toBe('2');
+	});
+
+	it.each(THEME_VALUES)('should set correct aria-checked for %s theme option', async (theme) => {
+		const { getByTestId } = render(ThemeSelector);
+
+		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`));
+
+		expect(getByTestId(`${THEME_SELECTOR_CARD}-${theme}`).getAttribute('aria-checked')).toBe(
+			JSON.stringify(true)
+		);
+
+		THEME_VALUES.filter((t) => t !== theme).forEach((otherTheme) => {
+			expect(getByTestId(`${THEME_SELECTOR_CARD}-${otherTheme}`).getAttribute('aria-checked')).toBe(
+				JSON.stringify(false)
+			);
+		});
 	});
 });
