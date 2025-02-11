@@ -15,7 +15,7 @@
 	<span class="text-center text-xl" slot="title">{airdrop.title}</span>
 
 	<ContentWithToolbar>
-		<div class="mb-5 relative flex items-end overflow-hidden rounded-2xl max-h-60">
+		<div class="relative mb-5 flex max-h-60 items-end overflow-hidden rounded-2xl">
 			<div class="max-h-60">
 				<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
 			</div>
