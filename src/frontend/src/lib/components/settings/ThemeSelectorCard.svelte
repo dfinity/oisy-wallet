@@ -2,6 +2,7 @@
 	export let label: string;
 	export let selected: boolean;
 	export let tabindex: number;
+	export let testId: string | undefined = undefined;
 </script>
 
 <div
@@ -11,6 +12,7 @@
 	role="radio"
 	aria-checked={selected}
 	{tabindex}
+	data-tid={testId}
 >
 	<div
 		class="duration-250 mb-2 rounded-xl border-4 transition-all sm:rounded-2xl"
