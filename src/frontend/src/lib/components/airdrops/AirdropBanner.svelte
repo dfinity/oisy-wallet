@@ -14,7 +14,6 @@
 
 	let airdrops: RewardInfo[] | undefined;
 	let balance: bigint | undefined;
-	let usdBalance: number | undefined;
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
