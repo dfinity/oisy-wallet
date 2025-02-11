@@ -23,7 +23,7 @@
 	{#each THEME_VALUES as theme}
 		<ThemeSelectorCard
 			label={$i18n.settings.text[`appearance_${theme}`]}
-			selected={$themeStore === theme}
+			selected={($themeStore ?? SystemTheme.SYSTEM) === theme}
 			on:click={() => selectTheme(theme)}
 			on:keydown={() => selectTheme(theme)}
 			tabindex={THEME_VALUES.indexOf(theme)}
