@@ -11,8 +11,8 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
-	import { formatUSD } from '$lib/utils/format.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { formatUSD } from '$lib/utils/format.utils';
 
 	let airdrops: RewardInfo[] | undefined;
 	let balance: BigNumber | undefined;
