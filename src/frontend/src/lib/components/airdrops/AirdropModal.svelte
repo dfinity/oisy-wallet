@@ -7,6 +7,7 @@
 	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import Share from '$lib/components/ui/Share.svelte';
 
 	export let airdrop: AirdropDescription;
 </script>
@@ -23,6 +24,12 @@
 
 		<span class="m-0 text-lg font-semibold">How to participate</span>
 		<p class="m-0 mt-2">{airdrop.description}</p>
+
+		<Share
+			text="Share on X"
+			href="https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com"
+			className="mt-2"
+		/>
 
 		{#if airdrop.requirements.length > 0}
 			<Hr spacing="md" />
