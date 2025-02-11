@@ -3,11 +3,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
-	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import AirdropBanner from '$lib/components/airdrops/AirdropBanner.svelte';
 
 	export let airdrop: AirdropDescription;
 </script>
@@ -16,11 +15,7 @@
 	<span class="text-center text-xl" slot="title">{airdrop.title}</span>
 
 	<ContentWithToolbar>
-		<div class="relative mb-5 flex max-h-60 items-end overflow-hidden rounded-2xl">
-			<div class="max-h-60">
-				<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
-			</div>
-		</div>
+		<AirdropBanner />
 
 		<span class="m-0 text-lg font-semibold">How to participate</span>
 		<p class="m-0 mt-2">{airdrop.description}</p>
