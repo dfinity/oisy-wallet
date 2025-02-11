@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" fill="none">
 	<path
 		fill="#C6D1E3"

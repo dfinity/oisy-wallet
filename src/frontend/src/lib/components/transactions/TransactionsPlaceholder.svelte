@@ -1,6 +1,5 @@
 <script lang="ts">
 	import IconOisyEmptyState from '$lib/components/icons/IconOisyEmptyState.svelte';
-	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
