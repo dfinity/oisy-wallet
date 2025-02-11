@@ -4,7 +4,7 @@
 	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
-	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
+	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
 	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
