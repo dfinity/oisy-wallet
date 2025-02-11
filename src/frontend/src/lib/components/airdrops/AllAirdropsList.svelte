@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type AirdropDescription, airdropEvents } from '$lib/types/airdrop-events';
+	import airdropBanner from '$lib/assets/airdrops-banner.svg';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
@@ -42,7 +43,7 @@
 
 <div class="relative mb-6 flex items-end overflow-hidden rounded-2xl md:mb-10">
 	<div class="max-h-64">
-		<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_BANNER} />
+		<ImgBanner src={airdropBanner} testId={AIRDROPS_BANNER} />
 	</div>
 </div>
 
