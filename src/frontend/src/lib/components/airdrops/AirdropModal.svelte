@@ -21,11 +21,7 @@
 		<span class="m-0 text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
 		<p class="m-0 mt-2">{airdrop.description}</p>
 
-		<Share
-			text={$i18n.airdrops.text.share}
-			href={airdrop.shareHref}
-			className="mt-2"
-		/>
+		<Share text={$i18n.airdrops.text.share} href={airdrop.shareHref} className="mt-2" />
 
 		{#if airdrop.requirements.length > 0}
 			<Hr spacing="md" />
