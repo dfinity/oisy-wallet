@@ -1,30 +1,42 @@
 <script lang="ts">
 	import { themeStore, Theme } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
-	import { THEME_VALUES } from '$lib/constants/themes.constants';
+	import { THEME_KEY, THEME_VALUES } from '$lib/constants/themes.constants';
 	import { SystemTheme } from '$lib/enums/themes';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	const selectTheme = (theme: Theme | SystemTheme) => {
-		// Since gix-components does not support System theme, a good solution is to delete the cached theme when the user selects the System theme.
+		// Since gix-components does not support System theme, a solution is to delete the cached theme when the user selects the System theme.
 		if (theme === SystemTheme.SYSTEM) {
-			// TODO: use variable exposed from gix-components when it will be exposed.
-			localStorage.setItem('nnsTheme', JSON.stringify(null));
-			themeStore.select(null);
+			localStorage.removeItem(THEME_KEY);
+			updateSelectedTheme();
 			return;
 		}
 
 		themeStore.select(theme);
+		updateSelectedTheme();
 	};
+
+	let selectedTheme: Theme | SystemTheme;
+
+	const updateSelectedTheme = () => {
+		selectedTheme =
+			isNullish(localStorage.getItem(THEME_KEY)) || isNullish($themeStore)
+				? SystemTheme.SYSTEM
+				: $themeStore;
+	};
+
+	$: $themeStore, updateSelectedTheme();
 </script>
 
 <div class="flex flex-row">
 	{#each THEME_VALUES as theme}
 		<ThemeSelectorCard
 			label={$i18n.settings.text[`appearance_${theme}`]}
-			selected={theme === SystemTheme.SYSTEM ? localStorage.getItem('nnsTheme') === "null" : $themeStore === theme}
+			selected={selectedTheme === theme}
 			on:click={() => selectTheme(theme)}
 			on:keydown={() => selectTheme(theme)}
 			tabindex={THEME_VALUES.indexOf(theme)}
