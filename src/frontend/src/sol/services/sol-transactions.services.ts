@@ -6,6 +6,7 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
@@ -18,6 +19,8 @@ import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction'
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { findAssociatedTokenPda } from '@solana-program/token';
+import { address as solAddress } from '@solana/addresses';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
 	signalEnd: () => void;
@@ -58,6 +61,14 @@ export const fetchSolTransactionsForSignature = async ({
 		...putativeInnerInstructions.flatMap(({ instructions }) => instructions)
 	];
 
+	const [ataAddress] = nonNullish(tokenAddress)
+		? await findAssociatedTokenPda({
+				owner: solAddress(address),
+				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
+				mint: solAddress(tokenAddress)
+			})
+		: [undefined];
+
 	// The instructions are received in the order they were executed, meaning the first instruction
 	// in the list was executed first, and the last instruction was executed last.
 	// However, since they all share the same timestamp, we want to display them in reverse
@@ -88,7 +99,7 @@ export const fetchSolTransactionsForSignature = async ({
 			if (nonNullish(mappedTransaction) && mappedTransaction.tokenAddress === tokenAddress) {
 				const { value, from, to } = mappedTransaction;
 
-				if (from !== address && to !== address) {
+				if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
 					return acc;
 				}
 

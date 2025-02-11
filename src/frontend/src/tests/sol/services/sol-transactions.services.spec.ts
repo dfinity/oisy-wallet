@@ -20,11 +20,18 @@ import {
 	mockSolRpcSendTransaction
 } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
+import * as solProgramToken from '@solana-program/token';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+vi.mock('@solana-program/token', () => ({
+	findAssociatedTokenPda: vi.fn()
+}));
+
 describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
+	let spyFindAssociatedTokenPda: MockInstance;
+
 	const signalEnd = vi.fn();
 
 	const mockTransactions = createMockSolTransactionsUi(2);
@@ -40,6 +47,8 @@ describe('sol-transactions.services', () => {
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
+		spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
+		spyFindAssociatedTokenPda.mockResolvedValue([mockSplAddress]);
 	});
 
 	describe('fetchSolTransactionsForSignature', () => {
@@ -189,6 +198,7 @@ describe('sol-transactions.services', () => {
 			await expect(
 				fetchSolTransactionsForSignature({ ...mockParams, tokenAddress: mockSplAddress })
 			).resolves.toEqual([]);
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
 		});
 
 		it('should create a duplicate transaction for self-transfers with opposite type', async () => {
