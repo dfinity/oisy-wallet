@@ -13,10 +13,13 @@
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import { usdValue } from '$lib/utils/exchange.utils';
+
+	const token = ICP_TOKEN;
 
 	let airdrops: RewardInfo[] | undefined;
-	let balance: BigNumber | undefined;
-
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
@@ -26,6 +29,7 @@
 		airdrops = await getAirdrops({ identity: $authIdentity });
 	});
 
+	let balance: BigNumber | undefined;
 	$: balance = nonNullish(airdrops)
 		? airdrops?.reduce(
 				(total, airdrop) => total.add(BigNumber.from(airdrop.amount)),
@@ -33,7 +37,11 @@
 			)
 		: undefined;
 
-	// TODO calculate usdBalance and display
+	let exchangeRate: number | undefined;
+	$: exchangeRate = $exchanges?.[token.id]?.usd;
+
+	let usdBalance: number | undefined;
+	$: usdBalance = nonNullish(balance) && nonNullish(exchangeRate) ? usdValue({token, balance, exchangeRate}) : undefined;
 </script>
 
 <div class="relative mb-5 flex max-h-60 items-end overflow-hidden rounded-2xl">
@@ -46,13 +54,13 @@
 	>
 		<div class="text-5xl font-semibold">
 			{#if nonNullish(balance)}
-				<Amount amount={balance} decimals={3} symbol="ICP" />
+				<Amount amount={balance} decimals={token.decimals} symbol={token.symbol} />
 			{:else}
 				<span class="animate-pulse">{'-'}</span>
 			{/if}
 		</div>
-		{#if nonNullish(airdrops)}
-			<span class="text-xl">{formatUSD({ value: 1.0 })}</span>
+		{#if nonNullish(usdBalance)}
+			<span class="text-xl">{formatUSD({ value: usdBalance })}</span>
 		{:else}
 			<span class="animate-pulse text-xl">{'-'}</span>
 		{/if}
