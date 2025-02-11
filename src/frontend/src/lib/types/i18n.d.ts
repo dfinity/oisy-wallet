@@ -119,9 +119,7 @@ interface I18nAirdrops {
 		modal_button_text: string;
 		activity_button_text: string;
 	};
-	alt: {
-		upcoming_campaigns: string;
-	}
+	alt: { upcoming_campaigns: string };
 }
 
 interface I18nFooter {
