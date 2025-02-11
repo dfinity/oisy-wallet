@@ -102,6 +102,25 @@ export const idlFactory = ({ IDL }) => {
 		lp_fee_bps: IDL.Nat8
 	});
 	const AddPoolResult = IDL.Variant({ Ok: AddPoolReply, Err: IDL.Text });
+	const AddTokenArgs = IDL.Record({ token: IDL.Text });
+	const ICTokenReply = IDL.Record({
+		fee: IDL.Nat,
+		decimals: IDL.Nat8,
+		token_id: IDL.Nat32,
+		chain: IDL.Text,
+		name: IDL.Text,
+		canister_id: IDL.Text,
+		icrc1: IDL.Bool,
+		icrc2: IDL.Bool,
+		icrc3: IDL.Bool,
+		is_removed: IDL.Bool,
+		symbol: IDL.Text
+	});
+	const AddTokenReply = IDL.Variant({ IC: ICTokenReply });
+	const AddTokenResult = IDL.Variant({
+		Ok: AddTokenReply,
+		Err: IDL.Text
+	});
 	const PoolExpectedBalance = IDL.Record({
 		balance: IDL.Nat,
 		kong_fee: IDL.Nat,
@@ -388,19 +407,6 @@ export const idlFactory = ({ IDL }) => {
 		Err: IDL.Text
 	});
 	const SwapAsyncResult = IDL.Variant({ Ok: IDL.Nat64, Err: IDL.Text });
-	const ICTokenReply = IDL.Record({
-		fee: IDL.Nat,
-		decimals: IDL.Nat8,
-		token_id: IDL.Nat32,
-		chain: IDL.Text,
-		name: IDL.Text,
-		canister_id: IDL.Text,
-		icrc1: IDL.Bool,
-		icrc2: IDL.Bool,
-		icrc3: IDL.Bool,
-		is_removed: IDL.Bool,
-		symbol: IDL.Text
-	});
 	const LPTokenReply = IDL.Record({
 		fee: IDL.Nat,
 		decimals: IDL.Nat8,
@@ -425,6 +431,12 @@ export const idlFactory = ({ IDL }) => {
 		RemoveLiquidity: RemoveLiquidityReply
 	});
 	const TxsResult = IDL.Variant({ Ok: IDL.Vec(TxsReply), Err: IDL.Text });
+	const UpdateTokenArgs = IDL.Record({ token: IDL.Text });
+	const UpdateTokenReply = IDL.Variant({ IC: ICTokenReply });
+	const UpdateTokenResult = IDL.Variant({
+		Ok: UpdateTokenReply,
+		Err: IDL.Text
+	});
 	const LPBalancesReply = IDL.Record({
 		ts: IDL.Nat64,
 		usd_balance: IDL.Float64,
@@ -460,6 +472,7 @@ export const idlFactory = ({ IDL }) => {
 		add_liquidity_amounts: IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [AddLiquiditAmountsResult]),
 		add_liquidity_async: IDL.Func([AddLiquidityArgs], [AddLiquidityAsyncResult], []),
 		add_pool: IDL.Func([AddPoolArgs], [AddPoolResult], []),
+		add_token: IDL.Func([AddTokenArgs], [AddTokenResult], []),
 		check_pools: IDL.Func([], [CheckPoolsResult], []),
 		get_user: IDL.Func([], [UserResult]),
 		icrc10_supported_standards: IDL.Func([], [IDL.Vec(Icrc10SupportedStandards)]),
@@ -484,6 +497,7 @@ export const idlFactory = ({ IDL }) => {
 		swap_async: IDL.Func([SwapArgs], [SwapAsyncResult], []),
 		tokens: IDL.Func([IDL.Opt(IDL.Text)], [TokensResult]),
 		txs: IDL.Func([IDL.Opt(IDL.Text)], [TxsResult]),
+		update_token: IDL.Func([UpdateTokenArgs], [UpdateTokenResult], []),
 		user_balances: IDL.Func([IDL.Text], [UserBalancesResult]),
 		validate_add_liquidity: IDL.Func([], [ValidateAddLiquidityResult], []),
 		validate_remove_liquidity: IDL.Func([], [ValidateRemoveLiquidityResult], [])
