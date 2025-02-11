@@ -11,9 +11,10 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	let airdrops: RewardInfo[] | undefined;
-	let balance: bigint | undefined;
+	let balance: BigNumber | undefined;
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
@@ -25,7 +26,7 @@
 	});
 
 	$: balance = nonNullish(airdrops)
-		? airdrops?.reduce((total, airdrop) => BigInt(total) + BigInt(airdrop.amount), BigInt(0))
+		? airdrops?.reduce((total, airdrop) => total.add(BigNumber.from(airdrop.amount)), BigNumber.from(0))
 		: undefined;
 
 	// TODO calculate usdBalance and display
