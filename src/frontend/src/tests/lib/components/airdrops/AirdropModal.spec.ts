@@ -7,6 +7,15 @@ describe('AirdropModal', () => {
 	const imageBannerSelector = `img[data-tid="${AIRDROPS_MODAL_IMAGE_BANNER}"]`;
 
 	it('should render modal content', () => {
+		Object.defineProperty(window, 'navigator', {
+			writable: true,
+			value: {
+				userAgentData: {
+					mobile: false
+				}
+			}
+		});
+
 		const title = 'myTitle';
 		const description = 'my description';
 		const requirements = ['step 1', 'step 2'];
