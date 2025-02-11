@@ -36,6 +36,7 @@ describe('ThemeSelector', () => {
 		expect(spy).toHaveBeenCalledWith(Theme.LIGHT);
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.LIGHT));
 
+		// We repeat the test just to make sure that the theme is actually changing
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
 		expect(spy).toHaveBeenCalledWith(Theme.DARK);
