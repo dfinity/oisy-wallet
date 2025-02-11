@@ -15,12 +15,10 @@
 	<span class="text-center text-xl" slot="title">{airdrop.title}</span>
 
 	<ContentWithToolbar>
-		<div class="mb-5">
-			<article class="relative flex items-end overflow-hidden rounded-2xl">
-				<div class="max-h-60">
-					<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
-				</div>
-			</article>
+		<div class="mb-5 relative flex items-end overflow-hidden rounded-2xl max-h-60">
+			<div class="max-h-60">
+				<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
+			</div>
 		</div>
 
 		<span class="m-0 text-lg font-semibold">How to participate</span>
