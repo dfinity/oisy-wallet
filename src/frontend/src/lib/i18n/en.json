@@ -115,7 +115,18 @@
 	},
 	"airdrops": {
 		"text": {
-			"title": "Airdrops"
+			"title": "Airdrops",
+			"active_campaigns": "Active campaigns",
+			"upcoming_campaigns": "Upcoming campaigns",
+			"active_date": "Due on $date",
+			"participate_title": "How to participate",
+			"share": "Share on X",
+			"requirements_title": "Requirements",
+			"modal_button_text": "Got it",
+			"activity_button_text": "Check on Recent Activity"
+		},
+		"alt": {
+			"upcoming_campaigns": "Stay tuned for the upcoming airdrops - subscribe to OISY on X and follow recent updates."
 		}
 	},
 	"footer": {

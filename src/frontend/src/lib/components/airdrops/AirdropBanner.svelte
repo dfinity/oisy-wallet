@@ -12,6 +12,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let airdrops: RewardInfo[] | undefined;
 	let balance: BigNumber | undefined;
@@ -60,7 +61,7 @@
 			<Button colorStyle="tertiary" link paddingSmall>
 				<div class="flex flex-col items-center justify-center gap-2 lg:flex-row">
 					<IconCoins />
-					<span class="text-lg">Check on Recent Activity</span>
+					<span class="text-lg">{$i18n.airdrops.text.activity_button_text}</span>
 				</div>
 			</Button>
 		</div>

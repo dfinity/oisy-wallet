@@ -108,7 +108,20 @@ interface I18nDapps {
 }
 
 interface I18nAirdrops {
-	text: { title: string };
+	text: {
+		title: string;
+		active_campaigns: string;
+		upcoming_campaigns: string;
+		active_date: string;
+		participate_title: string;
+		share: string;
+		requirements_title: string;
+		modal_button_text: string;
+		activity_button_text: string;
+	};
+	alt: {
+		upcoming_campaigns: string;
+	}
 }
 
 interface I18nFooter {

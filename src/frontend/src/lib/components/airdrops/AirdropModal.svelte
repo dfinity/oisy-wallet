@@ -7,6 +7,7 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let airdrop: AirdropDescription;
 </script>
@@ -17,11 +18,11 @@
 	<ContentWithToolbar>
 		<AirdropBanner />
 
-		<span class="m-0 text-lg font-semibold">How to participate</span>
+		<span class="m-0 text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
 		<p class="m-0 mt-2">{airdrop.description}</p>
 
 		<Share
-			text="Share on X"
+			text={$i18n.airdrops.text.share}
 			href="https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com"
 			className="mt-2"
 		/>
@@ -29,7 +30,7 @@
 		{#if airdrop.requirements.length > 0}
 			<Hr spacing="md" />
 
-			<span class="text-md m-0 font-semibold">Requirements</span>
+			<span class="text-md m-0 font-semibold">{$i18n.airdrops.text.requirements_title}</span>
 			<ul class="list-none">
 				{#each airdrop.requirements as requirement}
 					<li class="mt-2 flex gap-2">
@@ -41,7 +42,7 @@
 		{/if}
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
-			Got it
+			{$i18n.airdrops.text.modal_button_text}
 		</Button>
 	</ContentWithToolbar>
 </Modal>

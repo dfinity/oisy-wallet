@@ -11,6 +11,7 @@
 	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type AirdropDescription, airdropEvents } from '$lib/types/airdrop-events';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
@@ -46,15 +47,15 @@
 </div>
 
 <AirdropsGroups
-	title="Active campaigns"
+	title={$i18n.airdrops.text.active_campaigns}
 	airdrops={ongoingEvents}
 	testId={AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER}
 />
 
 <AirdropsGroups
-	title="Upcoming campaigns"
+	title={$i18n.airdrops.text.upcoming_campaigns}
 	airdrops={upcomingEvents}
-	altText="Stay tuned for the upcoming airdrops - subscribe to OISY on X and follow recent updates."
+	altText={$i18n.airdrops.alt.upcoming_campaigns}
 	testId={AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER}
 />
 
