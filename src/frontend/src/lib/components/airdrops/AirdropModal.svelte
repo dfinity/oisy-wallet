@@ -23,7 +23,7 @@
 
 		<Share
 			text={$i18n.airdrops.text.share}
-			href="https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com"
+			href={airdrop.shareHref}
 			className="mt-2"
 		/>
 

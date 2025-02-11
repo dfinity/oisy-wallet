@@ -8,6 +8,7 @@ export const AirdropEventsSchema = z.object({
 	description: z.string(),
 	requirements: z.array(z.string()),
 	logo: z.string(),
+	shareHref: z.string(),
 	startDate: z.string().transform((val) => new Date(val)),
 	endDate: z.string().transform((val) => new Date(val))
 });
