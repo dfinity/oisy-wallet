@@ -7,7 +7,7 @@
 
 <a
 	{href}
-	class="nav-item flex w-full flex-row gap-3 rounded-xl p-3 text-left no-underline transition-colors duration-700"
+	class="nav-item"
 	class:selected={selected}
 	aria-label={ariaLabel}
 	data-tid={testId}

@@ -3,7 +3,7 @@
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 </script>
 
-<div class="box-content flex w-full flex-col gap-5 py-3">
+<div class="box-content flex w-full flex-col py-3">
 	<AboutWhyOisy asMenuItem />
 
 	<ChangelogLink />

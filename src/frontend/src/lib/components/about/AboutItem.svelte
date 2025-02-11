@@ -4,7 +4,7 @@
 </script>
 
 <button
-	class={asMenuItem ? 'text' : 'whitespace-nowrap text-center font-bold text-brand-primary'}
+	class={asMenuItem ? 'nav-item' : 'whitespace-nowrap text-center font-bold text-brand-primary'}
 	on:click
 	data-tid={testId}
 >

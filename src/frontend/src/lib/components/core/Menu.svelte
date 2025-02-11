@@ -114,7 +114,7 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
+	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
@@ -180,6 +180,7 @@
 			href="mailto:support@oisy.com"
 			ariaLabel={$i18n.navigation.alt.support_email}
 			iconVisible={false}
+			styleClass="nav-item"
 		>
 			<IconHelp />
 			{$i18n.navigation.text.support_email}
@@ -191,7 +192,7 @@
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="flex items-center gap-2 no-underline"
+			class="nav-item"
 			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />

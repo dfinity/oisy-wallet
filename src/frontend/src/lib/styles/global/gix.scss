@@ -1,6 +1,8 @@
 @use '../mixins/media';
 
 :root {
+	--toggle-disabled-opacity: 1;
+
 	--positive-emphasis: var(--color-background-success-primary);
 	--positive-emphasis-rgb: 48, 175, 145;
 
@@ -233,17 +235,35 @@ div.popover {
 div.toggle {
 	zoom: 1.45;
 
-	--card-background-contrast: var(--color-background-tertiary);
-	--card-background: var(--color-background-surface);
+	--card-background-contrast: var(--color-background-brand-subtle-10);
+	--card-background: var(--color-base-white);
+
+	&:disabled, &.disabled {
+		--card-background-contrast: var(--color-background-disabled) !important;
+	}
 
 	// todo: solve properly
 	&>label {
-		outline: 1px solid var(--color-border-primary);
+		//outline: 1px solid var(--color-border-brand-subtle-10);
 	}
 
 	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--color-primary);
+		--card-background-contrast: var(--primary);
+
+		&:hover {
+			--card-background-contrast: var(--color-background-brand-secondary);
+		}
+
+		&:active {
+			--card-background-contrast: var(--primary);
+		}
+
+		&:disabled, &.disabled {
+			--card-background-contrast: var(--color-background-brand-disabled) !important;
+		}
 	}
+
+
 }
 
 div.segment-button {

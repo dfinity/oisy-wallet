@@ -9,6 +9,7 @@
 	href="https://github.com/dfinity/oisy-wallet/releases"
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	iconVisible={false}
+	styleClass="nav-item"
 >
 	<IconChangelog />
 	{replaceOisyPlaceholders($i18n.navigation.text.changelog)}

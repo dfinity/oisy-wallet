@@ -12,6 +12,7 @@
 		if (theme === SystemTheme.SYSTEM) {
 			// TODO: use variable exposed from gix-components when it will be exposed.
 			localStorage.setItem('nnsTheme', JSON.stringify(null));
+			themeStore.select(null);
 			return;
 		}
 
@@ -23,7 +24,7 @@
 	{#each THEME_VALUES as theme}
 		<ThemeSelectorCard
 			label={$i18n.settings.text[`appearance_${theme}`]}
-			selected={($themeStore ?? SystemTheme.SYSTEM) === theme}
+			selected={theme === SystemTheme.SYSTEM ? localStorage.getItem('nnsTheme') === "null" : $themeStore === theme}
 			on:click={() => selectTheme(theme)}
 			on:keydown={() => selectTheme(theme)}
 			tabindex={THEME_VALUES.indexOf(theme)}
