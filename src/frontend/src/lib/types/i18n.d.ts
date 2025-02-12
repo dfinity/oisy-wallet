@@ -104,10 +104,9 @@ interface I18nDapps {
 		website: string;
 	};
 }
+
 interface I18nAirdrop {
-	text: {
-		title: string;
-	}
+	text: { title: string };
 }
 
 interface I18nFooter {
@@ -824,6 +823,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
+	airdrop: I18nAirdrop;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
