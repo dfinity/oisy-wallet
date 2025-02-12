@@ -111,6 +111,11 @@
 			"website": "Image of $dAppName"
 		}
 	},
+	"airdrop": {
+		"text": {
+			"title": "Airdrops"
+		}
+	},
 	"footer": {
 		"text": {
 			"incubated_with": "Incubated with",

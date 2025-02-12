@@ -104,6 +104,11 @@ interface I18nDapps {
 		website: string;
 	};
 }
+interface I18nAirdrop {
+	text: {
+		title: string;
+	}
+}
 
 interface I18nFooter {
 	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
