@@ -23,6 +23,8 @@ describe('reward-code', () => {
 		const mockedUserData: UserData = {
 			is_vip: [true],
 			airdrops: [],
+			usage_awards: [],
+			last_snapshot_timestamp: [BigInt(Date.now())],
 			sprinkles: []
 		};
 
