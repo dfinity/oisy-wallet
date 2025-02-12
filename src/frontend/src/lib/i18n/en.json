@@ -111,7 +111,7 @@
 			"website": "Image of $dAppName"
 		}
 	},
-	"airdrop": {
+	"airdrops": {
 		"text": {
 			"title": "Airdrops"
 		}

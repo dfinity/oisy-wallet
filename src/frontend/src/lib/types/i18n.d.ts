@@ -823,7 +823,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
-	airdrop: I18nAirdrop;
+	airdrops: I18nAirdrop;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
