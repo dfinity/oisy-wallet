@@ -30,7 +30,7 @@
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
-		NAVIGATION_MENU_VIP_BUTTON
+		NAVIGATION_MENU_VIP_BUTTON, NAVIGATION_ITEM_AIRDROPS
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
@@ -39,13 +39,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
-		isRouteActivity,
+		isRouteActivity, isRouteAirdrops,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import {AIRDROPS_ENABLED} from "$env/airdrops.env";
+	import IconTrophy from "$lib/components/icons/IconTrophy.svelte";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -87,6 +89,8 @@
 
 	const goToActivity = async () => await navigateTo(AppPath.Activity);
 
+	const goToAirdrops = async () => await navigateTo(AppPath.Airdrops);
+
 	let assetsRoute = false;
 	$: assetsRoute = isRouteTokens($page);
 
@@ -99,8 +103,11 @@
 	let activityRoute = false;
 	$: activityRoute = isRouteActivity($page);
 
+	let airdropsRoute = false;
+	$: airdropsRoute = isRouteAirdrops($page);
+
 	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !airdropsRoute;
 </script>
 
 <ButtonIcon
@@ -134,6 +141,17 @@
 			>
 				<IconActivity size="20" />
 				{$i18n.navigation.text.activity}
+			</ButtonMenu>
+		{/if}
+
+		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
+			<ButtonMenu
+					testId={NAVIGATION_ITEM_AIRDROPS}
+					ariaLabel={$i18n.navigation.alt.airdrops}
+					on:click={goToAirdrops}
+			>
+				<IconTrophy size="20" />
+				{$i18n.navigation.text.airdrops}
 			</ButtonMenu>
 		{/if}
 
