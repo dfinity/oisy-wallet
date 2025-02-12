@@ -1,12 +1,19 @@
 import type {
 	ClaimVipRewardResponse,
 	NewVipRewardResponse,
+	RewardInfo,
 	UserData
 } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { claimVipReward, getNewReward, isVipUser } from '$lib/services/reward-code.services';
+import {
+	claimVipReward,
+	getAirdrops,
+	getNewReward,
+	isVipUser
+} from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import type { AirdropInfo } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -149,6 +156,44 @@ describe('reward-code', () => {
 			expect(result.success).toBeFalsy();
 			expect(result.err).not.toBeUndefined();
 			expect(result.err).toBeInstanceOf(AlreadyClaimedError);
+		});
+	});
+
+	describe('getAirdrops', () => {
+		const lastTimestamp = BigInt(Date.now());
+
+		const mockedAirdrop: RewardInfo = {
+			timestamp: BigInt(Date.now()),
+			amount: BigInt(1000000),
+			ledger: mockIdentity.getPrincipal(),
+			name: ['jackpot']
+		};
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			airdrops: [],
+			usage_awards: [[mockedAirdrop]],
+			last_snapshot_timestamp: [lastTimestamp],
+			sprinkles: []
+		};
+		const expectedAirdrop: AirdropInfo = {
+			timestamp: BigInt(Date.now()),
+			amount: BigInt(1000000),
+			ledger: mockIdentity.getPrincipal(),
+			name: 'jackpot'
+		};
+
+		it('should return a list of airdrops and the last timestamp', async () => {
+			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			const result = await getAirdrops({ identity: mockIdentity });
+
+			expect(getUserInfoSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				certified: false,
+				nullishIdentityErrorMessage
+			});
+
+			expect(result).toEqual({ airdrops: [expectedAirdrop], lastTimestamp });
 		});
 	});
 });
