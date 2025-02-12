@@ -29,6 +29,7 @@ describe('Menu', () => {
 			is_vip: [true],
 			airdrops: [],
 			usage_awards: [],
+			last_snapshot_timestamp: [12345789],
 			sprinkles: []
 		};
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
@@ -57,6 +58,7 @@ describe('Menu', () => {
 			is_vip: [false],
 			airdrops: [],
 			usage_awards: [],
+			last_snapshot_timestamp: [12345789],
 			sprinkles: []
 		};
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);

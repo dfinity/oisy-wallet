@@ -33,6 +33,7 @@ describe('reward.canister', () => {
 				is_vip: [true],
 				airdrops: [],
 				usage_awards: [],
+				last_snapshot_timestamp: [12345789],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);
@@ -52,6 +53,7 @@ describe('reward.canister', () => {
 				is_vip: [false],
 				airdrops: [],
 				usage_awards: [],
+				last_snapshot_timestamp: [12345789],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);
