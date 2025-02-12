@@ -10,7 +10,6 @@ import type {
 	SolSignedTransaction,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { address } from '@solana/addresses';
 import { signature } from '@solana/keys';
@@ -27,8 +26,6 @@ const mockSignature =
 	'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM';
 const mockSignature2 =
 	'4xiJZFz8wVnFHhjNfLV2ZaGnFFkoJ1U2RcYhTFmyq8szGDNTvha2MtUhzPjqQwcNF9JqNwG4h5FVohFNWrqzrwVc';
-const mockSignature3 =
-	'2cg1qDf4swkfKiZDJTDGxHaiN2LBLLeVM7E87yLjUTpAcCp2rq8mxR2mtvjMU97JcmkiTE8QkB8vNWN1mtrTT2bc';
 
 export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
 	Array.from({ length: n }, () => createMockSolTransactionUi(`txn-${n}`));
@@ -194,93 +191,13 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 	version: 'legacy'
 };
 
-export const mockSolRpcSendToMyselfTransaction: SolRpcTransaction = {
-	blockTime: 1736329927n as UnixTimestamp,
-	confirmationStatus: 'finalized',
-	id: mockSignature3,
-	signature: signature(mockSignature3),
-	meta: {
-		computeUnitsConsumed: 450n,
-		err: null,
-		fee: lamports(14900n),
-		innerInstructions: [],
-		logMessages: [
-			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
-			'Program ComputeBudget111111111111111111111111111111 success',
-			'Program ComputeBudget111111111111111111111111111111 invoke [1]',
-			'Program ComputeBudget111111111111111111111111111111 success',
-			'Program 11111111111111111111111111111111 invoke [1]',
-			'Program 11111111111111111111111111111111 success'
-		],
-		postBalances: [lamports(4843782320n), lamports(1n), lamports(1n)],
-		postTokenBalances: [],
-		preBalances: [lamports(4843797220n), lamports(1n), lamports(1n)],
-		preTokenBalances: [],
-		rewards: [],
-		status: {
-			Ok: null
-		}
-	},
-	slot: 352647164n,
-	transaction: {
-		message: {
-			accountKeys: [
-				{
-					pubkey: address(mockSolAddress),
-					signer: true,
-					source: 'external',
-					writable: true
-				},
-				{
-					pubkey: address(SYSTEM_PROGRAM_ADDRESS),
-					signer: false,
-					source: 'program',
-					writable: false
-				},
-				{
-					pubkey: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
-					signer: false,
-					source: 'program',
-					writable: false
-				}
-			],
-			instructions: [
-				{
-					accounts: [],
-					data: '3DVGviTXKAPH' as Base58EncodedBytes,
-					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
-					stackHeight: undefined
-				},
-				{
-					accounts: [],
-					data: 'LCQ37u' as Base58EncodedBytes,
-					programId: address(COMPUTE_BUDGET_PROGRAM_ADDRESS),
-					stackHeight: undefined
-				},
-				{
-					accounts: [address(mockSolAddress), address(SYSTEM_PROGRAM_ADDRESS)],
-					data: '3Bxs3zzLZLuLQEYX' as Base58EncodedBytes,
-					programId: address(SYSTEM_PROGRAM_ADDRESS),
-					stackHeight: undefined
-				}
-			],
-			recentBlockhash: blockhash('Cp5CeDEfmtwQKKenDaiewY2wNuZJmEAJvSMV5kpFoFm3')
-		},
-		signatures: [mockSignature3] as Base58EncodedBytes[]
-	},
-	version: 'legacy'
-};
-
 export const mockSolCertifiedTransactions: SolCertifiedTransaction[] = [
 	{
-		data: mapSolTransactionUi({
-			transaction: mockSolRpcReceiveTransaction,
-			address: mockSolAddress
-		}),
+		data: createMockSolTransactionUi(mockSolRpcReceiveTransaction.id),
 		certified: false
 	},
 	{
-		data: mapSolTransactionUi({ transaction: mockSolRpcSendTransaction, address: mockSolAddress }),
+		data: createMockSolTransactionUi(mockSolRpcSendTransaction.id),
 		certified: false
 	}
 ];
