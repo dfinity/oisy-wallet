@@ -69,14 +69,12 @@ const queryAirdrops = async (params: {
 	const awards: RewardInfo[] | undefined = fromNullable(usage_awards);
 
 	return {
-		airdrops: nonNullish(awards) ? awards.map((award) => mapRewardsInfo(award)) : [],
+		airdrops: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
 		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? BigInt(0)
 	};
 };
 
-const mapRewardsInfo = (rewardInfo: RewardInfo): AirdropInfo => {
-	return { ...rewardInfo, name: fromNullable(rewardInfo.name) };
-};
+const mapRewardsInfo = ({name, ...rest}: RewardInfo): AirdropInfo => ({ ...rest, name: fromNullable(name) });
 
 /**
  * Gets the airdrops the user received.
