@@ -13,15 +13,15 @@
 	{tabindex}
 >
 	<div
-		class="duration-250 mb-2 rounded-xl border-4 transition-all sm:rounded-2xl"
+		class="mb-2 rounded-xl sm:rounded-2xl border-4 transition-all duration-250"
 		class:border-brand-primary={selected}
 		class:border-transparent={!selected}
 	>
-		<div class="relative overflow-hidden rounded-lg shadow sm:rounded-xl">
+		<div class="rounded-lg shadow-sm sm:rounded-xl relative overflow-hidden">
 			<slot />
 
 			<span
-				class="absolute bottom-2 right-2 rounded-full border-4 p-1 shadow"
+				class="right-2 bottom-2 p-1 shadow-sm absolute rounded-full border-4"
 				class:border-brand-primary={selected}
 				class:border-page={!selected}
 				class:bg-white={selected}

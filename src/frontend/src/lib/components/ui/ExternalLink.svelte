@@ -28,7 +28,7 @@
 	{href}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="inline-flex items-center gap-2 no-underline {styleClass}"
+	class="gap-2 inline-flex items-center no-underline {styleClass}"
 	aria-label={ariaLabel}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	data-tid={testId}
