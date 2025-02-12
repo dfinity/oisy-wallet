@@ -2,7 +2,7 @@
 	export let styleClass = '';
 </script>
 
-<div class={`group flex gap-3 sm:gap-8 ${styleClass}`}>
+<div class={`group gap-3 sm:gap-8 flex ${styleClass}`}>
 	<button class="flex-1" on:click>
 		<div class="w-full">
 			<slot />

@@ -34,7 +34,7 @@
 		: '0';
 </script>
 
-<div class="flex items-center gap-1" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
+<div class="gap-1 flex items-center" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
 	{#if nonNullish(exchangeRate)}
 		<button
 			class:hover:cursor-default={disabled}
