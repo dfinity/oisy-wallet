@@ -101,10 +101,6 @@ export const SOLANA_NETWORKS: Network[] = [
 
 export const SOLANA_NETWORKS_IDS: NetworkId[] = SOLANA_NETWORKS.map(({ id }) => id);
 
-// TODO: to be removed when the feature is fully implemented
-export const SOLANA_NETWORK_ENABLED =
-	JSON.parse(import.meta.env.VITE_SOLANA_NETWORK_ENABLED ?? false) === true;
-
 export const SOLANA_KEY_ID: SchnorrKeyId = {
 	algorithm: { ed25519: null },
 	name: SIGNER_ROOT_KEY_NAME
