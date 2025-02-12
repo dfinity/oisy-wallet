@@ -1,6 +1,6 @@
 import type { RewardInfo } from '$declarations/rewards/rewards.did';
 
-export type AirdropsResponse = {
+export interface AirdropsResponse {
 	airdrops: RewardInfo[];
 	last_timestamp: bigint;
-};
+}
