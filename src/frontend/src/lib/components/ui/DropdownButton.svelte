@@ -9,7 +9,7 @@
 </script>
 
 <button
-	class="min-w-72 justify-between gap-2 rounded-xl border border-tertiary bg-white px-4 py-3 text-left font-medium leading-5 text-black text-inherit hover:border-brand-primary"
+	class="min-w-72 gap-2 rounded-xl px-4 py-3 leading-5 font-medium justify-between border border-tertiary bg-white text-left text-black text-inherit hover:border-brand-primary"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
@@ -19,7 +19,7 @@
 	class:border-brand-primary={opened}
 >
 	<slot />
-	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>
+	<div class="ease-in-out transform transition-transform duration-300" class:-scale-y-100={opened}>
 		<IconExpandMore size="24" />
 	</div>
 </button>

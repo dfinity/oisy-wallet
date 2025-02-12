@@ -33,7 +33,7 @@
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 	{#if nonNullish(json)}
-		<div class="mt-4 rounded-sm bg-dust p-4">
+		<div class="mt-4 rounded-xs p-4 bg-dust">
 			<Json {json} _collapsed={true} />
 		</div>
 	{:else}

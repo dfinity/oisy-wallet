@@ -13,7 +13,7 @@
 	export let destinationTokenExchangeRate: number | undefined;
 </script>
 
-<div class="mb-6 rounded-lg border border-solid border-tertiary bg-primary p-4 shadow">
+<div class="mb-6 rounded-lg p-4 shadow-sm border border-solid border-tertiary bg-primary">
 	<SwapToken token={sourceToken} amount={sendAmount} exchangeRate={sourceTokenExchangeRate}>
 		<span slot="title">{$i18n.tokens.text.source_token_title}</span>
 	</SwapToken>

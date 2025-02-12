@@ -9,7 +9,7 @@
 </script>
 
 <header
-	class="z-1 pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
+	class="gap-y-5 px-4 pt-6 md:px-8 pointer-events-none relative z-1 flex w-full max-w-screen-2.5xl items-center justify-between"
 	class:lg:fixed={$authSignedIn}
 	class:lg:top-0={$authSignedIn}
 	class:lg:inset-x-0={$authSignedIn}
@@ -21,7 +21,7 @@
 		<OisyWalletLogoLink />
 	</div>
 
-	<div class="pointer-events-auto flex justify-end gap-4">
+	<div class="gap-4 pointer-events-auto flex justify-end">
 		{#if $authSignedIn}
 			<WalletConnect />
 		{/if}

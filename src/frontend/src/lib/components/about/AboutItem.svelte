@@ -4,11 +4,11 @@
 </script>
 
 <button
-	class={asMenuItem ? 'text' : 'whitespace-nowrap text-center font-bold text-brand-primary'}
+	class={asMenuItem ? 'text' : 'font-bold text-center whitespace-nowrap text-brand-primary'}
 	on:click
 	data-tid={testId}
 >
-	<div class="flex items-center gap-2">
+	<div class="gap-2 flex items-center">
 		{#if asMenuItem}
 			<slot name="icon" />
 		{/if}

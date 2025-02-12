@@ -41,7 +41,7 @@
 		<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
 		<svelte:fragment slot="main-value">
-			<div class="flex gap-2">
+			<div class="gap-2 flex">
 				<div class="mt-1">
 					<Logo
 						src={kongSwapDApp.logo}

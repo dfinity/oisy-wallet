@@ -17,7 +17,7 @@
 </script>
 
 <footer
-	class="z-1 pointer-events-none mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-12 sm:flex-1 sm:flex-grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0"
+	class="px-4 pt-12 pb-5 sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0 pointer-events-none z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end"
 	class:sm:sticky={$authNotSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}
 	class:md:h-md:grid-cols-2={$authNotSignedIn}
@@ -27,12 +27,12 @@
 	class:md:bottom-0={$authSignedIn}
 >
 	<div
-		class="pointer-events-none flex w-full flex-col items-center justify-between md:flex-row md:gap-4"
+		class="md:flex-row md:gap-4 pointer-events-none flex w-full flex-col items-center justify-between"
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
 	>
 		<div
-			class={`pointer-events-auto flex flex-row items-center gap-4 ${isHomePage ? '' : 'hidden md:flex'}`}
+			class={`gap-4 pointer-events-auto flex flex-row items-center ${isHomePage ? '' : 'md:flex hidden'}`}
 		>
 			<ExternalLinkIcon
 				href={OISY_TWITTER_URL}
@@ -60,7 +60,7 @@
 		</div>
 
 		<div
-			class="item pointer-events-auto px-6 text-sm md:px-0 lg:max-w-48"
+			class="item px-6 text-sm md:px-0 lg:max-w-48 pointer-events-auto"
 			class:sm:max-w-none={$authNotSignedIn}
 			class:lg:max-w-none={$authNotSignedIn}
 			class:xl:max-w-none={$authNotSignedIn}
@@ -75,14 +75,14 @@
 			class:1.5md:translate-x-0={$authSignedIn}
 			class:1.5md:visible={$authSignedIn}
 		>
-			<div class="flex flex-col items-center pt-2 sm:flex-row sm:items-start sm:gap-2">
+			<div class="pt-2 sm:flex-row sm:items-start sm:gap-2 flex flex-col items-center">
 				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 				<span
 					class:md:hidden={$authSignedIn}
 					class:xl:block={$authSignedIn}
 					class:md:h-md:hidden={$authNotSignedIn}
 					class:1.5md:h-md:block={$authNotSignedIn}
-					class="text-center md:text-left"
+					class="md:text-left text-center"
 				>
 					{$i18n.footer.text.incubated_with}
 					<IconHeart styleClass="inline-flex mb-1" />

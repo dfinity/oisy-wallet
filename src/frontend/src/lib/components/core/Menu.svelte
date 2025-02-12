@@ -114,7 +114,7 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
+	<div class="gap-4 flex flex-col" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
@@ -191,7 +191,7 @@
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="flex items-center gap-2 no-underline"
+			class="gap-2 flex items-center no-underline"
 			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />
@@ -204,7 +204,7 @@
 
 		<Hr />
 
-		<span class="text-center text-sm text-tertiary">
+		<span class="text-sm text-center text-tertiary">
 			<LicenseLink noUnderline />
 		</span>
 	</div>

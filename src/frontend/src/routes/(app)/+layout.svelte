@@ -44,7 +44,7 @@
 </script>
 
 <div
-	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
+	class="lg:flex lg:h-full lg:flex-col relative min-h-[640px]"
 	class:overflow-hidden={$authNotSignedIn}
 	class:flex={$authSignedIn}
 	class:h-full={$authSignedIn}
@@ -59,7 +59,7 @@
 		<SplitPane>
 			<NavigationMenu slot="menu">
 				{#if tokensRoute}
-					<div transition:fade class="hidden xl:block">
+					<div transition:fade class="xl:block hidden">
 						<DappsCarousel />
 					</div>
 				{/if}

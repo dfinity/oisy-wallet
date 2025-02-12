@@ -57,7 +57,7 @@
 	export const triggerValidate = debounceValidate;
 </script>
 
-<label for="amount" class="px-4.5 font-bold">{$i18n.core.text.amount}</label>
+<label for="amount" class="font-bold px-4.5">{$i18n.core.text.amount}</label>
 <InputCurrency
 	name="amount"
 	bind:value={amount}

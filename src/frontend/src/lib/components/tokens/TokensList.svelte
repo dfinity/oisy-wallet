@@ -41,7 +41,7 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		<div class="mb-3 flex flex-col gap-3">
+		<div class="mb-3 gap-3 flex flex-col">
 			{#each tokens ?? [] as token (token.id)}
 				<div
 					transition:fade

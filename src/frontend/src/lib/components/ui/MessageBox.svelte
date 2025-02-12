@@ -30,7 +30,7 @@
 
 {#if visible}
 	<div
-		class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
+		class="mb-4 gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base flex items-start"
 		class:bg-primary={level === 'plain'}
 		class:bg-brand-subtle-alt={level === 'info'}
 		class:bg-warning-subtle={level === 'light-warning'}
@@ -51,7 +51,7 @@
 		</div>
 		{#if closable}
 			<button
-				class="ml-auto p-0.5 text-tertiary"
+				class="p-0.5 ml-auto text-tertiary"
 				on:click={close}
 				aria-label={$i18n.core.text.close}
 			>

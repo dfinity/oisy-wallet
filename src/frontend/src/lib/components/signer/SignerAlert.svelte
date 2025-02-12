@@ -9,9 +9,9 @@
 	$: icon = alertType === 'error' ? IconClose : IconCheck;
 </script>
 
-<div class="flex justify-center pb-5 pt-8">
+<div class="pt-8 pb-5 flex justify-center">
 	<div
-		class="flex h-20 w-20 items-center justify-center rounded-full"
+		class="h-20 w-20 flex items-center justify-center rounded-full"
 		class:bg-cyclamen={alertType === 'error'}
 		class:bg-brand-primary={alertType === 'ok'}
 	>

@@ -8,8 +8,8 @@
 </script>
 
 {#if !hideInfo}
-	<div class="relative mb-12 rounded-lg bg-white px-6 py-4" transition:slide={SLIDE_EASING}>
-		<button class="absolute right-2 top-2 text-tertiary" on:click aria-label={$i18n.core.text.close}
+	<div class="mb-12 rounded-lg px-6 py-4 relative bg-white" transition:slide={SLIDE_EASING}>
+		<button class="top-2 right-2 absolute text-tertiary" on:click aria-label={$i18n.core.text.close}
 			><IconClose /></button
 		>
 		<slot />

@@ -23,8 +23,8 @@
 	];
 </script>
 
-<div class="flex flex-col items-center text-center md:items-start md:text-left lg:mb-20">
-	<div class="mb-7 mt-5 pt-2">
+<div class="md:items-start md:text-left lg:mb-20 flex flex-col items-center text-center">
+	<div class="mt-5 mb-7 pt-2">
 		<h1 class="text-4xl md:leading-tight lg:text-5xl">
 			{$i18n.auth.text.title_part_1}<br /><span class="text-brand-primary"
 				>{$i18n.auth.text.title_part_2}</span
@@ -32,10 +32,10 @@
 		</h1>
 	</div>
 
-	<div class="mb-7 flex flex-col items-center gap-2 md:items-start md:gap-3 md:text-lg">
+	<div class="mb-7 gap-2 md:items-start md:gap-3 md:text-lg flex flex-col items-center">
 		{#each infoList as { label, icon }}
-			<div class="flex items-center gap-4">
-				<div class="hidden md:block">
+			<div class="gap-4 flex items-center">
+				<div class="md:block hidden">
 					<svelte:component this={icon} />
 				</div>
 				{label}

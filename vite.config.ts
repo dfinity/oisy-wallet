@@ -1,5 +1,6 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
 import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
@@ -13,7 +14,7 @@ import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './v
 const network = process.env.DFX_NETWORK ?? 'local';
 
 const config: UserConfig = {
-	plugins: [sveltekit()],
+	plugins: [sveltekit(), tailwindcss()],
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations')

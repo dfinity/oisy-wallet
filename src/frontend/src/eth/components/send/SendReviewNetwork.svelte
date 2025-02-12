@@ -38,7 +38,7 @@
 {#if nonNullish(targetNetwork)}
 	<Value ref="target-network" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
-		<span class="flex gap-1">
+		<span class="gap-1 flex">
 			{#if nativeIcp}
 				{$i18n.send.text.convert_to_native_icp}
 				<Logo

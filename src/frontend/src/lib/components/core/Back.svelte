@@ -18,7 +18,7 @@
 </script>
 
 <button
-	class="pointer-events-auto flex gap-0.5 font-bold"
+	class="gap-0.5 font-bold pointer-events-auto flex"
 	class:text-current={color === 'current'}
 	class:text-brand-primary={color === 'primary'}
 	class:icon={onlyArrow}

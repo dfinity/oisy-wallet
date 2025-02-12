@@ -25,7 +25,8 @@
 		networkBitcoin,
 		networkEthereum,
 		networkICP,
-		networkSolana
+		networkSolana,
+		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -70,25 +71,27 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="bg-pos-0 p-6 ease-in-out flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-linear-to-b text-center text-white transition-all duration-500"
+	class:from-brand-primary={$pseudoNetworkChainFusion}
+	class:to-absolute-blue={$pseudoNetworkChainFusion}
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
 	class:bg-cover={isTrumpToken}
 	class:bg-size-200={!isTrumpToken}
-	class:via-interdimensional-blue={$networkICP && !isGLDTToken}
+	class:from-interdimensional-blue={$networkICP && !isGLDTToken}
 	class:to-chinese-purple={$networkICP && !isGLDTToken}
-	class:via-bright-gold={isGLDTToken}
+	class:from-bright-gold={isGLDTToken}
 	class:to-golden-sap={isGLDTToken}
-	class:via-beer={$networkBitcoin}
+	class:from-beer={$networkBitcoin}
 	class:to-fulvous={$networkBitcoin}
-	class:via-united-nations-blue={$networkEthereum}
+	class:from-united-nations-blue={$networkEthereum}
 	class:to-bright-lilac={$networkEthereum}
 	class:bg-gradient-to-r={($networkSolana && !isTrumpToken) || isGLDTToken}
-	class:via-lavander-indigo={$networkSolana && !isTrumpToken}
+	class:from-lavander-indigo={$networkSolana && !isTrumpToken}
 	class:to-medium-spring-green={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
 >
 	{#if isTransactionsPage}
-		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
+		<div in:slide={SLIDE_PARAMS} class="gap-6 flex w-full flex-col">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
 

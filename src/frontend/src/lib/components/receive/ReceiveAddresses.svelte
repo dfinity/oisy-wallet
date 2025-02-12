@@ -254,7 +254,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="flex flex-col gap-2">
+	<div class="gap-2 flex flex-col">
 		{#each receiveAddressList as { title, text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
 				{#if nonNullish(text)}

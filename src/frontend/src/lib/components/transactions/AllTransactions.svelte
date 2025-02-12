@@ -44,7 +44,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-5">
+<div class="gap-5 flex flex-col">
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
 
 	{#if $testnetsEnabled}

@@ -1,21 +1,38 @@
 @use 'sass:meta';
+@use 'tailwindcss';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config '../../../../../tailwind.config.ts';
 
-@include meta.load-css('global/font-faces');
-@include meta.load-css('global/fonts');
-@include meta.load-css('global/theme');
-@include meta.load-css('global/variables');
-@include meta.load-css('global/colors');
-@include meta.load-css('global/layout');
-@include meta.load-css('global/body');
-@include meta.load-css('global/button');
-@include meta.load-css('global/text');
-@include meta.load-css('global/gix');
-@include meta.load-css('global/position');
-@include meta.load-css('global/links');
-@include meta.load-css('global/border');
-@include meta.load-css('global/scrollbar');
-@include meta.load-css('theme/default-theme');
+@layer base {
+	/*
+	The default border color has changed to `currentColor` in Tailwind CSS v4,
+	so we've added these compatibility styles to make sure everything still
+	looks the same as it did with Tailwind CSS v3.
+
+	If we ever want to remove these styles, we need to add an explicit border
+	color utility to any element that depends on these defaults.
+    */
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentColor);
+	}
+
+	@include meta.load-css('global/font-faces');
+	@include meta.load-css('global/fonts');
+	@include meta.load-css('global/theme');
+	@include meta.load-css('global/variables');
+	@include meta.load-css('global/colors');
+	@include meta.load-css('global/layout');
+	@include meta.load-css('global/body');
+	@include meta.load-css('global/button');
+	@include meta.load-css('global/text');
+	@include meta.load-css('global/gix');
+	@include meta.load-css('global/position');
+	@include meta.load-css('global/links');
+	@include meta.load-css('global/border');
+	@include meta.load-css('global/scrollbar');
+	@include meta.load-css('theme/default-theme');
+}
