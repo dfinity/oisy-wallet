@@ -33,6 +33,8 @@ describe('reward.canister', () => {
 			const mockedUserData: UserData = {
 				is_vip: [true],
 				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [BigInt(Date.now())],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);
@@ -51,6 +53,8 @@ describe('reward.canister', () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [BigInt(Date.now())],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);
