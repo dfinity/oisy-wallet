@@ -2,6 +2,8 @@
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { AIRDROPS_ENABLED } from '$env/airdrops.env';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
@@ -10,7 +12,8 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
-		NAVIGATION_ITEM_ACTIVITY, NAVIGATION_ITEM_AIRDROPS,
+		NAVIGATION_ITEM_ACTIVITY,
+		NAVIGATION_ITEM_AIRDROPS,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
@@ -18,15 +21,14 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
-		isRouteActivity, isRouteAirdrops,
+		isRouteActivity,
+		isRouteAirdrops,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import {AIRDROPS_ENABLED} from "$env/airdrops.env";
-	import IconGift from "$lib/components/icons/IconGift.svelte";
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -78,15 +80,15 @@
 
 		{#if AIRDROPS_ENABLED}
 			<NavigationItem
-					href={networkUrl({
+				href={networkUrl({
 					path: AppPath.Airdrops,
 					networkId: $networkId,
 					usePreviousRoute: isTransactionsRoute,
 					fromRoute
 				})}
-					ariaLabel={$i18n.navigation.alt.airdrops}
-					selected={isRouteAirdrops(pageData)}
-					testId={NAVIGATION_ITEM_AIRDROPS}
+				ariaLabel={$i18n.navigation.alt.airdrops}
+				selected={isRouteAirdrops(pageData)}
+				testId={NAVIGATION_ITEM_AIRDROPS}
 			>
 				<IconGift />
 				{$i18n.navigation.text.airdrops}
