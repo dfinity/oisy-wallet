@@ -46,7 +46,7 @@ export const registerAirdropRecipient = async ({
 	identity
 }: CanisterApiFunctionParams<{
 	userSnapshot: UserSnapshot;
-}>): Promise<undefined> => {
+}>): Promise<void> => {
 	const { registerAirdropRecipient } = await rewardCanister({ identity });
 
 	return registerAirdropRecipient(userSnapshot);
