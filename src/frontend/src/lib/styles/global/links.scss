@@ -19,7 +19,7 @@ a.nav-item:not([disabled]):not(.disabled):not(.loading), button.nav-item:not([di
 	@apply flex-row;
 	@apply gap-3;
 	@apply rounded-xl;
-	@apply p-3;
+	@apply px-3;
 	@apply text-left;
 	@apply no-underline;
 	@apply transition-colors;
@@ -62,7 +62,10 @@ button.nav-item.disabled:not(.loading), button.nav-item[disabled]:not(.loading){
 	@apply bg-disabled;
 }
 
+.nav-item {
+	@apply py-3;
+}
+
 .nav-item-condensed {
-	@apply px-3 !important;
-	@apply py-1.5 !important;
+	@apply py-1.5;
 }

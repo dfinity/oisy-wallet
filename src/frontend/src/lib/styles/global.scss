@@ -20,18 +20,21 @@
 		border-color: var(--color-gray-200, currentColor);
 	}
 
-@include meta.load-css('global/font-faces');
-@include meta.load-css('global/fonts');
-@include meta.load-css('global/theme');
-@include meta.load-css('global/variables');
-@include meta.load-css('global/layout');
-@include meta.load-css('global/body');
-@include meta.load-css('global/button');
-@include meta.load-css('global/text');
-@include meta.load-css('global/gix');
-@include meta.load-css('global/position');
-@include meta.load-css('global/links');
-@include meta.load-css('global/border');
-@include meta.load-css('global/scrollbar');
-@include meta.load-css('theme/default-theme');
-@include meta.load-css('theme/dark-theme');
+	@include meta.load-css('global/font-faces');
+	@include meta.load-css('global/fonts');
+	@include meta.load-css('global/theme');
+	@include meta.load-css('global/variables');
+	@include meta.load-css('global/layout');
+	@include meta.load-css('global/body');
+	@include meta.load-css('global/button');
+	@include meta.load-css('global/text');
+	@include meta.load-css('global/gix');
+	@include meta.load-css('global/position');
+	@include meta.load-css('global/links');
+	@include meta.load-css('global/border');
+	@include meta.load-css('global/scrollbar');
+	@include meta.load-css('theme/default-theme');
+	@include meta.load-css('theme/dark-theme');
+}
+
+
