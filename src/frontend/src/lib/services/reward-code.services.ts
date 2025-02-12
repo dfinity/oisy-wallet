@@ -12,6 +12,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type {AirdropsResponse} from "$lib/types/airdrop";
 
 const queryVipUser = async (params: {
 	identity: Identity;
@@ -54,6 +55,47 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 
 		return { success: false, err };
 	}
+};
+
+const queryAirdrops = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<AirdropsResponse> => {
+	const userData = await getUserInfoApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	return {
+		airdrops: fromNullable(userData.usage_awards) ?? [],
+		last_timestamp: fromNullable(userData.last_snapshot_timestamp) ?? BigInt(0)
+	};
+};
+
+/**
+ * Gets the airdrops the user received.
+ *
+ * This function performs **always** a query (not certified) to get the airdrops of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to load the user data.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<AirdropsResponse>} - Resolves with the received airdrops and the last timestamp of the user.
+ *
+ * @throws {Error} Displays an error toast and returns an empty list of airdrops if the query fails.
+ */
+export const getAirdrops = async (params: { identity: Identity }): Promise<AirdropsResponse> => {
+	try {
+		return await queryAirdrops({ ...params, certified: false });
+	} catch (err: unknown) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
+	}
+
+	return { airdrops: [], last_timestamp: BigInt(0) };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
