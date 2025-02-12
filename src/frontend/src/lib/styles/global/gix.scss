@@ -79,7 +79,7 @@
 	--backdrop-contrast: var(--color-secondary);
 	--backdrop-filter: blur(4px);
 
-	@screen sm {
+	@media (width >= theme(--breakpoint-sm)) {
 		--dialog-width: 560px;
 		--alert-max-width: calc(100vw - var(--padding-4x));
 		--alert-max-height: initial;
@@ -133,7 +133,7 @@ div.modal {
 
 	font-weight: var(--font-weight-normal);
 
-	@screen sm {
+	@media (width >= theme(--breakpoint-sm)) {
 		--toolbar-height: 90px;
 	}
 
@@ -145,7 +145,7 @@ div.modal {
 
 		--color-grey: rgba(0, 0, 0, 0.05);
 
-		@screen sm {
+		@media (width >= theme(--breakpoint-sm)) {
 			--dialog-padding-y: 1.5rem;
 			--padding-3x: 1rem;
 		}
@@ -174,7 +174,7 @@ div.modal {
 			--dialog-padding-x: 12px;
 			--dialog-padding-y: 16px;
 
-			@screen sm {
+			@media (width >= theme(--breakpoint-sm)) {
 				--dialog-padding-x: 24px;
 				--dialog-padding-y: 24px;
 			}
@@ -187,7 +187,7 @@ div.modal {
 			--dialog-padding-x: 12px;
 			--dialog-padding-y: 16px;
 
-			@screen sm {
+			@media (width >= theme(--breakpoint-sm)) {
 				--dialog-padding-x: 24px;
 				--dialog-padding-y: 24px;
 			}
