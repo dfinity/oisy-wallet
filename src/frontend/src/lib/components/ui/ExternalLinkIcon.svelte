@@ -10,7 +10,7 @@
 	{href}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class={`as-button ${colorStyle} icon flex flex-col text-center text-xs font-normal`}
+	class={`as-button ${colorStyle} icon text-xs font-normal flex flex-col text-center`}
 	on:click
 	aria-label={ariaLabel}
 >
