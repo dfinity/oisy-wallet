@@ -10,7 +10,8 @@ import {
 import {
 	back,
 	gotoReplaceRoot,
-	isRouteActivity, isRouteAirdrops,
+	isRouteActivity,
+	isRouteAirdrops,
 	isRouteDappExplorer,
 	isRouteSettings,
 	isRouteTokens,
