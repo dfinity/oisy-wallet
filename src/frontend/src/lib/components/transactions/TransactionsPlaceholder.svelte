@@ -4,7 +4,7 @@
 </script>
 
 <div class="py-12" data-tid="no-transactions-placeholder">
-	<div class="mb-5 flex justify-center p-2">
+	<div class="mb-5 p-2 flex justify-center">
 		<IconOisyEmptyState />
 	</div>
 
