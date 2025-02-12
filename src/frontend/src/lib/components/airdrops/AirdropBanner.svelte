@@ -48,13 +48,13 @@
 			: undefined;
 </script>
 
-<div class="relative mb-5 flex max-h-60 items-end overflow-hidden rounded-2xl">
+<div class="mb-5 max-h-60 rounded-2xl relative flex items-end overflow-hidden">
 	<div class="max-h-60">
 		<ImgBanner src={'/images/dapps/kong-swap.webp'} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
 	</div>
 
 	<div
-		class="absolute flex h-full w-full flex-col items-center justify-center gap-2 text-center text-white sm:gap-4"
+		class="gap-2 sm:gap-4 absolute flex h-full w-full flex-col items-center justify-center text-center text-white"
 	>
 		<div class="text-3xl font-semibold sm:text-5xl">
 			{#if nonNullish(balance)}
@@ -74,7 +74,7 @@
 
 		<div class="flex w-3/5 items-center">
 			<Button colorStyle="tertiary" link paddingSmall>
-				<div class="flex items-center justify-center gap-2">
+				<div class="gap-2 flex items-center justify-center">
 					<IconCoins />
 					<span class="text-lg"
 						>{isMobile() ? 'Check activity' : $i18n.airdrops.text.activity_button_text}</span

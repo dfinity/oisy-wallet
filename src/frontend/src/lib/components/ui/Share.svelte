@@ -15,7 +15,7 @@
 	class:text-brand-primary={color === 'blue'}
 	class:hover:text-inherit={color === 'blue'}
 	class:active:text-inherit={color === 'blue'}
-	class={nonNullish(className) ? `${className} flex gap-2 no-underline` : 'flex gap-2 no-underline'}
+	class={nonNullish(className) ? `${className} gap-2 flex no-underline` : 'gap-2 flex no-underline'}
 	data-tid={testId}
 >
 	{text}

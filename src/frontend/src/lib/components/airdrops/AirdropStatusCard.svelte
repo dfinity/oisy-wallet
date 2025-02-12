@@ -2,7 +2,7 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 </script>
 
-<div class="flex flex-col gap-2 bg-black py-2 text-center text-white">
+<div class="gap-2 py-2 flex flex-col bg-black text-center text-white">
 	<div class="flex justify-center">
 		<IconSend size="40" />
 	</div>

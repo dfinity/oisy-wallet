@@ -9,7 +9,7 @@
 	let formattedDate = `${endDate.toLocaleDateString('en-US', { month: 'long' })} ${endDate.getDate()}`;
 </script>
 
-<ul class="flex list-none flex-wrap gap-2" data-tid={testId}>
+<ul class="gap-2 flex list-none flex-wrap" data-tid={testId}>
 	<li class="flex">
 		<Badge>
 			{replacePlaceholders($i18n.airdrops.text.active_date, { $date: formattedDate })}
