@@ -24,7 +24,7 @@ describe('reward-code', () => {
 			is_vip: [true],
 			airdrops: [],
 			usage_awards: [],
-			last_snapshot_timestamp: [12345789],
+			last_snapshot_timestamp: [BigInt(12345789)],
 			sprinkles: []
 		};
 
