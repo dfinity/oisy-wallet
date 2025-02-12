@@ -45,6 +45,7 @@ export type ClaimVipRewardResponse =
 	| { Success: null }
 	| { InvalidCode: null };
 export interface Config {
+	usage_awards_config: [] | [UsageAwardConfig];
 	batch_sizes: [] | [BatchSizes];
 	airdrop_config: [] | [AirDropConfig];
 	index_canisters: Array<Principal>;
@@ -79,6 +80,7 @@ export interface PublicSprinkleInfo {
 	ledger: Principal;
 }
 export interface RewardInfo {
+	name: [] | [string];
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
@@ -127,13 +129,42 @@ export interface Transaction_Spl {
 	timestamp: bigint;
 	amount: bigint;
 }
+export interface UsageAwardConfig {
+	awards: Array<UsageAwardEvent>;
+	day_length_s: bigint;
+	eligibility_criteria: UsageCriteria;
+}
+export interface UsageAwardEvent {
+	name: string;
+	awards: Array<TokenConfig>;
+	num_users_per_event: number;
+	num_events_per_day: number;
+}
+export interface UsageAwardState {
+	snapshots: Array<UserSnapshot>;
+}
+export interface UsageAwardStats {
+	user_count: bigint;
+	eligible_user_count: bigint;
+	snapshot_count: bigint;
+	awarded_count: bigint;
+	eligible_snapshots: bigint;
+}
+export interface UsageCriteria {
+	max_days_to_take: number;
+	num_days_logged_in: number;
+	min_valuation_usd: bigint;
+}
 export interface UserData {
 	airdrops: Array<RewardInfo>;
+	usage_awards: [] | [Array<RewardInfo>];
+	last_snapshot_timestamp: [] | [bigint];
 	is_vip: [] | [boolean];
 	sprinkles: Array<RewardInfo>;
 }
 export interface UserSnapshot {
 	accounts: Array<AccountSnapshotFor>;
+	timestamp: [] | [bigint];
 }
 export interface VipConfig {
 	code_validity_duration: bigint;
@@ -149,15 +180,20 @@ export interface VipStats {
 	total_issued: number;
 }
 export interface _SERVICE {
+	claim_usage_award: ActorMethod<[UsageAwardEvent, Principal], undefined>;
 	claim_vip_reward: ActorMethod<[VipReward], ClaimVipRewardResponse>;
 	config: ActorMethod<[], Config>;
+	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
 	new_vip_reward: ActorMethod<[], NewVipRewardResponse>;
 	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
 	set_sprinkle_timestamp: ActorMethod<[SetSprinkleTimestampArg], undefined>;
 	status: ActorMethod<[], StatusResponse>;
+	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
+	usage_stats: ActorMethod<[], UsageAwardStats>;
 	user_info: ActorMethod<[], UserData>;
+	user_stats: ActorMethod<[Principal], UsageAwardState>;
 	vip_stats: ActorMethod<[], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
