@@ -84,10 +84,10 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-full p-4">
+		<div class="mb-4 h-80 p-4 mx-auto aspect-square max-h-[44vh] max-w-full">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<div slot="logo" class="flex items-center justify-center rounded-lg bg-white p-2">
+					<div slot="logo" class="rounded-lg p-2 flex items-center justify-center bg-white">
 						<IconAstronautHelmet />
 					</div>
 				</QRCode>
@@ -95,7 +95,7 @@
 		</div>
 
 		{#if nonNullish(code)}
-			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2">
+			<div class="gap-4 rounded-lg px-3 py-2 flex items-center justify-between bg-brand-subtle">
 				<output class="break-all">{qrCodeUrl}</output>
 				<ReceiveCopy
 					address={qrCodeUrl}
@@ -104,7 +104,7 @@
 				/>
 			</div>
 
-			<span class="mb-4 block w-full pt-3 text-center text-sm text-tertiary">
+			<span class="mb-4 pt-3 text-sm block w-full text-center text-tertiary">
 				{#if 0 >= counter}
 					<span class="animate-pulse">{$i18n.vip.invitation.text.generating_new_code}</span>
 				{:else}

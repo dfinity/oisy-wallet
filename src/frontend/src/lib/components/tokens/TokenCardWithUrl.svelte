@@ -11,7 +11,7 @@
 	$: url = transactionsUrl({ token });
 </script>
 
-<div class="group flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8">
+<div class="group gap-3 rounded-xl px-3 py-2 sm:gap-8 flex hover:bg-white active:bg-white">
 	<a
 		class="flex-1 no-underline"
 		href={url}

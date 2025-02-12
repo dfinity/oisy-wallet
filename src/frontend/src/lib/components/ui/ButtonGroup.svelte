@@ -2,6 +2,6 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<div class="mb-2 flex w-full gap-3" data-tid={testId}>
+<div class="mb-2 gap-3 flex w-full" data-tid={testId}>
 	<slot />
 </div>
