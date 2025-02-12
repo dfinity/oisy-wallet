@@ -6,19 +6,10 @@ import type {
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { fromNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
-
-vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
-	};
-});
 
 describe('reward.canister', () => {
 	const createRewardCanister = ({
@@ -41,6 +32,8 @@ describe('reward.canister', () => {
 			const mockedUserData: UserData = {
 				is_vip: [true],
 				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [BigInt(Date.now())],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);
@@ -59,6 +52,8 @@ describe('reward.canister', () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [BigInt(Date.now())],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);

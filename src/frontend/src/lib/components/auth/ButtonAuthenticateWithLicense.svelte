@@ -9,13 +9,13 @@
 </script>
 
 <div
-	class="flex w-full flex-col items-center md:items-start"
+	class="md:items-start flex w-full flex-col items-center"
 	class:md:items-center={licenseAlignment === 'center'}
 >
 	<ButtonAuthenticate on:click={async () => await signIn({})} {fullWidth} />
 
 	<span
-		class={`mt-4 flex flex-col text-sm text-tertiary ${licenseAlignment === 'center' ? 'text-center' : ''}`}
+		class={`mt-4 text-sm flex flex-col text-tertiary ${licenseAlignment === 'center' ? 'text-center' : ''}`}
 	>
 		{$i18n.license_agreement.text.accept_terms}
 

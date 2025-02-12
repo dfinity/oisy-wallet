@@ -30,7 +30,7 @@
 				{#if nonNullish(twinToken)}
 					<Value ref="name">
 						<svelte:fragment slot="label">{$i18n.tokens.details.twin_token}</svelte:fragment>
-						<span class="flex items-center gap-1">
+						<span class="gap-1 flex items-center">
 							<output>{twinToken.name}</output>
 							<Logo
 								src={twinToken.icon}

@@ -25,7 +25,9 @@ export const saveCustomTokens = async ({
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
-	disabledTokens.forEach(({ ledgerCanisterId }) => icrcCustomTokensStore.reset(ledgerCanisterId));
+	disabledTokens.forEach((token) =>
+		token.networkKey === 'Icrc' ? icrcCustomTokensStore.reset(token.ledgerCanisterId) : null
+	);
 
 	// Reload all custom tokens for simplicity reason.
 	await loadCustomTokens({ identity });

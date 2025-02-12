@@ -25,7 +25,7 @@
 
 <div
 	in:fade
-	class="mx-auto aspect-square h-80 max-h-[44vh] max-w-[100%] px-4 pb-4"
+	class="h-80 px-4 pb-4 mx-auto aspect-square max-h-[44vh] max-w-[100%]"
 	class:opacity-0={!render}
 >
 	{#if render}
@@ -37,7 +37,7 @@
 			<QRCode value={address}>
 				<svelte:fragment slot="logo">
 					{#if nonNullish(addressToken)}
-						<div class="flex items-center justify-center rounded-lg bg-white p-2">
+						<div class="rounded-lg p-2 flex items-center justify-center bg-white">
 							<TokenLogo data={addressToken} />
 						</div>
 					{/if}

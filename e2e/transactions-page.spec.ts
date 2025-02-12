@@ -20,7 +20,7 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 // 		page,
 // 		iiPage,
 // 		tokenSymbol: 'ETH',
-// 		networkId: 'ETH
+// 		networkId: 'ETH'
 // 	});
 //
 // 	await transactionsPage.waitForReady();
