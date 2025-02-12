@@ -9,27 +9,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	const selectTheme = (theme: Theme | SystemTheme) => {
-		// Since gix-components does not support System theme, a solution is to delete the cached theme when the user selects the System theme.
 		if (theme === SystemTheme.SYSTEM) {
 			themeStore.resetToSystemSettings();
-			updateSelectedTheme();
 			return;
 		}
 
 		themeStore.select(theme);
-		updateSelectedTheme();
 	};
 
 	let selectedTheme: Theme | SystemTheme;
-
-	const updateSelectedTheme = () => {
-		selectedTheme =
-			isNullish(localStorage.getItem(THEME_KEY)) || isNullish($themeStore)
-				? SystemTheme.SYSTEM
-				: $themeStore;
-	};
-
-	$: $themeStore, updateSelectedTheme();
+	$: selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
+		? SystemTheme.SYSTEM
+		: ($themeStore ?? SystemTheme.SYSTEM);
 </script>
 
 <div class="flex flex-row">
