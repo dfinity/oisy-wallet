@@ -1,4 +1,4 @@
-import type {RewardInfo, VipReward} from '$declarations/rewards/rewards.did';
+import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
@@ -7,11 +7,11 @@ import {
 import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type {AirdropInfo, AirdropsResponse} from '$lib/types/airdrop';
+import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
-import {fromNullable, nonNullish} from '@dfinity/utils';
+import { fromNullable, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
@@ -75,8 +75,8 @@ const queryAirdrops = async (params: {
 };
 
 const mapRewardsInfo = (rewardInfo: RewardInfo): AirdropInfo => {
-	return {...rewardInfo, name: fromNullable(rewardInfo.name)};
-}
+	return { ...rewardInfo, name: fromNullable(rewardInfo.name) };
+};
 
 /**
  * Gets the airdrops the user received.

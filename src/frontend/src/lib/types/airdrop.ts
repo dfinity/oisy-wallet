@@ -1,4 +1,4 @@
-import type {Principal} from "@dfinity/principal";
+import type { Principal } from '@dfinity/principal';
 
 export interface AirdropsResponse {
 	airdrops: AirdropInfo[];

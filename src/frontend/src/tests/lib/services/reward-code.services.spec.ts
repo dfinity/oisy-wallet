@@ -13,11 +13,11 @@ import {
 } from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import type { AirdropInfo } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
-import type {AirdropInfo} from "$lib/types/airdrop";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -180,7 +180,7 @@ describe('reward-code', () => {
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot'
-		}
+		};
 
 		it('should return a list of airdrops and the last timestamp', async () => {
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
