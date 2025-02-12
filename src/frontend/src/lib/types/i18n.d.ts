@@ -420,6 +420,7 @@ interface I18nSwap {
 		value_difference: string;
 		total_fee: string;
 		token_fee: string;
+		approval_fee: string;
 		gas_fee: string;
 		lp_fee: string;
 		max_slippage_info: string;
