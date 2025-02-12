@@ -9,9 +9,11 @@
 
 	let url: string;
 	$: url = transactionsUrl({ token });
+
+	export let styleClass = '';
 </script>
 
-<div class="group flex gap-3 rounded-xl px-3 py-2 hover:bg-primary active:bg-primary sm:gap-8">
+<div class={`group flex gap-3 sm:gap-8 ${styleClass}`}>
 	<a
 		class="flex-1 no-underline"
 		href={url}

@@ -34,7 +34,7 @@
 		{/if}
 
 		<div
-			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2"
+			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
 			class:mt-3={!text}
 			data-tid={testId}
 		>

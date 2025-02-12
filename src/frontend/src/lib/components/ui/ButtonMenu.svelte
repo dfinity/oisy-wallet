@@ -5,7 +5,7 @@
 </script>
 
 <button
-	class="nav-item"
+	class="nav-item nav-item-condensed"
 	data-tid={testId}
 	aria-label={ariaLabel}
 	on:click

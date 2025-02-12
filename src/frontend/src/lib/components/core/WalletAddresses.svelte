@@ -12,7 +12,7 @@
 	};
 </script>
 
-<button on:click={openReceive} class="nav-item">
+<button on:click={openReceive} class="nav-item nav-item-condensed">
 	<IconCopy />
 	{$i18n.wallet.text.your_addresses}
 </button>

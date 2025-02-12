@@ -172,15 +172,15 @@
 			</ButtonMenu>
 		{/if}
 
-		<AboutWhyOisy asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy styleClass="nav-item-condensed" asMenuItem on:icOpenAboutModal={hidePopover} />
 
-		<ChangelogLink />
+		<ChangelogLink styleClass="nav-item-condensed" />
 
 		<ExternalLink
 			href="mailto:support@oisy.com"
 			ariaLabel={$i18n.navigation.alt.support_email}
 			iconVisible={false}
-			styleClass="nav-item"
+			styleClass="nav-item nav-item-condensed"
 		>
 			<IconHelp />
 			{$i18n.navigation.text.support_email}
@@ -192,7 +192,7 @@
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="nav-item"
+			class="nav-item nav-item-condensed"
 			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />

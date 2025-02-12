@@ -95,7 +95,7 @@
 		</div>
 
 		{#if nonNullish(code)}
-			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2">
+			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
 				<output class="break-all">{qrCodeUrl}</output>
 				<ReceiveCopy
 					address={qrCodeUrl}

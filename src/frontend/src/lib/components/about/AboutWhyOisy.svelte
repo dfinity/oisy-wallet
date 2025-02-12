@@ -15,9 +15,11 @@
 		dispatch('icOpenAboutModal');
 		modalStore.openAboutWhyOisy();
 	};
+
+	export let styleClass = '';
 </script>
 
-<AboutItem {asMenuItem} on:click={openModal} testId={ABOUT_WHY_OISY_BUTTON}>
+<AboutItem {asMenuItem} on:click={openModal} testId={ABOUT_WHY_OISY_BUTTON} {styleClass}>
 	<IconInfo slot="icon" />
 	<span slot="label">{replaceOisyPlaceholders($i18n.about.why_oisy.text.label)}</span>
 </AboutItem>

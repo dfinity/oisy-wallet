@@ -52,7 +52,7 @@
 			{/each}
 		</ul>
 
-		<span class="px-4.5 mb-5 mt-8 flex font-bold">{$i18n.networks.test_networks}</span>
+		<span class="px-3 mb-5 mt-8 flex font-bold">{$i18n.networks.test_networks}</span>
 
 		{#if $testnetsEnabled}
 			<ul class="mb-2 flex list-none flex-col font-normal" transition:slide={SLIDE_EASING}>
@@ -64,11 +64,11 @@
 			</ul>
 		{/if}
 
-		<hr class="my-4 w-10/12 opacity-10" style="border: 0.05rem solid" />
+		<hr class="mx-3 w-11/12 opacity-10" style="border: 0.05rem solid" />
 
 		<ul class="flex list-none flex-col gap-4 font-normal">
 			<li class="flex items-center justify-between">
-				<div class="flex items-center gap-2 dropdown-button disabled">
+				<div class="flex items-center gap-2 dropdown-item disabled">
 					<IconMorePlain />
 					<span class="text-grey">{$i18n.networks.more}</span>
 				</div>

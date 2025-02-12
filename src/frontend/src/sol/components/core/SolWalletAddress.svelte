@@ -45,7 +45,7 @@
 		: undefined;
 </script>
 
-<div>
+<div class="p-3">
 	<label class="block text-sm font-bold" for="eth-wallet-address"
 		>{$i18n.wallet.text.wallet_address}:</label
 	>

@@ -53,7 +53,7 @@
 		class="ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold hover:bg-brand-subtle-alt"
 		aria-label={$i18n.swap.text.max_slippage}
 		on:click={extendedToggleContent}
-		class:bg-brand-subtle={!slippageValueError && !slippageValueWarning}
+		class:bg-brand-subtle-20={!slippageValueError && !slippageValueWarning}
 		class:hover:bg-brand-subtle-alt={!slippageValueError && !slippageValueWarning}
 		class:text-brand-primary={!slippageValueError && !slippageValueWarning}
 		class:bg-warning-subtle={slippageValueWarning}

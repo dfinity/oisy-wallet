@@ -283,6 +283,13 @@ div.step.completed {
 }
 
 div.checkbox {
+	&:hover input {
+		--secondary: var(--color-background-brand-secondary) !important;
+		--input-custom-border-color: var(--color-background-brand-secondary);
+		--focus-background: var(--color-background-brand-secondary);
+		--input-background: var(--color-background-brand-secondary);
+	}
+
 	input[type='checkbox'] {
 		--secondary: var(--color-primary);
 		--focus-background: var(--color-background-primary);
