@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
 
 	export let ref: undefined | string = undefined;
 
@@ -7,7 +8,7 @@
 	$: secondaryValue = nonNullish($$slots['secondary-value']);
 </script>
 
-<div class="mb-2 last:mb-0 md:items-center flex w-full justify-between">
+<div in:fade class="mb-2 last:mb-0 md:items-center flex w-full justify-between">
 	<label for={ref} class="mr-1 text-sm sm:mr-2 text-tertiary"><slot name="label" /></label>
 
 	<div class="sm:flex-row sm:items-center flex flex-col items-end">
