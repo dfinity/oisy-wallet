@@ -219,11 +219,12 @@ div.popover {
 div.toggle {
 	zoom: 1.45;
 
-	--card-background-contrast: var(--color-background-brand-subtle-10);
+	--card-background-contrast: var(--color-background-brand-subtle-20);
 	--card-background: var(--color-base-white);
 
 	&:disabled, &.disabled {
-		--card-background-contrast: var(--color-background-disabled) !important;
+		--card-background: var(--color-background-primary-alt);
+		--card-background-contrast: var(--color-background-disabled-alt);
 	}
 
 	// todo: solve properly
@@ -243,7 +244,8 @@ div.toggle {
 		}
 
 		&:disabled, &.disabled {
-			--card-background-contrast: var(--color-background-brand-disabled) !important;
+			--card-background: var(--color-background-primary-alt);
+			--card-background-contrast: var(--color-background-brand-subtle-20);
 		}
 	}
 

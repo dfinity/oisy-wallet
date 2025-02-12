@@ -173,21 +173,21 @@ a.as-button {
 
 	// TERTIARY
 	&.tertiary:not([disabled]):not(.disabled):not(.loading) {
-		@apply text-brand-primary-alt;
+		@apply text-primary;
 		@apply bg-primary;
 
 		&:hover {
 			@apply text-brand-primary-alt;
-			@apply bg-brand-subtle-10;
+			@apply bg-primary;
 		}
 
 		&:active {
-			@apply text-brand-primary-alt;
+			@apply text-brand-secondary;
 			@apply bg-primary;
 		}
 
 		&:focus-visible {
-			@apply text-brand-primary-alt;
+			@apply text-primary;
 			@apply bg-primary;
 		}
 	}
