@@ -9,7 +9,7 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 
 describe('reward.canister', () => {
@@ -147,7 +147,10 @@ describe('reward.canister', () => {
 	});
 
 	describe('registerAirdropRecipient', () => {
-		const mockUserSnapshot: UserSnapshot = { accounts: [] };
+		const mockUserSnapshot: UserSnapshot = {
+			accounts: [],
+			timestamp: toNullable(BigInt(Date.now()))
+		};
 
 		it('should register an user as a recipient', async () => {
 			const { registerAirdropRecipient } = await createRewardCanister({
