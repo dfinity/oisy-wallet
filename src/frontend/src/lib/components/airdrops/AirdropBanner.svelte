@@ -13,7 +13,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type {AirdropInfo} from '$lib/types/airdrop';
+	import type { AirdropInfo } from '$lib/types/airdrop';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatUSD } from '$lib/utils/format.utils';
@@ -27,7 +27,7 @@
 			return;
 		}
 
-		({airdrops} = await getAirdrops({ identity: $authIdentity }));
+		({ airdrops } = await getAirdrops({ identity: $authIdentity }));
 	});
 
 	let balance: BigNumber | undefined;
