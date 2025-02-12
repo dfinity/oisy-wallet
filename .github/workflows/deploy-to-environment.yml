@@ -103,13 +103,12 @@ jobs:
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_QUICKNODE_API_KEY=${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_STAGING }}" >> $GITHUB_ENV
-            echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}" >> $GITHUB_ENV
             echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}" >> $GITHUB_ENV
             echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}" >> $GITHUB_ENV
             echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_SWAP_ACTION_ENABLED=${{ secrets.VITE_SWAP_ACTION_ENABLED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROPS_ENABLED=${{ secrets.VITE_AIRDROPS_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
             if [[ "$NETWORK" == "staging" ]]; then
@@ -132,8 +131,6 @@ jobs:
             echo "VITE_QUICKNODE_API_KEY=${{ secrets.VITE_QUICKNODE_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}" >> $GITHUB_ENV
             echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_BETA }}" >> $GITHUB_ENV
-            echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_BETA }}" >> $GITHUB_ENV
-            echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_BETA }}" >> $GITHUB_ENV
             echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}" >> $GITHUB_ENV
             echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}" >> $GITHUB_ENV
@@ -141,6 +138,7 @@ jobs:
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
             echo "VITE_SWAP_ACTION_ENABLED=${{ secrets.VITE_SWAP_ACTION_ENABLED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROPS_ENABLED=${{ secrets.VITE_AIRDROPS_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}" >> $GITHUB_ENV
             {
               echo 'DFX_DEPLOY_KEY<<EOF'

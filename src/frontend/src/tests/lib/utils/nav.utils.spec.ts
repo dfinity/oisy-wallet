@@ -11,6 +11,7 @@ import {
 	back,
 	gotoReplaceRoot,
 	isRouteActivity,
+	isRouteAirdrops,
 	isRouteDappExplorer,
 	isRouteSettings,
 	isRouteTokens,
@@ -329,6 +330,22 @@ describe('nav.utils', () => {
 				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
 
 				expect(isRouteTokens(mockPage('/anotherGroup'))).toBe(false);
+			});
+		});
+
+		describe('isRouteAirdrops', () => {
+			it('should return true when route id matches Airdrops path', () => {
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Airdrops}`))).toBe(true);
+			});
+
+			it('should return false when route id does not match Airdrops path', () => {
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+				expect(isRouteAirdrops(mockPage(`/anotherGroup/${AppPath.Airdrops}`))).toBe(false);
 			});
 		});
 	});
