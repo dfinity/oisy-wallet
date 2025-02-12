@@ -16,19 +16,30 @@ import type {
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
 import {
-	mockSolCertifiedTransactions,
-	mockSolRpcReceiveTransaction,
+	createMockSolTransactionsUi,
 	mockSolRpcSendTransaction
 } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
+import * as solProgramToken from '@solana-program/token';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+vi.mock('@solana-program/token', () => ({
+	findAssociatedTokenPda: vi.fn()
+}));
+
 describe('sol-transactions.services', () => {
 	let spyGetTransactions: MockInstance;
+	let spyFindAssociatedTokenPda: MockInstance;
+
 	const signalEnd = vi.fn();
 
-	const mockTransactions = [mockSolRpcReceiveTransaction, mockSolRpcSendTransaction];
+	const mockTransactions = createMockSolTransactionsUi(2);
+
+	const mockCertifiedTransactions = mockTransactions.map((transaction) => ({
+		data: transaction,
+		certified: false
+	}));
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -36,6 +47,8 @@ describe('sol-transactions.services', () => {
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
+		spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
+		spyFindAssociatedTokenPda.mockResolvedValue([mockSplAddress]);
 	});
 
 	describe('fetchSolTransactionsForSignature', () => {
@@ -72,7 +85,7 @@ describe('sol-transactions.services', () => {
 			{ ...expected, id: `${expected.id}-${mockInstructions[0].programId}` },
 			{ ...expected, id: `${expected.id}-${mockInstructions[1].programId}` },
 			{ ...expected, id: `${expected.id}-${mockInstructions[2].programId}` }
-		];
+		].reverse();
 
 		let spyFetchTransactionDetailForSignature: MockInstance;
 		let spyMapSolParsedInstruction: MockInstance;
@@ -118,7 +131,7 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
-		it('should use inner instructions if presents and required', async () => {
+		it('should use inner instructions if presents and/or required', async () => {
 			const innerInstructions = [
 				{ index: 0, instructions: [mockInstructions[0]] },
 				{ index: 1, instructions: [mockInstructions[1]] },
@@ -130,10 +143,22 @@ describe('sol-transactions.services', () => {
 				meta: { innerInstructions }
 			});
 
-			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(expectedResults);
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
+				...innerInstructions
+					.flatMap(({ instructions }) => instructions)
+					.map((instruction) => ({
+						...expected,
+						id: `${expected.id}-${instruction.programId}`
+					}))
+					.reverse(),
+				...expectedResults
+			]);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
-				instruction: { ...mockInstructions[0], programAddress: mockInstructions[0].programId },
+				instruction: {
+					...mockInstructions[mockInstructions.length - 1],
+					programAddress: mockInstructions[mockInstructions.length - 1].programId
+				},
 				innerInstructions: innerInstructions[0].instructions.map((innerInstruction) => ({
 					...innerInstruction,
 					programAddress: innerInstruction.programId
@@ -173,6 +198,7 @@ describe('sol-transactions.services', () => {
 			await expect(
 				fetchSolTransactionsForSignature({ ...mockParams, tokenAddress: mockSplAddress })
 			).resolves.toEqual([]);
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
 		});
 
 		it('should create a duplicate transaction for self-transfers with opposite type', async () => {
@@ -183,16 +209,28 @@ describe('sol-transactions.services', () => {
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
-				{ ...expectedResults[0], from: mockSolAddress, to: mockSolAddress },
 				{
 					...expected,
-					id: `${expected.id}-${mockInstructions[0].programId}-self`,
+					id: `${expected.id}-${mockInstructions[mockInstructions.length - 1].programId}-self`,
 					type: 'receive',
 					from: mockSolAddress,
 					to: mockSolAddress
 				},
+				{ ...expectedResults[0], from: mockSolAddress, to: mockSolAddress },
 				...expectedResults.slice(1)
 			]);
+		});
+
+		it('should ignore transactions that do not involve the address', async () => {
+			spyMapSolParsedInstruction.mockResolvedValueOnce({
+				...mockMappedTransaction,
+				from: mockSolAddress2,
+				to: mockSolAddress2
+			});
+
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(
+				expectedResults.slice(1)
+			);
 		});
 	});
 
@@ -206,7 +244,7 @@ describe('sol-transactions.services', () => {
 				signalEnd
 			});
 
-			expect(transactions).toEqual(mockSolCertifiedTransactions);
+			expect(transactions).toEqual(mockCertifiedTransactions);
 			expect(signalEnd).not.toHaveBeenCalled();
 			expect(spyGetTransactions).toHaveBeenCalledWith({
 				address: mockSolAddress,
@@ -258,7 +296,7 @@ describe('sol-transactions.services', () => {
 			});
 
 			const storeData = get(solTransactionsStore)?.[SOLANA_TOKEN_ID];
-			expect(storeData).toEqual(mockSolCertifiedTransactions);
+			expect(storeData).toEqual(mockCertifiedTransactions);
 		});
 
 		it('should handle errors and reset store', async () => {

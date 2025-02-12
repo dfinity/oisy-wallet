@@ -1,10 +1,13 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import { fetchSignatures, fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import type { SolAddress } from '$lib/types/address';
+import { fetchSignatures } from '$sol/api/solana.api';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
+import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolRpcTransaction } from '$sol/types/sol-transaction';
-import { getSolBalanceChange } from '$sol/utils/sol-transactions.utils';
+import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
-import { address as solAddress } from '@solana/addresses';
+import { findAssociatedTokenPda } from '@solana-program/token';
+import { assertIsAddress, address as solAddress } from '@solana/addresses';
 import { signature } from '@solana/keys';
 
 /**
@@ -13,27 +16,47 @@ import { signature } from '@solana/keys';
 export const getSolTransactions = async ({
 	address,
 	network,
+	tokenAddress,
 	before,
 	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams): Promise<SolRpcTransaction[]> => {
-	const wallet = solAddress(address);
-	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
-	const signatures = await fetchSignatures({ network, wallet, before: beforeSignature, limit });
+}: GetSolTransactionsParams & {
+	tokenAddress?: SolAddress;
+}): Promise<SolTransactionUi[]> => {
+	if (nonNullish(tokenAddress)) {
+		assertIsAddress(tokenAddress);
+	}
 
-	const transactions = await signatures.reduce(
+	const [relevantAddress] = nonNullish(tokenAddress)
+		? await findAssociatedTokenPda({
+				owner: solAddress(address),
+				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
+				mint: solAddress(tokenAddress)
+			})
+		: [address];
+
+	const wallet = solAddress(relevantAddress);
+
+	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
+
+	const signatures: SolSignature[] = await fetchSignatures({
+		network,
+		wallet,
+		before: beforeSignature,
+		limit
+	});
+
+	return await signatures.reduce(
 		async (accPromise, signature) => {
 			const acc = await accPromise;
-			const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
-			if (
-				nonNullish(transactionDetail) &&
-				getSolBalanceChange({ transaction: transactionDetail, address })
-			) {
-				acc.push(transactionDetail);
-			}
-			return acc;
-		},
-		Promise.resolve([] as SolRpcTransaction[])
-	);
+			const parsedTransactions = await fetchSolTransactionsForSignature({
+				signature,
+				network,
+				address,
+				tokenAddress
+			});
 
-	return transactions.slice(0, limit);
+			return [...acc, ...parsedTransactions];
+		},
+		Promise.resolve([] as SolTransactionUi[])
+	);
 };

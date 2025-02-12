@@ -50,7 +50,7 @@
 
 <button
 	data-tid={`${testId}-button`}
-	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
+	class="gap-0.5 font-bold pointer-events-auto ml-auto flex"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
@@ -60,7 +60,7 @@
 </button>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
-	<div class="flex flex-col gap-3">
+	<div class="gap-3 flex flex-col">
 		{#if $tokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} on:click={hideToken}>
 				{hideTokenLabel}

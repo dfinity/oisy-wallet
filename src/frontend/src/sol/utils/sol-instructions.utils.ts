@@ -160,6 +160,91 @@ const mapTokenParsedInstruction = async ({
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
 	}
+
+	if (type === 'transferChecked') {
+		// We need to cast the type since it is not implied
+		const {
+			destination,
+			tokenAmount: { amount: value },
+			source,
+			mint: tokenAddress
+		} = info as {
+			destination: SolAddress;
+			tokenAmount: {
+				amount: string;
+			};
+			source: SolAddress;
+			mint: SplTokenAddress;
+		};
+
+		const { getAccountInfo } = solanaHttpRpc(network);
+
+		const { value: sourceResult } = await getAccountInfo(address(source), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		const { value: destinationResult } = await getAccountInfo(address(destination), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (
+			nonNullish(sourceResult) &&
+			'parsed' in sourceResult.data &&
+			nonNullish(destinationResult) &&
+			'parsed' in destinationResult.data
+		) {
+			const {
+				data: {
+					parsed: { info: sourceAccoutInfo }
+				}
+			} = sourceResult;
+
+			const { owner: from } = sourceAccoutInfo as {
+				owner: SolAddress;
+			};
+
+			const {
+				data: {
+					parsed: { info: destinationAccoutInfo }
+				}
+			} = destinationResult;
+
+			const { owner: to } = destinationAccoutInfo as {
+				owner: SolAddress;
+			};
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
+	}
+
+	if (type === 'closeAccount') {
+		// We need to cast the type since it is not implied
+		const { destination: to, account: from } = info as {
+			destination: SolAddress;
+			account: SolAddress;
+		};
+
+		const { getAccountInfo } = solanaHttpRpc(network);
+
+		const { value: result } = await getAccountInfo(address(from), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (nonNullish(result) && 'parsed' in result.data) {
+			const {
+				data: {
+					parsed: { info }
+				}
+			} = result;
+
+			const { mint: tokenAddress } = info as {
+				mint: SplTokenAddress;
+			};
+
+			// TODO: find a way to get the amount redeemed in the close account instruction
+			return { value: 0n, from, to, tokenAddress };
+		}
+	}
 };
 
 const mapAssociatedTokenAccountInstruction = ({

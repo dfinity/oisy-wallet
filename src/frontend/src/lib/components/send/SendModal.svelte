@@ -5,6 +5,7 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -78,6 +79,7 @@
 	bind:this={modal}
 	on:nnsClose={close}
 	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
+	testId={SEND_TOKENS_MODAL}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
