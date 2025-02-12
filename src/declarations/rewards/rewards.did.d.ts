@@ -158,11 +158,13 @@ export interface UsageCriteria {
 export interface UserData {
 	airdrops: Array<RewardInfo>;
 	usage_awards: [] | [Array<RewardInfo>];
+	last_snapshot_timestamp: [] | [bigint];
 	is_vip: [] | [boolean];
 	sprinkles: Array<RewardInfo>;
 }
 export interface UserSnapshot {
 	accounts: Array<AccountSnapshotFor>;
+	timestamp: [] | [bigint];
 }
 export interface VipConfig {
 	code_validity_duration: bigint;

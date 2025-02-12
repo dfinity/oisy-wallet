@@ -86,14 +86,12 @@ type LedgerConfig = record {
 type NewVipRewardResponse = variant {
     /// The VIP is not logged in.
     Anonymous;
-    /// The reward code
-    VipReward: VipReward;
     /// User is not a VIP
     NotImportantPerson;
+    /// The reward code
+    VipReward: VipReward;
 };
 type PublicAirdropStatus = variant {
-    /// The airdrop will start in the future
-    Upcoming;
     /// The airdrop is currently ongoing
     Ongoing: record {
         /// The total number of airdrops.
@@ -105,7 +103,9 @@ type PublicAirdropStatus = variant {
     Completed: record {
       /// The total number of airdrops.
       total_airdrops: nat64;
-  };
+    };
+    /// The airdrop will start in the future
+    Upcoming;
 };
 type PublicRewardsInfo = record {
     /// The status of the airdrop. If absent, then no airdrop is configured (and none happened in the past).
@@ -181,13 +181,13 @@ type StatusResponse = record {
     sprinkle_status: SprinkleStatus;
 };
 type TokenConfig = record {
+    /// The amount of tokens to distribute per user.
+    amount_per_user : nat;
     /// Account that holds the tokens for the airdrop.
     /// The rewards canister will use `icrc2_transfer_from` to distribute the tokens.
     account : Account;
     /// The ledger canister that manages the token.
     ledger_canister : principal;
-    /// The amount of tokens to distribute per user.
-    amount_per_user : nat;
 };
 type Transaction_Icrc = record {
   transaction_type : TransactionType;
@@ -235,10 +235,15 @@ type UserData = record {
     usage_awards : opt vec RewardInfo;
     /// Very Important Powers
     is_vip : opt bool;
+    /// The last time the user submitted a snapshot, if ever.
+    last_snapshot_timestamp : opt nat64;
     /// Sprinkles the user has received
     sprinkles : vec RewardInfo;
 };
-type UserSnapshot = record { accounts : vec AccountSnapshotFor };
+type UserSnapshot = record {
+    accounts : vec AccountSnapshotFor;
+    timestamp : opt nat64;
+};
 type VipConfig = record {
     code_validity_duration : nat64;
     vips : vec principal;
@@ -254,7 +259,8 @@ type VipStats = record {
   total_issued : nat32;
 };
 service : (opt Config) -> {
-    /// Pays usage rewards
+    /// Pays usage rewards.  This is normally called internally after the random timing & user selection
+    /// has taken place.  For testing, it can be convenient to call it directly.
     claim_usage_award : (UsageAwardEvent, principal) -> ();
     /// Requests rewards from a VIP token.
     claim_vip_reward : (VipReward) -> (ClaimVipRewardResponse);
@@ -277,8 +283,10 @@ service : (opt Config) -> {
     set_sprinkle_timestamp : (SetSprinkleTimestampArg) -> ();
     /// Gives information about the current status of the canister.
     status : () -> (StatusResponse) query;
+    /// Runs the provided award event.  This is normally done automatically.  It can be useful
+    /// to trigger an event directly when testing.
     trigger_usage_award_event : (UsageAwardEvent) -> ();
-    /// Aggregate usage stats
+    /// Aggregate usage stats.
     usage_stats : () -> (UsageAwardStats) query;
     /// Endpoint for users to query their information with regards to rewards distributed by this canister.
     user_info : () -> (UserData) query;

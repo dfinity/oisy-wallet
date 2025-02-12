@@ -122,7 +122,10 @@ export const idlFactory = ({ IDL }) => {
 		SplDevnet: AccountSnapshot_Spl,
 		SplMainnet: AccountSnapshot_Spl
 	});
-	const UserSnapshot = IDL.Record({ accounts: IDL.Vec(AccountSnapshotFor) });
+	const UserSnapshot = IDL.Record({
+		accounts: IDL.Vec(AccountSnapshotFor),
+		timestamp: IDL.Opt(IDL.Nat64)
+	});
 	const LedgerConfig = IDL.Record({
 		ledger_index: IDL.Principal,
 		ledger: IDL.Principal,
@@ -168,6 +171,7 @@ export const idlFactory = ({ IDL }) => {
 	const UserData = IDL.Record({
 		airdrops: IDL.Vec(RewardInfo),
 		usage_awards: IDL.Opt(IDL.Vec(RewardInfo)),
+		last_snapshot_timestamp: IDL.Opt(IDL.Nat64),
 		is_vip: IDL.Opt(IDL.Bool),
 		sprinkles: IDL.Vec(RewardInfo)
 	});
