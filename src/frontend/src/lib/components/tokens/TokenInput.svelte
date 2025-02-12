@@ -60,7 +60,7 @@
 </script>
 
 <div
-	class="rounded-lg border border-solid p-5 text-left transition first:mb-2"
+	class="rounded-lg p-5 first:mb-2 border border-solid text-left transition"
 	class:bg-brand-subtle-alt={focused}
 	class:border-brand-subtle-alt={focused}
 	class:bg-secondary={!focused}
@@ -100,7 +100,7 @@
 					/>
 				{/if}
 			{:else}
-				<button on:click class="h-full w-full pl-3 text-base"
+				<button on:click class="pl-3 text-base h-full w-full"
 					>{$i18n.tokens.text.select_token}</button
 				>
 			{/if}
@@ -108,7 +108,7 @@
 
 		<div class="h-3/4 w-[1px] bg-disabled" />
 
-		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
+		<button class="gap-1 px-3 flex h-full" on:click disabled={!isSelectable}>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
 				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
@@ -127,7 +127,7 @@
 		</button>
 	</TokenInputContainer>
 
-	<div class="mt-2 flex min-h-6 items-center justify-between text-sm">
+	<div class="mt-2 min-h-6 text-sm flex items-center justify-between">
 		<slot name="amount-info" />
 
 		<slot name="balance" />

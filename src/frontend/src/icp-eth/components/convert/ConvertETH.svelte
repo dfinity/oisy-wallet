@@ -40,7 +40,7 @@
 		) ||
 		($networkICP && isNullish($ckEthMinterInfoStore?.[nativeTokenId]));
 
-	const openSend = async () => {
+	const openConvert = async () => {
 		if (isDisabled()) {
 			const status = await waitWalletReady(isDisabled);
 
@@ -80,7 +80,7 @@
 
 <CkEthLoader {nativeTokenId}>
 	<ButtonHero
-		on:click={async () => await openSend()}
+		on:click={async () => await openConvert()}
 		disabled={$isBusy || $outflowActionsDisabled}
 		{ariaLabel}
 	>

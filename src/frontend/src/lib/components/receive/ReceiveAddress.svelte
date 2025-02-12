@@ -28,13 +28,13 @@
 		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
 
 		{#if text}
-			<p class="mb-1.5 break-normal py-2 text-misty-rose">
+			<p class="mb-1.5 py-2 break-normal text-misty-rose">
 				<slot name="text" />
 			</p>
 		{/if}
 
 		<div
-			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2"
+			class="gap-4 rounded-lg px-3 py-2 flex items-center justify-between bg-brand-subtle"
 			class:mt-3={!text}
 			data-tid={testId}
 		>
@@ -45,7 +45,7 @@
 			{#if nonNullish(address)}
 				<output
 					id="ic-wallet-address"
-					class="break-all text-sm"
+					class="text-sm break-all"
 					data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
 					in:fade>{address}</output
 				>
