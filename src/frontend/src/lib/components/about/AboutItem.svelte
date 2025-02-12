@@ -5,11 +5,11 @@
 </script>
 
 <button
-	class={asMenuItem ? `nav-item ${styleClass}` : `whitespace-nowrap text-center font-bold text-brand-primary ${styleClass}`}
+	class={asMenuItem ? `text ${styleClass}` : `font-bold text-center whitespace-nowrap text-brand-primary ${styleClass}`}
 	on:click
 	data-tid={testId}
 >
-	<div class="flex items-center gap-2">
+	<div class="gap-2 flex items-center">
 		{#if asMenuItem}
 			<slot name="icon" />
 		{/if}

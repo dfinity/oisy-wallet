@@ -36,7 +36,7 @@
 	</MultipleListeners>
 
 	{#if isExpanded}
-		<div class="flex flex-col gap-3 rounded-b-xl bg-secondary pt-2" transition:slide={SLIDE_PARAMS}>
+		<div class="gap-3 rounded-b-xl pt-2 flex flex-col bg-secondary" transition:slide={SLIDE_PARAMS}>
 			{#each tokenGroup.tokens as token (token.id)}
 				<TokenCardWithUrl styleClass="rounded-xl px-3 py-2" {token}>
 					<TokenCardContent logoSize="md" data={token} />

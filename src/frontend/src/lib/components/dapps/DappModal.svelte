@@ -46,13 +46,13 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">
-		<span class="text-center text-xl">{dAppName}</span>
+		<span class="text-xl text-center">{dAppName}</span>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="flex flex-col gap-6">
+		<div class="gap-6 flex flex-col">
 			{#if nonNullish(screenshots) && screenshots.length > 0}
-				<div class="overflow-hidden rounded-3xl">
+				<div class="rounded-3xl overflow-hidden">
 					<ImgBanner
 						styleClass="max-h-64"
 						src={screenshots[0]}
@@ -63,7 +63,7 @@
 
 			<article>
 				<div
-					class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
+					class="gap-x-4 gap-y-2 pb-2 sm:gap-4 sm:pb-4 flex flex-wrap items-center justify-start border-b border-tertiary"
 				>
 					<Logo
 						size="md"
@@ -83,7 +83,7 @@
 							>
 						{/if}
 					</div>
-					<div class="flex space-x-3">
+					<div class="space-x-3 flex">
 						{#if nonNullish(telegram)}
 							<ExternalLinkIcon
 								href={telegram}
@@ -127,7 +127,7 @@
 					</div>
 				</div>
 
-				<p class="m-0 my-4 text-sm [&_ul]:list-disc [&_ul]:pl-6">
+				<p class="m-0 my-4 text-sm [&_ul]:pl-6 [&_ul]:list-disc">
 					<Html text={description} />
 				</p>
 				<DappTags {dAppName} {tags} />
