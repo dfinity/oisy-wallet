@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import {
 		TOKEN_INPUT_CURRENCY_USD,
@@ -18,11 +19,16 @@
 
 	let displayValue: OptionAmount;
 
-	const handleInput = () =>
-		(tokenAmount =
+	const dispatch = createEventDispatcher();
+
+	const handleInput = () => {
+		tokenAmount =
 			nonNullish(exchangeRate) && nonNullish(displayValue)
 				? (Number(displayValue) / exchangeRate).toFixed(tokenDecimals)
-				: undefined);
+				: undefined;
+
+		dispatch('nnsInput');
+	};
 
 	const syncDisplayValueWithTokenAmount = () => {
 		const newDisplayValue =
@@ -65,7 +71,7 @@
 </TokenInputCurrency>
 
 <style lang="scss">
-	:global(.swap-input-currency.no-padding div.input-field input[id]) {
+	:global(.token-input-currency.no-padding div.input-field input[id]) {
 		padding: 0;
 	}
 </style>

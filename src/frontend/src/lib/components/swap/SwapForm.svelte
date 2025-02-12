@@ -119,7 +119,7 @@
 					dispatch('icShowTokensList', 'source');
 				}}
 			>
-				<span slot="title">{$i18n.swap.text.select_source_token_title}</span>
+				<span slot="title">{$i18n.tokens.text.source_token_title}</span>
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($sourceToken)}
@@ -154,7 +154,7 @@
 					dispatch('icShowTokensList', 'destination');
 				}}
 			>
-				<span slot="title">{$i18n.swap.text.select_destination_token_title}</span>
+				<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
@@ -163,7 +163,7 @@
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
-							<div class="flex gap-3 text-tertiary">
+							<div class="gap-3 flex text-tertiary">
 								<TokenInputAmountExchange
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
@@ -190,7 +190,7 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="flex flex-col gap-3">
+			<div class="gap-3 flex flex-col">
 				<SwapProvider />
 				<SwapFees />
 			</div>
