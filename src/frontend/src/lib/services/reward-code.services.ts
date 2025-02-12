@@ -1,4 +1,4 @@
-import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
+import type { VipReward } from '$declarations/rewards/rewards.did';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
@@ -12,6 +12,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { AirdropsResponse } from '$lib/types/airdrop';
 
 const queryVipUser = async (params: {
 	identity: Identity;
@@ -59,13 +60,13 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 const queryAirdrops = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<RewardInfo[]> => {
+}): Promise<AirdropsResponse> => {
 	const userData = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return userData.airdrops;
+	return {airdrops: fromNullable(userData.usage_awards) ?? [], last_timestamp: fromNullable(userData.last_snapshot_timestamp) ?? BigInt(0)};
 };
 
 /**
@@ -74,13 +75,13 @@ const queryAirdrops = async (params: {
  * This function performs **always** a query (not certified) to get the airdrops of a user.
  *
  * @async
- * @param {Object} params - The parameters required to check VIP status.
+ * @param {Object} params - The parameters required to load the user data.
  * @param {Identity} params.identity - The user's identity for authentication.
- * @returns {Promise<RewardInfo[]>} - Resolves with the received airdrops of the user.
+ * @returns {Promise<AirdropsResponse>} - Resolves with the received airdrops and the last timestamp of the user.
  *
- * @throws {Error} Displays an error toast and returns an empty list if the query fails.
+ * @throws {Error} Displays an error toast and returns an empty list of airdrops if the query fails.
  */
-export const getAirdrops = async (params: { identity: Identity }): Promise<RewardInfo[]> => {
+export const getAirdrops = async (params: { identity: Identity }): Promise<AirdropsResponse> => {
 	try {
 		return await queryAirdrops({ ...params, certified: false });
 	} catch (err: unknown) {
@@ -91,7 +92,7 @@ export const getAirdrops = async (params: { identity: Identity }): Promise<Rewar
 		});
 	}
 
-	return [];
+	return {airdrops: [], last_timestamp: BigInt(0)};
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
