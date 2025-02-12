@@ -47,7 +47,10 @@ describe('IcTokenFeeContext', () => {
 				identity: mockIdentity
 			});
 			expect(setIcTokenFeeSpy).toHaveBeenCalledOnce();
-			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({ [ICP_TOKEN.symbol]: mockFee });
+			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({
+				tokenSymbol: ICP_TOKEN.symbol,
+				fee: mockFee
+			});
 		});
 	});
 
@@ -87,7 +90,8 @@ describe('IcTokenFeeContext', () => {
 		mockAuthStore();
 
 		icTokenFeeStore.setIcTokenFee({
-			[ICP_TOKEN.symbol]: mockFee
+			tokenSymbol: ICP_TOKEN.symbol,
+			fee: mockFee
 		});
 		render(IcTokenFeeContext, {
 			props,
@@ -114,7 +118,10 @@ describe('IcTokenFeeContext', () => {
 
 		await waitFor(() => {
 			expect(setIcTokenFeeSpy).toHaveBeenCalledOnce();
-			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({ [ICP_TOKEN.symbol]: ICP_TOKEN.fee });
+			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({
+				tokenSymbol: ICP_TOKEN.symbol,
+				fee: ICP_TOKEN.fee
+			});
 		});
 	});
 });

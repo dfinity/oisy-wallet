@@ -1,26 +1,32 @@
 import type { Option } from '$lib/types/utils';
+import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type IcTokenFeeStoreData = Option<Record<string, bigint>>;
 
+interface SetIcTokenFeeParams {
+	tokenSymbol: string;
+	fee: bigint;
+}
+
 export interface IcTokenFeeStore extends Readable<IcTokenFeeStoreData> {
-	setIcTokenFee: (data: IcTokenFeeStoreData) => void;
+	setIcTokenFee: (params: SetIcTokenFeeParams) => void;
 	reset: () => void;
 }
 
-export const initIcTokenFeeStore = (): IcTokenFeeStore => {
-	const { subscribe, set } = writable<IcTokenFeeStoreData>(undefined);
+const initIcTokenFeeStore = (): IcTokenFeeStore => {
+	const { subscribe, set, update } = writable<IcTokenFeeStoreData>(undefined);
 
 	return {
 		subscribe,
 
-		reset() {
-			set(null);
-		},
+		reset: () => set(null),
 
-		setIcTokenFee(data: IcTokenFeeStoreData) {
-			set(data);
-		}
+		setIcTokenFee: ({ tokenSymbol, fee }: SetIcTokenFeeParams) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenSymbol]: fee
+			}))
 	};
 };
 

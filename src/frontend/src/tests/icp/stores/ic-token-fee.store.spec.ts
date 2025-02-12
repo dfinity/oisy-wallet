@@ -10,8 +10,8 @@ describe('icTokenFeeStore', () => {
 	});
 
 	const data = {
-		ICP: 1000n,
-		ETH: 5000n
+		fee: 1000n,
+		tokenSymbol: 'ICP'
 	};
 
 	it('should ensure derived stores update at most once when the store changes', async () => {
@@ -21,8 +21,7 @@ describe('icTokenFeeStore', () => {
 	it('should have all expected values', () => {
 		icTokenFeeStore.setIcTokenFee(data);
 
-		expect(get(icTokenFeeStore)?.ICP).toStrictEqual(data.ICP);
-		expect(get(icTokenFeeStore)?.ETH).toStrictEqual(data.ETH);
+		expect(get(icTokenFeeStore)).toStrictEqual({ [data.tokenSymbol]: data.fee });
 	});
 
 	it('should reset the value', () => {

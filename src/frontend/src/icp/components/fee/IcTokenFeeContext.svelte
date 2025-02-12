@@ -13,6 +13,7 @@
 
 	const loadIcTokenFee = async () => {
 		if (isNullish($authIdentity)) {
+			store.reset();
 			await nullishSignOut();
 			return;
 		}
@@ -23,8 +24,8 @@
 
 		try {
 			store.setIcTokenFee({
-				...$store,
-				[token.symbol]: await transactionFee({
+				tokenSymbol: token.symbol,
+				fee: await transactionFee({
 					identity: $authIdentity,
 					ledgerCanisterId: token.ledgerCanisterId
 				})
@@ -32,8 +33,8 @@
 		} catch (e: unknown) {
 			// as a fallback, we use the icToken fee prop
 			store.setIcTokenFee({
-				...$store,
-				[token.symbol]: token.fee
+				tokenSymbol: token.symbol,
+				fee: token.fee
 			});
 		}
 	};
