@@ -74,7 +74,10 @@ const queryAirdrops = async (params: {
 	};
 };
 
-const mapRewardsInfo = ({name, ...rest}: RewardInfo): AirdropInfo => ({ ...rest, name: fromNullable(name) });
+const mapRewardsInfo = ({ name, ...rest }: RewardInfo): AirdropInfo => ({
+	...rest,
+	name: fromNullable(name)
+});
 
 /**
  * Gets the airdrops the user received.
