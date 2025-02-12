@@ -11,7 +11,7 @@
 	const selectTheme = (theme: Theme | SystemTheme) => {
 		// Since gix-components does not support System theme, a solution is to delete the cached theme when the user selects the System theme.
 		if (theme === SystemTheme.SYSTEM) {
-			localStorage.removeItem(THEME_KEY);
+			themeStore.resetToSystemSettings();
 			updateSelectedTheme();
 			return;
 		}

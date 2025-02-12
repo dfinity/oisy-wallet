@@ -4,13 +4,29 @@ import { THEME_KEY, THEME_VALUES } from '$lib/constants/themes.constants';
 import { SystemTheme } from '$lib/enums/themes';
 import { Theme, themeStore } from '@dfinity/gix-components';
 import { fireEvent, render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('ThemeSelector', () => {
+	const originalMatchMedia = window.matchMedia;
+
 	beforeEach(() => {
 		vi.resetAllMocks();
 		vi.clearAllMocks();
 
 		localStorage.clear();
+
+		// We mock window.matchMedia to match the DARK theme
+		Object.defineProperty(window, 'matchMedia', {
+			value: vi.fn().mockImplementation(() => ({
+				matches: false
+			}))
+		});
+	});
+
+	afterAll(() => {
+		Object.defineProperty(window, 'matchMedia', {
+			value: originalMatchMedia
+		});
 	});
 
 	it('should render all theme options', () => {
@@ -21,26 +37,47 @@ describe('ThemeSelector', () => {
 		});
 	});
 
-	it('should call themeStore.select when clicking a theme option', async () => {
+	it('should set the correct theme option', async () => {
 		const spy = vi.spyOn(themeStore, 'select');
 
 		const { getByTestId } = render(ThemeSelector);
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
+		expect(get(themeStore)).toBe(Theme.DARK);
 		expect(spy).toHaveBeenCalledWith(Theme.DARK);
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.DARK));
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.LIGHT}`));
 
+		expect(get(themeStore)).toBe(Theme.LIGHT);
 		expect(spy).toHaveBeenCalledWith(Theme.LIGHT);
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.LIGHT));
 
 		// We repeat the test just to make sure that the theme is actually changing
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
+		expect(get(themeStore)).toBe(Theme.DARK);
 		expect(spy).toHaveBeenCalledWith(Theme.DARK);
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.DARK));
+
+		spy.mockRestore();
+	});
+
+	it('should call set the System theme when clicking on the System option', async () => {
+		const spy = vi.spyOn(themeStore, 'resetToSystemSettings');
+
+		const { getByTestId } = render(ThemeSelector);
+
+		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
+
+		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.DARK));
+
+		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${SystemTheme.SYSTEM}`));
+
+		expect(get(themeStore)).toBe(Theme.LIGHT);
+		expect(spy).toHaveBeenCalledOnce();
+		expect(localStorage.getItem(THEME_KEY)).toBeNull();
 
 		spy.mockRestore();
 	});
