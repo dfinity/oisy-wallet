@@ -49,7 +49,7 @@ export class RewardCanister extends Canister<RewardService> {
 		return claim_vip_reward(vipReward);
 	};
 
-	registerAirdropRecipient = (userSnapshot: UserSnapshot): Promise<undefined> => {
+	registerAirdropRecipient = (userSnapshot: UserSnapshot): Promise<void> => {
 		const { register_airdrop_recipient } = this.caller({ certified: true });
 
 		return register_airdrop_recipient(userSnapshot);
