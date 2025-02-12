@@ -50,7 +50,7 @@
 		"indexCanisterId": "6dfr2-giaaa-aaaaq-aaawq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "YRAL",
+			"name": "DOLR AI",
 			"symbol": "DOLR",
 			"fee": {
 				"__bigint__": "100000"
@@ -475,6 +475,21 @@
 			},
 			"alternativeName": "Alice",
 			"url": "https://alice.fun/"
+		}
+	},
+	{
+		"ledgerCanisterId": "mih44-vaaaa-aaaaq-aaekq-cai",
+		"rootCanisterId": "m2blf-zqaaa-aaaaq-aaejq-cai",
+		"indexCanisterId": "mgfru-oqaaa-aaaaq-aaelq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "NFID Wallet",
+			"symbol": "NFIDW",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "NFID Wallet",
+			"url": "https://nfid.one/"
 		}
 	}
 ]
