@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {fromNullable, isNullish, nonNullish} from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -21,10 +21,14 @@
 		const initialLoading = sessionStorage.getItem('initialLoading');
 		if (isNullish(initialLoading)) {
 			const airdropsResponse: AirdropsResponse = await getAirdrops({ identity: $authIdentity });
-			const newAirdrops = airdropsResponse.airdrops.filter((airdrop) => airdrop.timestamp >= airdropsResponse.last_timestamp);
+			const newAirdrops = airdropsResponse.airdrops.filter(
+				(airdrop) => airdrop.timestamp >= airdropsResponse.last_timestamp
+			);
 
 			if (newAirdrops.length > 0) {
-				const containsJackpot = newAirdrops.some((airdrop) => fromNullable(airdrop.name) === 'jackpot');
+				const containsJackpot = newAirdrops.some(
+					(airdrop) => fromNullable(airdrop.name) === 'jackpot'
+				);
 				modalStore.openAirdropState(containsJackpot);
 			}
 			sessionStorage.setItem('initialLoading', 'true');

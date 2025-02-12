@@ -1,10 +1,16 @@
 import type {
 	ClaimVipRewardResponse,
-	NewVipRewardResponse, RewardInfo,
+	NewVipRewardResponse,
+	RewardInfo,
 	UserData
 } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import {claimVipReward, getAirdrops, getNewReward, isVipUser} from '$lib/services/reward-code.services';
+import {
+	claimVipReward,
+	getAirdrops,
+	getNewReward,
+	isVipUser
+} from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
@@ -160,7 +166,7 @@ describe('reward-code', () => {
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
 			name: ['jackpot']
-		}
+		};
 		const mockedUserData: UserData = {
 			is_vip: [false],
 			airdrops: [],
