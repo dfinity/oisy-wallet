@@ -19,15 +19,11 @@
 
 		const initialLoading = sessionStorage.getItem('initialLoading');
 		if (isNullish(initialLoading)) {
-			const {airdrops, lastTimestamp} = await getAirdrops({ identity: $authIdentity });
-			const newAirdrops = airdrops.filter(
-				(airdrop) => airdrop.timestamp >= lastTimestamp
-			);
+			const { airdrops, lastTimestamp } = await getAirdrops({ identity: $authIdentity });
+			const newAirdrops = airdrops.filter((airdrop) => airdrop.timestamp >= lastTimestamp);
 
 			if (newAirdrops.length > 0) {
-				const containsJackpot = newAirdrops.some(
-					(airdrop) => airdrop.name === 'jackpot'
-				);
+				const containsJackpot = newAirdrops.some((airdrop) => airdrop.name === 'jackpot');
 				modalStore.openAirdropState(containsJackpot);
 			}
 			sessionStorage.setItem('initialLoading', 'true');
