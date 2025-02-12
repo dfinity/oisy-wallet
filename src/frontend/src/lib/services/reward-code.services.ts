@@ -1,4 +1,4 @@
-import type { VipReward } from '$declarations/rewards/rewards.did';
+import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
@@ -7,11 +7,11 @@ import {
 import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { AirdropsResponse } from '$lib/types/airdrop';
+import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
@@ -61,16 +61,23 @@ const queryAirdrops = async (params: {
 	identity: Identity;
 	certified: boolean;
 }): Promise<AirdropsResponse> => {
-	const userData = await getUserInfoApi({
+	const { usage_awards, last_snapshot_timestamp } = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
+	const awards: RewardInfo[] | undefined = fromNullable(usage_awards);
+
 	return {
-		airdrops: fromNullable(userData.usage_awards) ?? [],
-		last_timestamp: fromNullable(userData.last_snapshot_timestamp) ?? BigInt(0)
+		airdrops: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? BigInt(0)
 	};
 };
+
+const mapRewardsInfo = ({ name, ...rest }: RewardInfo): AirdropInfo => ({
+	...rest,
+	name: fromNullable(name)
+});
 
 /**
  * Gets the airdrops the user received.
@@ -95,7 +102,7 @@ export const getAirdrops = async (params: { identity: Identity }): Promise<Airdr
 		});
 	}
 
-	return { airdrops: [], last_timestamp: BigInt(0) };
+	return { airdrops: [], lastTimestamp: BigInt(0) };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
