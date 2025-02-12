@@ -83,7 +83,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openDappDetails: <D extends T>(data: D) => void;
 	openRewardState: <D extends T>(data: D) => void;
 	openAirdropDetails: <D extends T>(data: D) => void;
-	openAirdropState: () => void;
+	openAirdropState: <D extends T>(data: D) => void;
 	close: () => void;
 }
 
@@ -136,7 +136,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openDappDetails: setTypeWithData('dapp-details'),
 		openRewardState: setTypeWithData('reward-state'),
 		openAirdropDetails: setTypeWithData('airdrop-details'),
-		openAirdropState: setType('airdrop-state'),
+		openAirdropState: setTypeWithData('airdrop-state'),
 		close: () => set(null),
 		subscribe
 	};
