@@ -61,14 +61,14 @@ const queryAirdrops = async (params: {
 	identity: Identity;
 	certified: boolean;
 }): Promise<AirdropsResponse> => {
-	const userData = await getUserInfoApi({
+	const { usage_awards, last_snapshot_timestamp } = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
 	return {
-		airdrops: fromNullable(userData.usage_awards) ?? [],
-		last_timestamp: fromNullable(userData.last_snapshot_timestamp) ?? BigInt(0)
+		airdrops: fromNullable(usage_awards) ?? [],
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? BigInt(0)
 	};
 };
 
@@ -95,7 +95,7 @@ export const getAirdrops = async (params: { identity: Identity }): Promise<Airdr
 		});
 	}
 
-	return { airdrops: [], last_timestamp: BigInt(0) };
+	return { airdrops: [], lastTimestamp: BigInt(0) };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
