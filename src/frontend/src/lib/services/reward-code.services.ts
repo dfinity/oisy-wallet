@@ -7,12 +7,12 @@ import {
 import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { AirdropsResponse } from '$lib/types/airdrop';
 
 const queryVipUser = async (params: {
 	identity: Identity;
@@ -66,7 +66,10 @@ const queryAirdrops = async (params: {
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return {airdrops: fromNullable(userData.usage_awards) ?? [], last_timestamp: fromNullable(userData.last_snapshot_timestamp) ?? BigInt(0)};
+	return {
+		airdrops: fromNullable(userData.usage_awards) ?? [],
+		last_timestamp: fromNullable(userData.last_snapshot_timestamp) ?? BigInt(0)
+	};
 };
 
 /**
@@ -92,7 +95,7 @@ export const getAirdrops = async (params: { identity: Identity }): Promise<Airdr
 		});
 	}
 
-	return {airdrops: [], last_timestamp: BigInt(0)};
+	return { airdrops: [], last_timestamp: BigInt(0) };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
