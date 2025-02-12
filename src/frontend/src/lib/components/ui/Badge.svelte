@@ -2,7 +2,7 @@
 	export let styleClass: string | undefined = undefined;
 
 	const variantClassNames = {
-		default: 'bg-secondary text-primary',
+		default: 'bg-secondary text-primary border border-secondary',
 		info: 'bg-brand-subtle-20 text-brand-primary',
 		error: 'bg-error-subtle-20 text-error-primary',
 		warning: 'bg-warning-subtle-20 text-warning-primary',
