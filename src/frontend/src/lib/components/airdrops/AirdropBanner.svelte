@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onMount } from 'svelte';
-	import type { RewardInfo } from '$declarations/rewards/rewards.did';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import IconCoins from '$lib/components/icons/IconCoins.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -17,22 +16,23 @@
 	import { isMobile } from '$lib/utils/device.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import type { AirdropsResponse } from '$lib/types/airdrop';
 
 	const token = ICP_TOKEN;
 
-	let airdrops: RewardInfo[] | undefined;
+	let airdropsResponse: AirdropsResponse;
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
 		}
 
-		airdrops = await getAirdrops({ identity: $authIdentity });
+		airdropsResponse = await getAirdrops({ identity: $authIdentity });
 	});
 
 	let balance: BigNumber | undefined;
-	$: balance = nonNullish(airdrops)
-		? airdrops?.reduce(
+	$: balance = nonNullish(airdropsResponse)
+		? airdropsResponse.airdrops?.reduce(
 				(total, airdrop) => total.add(BigNumber.from(airdrop.amount)),
 				BigNumber.from(0)
 			)
