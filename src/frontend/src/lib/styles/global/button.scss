@@ -287,3 +287,30 @@ a.as-button {
 		@include button.icon;
 	}
 }
+
+
+// TERTIARY
+.dropdown-button:not(.loading) {
+	@apply text-primary;
+	@apply rounded-xl;
+	@apply px-3;
+	@apply py-2;
+
+	margin-bottom: 1px;
+
+	&:hover:not(.disabled):not([disabled]) {
+		@apply bg-secondary;
+	}
+
+	&.selected {
+		@apply bg-brand-subtle-10;
+
+		&>span>svg {
+			color: var(--color-foreground-brand-primary-alt)
+		}
+	}
+}
+
+.dropdown-button.disabled:not(.loading), .dropdown-button[disabled]:not(.loading) {
+	@apply text-tertiary-inverted;
+}

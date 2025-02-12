@@ -33,7 +33,7 @@
 
 	--dropdown-background: var(--overlay-background);
 	--dropdown-border-size: 1.5px;
-	--dropdown-border-color: #ebedf9;
+	--dropdown-border-color: var(--color-border-secondary);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -219,8 +219,8 @@ div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
-		padding: var(--padding-2x);
-		--padding: var(--padding-2x);
+		padding: var(--padding-0_75x);
+		--padding: var(--padding-0_75x);
 
 		--border-radius: 16px;
 
