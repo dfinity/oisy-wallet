@@ -58,7 +58,7 @@
 	<ContentWithToolbar>
 		<ImgBanner styleClass="max-h-56" src={CoverWhyOisy} alt={$i18n.about.why_oisy.text.title} />
 
-		<div class="mt-5 flex flex-col gap-6">
+		<div class="mt-5 gap-6 flex flex-col">
 			{#each features as feature}
 				<AboutFeatureItem title={feature.title} description={feature.description}>
 					<svelte:component this={feature.icon} slot="icon" />

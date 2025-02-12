@@ -23,6 +23,7 @@
 	on:focus
 	on:blur
 	testId={TOKEN_INPUT_CURRENCY_TOKEN}
+	on:nnsInput
 >
 	<slot name="inner-end" slot="inner-end" />
 </TokenInputCurrency>

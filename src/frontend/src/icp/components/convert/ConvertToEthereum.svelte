@@ -1,6 +1,6 @@
 <script lang="ts">
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
+	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
 	import {
 		ckEthereumTwinTokenNetworkId,
 		ckEthereumTwinToken,

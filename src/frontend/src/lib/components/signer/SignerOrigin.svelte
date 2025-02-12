@@ -32,7 +32,7 @@
 </script>
 
 {#if nonNullish(origin)}
-	<p class="mb-6 break-normal text-center">
+	<p class="mb-6 text-center break-normal">
 		{$i18n.signer.origin.text.request_from}
 		{#if nonNullish(host)}<span class="font-bold text-brand-primary"
 				><ExternalLink

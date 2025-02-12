@@ -1,5 +1,4 @@
 import * as btcAddressServices from '$btc/services/btc-address.services';
-import * as solEnv from '$env/networks/networks.sol.env';
 import * as ethAddressServices from '$eth/services/eth-address.services';
 import * as api from '$lib/api/backend.api';
 import { CanisterInternalError } from '$lib/canisters/errors';
@@ -44,8 +43,6 @@ describe('AddressGuard', () => {
 		});
 
 		vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
-
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	describe('Signer allowance', () => {
@@ -215,30 +212,6 @@ describe('AddressGuard', () => {
 					});
 				}
 			);
-		});
-
-		describe('Solana network disabled', () => {
-			beforeEach(() => {
-				apiMock.mockResolvedValue(undefined);
-				vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
-			});
-
-			it('should not validate SOL address when network is disabled', async () => {
-				render(AddressGuard);
-
-				const spy = vi.spyOn(solAddressServices, 'validateSolAddressMainnet');
-
-				solAddressMainnetStore.set({
-					data: mockSolAddress,
-					certified: true
-				});
-
-				emit({ message: 'oisyValidateAddresses' });
-
-				await vi.waitFor(() => {
-					expect(spy).not.toHaveBeenCalled();
-				});
-			});
 		});
 	});
 });

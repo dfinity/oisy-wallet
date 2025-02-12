@@ -9,7 +9,7 @@
 </script>
 
 <div class="pr-2">
-	<h4 class="flex items-center gap-2 font-medium">
+	<h4 class="gap-2 font-medium flex items-center">
 		<Logo src={bitcoin} alt={`Bitcoin logo`} />
 		<span>{$i18n.info.bitcoin.title}</span>
 	</h4>
