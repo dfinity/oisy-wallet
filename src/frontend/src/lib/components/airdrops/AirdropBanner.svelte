@@ -13,10 +13,10 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { AirdropsResponse } from '$lib/types/airdrop';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatUSD } from '$lib/utils/format.utils';
-	import type { AirdropsResponse } from '$lib/types/airdrop';
 
 	const token = ICP_TOKEN;
 
