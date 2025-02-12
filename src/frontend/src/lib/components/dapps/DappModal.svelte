@@ -140,7 +140,7 @@
 					ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
 						$dAppName: dAppName
 					})}
-					styleClass="as-button secondary-light padding-sm flex-1 flex-row-reverse"
+					styleClass="as-button primary padding-sm flex-1 flex-row-reverse"
 					href={websiteURL.toString()}
 					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
 					>{callToAction ??

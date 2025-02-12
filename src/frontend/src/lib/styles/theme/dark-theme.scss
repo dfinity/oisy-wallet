@@ -104,7 +104,7 @@ html[theme="dark"]:root {
 
   --value-color: #{$base-white};
 
-  // invert logo image, easier than fidgeting with svg colors
+  // invert logo image, cant be styled with currentColor because not inlined
   #oisy-wallet-logo {
     filter: brightness(0) invert(1);
   }

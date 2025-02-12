@@ -1,23 +1,12 @@
 @use '../mixins/media';
 
+@use "sass:color";
+@function hex2rgb($hex) {
+	@return red($hex), green($hex), blue($hex);
+}
+
 :root {
 	--toggle-disabled-opacity: 1;
-
-	--positive-emphasis: var(--color-background-success-primary);
-	--positive-emphasis-rgb: 48, 175, 145;
-
-	--warning-emphasis-shade: var(--color-background-warning-primary);
-
-	--negative-emphasis: var(--color-background-error-primary);
-
-	--color-primary: var(--color-foreground-primary-inverted);
-	--color-secondary: var(--color-foreground-primary);
-
-	--primary: var(--color-background-brand-primary);
-	--primary-contrast: var(--color-foreground-primary);
-	--tertiary: var(--color-secondary);
-
-	--value-color: var(--color-secondary);
 
 	--border-radius-2x: var(--border-radius-lg);
 	--border-radius-0_5x: var(--border-radius-xs);
@@ -25,7 +14,7 @@
 
 	--animation-time-normal: 0.2s;
 
-	--progress-color: var(--color-primary);
+	--progress-color: var(--color-background-brand-primary);
 	--progress-color-contrast: var(--color-foreground-primary-inverted);
 
 	--overlay-background: var(--color-background-primary);
@@ -81,7 +70,7 @@
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
 
-	--backdrop-contrast: var(--color-secondary);
+	--backdrop-contrast: var(--color-foreground-primary-inverted);
 	--backdrop-filter: blur(4px);
 
 	@screen sm {
@@ -132,7 +121,7 @@ div.modal {
 	--overlay-content-background: var(--color-background-surface);
 	--overlay-content-background-contrast: var(--color-foreground-primary);
 
-	color: var(--color-secondary);
+	color: var(--color-foreground-secondary);
 
 	--toolbar-height: 78px;
 
@@ -248,14 +237,14 @@ div.toggle {
 	}
 
 	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--primary);
+		--card-background-contrast: var(--color-background-brand-primary);
 
 		&:hover {
 			--card-background-contrast: var(--color-background-brand-secondary);
 		}
 
 		&:active {
-			--card-background-contrast: var(--primary);
+			--card-background-contrast: var(--color-background-brand-primary);
 		}
 
 		&:disabled, &.disabled {
@@ -272,13 +261,24 @@ div.segment-button {
 	}
 }
 
+div.step .state {
+	color: var(--color-foreground-brand-primary-alt) !important;
+	background: var(--color-background-brand-subtle-30) !important;
+}
+
 div.step.completed {
 	svg {
-		--icon-check-circle-background: var(--color-primary);
+		--icon-check-circle-background: var(--color-background-brand-primary);
+		--icon-check-circle-color: var(--color-foreground-primary-inverted);
 	}
 
 	div.line {
-		--line-color: var(--color-primary);
+		--line-color: var(--color-background-brand-primary);
+	}
+
+	.state {
+		color: var(--color-foreground-success-primary) !important;
+		background: var(--color-background-success-subtle-30) !important;
 	}
 }
 
