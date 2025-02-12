@@ -11,12 +11,12 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelp from '$lib/components/icons/IconHelp.svelte';
-	import IconTrophy from '$lib/components/icons/lucide/IconTrophy.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
+	import IconTrophy from '$lib/components/icons/lucide/IconTrophy.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
