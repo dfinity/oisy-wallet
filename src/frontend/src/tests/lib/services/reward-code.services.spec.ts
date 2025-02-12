@@ -175,7 +175,7 @@ describe('reward-code', () => {
 			sprinkles: []
 		};
 
-		it('should return a list airdrops and the last timestamp', async () => {
+		it('should return a list of airdrops and the last timestamp', async () => {
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
 			const result = await getAirdrops({ identity: mockIdentity });
