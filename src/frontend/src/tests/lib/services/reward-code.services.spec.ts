@@ -17,6 +17,7 @@ import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
+import type {AirdropInfo} from "$lib/types/airdrop";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -174,6 +175,12 @@ describe('reward-code', () => {
 			last_snapshot_timestamp: [lastTimestamp],
 			sprinkles: []
 		};
+		const expectedAirdrop: AirdropInfo = {
+			timestamp: BigInt(Date.now()),
+			amount: BigInt(1000000),
+			ledger: mockIdentity.getPrincipal(),
+			name: 'jackpot'
+		}
 
 		it('should return a list of airdrops and the last timestamp', async () => {
 			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
@@ -186,7 +193,7 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 
-			expect(result).toEqual({ airdrops: [mockedAirdrop], last_timestamp: lastTimestamp });
+			expect(result).toEqual({ airdrops: [expectedAirdrop], lastTimestamp });
 		});
 	});
 });

@@ -1,6 +1,13 @@
-import type { RewardInfo } from '$declarations/rewards/rewards.did';
+import type {Principal} from "@dfinity/principal";
 
 export interface AirdropsResponse {
-	airdrops: RewardInfo[];
+	airdrops: AirdropInfo[];
 	lastTimestamp: bigint;
+}
+
+export interface AirdropInfo {
+	name: string | undefined;
+	ledger: Principal;
+	timestamp: bigint;
+	amount: bigint;
 }
