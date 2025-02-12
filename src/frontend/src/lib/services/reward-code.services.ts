@@ -7,12 +7,12 @@ import {
 import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type {AirdropsResponse} from "$lib/types/airdrop";
 
 const queryVipUser = async (params: {
 	identity: Identity;
