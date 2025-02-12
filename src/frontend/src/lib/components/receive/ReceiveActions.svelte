@@ -10,7 +10,7 @@
 	export let copyButtonTestId: string | undefined = undefined;
 </script>
 
-<div class="flex justify-center gap-2">
+<div class="gap-2 flex justify-center">
 	{#if qrCodeAction.enabled}
 		<ButtonIcon ariaLabel={qrCodeAction.ariaLabel} on:click testId={qrCodeAction?.testId}>
 			<IconQRCodeScanner size="24" slot="icon" />
