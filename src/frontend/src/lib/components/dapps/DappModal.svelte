@@ -79,7 +79,7 @@
 									$dAppName: dAppName
 								})}
 								href={websiteURL.toString()}
-								styleClass="text-sm text-misty-rose">{websiteURL.hostname}</ExternalLink
+								styleClass="text-sm text-tertiary">{websiteURL.hostname}</ExternalLink
 							>
 						{/if}
 					</div>

@@ -74,11 +74,11 @@
 	<div class="mt-4 gap-x-4 grid grid-cols-[1fr_auto]">
 		<div class="mb-2 gap-2 flex flex-col items-center overflow-hidden">
 			<span
-				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-misty-rose"
+				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-tertiary"
 				>1</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<ReceiveAddress
@@ -101,11 +101,11 @@
 
 		<div class="mb-2 gap-2 flex flex-col items-center overflow-hidden">
 			<span
-				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-misty-rose"
+				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-tertiary"
 				>2</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<div>
@@ -129,7 +129,7 @@
 
 		<div class="flex justify-center">
 			<span
-				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-misty-rose"
+				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-tertiary"
 				>3</span
 			>
 		</div>

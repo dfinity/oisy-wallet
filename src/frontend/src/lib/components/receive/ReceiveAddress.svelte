@@ -28,7 +28,7 @@
 		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
 
 		{#if text}
-			<p class="mb-1.5 py-2 break-normal text-misty-rose">
+			<p class="mb-1.5 py-2 break-normal text-tertiary">
 				<slot name="text" />
 			</p>
 		{/if}
