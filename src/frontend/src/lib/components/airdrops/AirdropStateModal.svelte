@@ -23,19 +23,19 @@
 					? $i18n.airdrops.text.state_modal_title_jackpot
 					: $i18n.airdrops.text.state_modal_title}</h3
 			>
-			<span class="block w-full text-center"
-				>{$i18n.airdrops.text.state_modal_content_text}</span
-			>
+			<span class="block w-full text-center">{$i18n.airdrops.text.state_modal_content_text}</span>
 			<Share
 				text={$i18n.airdrops.text.share}
-				href={jackpot ?
-				'https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com' :
-				'https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com'}
+				href={jackpot
+					? 'https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com'
+					: 'https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com'}
 			/>
 		</div>
 
 		<ButtonGroup slot="toolbar">
-			<Button on:click={modalStore.close} colorStyle="secondary">{$i18n.airdrops.text.open_wallet}</Button>
+			<Button on:click={modalStore.close} colorStyle="secondary"
+				>{$i18n.airdrops.text.open_wallet}</Button
+			>
 		</ButtonGroup>
 	</ContentWithToolbar>
 </Modal>
