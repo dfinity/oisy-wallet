@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import IconShare from '$lib/components/icons/IconShare.svelte';
 
 	export let text: string;
 	export let href: string;
-	export let color: 'blue' | 'inherit' = 'blue';
+	export let color: 'blue' | 'inherit' = 'inherit';
 	export let testId: string | undefined = undefined;
-	export let className: string | undefined = undefined;
+	export let styleClass: string | undefined = undefined;
 </script>
 
 <a
@@ -15,7 +14,7 @@
 	class:text-brand-primary={color === 'blue'}
 	class:hover:text-inherit={color === 'blue'}
 	class:active:text-inherit={color === 'blue'}
-	class={nonNullish(className) ? `${className} gap-2 flex no-underline` : 'gap-2 flex no-underline'}
+	class={`${styleClass ?? ''} gap-2 flex no-underline border border-grey rounded-xl px-3 py-2`}
 	data-tid={testId}
 >
 	{text}
