@@ -14,7 +14,7 @@
 	class:text-brand-primary={color === 'blue'}
 	class:hover:text-inherit={color === 'blue'}
 	class:active:text-inherit={color === 'blue'}
-	class={`${styleClass ?? ''} gap-2 flex no-underline border border-grey rounded-xl px-3 py-2`}
+	class={`${styleClass ?? ''} gap-2 rounded-xl px-3 py-2 flex border border-grey no-underline`}
 	data-tid={testId}
 >
 	{text}
