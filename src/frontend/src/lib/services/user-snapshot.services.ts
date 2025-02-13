@@ -11,20 +11,23 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
+import { solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token } from '$lib/types/token';
-import { isNetworkIdSOLMainnet } from '$lib/utils/network.utils';
+import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
-import { Principal } from '@dfinity/principal';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
+
+// All the functions below will be using stores imperatively, since the service it is not reactive.
+// It "simply" needs to take a snapshot of the current user's balances and transactions and send it to the reward canister.
 
 interface ToSnapshotParams<T extends Token> {
 	token: T;
@@ -88,7 +91,11 @@ const toIcrcSnapshot = ({
 	exchangeRate,
 	timestamp
 }: ToSnapshotParams<IcToken>): AccountSnapshotFor => {
-	const { id, ledgerCanisterId } = token;
+	const { id } = token;
+
+	const identity = get(authIdentity);
+	// This should not happen, since the service is used only after login and never after logout.
+	assertNonNullish(identity);
 
 	const lastTransactions = (get(icTransactionsStore)?.[id] ?? []).map(
 		({ data: transaction }) => transaction
@@ -96,7 +103,7 @@ const toIcrcSnapshot = ({
 
 	const snapshot: AccountSnapshot_Icrc = {
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
-		account: Principal.from(ledgerCanisterId),
+		account: identity.getPrincipal(),
 		last_transactions: lastTransactions.map(toIcrcTransaction)
 	};
 
@@ -108,12 +115,18 @@ const toSplSnapshot = ({
 	balance,
 	exchangeRate,
 	timestamp
-}: ToSnapshotParams<SplToken>): AccountSnapshotFor => {
+}: ToSnapshotParams<SplToken>): AccountSnapshotFor | undefined => {
 	const {
 		id,
-		address,
 		network: { id: networkId }
 	} = token;
+
+	const address = isNetworkIdSOLDevnet(networkId) ? get(solAddressDevnet) : get(solAddressMainnet);
+
+	// This may happen if the user has not loaded the testnets yet, so the address is not available.
+	if (isNullish(address)) {
+		return;
+	}
 
 	const lastTransactions = (get(solTransactionsStore)?.[id] ?? []).map(
 		({ data: transaction }) => transaction
@@ -125,10 +138,10 @@ const toSplSnapshot = ({
 		last_transactions: lastTransactions.map(toSplTransaction)
 	};
 
-	return isNetworkIdSOLMainnet(networkId) ? { SplMainnet: snapshot } : { SplDevnet: snapshot };
+	return isNetworkIdSOLDevnet(networkId) ? { SplDevnet: snapshot } : { SplMainnet: snapshot };
 };
 
-const takeUserSnapshot = (): AccountSnapshotFor[] => {
+const takeAccountSnapshots = (timestamp: number): AccountSnapshotFor[] => {
 	const balances = get(balancesStore);
 
 	if (isNullish(balances)) {
@@ -138,8 +151,6 @@ const takeUserSnapshot = (): AccountSnapshotFor[] => {
 	const exchangeRates = get(exchanges);
 
 	const allTokens: Token[] = get(tokens);
-
-	const now = Date.now();
 
 	return allTokens.reduce<AccountSnapshotFor[]>((acc, token) => {
 		const balance = balances[token.id]?.data;
@@ -155,9 +166,9 @@ const takeUserSnapshot = (): AccountSnapshotFor[] => {
 		}
 
 		const snapshot: AccountSnapshotFor | undefined = isIcToken(token)
-			? toIcrcSnapshot({ token, balance, exchangeRate, timestamp: now })
+			? toIcrcSnapshot({ token, balance, exchangeRate, timestamp })
 			: isTokenSpl(token)
-				? toSplSnapshot({ token, balance, exchangeRate, timestamp: now })
+				? toSplSnapshot({ token, balance, exchangeRate, timestamp })
 				: undefined;
 
 		return nonNullish(snapshot) ? [...acc, snapshot] : acc;
@@ -165,14 +176,16 @@ const takeUserSnapshot = (): AccountSnapshotFor[] => {
 };
 
 export const registerUserSnapshot = async () => {
-	const accounts = takeUserSnapshot();
+	const timestamp = Date.now();
+
+	const accounts = takeAccountSnapshots(timestamp);
 
 	if (accounts.length === 0) {
 		return;
 	}
 
 	await registerAirdropRecipient({
-		userSnapshot: { accounts },
+		userSnapshot: { accounts, timestamp: toNullable(BigInt(timestamp)) },
 		identity: get(authIdentity)
 	});
 };

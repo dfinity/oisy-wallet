@@ -7,6 +7,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
+import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
@@ -23,10 +24,11 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 import { BigNumber } from 'ethers';
 import { readable } from 'svelte/store';
 
@@ -59,7 +61,7 @@ describe('user-snapshot.services', () => {
 					amount: mockIcAmount * 2n,
 					timestamp: BigInt(now),
 					network: {},
-					account: Principal.from(ICP_TOKEN.ledgerCanisterId),
+					account: mockIdentity.getPrincipal(),
 					last_transactions: []
 				}
 			},
@@ -70,7 +72,7 @@ describe('user-snapshot.services', () => {
 					amount: mockIcAmount,
 					timestamp: BigInt(now),
 					network: {},
-					account: Principal.from(mockValidIcToken.ledgerCanisterId),
+					account: mockIdentity.getPrincipal(),
 					last_transactions: []
 				}
 			}
@@ -88,14 +90,15 @@ describe('user-snapshot.services', () => {
 					amount: mockSplAmount,
 					timestamp: BigInt(now),
 					network: {},
-					account: mockValidSplToken.address,
+					account: mockSolAddress,
 					last_transactions: []
 				}
 			}
 		];
 
 		const userSnapshot: UserSnapshot = {
-			accounts: [...icrcAccounts, ...splMainnetAccounts]
+			accounts: [...icrcAccounts, ...splMainnetAccounts],
+			timestamp: toNullable(BigInt(now))
 		};
 
 		const mockExchangesData: ExchangesData = tokens.reduce<ExchangesData>(
@@ -124,6 +127,10 @@ describe('user-snapshot.services', () => {
 			mockAuthStore();
 
 			vi.spyOn(tokensDerived, 'tokens', 'get').mockImplementation(() => readable(tokens));
+
+			vi.spyOn(addressStore, 'solAddressMainnet', 'get').mockImplementation(() =>
+				readable(mockSolAddress)
+			);
 
 			tokens.forEach(({ id }) => {
 				balancesStore.reset(id);
@@ -213,7 +220,10 @@ describe('user-snapshot.services', () => {
 			await registerUserSnapshot();
 
 			expect(registerAirdropRecipient).toHaveBeenCalledWith({
-				userSnapshot: { accounts: [...icrcAccounts.slice(0, 1), ...splMainnetAccounts] },
+				userSnapshot: {
+					accounts: [...icrcAccounts.slice(0, 1), ...splMainnetAccounts],
+					timestamp: toNullable(BigInt(now))
+				},
 				identity: mockIdentity
 			});
 		});
