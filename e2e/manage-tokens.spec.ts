@@ -93,6 +93,6 @@ testWithII('should enable and disable DevnetSPL token', async () => {
 	await enableAndDisableToken({
 		page: homepageLoggedIn,
 		tokenSymbol: 'DevnetEURC',
-		networkSymbol: 'Customize Toolbar…'
+		networkSymbol: 'SOL (Devnet)'
 	});
 });
