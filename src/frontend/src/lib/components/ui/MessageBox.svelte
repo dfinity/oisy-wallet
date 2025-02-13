@@ -32,9 +32,9 @@
 	<div
 		class="mb-4 gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base flex items-start"
 		class:bg-primary={level === 'plain'}
-		class:bg-brand-subtle-alt={level === 'info'}
-		class:bg-warning-subtle={level === 'light-warning'}
-		class:bg-error-subtle-alt={level === 'error'}
+		class:bg-brand-subtle-30={level === 'info'}
+		class:bg-warning-subtle-20={level === 'light-warning'}
+		class:bg-error-subtle-30={level === 'error'}
 		transition:slide={SLIDE_EASING}
 		data-tid={testId}
 	>
