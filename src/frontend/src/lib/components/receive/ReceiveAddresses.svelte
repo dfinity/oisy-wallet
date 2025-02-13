@@ -268,7 +268,7 @@
 						{qrCodeAction}
 					>
 						<svelte:fragment slot="title">{title}</svelte:fragment>
-						<span slot="text" class="text-sm ">{text}</span>
+						<span slot="text" class="text-sm">{text}</span>
 					</ReceiveAddress>
 				{:else}
 					<ReceiveAddress

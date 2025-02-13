@@ -1,6 +1,6 @@
 @use 'base-colors' as *;
 
-html[theme="light"]:root {
+html[theme='light']:root {
 	--color-foreground-primary: #{$base-black};
 	--color-foreground-primary-inverted: #{$base-white};
 	--color-foreground-secondary: #{$gray-iron-800};

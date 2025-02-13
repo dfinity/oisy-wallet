@@ -28,7 +28,6 @@
 						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
 					}
 		) as ProgressSteps;
-		console.log()
 	};
 
 	$: progressStep, updateSteps();

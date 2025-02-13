@@ -5,12 +5,6 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<a
-	{href}
-	class="nav-item"
-	class:selected={selected}
-	aria-label={ariaLabel}
-	data-tid={testId}
->
+<a {href} class="nav-item" class:selected aria-label={ariaLabel} data-tid={testId}>
 	<slot />
 </a>

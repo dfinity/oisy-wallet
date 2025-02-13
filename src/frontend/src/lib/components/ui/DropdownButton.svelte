@@ -15,8 +15,8 @@
 	aria-label={ariaLabel}
 	data-tid={testId}
 	{disabled}
-	class:disabled={disabled}
-	class:opened={opened}
+	class:disabled
+	class:opened
 >
 	<slot />
 	<div class="ease-in-out transform transition-transform duration-300" class:-scale-y-100={opened}>

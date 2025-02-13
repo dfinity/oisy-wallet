@@ -10,7 +10,6 @@
 **   solution must be tried and still is prefered. **
 ****************************************************/
 
-
 :root {
 	--toggle-disabled-opacity: 1;
 
@@ -233,13 +232,14 @@ div.toggle {
 	--card-background-contrast: var(--color-background-brand-subtle-20);
 	--card-background: var(--color-base-white);
 
-	&:disabled, &.disabled {
+	&:disabled,
+	&.disabled {
 		--card-background: var(--color-background-primary-alt);
 		--card-background-contrast: var(--color-background-disabled-alt);
 	}
 
 	// todo: solve properly
-	&>label {
+	& > label {
 		//outline: 1px solid var(--color-border-brand-subtle-10);
 	}
 
@@ -254,13 +254,12 @@ div.toggle {
 			--card-background-contrast: var(--color-background-brand-primary);
 		}
 
-		&:disabled, &.disabled {
+		&:disabled,
+		&.disabled {
 			--card-background: var(--color-background-primary-alt);
 			--card-background-contrast: var(--color-background-brand-subtle-20);
 		}
 	}
-
-
 }
 
 div.segment-button {
@@ -313,7 +312,8 @@ div.checkbox {
 			--input-custom-border-color: var(--color-background-brand-primary-alt);
 			--input-background: var(--color-background-brand-primary-alt);
 
-			&:hover:not(:active), &:focus:not(:active) {
+			&:hover:not(:active),
+			&:focus:not(:active) {
 				--secondary: var(--color-background-brand-secondary);
 				--focus-background: var(--color-background-brand-secondary);
 				--input-custom-border-color: var(--color-background-brand-secondary);

@@ -13,7 +13,7 @@
 	export let styleClass = '';
 </script>
 
-<div class={`group flex gap-3 sm:gap-8 ${styleClass}`}>
+<div class={`group gap-3 sm:gap-8 flex ${styleClass}`}>
 	<a
 		class="flex-1 no-underline"
 		href={url}

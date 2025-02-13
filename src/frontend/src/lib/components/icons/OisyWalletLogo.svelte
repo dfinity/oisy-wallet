@@ -9,8 +9,6 @@
 
 	let ariaLabel: string;
 	$: ariaLabel = replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME });
-
-
 </script>
 
 <div class="mr-3">

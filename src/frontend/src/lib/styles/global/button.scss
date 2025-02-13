@@ -115,7 +115,8 @@ a.as-button {
 		}
 	}
 
-	&.primary.disabled:not(.loading), &.primary[disabled]:not(.loading) {
+	&.primary.disabled:not(.loading),
+	&.primary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -141,11 +142,11 @@ a.as-button {
 		}
 	}
 
-	&.secondary.disabled:not(.loading), &.secondary[disabled]:not(.loading) {
+	&.secondary.disabled:not(.loading),
+	&.secondary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
-
 
 	// SECONDARY LIGHT
 	&.secondary-light:not([disabled]):not(.disabled):not(.loading) {
@@ -168,7 +169,8 @@ a.as-button {
 		}
 	}
 
-	&.secondary-light.disabled:not(.loading), &.secondary-light[disabled]:not(.loading) {
+	&.secondary-light.disabled:not(.loading),
+	&.secondary-light[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -194,7 +196,8 @@ a.as-button {
 		}
 	}
 
-	&.tertiary.disabled:not(.loading), &.tertiary[disabled]:not(.loading) {
+	&.tertiary.disabled:not(.loading),
+	&.tertiary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -220,7 +223,8 @@ a.as-button {
 		}
 	}
 
-	&.tertiary-alt.disabled:not(.loading), &.tertiary-alt[disabled]:not(.loading) {
+	&.tertiary-alt.disabled:not(.loading),
+	&.tertiary-alt[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -245,7 +249,8 @@ a.as-button {
 		}
 	}
 
-	&.tertiary-main-card.disabled:not(.loading), &.tertiary-main-card[disabled]:not(.loading) {
+	&.tertiary-main-card.disabled:not(.loading),
+	&.tertiary-main-card[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-primary-alt;
 	}
@@ -271,7 +276,8 @@ a.as-button {
 		}
 	}
 
-	&.success.disabled, &.success[disabled] {
+	&.success.disabled,
+	&.success[disabled] {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -297,7 +303,8 @@ a.as-button {
 		}
 	}
 
-	&.error.disabled, &.error[disabled] {
+	&.error.disabled,
+	&.error[disabled] {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -315,7 +322,6 @@ a.as-button {
 		@include button.icon;
 	}
 }
-
 
 // DROPDOWN BUTTON
 .dropdown-button:not(.loading) {
@@ -335,13 +341,15 @@ a.as-button {
 		@apply text-tertiary;
 	}
 
-	&:hover:not(.disabled):not([disabled]), &.opened {
+	&:hover:not(.disabled):not([disabled]),
+	&.opened {
 		@apply bg-primary;
 		@apply border-brand-primary;
 	}
 }
 
-.dropdown-button.disabled:not(.loading), .dropdown-button[disabled]:not(.loading) {
+.dropdown-button.disabled:not(.loading),
+.dropdown-button[disabled]:not(.loading) {
 	@apply text-disabled;
 	@apply bg-disabled;
 }
@@ -362,12 +370,13 @@ a.as-button {
 	&.selected {
 		@apply bg-brand-subtle-10;
 
-		&>span>svg {
-			color: var(--color-foreground-brand-primary-alt)
+		& > span > svg {
+			color: var(--color-foreground-brand-primary-alt);
 		}
 	}
 }
 
-.dropdown-item.disabled:not(.loading), .dropdown-item[disabled]:not(.loading) {
+.dropdown-item.disabled:not(.loading),
+.dropdown-item[disabled]:not(.loading) {
 	@apply text-tertiary-inverted;
 }

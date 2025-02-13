@@ -12,7 +12,8 @@ a.blue-link {
 }
 
 // NAV ITEMS
-a.nav-item:not([disabled]):not(.disabled):not(.loading), button.nav-item:not([disabled]):not(.disabled):not(.loading) {
+a.nav-item:not([disabled]):not(.disabled):not(.loading),
+button.nav-item:not([disabled]):not(.disabled):not(.loading) {
 	@apply text-primary;
 	@apply flex;
 	@apply w-full;
@@ -25,7 +26,8 @@ a.nav-item:not([disabled]):not(.disabled):not(.loading), button.nav-item:not([di
 	@apply transition-colors;
 	@apply duration-700;
 
-	&:hover, &.selected {
+	&:hover,
+	&.selected {
 		@apply text-brand-primary-alt;
 		@apply bg-brand-subtle-10;
 	}
@@ -56,8 +58,10 @@ a.nav-item:not([disabled]):not(.disabled):not(.loading), button.nav-item:not([di
 	}
 }
 
-a.nav-item.disabled:not(.loading), a.nav-item[disabled]:not(.loading),
-button.nav-item.disabled:not(.loading), button.nav-item[disabled]:not(.loading){
+a.nav-item.disabled:not(.loading),
+a.nav-item[disabled]:not(.loading),
+button.nav-item.disabled:not(.loading),
+button.nav-item[disabled]:not(.loading) {
 	@apply text-disabled;
 	@apply bg-disabled;
 }

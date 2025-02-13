@@ -17,13 +17,3 @@
 	<IconWalletConnect size="24" />
 	<slot />
 </button>
-
-<style lang="scss">
-	button {
-		border-radius: var(--border-radius-sm-1_5x);
-
-		&:hover {
-			color: inherit;
-		}
-	}
-</style>

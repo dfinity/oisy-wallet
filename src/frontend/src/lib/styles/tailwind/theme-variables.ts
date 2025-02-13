@@ -1,12 +1,12 @@
 export const themeVariables = {
-	'foreground': {
-		'primary': 'var(--color-foreground-primary)',
+	foreground: {
+		primary: 'var(--color-foreground-primary)',
 		'primary-inverted': 'var(--color-foreground-primary-inverted)',
-		'secondary': 'var(--color-foreground-secondary)',
+		secondary: 'var(--color-foreground-secondary)',
 		'secondary-inverted': 'var(--color-foreground-secondary-inverted)',
-		'tertiary': 'var(--color-foreground-tertiary)',
+		tertiary: 'var(--color-foreground-tertiary)',
 		'tertiary-inverted': 'var(--color-foreground-tertiary-inverted)',
-		'disabled': 'var(--color-foreground-disabled)',
+		disabled: 'var(--color-foreground-disabled)',
 		'disabled-alt': 'var(--color-foreground-disabled-alt)',
 		'success-primary': 'var(--color-foreground-success-primary)',
 		'success-secondary': 'var(--color-foreground-success-secondary)',
@@ -27,22 +27,22 @@ export const themeVariables = {
 		'brand-subtle-30': 'var(--color-foreground-brand-subtle-30)',
 		'brand-tertiary': 'var(--color-foreground-brand-tertiary)',
 		'primary-inverted-alt': 'var(--color-foreground-primary-inverted-alt)',
-		'white': 'var(--color-foreground-white)',
+		white: 'var(--color-foreground-white)'
 	},
-	'background': {
-		'page': 'var(--color-background-page)',
-		'surface': 'var(--color-background-surface)',
+	background: {
+		page: 'var(--color-background-page)',
+		surface: 'var(--color-background-surface)',
 		'modal-overlay': 'var(--color-background-modal-overlay)',
-		'primary': 'var(--color-background-primary)',
+		primary: 'var(--color-background-primary)',
 		'primary-alt': 'var(--color-background-primary-alt)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
-		'secondary': 'var(--color-background-secondary)',
+		secondary: 'var(--color-background-secondary)',
 		'secondary-alt': 'var(--color-background-secondary-alt)',
 		'secondary-inverted': 'var(--color-background-secondary-inverted)',
-		'tertiary': 'var(--color-background-tertiary)',
+		tertiary: 'var(--color-background-tertiary)',
 		'tertiary-alt': 'var(--color-background-tertiary-alt)',
 		'tertiary-inverted': 'var(--color-background-tertiary-inverted)',
-		'disabled': 'var(--color-background-disabled)',
+		disabled: 'var(--color-background-disabled)',
 		'disabled-alt': 'var(--color-background-disabled-alt)',
 		'success-primary': 'var(--color-background-success-primary)',
 		'success-secondary': 'var(--color-background-success-secondary)',
@@ -69,17 +69,17 @@ export const themeVariables = {
 		'brand-subtle-10': 'var(--color-background-brand-subtle-10)',
 		'brand-subtle-20': 'var(--color-background-brand-subtle-20)',
 		'brand-subtle-30': 'var(--color-background-brand-subtle-30)',
-		'brand-tertiary': 'var(--color-background-brand-tertiary)',
+		'brand-tertiary': 'var(--color-background-brand-tertiary)'
 	},
-	'border': {
-		'page': 'var(--color-background-page)',
-		'primary': 'var(--color-border-primary)',
+	border: {
+		page: 'var(--color-background-page)',
+		primary: 'var(--color-border-primary)',
 		'primary-inverted': 'var(--color-border-primary-inverted)',
-		'secondary': 'var(--color-border-secondary)',
+		secondary: 'var(--color-border-secondary)',
 		'secondary-inverted': 'var(--color-border-secondary-inverted)',
-		'tertiary': 'var(--color-border-tertiary)',
+		tertiary: 'var(--color-border-tertiary)',
 		'tertiary-inverted': 'var(--color-border-tertiary-inverted)',
-		'disabled': 'var(--color-border-disabled)',
+		disabled: 'var(--color-border-disabled)',
 		'success-subtle-10': 'var(--color-border-success-subtle-10)',
 		'success-subtle-20': 'var(--color-border-success-subtle-20)',
 		'warning-subtle-10': 'var(--color-border-warning-subtle-10)',
@@ -101,4 +101,4 @@ export const themeVariables = {
 		'warning-solid': 'var(--color-border-warning-solid)',
 		'warning-solid-alt': 'var(--color-border-warning-solid-alt)'
 	}
-}
+};
