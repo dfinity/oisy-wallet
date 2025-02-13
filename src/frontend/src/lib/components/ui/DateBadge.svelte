@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import {formatToShortDateString} from "$lib/utils/format.utils";
+	import { formatToShortDateString } from '$lib/utils/format.utils';
 
 	export let date: Date;
 	export let prefix: string | undefined = undefined;
