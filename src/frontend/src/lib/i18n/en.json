@@ -116,7 +116,7 @@
 	"airdrops": {
 		"text": {
 			"title": "Airdrops",
-			"active_date": "Due on $date"
+			"active_date": "Due on"
 		}
 	},
 	"footer": {
