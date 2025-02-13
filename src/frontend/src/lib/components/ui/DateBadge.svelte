@@ -6,7 +6,7 @@
 	export let suffix: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
 
-	let formattedDate
+	let formattedDate;
 	$: formattedDate = `${date.toLocaleDateString('en-US', { month: 'long' })} ${date.getDate()}`;
 </script>
 
