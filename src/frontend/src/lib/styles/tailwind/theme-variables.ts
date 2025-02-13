@@ -89,11 +89,11 @@ export const themeVariables = {
 			'tertiary-alt': 'var(--color-brand-300)',
 			disabled: 'var(--color-brand-300)'
 		},
-		success: 'var(--color-success-default)',
+		'success-primary': 'var(--color-success-default)',
 		'success-alt': 'var(--color-success-light)',
-		warning: 'var(--color-warning-default)',
+		'warning-primary': 'var(--color-warning-default)',
 		'warning-alt': 'var(--color-warning-light)',
-		error: 'var(--color-error-default)',
+		'error-primary': 'var(--color-error-default)',
 		'error-alt': 'var(--color-error-light)'
 	}
 };

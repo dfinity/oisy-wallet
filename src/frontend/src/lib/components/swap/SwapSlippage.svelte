@@ -58,10 +58,10 @@
 		class:text-brand-primary={!slippageValueError && !slippageValueWarning}
 		class:bg-warning-subtle={slippageValueWarning}
 		class:hover:bg-warning-subtle-alt={slippageValueWarning}
-		class:text-warning={slippageValueWarning}
+		class:text-warning-primary={slippageValueWarning}
 		class:bg-error-subtle={slippageValueError}
 		class:hover:bg-error-subtle-alt={slippageValueError}
-		class:text-error={slippageValueError}
+		class:text-error-primary={slippageValueError}
 	>
 		<span>{parsedValue}%</span>
 
@@ -101,8 +101,8 @@
 	<div
 		class="mt-2 text-sm text-tertiary"
 		class:text-tertiary={!slippageValueError && !slippageValueWarning}
-		class:text-warning={slippageValueWarning}
-		class:text-error={slippageValueError}
+		class:text-warning-primary={slippageValueWarning}
+		class:text-error-primary={slippageValueError}
 	>
 		{#if slippageValueError}
 			<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
