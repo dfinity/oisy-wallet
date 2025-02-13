@@ -176,7 +176,7 @@ describe('reward-code', () => {
 			sprinkles: []
 		};
 		const expectedAirdrop: AirdropInfo = {
-			timestamp: BigInt(Date.now()),
+			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot'
