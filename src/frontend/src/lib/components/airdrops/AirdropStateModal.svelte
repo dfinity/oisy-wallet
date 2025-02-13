@@ -15,7 +15,7 @@
 	export let jackpot = false;
 
 	let airdrop: AirdropDescription | undefined;
-	$: airdrop = airdropCampaigns.find((campaign) => campaign.id === 'OISY Airdrop');
+	$: airdrop = airdropCampaigns.find((campaign) => campaign.id === 'OISY Airdrop #1');
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
