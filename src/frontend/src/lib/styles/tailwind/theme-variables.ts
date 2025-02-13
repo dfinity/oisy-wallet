@@ -59,32 +59,32 @@ export const themeVariables = {
 		'tertiary-inverted': 'var(--color-border-tertiary-inverted)',
 		disabled: 'var(--color-border-disabled)',
 		brand: {
-			disabled: 'var(--color-border-brand-disabled)',
-			primary: 'var(--color-border-brand-primary)',
-			'primary-alt': 'var(--color-border-brand-primary-alt)',
-			secondary: 'var(--color-border-brand-secondary)',
 			'subtle-10': 'var(--color-border-brand-subtle-10)',
 			'subtle-20': 'var(--color-border-brand-subtle-20)',
 			'subtle-30': 'var(--color-border-brand-subtle-30)',
-			tertiary: 'var(--color-border-brand-tertiary)'
+			primary: 'var(--color-border-brand-primary)',
+			'primary-alt': 'var(--color-border-brand-primary-alt)',
+			secondary: 'var(--color-border-brand-secondary)',
+			tertiary: 'var(--color-border-brand-tertiary)',
+			disabled: 'var(--color-border-brand-disabled)'
 		},
 		success: {
-			solid: 'var(--color-border-success-solid)',
-			'solid-alt': 'var(--color-border-success-solid-alt)',
 			'subtle-10': 'var(--color-border-success-subtle-10)',
-			'subtle-20': 'var(--color-border-success-subtle-20)'
+			'subtle-20': 'var(--color-border-success-subtle-20)',
+			solid: 'var(--color-border-success-solid)',
+			'solid-alt': 'var(--color-border-success-solid-alt)'
 		},
 		warning: {
-			solid: 'var(--color-border-warning-solid)',
-			'solid-alt': 'var(--color-border-warning-solid-alt)',
 			'subtle-10': 'var(--color-border-warning-subtle-10)',
-			'subtle-20': 'var(--color-border-warning-subtle-20)'
+			'subtle-20': 'var(--color-border-warning-subtle-20)',
+			solid: 'var(--color-border-warning-solid)',
+			'solid-alt': 'var(--color-border-warning-solid-alt)'
 		},
 		error: {
-			solid: 'var(--color-border-error-solid)',
-			'solid-alt': 'var(--color-border-error-solid-alt)',
 			'subtle-10': 'var(--color-border-error-subtle-10)',
-			'subtle-20': 'var(--color-border-error-subtle-20)'
+			'subtle-20': 'var(--color-border-error-subtle-20)',
+			solid: 'var(--color-border-error-solid)',
+			'solid-alt': 'var(--color-border-error-solid-alt)'
 		}
 	},
 	foreground: {
