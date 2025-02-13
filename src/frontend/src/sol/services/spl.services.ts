@@ -260,8 +260,8 @@ export const getSplMetadata = async ({
 	if (!('content' in result)) {
 		return {
 			decimals,
-			name: '',
-			symbol: ''
+			name: address,
+			symbol: address
 		};
 	}
 
