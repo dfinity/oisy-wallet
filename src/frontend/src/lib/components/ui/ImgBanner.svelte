@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { themeStore } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
 
 	export let src: string;
