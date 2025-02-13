@@ -33,6 +33,7 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		airdrops: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -46,6 +47,7 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		airdrops: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
@@ -103,6 +105,10 @@ interface I18nDapps {
 		tags: string;
 		website: string;
 	};
+}
+
+interface I18nAirdrops {
+	text: { title: string };
 }
 
 interface I18nFooter {
@@ -819,6 +825,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
+	airdrops: I18nAirdrops;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
