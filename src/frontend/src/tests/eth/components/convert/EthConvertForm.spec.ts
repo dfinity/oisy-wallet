@@ -107,18 +107,6 @@ describe('EthConvertForm', () => {
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
-	it('should keep the next button disabled if maxGasFee is undefined', () => {
-		store.setFee({ ...mockFeeStore, maxFeePerGas: null });
-		mockCkEthStore('address');
-
-		const { getByTestId } = render(EthConvertForm, {
-			props,
-			context: mockContext({ feeStore: store })
-		});
-
-		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
-	});
-
 	it('should keep the next button disabled if ckEthHelperContractAddress is not available', () => {
 		store.setFee(mockFeeStore);
 		mockCkEthStore(undefined);

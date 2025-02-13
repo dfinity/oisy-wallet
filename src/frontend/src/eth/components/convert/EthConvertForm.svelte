@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
@@ -11,7 +10,6 @@
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
-	export let amountError = false;
 
 	const { sourceTokenExchangeRate } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
@@ -20,14 +18,12 @@
 	let insufficientFunds: boolean;
 	let insufficientFundsForFee: boolean;
 
-	$: amountError = insufficientFunds || insufficientFundsForFee;
-
 	let invalid: boolean;
 	$: invalid =
-		amountError ||
+		insufficientFunds ||
+		insufficientFundsForFee ||
 		invalidAmount(sendAmount) ||
-		isNullishOrEmpty($ckEthHelperContractAddress) ||
-		isNullish($maxGasFee);
+		isNullishOrEmpty($ckEthHelperContractAddress);
 </script>
 
 <ConvertForm
