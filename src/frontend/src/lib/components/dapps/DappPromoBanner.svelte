@@ -11,7 +11,7 @@
 
 <article class="rounded-2xl relative flex items-end overflow-hidden">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="max-h-64 bg-brand-subtle-alt">
+		<div class="max-h-64 bg-brand-subtle-30">
 			<ImgBanner
 				src={dAppDescription.screenshots[0]}
 				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}

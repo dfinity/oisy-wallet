@@ -104,10 +104,10 @@ a.as-button {
 	}
 
 	&.secondary:not([disabled]):not(.disabled):not(.loading) {
-		@apply text-brand-primary bg-brand-subtle;
+		@apply text-brand-primary bg-brand-subtle-20;
 
 		&:hover {
-			@apply bg-brand-subtle-alt;
+			@apply bg-brand-subtle-30;
 		}
 
 		&:active {
@@ -123,7 +123,7 @@ a.as-button {
 		}
 
 		&:active {
-			@apply bg-brand-subtle-alt;
+			@apply bg-brand-subtle-30;
 			color: currentColor;
 		}
 
