@@ -19,6 +19,7 @@
 
 	export let jackpot = false;
 
+	// TODO At the moment the selected campaign is hardcoded. In the future this should be configurable from the outside.
 	let airdrop: AirdropDescription | undefined;
 	$: airdrop = airdropCampaigns.find((campaign) => campaign.id === 'OISY Airdrop #1');
 </script>
