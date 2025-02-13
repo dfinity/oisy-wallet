@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import AirdropDateTag from '$lib/components/airdrops/AirdropDateTag.svelte';
+	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import type { AirdropDescription } from '$lib/types/airdrop-events';
 
@@ -30,10 +30,7 @@
 			</p>
 		</section>
 		<section class="bottom-4 left-4 right-4 max-h-6 min-h-6 md:max-h-14 absolute overflow-hidden">
-			<AirdropDateTag
-				endDate={airdrop.endDate}
-				testId={nonNullish(testId) ? `${testId}-tag` : undefined}
-			/>
+			<AirdropDateBadge date={airdrop.endDate} testId={nonNullish(testId) ? `${testId}-tag` : undefined} />
 		</section>
 	</article>
 </button>
