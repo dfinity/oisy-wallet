@@ -10,7 +10,7 @@ describe('AirdropCard', () => {
 
 		const testId = 'testId';
 		const logoSelector = `div[data-tid="${testId}-logo"]`;
-		const tagSelector = `ul[data-tid="${testId}-tag"]`;
+		const badgeSelector = `span[data-tid="${testId}-tag"]`;
 
 		const { container, getByText } = render(AirdropCard, {
 			props: {
@@ -25,7 +25,7 @@ describe('AirdropCard', () => {
 		const logo: HTMLDivElement | null = container.querySelector(logoSelector);
 		expect(logo).toBeInTheDocument();
 
-		const tag: HTMLUListElement | null = container.querySelector(tagSelector);
-		expect(tag).toBeInTheDocument();
+		const badge: HTMLSpanElement | null = container.querySelector(badgeSelector);
+		expect(badge).toBeInTheDocument();
 	});
 });
