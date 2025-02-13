@@ -9,11 +9,11 @@
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
-		dAppDescriptions,
 		type OisyDappDescription
-	} from '$lib/types/dapp-description';
+	} from '$lib/types/dapp-descriptions';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
+	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 
 	export let styleClass: string | undefined = undefined;
 

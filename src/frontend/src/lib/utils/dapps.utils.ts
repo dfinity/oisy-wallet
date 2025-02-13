@@ -1,7 +1,7 @@
 import {
 	type CarouselSlideOisyDappDescription,
 	type OisyDappDescription
-} from '$lib/types/dapp-description';
+} from '$lib/types/dapp-descriptions';
 import { nonNullish } from '@dfinity/utils';
 
 export const filterCarouselDapps = ({

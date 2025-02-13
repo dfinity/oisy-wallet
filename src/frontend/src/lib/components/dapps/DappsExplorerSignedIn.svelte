@@ -8,8 +8,9 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { dAppDescriptions, type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
+	import { type FeaturedOisyDappDescription } from '$lib/types/dapp-descriptions';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 
 	// For the moment only the first featured dapp is highlighted
 	const selectFirstFeaturedDapp = (): FeaturedOisyDappDescription | undefined =>
