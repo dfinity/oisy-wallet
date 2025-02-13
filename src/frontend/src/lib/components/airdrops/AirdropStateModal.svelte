@@ -17,18 +17,18 @@
 	<ContentWithToolbar>
 		<ImgBanner src={jackpot ? airdropJackpotReceived : airdropReceived} styleClass="aspect-auto" />
 
-		<div class="gap-4 flex flex-col items-center">
-			<h3 class="my-3 text-center"
+		<div class="gap-4 flex flex-col items-center text-center">
+			<h3 class="my-3"
 				>{jackpot
 					? $i18n.airdrops.text.state_modal_title_jackpot
 					: $i18n.airdrops.text.state_modal_title}</h3
 			>
-			<span class="block w-full text-center">{$i18n.airdrops.text.state_modal_content_text}</span>
+			<span class="block w-full">{$i18n.airdrops.text.state_modal_content_text}</span>
 			<Share
 				text={$i18n.airdrops.text.share}
 				href={jackpot
-					? 'https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com'
-					: 'https://x.com/intent/post?text=I%20just%20discovered%20an%20OISY%20airdrop%20campaign%21%0AGo%20to%20OISY%3A%20https%3A%2F%2Foisy.com'}
+					? 'https://x.com/intent/post?text=Just%20received%20a%20%F0%9F%8E%87%20Jackpot%20Airdrop%20%F0%9F%8E%87%20worth%20%2450%20in%20%40oisy%27s%20first%20airdrop%20campaign%21%0D%0A%0D%0ASign-up%20and%20participate%20in%3A%20https%3A%2F%2Foisy.com'
+					: 'https://x.com/intent/post?text=Just%20received%20an%20%F0%9F%8E%81%20Airdrop%20%F0%9F%8E%81%20in%20%40oisy%27s%20first%20airdrop%20campaign!%0A%0ASign-up%20and%20participate%20in%3A%20https%3A%2F%2Foisy.com'}
 			/>
 		</div>
 
