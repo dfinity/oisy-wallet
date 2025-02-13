@@ -5,9 +5,9 @@
 	const variantClassNames = {
 		default: 'border border-tertiary bg-dust/30',
 		info: 'bg-brand-subtle text-brand-primary',
-		error: 'bg-error-subtle text-error',
-		warning: 'bg-warning-subtle text-warning',
-		success: 'bg-success-subtle text-success',
+		error: 'bg-error-subtle text-error-primary',
+		warning: 'bg-warning-subtle text-warning-primary',
+		success: 'bg-success-subtle text-success-primary',
 		outline: 'border border-tertiary bg-off-white'
 	};
 
