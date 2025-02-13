@@ -26,7 +26,7 @@
 	<article class="gap-y-4 md:gap-y-2 flex h-full flex-col justify-between">
 		<section>
 			<p class="m-0 text-lg font-semibold text-start">{dAppName}</p>
-			<p title={oneLiner} class="m-0 mt-2 text-xs text-start text-misty-rose">
+			<p title={oneLiner} class="m-0 mt-2 text-xs text-start text-tertiary">
 				{oneLiner}
 			</p>
 		</section>
