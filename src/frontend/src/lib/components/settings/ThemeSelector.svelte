@@ -4,32 +4,29 @@
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
-	import { THEME_KEY, THEME_VALUES } from '$lib/constants/themes.constants';
-	import { SystemTheme } from '$lib/enums/themes';
 	import { i18n } from '$lib/stores/i18n.store';
 
+	enum SystemTheme {
+		SYSTEM = 'system'
+	}
+	const THEME_VALUES = [...Object.values(Theme), ...Object.values(SystemTheme)];
+
+	// TODO: use variable exposed from gix-components when it will be exposed.
+	const THEME_KEY = 'nnsTheme';
+
 	const selectTheme = (theme: Theme | SystemTheme) => {
-		// Since gix-components does not support System theme, a solution is to delete the cached theme when the user selects the System theme.
 		if (theme === SystemTheme.SYSTEM) {
-			localStorage.removeItem(THEME_KEY);
-			updateSelectedTheme();
+			themeStore.resetToSystemSettings();
 			return;
 		}
 
 		themeStore.select(theme);
-		updateSelectedTheme();
 	};
 
 	let selectedTheme: Theme | SystemTheme;
-
-	const updateSelectedTheme = () => {
-		selectedTheme =
-			isNullish(localStorage.getItem(THEME_KEY)) || isNullish($themeStore)
-				? SystemTheme.SYSTEM
-				: $themeStore;
-	};
-
-	$: $themeStore, updateSelectedTheme();
+	$: selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
+		? SystemTheme.SYSTEM
+		: ($themeStore ?? SystemTheme.SYSTEM);
 </script>
 
 <div class="flex flex-row">
