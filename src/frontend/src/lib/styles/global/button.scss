@@ -104,7 +104,7 @@ a.as-button {
 	}
 
 	&.secondary:not([disabled]):not(.disabled):not(.loading) {
-		@apply text-brand-primary bg-brand-subtle;
+		@apply text-brand-primary bg-brand-subtle-20;
 
 		&:hover {
 			@apply bg-brand-subtle-alt;
