@@ -109,11 +109,12 @@ html[theme='dark']:root {
 		filter: brightness(0) invert(1);
 	}
 
+	// invert black and white network icons, cant be styled with currentColor because not inlined
 	.network-logo-bw {
 		filter: invert(1);
 	}
 
-	// soften background, easier than fidgeting with svg colors
+	// soften background, easier than fidgeting with svg colors and mutes the rather bright bg image
 	#app-background {
 		filter: brightness(0.3);
 	}
