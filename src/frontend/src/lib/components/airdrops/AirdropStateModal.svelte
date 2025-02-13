@@ -11,6 +11,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type AirdropDescription, airdropCampaigns } from '$lib/types/airdrop-events';
+	import {
+		AIRDROPS_STATE_MODAL_IMAGE_BANNER,
+		AIRDROPS_STATE_MODAL_SHARE_BUTTON
+	} from "$lib/constants/test-ids.constants";
 
 	export let jackpot = false;
 
@@ -20,7 +24,7 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
-		<ImgBanner src={jackpot ? airdropJackpotReceived : airdropReceived} styleClass="aspect-auto" />
+		<ImgBanner src={jackpot ? airdropJackpotReceived : airdropReceived} styleClass="aspect-auto" testId={AIRDROPS_STATE_MODAL_IMAGE_BANNER} />
 
 		<div class="gap-4 flex flex-col items-center text-center">
 			<h3 class="my-3"
@@ -32,6 +36,7 @@
 
 			{#if nonNullish(airdrop)}
 				<Share
+					testId={AIRDROPS_STATE_MODAL_SHARE_BUTTON}
 					text={$i18n.airdrops.text.share}
 					href={jackpot ? airdrop.jackpotHref : airdrop.airdropHref}
 				/>
