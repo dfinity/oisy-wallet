@@ -4,7 +4,8 @@ export enum AppPath {
 	Settings = '/settings',
 	Transactions = '/transactions',
 	Activity = '/activity',
-	WalletConnect = '/wc'
+	WalletConnect = '/wc',
+	Airdrops = '/airdrops'
 }
 
 // SvelteKit uses the group defined in src/routes/(app)/ as part of the routeId. It also prefixes it with /.
