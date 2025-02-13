@@ -107,6 +107,10 @@ interface I18nDapps {
 	};
 }
 
+interface I18nAirdrops {
+	text: { title: string };
+}
+
 interface I18nFooter {
 	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
 	alt: { dfinity: string; status: string };
@@ -821,6 +825,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
+	airdrops: I18nAirdrops;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
