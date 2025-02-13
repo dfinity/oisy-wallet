@@ -5,7 +5,7 @@ import { render } from '@testing-library/svelte';
 describe('AirdropsGroups', () => {
 	const title = 'Active campaigns';
 	const groupTitle = 'campaign';
-	const activeGroupSelector = `button[data-tid="${groupTitle}-active"]`;
+	const activeGroupSelector = `button[data-tid="${groupTitle}-OISY Airdrop #1"]`;
 
 	it('should render campaigns', () => {
 		const { container, getByText } = render(AirdropsGroup, {
