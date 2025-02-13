@@ -116,6 +116,7 @@
 	"airdrops": {
 		"text": {
 			"title": "Airdrops",
+            "active_date": "Due on",
 			"share": "Share",
 			"open_wallet": "Take me to the wallet",
 			"state_modal_title": "Congratulations on winning today's airdrop!",
