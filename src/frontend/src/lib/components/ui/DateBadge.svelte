@@ -10,7 +10,7 @@
 	$: formattedDate = `${date.toLocaleDateString('en-US', { month: 'long' })} ${date.getDate()}`;
 </script>
 
-<Badge>
+<Badge {testId}>
 	{prefix ?? ''}
 	{formattedDate}
 	{suffix ?? ''}
