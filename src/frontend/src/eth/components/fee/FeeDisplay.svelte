@@ -1,4 +1,6 @@
 <script lang="ts">
+	// TODO: this component is deprecated and will be replaced with EthFeeDisplay in the new send/convert flow UI
+
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
