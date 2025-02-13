@@ -52,7 +52,7 @@
 			{/each}
 		</ul>
 
-		<span class="mt-8 mb-5 font-bold px-4.5 flex">{$i18n.networks.test_networks}</span>
+		<span class="mt-8 mb-5 font-bold flex">{$i18n.networks.test_networks}</span>
 
 		{#if $testnetsEnabled}
 			<ul class="mb-2 gap-4 font-normal flex list-none flex-col" transition:slide={SLIDE_EASING}>
