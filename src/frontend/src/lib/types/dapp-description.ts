@@ -44,3 +44,7 @@ export const OisyDappDescriptionSchema = DAppDescriptionSchema.extend({
 });
 
 export type OisyDappDescription = z.infer<typeof OisyDappDescriptionSchema>;
+export type FeaturedOisyDappDescription = Omit<OisyDappDescription, 'screenshots'> &
+	Required<Pick<OisyDappDescription, 'screenshots'>>;
+export type CarouselSlideOisyDappDescription = Omit<OisyDappDescription, 'carousel'> &
+	Required<Pick<OisyDappDescription, 'carousel'>>;
