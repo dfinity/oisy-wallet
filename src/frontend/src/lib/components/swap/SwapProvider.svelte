@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -9,7 +10,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
-	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 
 	let kongSwapDApp: OisyDappDescription | undefined;
 	$: kongSwapDApp = dAppDescriptions.find(({ id }) => id === 'kongswap');
