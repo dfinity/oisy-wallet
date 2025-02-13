@@ -1,11 +1,16 @@
 import AirdropsGroup from '$lib/components/airdrops/AirdropsGroup.svelte';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
+import type {AirdropDescription} from "$lib/types/airdrop-events";
+import {assertNonNullish} from "@dfinity/utils";
 
 describe('AirdropsGroups', () => {
+	const mockAirdropCampaign: AirdropDescription | undefined = mockAirdropCampaigns.at(0);
+	assertNonNullish(mockAirdropCampaign);
+
 	const title = 'Active campaigns';
 	const groupTitle = 'campaign';
-	const activeGroupSelector = `button[data-tid="${groupTitle}-OISY Airdrop #1"]`;
+	const activeGroupSelector = `button[data-tid="${groupTitle}-${mockAirdropCampaign.id}"]`;
 
 	it('should render campaigns', () => {
 		const { container, getByText } = render(AirdropsGroup, {
