@@ -1,11 +1,11 @@
 <script lang="ts">
-	import IconShare from '$lib/components/icons/IconShare.svelte';
+	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 
 	export let text: string;
 	export let href: string;
 	export let color: 'blue' | 'inherit' = 'inherit';
-	export let testId: string | undefined = undefined;
 	export let styleClass: string | undefined = undefined;
+	export let testId: string | undefined = undefined;
 </script>
 
 <a

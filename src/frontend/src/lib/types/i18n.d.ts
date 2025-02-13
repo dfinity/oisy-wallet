@@ -118,6 +118,10 @@ interface I18nAirdrops {
 		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
+		open_wallet: string;
+		state_modal_title: string;
+		state_modal_title_jackpot: string;
+		state_modal_content_text: string;
 	};
 	alt: { upcoming_campaigns: string };
 }
