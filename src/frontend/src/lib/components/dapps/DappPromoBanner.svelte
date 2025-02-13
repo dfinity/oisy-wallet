@@ -3,7 +3,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-descriptions';
+	import type { FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dAppDescription: FeaturedOisyDappDescription;

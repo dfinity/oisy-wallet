@@ -8,7 +8,7 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type FeaturedOisyDappDescription } from '$lib/types/dapp-descriptions';
+	import { type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 

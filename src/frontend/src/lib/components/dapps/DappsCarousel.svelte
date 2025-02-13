@@ -10,7 +10,7 @@
 	import {
 		type CarouselSlideOisyDappDescription,
 		type OisyDappDescription
-	} from '$lib/types/dapp-descriptions';
+	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
