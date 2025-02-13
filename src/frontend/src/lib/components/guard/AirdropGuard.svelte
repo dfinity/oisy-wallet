@@ -17,7 +17,7 @@
 			const newAirdrops = airdrops.filter((airdrop) => airdrop.timestamp >= lastTimestamp);
 
 			if (newAirdrops.length > 0) {
-				const containsJackpot = newAirdrops.some((airdrop) => airdrop.name === 'jackpot');
+				newAirdrops.some((airdrop) => airdrop.name === 'jackpot');
 				// TODO open airdrop modal
 			}
 			sessionStorage.setItem('initialLoading', 'true');
