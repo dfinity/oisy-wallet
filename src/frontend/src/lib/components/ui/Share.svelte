@@ -11,6 +11,7 @@
 <ExternalLink
         {href}
         {testId}
+        ariaLabel={text}
         iconVisible={false}
         styleClass={`${styleClass ?? ''} border border-grey rounded-xl px-3 py-2`}
 >
