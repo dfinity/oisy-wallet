@@ -14,7 +14,7 @@
 
 	export let jackpot = false;
 
-	let airdrop: AirdropDescription;
+	let airdrop: AirdropDescription | undefined;
 	$: airdrop = airdropCampaigns.find((campaign) => campaign.id === 'OISY Airdrop');
 </script>
 
