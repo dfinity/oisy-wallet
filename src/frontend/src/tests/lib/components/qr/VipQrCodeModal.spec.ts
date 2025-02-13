@@ -5,11 +5,8 @@ import {
 	VIP_CODE_REGENERATE_BUTTON,
 	VIP_QR_CODE_COPY_BUTTON
 } from '$lib/constants/test-ids.constants';
-import * as authStore from '$lib/derived/auth.derived';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { Identity } from '@dfinity/agent';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
 import { vi } from 'vitest';
 
 describe('VipQrCodeModal', () => {
@@ -17,9 +14,6 @@ describe('VipQrCodeModal', () => {
 	const urlSelector = `output`;
 	const copyButtonSelector = `button[data-tid=${VIP_QR_CODE_COPY_BUTTON}]`;
 	const regenerateButtonSelector = `button[data-tid=${VIP_CODE_REGENERATE_BUTTON}]`;
-
-	const mockAuthStore = (value: Identity | null = mockIdentity) =>
-		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
 	const mockedNewRewardResponse: NewVipRewardResponse = {
 		VipReward: {
