@@ -88,6 +88,10 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
+export const formatToShortDateString = (date: Date): string => {
+	return date.toLocaleDateString('en', { month: 'long' });
+};
+
 const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
