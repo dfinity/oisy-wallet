@@ -56,7 +56,11 @@
 </div>
 
 {#if nonNullish(explorerAddressUrl)}
-	<ExternalLink href={explorerAddressUrl} ariaLabel={$i18n.wallet.alt.open_solscan}>
+	<ExternalLink
+		styleClass="nav-item"
+		href={explorerAddressUrl}
+		ariaLabel={$i18n.wallet.alt.open_solscan}
+	>
 		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}

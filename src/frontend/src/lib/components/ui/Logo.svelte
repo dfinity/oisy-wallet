@@ -11,6 +11,7 @@
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 	export let ring = false;
 	export let testId: string | undefined = undefined;
+	export let styleClass = '';
 
 	let sizePx = logoSizes[size];
 
@@ -30,7 +31,7 @@
 </script>
 
 <div
-	class="flex items-center justify-center overflow-hidden rounded-full ring-white"
+	class={`flex items-center justify-center overflow-hidden rounded-full ring-white ${styleClass}`}
 	class:bg-dust={color === 'dust' && !loaded}
 	class:bg-off-white={color === 'off-white' && !loaded}
 	class:bg-white={color === 'white' && !loaded}

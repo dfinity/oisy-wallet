@@ -15,7 +15,7 @@
 	<IconAstronautHelmet />
 </div>
 
-<picture aria-label={ariaLabel} class="w-24">
+<picture aria-label={ariaLabel} id="oisy-wallet-logo" class="w-24">
 	<source srcset={oisyLogoSmall} media="(max-width: 639px)" />
 	<Img src={oisyLogoLarge} alt={ariaLabel} />
 </picture>
