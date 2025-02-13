@@ -8,13 +8,13 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { type AirdropDescription, airdropCampaigns } from '$lib/types/airdrop-events';
 	import {
 		AIRDROPS_STATE_MODAL_IMAGE_BANNER,
 		AIRDROPS_STATE_MODAL_SHARE_BUTTON
-	} from "$lib/constants/test-ids.constants";
+	} from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { type AirdropDescription, airdropCampaigns } from '$lib/types/airdrop-events';
 
 	export let jackpot = false;
 
@@ -24,7 +24,11 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
-		<ImgBanner src={jackpot ? airdropJackpotReceived : airdropReceived} styleClass="aspect-auto" testId={AIRDROPS_STATE_MODAL_IMAGE_BANNER} />
+		<ImgBanner
+			src={jackpot ? airdropJackpotReceived : airdropReceived}
+			styleClass="aspect-auto"
+			testId={AIRDROPS_STATE_MODAL_IMAGE_BANNER}
+		/>
 
 		<div class="gap-4 flex flex-col items-center text-center">
 			<h3 class="my-3"
