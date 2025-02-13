@@ -1,3 +1,4 @@
+import type { AirdropDescription } from '$env/types/env-airdrop';
 import airdropJackpotReceived from '$lib/assets/airdrop-jackpot-received.svg';
 import airdropReceived from '$lib/assets/airdrop-received.svg';
 import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
@@ -10,7 +11,6 @@ import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import type {AirdropDescription} from "$env/types/env-airdrop";
 
 describe('AirdropStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${AIRDROPS_STATE_MODAL_IMAGE_BANNER}"]`;
