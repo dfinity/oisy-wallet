@@ -1,6 +1,6 @@
 import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte';
 import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
-import { mockAirdropEvents } from '$tests/mocks/airdrop-campaigns.mock';
+import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
 
 describe('AirdropModal', () => {
@@ -19,7 +19,7 @@ describe('AirdropModal', () => {
 		const title = 'myTitle';
 		const description = 'my description';
 		const requirements = ['step 1', 'step 2'];
-		const mockedAirdrop = { ...mockAirdropEvents[0], title, description, requirements };
+		const mockedAirdrop = { ...mockAirdropCampaigns[0], title, description, requirements };
 
 		const { container, getByText } = render(AirdropModal, {
 			props: {

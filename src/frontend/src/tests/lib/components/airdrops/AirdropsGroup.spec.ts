@@ -1,5 +1,5 @@
 import AirdropsGroup from '$lib/components/airdrops/AirdropsGroup.svelte';
-import { mockAirdropEvents } from '$tests/mocks/airdrop-campaigns.mock';
+import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
 
 describe('AirdropsGroups', () => {
@@ -11,7 +11,7 @@ describe('AirdropsGroups', () => {
 		const { container, getByText } = render(AirdropsGroup, {
 			props: {
 				title,
-				airdrops: mockAirdropEvents,
+				airdrops: mockAirdropCampaigns,
 				testId: groupTitle
 			}
 		});
@@ -47,7 +47,7 @@ describe('AirdropsGroups', () => {
 		const { container, queryByText } = render(AirdropsGroup, {
 			props: {
 				title,
-				airdrops: mockAirdropEvents,
+				airdrops: mockAirdropCampaigns,
 				testId: groupTitle,
 				altText: altText
 			}
