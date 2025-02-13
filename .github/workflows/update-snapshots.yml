@@ -149,7 +149,6 @@ jobs:
     needs: [update_snapshots]
 
     steps:
-
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@v1
         id: app-token
