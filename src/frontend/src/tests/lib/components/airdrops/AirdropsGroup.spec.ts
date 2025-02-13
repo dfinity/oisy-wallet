@@ -1,5 +1,5 @@
 import AirdropsGroup from '$lib/components/airdrops/AirdropsGroup.svelte';
-import { mockAirdropEvents } from '$tests/mocks/airdrop-events.mock';
+import { mockAirdropEvents } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
 
 describe('AirdropsGroups', () => {

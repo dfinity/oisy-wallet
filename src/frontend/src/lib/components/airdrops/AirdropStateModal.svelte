@@ -9,8 +9,13 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { type AirdropDescription, airdropCampaigns } from '$lib/types/airdrop-events';
+	import {nonNullish} from "@dfinity/utils";
 
 	export let jackpot = false;
+
+	let airdrop: AirdropDescription;
+	$: airdrop = airdropCampaigns.find((campaign) => campaign.id === 'OISY Airdrop');
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -24,12 +29,15 @@
 					: $i18n.airdrops.text.state_modal_title}</h3
 			>
 			<span class="block w-full">{$i18n.airdrops.text.state_modal_content_text}</span>
-			<Share
-				text={$i18n.airdrops.text.share}
-				href={jackpot
-					? 'https://x.com/intent/post?text=Just%20received%20a%20%F0%9F%8E%87%20Jackpot%20Airdrop%20%F0%9F%8E%87%20worth%20%2450%20in%20%40oisy%27s%20first%20airdrop%20campaign%21%0D%0A%0D%0ASign-up%20and%20participate%20in%3A%20https%3A%2F%2Foisy.com'
-					: 'https://x.com/intent/post?text=Just%20received%20an%20%F0%9F%8E%81%20Airdrop%20%F0%9F%8E%81%20in%20%40oisy%27s%20first%20airdrop%20campaign!%0A%0ASign-up%20and%20participate%20in%3A%20https%3A%2F%2Foisy.com'}
-			/>
+
+			{#if nonNullish(airdrop)}
+				<Share
+					text={$i18n.airdrops.text.share}
+					href={jackpot
+						? airdrop.jackpotHref
+						: airdrop.airdropHref}
+				/>
+			{/if}
 		</div>
 
 		<ButtonGroup slot="toolbar">

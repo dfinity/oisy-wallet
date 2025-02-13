@@ -1,6 +1,6 @@
 import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte';
 import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
-import { mockAirdropEvents } from '$tests/mocks/airdrop-events.mock';
+import { mockAirdropEvents } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
 
 describe('AirdropModal', () => {

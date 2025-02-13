@@ -12,7 +12,7 @@
 	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type AirdropDescription, airdropEvents } from '$lib/types/airdrop-events';
+	import { type AirdropDescription, airdropCampaigns } from '$lib/types/airdrop-events';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
@@ -33,12 +33,12 @@
 	};
 
 	let ongoingEvents: AirdropDescription[];
-	$: ongoingEvents = airdropEvents.filter((airdrop) =>
+	$: ongoingEvents = airdropCampaigns.filter((airdrop) =>
 		isOngoingEvent({ startDate: airdrop.startDate, endDate: airdrop.endDate })
 	);
 
 	let upcomingEvents: AirdropDescription[];
-	$: upcomingEvents = airdropEvents.filter((airdrop) => isUpcomingEvent(airdrop.startDate));
+	$: upcomingEvents = airdropCampaigns.filter((airdrop) => isUpcomingEvent(airdrop.startDate));
 </script>
 
 <div class="mb-6 rounded-2xl md:mb-10 relative flex items-end overflow-hidden">
