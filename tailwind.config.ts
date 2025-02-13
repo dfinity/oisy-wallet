@@ -31,7 +31,6 @@ export default {
 			'united-nations-blue': '#627eea',
 			'pale-cornflower-blue': '#b0cdff',
 			'brilliant-azure': '#348afd',
-			'misty-rose': '#937993',
 			'chinese-purple': '#7014a4',
 			'lavander-indigo': '#904efa',
 			goldenrod: '#dfa81b',

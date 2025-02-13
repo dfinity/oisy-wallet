@@ -33,7 +33,7 @@
 				<CardAmount><slot name="amount" /></CardAmount>
 			{/if}
 		</div>
-		<div class="gap-1 flex text-misty-rose" class:items-center={!description}>
+		<div class="gap-1 flex text-tertiary" class:items-center={!description}>
 			<span class="inline-flex items-center text-left">
 				<slot name="description" />
 			</span>
