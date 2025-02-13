@@ -1,13 +1,17 @@
 import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
-import { THEME_KEY, THEME_VALUES } from '$lib/constants/themes.constants';
-import { SystemTheme } from '$lib/enums/themes';
 import { Theme, themeStore } from '@dfinity/gix-components';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('ThemeSelector', () => {
 	const originalMatchMedia = window.matchMedia;
+
+	enum SystemTheme {
+		SYSTEM = 'system'
+	}
+	const THEME_VALUES = [...Object.values(Theme), ...Object.values(SystemTheme)];
+	const THEME_KEY = 'nnsTheme';
 
 	beforeEach(() => {
 		vi.resetAllMocks();

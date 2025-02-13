@@ -4,9 +4,15 @@
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
-	import { THEME_KEY, THEME_VALUES } from '$lib/constants/themes.constants';
-	import { SystemTheme } from '$lib/enums/themes';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	enum SystemTheme {
+		SYSTEM = 'system'
+	}
+	const THEME_VALUES = [...Object.values(Theme), ...Object.values(SystemTheme)];
+
+	// TODO: use variable exposed from gix-components when it will be exposed.
+	const THEME_KEY = 'nnsTheme';
 
 	const selectTheme = (theme: Theme | SystemTheme) => {
 		if (theme === SystemTheme.SYSTEM) {
