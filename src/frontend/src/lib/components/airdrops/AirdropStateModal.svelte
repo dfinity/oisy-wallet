@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import airdropJackpotReceived from '$lib/assets/airdrop-jackpot-received.svg';
 	import airdropReceived from '$lib/assets/airdrop-received.svg';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -10,7 +11,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { type AirdropDescription, airdropCampaigns } from '$lib/types/airdrop-events';
-	import {nonNullish} from "@dfinity/utils";
 
 	export let jackpot = false;
 
@@ -33,9 +33,7 @@
 			{#if nonNullish(airdrop)}
 				<Share
 					text={$i18n.airdrops.text.share}
-					href={jackpot
-						? airdrop.jackpotHref
-						: airdrop.airdropHref}
+					href={jackpot ? airdrop.jackpotHref : airdrop.airdropHref}
 				/>
 			{/if}
 		</div>
