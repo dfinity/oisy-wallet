@@ -5,6 +5,42 @@ import { HomepageLoggedIn } from './utils/pages/homepage.page';
 
 let homepageLoggedIn: HomepageLoggedIn;
 
+const enableAndDisableToken = async ({
+	page,
+	tokenSymbol,
+	networkSymbol
+}: {
+	page: HomepageLoggedIn;
+	tokenSymbol: string;
+	networkSymbol: string;
+}) => {
+	await page.activateTestnetSettings();
+	await page.toggleTokenInList({
+		tokenSymbol,
+		networkSymbol
+	});
+	await expect(
+		page.getTokenCardLocator({
+			tokenSymbol,
+			networkSymbol
+		})
+	).toBeVisible();
+	await page.waitForLoadState();
+	await page.setCarouselFirstSlide();
+	await page.waitForLoadState();
+	await page.takeScreenshot();
+	await page.toggleTokenInList({
+		tokenSymbol,
+		networkSymbol
+	});
+	await expect(
+		page.getTokenCardLocator({
+			tokenSymbol,
+			networkSymbol
+		})
+	).not.toBeVisible();
+};
+
 testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
@@ -22,85 +58,41 @@ testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
 });
 
 testWithII('should enable and disable ICRC token', async () => {
-	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList({
+	await enableAndDisableToken({
+		page: homepageLoggedIn,
 		tokenSymbol: 'ckSepoliaETH',
 		networkSymbol: 'ICP'
 	});
-	await expect(
-		homepageLoggedIn.getTokenCardLocator({
-			tokenSymbol: 'ckSepoliaETH',
-			networkSymbol: 'ICP'
-		})
-	).toBeVisible();
-	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.setCarouselFirstSlide();
-	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.takeScreenshot();
-	await homepageLoggedIn.toggleTokenInList({
-		tokenSymbol: 'ckSepoliaETH',
-		networkSymbol: 'ICP'
-	});
-	await expect(
-		homepageLoggedIn.getTokenCardLocator({
-			tokenSymbol: 'ckSepoliaETH',
-			networkSymbol: 'ICP'
-		})
-	).not.toBeVisible();
 });
 
 testWithII('should enable and disable ERC20 token', async () => {
-	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList({
+	await enableAndDisableToken({
+		page: homepageLoggedIn,
 		tokenSymbol: 'SHIB',
 		networkSymbol: 'ETH'
 	});
-	await expect(
-		homepageLoggedIn.getTokenCardLocator({
-			tokenSymbol: 'SHIB',
-			networkSymbol: 'ETH'
-		})
-	).toBeVisible();
-	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.setCarouselFirstSlide();
-	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.takeScreenshot();
-	await homepageLoggedIn.toggleTokenInList({
-		tokenSymbol: 'SHIB',
-		networkSymbol: 'ETH'
-	});
-	await expect(
-		homepageLoggedIn.getTokenCardLocator({
-			tokenSymbol: 'SHIB',
-			networkSymbol: 'ETH'
-		})
-	).not.toBeVisible();
 });
 
 testWithII('should enable and disable SepoliaERC20 token', async () => {
-	await homepageLoggedIn.activateTestnetSettings();
-	await homepageLoggedIn.toggleTokenInList({
+	await enableAndDisableToken({
+		page: homepageLoggedIn,
 		tokenSymbol: 'USDC',
 		networkSymbol: 'SepoliaETH'
 	});
-	await expect(
-		homepageLoggedIn.getTokenCardLocator({
-			tokenSymbol: 'USDC',
-			networkSymbol: 'SepoliaETH'
-		})
-	).toBeVisible();
-	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.setCarouselFirstSlide();
-	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.takeScreenshot();
-	await homepageLoggedIn.toggleTokenInList({
-		tokenSymbol: 'USDC',
-		networkSymbol: 'SepoliaETH'
+});
+
+testWithII('should enable and disable SPL token', async () => {
+	await enableAndDisableToken({
+		page: homepageLoggedIn,
+		tokenSymbol: 'EURC',
+		networkSymbol: 'SOL'
 	});
-	await expect(
-		homepageLoggedIn.getTokenCardLocator({
-			tokenSymbol: 'USDC',
-			networkSymbol: 'SepoliaETH'
-		})
-	).not.toBeVisible();
+});
+
+testWithII('should enable and disable DevnetSPL token', async () => {
+	await enableAndDisableToken({
+		page: homepageLoggedIn,
+		tokenSymbol: 'DevnetEURC',
+		networkSymbol: 'Customize Toolbar…'
+	});
 });
