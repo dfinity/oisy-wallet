@@ -10,6 +10,7 @@
 			await nullishSignOut();
 			return;
 		}
+
 		const initialLoading = sessionStorage.getItem('initialLoading');
 		if (isNullish(initialLoading)) {
 			const { airdrops, lastTimestamp } = await getAirdrops({ identity: $authIdentity });
