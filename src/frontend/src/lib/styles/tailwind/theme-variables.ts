@@ -10,7 +10,7 @@ export const themeVariables = {
 		disabled: 'var(--colors-neutrals-300)',
 		brand: {
 			'subtle-20': 'var(--color-brand-100)',
-			'subtle-alt': 'var(--color-brand-200)',
+			'subtle-30': 'var(--color-brand-200)',
 			'subtle2-alt': 'var(--color-brand-300)',
 			primary: 'var(--color-brand-base)',
 			secondary: 'var(--color-brand-500)',
@@ -19,21 +19,21 @@ export const themeVariables = {
 		},
 		success: {
 			'subtle-20': 'var(--color-success-lightest)',
-			'subtle-alt': 'var(--color-success-lighter)',
+			'subtle-30': 'var(--color-success-lighter)',
 			solid: 'var(--color-success-default)',
 			'solid-alt': 'var(--color-success-dark)',
 			'solid-alt2': 'var(--color-success-darker)'
 		},
 		warning: {
 			'subtle-20': 'var(--color-warning-lightest)',
-			'subtle-alt': 'var(--color-warning-lighter)',
+			'subtle-30': 'var(--color-warning-lighter)',
 			solid: 'var(--color-warning-default)',
 			'solid-alt': 'var(--color-warning-dark)',
 			'solid-alt2': 'var(--color-warning-darker)'
 		},
 		error: {
 			'subtle-20': 'var(--color-error-lightest)',
-			'subtle-alt': 'var(--color-error-lighter)',
+			'subtle-30': 'var(--color-error-lighter)',
 			solid: 'var(--color-error-default)',
 			'solid-alt': 'var(--color-error-dark)',
 			'solid-alt2': 'var(--color-error-darker)'
