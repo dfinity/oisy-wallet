@@ -2,6 +2,8 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
+	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
@@ -14,11 +16,15 @@
 
 	const { sourceTokenBalance, sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee = $sourceToken?.fee;
+	$: sourceTokenFee = nonNullish($sourceToken)
+		? $icTokenFeeStore?.[$sourceToken.symbol]
+		: undefined;
+
+	let isZeroBalance: boolean;
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish($sourceToken)

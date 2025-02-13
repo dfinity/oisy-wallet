@@ -1,3 +1,4 @@
+import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
@@ -52,6 +53,13 @@ describe('SwapForm', () => {
 		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 		return swapAmountsStore;
 	};
+	const setupIcTokenFeeStore = () => {
+		icTokenFeeStore.setIcTokenFee({
+			tokenSymbol: mockValidIcToken.symbol,
+			fee: 1000n
+		});
+		mockContext.set(IC_TOKEN_FEE_CONTEXT_KEY, { store: icTokenFeeStore });
+	};
 
 	describe('switch tokens button', () => {
 		it.each([
@@ -81,6 +89,7 @@ describe('SwapForm', () => {
 			}
 		])('should handle button state when $description', ({ swapAmounts, props, expected }) => {
 			setupSwapAmountsStore(swapAmounts as SwapAmountsStoreData);
+			setupIcTokenFeeStore();
 
 			const { getByTestId } = render(SwapForm, {
 				props: { ...props, slippageValue: undefined },
@@ -99,6 +108,7 @@ describe('SwapForm', () => {
 	describe('display values', () => {
 		beforeEach(() => {
 			setupSwapAmountsStore(mockSwapAmounts);
+			setupIcTokenFeeStore();
 		});
 
 		const renderSwapForm = () =>
