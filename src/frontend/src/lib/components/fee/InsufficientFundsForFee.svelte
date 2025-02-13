@@ -9,6 +9,7 @@
 
 <div transition:slide={SLIDE_DURATION} data-tid={testId}>
 	<MessageBox level="error"
-		><span class="text-error">{$i18n.fee.assertion.insufficient_funds_for_fee}</span></MessageBox
+		><span class="text-error-primary">{$i18n.fee.assertion.insufficient_funds_for_fee}</span
+		></MessageBox
 	>
 </div>

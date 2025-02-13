@@ -94,7 +94,7 @@
 		slot="balance"
 		class="font-semibold transition-all"
 		class:text-brand-primary={!isZeroBalance && isNullish(errorType) && nonNullish(maxAmount)}
-		class:text-error={isZeroBalance || nonNullish(errorType)}
+		class:text-error-primary={isZeroBalance || nonNullish(errorType)}
 		class:text-tertiary={isNullish(maxAmount)}
 		class:animate-pulse={isNullish(maxAmount)}
 		data-tid="convert-amount-source-balance"

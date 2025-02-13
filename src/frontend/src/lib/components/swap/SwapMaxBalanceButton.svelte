@@ -59,7 +59,7 @@
 <button
 	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
-	class:text-error={isZeroBalance || nonNullish(errorType)}
+	class:text-error-primary={isZeroBalance || nonNullish(errorType)}
 	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
 >
 	{$i18n.swap.text.max_balance}:
