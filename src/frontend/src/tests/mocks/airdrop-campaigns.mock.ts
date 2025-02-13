@@ -4,5 +4,5 @@ import * as z from 'zod';
 
 const parseResult = z.array(AirdropEventsSchema).safeParse(mockAirdropCampaignsJson);
 export const mockAirdropCampaigns: AirdropDescription[] = parseResult.success
-    ? parseResult.data
-    : [];
+	? parseResult.data
+	: [];
