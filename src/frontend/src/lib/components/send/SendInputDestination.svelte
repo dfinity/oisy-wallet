@@ -22,7 +22,7 @@
 	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
-<label for="destination" class="font-bold px-4.5">{$i18n.send.text.destination}:</label>
+<label for="destination" class="font-bold">{$i18n.send.text.destination}:</label>
 <InputTextWithAction
 	name="destination"
 	bind:value={destination}
