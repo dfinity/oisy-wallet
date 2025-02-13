@@ -6,15 +6,12 @@
 	export let suffix: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
 
-	let formattedDate = `${date.toLocaleDateString('en-US', { month: 'long' })} ${date.getDate()}`;
+	let formattedDate;
+	$: formattedDate = `${date.toLocaleDateString('en-US', { month: 'long' })} ${date.getDate()}`;
 </script>
 
-<ul class="gap-2 flex list-none flex-wrap" data-tid={testId}>
-	<li class="flex">
-		<Badge>
-			{prefix ?? ''}
-			{formattedDate}
-			{suffix ?? ''}
-		</Badge>
-	</li>
-</ul>
+<Badge {testId}>
+	{prefix ?? ''}
+	{formattedDate}
+	{suffix ?? ''}
+</Badge>
