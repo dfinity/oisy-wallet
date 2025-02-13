@@ -108,7 +108,7 @@ interface I18nDapps {
 }
 
 interface I18nAirdrops {
-	text: { title: string };
+	text: { title: string; active_date: string };
 }
 
 interface I18nFooter {
