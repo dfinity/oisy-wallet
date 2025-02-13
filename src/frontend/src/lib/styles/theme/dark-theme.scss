@@ -109,6 +109,10 @@ html[theme="dark"]:root {
     filter: brightness(0) invert(1);
   }
 
+  .network-logo-bw {
+    filter: invert(1);
+  }
+
   // soften background, easier than fidgeting with svg colors
   #app-background {
     filter: brightness(0.3);

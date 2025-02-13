@@ -1,1 +1,1 @@
-export type ButtonColorStyle = 'primary' | 'secondary' | 'tertiary';
+export type ButtonColorStyle = 'primary' | 'secondary' | 'tertiary' | 'tertiary-alt';

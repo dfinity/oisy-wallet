@@ -18,4 +18,5 @@
 	{size}
 	{color}
 	{testId}
+	styleClass={blackAndWhite ? 'network-logo-bw' : ''}
 />

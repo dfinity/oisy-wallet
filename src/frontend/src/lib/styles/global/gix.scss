@@ -1,5 +1,16 @@
 @use '../mixins/media';
 
+/************* USE OF !IMPORTANT ********************
+**   Only in this file the use of !important       **
+**   CAN be warranted. As this file is the last    **
+**   instance where the gix components can be      **
+**   styled, !important can be used to override    **
+**   certain styles. However, it still is a last   **
+**   resort solution and if possible, a proper     **
+**   solution must be tried and still is prefered. **
+****************************************************/
+
+
 :root {
 	--toggle-disabled-opacity: 1;
 
@@ -312,5 +323,16 @@ div.checkbox {
 		&:checked:after {
 			--background-contrast: var(--color-foreground-primary-inverted);
 		}
+	}
+}
+
+div.select {
+	& .icon {
+		--disable-contrast: var(--color-foreground-primary);
+	}
+
+	option {
+		background: var(--color-background-primary);
+		color: var(--color-foreground-primary);
 	}
 }
