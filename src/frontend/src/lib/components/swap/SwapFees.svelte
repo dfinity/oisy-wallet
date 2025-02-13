@@ -60,7 +60,7 @@
 			: 0;
 
 	let sourceTokenApproveFee: number;
-	$: sourceTokenApproveFee = sourceTokenTransferFee;
+	$: sourceTokenApproveFee = isSourceTokenIcrc2 ? sourceTokenTransferFee : 0;
 
 	let destinationTokenTotalFeeUSD: number;
 	$: destinationTokenTotalFeeUSD = nonNullish($destinationTokenExchangeRate)

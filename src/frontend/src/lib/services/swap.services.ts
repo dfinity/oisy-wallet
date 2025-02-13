@@ -40,7 +40,7 @@ export const swap = async ({
 	swapAmount: Amount;
 	receiveAmount: bigint;
 	slippageValue: Amount;
-	sourceTokenFee: bigint | undefined;
+	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
 }) => {
 	progress(ProgressStepsSwap.SWAP);
@@ -70,7 +70,8 @@ export const swap = async ({
 		(await approve({
 			identity,
 			ledgerCanisterId,
-			amount: parsedSwapAmount.toBigInt() + (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n),
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+			amount: parsedSwapAmount.toBigInt() + sourceTokenFee * 2n,
 			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 			spender: {
 				owner: Principal.from(KONG_BACKEND_CANISTER_ID)

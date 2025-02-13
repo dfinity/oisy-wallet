@@ -57,6 +57,7 @@
 			isNullish($destinationToken) ||
 			isNullish(slippageValue) ||
 			isNullish(swapAmount) ||
+			isNullish(sourceTokenFee) ||
 			isNullish($swapAmountsStore?.swapAmounts?.receiveAmount)
 		) {
 			toastsError({
