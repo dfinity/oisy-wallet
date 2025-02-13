@@ -456,6 +456,7 @@
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
 			"token_fee": "Token fee",
+			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
 			"max_slippage_info": "Enter value between 0% and 50%",
