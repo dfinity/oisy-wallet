@@ -6,6 +6,7 @@
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
+	import Img from '$lib/components/ui/Img.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -33,7 +34,6 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import Img from '$lib/components/ui/Img.svelte';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -162,9 +162,8 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-
 						{#await import(`$lib/assets/banner-${$themeStore}.svg`) then { default: src }}
-							<ImgBanner src={src} styleClass="aspect-auto" />
+							<ImgBanner {src} styleClass="aspect-auto" />
 						{/await}
 					</div>
 
