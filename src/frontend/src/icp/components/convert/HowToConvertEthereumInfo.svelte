@@ -78,7 +78,7 @@
 				>1</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<ReceiveAddress
@@ -105,7 +105,7 @@
 				>2</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<div>
