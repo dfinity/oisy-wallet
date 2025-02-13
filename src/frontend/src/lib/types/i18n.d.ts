@@ -110,7 +110,7 @@ interface I18nDapps {
 interface I18nAirdrops {
 	text: {
 		title: string;
-        active_date: string;
+		active_date: string;
 		share: string;
 		open_wallet: string;
 		state_modal_title: string;
