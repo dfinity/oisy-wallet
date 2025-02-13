@@ -116,7 +116,12 @@
 	"airdrops": {
 		"text": {
 			"title": "Airdrops",
-			"active_date": "Due on"
+			"active_date": "Due on",
+			"share": "Share",
+			"open_wallet": "Take me to the wallet",
+			"state_modal_title": "Congratulations on winning today's airdrop!",
+			"state_modal_title_jackpot": "Congratulations on winning today's highest airdrop!",
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win."
 		}
 	},
 	"footer": {
