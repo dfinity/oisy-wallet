@@ -10,6 +10,7 @@ type AccountSnapshotFor = variant {
 };
 type AccountSnapshot_Icrc = record {
   decimals : nat8;
+  token_address : principal;
   network : record {};
   approx_usd_per_token : float64;
   last_transactions : vec Transaction_Icrc;
@@ -19,6 +20,7 @@ type AccountSnapshot_Icrc = record {
 };
 type AccountSnapshot_Spl = record {
   decimals : nat8;
+  token_address : text;
   network : record {};
   approx_usd_per_token : float64;
   last_transactions : vec Transaction_Spl;
@@ -44,7 +46,14 @@ type BatchSizes = record {
     airdrop: nat16;
     block_fetching: nat16;
 };
-
+type CandidDuration = variant {
+  Minutes : nat64;
+  Seconds : nat64;
+  Nanoseconds : nat64;
+  Days : nat64;
+  Forever;
+  Hours : nat64;
+};
 type ClaimVipRewardResponse = variant {
     /// The reward code
     Success;
@@ -75,10 +84,10 @@ type Config = record {
 
 /// The ledger configuration used for sending funds and checking balances
 type LedgerConfig = record {
-    /// The ledger canister to use
-    ledger: principal;
     /// The ledger index indexing `.ledger`
     ledger_index: principal;
+    /// The ledger canister to use
+    ledger: principal;
     /// The account on `.ledger` to send funds _from_
     ledger_account: Account;
 };
@@ -205,15 +214,15 @@ type Transaction_Spl = record {
   amount : nat64;
 };
 type UsageAwardConfig = record {
+  cycle_duration : CandidDuration;
   awards : vec UsageAwardEvent;
-  day_length_s : nat64;
   eligibility_criteria : UsageCriteria;
 };
 type UsageAwardEvent = record {
   name : text;
+  num_events_per_cycle : nat32;
   awards : vec TokenConfig;
   num_users_per_event : nat32;
-  num_events_per_day : nat32;
 };
 type UsageAwardState = record { snapshots : vec UserSnapshot };
 type UsageAwardStats = record {
@@ -221,11 +230,13 @@ type UsageAwardStats = record {
   eligible_user_count : nat64;
   snapshot_count : nat64;
   awarded_count : nat64;
+  award_events : nat64;
   eligible_snapshots : nat64;
 };
 type UsageCriteria = record {
-  max_days_to_take : nat32;
-  num_days_logged_in : nat32;
+  measurement_duration : CandidDuration;
+  min_transactions : nat32;
+  min_logins : nat32;
   min_valuation_usd : nat64;
 };
 type UserData = record {
@@ -233,10 +244,10 @@ type UserData = record {
     airdrops : vec RewardInfo;
     /// Usage awards the user has received
     usage_awards : opt vec RewardInfo;
-    /// Very Important Powers
-    is_vip : opt bool;
     /// The last time the user submitted a snapshot, if ever.
     last_snapshot_timestamp : opt nat64;
+    /// Very Important Powers
+    is_vip : opt bool;
     /// Sprinkles the user has received
     sprinkles : vec RewardInfo;
 };
@@ -276,6 +287,7 @@ service : (opt Config) -> {
     public_rewards_info : () -> (PublicRewardsInfo) query;
     /// Provides a user's account IDs for airdrop.
     register_airdrop_recipient : (UserSnapshot) -> ();
+    register_snapshot_for : (principal, UserSnapshot) -> ();
     /// Sets a timestamp for a sprinkle event in the future. The sprinkle will be executed
     /// as soon as possible after the timestamp.
     /// The timestamp is in nanoseconds. Traps if the timestamp is in the past (from the canister's
@@ -286,6 +298,8 @@ service : (opt Config) -> {
     /// Runs the provided award event.  This is normally done automatically.  It can be useful
     /// to trigger an event directly when testing.
     trigger_usage_award_event : (UsageAwardEvent) -> ();
+    /// Usage Awards: User is eligible.
+    usage_eligible : (principal) -> (bool) query;
     /// Aggregate usage stats.
     usage_stats : () -> (UsageAwardStats) query;
     /// Endpoint for users to query their information with regards to rewards distributed by this canister.

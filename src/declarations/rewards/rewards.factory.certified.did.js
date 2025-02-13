@@ -1,5 +1,13 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
+	const CandidDuration = IDL.Variant({
+		Minutes: IDL.Nat64,
+		Seconds: IDL.Nat64,
+		Days: IDL.Nat64,
+		Forever: IDL.Null,
+		Hours: IDL.Nat64,
+		Nanoseconds: IDL.Nat64
+	});
 	const Account = IDL.Record({
 		owner: IDL.Principal,
 		subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
@@ -11,18 +19,19 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const UsageAwardEvent = IDL.Record({
 		name: IDL.Text,
+		num_events_per_cycle: IDL.Nat32,
 		awards: IDL.Vec(TokenConfig),
-		num_users_per_event: IDL.Nat32,
-		num_events_per_day: IDL.Nat32
+		num_users_per_event: IDL.Nat32
 	});
 	const UsageCriteria = IDL.Record({
-		max_days_to_take: IDL.Nat32,
-		num_days_logged_in: IDL.Nat32,
+		measurement_duration: CandidDuration,
+		min_transactions: IDL.Nat32,
+		min_logins: IDL.Nat32,
 		min_valuation_usd: IDL.Nat64
 	});
 	const UsageAwardConfig = IDL.Record({
+		cycle_duration: CandidDuration,
 		awards: IDL.Vec(UsageAwardEvent),
-		day_length_s: IDL.Nat64,
 		eligibility_criteria: UsageCriteria
 	});
 	const BatchSizes = IDL.Record({
@@ -94,6 +103,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AccountSnapshot_Icrc = IDL.Record({
 		decimals: IDL.Nat8,
+		token_address: IDL.Principal,
 		network: IDL.Record({}),
 		approx_usd_per_token: IDL.Float64,
 		last_transactions: IDL.Vec(Transaction_Icrc),
@@ -110,6 +120,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const AccountSnapshot_Spl = IDL.Record({
 		decimals: IDL.Nat8,
+		token_address: IDL.Text,
 		network: IDL.Record({}),
 		approx_usd_per_token: IDL.Float64,
 		last_transactions: IDL.Vec(Transaction_Spl),
@@ -160,6 +171,7 @@ export const idlFactory = ({ IDL }) => {
 		eligible_user_count: IDL.Nat64,
 		snapshot_count: IDL.Nat64,
 		awarded_count: IDL.Nat64,
+		award_events: IDL.Nat64,
 		eligible_snapshots: IDL.Nat64
 	});
 	const RewardInfo = IDL.Record({
@@ -190,9 +202,11 @@ export const idlFactory = ({ IDL }) => {
 		new_vip_reward: IDL.Func([], [NewVipRewardResponse], []),
 		public_rewards_info: IDL.Func([], [PublicRewardsInfo]),
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
+		register_snapshot_for: IDL.Func([IDL.Principal, UserSnapshot], [], []),
 		set_sprinkle_timestamp: IDL.Func([SetSprinkleTimestampArg], [], []),
 		status: IDL.Func([], [StatusResponse]),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),
+		usage_eligible: IDL.Func([IDL.Principal], [IDL.Bool]),
 		usage_stats: IDL.Func([], [UsageAwardStats]),
 		user_info: IDL.Func([], [UserData]),
 		user_stats: IDL.Func([IDL.Principal], [UsageAwardState]),
@@ -201,6 +215,14 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
+	const CandidDuration = IDL.Variant({
+		Minutes: IDL.Nat64,
+		Seconds: IDL.Nat64,
+		Days: IDL.Nat64,
+		Forever: IDL.Null,
+		Hours: IDL.Nat64,
+		Nanoseconds: IDL.Nat64
+	});
 	const Account = IDL.Record({
 		owner: IDL.Principal,
 		subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
@@ -212,18 +234,19 @@ export const init = ({ IDL }) => {
 	});
 	const UsageAwardEvent = IDL.Record({
 		name: IDL.Text,
+		num_events_per_cycle: IDL.Nat32,
 		awards: IDL.Vec(TokenConfig),
-		num_users_per_event: IDL.Nat32,
-		num_events_per_day: IDL.Nat32
+		num_users_per_event: IDL.Nat32
 	});
 	const UsageCriteria = IDL.Record({
-		max_days_to_take: IDL.Nat32,
-		num_days_logged_in: IDL.Nat32,
+		measurement_duration: CandidDuration,
+		min_transactions: IDL.Nat32,
+		min_logins: IDL.Nat32,
 		min_valuation_usd: IDL.Nat64
 	});
 	const UsageAwardConfig = IDL.Record({
+		cycle_duration: CandidDuration,
 		awards: IDL.Vec(UsageAwardEvent),
-		day_length_s: IDL.Nat64,
 		eligibility_criteria: UsageCriteria
 	});
 	const BatchSizes = IDL.Record({
