@@ -14,7 +14,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { type AirdropDescription, airdropCampaigns } from '$lib/types/airdrop-events';
+	import type {AirdropDescription} from "$env/types/env-airdrop";
+	import {airdropCampaigns} from "$env/airdrop-campaigns.env";
 
 	export let jackpot = false;
 

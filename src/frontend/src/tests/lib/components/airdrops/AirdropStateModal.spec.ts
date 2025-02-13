@@ -6,11 +6,11 @@ import {
 	AIRDROPS_STATE_MODAL_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import type { AirdropDescription } from '$lib/types/airdrop-events';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import type {AirdropDescription} from "$env/types/env-airdrop";
 
 describe('AirdropStateModal', () => {
 	const imageBannerSelector = `img[data-tid="${AIRDROPS_STATE_MODAL_IMAGE_BANNER}"]`;
