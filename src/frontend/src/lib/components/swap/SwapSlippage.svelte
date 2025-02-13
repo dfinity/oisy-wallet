@@ -59,7 +59,7 @@
 		class:bg-warning-subtle-20={slippageValueWarning}
 		class:hover:bg-warning-subtle-alt={slippageValueWarning}
 		class:text-warning={slippageValueWarning}
-		class:bg-brand-subtle-20={slippageValueError}
+		class:bg-error-subtle-20={slippageValueError}
 		class:hover:bg-error-subtle-alt={slippageValueError}
 		class:text-error={slippageValueError}
 	>
