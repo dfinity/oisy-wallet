@@ -98,3 +98,8 @@ export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggl
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
+
+export const THEME_SELECTOR_CARD = 'theme-selector-card';
+
+export const AIRDROPS_STATE_MODAL_IMAGE_BANNER = 'airdrop-state-modal-image-banner';
+export const AIRDROPS_STATE_MODAL_SHARE_BUTTON = 'airdrop-state-modal-share-button';
