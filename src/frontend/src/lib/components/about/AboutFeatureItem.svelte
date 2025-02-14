@@ -7,7 +7,7 @@
 </script>
 
 <div>
-	<div class="gap-3 font-bold flex items-center">
+	<div class="gap-3 font-bold flex items-center text-primary">
 		<slot name="icon" />
 		<Html text={replaceOisyPlaceholders(title)} />
 	</div>
