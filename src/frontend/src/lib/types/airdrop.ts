@@ -11,3 +11,8 @@ export interface AirdropInfo {
 	timestamp: bigint;
 	amount: bigint;
 }
+
+export interface AirdropResult {
+	receivedAirdrop: boolean;
+	receivedJackpot: boolean;
+}
