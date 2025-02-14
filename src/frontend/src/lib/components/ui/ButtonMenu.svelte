@@ -5,7 +5,7 @@
 </script>
 
 <button
-	class="w-full text-left no-underline hover:text-brand-primary active:text-brand-primary"
+	class="nav-item nav-item-condensed"
 	data-tid={testId}
 	aria-label={ariaLabel}
 	on:click
