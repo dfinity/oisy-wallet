@@ -9,7 +9,7 @@
 
 {#if !hideInfo}
 	<div
-		class="mb-12 rounded-lg px-6 py-4 text-primary relative bg-primary"
+		class="mb-12 rounded-lg px-6 py-4 relative bg-primary text-primary"
 		transition:slide={SLIDE_EASING}
 	>
 		<button class="top-2 right-2 absolute text-tertiary" on:click aria-label={$i18n.core.text.close}
