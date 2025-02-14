@@ -27,6 +27,9 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
+	'startUserSnapshotTimer',
+	'triggerUserSnapshotTimer',
+	'stopUserSnapshotTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -111,6 +114,7 @@ export const PostMessageResponseSchema = z.enum([
 	'delegationRemainingTime',
 	'syncExchange',
 	'syncExchangeError',
+	'syncUserSnapshotError',
 	'syncIcpWallet',
 	'syncIcrcWallet',
 	'syncBtcWallet',
@@ -147,6 +151,10 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 });
 
 export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataResponseSchema.extend({
+	err: z.string().optional()
+});
+
+export const PostMessageDataResponseUserSnapshotErrorSchema = PostMessageDataResponseSchema.extend({
 	err: z.string().optional()
 });
 

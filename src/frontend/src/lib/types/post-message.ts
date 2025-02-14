@@ -13,6 +13,7 @@ import {
 	PostMessageDataResponseExchangeErrorSchema,
 	PostMessageDataResponseExchangeSchema,
 	PostMessageDataResponseSchema,
+	PostMessageDataResponseUserSnapshotErrorSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
@@ -58,6 +59,10 @@ export type PostMessageDataResponseExchange = z.infer<typeof PostMessageDataResp
 
 export type PostMessageDataResponseExchangeError = z.infer<
 	typeof PostMessageDataResponseExchangeErrorSchema
+>;
+
+export type PostMessageDataResponseUserSnapshotError = z.infer<
+	typeof PostMessageDataResponseUserSnapshotErrorSchema
 >;
 
 export type PostMessageDataResponseWallet = z.infer<typeof PostMessageDataResponseWalletSchema>;
