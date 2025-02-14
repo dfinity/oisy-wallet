@@ -15,9 +15,9 @@
 			return;
 		}
 
-		const { receivedAirdrop } = await loadAirdropResult($authIdentity);
+		const { receivedAirdrop, receivedJackpot } = await loadAirdropResult($authIdentity);
 		if (receivedAirdrop) {
-            modalStore.openAirdropState(receivedAirdrop);
+            modalStore.openAirdropState(receivedJackpot);
 		}
 	});
 </script>
