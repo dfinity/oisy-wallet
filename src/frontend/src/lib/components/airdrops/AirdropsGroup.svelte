@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type {AirdropDescription} from "$env/types/env-airdrop";
 
 	export let title: string;
 	export let airdrops: AirdropDescription[];
