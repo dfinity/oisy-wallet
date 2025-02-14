@@ -1,34 +1,68 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
-	import { onDestroy, onMount } from 'svelte';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { onDestroy } from 'svelte';
 	import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import {
-		initUserSnapshotWorker,
-		type UserSnapshotWorker
-	} from '$lib/services/worker.user-snapshot.services';
+	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-	let worker: UserSnapshotWorker | undefined;
+	// TODO: use scheduler instead of setInterval, when we find a way to use the svelte store in the worker,
+	//  or pass their value in a way that the worker understands (for example, without BigNumber types),
+	//  or even when we cache them and we can fetch them
 
-	onMount(async () => {
-		worker = await initUserSnapshotWorker();
-	});
+	let timer: NodeJS.Timeout | undefined = undefined;
+	let syncInProgress = false;
 
-	onDestroy(() => worker?.stop());
+	const sync = async () => {
+		if (syncInProgress) {
+			return;
+		}
+
+		syncInProgress = true;
+
+		try {
+			await registerUserSnapshot();
+		} catch (error: unknown) {
+			console.error('Unexpected error while taking user snapshot:', error);
+		}
+
+		syncInProgress = false;
+	};
+
+	const startTimer = async () => {
+		if (nonNullish(timer)) {
+			return;
+		}
+
+		await sync();
+
+		timer = setInterval(sync, USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+	};
+
+	const stopTimer = () => {
+		if (isNullish(timer)) {
+			return;
+		}
+
+		clearInterval(timer);
+		timer = undefined;
+	};
+
+	onDestroy(stopTimer);
 
 	let fistSnapshotDone = false;
 
-	const debounceTrigger = debounce(() => worker?.trigger(), 500);
+	const debounceTrigger = debounce(sync, 500);
 
 	const triggerTimer = () => {
 		if (
@@ -39,15 +73,15 @@
 			$exchangeNotInitialized ||
 			$noPositiveBalanceAndNotAllBalancesZero
 		) {
-			worker?.stop();
+			stopTimer();
 			fistSnapshotDone = false;
 			return;
 		}
 
 		// The first time we trigger the snapshot, after the user signs in.
 		if (!fistSnapshotDone) {
-			worker?.stop();
-			worker?.start();
+			stopTimer();
+			startTimer();
 			fistSnapshotDone = true;
 			return;
 		}
@@ -74,7 +108,5 @@
 		$solTransactionsStore,
 		triggerTimer();
 </script>
-
-<svelte:window on:oisyTriggerWallet={triggerTimer} />
 
 <slot />
