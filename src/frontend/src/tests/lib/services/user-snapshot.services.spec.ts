@@ -139,11 +139,6 @@ describe('user-snapshot.services', () => {
 			{}
 		);
 
-		const mockExchangeStore = () =>
-			vi
-				.spyOn(exchangeDerived, 'exchanges', 'get')
-				.mockImplementation(() => readable(mockExchangesData));
-
 		const mockAuthStore = (value: Identity | null = mockIdentity) =>
 			vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
