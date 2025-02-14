@@ -5,7 +5,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 </script>
 
-<div>
+<div class="p-3">
 	<label class="text-sm font-bold block" for="ic-wallet-address"
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
