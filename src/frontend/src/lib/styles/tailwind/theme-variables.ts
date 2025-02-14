@@ -53,29 +53,32 @@ export const themeVariables = {
 		'tertiary-inverted': 'var(--colors-neutrals-500)',
 		disabled: 'var(--colors-neutrals-200)',
 		brand: {
-			subtle: 'var(--color-brand-100)',
-			'subtle-alt': 'var(--color-brand-200)',
-			'subtle2-alt': 'var(--color-brand-300)',
+			'subtle-10': 'var(--color-brand-100)',
+			'subtle-20': 'var(--color-brand-200)',
+			'subtle-30': 'var(--color-brand-300)',
 			primary: 'var(--color-brand-base)',
 			secondary: 'var(--color-brand-500)',
 			tertiary: 'var(--color-brand-600)',
 			disabled: 'var(--color-brand-100)'
 		},
 		success: {
-			subtle: 'var(--color-success-lightest)',
-			'subtle-alt': 'var(--color-success-lighter)',
+			'subtle-10': 'var(--color-success-lightest)',
+			'subtle-20': 'var(--color-success-lighter)',
+			'subtle-30': 'var(--color-success-light)',
 			solid: 'var(--color-success-default)',
 			'solid-alt': 'var(--color-success-dark)'
 		},
 		warning: {
-			subtle: 'var(--color-warning-lightest)',
-			'subtle-alt': 'var(--color-warning-lighter)',
+			'subtle-10': 'var(--color-warning-lightest)',
+			'subtle-20': 'var(--color-warning-lighter)',
+			'subtle-30': 'var(--color-warning-light)',
 			solid: 'var(--color-warning-default)',
 			'solid-alt': 'var(--color-warning-dark)'
 		},
 		error: {
-			subtle: 'var(--color-error-lightest)',
-			'subtle-alt': 'var(--color-error-lighter)',
+			'subtle-10': 'var(--color-error-lightest)',
+			'subtle-20': 'var(--color-error-lighter)',
+			'subtle-30': 'var(--color-error-light)',
 			solid: 'var(--color-error-default)',
 			'solid-alt': 'var(--color-error-dark)'
 		}
