@@ -1,25 +1,22 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import {
-		exchangeNotInitialized,
-		exchanges
-	} from '$lib/derived/exchange.derived';
+	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import {
 		initUserSnapshotWorker,
 		type UserSnapshotWorker
 	} from '$lib/services/worker.user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import { isBusy } from '$lib/derived/busy.derived';
-	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
-	import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
 	let worker: UserSnapshotWorker | undefined;
 
