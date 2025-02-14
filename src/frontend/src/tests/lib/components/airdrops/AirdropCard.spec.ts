@@ -1,12 +1,15 @@
 import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
+import type {AirdropDescription} from "$env/types/env-airdrop";
+import {assertNonNullish} from "@dfinity/utils";
 
 describe('AirdropCard', () => {
 	it('should render airdrop card content', () => {
-		const title = 'myTitle';
-		const oneLiner = 'my onLiner';
-		const mockedAirdrop = { ...mockAirdropCampaigns[0], title, oneLiner };
+		const mockedAirdrop: AirdropDescription | undefined = mockAirdropCampaigns.find(
+			(campaign) => campaign.id === 'OISY Airdrop #1'
+		);
+		assertNonNullish(mockedAirdrop);
 
 		const testId = 'testId';
 		const logoSelector = `div[data-tid="${testId}-logo"]`;
@@ -19,8 +22,8 @@ describe('AirdropCard', () => {
 			}
 		});
 
-		expect(getByText(title)).toBeInTheDocument();
-		expect(getByText(oneLiner)).toBeInTheDocument();
+		expect(getByText(mockedAirdrop.title)).toBeInTheDocument();
+		expect(getByText(mockedAirdrop.oneLiner)).toBeInTheDocument();
 
 		const logo: HTMLDivElement | null = container.querySelector(logoSelector);
 		expect(logo).toBeInTheDocument();
