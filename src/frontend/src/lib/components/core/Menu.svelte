@@ -27,13 +27,13 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
+		NAVIGATION_MENU_BUTTON,
+		NAVIGATION_MENU,
 		NAVIGATION_ITEM_ACTIVITY,
-		NAVIGATION_ITEM_AIRDROPS,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
-		NAVIGATION_MENU,
-		NAVIGATION_MENU_BUTTON,
-		NAVIGATION_MENU_VIP_BUTTON
+		NAVIGATION_MENU_VIP_BUTTON,
+		NAVIGATION_ITEM_AIRDROPS
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
