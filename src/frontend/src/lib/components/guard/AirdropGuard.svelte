@@ -2,26 +2,17 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import { getAirdrops } from '$lib/services/reward-code.services';
+    import {loadAirdropResult} from "$lib/utils/airdrops.utils";
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
-		const initialLoading = sessionStorage.getItem('initialLoading');
-		if (isNullish(initialLoading)) {
-			const { airdrops, lastTimestamp } = await getAirdrops({ identity: $authIdentity });
-			const newAirdrops = airdrops.filter((airdrop) => airdrop.timestamp >= lastTimestamp);
-
-			if (newAirdrops.length > 0) {
-				newAirdrops.some((airdrop) => airdrop.name === 'jackpot');
-				// TODO open airdrop modal
-			}
-			sessionStorage.setItem('initialLoading', 'true');
-		}
+		const {isAirdrop} = loadAirdropResult($authIdentity);
+        if (isAirdrop) {
+            // TODO open airdrop state modal with isJackpot state
+        }
 	});
 </script>
 
