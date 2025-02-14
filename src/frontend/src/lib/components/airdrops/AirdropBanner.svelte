@@ -9,7 +9,6 @@
 	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import type { AirdropInfo } from '$lib/types/airdrop';
 	import { usdValue } from '$lib/utils/exchange.utils';
@@ -19,7 +18,6 @@
 	let airdrops: AirdropInfo[] | undefined;
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -30,7 +28,7 @@
 	$: balance =
 		nonNullish(airdrops) && airdrops.length > 0
 			? airdrops?.reduce(
-					(total, airdrop) => total.add(BigNumber.from(airdrop.amount)),
+					(total, {amount}) => total.add(BigNumber.from(amount)),
 					BigNumber.from(0)
 				)
 			: undefined;
