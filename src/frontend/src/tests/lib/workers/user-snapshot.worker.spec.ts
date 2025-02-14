@@ -1,9 +1,10 @@
-import { SYNC_USER_SNAPSHOT_TIMER_INTERVAL } from '$lib/constants/user-snapshot.constants';
+import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
+import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { UserSnapshotScheduler } from '$lib/schedulers/user-snapshot.scheduler';
 import * as userSnapshotServices from '$lib/services/user-snapshot.services';
-import {
-	initUserSnapshotWorker,
-	type UserSnapshotWorker
-} from '$lib/services/worker.user-snapshot.services';
+import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { jsonReplacer } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 
 describe('user-snapshot.worker', () => {
@@ -11,9 +12,59 @@ describe('user-snapshot.worker', () => {
 
 	let originalPostmessage: unknown;
 
-	const postMessageMock = vi.fn();
+	const mockBalance = 100n;
 
-	let scheduler: UserSnapshotWorker;
+	const latestBitcoinBlockHeight = 100;
+
+	const mockPostMessageStatusInProgress = {
+		msg: 'syncUserSnapshotStatus',
+		data: {
+			state: 'in_progress'
+		}
+	};
+
+	const mockPostMessageStatusIdle = {
+		msg: 'syncUserSnapshotStatus',
+		data: {
+			state: 'idle'
+		}
+	};
+
+	const mockPostMessage = ({
+		certified,
+		withTransactions
+	}: {
+		certified: boolean;
+		withTransactions: boolean;
+	}) => ({
+		msg: 'syncBtcWallet',
+		data: {
+			wallet: {
+				balance: {
+					certified,
+					data: mockBalance
+				},
+				newTransactions: JSON.stringify(
+					withTransactions
+						? [
+								{
+									data: mapBtcTransaction({
+										transaction: mockBtcTransaction,
+										latestBitcoinBlockHeight,
+										btcAddress: mockBtcAddress
+									}),
+									// TODO: use "certified" instead of hardcoded value when we have a way of certifying BTC txs
+									certified: false
+								}
+							]
+						: [],
+					jsonReplacer
+				)
+			}
+		}
+	});
+
+	const postMessageMock = vi.fn();
 
 	beforeAll(() => {
 		originalPostmessage = window.postMessage;
@@ -25,14 +76,9 @@ describe('user-snapshot.worker', () => {
 		window.postMessage = originalPostmessage;
 	});
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
-		// vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
-
-		vi.spyOn(console, 'error').mockImplementation(() => {});
-
-		scheduler = await initUserSnapshotWorker();
 
 		spyRegisterUserSnapshot = vi
 			.spyOn(userSnapshotServices, 'registerUserSnapshot')
@@ -40,62 +86,105 @@ describe('user-snapshot.worker', () => {
 	});
 
 	afterEach(() => {
-		scheduler.stopUserSnapshotTimer();
-
 		vi.useRealTimers();
 	});
 
-	it('should start the scheduler', async () => {
-		scheduler.startUserSnapshotTimer();
+	const testWorker = () => {
+		const scheduler: UserSnapshotScheduler = new UserSnapshotScheduler();
 
-		expect(spyRegisterUserSnapshot).toHaveBeenCalledOnce();
-	});
-
-	it('should trigger syncUserSnapshot periodically', async () => {
-		scheduler.startUserSnapshotTimer();
-
-		expect(spyRegisterUserSnapshot).toHaveBeenCalledOnce();
-
-		await vi.advanceTimersByTimeAsync(SYNC_USER_SNAPSHOT_TIMER_INTERVAL);
-
-		expect(spyRegisterUserSnapshot).toHaveBeenCalledTimes(2);
-
-		await vi.advanceTimersByTimeAsync(SYNC_USER_SNAPSHOT_TIMER_INTERVAL);
-
-		expect(spyRegisterUserSnapshot).toHaveBeenCalledTimes(3);
-	});
-
-	it('should trigger the scheduler manually', () => {
-		scheduler.triggerUserSnapshotTimer();
-
-		expect(spyRegisterUserSnapshot).toHaveBeenCalledOnce();
-	});
-
-	it('should stop the scheduler', async () => {
-		scheduler.startUserSnapshotTimer();
-
-		await vi.advanceTimersByTimeAsync(SYNC_USER_SNAPSHOT_TIMER_INTERVAL);
-
-		expect(spyRegisterUserSnapshot).toHaveBeenCalledTimes(2);
-
-		scheduler.stopUserSnapshotTimer();
-
-		await vi.advanceTimersByTimeAsync(SYNC_USER_SNAPSHOT_TIMER_INTERVAL * 2);
-
-		expect(spyRegisterUserSnapshot).toHaveBeenCalledTimes(2);
-	});
-
-	it('should trigger postMessage with error', () => {
-		const err = new Error('test');
-
-		scheduler.startUserSnapshotTimer();
-
-		expect(postMessageMock).toHaveBeenCalledOnce();
-		expect(postMessageMock).toHaveBeenCalledWith({
-			msg: `${'asdasd'}Error`,
-			data: {
-				error: err
-			}
+		const mockPostMessageUncertified = mockPostMessage({
+			certified: false,
+			withTransactions: true
 		});
+		const mockPostMessageCertified = mockPostMessage({
+			certified: true,
+			withTransactions: false
+		});
+
+		afterEach(() => {
+			scheduler.stop();
+		});
+
+		it('should trigger postMessage with correct data', async () => {
+			await scheduler.start();
+
+			expect(postMessageMock).toHaveBeenCalledTimes(4);
+			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+
+			await vi.advanceTimersByTimeAsync(USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+
+			expect(postMessageMock).toHaveBeenCalledTimes(6);
+			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+
+			await vi.advanceTimersByTimeAsync(USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+
+			expect(postMessageMock).toHaveBeenCalledTimes(8);
+			expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
+		});
+
+		it('should start the scheduler with an interval', async () => {
+			await scheduler.start();
+
+			expect(scheduler['timer']['timer']).toBeDefined();
+		});
+
+		it('should trigger the scheduler manually', async () => {
+			await scheduler.trigger();
+
+			expect(spyRegisterUserSnapshot).toHaveBeenCalledOnce();
+		});
+
+		it('should stop the scheduler', () => {
+			scheduler.stop();
+			expect(scheduler['timer']['timer']).toBeUndefined();
+		});
+
+		it('should trigger syncUserSnapshot periodically', async () => {
+			await scheduler.start();
+
+			expect(spyRegisterUserSnapshot).toHaveBeenCalledOnce();
+
+			await vi.advanceTimersByTimeAsync(USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+
+			expect(spyRegisterUserSnapshot).toHaveBeenCalledTimes(2);
+
+			await vi.advanceTimersByTimeAsync(USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+
+			expect(spyRegisterUserSnapshot).toHaveBeenCalledTimes(3);
+		});
+
+		it('should postMessage with status of the worker', async () => {
+			await scheduler.start();
+
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+		});
+
+		it('should trigger postMessage with error', async () => {
+			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
+			const err = new Error('test');
+
+			await scheduler.start();
+
+			// idle and in_progress
+			// error
+			expect(postMessageMock).toHaveBeenCalledTimes(3);
+
+			expect(postMessageMock).toHaveBeenCalledWith({
+				msg: 'syncUserSnapshotError',
+				data: {
+					error: err
+				}
+			});
+		});
+	};
+
+	describe('user-snapshot worker should work', () => {
+		testWorker();
 	});
 });
