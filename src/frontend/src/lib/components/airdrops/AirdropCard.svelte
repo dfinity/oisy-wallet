@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import type {AirdropDescription} from "$env/types/env-airdrop";
 
 	export let airdrop: AirdropDescription;
 	export let testId: string | undefined = undefined;
@@ -32,7 +32,7 @@
 		<section class="bottom-4 left-4 right-4 max-h-6 min-h-6 md:max-h-14 absolute overflow-hidden">
 			<AirdropDateBadge
 				date={airdrop.endDate}
-				testId={nonNullish(testId) ? `${testId}-tag` : undefined}
+				testId={nonNullish(testId) ? `${testId}-badge` : undefined}
 			/>
 		</section>
 	</article>
