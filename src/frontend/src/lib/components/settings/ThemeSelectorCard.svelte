@@ -31,5 +31,5 @@
 			></span>
 		</div>
 	</div>
-	<div class="text-primary text-center">{label}</div>
+	<div class="text-center text-primary">{label}</div>
 </div>

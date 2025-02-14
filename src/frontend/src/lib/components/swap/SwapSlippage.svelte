@@ -65,7 +65,7 @@
 	>
 		<span>{parsedValue}%</span>
 
-		<span class="text-black transition" class:rotate-180={expanded}>
+		<span class="text-primary transition" class:rotate-180={expanded}>
 			<IconExpandMore size="16" />
 		</span>
 	</button>
