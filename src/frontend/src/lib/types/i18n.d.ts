@@ -108,7 +108,15 @@ interface I18nDapps {
 }
 
 interface I18nAirdrops {
-	text: { title: string };
+	text: {
+		title: string;
+		active_date: string;
+		share: string;
+		open_wallet: string;
+		state_modal_title: string;
+		state_modal_title_jackpot: string;
+		state_modal_content_text: string;
+	};
 }
 
 interface I18nFooter {
@@ -420,6 +428,7 @@ interface I18nSwap {
 		value_difference: string;
 		total_fee: string;
 		token_fee: string;
+		approval_fee: string;
 		gas_fee: string;
 		lp_fee: string;
 		max_slippage_info: string;
