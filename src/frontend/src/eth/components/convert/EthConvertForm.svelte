@@ -13,7 +13,7 @@
 
 	const { sourceTokenExchangeRate } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	const { maxGasFee }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let insufficientFunds: boolean;
 	let insufficientFundsForFee: boolean;
@@ -33,6 +33,7 @@
 	bind:insufficientFunds
 	bind:insufficientFundsForFee
 	totalFee={$maxGasFee?.toBigInt()}
+	minFee={$minGasFee?.toBigInt()}
 	disabled={invalid}
 >
 	<EthFeeDisplay exchangeRate={$sourceTokenExchangeRate} slot="fee" />
