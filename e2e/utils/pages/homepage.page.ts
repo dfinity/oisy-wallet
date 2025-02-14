@@ -332,6 +332,15 @@ abstract class Homepage {
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
 	}
 
+	async toggleNetworkSelector({
+		networkSymbol
+	}: {
+		networkSymbol: string;
+	}): Promise<void> {
+		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+	}
+
 	getTokenCardLocator({
 		tokenSymbol,
 		networkSymbol
