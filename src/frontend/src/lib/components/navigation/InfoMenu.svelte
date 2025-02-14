@@ -6,5 +6,5 @@
 <div class="gap-1 py-3 box-content flex w-full flex-col">
 	<AboutWhyOisy asMenuItem />
 
-	<ChangelogLink />
+	<ChangelogLink asMenuItem />
 </div>

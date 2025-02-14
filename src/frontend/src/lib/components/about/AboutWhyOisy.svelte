@@ -8,6 +8,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let asMenuItem = false;
+	export let asMenuItemCondensed = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -15,11 +16,9 @@
 		dispatch('icOpenAboutModal');
 		modalStore.openAboutWhyOisy();
 	};
-
-	export let styleClass = '';
 </script>
 
-<AboutItem {asMenuItem} on:click={openModal} testId={ABOUT_WHY_OISY_BUTTON} {styleClass}>
+<AboutItem {asMenuItem} {asMenuItemCondensed} on:click={openModal} testId={ABOUT_WHY_OISY_BUTTON}>
 	<IconInfo slot="icon" />
 	<span slot="label">{replaceOisyPlaceholders($i18n.about.why_oisy.text.label)}</span>
 </AboutItem>

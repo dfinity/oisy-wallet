@@ -192,9 +192,9 @@
 			</ButtonMenu>
 		{/if}
 
-		<AboutWhyOisy styleClass="nav-item-condensed" asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
-		<ChangelogLink styleClass="nav-item-condensed" />
+		<ChangelogLink asMenuItem asMenuItemCondensed />
 
 		<ExternalLink
 			href="mailto:support@oisy.com"
