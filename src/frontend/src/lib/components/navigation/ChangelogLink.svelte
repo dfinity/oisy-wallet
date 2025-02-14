@@ -9,8 +9,8 @@
 </script>
 
 <ExternalLink
-	asMenuItem={asMenuItem}
-	asMenuItemCondensed={asMenuItemCondensed}
+	{asMenuItem}
+	{asMenuItemCondensed}
 	href="https://github.com/dfinity/oisy-wallet/releases"
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	iconVisible={false}
