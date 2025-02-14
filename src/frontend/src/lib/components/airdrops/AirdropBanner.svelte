@@ -28,7 +28,7 @@
 	$: balance =
 		nonNullish(airdrops) && airdrops.length > 0
 			? airdrops?.reduce(
-					(total, {amount}) => total.add(BigNumber.from(amount)),
+					(total, { amount }) => total.add(BigNumber.from(amount)),
 					BigNumber.from(0)
 				)
 			: undefined;
