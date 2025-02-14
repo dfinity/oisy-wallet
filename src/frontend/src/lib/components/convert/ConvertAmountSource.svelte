@@ -2,6 +2,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
+	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
@@ -14,6 +15,7 @@
 
 	export let sendAmount: OptionAmount = undefined;
 	export let totalFee: bigint | undefined;
+	export let minFee: bigint | undefined = undefined;
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
@@ -32,7 +34,9 @@
 			userAmount,
 			decimals: $sourceToken.decimals,
 			balance: $sourceTokenBalance,
-			totalFee
+			// If ETH, the balance should cover the user entered amount plus the min gas fee
+			// If other tokens - the balance plus total (max) fee
+			totalFee: isSupportedEthTokenId($sourceToken.id) ? minFee : totalFee
 		});
 
 	let isZeroBalance: boolean;
