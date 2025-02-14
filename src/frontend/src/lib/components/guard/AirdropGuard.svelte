@@ -9,8 +9,8 @@
 			return;
 		}
 
-		const {isAirdrop} = loadAirdropResult($authIdentity);
-        if (isAirdrop) {
+		const {receivedAirdrop} = await loadAirdropResult($authIdentity);
+        if (receivedAirdrop) {
             // TODO open airdrop state modal with isJackpot state
         }
 	});
