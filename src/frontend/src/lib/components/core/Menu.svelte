@@ -123,7 +123,7 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="gap-4 flex flex-col" data-tid={NAVIGATION_MENU}>
+	<div class="gap-1 flex flex-col" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
@@ -192,14 +192,15 @@
 			</ButtonMenu>
 		{/if}
 
-		<AboutWhyOisy asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
-		<ChangelogLink />
+		<ChangelogLink asMenuItem asMenuItemCondensed />
 
 		<ExternalLink
 			href="mailto:support@oisy.com"
 			ariaLabel={$i18n.navigation.alt.support_email}
 			iconVisible={false}
+			styleClass="nav-item nav-item-condensed"
 		>
 			<IconHelp />
 			{$i18n.navigation.text.support_email}
@@ -211,7 +212,7 @@
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="gap-2 flex items-center no-underline"
+			class="nav-item nav-item-condensed"
 			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />
