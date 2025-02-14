@@ -7,7 +7,7 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import type {AirdropDescription} from "$env/types/env-airdrop";
 
 	export let airdrop: AirdropDescription;
 </script>

@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import type { AirdropDescription } from '$lib/types/airdrop-events';
+	import type {AirdropDescription} from "$env/types/env-airdrop";
 
 	export let airdrop: AirdropDescription;
 	export let testId: string | undefined = undefined;
