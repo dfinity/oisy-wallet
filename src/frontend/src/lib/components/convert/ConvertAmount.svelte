@@ -8,6 +8,7 @@
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
+	export let minFee: bigint | undefined = undefined;
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
@@ -24,10 +25,11 @@
 		bind:exchangeValueUnit
 		{inputUnit}
 		{totalFee}
+		{minFee}
 	/>
 
 	<div
-		class="top-0 right-0 bottom-0 left-0 h-9 w-9 rounded-lg shadow-sm absolute m-auto flex items-center justify-center border border-solid border-secondary bg-white"
+		class="top-0 right-0 bottom-0 left-0 h-9 w-9 rounded-lg shadow-sm absolute m-auto flex items-center justify-center border border-solid border-secondary bg-surface"
 	>
 		<IconMoveDown />
 	</div>
