@@ -56,9 +56,6 @@ jobs:
       - name: Update
         run: npm run build:tokens-ckerc20
 
-      - name: Stage Changes
-        run: git add .
-
       - name: Check for Changes
         run: |
           if ! git diff --cached --quiet; then

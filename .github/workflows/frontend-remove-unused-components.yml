@@ -25,9 +25,6 @@ jobs:
         run: ./scripts/check.unused.sh --remove-files
         continue-on-error: true
 
-      - name: Stage Changes
-        run: git add .
-
       - name: Check for Changes
         run: |
           if ! git diff --cached --quiet; then
