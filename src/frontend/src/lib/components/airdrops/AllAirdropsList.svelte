@@ -10,10 +10,6 @@
 		AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-
-	let selectedAirdrop: AirdropDescription;
-	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
 
 	const isOngoingEvent = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 		const currentDate = new Date(Date.now());
