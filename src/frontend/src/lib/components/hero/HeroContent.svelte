@@ -21,7 +21,6 @@
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
 	import {
-		exchangeInitialized,
 		exchangeNotInitialized,
 		exchanges
 	} from '$lib/derived/exchange.derived';
