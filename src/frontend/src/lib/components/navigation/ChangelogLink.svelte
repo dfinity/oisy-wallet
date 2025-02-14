@@ -8,8 +8,12 @@
 	export let asMenuItemCondensed = false;
 
 	let styleClass = '';
-	if (asMenuItem) {styleClass += ' nav-item';}
-	if (asMenuItemCondensed) {styleClass += ' nav-item-condensed';}
+	if (asMenuItem) {
+		styleClass += ' nav-item';
+	}
+	if (asMenuItemCondensed) {
+		styleClass += ' nav-item-condensed';
+	}
 </script>
 
 <ExternalLink
