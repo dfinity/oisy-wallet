@@ -235,17 +235,16 @@ jobs:
         if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
         run: git add e2e
 
-      - name: Set CHANGES_DETECTED env var
+      - name: Check the Changed Files
         if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
         run: |
           MODIFIED_FILES=$(git diff --cached --name-only)
-          echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
           echo "MODIFIED_FILES<<EOF" >> $GITHUB_ENV
           echo "$MODIFIED_FILES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Create Pull Request (if changes and on main)
-        if: github.ref == 'refs/heads/main' && env.CHANGES_DETECTED == 'true'
+        if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
         uses: ./.github/actions/create-pr
         with:
           token: ${{ steps.app-token.outputs.token }}
