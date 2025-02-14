@@ -9,6 +9,7 @@
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
+	import UserSnapshotWorker from '$lib/components/airdrops/UserSnapshotWorker.svelte';
 </script>
 
 <AddressGuard>
@@ -20,7 +21,9 @@
 						<ExchangeWorker>
 							<LoaderMetamask>
 								<LoaderUserProfile>
+									<UserSnapshotWorker>
 									<slot />
+									</UserSnapshotWorker>
 								</LoaderUserProfile>
 							</LoaderMetamask>
 						</ExchangeWorker>
