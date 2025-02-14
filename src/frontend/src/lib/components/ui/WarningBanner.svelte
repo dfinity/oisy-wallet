@@ -4,7 +4,7 @@
 
 <div
 	class="gap-2 rounded-lg px-6 py-2 text-xs font-bold sm:w-fit md:text-base inline-flex w-full items-center justify-center border border-warning-solid bg-warning-subtle-10 text-warning-primary"
-
+>
 	<IconWarning inline />
 	<span><slot /></span>
 </div>
