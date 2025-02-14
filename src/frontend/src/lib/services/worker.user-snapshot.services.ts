@@ -1,52 +1,44 @@
+import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
 	PostMessageDataResponse,
-	PostMessageDataResponseUserSnapshotError
+	PostMessageDataResponseError
 } from '$lib/types/post-message';
 
-export interface UserSnapshotWorker {
-	startUserSnapshotTimer: () => void;
-	stopUserSnapshotTimer: () => void;
-	triggerUserSnapshotTimer: () => void;
-	destroy: () => void;
-}
+export type UserSnapshotWorker = WalletWorker;
 
 export const initUserSnapshotWorker = async (): Promise<UserSnapshotWorker> => {
 	const UserSnapshotWorker = await import('$lib/workers/workers?worker');
-	const userSnapshotWorker: Worker = new UserSnapshotWorker.default();
+	const worker: Worker = new UserSnapshotWorker.default();
 
-	userSnapshotWorker.onmessage = ({
-		data
-	}: MessageEvent<
-		PostMessage<PostMessageDataResponse | PostMessageDataResponseUserSnapshotError>
-	>) => {
-		const { msg, data: value } = data;
+	worker.onmessage = ({ data }: MessageEvent<PostMessage<PostMessageDataResponse>>) => {
+		const { msg } = data;
 
 		switch (msg) {
 			case 'syncUserSnapshotError':
 				console.error(
 					'An error occurred while attempting to register the user snapshot.',
-					(value as PostMessageDataResponseUserSnapshotError | undefined)?.err
+					(data.data as PostMessageDataResponseError).error
 				);
 				return;
 		}
 	};
 
-	const stopTimer = () =>
-		userSnapshotWorker.postMessage({
-			msg: 'stopUserSnapshotTimer'
-		});
-
 	return {
-		startUserSnapshotTimer: () => {
-			userSnapshotWorker.postMessage({ msg: 'startUserSnapshotTimer' });
+		start: () => {
+			worker.postMessage({
+				msg: 'startUserSnapshotTimer'
+			});
 		},
-		stopUserSnapshotTimer: stopTimer,
-		triggerUserSnapshotTimer: () => {
-			userSnapshotWorker.postMessage({ msg: 'triggerUserSnapshotTimer' });
+		stop: () => {
+			worker.postMessage({
+				msg: 'stopUserSnapshotTimer'
+			});
 		},
-		destroy: () => {
-			stopTimer();
+		trigger: () => {
+			worker.postMessage({
+				msg: 'triggerUserSnapshotTimer'
+			});
 		}
 	};
 };

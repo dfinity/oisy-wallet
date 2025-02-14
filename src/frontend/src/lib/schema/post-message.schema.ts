@@ -106,7 +106,8 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus'
+	'syncCkBTCUpdateBalanceStatus',
+	'syncUserSnapshotStatus'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
