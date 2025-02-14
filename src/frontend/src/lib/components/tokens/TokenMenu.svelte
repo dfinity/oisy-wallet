@@ -60,7 +60,7 @@
 </button>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
-	<div class="gap-3 flex flex-col">
+	<div class="gap-1 flex flex-col">
 		{#if $tokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} on:click={hideToken}>
 				{hideTokenLabel}

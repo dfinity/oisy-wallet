@@ -13,7 +13,7 @@
 	};
 </script>
 
-<button on:click={logout} class="text gap-2" data-tid={LOGOUT_BUTTON}>
+<button on:click={logout} class="nav-item nav-item-condensed" data-tid={LOGOUT_BUTTON}>
 	<IconLogout />
 	{$i18n.auth.text.logout}
 </button>
