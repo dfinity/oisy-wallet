@@ -32,7 +32,7 @@
 		<section class="bottom-4 left-4 max-h-6 min-h-6 md:max-h-14 absolute overflow-hidden">
 			<AirdropDateBadge
 				date={airdrop.endDate}
-				testId={nonNullish(testId) ? `${testId}-tag` : undefined}
+				testId={nonNullish(testId) ? `${testId}-badge` : undefined}
 			/>
 		</section>
 	</article>
