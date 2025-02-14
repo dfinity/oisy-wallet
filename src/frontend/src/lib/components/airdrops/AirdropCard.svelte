@@ -25,7 +25,7 @@
 	<article class="gap-y-4 md:gap-y-2 flex h-full flex-col justify-between">
 		<section>
 			<p class="m-0 text-lg font-semibold text-start">{airdrop.title}</p>
-			<p class="m-0 mt-2 text-xs text-start text-misty-rose">
+			<p class="m-0 mt-2 text-xs text-misty-rose text-start">
 				{airdrop.oneLiner}
 			</p>
 		</section>
