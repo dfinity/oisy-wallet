@@ -37,7 +37,7 @@
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
-			class="-right-2.5 bottom-0 h-6 w-6 text-sm font-semibold absolute flex items-center justify-center rounded-full border-[0.5px] border-tertiary bg-white text-primary"
+			class="-right-2.5 bottom-0 h-6 w-6 text-sm font-semibold absolute flex items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-primary"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
