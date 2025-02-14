@@ -12,7 +12,7 @@
 <button
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
 	on:click
-	class="h-60 rounded-lg p-4 pt-12 shadow-sm relative flex-1 bg-white"
+	class="h-60 rounded-lg p-4 pt-12 shadow-sm relative flex-1 bg-primary"
 >
 	<span class="-top-5 left-4 absolute">
 		<Logo
