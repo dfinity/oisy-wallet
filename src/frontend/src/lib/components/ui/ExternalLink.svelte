@@ -41,7 +41,7 @@
 	class:active:text-brand-primary={color === 'inherit'}
 	class:w-full={fullWidth}
 	class:nav-item={asMenuItem}
-	class:nav-item={asMenuItemCondensed}
+	class:nav-item-condensed={asMenuItemCondensed}
 	on:click={onClick}
 >
 	{#if iconVisible}
