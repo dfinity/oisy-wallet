@@ -114,7 +114,7 @@
 				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
 			{:else}
 				<span
-					class="text-primary-inverted flex items-center justify-center rounded-full bg-brand-primary"
+					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
 				>
 					<IconPlus />
