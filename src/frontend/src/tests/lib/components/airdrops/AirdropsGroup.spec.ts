@@ -5,7 +5,9 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('AirdropsGroups', () => {
-	const mockAirdropCampaign: AirdropDescription | undefined = mockAirdropCampaigns.at(0);
+	const mockAirdropCampaign: AirdropDescription | undefined = mockAirdropCampaigns.find(
+		({ id }) => id === 'OISY Airdrop #1'
+	);
 	assertNonNullish(mockAirdropCampaign);
 
 	const title = 'Active campaigns';

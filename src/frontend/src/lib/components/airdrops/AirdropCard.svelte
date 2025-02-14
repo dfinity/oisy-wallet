@@ -10,7 +10,7 @@
 
 <button
 	on:click
-	class="h-40 rounded-lg p-4 pt-12 shadow relative w-full flex-1 bg-white"
+	class="h-40 rounded-lg p-4 pt-12 shadow relative w-full flex-1 bg-primary"
 	data-tid={testId}
 >
 	<span class="-top-5 left-4 absolute">
