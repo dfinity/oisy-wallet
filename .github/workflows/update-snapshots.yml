@@ -231,6 +231,10 @@ jobs:
           default_author: github_actions
           message: '🤖 Update E2E snapshots'
 
+      - name: Stage Changes on main
+        if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
+        run: git add e2e
+
       - name: Set CHANGES_DETECTED env var
         if: env.FINAL_CHANGES == 'true' && github.ref == 'refs/heads/main'
         run: |
