@@ -55,7 +55,7 @@
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged-->
 		<div
-			class="-right-1 -bottom-1 h-6 w-6 p-1 absolute items-center justify-center rounded-full bg-brand-tertiary text-primary-inverted"
+			class="-right-1 -bottom-1 h-6 w-6 p-1 text-primary-inverted absolute items-center justify-center rounded-full bg-brand-tertiary"
 			aria-label={badge.ariaLabel}
 			data-tid={`icon-${badgeTestId}`}
 		>
