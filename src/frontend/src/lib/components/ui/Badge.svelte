@@ -4,10 +4,10 @@
 
 	const variantClassNames = {
 		default: 'border border-tertiary bg-dust/30',
-		info: 'bg-brand-subtle text-brand-primary',
-		error: 'bg-error-subtle text-error-primary',
-		warning: 'bg-warning-subtle text-warning-primary',
-		success: 'bg-success-subtle text-success-primary',
+		info: 'bg-brand-subtle-10 text-brand-primary',
+		error: 'bg-error-subtle-10 text-error-primary',
+		warning: 'bg-warning-subtle-10 text-warning-primary',
+		success: 'bg-success-subtle-10 text-success-primary',
 		outline: 'border border-tertiary bg-off-white'
 	};
 

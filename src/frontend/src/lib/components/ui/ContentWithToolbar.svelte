@@ -9,7 +9,7 @@
 <slot name="outer-content" />
 
 <div
-	class="bottom-0 left-0 px-3 pt-4 pb-4 md:px-6 md:pt-5 md:pb-6 sticky w-full border-t border-secondary bg-white"
+	class="bottom-0 left-0 px-3 pt-4 pb-4 md:px-6 md:pt-5 md:pb-6 sticky w-full border-t border-secondary bg-surface"
 >
 	<slot name="toolbar" />
 </div>

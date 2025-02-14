@@ -1,6 +1,7 @@
 export const themeVariables = {
 	background: {
 		page: 'var(--colors-neutrals-white)',
+		surface: 'var(--colors-neutrals-white)',
 		primary: 'var(--colors-neutrals-white)',
 		'primary-inverted': 'var(--colors-neutrals-black)',
 		secondary: 'var(--colors-neutrals-100)',
@@ -9,31 +10,34 @@ export const themeVariables = {
 		'tertiary-inverted': 'var(--colors-neutrals-600)',
 		disabled: 'var(--colors-neutrals-300)',
 		brand: {
-			'subtle-20': 'var(--color-brand-100)',
-			'subtle-30': 'var(--color-brand-200)',
-			'subtle2-alt': 'var(--color-brand-300)',
+			'subtle-10': 'var(--color-brand-100)',
+			'subtle-20': 'var(--color-brand-200)',
+			'subtle-30': 'var(--color-brand-300)',
 			primary: 'var(--color-brand-base)',
 			secondary: 'var(--color-brand-500)',
 			tertiary: 'var(--color-brand-600)',
 			disabled: 'var(--color-brand-100)'
 		},
 		success: {
-			'subtle-20': 'var(--color-success-lightest)',
-			'subtle-30': 'var(--color-success-lighter)',
+			'subtle-10': 'var(--color-success-lightest)',
+			'subtle-20': 'var(--color-success-lighter)',
+			'subtle-30': 'var(--color-success-light)',
 			solid: 'var(--color-success-default)',
 			'solid-alt': 'var(--color-success-dark)',
 			'solid-alt2': 'var(--color-success-darker)'
 		},
 		warning: {
-			'subtle-20': 'var(--color-warning-lightest)',
-			'subtle-30': 'var(--color-warning-lighter)',
+			'subtle-10': 'var(--color-warning-lightest)',
+			'subtle-20': 'var(--color-warning-lighter)',
+			'subtle-30': 'var(--color-warning-light)',
 			solid: 'var(--color-warning-default)',
 			'solid-alt': 'var(--color-warning-dark)',
 			'solid-alt2': 'var(--color-warning-darker)'
 		},
 		error: {
-			'subtle-20': 'var(--color-error-lightest)',
-			'subtle-30': 'var(--color-error-lighter)',
+			'subtle-10': 'var(--color-error-lightest)',
+			'subtle-20': 'var(--color-error-lighter)',
+			'subtle-30': 'var(--color-error-light)',
 			solid: 'var(--color-error-default)',
 			'solid-alt': 'var(--color-error-dark)',
 			'solid-alt2': 'var(--color-error-darker)'

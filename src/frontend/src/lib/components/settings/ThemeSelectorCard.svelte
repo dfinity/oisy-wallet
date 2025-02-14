@@ -26,8 +26,8 @@
 				class="right-2 bottom-2 p-1 shadow-sm absolute rounded-full border-4"
 				class:border-brand-primary={selected}
 				class:border-page={!selected}
-				class:bg-white={selected}
-				class:bg-page={!selected}
+				class:bg-off-white={selected}
+				class:bg-primary={!selected}
 			></span>
 		</div>
 	</div>

@@ -280,7 +280,7 @@
 
 <div
 	data-tid={CAROUSEL_CONTAINER}
-	class={`${styleClass ?? ''} rounded-3xl px-3 pt-3 pb-10 shadow-sm relative overflow-hidden bg-white`}
+	class={`${styleClass ?? ''} rounded-3xl px-3 pt-3 pb-10 shadow-sm relative overflow-hidden bg-primary`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
 	out:slide={SLIDE_PARAMS}
 >
