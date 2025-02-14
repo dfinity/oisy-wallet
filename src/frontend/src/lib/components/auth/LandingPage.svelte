@@ -7,6 +7,8 @@
 
 	let ariaLabel: string;
 	$: ariaLabel = replaceOisyPlaceholders($i18n.auth.alt.preview);
+
+	let bassa = null;
 </script>
 
 <div
@@ -21,7 +23,7 @@
 		class="pt-12 md:m-0 md:flex md:h-full md:content-center md:items-center ml-auto min-w-[1127px]"
 	>
 		<div class="md:h-md:mt-auto w-full">
-			{#await import(`$lib/assets/main_image-${$themeStore}.webp`) then { default: src }}
+			{#await import(`$lib/assets/main_image-${bassa ?? 'light'}.webp`) then { default: src }}
 				<Img {src} alt={ariaLabel} />
 			{/await}
 		</div>
