@@ -27,7 +27,7 @@
 	<MultipleListeners tokens={tokenGroup.tokens}>
 		<TokenCardWithOnClick
 			on:click={() => toggleIsExpanded(!isExpanded)}
-			styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isExpanded
+			styleClass="rounded-xl px-3 py-2 hover:bg-primary active:bg-primary {isExpanded
 				? 'bg-primary rounded-b-none'
 				: ''}"
 		>
