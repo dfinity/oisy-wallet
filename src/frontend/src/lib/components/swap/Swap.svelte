@@ -6,6 +6,11 @@
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
 	} from '$icp/services/icrc.services';
+	import {
+		IC_TOKEN_FEE_CONTEXT_KEY,
+		type IcTokenFeeContext,
+		icTokenFeeStore
+	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
 	import SwapModal from '$lib/components/swap/SwapModal.svelte';
 	import { allDisabledKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
@@ -25,6 +30,10 @@
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
+	});
+
+	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
+		store: icTokenFeeStore
 	});
 
 	const onOpenSwap = async (tokenId: symbol) => {
