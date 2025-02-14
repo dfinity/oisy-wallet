@@ -1,5 +1,5 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
-import { TestnetsPage, TestnetCases } from './utils/pages/testnets.page';
+import { TestnetCases, TestnetsPage } from './utils/pages/testnets.page';
 
 TestnetCases.forEach(({ name, networkSymbol, tokenSymbol }) => {
 	testWithII(name, async ({ page, iiPage }) => {
