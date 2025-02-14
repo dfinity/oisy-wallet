@@ -6,21 +6,14 @@
 
 	export let asMenuItem = false;
 	export let asMenuItemCondensed = false;
-
-	let styleClass = '';
-	if (asMenuItem) {
-		styleClass += ' nav-item';
-	}
-	if (asMenuItemCondensed) {
-		styleClass += ' nav-item-condensed';
-	}
 </script>
 
 <ExternalLink
+	asMenuItem={asMenuItem}
+	asMenuItemCondensed={asMenuItemCondensed}
 	href="https://github.com/dfinity/oisy-wallet/releases"
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	iconVisible={false}
-	{styleClass}
 >
 	<IconChangelog />
 	{replaceOisyPlaceholders($i18n.navigation.text.changelog)}

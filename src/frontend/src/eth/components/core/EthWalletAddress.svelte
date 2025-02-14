@@ -24,7 +24,7 @@
 
 {#if nonNullish(explorerUrl)}
 	<ExternalLink
-		styleClass="nav-item"
+		asMenuItem
 		href={explorerUrl}
 		ariaLabel={$i18n.wallet.alt.open_etherscan}
 	>

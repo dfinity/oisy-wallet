@@ -57,7 +57,7 @@
 
 {#if nonNullish(explorerAddressUrl)}
 	<ExternalLink
-		styleClass="nav-item"
+		asMenuItem
 		href={explorerAddressUrl}
 		ariaLabel={$i18n.wallet.alt.open_solscan}
 	>
