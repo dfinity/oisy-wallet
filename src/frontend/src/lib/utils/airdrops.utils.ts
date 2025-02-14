@@ -15,9 +15,9 @@ export const loadAirdropResult = async (identity: Identity): Promise<AirdropResu
 
         if (newAirdrops.length > 0) {
             const containsJackpot: boolean = newAirdrops.some((airdrop) => airdrop.name === 'jackpot');
-            return {isAirdrop: true, isJackpot: containsJackpot};
+            return {receivedAirdrop: true, receivedJackpot: containsJackpot};
         }
     }
 
-    return {isAirdrop: false, isJackpot: false};
+    return {receivedAirdrop: false, receivedJackpot: false};
 }

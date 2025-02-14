@@ -22,10 +22,10 @@ describe('airdrops utils', () => {
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBe('true')
 
-            const {isAirdrop, isJackpot} = await loadAirdropResult(mockIdentity);
+            const {receivedAirdrop, receivedJackpot} = await loadAirdropResult(mockIdentity);
 
-            expect(isAirdrop).toBe(false);
-            expect(isJackpot).toBe(false);
+            expect(receivedAirdrop).toBe(false);
+            expect(receivedJackpot).toBe(false);
         });
 
         it('should return falsy airdrop result and set entry in the session storage', async () => {
@@ -40,10 +40,10 @@ describe('airdrops utils', () => {
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBeNull()
 
-            const {isAirdrop, isJackpot} = await loadAirdropResult(mockIdentity);
+            const {receivedAirdrop, receivedJackpot} = await loadAirdropResult(mockIdentity);
 
-            expect(isAirdrop).toBe(false);
-            expect(isJackpot).toBe(false);
+            expect(receivedAirdrop).toBe(false);
+            expect(receivedJackpot).toBe(false);
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBe('true')
         });
@@ -60,10 +60,10 @@ describe('airdrops utils', () => {
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBeNull()
 
-            const {isAirdrop, isJackpot} = await loadAirdropResult(mockIdentity);
+            const {receivedAirdrop, receivedJackpot} = await loadAirdropResult(mockIdentity);
 
-            expect(isAirdrop).toBe(true);
-            expect(isJackpot).toBe(false);
+            expect(receivedAirdrop).toBe(true);
+            expect(receivedJackpot).toBe(false);
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBe('true')
         });
@@ -81,10 +81,10 @@ describe('airdrops utils', () => {
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBeNull()
 
-            const {isAirdrop, isJackpot} = await loadAirdropResult(mockIdentity);
+            const {receivedAirdrop, receivedJackpot} = await loadAirdropResult(mockIdentity);
 
-            expect(isAirdrop).toBe(true);
-            expect(isJackpot).toBe(true);
+            expect(receivedAirdrop).toBe(true);
+            expect(receivedJackpot).toBe(true);
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBe('true')
         });
@@ -102,10 +102,10 @@ describe('airdrops utils', () => {
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBeNull()
 
-            const {isAirdrop, isJackpot} = await loadAirdropResult(mockIdentity);
+            const {receivedAirdrop, receivedJackpot} = await loadAirdropResult(mockIdentity);
 
-            expect(isAirdrop).toBe(true);
-            expect(isJackpot).toBe(true);
+            expect(receivedAirdrop).toBe(true);
+            expect(receivedJackpot).toBe(true);
 
             expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBe('true')
         });

@@ -13,6 +13,6 @@ export interface AirdropInfo {
 }
 
 export interface AirdropResult {
-	isAirdrop: boolean;
-	isJackpot: boolean;
+	receivedAirdrop: boolean;
+	receivedJackpot: boolean;
 }
