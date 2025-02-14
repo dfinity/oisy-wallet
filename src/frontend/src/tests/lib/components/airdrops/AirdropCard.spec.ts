@@ -1,8 +1,8 @@
+import type { AirdropDescription } from '$env/types/env-airdrop';
 import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import type {AirdropDescription} from "$env/types/env-airdrop";
-import {assertNonNullish} from "@dfinity/utils";
 
 describe('AirdropCard', () => {
 	it('should render airdrop card content', () => {
