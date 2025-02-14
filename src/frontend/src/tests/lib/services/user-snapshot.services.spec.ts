@@ -1,10 +1,13 @@
 import type {
 	AccountSnapshot_Icrc,
 	AccountSnapshot_Spl,
+	Transaction_Icrc,
+	Transaction_Spl,
 	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import * as addressStore from '$lib/derived/address.derived';
@@ -18,16 +21,18 @@ import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.sto
 import type { WritableUpdateStore } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { Identity } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { BigNumber } from 'ethers';
 import { readable } from 'svelte/store';
@@ -51,7 +56,10 @@ describe('user-snapshot.services', () => {
 
 		const mockIcAmount = 123456n;
 
-		const mockIcTransactions: IcTransactionUi[] = createMockIcTransactionsUi(7);
+		const mockIcTransactions: IcTransactionUi[] = createMockIcTransactionsUi(7).map((tx) => ({
+			...tx,
+			from: mockPrincipalText
+		}));
 
 		const icrcAccounts: { Icrc: AccountSnapshot_Icrc }[] = [
 			{
@@ -62,7 +70,16 @@ describe('user-snapshot.services', () => {
 					timestamp: BigInt(now),
 					network: {},
 					account: mockIdentity.getPrincipal(),
-					last_transactions: []
+					token_address: Principal.from(ICP_TOKEN.ledgerCanisterId),
+					last_transactions: mockIcTransactions.slice(0, 5).map(
+						({ value, timestamp, to }: IcTransactionUi): Transaction_Icrc => ({
+							transaction_type: { Send: null },
+							timestamp: timestamp ?? 0n,
+							amount: value ?? 0n,
+							network: {},
+							counterparty: Principal.fromText(to ?? '')
+						})
+					)
 				}
 			},
 			{
@@ -73,6 +90,7 @@ describe('user-snapshot.services', () => {
 					timestamp: BigInt(now),
 					network: {},
 					account: mockIdentity.getPrincipal(),
+					token_address: Principal.from(mockValidIcToken.ledgerCanisterId),
 					last_transactions: []
 				}
 			}
@@ -80,7 +98,10 @@ describe('user-snapshot.services', () => {
 
 		const mockSplAmount = 987654n;
 
-		const mockSolTransactions: SolTransactionUi[] = createMockSolTransactionsUi(13);
+		const mockSolTransactions: SolTransactionUi[] = createMockSolTransactionsUi(13).map((tx) => ({
+			...tx,
+			from: mockSolAddress
+		}));
 
 		const splMainnetAccounts: { SplMainnet: AccountSnapshot_Spl }[] = [
 			{
@@ -91,7 +112,16 @@ describe('user-snapshot.services', () => {
 					timestamp: BigInt(now),
 					network: {},
 					account: mockSolAddress,
-					last_transactions: []
+					token_address: mockValidSplToken.address,
+					last_transactions: mockSolTransactions.slice(0, 5).map(
+						({ value, timestamp, to }: SolTransactionUi): Transaction_Spl => ({
+							transaction_type: { Send: null },
+							timestamp: timestamp ?? 0n,
+							amount: value ?? 0n,
+							network: {},
+							counterparty: to ?? ''
+						})
+					)
 				}
 			}
 		];
@@ -134,7 +164,10 @@ describe('user-snapshot.services', () => {
 
 			tokens.forEach(({ id }) => {
 				balancesStore.reset(id);
+				icTransactionsStore.reset(id);
+				solTransactionsStore.reset(id);
 			});
+
 			balancesStore.set({
 				tokenId: ICP_TOKEN.id,
 				data: { data: BigNumber.from(mockIcAmount * 2n), certified }
@@ -150,6 +183,21 @@ describe('user-snapshot.services', () => {
 			balancesStore.set({
 				tokenId: mockValidSplToken.id,
 				data: { data: BigNumber.from(mockSplAmount), certified }
+			});
+
+			icTransactionsStore.prepend({
+				tokenId: ICP_TOKEN.id,
+				transactions: mockIcTransactions.map((transaction) => ({
+					data: transaction,
+					certified
+				}))
+			});
+			solTransactionsStore.prepend({
+				tokenId: mockValidSplToken.id,
+				transactions: mockSolTransactions.map((transaction) => ({
+					data: transaction,
+					certified
+				}))
 			});
 
 			vi.spyOn(exchangeDerived, 'exchanges', 'get').mockImplementation(() =>

@@ -16,12 +16,14 @@ import { authIdentity } from '$lib/derived/auth.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
@@ -35,6 +37,8 @@ interface ToSnapshotParams<T extends Token> {
 	exchangeRate: number;
 	timestamp: number;
 }
+
+const LAST_TRANSACTIONS_COUNT = 5;
 
 const toTransactionType = (type: IcTransactionType): TransactionType =>
 	type === 'send' ? { Send: null } : { Receive: null };
@@ -53,19 +57,37 @@ const toBaseTransaction = ({
 	network: {}
 });
 
-const toIcrcTransaction = ({ type, value, timestamp }: IcTransactionUi): Transaction_Icrc => {
+const toIcrcTransaction = ({
+	transaction: { type, value, timestamp, from, to },
+	address
+}: {
+	transaction: IcTransactionUi;
+	address: Principal;
+}): Transaction_Icrc => {
+	// This does not happen, but we need it to be type-safe.
+	assertNonNullish(from);
+	assertNonNullish(to);
+
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
-		// TODO: check what this is
-		counterparty: ''
+		counterparty: Principal.fromText(address.toText() === from ? to : from)
 	};
 };
 
-const toSplTransaction = ({ type, value, timestamp }: SolTransactionUi): Transaction_Spl => {
+const toSplTransaction = ({
+	transaction: { type, value, timestamp, from, to },
+	address
+}: {
+	transaction: SolTransactionUi;
+	address: SolAddress;
+}): Transaction_Spl => {
+	// This does not happen, but we need it to be type-safe.
+	assertNonNullish(from);
+	assertNonNullish(to);
+
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
-		// TODO: check what this is
-		counterparty: ''
+		counterparty: address === from ? to : from
 	};
 };
 
@@ -76,7 +98,7 @@ const toBaseSnapshot = ({
 	timestamp
 }: ToSnapshotParams<Token>): Omit<
 	AccountSnapshot_Icrc | AccountSnapshot_Spl,
-	'account' | 'last_transactions'
+	'account' | 'token_address' | 'last_transactions'
 > => ({
 	decimals,
 	approx_usd_per_token: exchangeRate,
@@ -91,20 +113,25 @@ const toIcrcSnapshot = ({
 	exchangeRate,
 	timestamp
 }: ToSnapshotParams<IcToken>): AccountSnapshotFor => {
-	const { id } = token;
+	const { id, ledgerCanisterId } = token;
 
 	const identity = get(authIdentity);
 	// This should not happen, since the service is used only after login and never after logout.
 	assertNonNullish(identity);
 
-	const lastTransactions = (get(icTransactionsStore)?.[id] ?? []).map(
-		({ data: transaction }) => transaction
-	);
+	const address = identity.getPrincipal();
+
+	const lastTransactions = (get(icTransactionsStore)?.[id] ?? [])
+		.map(({ data: transaction }) => transaction)
+		.slice(0, LAST_TRANSACTIONS_COUNT);
 
 	const snapshot: AccountSnapshot_Icrc = {
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
-		account: identity.getPrincipal(),
-		last_transactions: lastTransactions.map(toIcrcTransaction)
+		account: address,
+		token_address: Principal.from(ledgerCanisterId),
+		last_transactions: lastTransactions.map((transaction) =>
+			toIcrcTransaction({ transaction, address })
+		)
 	};
 
 	return { Icrc: snapshot };
@@ -118,6 +145,7 @@ const toSplSnapshot = ({
 }: ToSnapshotParams<SplToken>): AccountSnapshotFor | undefined => {
 	const {
 		id,
+		address: tokenAddress,
 		network: { id: networkId }
 	} = token;
 
@@ -128,20 +156,24 @@ const toSplSnapshot = ({
 		return;
 	}
 
-	const lastTransactions = (get(solTransactionsStore)?.[id] ?? []).map(
-		({ data: transaction }) => transaction
-	);
+	const lastTransactions = (get(solTransactionsStore)?.[id] ?? [])
+		.map(({ data: transaction }) => transaction)
+		.slice(0, LAST_TRANSACTIONS_COUNT);
 
 	const snapshot: AccountSnapshot_Spl = {
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
-		last_transactions: lastTransactions.map(toSplTransaction)
+		token_address: tokenAddress,
+		last_transactions: lastTransactions.map((transaction) =>
+			toSplTransaction({ transaction, address })
+		)
 	};
 
 	return isNetworkIdSOLDevnet(networkId) ? { SplDevnet: snapshot } : { SplMainnet: snapshot };
 };
 
 const takeAccountSnapshots = (timestamp: number): AccountSnapshotFor[] => {
+	``;
 	const balances = get(balancesStore);
 
 	if (isNullish(balances)) {
