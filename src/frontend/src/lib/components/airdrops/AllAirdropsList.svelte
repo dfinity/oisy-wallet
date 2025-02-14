@@ -11,7 +11,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	const isOngoingEvent = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
+	const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 		const currentDate = new Date(Date.now());
 		let startDiff = startDate.getTime() - currentDate.getTime();
 		let endDiff = endDate.getTime() - currentDate.getTime();
@@ -19,20 +19,20 @@
 		return startDiff <= 0 && endDiff > 0;
 	};
 
-	const isUpcomingEvent = (startDate: Date) => {
+	const isUpcomingCampaign = (startDate: Date) => {
 		const currentDate = new Date(Date.now());
 		let startDiff = startDate.getTime() - currentDate.getTime();
 
 		return startDiff > 0;
 	};
 
-	let ongoingEvents: AirdropDescription[];
-	$: ongoingEvents = airdropCampaigns.filter(({ startDate, endDate }) =>
-		isOngoingEvent({ startDate, endDate })
+	let ongoingCampaigns: AirdropDescription[];
+	$: ongoingCampaigns = airdropCampaigns.filter(({ startDate, endDate }) =>
+		isOngoingCampaign({ startDate, endDate })
 	);
 
-	let upcomingEvents: AirdropDescription[];
-	$: upcomingEvents = airdropCampaigns.filter(({ startDate }) => isUpcomingEvent(startDate));
+	let upcomingCampaigns: AirdropDescription[];
+	$: upcomingCampaigns = airdropCampaigns.filter(({ startDate }) => isUpcomingCampaign(startDate));
 </script>
 
 <div class="mb-6 rounded-2xl md:mb-10 relative flex items-end overflow-hidden">
@@ -43,13 +43,13 @@
 
 <AirdropsGroups
 	title={$i18n.airdrops.text.active_campaigns}
-	airdrops={ongoingEvents}
+	airdrops={ongoingCampaigns}
 	testId={AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER}
 />
 
 <AirdropsGroups
 	title={$i18n.airdrops.text.upcoming_campaigns}
-	airdrops={upcomingEvents}
+	airdrops={upcomingCampaigns}
 	altText={$i18n.airdrops.alt.upcoming_campaigns}
 	testId={AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER}
 />
