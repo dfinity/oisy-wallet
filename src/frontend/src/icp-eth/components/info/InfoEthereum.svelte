@@ -48,7 +48,7 @@
 		>
 	</h4>
 
-	<p class="mt-3">
+	<p class="mt-3 text-tertiary">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
 			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol,
@@ -56,7 +56,7 @@
 		})}
 	</p>
 
-	<p class="mt-3">
+	<p class="mt-3 text-tertiary">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.note), {
 			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol

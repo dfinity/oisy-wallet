@@ -87,7 +87,7 @@
 		<div class="mb-4 h-80 p-4 mx-auto aspect-square max-h-[44vh] max-w-full">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<div slot="logo" class="rounded-lg p-2 flex items-center justify-center bg-white">
+					<div slot="logo" class="rounded-lg p-2 flex items-center justify-center bg-primary">
 						<IconAstronautHelmet />
 					</div>
 				</QRCode>
