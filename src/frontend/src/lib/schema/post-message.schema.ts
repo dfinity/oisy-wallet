@@ -155,10 +155,6 @@ export const PostMessageDataResponseExchangeErrorSchema = PostMessageDataRespons
 	err: z.string().optional()
 });
 
-export const PostMessageDataResponseUserSnapshotErrorSchema = PostMessageDataResponseSchema.extend({
-	err: z.string().optional()
-});
-
 // Transactions & {certified: boolean}
 export const JsonTransactionsTextSchema = z.string();
 
