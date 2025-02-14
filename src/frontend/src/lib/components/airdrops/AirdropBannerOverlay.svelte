@@ -48,7 +48,9 @@
 				<div class="gap-2 flex items-center justify-center">
 					<IconCoins />
 					<span class="text-lg"
-						>{isMobile() ? $i18n.airdrops.text.activity_button_text_short : $i18n.airdrops.text.activity_button_text}</span
+						>{isMobile()
+							? $i18n.airdrops.text.activity_button_text_short
+							: $i18n.airdrops.text.activity_button_text}</span
 					>
 				</div>
 			</Button>
