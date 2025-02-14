@@ -66,7 +66,7 @@
 			"title_part_2": "Safe. Seamless. Sovereign.",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"asset_types": "Bitcoin, Ethereum, ICP and more",
+			"asset_types": "Bitcoin, Solana, Ethereum, ICP and more",
 			"instant_and_private": "Instant and private access anywhere",
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
@@ -796,7 +796,7 @@
 				"title": "Why $oisy_short",
 				"hold_crypto": {
 					"title": "Unified Management of All Your Digital Assets",
-					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Solana, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
 				},
 				"network_custody": {
 					"title": "No more private key anxiety with Network Custody",
