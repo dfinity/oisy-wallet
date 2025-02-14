@@ -1,8 +1,8 @@
+import type { AirdropDescription } from '$env/types/env-airdrop';
 import AirdropsGroup from '$lib/components/airdrops/AirdropsGroup.svelte';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import type {AirdropDescription} from "$env/types/env-airdrop";
 
 describe('AirdropsGroups', () => {
 	const mockAirdropCampaign: AirdropDescription | undefined = mockAirdropCampaigns.at(0);
