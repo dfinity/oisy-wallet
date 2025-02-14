@@ -101,7 +101,6 @@ export const themeVariables = {
 			disabled: 'var(--color-foreground-brand-disabled)',
 			primary: 'var(--color-foreground-brand-primary)',
 			'primary-alt': 'var(--color-foreground-brand-primary-alt)',
-			'primary-inverted': 'var(--color-foreground-brand-primary-inverted)',
 			secondary: 'var(--color-foreground-brand-secondary)',
 			tertiary: 'var(--color-foreground-brand-tertiary)',
 			'subtle-10': 'var(--color-foreground-brand-subtle-10)',
