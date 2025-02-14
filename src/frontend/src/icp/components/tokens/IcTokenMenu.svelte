@@ -19,6 +19,7 @@
 	{#if nonNullish(transactionsExplorerUrl)}
 		<div in:fade>
 			<ExternalLink
+				asMenuItem
 				fullWidth
 				href={transactionsExplorerUrl}
 				ariaLabel={$i18n.tokens.alt.open_dashboard}
