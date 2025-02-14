@@ -1,3 +1,4 @@
+import type { AirdropDescription } from '$env/types/env-airdrop';
 import airdropJackpotReceived from '$lib/assets/airdrop-jackpot-received.svg';
 import airdropReceived from '$lib/assets/airdrop-received.svg';
 import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
@@ -6,7 +7,6 @@ import {
 	AIRDROPS_STATE_MODAL_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import type { AirdropDescription } from '$lib/types/airdrop-events';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
