@@ -333,6 +333,9 @@ abstract class Homepage {
 	}
 
 	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
+		const dropdownSelector = `[data-tid="${NETWORKS_SWITCHER_DROPDOWN}"]`;
+		const dropdown = this.#page.locator(dropdownSelector);
+		await dropdown.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
 	}
