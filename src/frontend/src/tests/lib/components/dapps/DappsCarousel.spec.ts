@@ -1,8 +1,8 @@
 import type { Settings, UserProfile } from '$declarations/backend/backend.did';
+import * as dapps from '$env/dapp-descriptions.env';
 import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import * as dapps from '$lib/types/dapp-description';
 import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';

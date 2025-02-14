@@ -1,4 +1,3 @@
-import dAppDescriptionsJson from '$env/dapp-descriptions.json';
 import { UrlSchema } from '$lib/validation/url.validation';
 import * as z from 'zod';
 
@@ -36,7 +35,7 @@ const CarouselDappDescriptionSchema = z.object({
 	callToAction: z.string()
 });
 
-const OisyDappDescriptionSchema = DAppDescriptionSchema.extend({
+export const OisyDappDescriptionSchema = DAppDescriptionSchema.extend({
 	featured: z.boolean().optional(),
 	callToAction: z.string().optional(),
 	telegram: UrlSchema.optional(),
@@ -49,7 +48,3 @@ export type FeaturedOisyDappDescription = Omit<OisyDappDescription, 'screenshots
 	Required<Pick<OisyDappDescription, 'screenshots'>>;
 export type CarouselSlideOisyDappDescription = Omit<OisyDappDescription, 'carousel'> &
 	Required<Pick<OisyDappDescription, 'carousel'>>;
-
-// TODO: to be move to $env
-const parseResult = z.array(OisyDappDescriptionSchema).safeParse(dAppDescriptionsJson);
-export const dAppDescriptions: OisyDappDescription[] = parseResult.success ? parseResult.data : [];
