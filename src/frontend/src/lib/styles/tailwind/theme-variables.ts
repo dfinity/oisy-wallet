@@ -78,6 +78,7 @@ export const themeVariables = {
 	},
 	foreground: {
 		primary: 'var(--colors-neutrals-black)',
+		'primary-inverted': 'var(--colors-neutrals-white)',
 		tertiary: 'var(--colors-neutrals-500)',
 		'tertiary-inverted': 'var(--colors-neutrals-500)',
 		disabled: 'var(--colors-neutrals-400)',
