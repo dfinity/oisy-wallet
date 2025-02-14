@@ -15,12 +15,14 @@
 		const currentDate = new Date(Date.now());
 		let startDiff = startDate.getTime() - currentDate.getTime();
 		let endDiff = endDate.getTime() - currentDate.getTime();
+
 		return startDiff <= 0 && endDiff > 0;
 	};
 
 	const isUpcomingEvent = (startDate: Date) => {
 		const currentDate = new Date(Date.now());
 		let startDiff = startDate.getTime() - currentDate.getTime();
+
 		return startDiff > 0;
 	};
 
