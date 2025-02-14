@@ -1,12 +1,9 @@
 import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler } from '$lib/schedulers/scheduler';
 import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
-import type {
-	PostMessageDataRequestBtc,
-	PostMessageDataResponseError
-} from '$lib/types/post-message';
+import type { PostMessageDataRequest, PostMessageDataResponseError } from '$lib/types/post-message';
 
-export class UserSnapshotScheduler implements Scheduler<PostMessageDataRequestBtc> {
+export class UserSnapshotScheduler implements Scheduler<PostMessageDataRequest> {
 	private timer = new SchedulerTimer('syncUserSnapshotStatus');
 
 	stop() {
