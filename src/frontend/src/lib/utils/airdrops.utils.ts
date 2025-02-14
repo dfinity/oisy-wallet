@@ -10,13 +10,13 @@ export const loadAirdropResult = async (identity: Identity): Promise<AirdropResu
 	if (isNullish(initialLoading)) {
 		const { airdrops, lastTimestamp } = await getAirdrops({ identity });
 		const newAirdrops: AirdropInfo[] = airdrops.filter(
-			({timestamp}) => timestamp >= lastTimestamp
+			({ timestamp }) => timestamp >= lastTimestamp
 		);
 
 		sessionStorage.setItem(INITIAL_AIRDROP_RESULT, 'true');
 
 		if (newAirdrops.length > 0) {
-			const containsJackpot: boolean = newAirdrops.some(({name}) => name === 'jackpot');
+			const containsJackpot: boolean = newAirdrops.some(({ name }) => name === 'jackpot');
 			return { receivedAirdrop: true, receivedJackpot: containsJackpot };
 		}
 	}
