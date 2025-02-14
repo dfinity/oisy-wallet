@@ -17,7 +17,7 @@ inputs:
     required: true
   path:
     description: 'Path of the changes to be staged'
-    required: true
+    required: false
 
 runs:
   using: 'composite'
