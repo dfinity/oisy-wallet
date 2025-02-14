@@ -25,7 +25,7 @@
 	<article class="h-full">
 		<section>
 			<p class="m-0 text-lg font-semibold text-start">{airdrop.title}</p>
-			<p class="m-0 mt-2 text-xs text-misty-rose text-start">
+			<p class="m-0 mt-2 text-xs text-start text-tertiary">
 				{airdrop.oneLiner}
 			</p>
 		</section>
