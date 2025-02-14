@@ -55,11 +55,11 @@
 		</div>
 	{:else}
 		<div class="text-3xl font-semibold sm:text-5xl">
-			<span>Start earning</span>
+			<span>{$i18n.airdrops.text.no_balance_title}</span>
 		</div>
 
 		<div class="text-lg sm:text-xl">
-			<span>Check back later to see your rewards</span>
+			<span>{$i18n.airdrops.text.no_balance_description}</span>
 		</div>
 	{/if}
 </div>
