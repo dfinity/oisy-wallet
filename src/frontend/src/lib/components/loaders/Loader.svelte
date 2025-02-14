@@ -33,7 +33,6 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import Img from '$lib/components/ui/Img.svelte';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -162,9 +161,8 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-
 						{#await import(`$lib/assets/banner-${$themeStore}.svg`) then { default: src }}
-							<ImgBanner src={src} styleClass="aspect-auto" />
+							<ImgBanner {src} styleClass="aspect-auto" />
 						{/await}
 					</div>
 

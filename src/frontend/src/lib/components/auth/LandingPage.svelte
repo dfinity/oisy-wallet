@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { themeStore } from '@dfinity/gix-components';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { themeStore } from '@dfinity/gix-components';
 
 	let ariaLabel: string;
 	$: ariaLabel = replaceOisyPlaceholders($i18n.auth.alt.preview);
@@ -22,7 +22,7 @@
 	>
 		<div class="md:h-md:mt-auto w-full">
 			{#await import(`$lib/assets/main_image-${$themeStore}.webp`) then { default: src }}
-				<Img src={src} alt={ariaLabel} />
+				<Img {src} alt={ariaLabel} />
 			{/await}
 		</div>
 	</div>
