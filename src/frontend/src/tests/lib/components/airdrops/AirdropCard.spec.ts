@@ -1,6 +1,6 @@
 import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
+import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
-import {mockAirdropCampaigns} from "$tests/mocks/airdrop-campaigns.mock";
 
 describe('AirdropCard', () => {
 	it('should render airdrop card content', () => {
