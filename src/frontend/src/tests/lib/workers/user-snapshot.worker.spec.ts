@@ -1,6 +1,8 @@
 import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { UserSnapshotScheduler } from '$lib/schedulers/user-snapshot.scheduler';
 import * as userSnapshotServices from '$lib/services/user-snapshot.services';
+import * as authUtils from '$lib/utils/auth.utils';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { MockInstance } from 'vitest';
 
 describe('user-snapshot.worker', () => {
@@ -38,6 +40,8 @@ describe('user-snapshot.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
+		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+
 		spyRegisterUserSnapshot = vi
 			.spyOn(userSnapshotServices, 'registerUserSnapshot')
 			.mockImplementation(vi.fn());
@@ -63,15 +67,15 @@ describe('user-snapshot.worker', () => {
 
 			await vi.advanceTimersByTimeAsync(USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(6);
-			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+			expect(postMessageMock).toHaveBeenCalledTimes(4);
+			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 
 			await vi.advanceTimersByTimeAsync(USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(8);
-			expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
+			expect(postMessageMock).toHaveBeenCalledTimes(6);
+			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 		});
 
 		it('should start the scheduler with an interval', async () => {
@@ -116,6 +120,7 @@ describe('user-snapshot.worker', () => {
 		it('should trigger postMessage with error', async () => {
 			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 			const err = new Error('test');
+			spyRegisterUserSnapshot.mockRejectedValueOnce(err);
 
 			await scheduler.start();
 
