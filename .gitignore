@@ -23,10 +23,6 @@ in/
 # files created by docker buildx
 out/
 
-# files created by e2e environment
-snapshot-status-macos/
-snapshot-status-ubuntu/
-
 # frontend code
 node_modules/
 build/
