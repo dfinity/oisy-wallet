@@ -20,10 +20,7 @@
 		balanceZero,
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
-	import {
-		exchangeNotInitialized,
-		exchanges
-	} from '$lib/derived/exchange.derived';
+	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkBitcoin,
 		networkEthereum,
