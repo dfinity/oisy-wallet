@@ -150,6 +150,11 @@ export const modalAirdropState: Readable<boolean> = derived(
 	($modalStore) => $modalStore?.type === 'airdrop-state'
 );
 
+export const modalAirdropState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'airdrop-state'
+);
+
 export const modalWalletConnect: Readable<boolean> = derived(
 	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],
 	([$modalWalletConnectAuth, $modalWalletConnectSign, $modalWalletConnectSend]) =>
