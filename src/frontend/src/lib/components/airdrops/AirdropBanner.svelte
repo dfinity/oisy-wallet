@@ -3,6 +3,8 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onMount } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import airdropBanner from '$lib/assets/airdrop-modal-banner.svg';
+	import AirdropBannerOverlay from '$lib/components/airdrops/AirdropBannerOverlay.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -11,8 +13,6 @@
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import type { AirdropInfo } from '$lib/types/airdrop';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import airdropBanner from '$lib/assets/airdrop-modal-banner.svg'
-	import AirdropBannerOverlay from "$lib/components/airdrops/AirdropBannerOverlay.svelte";
 
 	const token = ICP_TOKEN;
 
@@ -27,12 +27,13 @@
 	});
 
 	let balance: BigNumber | undefined;
-	$: balance = nonNullish(airdrops) && airdrops.length > 0
-		? airdrops?.reduce(
-				(total, airdrop) => total.add(BigNumber.from(airdrop.amount)),
-				BigNumber.from(0)
-			)
-		: undefined;
+	$: balance =
+		nonNullish(airdrops) && airdrops.length > 0
+			? airdrops?.reduce(
+					(total, airdrop) => total.add(BigNumber.from(airdrop.amount)),
+					BigNumber.from(0)
+				)
+			: undefined;
 
 	let exchangeRate: number | undefined;
 	$: exchangeRate = $exchanges?.[token.id]?.usd;

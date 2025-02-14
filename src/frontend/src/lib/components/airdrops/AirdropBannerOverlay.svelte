@@ -1,53 +1,65 @@
 <script lang="ts">
-    import {formatUSD} from "$lib/utils/format.utils.js";
-    import {goto} from "$app/navigation";
-    import {networkUrl} from "$lib/utils/nav.utils.js";
-    import {AppPath} from "$lib/constants/routes.constants.js";
-    import {networkId} from "$lib/derived/network.derived.js";
-    import {isMobile} from "$lib/utils/device.utils.js";
-    import {i18n} from "$lib/stores/i18n.store.js";
-    import Amount from "$lib/components/ui/Amount.svelte";
-    import Button from "$lib/components/ui/Button.svelte";
-    import IconCoins from "$lib/components/icons/IconCoins.svelte";
-    import {BigNumber} from "@ethersproject/bignumber";
-    import {nonNullish} from "@dfinity/utils";
+	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { goto } from '$app/navigation';
+	import IconCoins from '$lib/components/icons/IconCoins.svelte';
+	import Amount from '$lib/components/ui/Amount.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { networkId } from '$lib/derived/network.derived.js';
+	import { i18n } from '$lib/stores/i18n.store.js';
+	import { isMobile } from '$lib/utils/device.utils.js';
+	import { formatUSD } from '$lib/utils/format.utils.js';
+	import { networkUrl } from '$lib/utils/nav.utils.js';
 
-    export let token;
-    export let balance: BigNumber | undefined;
-    export let usdBalance: number | undefined;
+	export let token;
+	export let balance: BigNumber | undefined;
+	export let usdBalance: number | undefined;
 </script>
 
 <div
-        class="gap-2 sm:gap-4 absolute flex h-full w-full flex-col items-center justify-center text-center text-white bg-black/50"
+	class="gap-2 sm:gap-4 absolute flex h-full w-full flex-col items-center justify-center bg-black/50 text-center text-white"
 >
-    {#if nonNullish(token) && nonNullish(balance) && nonNullish(usdBalance)}
-        <div class="text-3xl font-semibold sm:text-5xl">
-            <Amount amount={balance} decimals={token.decimals} symbol={token.symbol} />
-        </div>
+	{#if nonNullish(token) && nonNullish(balance) && nonNullish(usdBalance)}
+		<div class="text-3xl font-semibold sm:text-5xl">
+			<Amount amount={balance} decimals={token.decimals} symbol={token.symbol} />
+		</div>
 
-        <div class="text-lg sm:text-xl">
-            <span>{formatUSD({ value: usdBalance })}</span>
-        </div>
+		<div class="text-lg sm:text-xl">
+			<span>{formatUSD({ value: usdBalance })}</span>
+		</div>
 
-        <div class="flex w-3/5 items-center">
-            <Button on:click={async () => {
-				await goto(networkUrl({path: AppPath.Activity, networkId: $networkId, usePreviousRoute: false, fromRoute: null }));
-			}} colorStyle="tertiary" link paddingSmall>
-                <div class="gap-2 flex items-center justify-center">
-                    <IconCoins />
-                    <span class="text-lg"
-                    >{isMobile() ? 'Check activity' : $i18n.airdrops.text.activity_button_text}</span
-                    >
-                </div>
-            </Button>
-        </div>
-    {:else}
-        <div class="text-3xl font-semibold sm:text-5xl">
-            <span>Start earning</span>
-        </div>
+		<div class="flex w-3/5 items-center">
+			<Button
+				on:click={async () => {
+					await goto(
+						networkUrl({
+							path: AppPath.Activity,
+							networkId: $networkId,
+							usePreviousRoute: false,
+							fromRoute: null
+						})
+					);
+				}}
+				colorStyle="tertiary"
+				link
+				paddingSmall
+			>
+				<div class="gap-2 flex items-center justify-center">
+					<IconCoins />
+					<span class="text-lg"
+						>{isMobile() ? 'Check activity' : $i18n.airdrops.text.activity_button_text}</span
+					>
+				</div>
+			</Button>
+		</div>
+	{:else}
+		<div class="text-3xl font-semibold sm:text-5xl">
+			<span>Start earning</span>
+		</div>
 
-        <div class="text-lg sm:text-xl">
-            <span>Check back later to see your rewards</span>
-        </div>
-    {/if}
+		<div class="text-lg sm:text-xl">
+			<span>Check back later to see your rewards</span>
+		</div>
+	{/if}
 </div>
