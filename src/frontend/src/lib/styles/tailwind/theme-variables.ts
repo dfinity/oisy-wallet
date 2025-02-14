@@ -25,28 +25,28 @@ export const themeVariables = {
 			disabled: 'var(--color-background-brand-disabled)'
 		},
 		success: {
-			primary: 'var(--color-background-success-primary)',
-			secondary: 'var(--color-background-success-secondary)',
-			tertiary: 'var(--color-background-success-tertiary)',
 			'subtle-10': 'var(--color-background-success-subtle-10)',
 			'subtle-20': 'var(--color-background-success-subtle-20)',
-			'subtle-30': 'var(--color-background-success-subtle-30)'
+			'subtle-30': 'var(--color-background-success-subtle-30)',
+			primary: 'var(--color-background-success-primary)',
+			secondary: 'var(--color-background-success-secondary)',
+			tertiary: 'var(--color-background-success-tertiary)'
 		},
-		warnings: {
-			primary: 'var(--color-background-warning-primary)',
-			secondary: 'var(--color-background-warning-secondary)',
-			tertiary: 'var(--color-background-warning-tertiary)',
+		warning: {
 			'subtle-10': 'var(--color-background-warning-subtle-10)',
 			'subtle-20': 'var(--color-background-warning-subtle-20)',
-			'subtle-30': 'var(--color-background-warning-subtle-30)'
+			'subtle-30': 'var(--color-background-warning-subtle-30)',
+			primary: 'var(--color-background-warning-primary)',
+			secondary: 'var(--color-background-warning-secondary)',
+			tertiary: 'var(--color-background-warning-tertiary)'
 		},
 		error: {
-			primary: 'var(--color-background-error-primary)',
-			secondary: 'var(--color-background-error-secondary)',
-			tertiary: 'var(--color-background-error-tertiary)',
 			'subtle-10': 'var(--color-background-error-subtle-10)',
 			'subtle-20': 'var(--color-background-error-subtle-20)',
-			'subtle-30': 'var(--color-background-error-subtle-30)'
+			'subtle-30': 'var(--color-background-error-subtle-30)',
+			primary: 'var(--color-background-error-primary)',
+			secondary: 'var(--color-background-error-secondary)',
+			tertiary: 'var(--color-background-error-tertiary)'
 		}
 	},
 	border: {
@@ -103,10 +103,10 @@ export const themeVariables = {
 			'primary-alt': 'var(--color-foreground-brand-primary-alt)',
 			'primary-inverted': 'var(--color-foreground-brand-primary-inverted)',
 			secondary: 'var(--color-foreground-brand-secondary)',
+			tertiary: 'var(--color-foreground-brand-tertiary)',
 			'subtle-10': 'var(--color-foreground-brand-subtle-10)',
 			'subtle-20': 'var(--color-foreground-brand-subtle-20)',
-			'subtle-30': 'var(--color-foreground-brand-subtle-30)',
-			tertiary: 'var(--color-foreground-brand-tertiary)'
+			'subtle-30': 'var(--color-foreground-brand-subtle-30)'
 		},
 		'success-primary': 'var(--color-foreground-success-primary)',
 		'success-secondary': 'var(--color-foreground-success-secondary)',
