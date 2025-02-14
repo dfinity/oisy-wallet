@@ -28,7 +28,7 @@
 			</div>
 			<div class="flex-1">
 				<h6 class="text-sm font-bold text-info-blue">{$i18n.dapps.text.featured}</h6>
-				<h4 class="text-white">{dAppDescription.name}</h4>
+				<h4 class="text-primary-inverted">{dAppDescription.name}</h4>
 			</div>
 
 			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="secondary" on:click>
