@@ -27,6 +27,9 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
+	'startUserSnapshotTimer',
+	'triggerUserSnapshotTimer',
+	'stopUserSnapshotTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -103,7 +106,8 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus'
+	'syncCkBTCUpdateBalanceStatus',
+	'syncUserSnapshotStatus'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -111,6 +115,7 @@ export const PostMessageResponseSchema = z.enum([
 	'delegationRemainingTime',
 	'syncExchange',
 	'syncExchangeError',
+	'syncUserSnapshotError',
 	'syncIcpWallet',
 	'syncIcrcWallet',
 	'syncBtcWallet',
