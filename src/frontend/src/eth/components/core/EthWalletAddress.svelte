@@ -23,11 +23,7 @@
 </div>
 
 {#if nonNullish(explorerUrl)}
-	<ExternalLink
-		styleClass="nav-item"
-		href={explorerUrl}
-		ariaLabel={$i18n.wallet.alt.open_etherscan}
-	>
+	<ExternalLink asMenuItem href={explorerUrl} ariaLabel={$i18n.wallet.alt.open_etherscan}>
 		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}

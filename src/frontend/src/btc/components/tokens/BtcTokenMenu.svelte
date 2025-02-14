@@ -39,7 +39,7 @@
 	{#if nonNullish(explorerAddressUrl)}
 		<div in:fade>
 			<ExternalLink
-				styleClass="nav-item"
+				asMenuItem
 				fullWidth
 				href={explorerAddressUrl}
 				ariaLabel={$i18n.tokens.alt.open_blockstream}
