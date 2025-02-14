@@ -20,7 +20,7 @@ describe('AirdropBannerOverlay', () => {
 	it('should render overlay content with balance', () => {
 		const token = ICP_TOKEN;
 		const balance: BigNumber = BigNumber.from(10000000);
-		const usdBalance: number = 7.22;
+		const usdBalance = 7.22;
 
 		const { getByText } = render(AirdropBannerOverlay, {
 			props: {
