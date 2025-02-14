@@ -173,7 +173,6 @@ const toSplSnapshot = ({
 };
 
 const takeAccountSnapshots = (timestamp: number): AccountSnapshotFor[] => {
-	``;
 	const balances = get(balancesStore);
 
 	if (isNullish(balances)) {
