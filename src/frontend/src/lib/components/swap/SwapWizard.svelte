@@ -109,14 +109,10 @@
 					? expectedSlippageMatch[1]
 					: 'N/A';
 
-				console.log(errorDetail, expectedSlippageMatch, expectedSlippage);
-
 				failedSwapError = replacePlaceholders($i18n.swap.error.slippage_exceeded, {
 					$expectedSlippage: expectedSlippage,
 					$maxSlippage: slippageValue.toString()
 				});
-
-				console.log(failedSwapError);
 			} else {
 				failedSwapError = undefined;
 
@@ -165,7 +161,7 @@
 				{slippageValue}
 				{swapAmount}
 				{receiveAmount}
-				bind:failedSwapError
+				{failedSwapError}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress bind:swapProgressStep />

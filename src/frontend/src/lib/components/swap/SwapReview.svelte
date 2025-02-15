@@ -17,7 +17,7 @@
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let slippageValue: OptionAmount;
-	export let failedSwapError: string | undefined = undefined;
+	export let failedSwapError: string | undefined;
 
 	$: failedSwapError, console.log(failedSwapError);
 
