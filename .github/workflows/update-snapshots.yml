@@ -250,6 +250,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           branch: bot-e2e-update-snapshots
+          paths: e2e/
           title: 'chore(e2e): Update Playwright E2E Snapshots'
           body: |
             The following E2E snapshots have been updated:
