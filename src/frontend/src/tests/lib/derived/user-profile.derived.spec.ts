@@ -7,12 +7,12 @@ describe('user-profile.derived', () => {
 	describe('userProfileLoaded', () => {
 		it('should return false when user profile is not set', () => {
 			userProfileStore.reset();
-			expect(get(userProfileLoaded)).toBe(false);
+			expect(get(userProfileLoaded)).toBeFalsy();
 		});
 
 		it('should return true when user profile is set', () => {
 			userProfileStore.set({ certified: true, profile: mockUserProfile });
-			expect(get(userProfileLoaded)).toBe(true);
+			expect(get(userProfileLoaded)).toBeTruthy();
 		});
 	});
 

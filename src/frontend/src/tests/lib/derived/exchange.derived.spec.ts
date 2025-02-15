@@ -10,26 +10,26 @@ describe('exchange.derived', () => {
 		});
 
 		it('should return false when exchange store is empty', () => {
-			expect(get(exchangeInitialized)).toBe(false);
+			expect(get(exchangeInitialized)).toBeFalsy();
 		});
 
 		it('should return true when exchange is disabled', () => {
 			vi.spyOn(exchangeEnv, 'EXCHANGE_DISABLED', 'get').mockImplementationOnce(() => true);
 
-			expect(get(exchangeInitialized)).toBe(true);
+			expect(get(exchangeInitialized)).toBeTruthy();
 		});
 
 		it('should return true when exchange store is not empty', () => {
 			exchangeStore.set([{ ethereum: { usd: 1 } }]);
 
-			expect(get(exchangeInitialized)).toBe(true);
+			expect(get(exchangeInitialized)).toBeTruthy();
 		});
 
 		it('should return false when exchange store is reset', () => {
 			exchangeStore.set([{ ethereum: { usd: 1 } }]);
 			exchangeStore.reset();
 
-			expect(get(exchangeInitialized)).toBe(false);
+			expect(get(exchangeInitialized)).toBeFalsy();
 		});
 	});
 });

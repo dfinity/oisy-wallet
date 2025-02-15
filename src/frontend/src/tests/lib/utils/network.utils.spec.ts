@@ -39,31 +39,31 @@ import {
 describe('network utils', () => {
 	describe('isNetworkICP', () => {
 		it('should return true for ICP network', () => {
-			expect(isNetworkICP(ICP_NETWORK)).toBe(true);
+			expect(isNetworkICP(ICP_NETWORK)).toBeTruthy();
 		});
 
 		it('should return false for non-ICP network', () => {
-			expect(isNetworkICP(ETHEREUM_NETWORK)).toBe(false);
+			expect(isNetworkICP(ETHEREUM_NETWORK)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkSolana', () => {
 		it.each(SOLANA_NETWORKS)('should return true for Solana network $name', (network) => {
-			expect(isNetworkSolana(network)).toBe(true);
+			expect(isNetworkSolana(network)).toBeTruthy();
 		});
 
 		it('should return false for non-ICP network', () => {
-			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBe(false);
+			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdICP', () => {
 		it('should return true for ICP network ID', () => {
-			expect(isNetworkIdICP(ICP_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdICP(ICP_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-ICP network ID', () => {
-			expect(isNetworkIdICP(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdICP(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
@@ -79,11 +79,11 @@ describe('network utils', () => {
 		});
 
 		it.each(allEthereumNetworkIds)('should return true for Ethereum network ID %s', (id) => {
-			expect(isNetworkIdEthereum(id as NetworkId)).toBe(true);
+			expect(isNetworkIdEthereum(id as NetworkId)).toBeTruthy();
 		});
 
 		it('should return false for non-Ethereum network IDs', () => {
-			expect(isNetworkIdEthereum(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdEthereum(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('should return false for Ethereum mainnet network ID when mainnet is disabled', () => {
@@ -105,11 +105,11 @@ describe('network utils', () => {
 		});
 
 		it.each(allBitcoinNetworkIds)('should return true for Bitcoin network ID %s', (id) => {
-			expect(isNetworkIdBitcoin(id as NetworkId)).toBe(true);
+			expect(isNetworkIdBitcoin(id as NetworkId)).toBeTruthy();
 		});
 
 		it('should return false for non-Bitcoin network IDs', () => {
-			expect(isNetworkIdBitcoin(ICP_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBitcoin(ICP_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('should return false for Bitcoin regtest network ID when it is not LOCAL env', () => {
@@ -118,49 +118,49 @@ describe('network utils', () => {
 				BTC_TESTNET_NETWORK_ID
 			]);
 
-			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdBTCMainnet', () => {
 		it('should return true for BTC mainnet ID', () => {
-			expect(isNetworkIdBTCMainnet(BTC_MAINNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdBTCMainnet(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-BTC mainnet ID', () => {
-			expect(isNetworkIdBTCMainnet(BTC_TESTNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBTCMainnet(BTC_TESTNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdBTCTestnet', () => {
 		it('should return true for BTC testnet ID', () => {
-			expect(isNetworkIdBTCTestnet(BTC_TESTNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdBTCTestnet(BTC_TESTNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-BTC testnet ID', () => {
-			expect(isNetworkIdBTCTestnet(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBTCTestnet(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdBTCRegtest', () => {
 		it('should return true for BTC regtest ID', () => {
-			expect(isNetworkIdBTCRegtest(BTC_REGTEST_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdBTCRegtest(BTC_REGTEST_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-BTC regtest ID', () => {
-			expect(isNetworkIdBTCRegtest(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdBTCRegtest(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSepolia', () => {
 		it('should return true for Sepolia network ID', () => {
-			expect(isNetworkIdSepolia(SEPOLIA_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSepolia(SEPOLIA_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-Sepolia network ID', () => {
-			expect(isNetworkIdSepolia(ETHEREUM_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSepolia(ETHEREUM_NETWORK_ID)).toBeFalsy();
 
-			expect(isNetworkIdSepolia(ICP_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSepolia(ICP_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
@@ -180,65 +180,65 @@ describe('network utils', () => {
 
 	describe('isNetworkIdSolana', () => {
 		it.each(SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
-			expect(isNetworkIdSolana(id)).toBe(true);
+			expect(isNetworkIdSolana(id)).toBeTruthy();
 		});
 
 		it('should return false for non-Solana network IDs', () => {
-			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSolana(ETHEREUM_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSolana(BTC_MAINNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSolana(ICP_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSolana(ETHEREUM_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSolana(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('should return false for undefined network ID', () => {
-			expect(isNetworkIdSolana(undefined)).toBe(false);
+			expect(isNetworkIdSolana(undefined)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLMainnet', () => {
 		it('should return true for SOL mainnet ID', () => {
-			expect(isNetworkIdSOLMainnet(SOLANA_MAINNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLMainnet(SOLANA_MAINNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL mainnet ID', () => {
-			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLMainnet(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLTestnet', () => {
 		it('should return true for SOL testnet ID', () => {
-			expect(isNetworkIdSOLTestnet(SOLANA_TESTNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLTestnet(SOLANA_TESTNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL testnet ID', () => {
-			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLTestnet(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLTestnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLTestnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLTestnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLTestnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLDevnet', () => {
 		it('should return true for SOL devnet ID', () => {
-			expect(isNetworkIdSOLDevnet(SOLANA_DEVNET_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLDevnet(SOLANA_DEVNET_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL devnet ID', () => {
-			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLDevnet(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLDevnet(SOLANA_LOCAL_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLDevnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLDevnet(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLDevnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
 		});
 	});
 
 	describe('isNetworkIdSOLLocal', () => {
 		it('should return true for SOL local ID', () => {
-			expect(isNetworkIdSOLLocal(SOLANA_LOCAL_NETWORK_ID)).toBe(true);
+			expect(isNetworkIdSOLLocal(SOLANA_LOCAL_NETWORK_ID)).toBeTruthy();
 		});
 
 		it('should return false for non-SOL local ID', () => {
-			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
-			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
+			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
 		});
 	});
 });

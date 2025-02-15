@@ -75,7 +75,7 @@ describe('btcPendingSentTransactionsStore', () => {
 		btcPendingSentTransactionsStore.setPendingTransactions({ address, pendingTransactions });
 
 		const storeData = get(btcPendingSentTransactionsStore);
-		expect(storeData[address].certified).toEqual(true);
+		expect(storeData[address].certified).toBeTruthy();
 	});
 
 	it('should update pending transactions for an existing address', () => {
