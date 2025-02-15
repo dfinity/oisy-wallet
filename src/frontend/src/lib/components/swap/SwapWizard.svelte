@@ -23,8 +23,8 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -102,7 +102,7 @@
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
 
-			if (nonNullish(errorDetail) &&  errorDetail.startsWith('Slippage exceeded.')) {
+			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
 				const expectedSlippageMatch = errorDetail.match(/(\d+(\.\d+)?)% slippage/);
 
 				const expectedSlippage = nonNullish(expectedSlippageMatch)
