@@ -135,7 +135,7 @@ jobs:
           fi
 
       - name: Save changed snapshots
-        if: env.CHANGES == 'true'
+        if: steps.check_snapshots.outputs.CHANGES == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: snapshots-${{ matrix.os }}
