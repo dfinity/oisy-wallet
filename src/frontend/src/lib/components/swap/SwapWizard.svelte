@@ -48,7 +48,7 @@
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
 
-	let failedSwapError: string | undefined = undefined;
+	let failedSwapError: string | undefined;
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
@@ -101,9 +101,8 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			const errorDetail = errorDetailToString(err);
-			console.log(errorDetail);
 
-			if ( nonNullish(errorDetail) &&  errorDetail.startsWith('Slippage exceeded.')) {
+			if (nonNullish(errorDetail) &&  errorDetail.startsWith('Slippage exceeded.')) {
 				const expectedSlippageMatch = errorDetail.match(/(\d+(\.\d+)?)% slippage/);
 
 				const expectedSlippage = nonNullish(expectedSlippageMatch)
