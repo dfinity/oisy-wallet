@@ -100,9 +100,11 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			if (typeof err === 'string' && err.startsWith('Slippage exceeded.')) {
-				const expectedSlippageMatch	 = err.match(/(\d+(\.\d+)?)% slippage/);
+				const expectedSlippageMatch = err.match(/(\d+(\.\d+)?)% slippage/);
 
-				const expectedSlippage = nonNullish(expectedSlippageMatch) ? expectedSlippageMatch[1] : 'N/A';
+				const expectedSlippage = nonNullish(expectedSlippageMatch)
+					? expectedSlippageMatch[1]
+					: 'N/A';
 
 				failedSwapError = replacePlaceholders($i18n.swap.error.slippage_exceeded, {
 					$expectedSlippage: expectedSlippage,
