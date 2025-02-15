@@ -22,7 +22,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Create Pull Request
+    - name: Create Pull Request (With Paths)
+      if: inputs.paths != ''
       uses: peter-evans/create-pull-request@v6
       with:
         token: ${{ inputs.token }}
@@ -32,6 +33,20 @@ runs:
         author: gix-bot <gix-bot@users.noreply.github.com>
         branch: ${{ inputs.branch }}
         add-paths: ${{ inputs.paths }}
+        delete-branch: true
+        title: ${{ inputs.title }}
+        body: ${{ inputs.body }}
+
+    - name: Create Pull Request (Without Paths)
+      if: inputs.paths == ''
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ inputs.token }}
+        base: main
+        commit-message: ${{ inputs.title }}
+        committer: GitHub <noreply@github.com>
+        author: gix-bot <gix-bot@users.noreply.github.com>
+        branch: ${{ inputs.branch }}
         delete-branch: true
         title: ${{ inputs.title }}
         body: ${{ inputs.body }}
