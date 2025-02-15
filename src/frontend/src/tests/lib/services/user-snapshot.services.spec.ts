@@ -5,6 +5,7 @@ import type {
 	Transaction_Spl,
 	UserSnapshot
 } from '$declarations/rewards/rewards.did';
+import * as airdropEnv from '$env/airdrop-campaigns.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
@@ -148,6 +149,8 @@ describe('user-snapshot.services', () => {
 			vi.clearAllMocks();
 
 			vi.useFakeTimers().setSystemTime(now);
+
+			vi.spyOn(airdropEnv, 'USER_SNAPSHOT_ENABLED', 'get').mockImplementationOnce(() => true);
 
 			mockAuthStore();
 
