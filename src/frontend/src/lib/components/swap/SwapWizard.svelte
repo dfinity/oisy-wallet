@@ -99,6 +99,8 @@
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			console.log(err);
+
 			if (typeof err === 'string' && err.startsWith('Slippage exceeded.')) {
 				const expectedSlippageMatch = err.match(/(\d+(\.\d+)?)% slippage/);
 
