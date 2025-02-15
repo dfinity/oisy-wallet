@@ -16,6 +16,7 @@ on:
       - 'docker/**'
       - # There may be some files in frontend folder that contains 'backend' in their name.
         '!src/frontend/**'
+  merge_group:
   workflow_dispatch:
 
 jobs:
