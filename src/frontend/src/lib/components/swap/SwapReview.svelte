@@ -12,10 +12,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let slippageValue: OptionAmount;
+	export let failedSwapError: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -53,6 +55,12 @@
 		</ModalValue>
 
 		<SwapFees {swapAmount} />
+
+		{#if nonNullish(failedSwapError)}
+			<MessageBox>
+				{failedSwapError}
+			</MessageBox>
+		{/if}
 	</div>
 
 	<ButtonGroup slot="toolbar">
