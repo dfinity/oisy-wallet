@@ -19,6 +19,8 @@
 	export let slippageValue: OptionAmount;
 	export let failedSwapError: string | undefined = undefined;
 
+	$: failedSwapError, console.log(failedSwapError);
+
 	const dispatch = createEventDispatcher();
 
 	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =

@@ -23,8 +23,8 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -48,7 +48,7 @@
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
 
-	let failedSwapError: string | undefined;
+	let failedSwapError: string | undefined = undefined;
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
@@ -109,10 +109,14 @@
 					? expectedSlippageMatch[1]
 					: 'N/A';
 
+				console.log(errorDetail, expectedSlippageMatch, expectedSlippage);
+
 				failedSwapError = replacePlaceholders($i18n.swap.error.slippage_exceeded, {
 					$expectedSlippage: expectedSlippage,
 					$maxSlippage: slippageValue.toString()
 				});
+
+				console.log(failedSwapError);
 			} else {
 				failedSwapError = undefined;
 
