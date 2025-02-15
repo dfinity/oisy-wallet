@@ -17,14 +17,16 @@
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let slippageValue: OptionAmount;
-	export let failedSwapError: string | undefined = undefined;
-
-	$: failedSwapError, console.log(failedSwapError);
 
 	const dispatch = createEventDispatcher();
 
-	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		sourceTokenExchangeRate,
+		destinationTokenExchangeRate,
+		failedSwapError
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
@@ -58,9 +60,9 @@
 
 		<SwapFees {swapAmount} />
 
-		{#if nonNullish(failedSwapError)}
+		{#if nonNullish($failedSwapError)}
 			<MessageBox>
-				{failedSwapError}
+				{$failedSwapError}
 			</MessageBox>
 		{/if}
 	</div>

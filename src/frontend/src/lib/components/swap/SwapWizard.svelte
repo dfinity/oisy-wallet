@@ -32,7 +32,7 @@
 	export let swapProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2 } =
+	const { sourceToken, destinationToken, isSourceTokenIcrc2, failedSwapError } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -47,8 +47,6 @@
 	$: sourceTokenFee = nonNullish($sourceToken)
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
-
-	let failedSwapError: string | undefined = undefined;
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
@@ -73,6 +71,8 @@
 		dispatch('icNext');
 
 		try {
+			failedSwapError.set(undefined);
+
 			await swapService({
 				identity: $authIdentity,
 				progress,
@@ -107,12 +107,14 @@
 					? expectedSlippageMatch[1]
 					: 'N/A';
 
-				failedSwapError = replacePlaceholders($i18n.swap.error.slippage_exceeded, {
-					$expectedSlippage: expectedSlippage,
-					$maxSlippage: slippageValue.toString()
-				});
+				failedSwapError.set(
+					replacePlaceholders($i18n.swap.error.slippage_exceeded, {
+						$expectedSlippage: expectedSlippage,
+						$maxSlippage: slippageValue.toString()
+					})
+				);
 			} else {
-				failedSwapError = undefined;
+				failedSwapError.set(undefined);
 
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected },
@@ -153,14 +155,7 @@
 				bind:slippageValue
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview
-				on:icSwap={swap}
-				on:icBack
-				{slippageValue}
-				{swapAmount}
-				{receiveAmount}
-				{failedSwapError}
-			/>
+			<SwapReview on:icSwap={swap} on:icBack {slippageValue} {swapAmount} {receiveAmount} />
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress bind:swapProgressStep />
 		{:else}
