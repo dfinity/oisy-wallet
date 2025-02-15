@@ -130,7 +130,7 @@
 	"type": "module",
 	"overrides": {
 		"ws": "^7.5.10",
-		"elliptic": "^6.5.7",
+		"elliptic": "^6.6.1",
 		"cookie": "^0.7.0"
 	},
 	"engines": {
