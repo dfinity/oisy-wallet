@@ -15,8 +15,8 @@ inputs:
   branch:
     description: 'Branch name for the PR'
     required: true
-  path:
-    description: 'Path of the changes to be staged'
+  paths:
+    description: 'Paths of the changes to be staged'
     required: false
 
 runs:
@@ -31,7 +31,7 @@ runs:
         committer: GitHub <noreply@github.com>
         author: gix-bot <gix-bot@users.noreply.github.com>
         branch: ${{ inputs.branch }}
-        path: ${{ inputs.path }}
+        add-paths: ${{ inputs.path }}
         delete-branch: true
         title: ${{ inputs.title }}
         body: ${{ inputs.body }}
