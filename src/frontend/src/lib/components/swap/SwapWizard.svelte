@@ -165,7 +165,7 @@
 				{slippageValue}
 				{swapAmount}
 				{receiveAmount}
-				{failedSwapError}
+				bind:failedSwapError
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress bind:swapProgressStep />
