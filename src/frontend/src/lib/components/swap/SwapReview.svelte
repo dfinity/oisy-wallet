@@ -17,9 +17,9 @@
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let slippageValue: OptionAmount;
-	export let failedSwapError: string | undefined;
+	export let failedSwapError: string | undefined = undefined;
 
-	$: failedSwapError,console.log(failedSwapError);
+	$: failedSwapError, console.log(failedSwapError);
 
 	const dispatch = createEventDispatcher();
 

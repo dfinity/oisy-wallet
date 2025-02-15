@@ -23,8 +23,8 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -48,7 +48,7 @@
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
 
-	let failedSwapError: string | undefined;
+	let failedSwapError: string | undefined = undefined;
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
@@ -73,8 +73,6 @@
 		dispatch('icNext');
 
 		try {
-			failedSwapError = undefined;
-
 			await swapService({
 				identity: $authIdentity,
 				progress,
