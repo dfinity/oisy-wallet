@@ -48,7 +48,7 @@
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
 
-	let failedSwapError: string | undefined = undefined;
+	let failedSwapError: string | undefined;
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
