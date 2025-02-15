@@ -27,6 +27,11 @@ export const exchangeInitialized: Readable<boolean> = derived(
 	([$exchangeStore]) => EXCHANGE_DISABLED || nonNullish($exchangeStore)
 );
 
+export const exchangeNotInitialized: Readable<boolean> = derived(
+	[exchangeInitialized],
+	([$exchangeInitialized]) => !$exchangeInitialized
+);
+
 // TODO: create tests for store
 export const exchanges: Readable<ExchangesData> = derived(
 	[exchangeStore, enabledErc20Tokens, allIcrcTokens, enabledSplTokens],
