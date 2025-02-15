@@ -94,7 +94,7 @@
 	// Addresses: IC principal and Solana addresses.
 	// Tokens: ICRC tokens and Solana tokens.
 	// Balances: All balances (since we need to check if the user has any balance).
-	// Exchanges: All exchanges (since we have no disclaimer specific for the tokens we are interested in).
+	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
 	// Transactions: IC and Solana transactions.
 	$: $authSignedIn,
 		$solAddressMainnet,
@@ -103,7 +103,7 @@
 		$splTokens,
 		$enabledSolanaTokens,
 		$balancesStore,
-		$exchanges,
+		$exchangeNotInitialized,
 		$icTransactionsStore,
 		$solTransactionsStore,
 		triggerTimer();
