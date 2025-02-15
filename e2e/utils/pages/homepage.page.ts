@@ -226,6 +226,10 @@ abstract class Homepage {
 		return await this.#page.getByTestId(testId);
 	}
 
+	protected async scrollToTop(): Promise<void> {
+		await this.#page.evaluate(() => window.scrollTo({ top: 0 }));
+	}
+
 	async waitForTimeout(timeout: number): Promise<void> {
 		await this.#page.waitForTimeout(timeout);
 	}
@@ -350,7 +354,11 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot(): Promise<void> {
+	async takeScreenshot(scrollToTop = true): Promise<void> {
+		if (scrollToTop) {
+			await this.scrollToTop();
+		}
+
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
