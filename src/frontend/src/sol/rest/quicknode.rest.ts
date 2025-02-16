@@ -10,6 +10,13 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { z } from 'zod';
 
+interface QuicknodeApiError {
+	error: {
+		code: number;
+		message: string;
+	};
+}
+
 interface SplMetadataResponse {
 	result: {
 		content: {
@@ -35,22 +42,23 @@ export const splMetadata = async ({
 	tokenAddress: SplTokenAddress;
 	network: SolanaNetworkType;
 }): Promise<SplMetadataResponse | undefined> => {
-	try {
-		return await fetchQuicknodeApi<SplMetadataResponse>({
-			body: {
-				jsonrpc: '2.0',
-				id: 1,
-				method: 'getAsset',
-				params: {
-					id: tokenAddress
-				}
-			},
-			network
-		});
-	} catch (err: unknown) {
-		// We care for the error only for development purposes.
-		console.warn(`QuickNode API error when fetching metadata: ${err}`);
+	const metadata = await fetchQuicknodeApi<SplMetadataResponse>({
+		body: {
+			jsonrpc: '2.0',
+			id: 1,
+			method: 'getAsset',
+			params: {
+				id: tokenAddress
+			}
+		},
+		network
+	});
+
+	if ('error' in metadata) {
+		return;
 	}
+
+	return metadata;
 };
 
 const fetchQuicknodeApi = async <T>({
@@ -59,7 +67,7 @@ const fetchQuicknodeApi = async <T>({
 }: {
 	body?: Record<string, unknown>;
 	network?: SolanaNetworkType;
-}): Promise<T> => {
+}): Promise<T | QuicknodeApiError> => {
 	const API_URL =
 		network === 'devnet'
 			? QUICKNODE_API_URL_DEVNET
