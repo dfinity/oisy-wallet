@@ -70,7 +70,8 @@ const fetchQuicknodeApi = async <T>({
 	});
 
 	if (!response.ok) {
-		throw new Error('QuickNode API response not ok.');
+		console.log(response);
+		throw new Error(`QuickNode API response not ok. Error: ${response.statusText}`);
 	}
 
 	return response.json();
