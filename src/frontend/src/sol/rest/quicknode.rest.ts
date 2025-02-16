@@ -34,7 +34,7 @@ export const splMetadata = async ({
 }: {
 	tokenAddress: SplTokenAddress;
 	network: SolanaNetworkType;
-}): Promise<SplMetadataResponse | { result: undefined }> => {
+}): Promise<SplMetadataResponse | undefined> => {
 	try {
 		return await fetchQuicknodeApi<SplMetadataResponse>({
 			body: {
@@ -51,8 +51,6 @@ export const splMetadata = async ({
 		// We care for the error only for development purposes.
 		console.warn(`QuickNode API error when fetching metadata: ${err}`);
 	}
-
-	return { result: undefined };
 };
 
 const fetchQuicknodeApi = async <T>({
