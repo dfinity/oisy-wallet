@@ -28,24 +28,32 @@ interface SplMetadataResponse {
  * - https://www.quicknode.com/docs/solana/getAsset
  *
  */
-export const splMetadata = ({
+export const splMetadata = async ({
 	tokenAddress,
 	network
 }: {
 	tokenAddress: SplTokenAddress;
 	network: SolanaNetworkType;
-}): Promise<SplMetadataResponse> =>
-	fetchQuicknodeApi<SplMetadataResponse>({
-		body: {
-			jsonrpc: '2.0',
-			id: 1,
-			method: 'getAsset',
-			params: {
-				id: tokenAddress
-			}
-		},
-		network
-	});
+}): Promise<SplMetadataResponse | { result: undefined }> => {
+	try {
+		return await fetchQuicknodeApi<SplMetadataResponse>({
+			body: {
+				jsonrpc: '2.0',
+				id: 1,
+				method: 'getAsset',
+				params: {
+					id: tokenAddress
+				}
+			},
+			network
+		});
+	} catch (err: unknown) {
+		// We care for the error only for development purposes.
+		console.warn(`QuickNode API error when fetching metadata: ${err}`);
+	}
+
+	return { result: undefined };
+};
 
 const fetchQuicknodeApi = async <T>({
 	body = {},
@@ -70,8 +78,7 @@ const fetchQuicknodeApi = async <T>({
 	});
 
 	if (!response.ok) {
-		console.log(response);
-		throw new Error(`QuickNode API response not ok. Error: ${response.statusText}`);
+		throw new Error(`QuickNode API response not ok. Error: ${response}`);
 	}
 
 	return response.json();
