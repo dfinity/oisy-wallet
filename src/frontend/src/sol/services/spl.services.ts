@@ -261,7 +261,8 @@ export const getSplMetadata = async ({
 		return {
 			decimals,
 			name: address,
-			symbol: address
+			// In the backend there is a limitation on the number of characters for the symbol.
+			symbol: address.slice(0, 6)
 		};
 	}
 
