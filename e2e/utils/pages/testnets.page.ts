@@ -43,8 +43,8 @@ export const TestnetCases: TestnetConfig[] = [
 ];
 
 export class TestnetsPage extends HomepageLoggedIn {
-	constructor({ page, iiPage }: TestnetsPageParams) {
-		super({ page, iiPage });
+	constructor(params: TestnetsPageParams) {
+		super(params);
 	}
 
 	async enableTestnets({

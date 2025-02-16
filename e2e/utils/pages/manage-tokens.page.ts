@@ -28,8 +28,8 @@ export const ManageTokensCases: ManageTokensConfig[] = [
 ];
 
 export class ManageTokensPage extends HomepageLoggedIn {
-	constructor({ page, iiPage }: ManageTokensPageParams) {
-		super({ page, iiPage });
+	constructor(params: ManageTokensPageParams) {
+		super(params);
 	}
 
 	enableAndDisableToken = async ({
