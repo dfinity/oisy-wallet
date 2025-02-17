@@ -473,7 +473,7 @@
 			"not_available": "n/a",
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
-			"token_fee": "Token fee",
+			"network_fee": "Network fee",
 			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",

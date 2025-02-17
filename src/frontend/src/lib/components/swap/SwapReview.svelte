@@ -58,7 +58,7 @@
 			</svelte:fragment>
 		</ModalValue>
 
-		<SwapFees {swapAmount} />
+		<SwapFees />
 
 		{#if nonNullish($failedSwapError)}
 			<div class="mt-4">

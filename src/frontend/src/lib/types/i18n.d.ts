@@ -437,7 +437,7 @@ interface I18nSwap {
 		not_available: string;
 		value_difference: string;
 		total_fee: string;
-		token_fee: string;
+		network_fee: string;
 		approval_fee: string;
 		gas_fee: string;
 		lp_fee: string;
