@@ -452,7 +452,7 @@ interface I18nSwap {
 		refreshing_ui: string;
 		swap_provider: string;
 	};
-	error: { unexpected: string; unexpected_missing_data: string };
+	error: { unexpected: string; unexpected_missing_data: string; slippage_exceeded: string };
 }
 
 interface I18nBuy {
