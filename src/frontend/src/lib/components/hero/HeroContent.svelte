@@ -20,7 +20,7 @@
 		balanceZero,
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
-	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
+	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkBitcoin,
 		networkEthereum,
@@ -55,7 +55,7 @@
 	$: loading.set(
 		isRouteTransactions($page)
 			? isNullish(pageTokenUi?.balance)
-			: !$exchangeInitialized || $noPositiveBalanceAndNotAllBalancesZero
+			: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
 	);
 
 	let isTransactionsPage = false;
