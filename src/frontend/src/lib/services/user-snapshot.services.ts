@@ -69,11 +69,9 @@ const toIcrcTransaction = ({
 	assertNonNullish(from);
 	assertNonNullish(to);
 
-	console.log('from', type, value, timestamp, from, to, address.toText(), address.toString());
-
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
-		counterparty: Principal.fromText(address.toText() === from ? to : from)
+		counterparty: Principal.fromHex(address.toHex() === from ? to : from)
 	};
 };
 
