@@ -4,11 +4,11 @@
 </script>
 
 <div
-	class="flex justify-center pt-12"
+	class="pt-12 flex justify-center"
 	role="presentation"
 	aria-label={$i18n.signer.idle.alt.img_placeholder}
 >
 	<SignerIdleAnimatedAstronaut />
 </div>
 
-<p class="mt-4 pb-12 text-center font-bold">{$i18n.signer.idle.text.waiting}</p>
+<p class="mt-4 pb-12 font-bold text-center">{$i18n.signer.idle.text.waiting}</p>

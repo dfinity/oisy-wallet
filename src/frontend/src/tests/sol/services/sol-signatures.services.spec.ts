@@ -5,7 +5,12 @@ import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks } from '$sol/types/network';
-import { mockSolSignature, mockSolSignatureResponse } from '$tests/mocks/sol-signatures.mock';
+import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	mockSolSignature,
+	mockSolSignatureResponse,
+	mockSolSignatureResponses
+} from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
@@ -32,9 +37,9 @@ describe('sol-transactions.services', () => {
 
 		const mockError = new Error('Mock Error');
 
-		const mockSignatures = [mockSolSignatureResponse(), mockSolSignatureResponse()];
+		const mockSignatures: SolSignature[] = mockSolSignatureResponses(7);
 
-		const mockSolTransactions = createMockSolTransactionsUi(3);
+		const mockSolTransactions: SolTransactionUi[] = createMockSolTransactionsUi(3);
 
 		beforeEach(() => {
 			spyFetchSignatures = vi.spyOn(solanaApi, 'fetchSignatures');
@@ -57,7 +62,7 @@ describe('sol-transactions.services', () => {
 
 			expect(transactions).toHaveLength(mockSignatures.length * mockSolTransactions.length);
 			expect(spyFetchSignatures).toHaveBeenCalledOnce();
-			expect(spyFetchTransactionsForSignature).toHaveBeenCalledTimes(2);
+			expect(spyFetchTransactionsForSignature).toHaveBeenCalledTimes(mockSignatures.length);
 		});
 
 		it('should correctly handle a token address', async () => {

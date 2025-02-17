@@ -5,8 +5,8 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 </script>
 
-<div>
-	<label class="block text-sm font-bold" for="ic-wallet-address"
+<div class="p-3">
+	<label class="text-sm font-bold block" for="ic-wallet-address"
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 
@@ -19,7 +19,7 @@
 		text={$i18n.wallet.text.address_copied}
 	/>
 
-	<p class="break-normal pt-2 text-misty-rose">
+	<p class="pt-2 break-normal text-tertiary">
 		{$i18n.wallet.text.icp_deposits}
 	</p>
 </div>

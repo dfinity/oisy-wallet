@@ -33,6 +33,7 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		airdrops: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -46,6 +47,7 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		airdrops: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
@@ -102,6 +104,18 @@ interface I18nDapps {
 		submit_your_dapp: string;
 		tags: string;
 		website: string;
+	};
+}
+
+interface I18nAirdrops {
+	text: {
+		title: string;
+		active_date: string;
+		share: string;
+		open_wallet: string;
+		state_modal_title: string;
+		state_modal_title_jackpot: string;
+		state_modal_content_text: string;
 	};
 }
 
@@ -414,6 +428,7 @@ interface I18nSwap {
 		value_difference: string;
 		total_fee: string;
 		token_fee: string;
+		approval_fee: string;
 		gas_fee: string;
 		lp_fee: string;
 		max_slippage_info: string;
@@ -819,6 +834,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
+	airdrops: I18nAirdrops;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;

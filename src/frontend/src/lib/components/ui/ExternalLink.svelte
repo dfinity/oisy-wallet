@@ -14,6 +14,8 @@
 	export let styleClass = '';
 	export let trackEvent: TrackEventParams | undefined = undefined;
 	export let testId: string | undefined = undefined;
+	export let asMenuItem = false;
+	export let asMenuItemCondensed = false;
 
 	const onClick = async () => {
 		if (isNullish(trackEvent)) {
@@ -28,7 +30,7 @@
 	{href}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="inline-flex items-center gap-2 no-underline {styleClass}"
+	class="gap-2 inline-flex items-center no-underline {styleClass}"
 	aria-label={ariaLabel}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	data-tid={testId}
@@ -38,6 +40,8 @@
 	class:hover:text-brand-primary={color === 'inherit'}
 	class:active:text-brand-primary={color === 'inherit'}
 	class:w-full={fullWidth}
+	class:nav-item={asMenuItem}
+	class:nav-item-condensed={asMenuItemCondensed}
 	on:click={onClick}
 >
 	{#if iconVisible}
