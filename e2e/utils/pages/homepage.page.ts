@@ -53,6 +53,10 @@ interface WaitForModalParams {
 	state?: 'detached';
 }
 
+interface TakeScreenshotParams {
+	scrollToTop?: boolean;
+}
+
 type TestModalSnapshotParams = {
 	selectorsToMock?: string[];
 } & WaitForModalParams;
@@ -354,7 +358,7 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot(scrollToTop = true): Promise<void> {
+	async takeScreenshot({ scrollToTop = false }: TakeScreenshotParams = {}): Promise<void> {
 		if (scrollToTop) {
 			await this.scrollToTop();
 		}

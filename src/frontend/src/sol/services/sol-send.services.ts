@@ -5,7 +5,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
 import { createAtaInstruction } from '$sol/services/spl-accounts.services';
@@ -167,19 +166,16 @@ const createSplTokenTransactionMessage = async ({
 			tokenAddress
 		});
 
-	const transferInstruction = getTransferInstruction(
-		{
-			source: solAddress(sourceTokenAccountAddress),
-			destination: solAddress(
-				mustCreateDestinationTokenAccount
-					? calculatedDestinationTokenAccountAddress
-					: destinationTokenAccountAddress
-			),
-			authority: signer,
-			amount: amount.toBigInt()
-		},
-		{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
-	);
+	const transferInstruction = getTransferInstruction({
+		source: solAddress(sourceTokenAccountAddress),
+		destination: solAddress(
+			mustCreateDestinationTokenAccount
+				? calculatedDestinationTokenAccountAddress
+				: destinationTokenAccountAddress
+		),
+		authority: signer,
+		amount: amount.toBigInt()
+	});
 
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(

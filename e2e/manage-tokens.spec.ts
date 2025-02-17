@@ -36,7 +36,7 @@ testWithII('should enable and disable ICRC token', async () => {
 	await homepageLoggedIn.waitForLoadState();
 	await homepageLoggedIn.setCarouselFirstSlide();
 	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.takeScreenshot();
+	await homepageLoggedIn.takeScreenshot({ scrollToTop: true });
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'ckSepoliaETH',
 		networkSymbol: 'ICP'
@@ -64,7 +64,7 @@ testWithII('should enable and disable ERC20 token', async () => {
 	await homepageLoggedIn.waitForLoadState();
 	await homepageLoggedIn.setCarouselFirstSlide();
 	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.takeScreenshot();
+	await homepageLoggedIn.takeScreenshot({ scrollToTop: true });
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'SHIB',
 		networkSymbol: 'ETH'
@@ -92,7 +92,7 @@ testWithII('should enable and disable SepoliaERC20 token', async () => {
 	await homepageLoggedIn.waitForLoadState();
 	await homepageLoggedIn.setCarouselFirstSlide();
 	await homepageLoggedIn.waitForLoadState();
-	await homepageLoggedIn.takeScreenshot();
+	await homepageLoggedIn.takeScreenshot({ scrollToTop: true });
 	await homepageLoggedIn.toggleTokenInList({
 		tokenSymbol: 'USDC',
 		networkSymbol: 'SepoliaETH'
