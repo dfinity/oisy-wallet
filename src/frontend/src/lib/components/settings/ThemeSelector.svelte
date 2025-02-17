@@ -16,7 +16,6 @@
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
-			console.log($themeStore);
 			updateSelectedTheme()
 			return;
 		}
