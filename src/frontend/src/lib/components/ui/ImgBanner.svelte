@@ -7,4 +7,4 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<Img {src} {alt} {testId} styleClass="w-full h-auto {styleClass ?? ''}" />
+<Img {src} {alt} {testId} styleClass="w-full h-auto aspect-video {styleClass ?? ''}" />

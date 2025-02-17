@@ -45,7 +45,7 @@
 
 <div class="mb-5 max-h-60 rounded-2xl relative flex items-end overflow-hidden">
 	<div class="max-h-60">
-		<ImgBanner src={airdropBanner} testId={AIRDROPS_MODAL_IMAGE_BANNER} />
+		<ImgBanner src={airdropBanner} testId={AIRDROPS_MODAL_IMAGE_BANNER} styleClass="object-cover" />
 	</div>
 
 	<AirdropBannerOverlay {token} {balance} {usdBalance} />
