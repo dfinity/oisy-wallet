@@ -33,6 +33,7 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -161,9 +162,11 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
-							<ImgBanner {src} styleClass="aspect-auto" />
-						{/await}
+						<LazyImg
+							src={`$lib/assets/banner-${$themeStore ?? 'light'}.svg`}
+							styleClass="aspect-auto"
+							asBanner
+						/>
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
