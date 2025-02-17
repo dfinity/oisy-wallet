@@ -44,6 +44,7 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		isSourceTokenIcrc2,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -109,7 +110,8 @@
 					userAmount,
 					decimals: $sourceToken.decimals,
 					balance: $sourceTokenBalance,
-					totalFee: sourceTokenFee
+					// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+					totalFee: (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)
 				})
 			: undefined;
 </script>
