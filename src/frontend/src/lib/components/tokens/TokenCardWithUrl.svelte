@@ -14,7 +14,7 @@
 
 <div class={`group gap-3 sm:gap-8 flex ${styleClass}`}>
 	<a
-		class="flex-1 no-underline unstyled"
+		class="unstyled flex-1 no-underline"
 		href={url}
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol
