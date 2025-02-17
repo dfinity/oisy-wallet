@@ -161,7 +161,7 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						{#await import(`$lib/assets/banner-${$themeStore}.svg`) then { default: src }}
+						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
 							<ImgBanner {src} styleClass="aspect-auto" />
 						{/await}
 					</div>
