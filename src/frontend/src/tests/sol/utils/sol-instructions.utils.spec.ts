@@ -261,6 +261,49 @@ describe('sol-instructions.utils', () => {
 				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			});
 
+			it('should map a valid `transfer` instruction', async () => {
+				const result = await mapSolParsedInstruction({
+					instruction: mockTokenInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 50n,
+					from: `${mockSolAddress}-owner`,
+					to: `${mockSolAddress2}-owner`,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `transferChecked` instruction', async () => {
+				const mockTransferCheckedInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'transferChecked',
+						info: {
+							destination: mockSolAddress2,
+							tokenAmount: {
+								amount: '50'
+							},
+							source: mockSolAddress,
+							mint: mockTokenAddress
+						}
+					}
+				};
+
+				const result = await mapSolParsedInstruction({
+					instruction: mockTransferCheckedInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 50n,
+					from: `${mockSolAddress}-owner`,
+					to: `${mockSolAddress2}-owner`,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
 					instruction: { ...mockTokenInstruction, parsed: { type: 'other-type', info: {} } },

@@ -257,6 +257,59 @@ const mapToken2022ParsedInstruction = async ({
 	info: object;
 	network: SolanaNetworkType;
 }): Promise<SolMappedTransaction | undefined> => {
+	if (type === 'transfer') {
+		// We need to cast the type since it is not implied
+		const {
+			destination,
+			amount: value,
+			source
+		} = info as {
+			destination: SolAddress;
+			amount: string;
+			source: SolAddress;
+		};
+
+		const { getAccountInfo } = solanaHttpRpc(network);
+
+		const { value: sourceResult } = await getAccountInfo(address(source), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		const { value: destinationResult } = await getAccountInfo(address(destination), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (
+			nonNullish(sourceResult) &&
+			'parsed' in sourceResult.data &&
+			nonNullish(destinationResult) &&
+			'parsed' in destinationResult.data
+		) {
+			const {
+				data: {
+					parsed: { info: sourceAccoutInfo }
+				}
+			} = sourceResult;
+
+			const { mint: tokenAddress, owner: from } = sourceAccoutInfo as {
+				mint: SplTokenAddress;
+				owner: SolAddress;
+			};
+
+			const {
+				data: {
+					parsed: { info: destinationAccoutInfo }
+				}
+			} = destinationResult;
+
+			const { owner: to } = destinationAccoutInfo as {
+				owner: SolAddress;
+			};
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
+	}
+
 	if (type === 'transferChecked') {
 		// We need to cast the type since it is not implied
 		const {
