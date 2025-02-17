@@ -244,13 +244,24 @@ div.segment-button {
 	}
 }
 
+div.step .state {
+	color: var(--color-foreground-brand-primary-alt) !important;
+	background: var(--color-background-brand-subtle-30) !important;
+}
+
 div.step.completed {
 	svg {
-		--icon-check-circle-background: var(--color-primary);
+		--icon-check-circle-background: var(--color-background-brand-primary);
+		--icon-check-circle-color: var(--color-foreground-primary-inverted);
 	}
 
 	div.line {
-		--line-color: var(--color-primary);
+		--line-color: var(--color-background-brand-primary) !important;
+	}
+
+	.state {
+		color: var(--color-foreground-success-primary) !important;
+		background: var(--color-background-success-subtle-30) !important;
 	}
 }
 
