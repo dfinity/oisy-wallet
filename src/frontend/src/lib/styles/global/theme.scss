@@ -58,7 +58,7 @@ a {
 	cursor: pointer;
 	word-break: break-word;
 }
-a:active,
+a:not(.unstyled):active,
 a:hover {
 	color: var(--color-blue-ribbon);
 }
