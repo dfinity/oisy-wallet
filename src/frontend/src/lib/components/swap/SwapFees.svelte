@@ -9,45 +9,13 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {
-		SWAP_AMOUNTS_CONTEXT_KEY,
-		type SwapAmountsContext
-	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { OptionAmount } from '$lib/types/send';
 	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
 
-	export let swapAmount: OptionAmount;
-
-	const {
-		destinationToken,
-		destinationTokenExchangeRate,
-		sourceToken,
-		sourceTokenExchangeRate,
-		isSourceTokenIcrc2
-	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
-
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
-
-	let liquidityProvidersFee: number;
-	$: liquidityProvidersFee = nonNullish($destinationToken)
-		? formatTokenBigintToNumber({
-				value: $swapAmountsStore?.swapAmounts?.liquidityProvidersFee ?? 0n,
-				displayDecimals: $destinationToken.decimals,
-				unitName: $destinationToken.decimals
-			})
-		: 0;
-
-	let gasFee: number;
-	$: gasFee = nonNullish($destinationToken)
-		? formatTokenBigintToNumber({
-				value: $swapAmountsStore?.swapAmounts?.gasFee ?? 0n,
-				displayDecimals: $destinationToken.decimals,
-				unitName: $destinationToken.decimals
-			})
-		: 0;
 
 	let sourceTokenTransferFee: number;
 	$: sourceTokenTransferFee =
@@ -62,46 +30,37 @@
 	let sourceTokenApproveFee: number;
 	$: sourceTokenApproveFee = isSourceTokenIcrc2 ? sourceTokenTransferFee : 0;
 
-	let destinationTokenTotalFeeUSD: number;
-	$: destinationTokenTotalFeeUSD = nonNullish($destinationTokenExchangeRate)
-		? (liquidityProvidersFee + gasFee) * $destinationTokenExchangeRate
-		: 0;
-
 	let sourceTokenTotalFeeUSD: number;
 	$: sourceTokenTotalFeeUSD = nonNullish($sourceTokenExchangeRate)
 		? (sourceTokenTransferFee + sourceTokenApproveFee) * $sourceTokenExchangeRate
 		: 0;
 </script>
 
-{#if nonNullish($destinationToken) && nonNullish($sourceToken) && nonNullish(swapAmount) && $swapAmountsStore?.swapAmounts !== null}
+{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 	<ModalExpandableValues>
 		<ModalValue slot="list-header">
 			<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
-				{#if isNullish($swapAmountsStore?.swapAmounts?.receiveAmount)}
+				{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
 					<div class="w-14 sm:w-16">
 						<SkeletonText />
 					</div>
-				{:else if destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
+				{:else if isNullish($sourceTokenExchangeRate)}
+					{sourceTokenTransferFee + sourceTokenApproveFee} {$sourceToken.symbol}
+				{:else if sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
 					{`< ${formatUSD({
 						value: SWAP_TOTAL_FEE_THRESHOLD
 					})}`}
 				{:else}
 					{formatUSD({
-						value: destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD
+						value: sourceTokenTotalFeeUSD
 					})}
 				{/if}
 			</svelte:fragment>
 		</ModalValue>
 
 		<svelte:fragment slot="list-items">
-			<SwapFee
-				fee={sourceTokenTransferFee}
-				symbol={$sourceToken.symbol}
-				label={$i18n.swap.text.token_fee}
-			/>
-
 			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
 				<SwapFee
 					fee={sourceTokenApproveFee}
@@ -110,12 +69,10 @@
 				/>
 			{/if}
 
-			<SwapFee fee={gasFee} symbol={$destinationToken.symbol} label={$i18n.swap.text.gas_fee} />
-
 			<SwapFee
-				fee={liquidityProvidersFee}
-				symbol={$destinationToken.symbol}
-				label={$i18n.swap.text.lp_fee}
+				fee={sourceTokenTransferFee}
+				symbol={$sourceToken.symbol}
+				label={$i18n.swap.text.network_fee}
 			/>
 		</svelte:fragment>
 	</ModalExpandableValues>
