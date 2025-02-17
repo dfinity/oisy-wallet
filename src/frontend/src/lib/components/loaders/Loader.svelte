@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { Modal, type ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import banner from '$lib/assets/banner.svg';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -162,7 +161,9 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						<ImgBanner src={banner} styleClass="aspect-auto" />
+						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+							<ImgBanner {src} styleClass="aspect-auto" />
+						{/await}
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
