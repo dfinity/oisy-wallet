@@ -25,7 +25,6 @@
 	class:duration-500={loading}
 	class:ease-in-out={loading}
 	class:animate-pulse={loading}
-	class:opacity-40={loading}
 	on:click
 	data-tid={testId}
 	aria-label={ariaLabel}

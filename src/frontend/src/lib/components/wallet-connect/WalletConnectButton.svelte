@@ -10,7 +10,7 @@
 	aria-label={ariaLabel}
 	on:click
 	in:fade
-	class="tertiary-alt h-10"
+	class="tertiary h-10"
 	class:icon={!$$slots.default}
 	disabled={$ethAddressNotLoaded}
 >
