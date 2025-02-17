@@ -1,6 +1,6 @@
 @use 'base-colors' as *;
 
-html[theme='dark']:root {
+:root[theme='dark'] {
 	--color-foreground-primary: #{$dusk-25};
 	--color-foreground-primary-inverted: #{$base-white};
 	--color-foreground-secondary: #{$dusk-100};
@@ -104,19 +104,4 @@ html[theme='dark']:root {
 	--color-base-white: #{$base-white};
 
 	--value-color: #{$base-white};
-
-	// invert logo image, cant be styled with currentColor because not inlined
-	#oisy-wallet-logo {
-		filter: brightness(0) invert(1);
-	}
-
-	// invert black and white network icons, cant be styled with currentColor because not inlined
-	.network-logo-bw {
-		filter: invert(1);
-	}
-
-	// soften background, easier than fidgeting with svg colors and mutes the rather bright bg image
-	#app-background {
-		filter: brightness(0.3);
-	}
 }
