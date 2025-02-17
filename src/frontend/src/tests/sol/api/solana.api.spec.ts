@@ -5,11 +5,13 @@ import {
 	fetchSignatures,
 	getSolCreateAccountFee,
 	getTokenDecimals,
+	getTokenOwner,
 	loadSolLamportsBalance,
 	loadSplTokenBalance,
 	loadTokenAccount
 } from '$sol/api/solana.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
 import {
@@ -52,6 +54,7 @@ describe('solana.api', () => {
 	];
 	const mockAccountInfo = {
 		value: {
+			owner: TOKEN_PROGRAM_ADDRESS,
 			data: {
 				parsed: {
 					info: {
@@ -531,6 +534,42 @@ describe('solana.api', () => {
 			});
 
 			expect(decimals).toEqual(0);
+		});
+	});
+
+	describe('getTokenOwner', () => {
+		it('should get token owner successfully', async () => {
+			const owner = await getTokenOwner({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(owner).toEqual(TOKEN_PROGRAM_ADDRESS);
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			await expect(
+				getTokenOwner({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				})
+			).rejects.toThrow(mockError);
+		});
+
+		it('should return undefined when owner is not found', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({})
+			});
+
+			const owner = await getTokenOwner({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(owner).toBeUndefined();
 		});
 	});
 });

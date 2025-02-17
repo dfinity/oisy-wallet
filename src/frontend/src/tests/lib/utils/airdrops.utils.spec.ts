@@ -1,6 +1,11 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
-import { INITIAL_AIRDROP_RESULT, loadAirdropResult } from '$lib/utils/airdrops.utils';
+import {
+	INITIAL_AIRDROP_RESULT,
+	isOngoingCampaign,
+	isUpcomingCampaign,
+	loadAirdropResult
+} from '$lib/utils/airdrops.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
 describe('airdrops utils', () => {
@@ -108,6 +113,51 @@ describe('airdrops utils', () => {
 			expect(receivedJackpot).toBe(true);
 
 			expect(sessionStorage.getItem(INITIAL_AIRDROP_RESULT)).toBe('true');
+		});
+	});
+
+	describe('isOngoingCampaign', () => {
+		it('should return true if the current date is between the start and end dates of the campaign', () => {
+			const startDate = new Date(Date.now() - 86400000);
+			const endDate = new Date(Date.now() + 86400000);
+
+			const result = isOngoingCampaign({ startDate, endDate });
+
+			expect(result).toBe(true);
+		});
+
+		it('should return false if the current date is before the start date of the campaign', () => {
+			const startDate = new Date(Date.now() + 86400000);
+
+			const result = isOngoingCampaign({ startDate, endDate: new Date() });
+
+			expect(result).toBe(false);
+		});
+
+		it('should return false if the current date is after the end date of the campaign', () => {
+			const startDate = new Date(Date.now() - 86400000);
+
+			const result = isOngoingCampaign({ startDate, endDate: new Date() });
+
+			expect(result).toBe(false);
+		});
+	});
+
+	describe('isUpcomingCampaign', () => {
+		it('should return true if the current date is before the start date of the campaign', () => {
+			const startDate = new Date(Date.now() + 86400000);
+
+			const result = isUpcomingCampaign(startDate);
+
+			expect(result).toBe(true);
+		});
+
+		it('should return false if the current date is after the start date of the campaign', () => {
+			const startDate = new Date(Date.now() - 86400000);
+
+			const result = isUpcomingCampaign(startDate);
+
+			expect(result).toBe(false);
 		});
 	});
 });
