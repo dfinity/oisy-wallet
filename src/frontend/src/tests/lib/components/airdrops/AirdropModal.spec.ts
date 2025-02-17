@@ -28,6 +28,6 @@ describe('AirdropModal', () => {
 			expect(getByText(requirement)).toBeInTheDocument();
 		});
 
-        // TODO check if image banner is displayed
+		// TODO check if image banner is displayed
 	});
 });
