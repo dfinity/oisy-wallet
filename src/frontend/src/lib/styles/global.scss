@@ -20,6 +20,12 @@
 		border-color: var(--color-gray-200, currentColor);
 	}
 
+	:root[theme='dark'] {
+		.dark\:invert {
+			filter: invert(1);
+		}
+	}
+
 	@include meta.load-css('global/font-faces');
 	@include meta.load-css('global/fonts');
 	@include meta.load-css('global/theme');
