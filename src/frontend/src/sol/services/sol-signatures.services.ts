@@ -28,6 +28,10 @@ export const getSolTransactions = async ({
 		assertIsAddress(tokenAddress);
 	}
 
+	if (nonNullish(tokenOwnerAddress)) {
+		assertIsAddress(tokenOwnerAddress);
+	}
+
 	const [relevantAddress] =
 		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
 			? await findAssociatedTokenPda({
@@ -55,7 +59,8 @@ export const getSolTransactions = async ({
 				signature,
 				network,
 				address,
-				tokenAddress
+				tokenAddress,
+				tokenOwnerAddress
 			});
 
 			return [...acc, ...parsedTransactions];
