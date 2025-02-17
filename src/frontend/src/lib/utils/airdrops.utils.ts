@@ -41,7 +41,7 @@ export const isUpcomingCampaign = (startDate: Date) => {
 };
 
 export const getAirdropsBalance = (airdrops: AirdropInfo[]) => {
-	return airdrops?.reduce(
+	return airdrops.reduce(
 		(total, { amount }) => total.add(BigNumber.from(amount)),
 		BigNumber.from(0)
 	);
