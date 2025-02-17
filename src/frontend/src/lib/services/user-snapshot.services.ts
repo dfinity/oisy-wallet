@@ -6,6 +6,7 @@ import type {
 	Transaction_Spl,
 	TransactionType
 } from '$declarations/rewards/rewards.did';
+import { USER_SNAPSHOT_ENABLED } from '$env/airdrop-campaigns.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
@@ -207,6 +208,10 @@ const takeAccountSnapshots = (timestamp: number): AccountSnapshotFor[] => {
 };
 
 export const registerUserSnapshot = async () => {
+	if (!USER_SNAPSHOT_ENABLED) {
+		return;
+	}
+
 	const timestamp = Date.now();
 
 	const accounts = takeAccountSnapshots(timestamp);
