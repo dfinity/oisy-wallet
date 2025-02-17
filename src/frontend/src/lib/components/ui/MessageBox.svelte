@@ -30,19 +30,19 @@
 
 {#if visible}
 	<div
-		class="mb-4 flex items-start gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base"
+		class="mb-4 gap-4 rounded-xl px-4 py-3 text-sm font-medium sm:text-base flex items-start"
 		class:bg-primary={level === 'plain'}
-		class:bg-brand-subtle-alt={level === 'info'}
-		class:bg-warning-subtle={level === 'light-warning'}
-		class:bg-error-subtle-alt={level === 'error'}
+		class:bg-brand-subtle-30={level === 'info'}
+		class:bg-warning-subtle-20={level === 'light-warning'}
+		class:bg-error-subtle-30={level === 'error'}
 		transition:slide={SLIDE_EASING}
 		data-tid={testId}
 	>
 		<div
 			class="min-w-5 py-0 sm:py-0.5"
 			class:text-brand-primary={level === 'plain' || level === 'info'}
-			class:text-warning={level === 'light-warning'}
-			class:text-error={level === 'error'}
+			class:text-warning-primary={level === 'light-warning'}
+			class:text-error-primary={level === 'error'}
 		>
 			<IconInfo />
 		</div>
@@ -51,7 +51,7 @@
 		</div>
 		{#if closable}
 			<button
-				class="ml-auto p-0.5 text-tertiary"
+				class="p-0.5 ml-auto text-tertiary"
 				on:click={close}
 				aria-label={$i18n.core.text.close}
 			>

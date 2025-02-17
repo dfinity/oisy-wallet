@@ -13,15 +13,15 @@
 	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 </script>
 
-<span class="flex flex-col items-center gap-2">
-	<output class={`mt-8 inline-block break-all text-5xl font-bold`}>
+<span class="gap-2 flex flex-col items-center">
+	<output class={`mt-8 text-5xl font-bold inline-block break-all`}>
 		{#if $loaded}
 			{formatUSD({ value: totalUsd })}
 		{:else}
 			<span class="animate-pulse">{formatUSD({ value: 0 })}</span>
 		{/if}
 	</output>
-	<span class="max-w-48 text-xl font-medium text-brand-secondary-alt sm:max-w-none">
+	<span class="max-w-48 text-xl font-medium sm:max-w-none text-brand-secondary-alt">
 		{$allBalancesZero ? $i18n.hero.text.top_up : $i18n.hero.text.available_balance}
 	</span>
 </span>

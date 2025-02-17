@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { validateBtcAddressMainnet } from '$btc/services/btc-address.services';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import { validateEthAddress } from '$eth/services/eth-address.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import {
@@ -33,9 +32,7 @@
 		await Promise.allSettled([
 			validateEthAddress($ethAddressStore),
 			validateBtcAddressMainnet($btcAddressMainnetStore),
-			SOLANA_NETWORK_ENABLED
-				? validateSolAddressMainnet($solAddressMainnetStore)
-				: Promise.resolve({ success: true })
+			validateSolAddressMainnet($solAddressMainnetStore)
 		]);
 	};
 

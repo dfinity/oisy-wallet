@@ -42,6 +42,7 @@ export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON =
 	'receive-tokens-modal-copy-icp-account-id-button';
 
 export const SEND_TOKENS_MODAL_OPEN_BUTTON = 'send-tokens-modal-open-button';
+export const SEND_TOKENS_MODAL = 'send-tokens-modal';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
@@ -52,6 +53,7 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
+export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-airdrops';
 
 export const AMOUNT_DATA = 'amount-data';
 export const AMOUNT_INPUT = 'amount-input';
@@ -89,3 +91,15 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
 export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
+
+export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
+export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
+export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
+
+export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
+export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
+
+export const THEME_SELECTOR_CARD = 'theme-selector-card';
+
+export const AIRDROPS_STATE_MODAL_IMAGE_BANNER = 'airdrop-state-modal-image-banner';
+export const AIRDROPS_STATE_MODAL_SHARE_BUTTON = 'airdrop-state-modal-share-button';
