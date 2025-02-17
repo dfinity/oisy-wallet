@@ -263,25 +263,30 @@ export const getSplMetadata = async ({
 }): Promise<TokenMetadata | undefined> => {
 	const decimals = await getTokenDecimals({ address, network });
 
-	const metadataResult = await splMetadata({ tokenAddress: address, network });
+	try {
+		const metadataResult = await splMetadata({ tokenAddress: address, network });
 
-	if (isNullish(metadataResult)) {
-		return;
-	}
-
-	const {
-		result: {
-			content: {
-				metadata: { name, symbol },
-				links: { image: icon }
-			}
+		if (isNullish(metadataResult)) {
+			return;
 		}
-	} = metadataResult;
 
-	return {
-		decimals,
-		name,
-		symbol,
-		icon
-	};
+		const {
+			result: {
+				content: {
+					metadata: { name, symbol },
+					links: { image: icon }
+				}
+			}
+		} = metadataResult;
+
+		return {
+			decimals,
+			name,
+			symbol,
+			icon
+		};
+	} catch (err: unknown) {
+		// We care only for development purposes.
+		console.warn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
+	}
 };
