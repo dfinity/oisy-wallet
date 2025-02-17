@@ -13,12 +13,14 @@ import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
-	tokenAddress?: SolAddress;
+	tokenAddress?: SplTokenAddress;
+	tokenOwnerAddress?: SolAddress;
 }
 
 interface SolWalletStore {
@@ -73,12 +75,14 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	private loadTransactions = async ({
 		address,
 		solanaNetwork,
-		tokenAddress
+		tokenAddress,
+		tokenOwnerAddress
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
 		const transactions = await getSolTransactions({
 			network: solanaNetwork,
 			address,
-			tokenAddress
+			tokenAddress,
+			tokenOwnerAddress
 		});
 
 		const transactionsUi = transactions.map((transaction) => ({
@@ -96,7 +100,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			const {
 				address: { data: address },
 				solanaNetwork,
-				tokenAddress
+				tokenAddress,
+				tokenOwnerAddress
 			} = data;
 
 			const [balance, transactions] = await Promise.all([
@@ -108,7 +113,8 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				this.loadTransactions({
 					address,
 					solanaNetwork,
-					tokenAddress
+					tokenAddress,
+					tokenOwnerAddress
 				})
 			]);
 
