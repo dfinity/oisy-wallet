@@ -17,8 +17,8 @@
 	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/airdrops.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-    let selectedAirdrop: AirdropDescription;
-    $: selectedAirdrop = $modalStore?.data as AirdropDescription;
+	let selectedAirdrop: AirdropDescription;
+	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
 
 	let ongoingCampaigns: AirdropDescription[];
 	$: ongoingCampaigns = airdropCampaigns.filter(({ startDate, endDate }) =>
