@@ -1,5 +1,15 @@
 @use '../mixins/media';
 
+/************* USE OF !IMPORTANT ********************
+**   Only in this file the use of !important       **
+**   CAN be warranted. As this file is the last    **
+**   instance where the gix components can be      **
+**   styled, !important can be used to override    **
+**   certain styles. However, it still is a last   **
+**   resort solution and if possible, a proper     **
+**   solution must be tried and still is prefered. **
+****************************************************/
+
 :root {
 	--positive-emphasis: var(--color-green-crayola);
 	--positive-emphasis-rgb: 48, 175, 145;
@@ -244,13 +254,24 @@ div.segment-button {
 	}
 }
 
+div.step .state {
+	color: var(--color-foreground-brand-primary-alt) !important;
+	background: var(--color-background-brand-subtle-30) !important;
+}
+
 div.step.completed {
 	svg {
-		--icon-check-circle-background: var(--color-primary);
+		--icon-check-circle-background: var(--color-background-brand-primary);
+		--icon-check-circle-color: var(--color-foreground-primary-inverted);
 	}
 
 	div.line {
-		--line-color: var(--color-primary);
+		--line-color: var(--color-background-brand-primary) !important;
+	}
+
+	.state {
+		color: var(--color-foreground-success-primary) !important;
+		background: var(--color-background-success-subtle-30) !important;
 	}
 }
 
