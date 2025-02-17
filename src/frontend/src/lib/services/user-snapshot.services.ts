@@ -73,7 +73,7 @@ const toIcrcTransaction = ({
 
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
-		counterparty: Principal.fromText(address.toString() === from ? to : from)
+		counterparty: Principal.fromText(address.toText() === from ? to : from)
 	};
 };
 
