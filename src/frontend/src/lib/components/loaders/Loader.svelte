@@ -8,6 +8,7 @@
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
@@ -33,7 +34,6 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 

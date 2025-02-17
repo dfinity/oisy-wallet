@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Img from '$lib/components/ui/Img.svelte';
 	import type { ComponentType } from 'svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 
 	export let src: string;
