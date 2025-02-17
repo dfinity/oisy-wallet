@@ -41,4 +41,5 @@
 	@include meta.load-css('global/border');
 	@include meta.load-css('global/scrollbar');
 	@include meta.load-css('theme/default-theme');
+	@include meta.load-css('theme/dark-theme');
 }

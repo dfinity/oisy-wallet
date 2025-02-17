@@ -20,5 +20,5 @@
 	--border-radius-md: calc(var(--border-radius-sm) * 2);
 	--border-radius-lg: calc(var(--border-radius-sm) * 4);
 
-	--backdrop: rgba(var(--color-secondary-rgb), 0.6);
+	--backdrop: var(--color-background-modal-overlay);
 }
