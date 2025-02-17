@@ -89,7 +89,7 @@
 		{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue}
 			<Button
 				on:click={() => onPresetValueClick(presetValue)}
-				colorStyle="secondary"
+				colorStyle="secondary-light"
 				styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
 				paddingSmall={true}
 			>

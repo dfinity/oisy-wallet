@@ -31,7 +31,7 @@
 				<h4 class="text-primary-inverted">{dAppDescription.name}</h4>
 			</div>
 
-			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="secondary" on:click>
+			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="primary" on:click>
 				{$i18n.core.text.view}
 			</Button>
 		</div>
