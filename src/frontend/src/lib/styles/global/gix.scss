@@ -11,18 +11,7 @@
 ****************************************************/
 
 :root {
-	--positive-emphasis: var(--color-green-crayola);
-	--positive-emphasis-rgb: 48, 175, 145;
-
-	--warning-emphasis-shade: var(--color-goldenrod);
-
-	--negative-emphasis: var(--color-cyclamen);
-
-	--primary: var(--color-blue-ribbon);
-	--primary-contrast: var(--color-white);
-	--tertiary: var(--color-secondary);
-
-	--value-color: var(--color-secondary);
+	--toggle-disabled-opacity: 1;
 
 	--border-radius-2x: var(--border-radius-lg);
 	--border-radius-0_5x: var(--border-radius-xs);
@@ -30,16 +19,15 @@
 
 	--animation-time-normal: 0.2s;
 
-	--progress-color: var(--color-primary);
-	--progress-color-contrast: var(--color-white);
-	--progress-color-rgb: var(--color-primary-rgb);
+	--progress-color: var(--color-background-brand-primary);
+	--progress-color-contrast: var(--color-foreground-primary-inverted);
 
-	--overlay-background: var(--color-white);
-	--overlay-background-contrast: var(--color-secondary);
+	--overlay-background: var(--color-background-primary);
+	--overlay-background-contrast: var(--color-foreground-primary);
 
 	--dropdown-background: var(--overlay-background);
 	--dropdown-border-size: 1.5px;
-	--dropdown-border-color: #ebedf9;
+	--dropdown-border-color: var(--color-border-secondary);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -49,12 +37,13 @@
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
 	// Input
-	--input-background: var(--color-white);
-	--focus-background: var(--color-white);
-	--input-border-color: var(--color-grey);
+	--input-background: var(--color-background-primary);
+	--focus-background: var(--color-background-primary);
+	--focus-border-color: var(--color-brand-base);
+	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
-	--secondary: var(--color-dark-blue);
+	--secondary: var(--color-background-brand-primary);
 
 	// Toast message max height is calculated based on the font-size.
 	--font-size-standard: 1rem;
@@ -86,7 +75,7 @@
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
 
-	--backdrop-contrast: var(--color-secondary);
+	--backdrop-contrast: var(--color-foreground-primary-inverted);
 	--backdrop-filter: blur(4px);
 
 	@media (width >= theme(--breakpoint-sm)) {
@@ -128,16 +117,16 @@ div.input-field input[id] {
 }
 
 div.input-field input[id]::placeholder {
-	color: var(--colors-neutrals-600);
+	color: var(--color-foreground-tertiary) !important;
 }
 
 div.modal {
-	--overlay-background: var(--colors-neutrals-white);
-	--overlay-background-contrast: var(--color-secondary);
-	--overlay-content-background: var(--colors-neutrals-white);
-	--overlay-content-background-contrast: var(--color-secondary);
+	--overlay-background: var(--color-background-surface);
+	--overlay-background-contrast: var(--color-foreground-primary);
+	--overlay-content-background: var(--color-background-surface);
+	--overlay-content-background-contrast: var(--color-foreground-primary);
 
-	color: var(--color-secondary);
+	color: var(--color-foreground-secondary);
 
 	--toolbar-height: 78px;
 
@@ -171,7 +160,7 @@ div.modal {
 	}
 
 	div.wrapper.dialog > div.container-wrapper {
-		margin: 0;
+		margin: 0 !important;
 
 		& > div.container {
 			border-radius: 0;
@@ -224,8 +213,8 @@ div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
-		padding: var(--padding-2x);
-		--padding: var(--padding-2x);
+		padding: var(--padding-0_75x);
+		--padding: var(--padding-0_75x);
 
 		--border-radius: 16px;
 
@@ -240,17 +229,37 @@ div.popover {
 div.toggle {
 	zoom: 1.45;
 
-	--card-background-contrast: var(--color-dust);
-	--card-background: var(--color-white);
+	--card-background-contrast: var(--color-background-brand-subtle-20);
+	--card-background: var(--color-base-white);
+
+	&:disabled,
+	&.disabled {
+		--card-background: var(--color-background-primary-alt);
+		--card-background-contrast: var(--color-background-disabled-alt);
+	}
 
 	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--color-blue-ribbon);
+		--card-background-contrast: var(--color-background-brand-primary);
+
+		&:hover {
+			--card-background-contrast: var(--color-background-brand-secondary);
+		}
+
+		&:active {
+			--card-background-contrast: var(--color-background-brand-primary);
+		}
+
+		&:disabled,
+		&.disabled {
+			--card-background: var(--color-background-primary-alt);
+			--card-background-contrast: var(--color-background-brand-subtle-20);
+		}
 	}
 }
 
 div.segment-button {
 	button.selected {
-		color: var(--color-white);
+		color: var(--color-foreground-primary-inverted);
 	}
 }
 
@@ -266,7 +275,7 @@ div.step.completed {
 	}
 
 	div.line {
-		--line-color: var(--color-background-brand-primary) !important;
+		--line-color: var(--color-background-brand-primary);
 	}
 
 	.state {
@@ -276,30 +285,49 @@ div.step.completed {
 }
 
 div.checkbox {
+	&:hover input {
+		--secondary: var(--color-background-brand-secondary) !important;
+		--input-custom-border-color: var(--color-background-brand-secondary);
+		--focus-background: var(--color-background-brand-secondary);
+		--input-background: var(--color-background-brand-secondary);
+	}
+
 	input[type='checkbox'] {
 		--secondary: var(--color-primary);
-		--focus-background: var(--color-white);
+		--focus-background: var(--color-background-primary);
 
 		&:focus {
 			--secondary: var(--color-primary);
-			--focus-background: var(--color-white);
+			--focus-background: var(--color-background-primary);
 		}
 
 		&:checked {
 			--secondary: var(--color-primary);
-			--focus-background: var(--color-cobalt);
-			--input-custom-border-color: var(--color-primary);
-			--input-background: var(--color-primary);
+			--focus-background: var(--color-background-brand-primary-alt);
+			--input-custom-border-color: var(--color-background-brand-primary-alt);
+			--input-background: var(--color-background-brand-primary-alt);
 
-			&:focus {
-				--secondary: var(--color-cobalt);
-				--focus-background: var(--color-cobalt);
-				--input-custom-border-color: var(--color-cobalt);
+			&:hover:not(:active),
+			&:focus:not(:active) {
+				--secondary: var(--color-background-brand-secondary);
+				--focus-background: var(--color-background-brand-secondary);
+				--input-custom-border-color: var(--color-background-brand-secondary);
 			}
 		}
 
 		&:checked:after {
-			--background-contrast: var(--color-white);
+			--background-contrast: var(--color-foreground-primary-inverted);
 		}
+	}
+}
+
+div.select {
+	& .icon {
+		--disable-contrast: var(--color-foreground-primary);
+	}
+
+	option {
+		background: var(--color-background-primary);
+		color: var(--color-foreground-primary);
 	}
 }
