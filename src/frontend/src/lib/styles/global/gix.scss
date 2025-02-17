@@ -117,7 +117,7 @@ div.input-field input[id] {
 }
 
 div.input-field input[id]::placeholder {
-	color: var(--color-foreground-tertiary);
+	color: var(--color-foreground-tertiary) !important;
 }
 
 div.modal {
@@ -236,11 +236,6 @@ div.toggle {
 	&.disabled {
 		--card-background: var(--color-background-primary-alt);
 		--card-background-contrast: var(--color-background-disabled-alt);
-	}
-
-	// todo: solve properly
-	& > label {
-		//outline: 1px solid var(--color-border-brand-subtle-10);
 	}
 
 	&:has(input[type='checkbox']:checked) {
