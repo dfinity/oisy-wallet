@@ -72,7 +72,7 @@
 			<SwapFee
 				fee={sourceTokenTransferFee}
 				symbol={$sourceToken.symbol}
-				label={$i18n.swap.text.token_fee}
+				label={$i18n.swap.text.network_fee}
 			/>
 		</svelte:fragment>
 	</ModalExpandableValues>
