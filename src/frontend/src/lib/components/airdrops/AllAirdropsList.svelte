@@ -11,21 +11,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-
-	const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
-		const currentDate = new Date(Date.now());
-		let startDiff = startDate.getTime() - currentDate.getTime();
-		let endDiff = endDate.getTime() - currentDate.getTime();
-
-		return startDiff <= 0 && endDiff > 0;
-	};
-
-	const isUpcomingCampaign = (startDate: Date) => {
-		const currentDate = new Date(Date.now());
-		let startDiff = startDate.getTime() - currentDate.getTime();
-
-		return startDiff > 0;
-	};
+	import {isOngoingCampaign, isUpcomingCampaign} from "$lib/utils/airdrops.utils";
 
 	let ongoingCampaigns: AirdropDescription[];
 	$: ongoingCampaigns = airdropCampaigns.filter(({ startDate, endDate }) =>
