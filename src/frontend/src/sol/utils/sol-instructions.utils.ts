@@ -3,6 +3,7 @@ import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -247,6 +248,72 @@ const mapTokenParsedInstruction = async ({
 	}
 };
 
+const mapToken2022ParsedInstruction = async ({
+	type,
+	info,
+	network
+}: {
+	type: string;
+	info: object;
+	network: SolanaNetworkType;
+}): Promise<SolMappedTransaction | undefined> => {
+	if (type === 'transferChecked') {
+		// We need to cast the type since it is not implied
+		const {
+			destination,
+			tokenAmount: { amount: value },
+			source,
+			mint: tokenAddress
+		} = info as {
+			destination: SolAddress;
+			tokenAmount: {
+				amount: string;
+			};
+			source: SolAddress;
+			mint: SplTokenAddress;
+		};
+
+		const { getAccountInfo } = solanaHttpRpc(network);
+
+		const { value: sourceResult } = await getAccountInfo(address(source), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		const { value: destinationResult } = await getAccountInfo(address(destination), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (
+			nonNullish(sourceResult) &&
+			'parsed' in sourceResult.data &&
+			nonNullish(destinationResult) &&
+			'parsed' in destinationResult.data
+		) {
+			const {
+				data: {
+					parsed: { info: sourceAccoutInfo }
+				}
+			} = sourceResult;
+
+			const { owner: from } = sourceAccoutInfo as {
+				owner: SolAddress;
+			};
+
+			const {
+				data: {
+					parsed: { info: destinationAccoutInfo }
+				}
+			} = destinationResult;
+
+			const { owner: to } = destinationAccoutInfo as {
+				owner: SolAddress;
+			};
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
+	}
+};
+
 const mapAssociatedTokenAccountInstruction = ({
 	type,
 	innerInstructions
@@ -310,6 +377,10 @@ export const mapSolParsedInstruction = async ({
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
 		return await mapTokenParsedInstruction({ type, info, network });
+	}
+
+	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
+		return mapToken2022ParsedInstruction({ type, info, network });
 	}
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
