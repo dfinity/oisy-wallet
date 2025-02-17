@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { themeStore, Theme } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
@@ -16,12 +17,9 @@
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
-			updateSelectedTheme();
 			return;
 		}
-
 		themeStore.select(theme);
-		updateSelectedTheme();
 	};
 
 	const updateSelectedTheme = () => {
@@ -31,6 +29,9 @@
 	};
 
 	let selectedTheme: Theme | typeof THEME_SYSTEM;
+
+	onMount(updateSelectedTheme);
+
 	$: $themeStore, updateSelectedTheme();
 </script>
 
