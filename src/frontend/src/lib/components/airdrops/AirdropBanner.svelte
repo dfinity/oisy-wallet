@@ -11,8 +11,8 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import type { AirdropInfo } from '$lib/types/airdrop';
+	import { getAirdropsBalance } from '$lib/utils/airdrops.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import {getAirdropsBalance} from "$lib/utils/airdrops.utils";
 
 	const token = ICP_TOKEN;
 
@@ -27,9 +27,7 @@
 
 	let balance: BigNumber | undefined;
 	$: balance =
-		nonNullish(airdrops) && airdrops.length > 0
-			? getAirdropsBalance(airdrops)
-			: undefined;
+		nonNullish(airdrops) && airdrops.length > 0 ? getAirdropsBalance(airdrops) : undefined;
 
 	let exchangeRate: number | undefined;
 	$: exchangeRate = $exchanges?.[token.id]?.usd;

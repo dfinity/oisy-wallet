@@ -1,16 +1,16 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
+import type { AirdropInfo } from '$lib/types/airdrop';
 import {
-	getAirdropsBalance,
 	INITIAL_AIRDROP_RESULT,
+	getAirdropsBalance,
 	isOngoingCampaign,
 	isUpcomingCampaign,
 	loadAirdropResult
 } from '$lib/utils/airdrops.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import {expect, it, vi} from "vitest";
-import type {AirdropInfo} from "$lib/types/airdrop";
-import {BigNumber} from "alchemy-sdk";
+import { BigNumber } from 'alchemy-sdk';
+import { expect, it, vi } from 'vitest';
 
 describe('airdrops utils', () => {
 	describe('loadAirdropResult', () => {
@@ -169,20 +169,23 @@ describe('airdrops utils', () => {
 		const lastTimestamp = BigInt(Date.now());
 
 		const mockedAirdrop: AirdropInfo = {
-			amount: BigInt(100), timestamp: lastTimestamp, name: 'airdrop', ledger: mockIdentity.getPrincipal()
-		}
+			amount: BigInt(100),
+			timestamp: lastTimestamp,
+			name: 'airdrop',
+			ledger: mockIdentity.getPrincipal()
+		};
 
 		it('should return the correct airdrops balance of multiple airdrops', () => {
-            const mockedAirdrops: AirdropInfo[] = [
+			const mockedAirdrops: AirdropInfo[] = [
 				mockedAirdrop,
-                { ...mockedAirdrop, amount: BigInt(200) },
-                { ...mockedAirdrop, amount: BigInt(300) }
-            ];
+				{ ...mockedAirdrop, amount: BigInt(200) },
+				{ ...mockedAirdrop, amount: BigInt(300) }
+			];
 
-            const result = getAirdropsBalance(mockedAirdrops);
+			const result = getAirdropsBalance(mockedAirdrops);
 
-            expect(result).toEqual(BigNumber.from(600));
-        });
+			expect(result).toEqual(BigNumber.from(600));
+		});
 
 		it('should return the correct airdrops balance of a single airdrop', () => {
 			const mockedAirdrops: AirdropInfo[] = [mockedAirdrop];
