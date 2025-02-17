@@ -55,7 +55,7 @@
 					{:else}
 						<Listener {token}>
 							<TokenCardWithUrl
-								styleClass="debug-2 rounded-xl px-3 py-2 hover:bg-brand-subtle-10"
+								styleClass="rounded-xl px-3 py-2 hover:bg-brand-subtle-10"
 								{token}
 							>
 								<TokenCardContent data={token} />
