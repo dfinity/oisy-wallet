@@ -12,6 +12,7 @@
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import type { AirdropInfo } from '$lib/types/airdrop';
 	import { usdValue } from '$lib/utils/exchange.utils';
+	import {getAirdropsBalance} from "$lib/utils/airdrops.utils";
 
 	const token = ICP_TOKEN;
 
@@ -27,10 +28,7 @@
 	let balance: BigNumber | undefined;
 	$: balance =
 		nonNullish(airdrops) && airdrops.length > 0
-			? airdrops?.reduce(
-					(total, { amount }) => total.add(BigNumber.from(amount)),
-					BigNumber.from(0)
-				)
+			? getAirdropsBalance(airdrops)
 			: undefined;
 
 	let exchangeRate: number | undefined;
