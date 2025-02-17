@@ -34,7 +34,7 @@
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
 	<div slot="items">
-		<ul class="gap-4 font-normal flex list-none flex-col">
+		<ul class="font-normal flex list-none flex-col">
 			<li>
 				<NetworkButton
 					id={undefined}
@@ -52,10 +52,10 @@
 			{/each}
 		</ul>
 
-		<span class="mt-8 mb-5 font-bold flex">{$i18n.networks.test_networks}</span>
+		<span class="mt-8 mb-5 font-bold px-3 flex">{$i18n.networks.test_networks}</span>
 
 		{#if $testnetsEnabled}
-			<ul class="mb-2 gap-4 font-normal flex list-none flex-col" transition:slide={SLIDE_EASING}>
+			<ul class="mb-2 font-normal flex list-none flex-col" transition:slide={SLIDE_EASING}>
 				{#each $networksTestnets as network}
 					<li>
 						<Network {network} on:icSelected={dropdown.close} />
@@ -64,7 +64,7 @@
 			</ul>
 		{/if}
 
-		<hr class="my-4 w-10/12 opacity-10" style="border: 0.05rem solid" />
+		<hr class="mx-3 w-11/12 opacity-10" style="border: 0.05rem solid" />
 
 		<ul class="gap-4 font-normal flex list-none flex-col">
 			<li class="flex items-center justify-between">
