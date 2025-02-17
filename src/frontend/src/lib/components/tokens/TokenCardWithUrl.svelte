@@ -6,12 +6,13 @@
 
 	export let token: Token;
 	export let disableTabSelector = false;
+	export let styleClass = '';
 
 	let url: string;
 	$: url = transactionsUrl({ token });
 </script>
 
-<div class="group gap-3 rounded-xl px-3 py-2 sm:gap-8 flex hover:bg-primary active:bg-primary">
+<div class={`group gap-3 sm:gap-8 flex ${styleClass}`}>
 	<a
 		class="flex-1 no-underline"
 		href={url}
