@@ -48,6 +48,7 @@
 	{#if nonNullish(explorerAddressUrl)}
 		<div in:fade>
 			<ExternalLink
+				asMenuItem
 				fullWidth
 				href={explorerAddressUrl}
 				ariaLabel={$i18n.tokens.alt.open_dashboard}
