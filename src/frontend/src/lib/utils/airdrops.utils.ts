@@ -26,15 +26,15 @@ export const loadAirdropResult = async (identity: Identity): Promise<AirdropResu
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 	const currentDate = new Date(Date.now());
-	let startDiff = startDate.getTime() - currentDate.getTime();
-	let endDiff = endDate.getTime() - currentDate.getTime();
+	const startDiff = startDate.getTime() - currentDate.getTime();
+	const endDiff = endDate.getTime() - currentDate.getTime();
 
 	return startDiff <= 0 && endDiff > 0;
 };
 
 export const isUpcomingCampaign = (startDate: Date) => {
 	const currentDate = new Date(Date.now());
-	let startDiff = startDate.getTime() - currentDate.getTime();
+	const startDiff = startDate.getTime() - currentDate.getTime();
 
 	return startDiff > 0;
 };
