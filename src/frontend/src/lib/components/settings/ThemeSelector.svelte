@@ -16,16 +16,23 @@
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
+			console.log($themeStore);
+			updateSelectedTheme()
 			return;
 		}
 
 		themeStore.select(theme);
+		updateSelectedTheme();
+	};
+
+	const updateSelectedTheme = () => {
+		selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
+			? THEME_SYSTEM
+			: ($themeStore ?? THEME_SYSTEM);
 	};
 
 	let selectedTheme: Theme | typeof THEME_SYSTEM;
-	$: selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
-		? THEME_SYSTEM
-		: ($themeStore ?? THEME_SYSTEM);
+	$: $themeStore,updateSelectedTheme()
 </script>
 
 <div class="flex flex-row">
