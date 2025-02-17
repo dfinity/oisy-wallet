@@ -20,7 +20,7 @@
 		balanceZero,
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
-	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
+	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkBitcoin,
 		networkEthereum,
@@ -55,7 +55,7 @@
 	$: loading.set(
 		isRouteTransactions($page)
 			? isNullish(pageTokenUi?.balance)
-			: !$exchangeInitialized || $noPositiveBalanceAndNotAllBalancesZero
+			: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
 	);
 
 	let isTransactionsPage = false;
@@ -71,7 +71,7 @@
 </script>
 
 <div
-	class="bg-pos-0 p-6 ease-in-out flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-linear-to-b text-center text-white transition-all duration-500"
+	class="bg-pos-0 p-6 ease-in-out flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-linear-to-b text-center text-primary-inverted transition-all duration-500"
 	class:from-brand-primary={$pseudoNetworkChainFusion}
 	class:to-absolute-blue={$pseudoNetworkChainFusion}
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}

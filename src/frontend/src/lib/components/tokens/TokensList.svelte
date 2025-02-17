@@ -54,7 +54,7 @@
 						<TokenGroupCard tokenGroup={token} />
 					{:else}
 						<Listener {token}>
-							<TokenCardWithUrl {token}>
+							<TokenCardWithUrl styleClass="rounded-xl px-3 py-2 hover:bg-brand-subtle-10" {token}>
 								<TokenCardContent data={token} />
 							</TokenCardWithUrl>
 						</Listener>

@@ -66,7 +66,7 @@
 			"title_part_2": "Safe. Seamless. Sovereign.",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"asset_types": "Bitcoin, Ethereum, ICP and more",
+			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
@@ -115,7 +115,25 @@
 	},
 	"airdrops": {
 		"text": {
-			"title": "Airdrops"
+			"title": "Airdrops",
+			"active_campaigns": "Active campaigns",
+			"upcoming_campaigns": "Upcoming campaigns",
+			"active_date": "Due on",
+			"participate_title": "How to participate",
+			"share": "Share",
+			"requirements_title": "Requirements",
+			"modal_button_text": "Got it",
+			"activity_button_text": "Check on Recent Activity",
+			"activity_button_text_short": "Check activity",
+			"no_balance_title": "Start earning",
+			"no_balance_description": "Check back later to see your rewards",
+			"open_wallet": "Take me to the wallet",
+			"state_modal_title": "Congratulations on winning today's airdrop!",
+			"state_modal_title_jackpot": "Congratulations on winning today's highest airdrop!",
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win."
+		},
+		"alt": {
+			"upcoming_campaigns": "Stay tuned for the upcoming airdrops - subscribe to $oisy_short on X and follow recent updates."
 		}
 	},
 	"footer": {
@@ -455,7 +473,7 @@
 			"not_available": "n/a",
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
-			"token_fee": "Token fee",
+			"network_fee": "Network fee",
 			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
@@ -472,7 +490,8 @@
 		},
 		"error": {
 			"unexpected": "Something went wrong while swapping tokens.",
-			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"slippage_exceeded": "The swap could not be executed because the expected slippage of $expectedSlippage% exceeded the maximum allowed value of $maxSlippage%.\nYou can change the allowed slippage in the previous form, but this can lead to more unfavorable trades."
 		}
 	},
 	"buy": {
@@ -790,7 +809,7 @@
 				"title": "Why $oisy_short",
 				"hold_crypto": {
 					"title": "Unified Management of All Your Digital Assets",
-					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Solana, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
 				},
 				"network_custody": {
 					"title": "No more private key anxiety with Network Custody",

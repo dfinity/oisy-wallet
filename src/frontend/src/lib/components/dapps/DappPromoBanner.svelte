@@ -11,7 +11,7 @@
 
 <article class="rounded-2xl relative flex items-end overflow-hidden">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="max-h-64 bg-brand-subtle-alt">
+		<div class="max-h-64 bg-brand-subtle-30">
 			<ImgBanner
 				src={dAppDescription.screenshots[0]}
 				alt={replacePlaceholders($i18n.dapps.alt.website, { $dAppName: dAppDescription.name })}
@@ -28,10 +28,10 @@
 			</div>
 			<div class="flex-1">
 				<h6 class="text-sm font-bold text-info-blue">{$i18n.dapps.text.featured}</h6>
-				<h4 class="text-white">{dAppDescription.name}</h4>
+				<h4 class="text-primary-inverted">{dAppDescription.name}</h4>
 			</div>
 
-			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="secondary" on:click>
+			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="primary" on:click>
 				{$i18n.core.text.view}
 			</Button>
 		</div>

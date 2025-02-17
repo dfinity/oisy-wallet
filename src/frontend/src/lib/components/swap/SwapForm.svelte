@@ -44,6 +44,7 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		isSourceTokenIcrc2,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -109,7 +110,8 @@
 					userAmount,
 					decimals: $sourceToken.decimals,
 					balance: $sourceTokenBalance,
-					totalFee: sourceTokenFee
+					// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+					totalFee: (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)
 				})
 			: undefined;
 </script>
@@ -169,7 +171,7 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
 						{#if $swapAmountsStore?.swapAmounts === null}
-							<div transition:slide={SLIDE_DURATION} class="text-error"
+							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
@@ -202,7 +204,7 @@
 
 			<div class="gap-3 flex flex-col">
 				<SwapProvider />
-				<SwapFees {swapAmount} />
+				<SwapFees />
 			</div>
 		{/if}
 	</div>
