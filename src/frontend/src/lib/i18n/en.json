@@ -66,7 +66,7 @@
 			"title_part_2": "Safe. Seamless. Sovereign.",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP and more",
+			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
@@ -116,12 +116,20 @@
 	"airdrops": {
 		"text": {
 			"title": "Airdrops",
+			"active_campaigns": "Active campaigns",
+			"upcoming_campaigns": "Upcoming campaigns",
 			"active_date": "Due on",
+			"participate_title": "How to participate",
 			"share": "Share",
+			"requirements_title": "Requirements",
+			"modal_button_text": "Got it",
 			"open_wallet": "Take me to the wallet",
 			"state_modal_title": "Congratulations on winning today's airdrop!",
 			"state_modal_title_jackpot": "Congratulations on winning today's highest airdrop!",
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win."
+		},
+		"alt": {
+			"upcoming_campaigns": "Stay tuned for the upcoming airdrops - subscribe to $oisy_short on X and follow recent updates."
 		}
 	},
 	"footer": {
