@@ -239,11 +239,5 @@ export const getTokenOwner = async ({
 
 	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
 
-	if (nonNullish(value)) {
-		const { owner } = value;
-
-		return owner.toString();
-	}
-
-	return undefined;
+	return value?.owner?.toString();
 };

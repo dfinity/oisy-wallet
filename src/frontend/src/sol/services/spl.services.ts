@@ -113,13 +113,15 @@ const saveCachedUserTokensToBackend = async ({
 
 		const metadata = await getSplMetadata({ address, network: solNetwork });
 
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		if (nonNullish(metadata)) {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		tokens.push({
-			address,
-			enabled: true,
-			...metadata
-		});
+			tokens.push({
+				address,
+				enabled: true,
+				...metadata
+			});
+		}
 	}
 
 	await setManyCustomTokens({
@@ -268,27 +270,23 @@ export const getSplMetadata = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<TokenMetadata> => {
+}): Promise<TokenMetadata | undefined> => {
 	const decimals = await getTokenDecimals({ address, network });
 
-	const { result } = await splMetadata({ tokenAddress: address, network });
+	const metadataResult = await splMetadata({ tokenAddress: address, network });
 
-	if (!('content' in result)) {
-		return {
-			decimals,
-			name: address,
-			symbol: address
-		};
+	if (isNullish(metadataResult)) {
+		return;
 	}
 
 	const {
-		content: {
-			metadata,
-			links: { image: icon }
+		result: {
+			content: {
+				metadata: { name, symbol },
+				links: { image: icon }
+			}
 		}
-	} = result;
-
-	const { name, symbol } = metadata;
+	} = metadataResult;
 
 	return {
 		decimals,
