@@ -1,5 +1,5 @@
 <script lang="ts">
-	import preview from '$lib/assets/preview.webp';
+	import { themeStore } from '@dfinity/gix-components';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,7 +21,9 @@
 		class="pt-12 md:m-0 md:flex md:h-full md:content-center md:items-center ml-auto min-w-[1127px]"
 	>
 		<div class="md:h-md:mt-auto w-full">
-			<Img src={preview} alt={ariaLabel} />
+			{#await import(`$lib/assets/main_image-${$themeStore ?? 'light'}.webp`) then { default: src }}
+				<Img {src} alt={ariaLabel} />
+			{/await}
 		</div>
 	</div>
 </div>
