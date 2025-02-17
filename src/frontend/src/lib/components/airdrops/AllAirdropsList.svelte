@@ -10,7 +10,7 @@
 		AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 		const currentDate = new Date(Date.now());
