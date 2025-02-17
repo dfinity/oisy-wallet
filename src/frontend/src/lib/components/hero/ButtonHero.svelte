@@ -16,7 +16,7 @@
 	{disabled}
 	loading={$loading}
 	{testId}
-	colorStyle="tertiary"
+	colorStyle="tertiary-main-card"
 	link
 	paddingSmall
 >
