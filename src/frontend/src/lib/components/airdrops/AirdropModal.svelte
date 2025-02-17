@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconCheckCircle, Modal } from '@dfinity/gix-components';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import AirdropBanner from '$lib/components/airdrops/AirdropBanner.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -15,7 +16,7 @@
 	<span class="text-xl text-center" slot="title">{airdrop.title}</span>
 
 	<ContentWithToolbar>
-		<!-- TODO display image banner -->
+		<AirdropBanner />
 
 		<span class="text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
 		<p class="mb-0 mt-2">{airdrop.description}</p>

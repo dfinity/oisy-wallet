@@ -123,6 +123,10 @@
 			"share": "Share",
 			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
+			"activity_button_text": "Check on Recent Activity",
+			"activity_button_text_short": "Check activity",
+			"no_balance_title": "Start earning",
+			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
 			"state_modal_title": "Congratulations on winning today's airdrop!",
 			"state_modal_title_jackpot": "Congratulations on winning today's highest airdrop!",
@@ -469,7 +473,7 @@
 			"not_available": "n/a",
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
-			"token_fee": "Token fee",
+			"network_fee": "Network fee",
 			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
@@ -486,7 +490,8 @@
 		},
 		"error": {
 			"unexpected": "Something went wrong while swapping tokens.",
-			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"slippage_exceeded": "The swap could not be executed because the expected slippage of $expectedSlippage% exceeded the maximum allowed value of $maxSlippage%.\nYou can change the allowed slippage in the previous form, but this can lead to more unfavorable trades."
 		}
 	},
 	"buy": {
