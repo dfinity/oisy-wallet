@@ -13,8 +13,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-    import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-    import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
