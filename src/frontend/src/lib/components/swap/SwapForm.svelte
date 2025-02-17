@@ -202,7 +202,7 @@
 
 			<div class="gap-3 flex flex-col">
 				<SwapProvider />
-				<SwapFees {swapAmount} />
+				<SwapFees />
 			</div>
 		{/if}
 	</div>

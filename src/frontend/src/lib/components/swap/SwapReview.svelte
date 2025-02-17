@@ -52,7 +52,7 @@
 			</svelte:fragment>
 		</ModalValue>
 
-		<SwapFees {swapAmount} />
+		<SwapFees />
 	</div>
 
 	<ButtonGroup slot="toolbar">
