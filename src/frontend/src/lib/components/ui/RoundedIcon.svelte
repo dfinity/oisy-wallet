@@ -6,7 +6,7 @@
 </script>
 
 <div
-	class="p-3 relative flex items-center justify-center rounded-full bg-primary ring-2 ring-brand-subtle-10"
+	class="p-3 relative flex items-center justify-center rounded-full bg-primary ring-1 ring-brand-subtle-20"
 >
 	<svelte:component this={icon} styleClass={opacity ? 'opacity-10' : ''} />
 </div>
