@@ -1,5 +1,15 @@
 @use '../mixins/media';
 
+/************* USE OF !IMPORTANT ********************
+**   Only in this file the use of !important       **
+**   CAN be warranted. As this file is the last    **
+**   instance where the gix components can be      **
+**   styled, !important can be used to override    **
+**   certain styles. However, it still is a last   **
+**   resort solution and if possible, a proper     **
+**   solution must be tried and still is prefered. **
+****************************************************/
+
 :root {
 	--positive-emphasis: var(--color-green-crayola);
 	--positive-emphasis-rgb: 48, 175, 145;
