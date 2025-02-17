@@ -40,9 +40,7 @@ export const isUpcomingCampaign = (startDate: Date) => {
 	return startDiff > 0;
 };
 
-export const getAirdropsBalance = (airdrops: AirdropInfo[]) => {
-	return airdrops.reduce(
+export const getAirdropsBalance = (airdrops: AirdropInfo[]) => airdrops.reduce(
 		(total, { amount }) => total.add(BigNumber.from(amount)),
 		BigNumber.from(0)
 	);
-};
