@@ -13,7 +13,8 @@
 	} from '$lib/constants/test-ids.constants';
 	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+    import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+    import { modalStore } from '$lib/stores/modal.store';
 
 	let selectedAirdrop: AirdropDescription;
 	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
@@ -57,7 +58,7 @@
 <AirdropsGroups
 	title={$i18n.airdrops.text.upcoming_campaigns}
 	airdrops={upcomingCampaigns}
-	altText={$i18n.airdrops.alt.upcoming_campaigns}
+	altText={replaceOisyPlaceholders($i18n.airdrops.alt.upcoming_campaigns)}
 	testId={AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER}
 />
 
