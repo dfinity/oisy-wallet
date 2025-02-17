@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import { getAirdrops } from '$lib/services/reward-code.services';
 import type { AirdropInfo, AirdropResult } from '$lib/types/airdrop';
 import type { Identity } from '@dfinity/agent';
@@ -41,4 +42,4 @@ export const isUpcomingCampaign = (startDate: Date) => {
 };
 
 export const getAirdropsBalance = (airdrops: AirdropInfo[]) =>
-	airdrops.reduce((total, { amount }) => total.add(BigNumber.from(amount)), BigNumber.from(0));
+	airdrops.reduce((total, { amount }) => total.add(BigNumber.from(amount)), ZERO);

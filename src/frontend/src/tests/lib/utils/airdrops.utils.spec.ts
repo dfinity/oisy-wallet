@@ -9,8 +9,7 @@ import {
 	loadAirdropResult
 } from '$lib/utils/airdrops.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { BigNumber } from 'alchemy-sdk';
-import { expect, it, vi } from 'vitest';
+import { BigNumber } from '@ethersproject/bignumber';
 
 describe('airdrops utils', () => {
 	describe('loadAirdropResult', () => {

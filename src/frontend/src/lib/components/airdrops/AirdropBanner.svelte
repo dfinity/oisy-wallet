@@ -9,6 +9,7 @@
 	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import type { AirdropInfo } from '$lib/types/airdrop';
 	import { getAirdropsBalance } from '$lib/utils/airdrops.utils';
@@ -19,6 +20,7 @@
 	let airdrops: AirdropInfo[] | undefined;
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
+			await nullishSignOut();
 			return;
 		}
 
@@ -39,7 +41,7 @@
 			: undefined;
 </script>
 
-<div class="mb-5 max-h-60 rounded-2xl relative flex items-end overflow-hidden">
+<div class="mb-5 rounded-2xl relative flex overflow-hidden">
 	<div class="max-h-60">
 		<ImgBanner src={airdropBanner} testId={AIRDROPS_MODAL_IMAGE_BANNER} styleClass="object-cover" />
 	</div>
