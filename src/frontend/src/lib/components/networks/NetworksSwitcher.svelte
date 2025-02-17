@@ -68,7 +68,7 @@
 
 		<ul class="gap-4 font-normal flex list-none flex-col">
 			<li class="flex items-center justify-between">
-				<div class="gap-2 flex items-center">
+				<div class="gap-2 dropdown-item disabled flex items-center">
 					<IconMorePlain />
 					<span class="text-grey">{$i18n.networks.more}</span>
 				</div>
