@@ -13,12 +13,14 @@
 	import type { AirdropInfo } from '$lib/types/airdrop';
 	import { getAirdropsBalance } from '$lib/utils/airdrops.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
+	import {nullishSignOut} from "$lib/services/auth.services";
 
 	const token = ICP_TOKEN;
 
 	let airdrops: AirdropInfo[] | undefined;
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
+			await nullishSignOut();
 			return;
 		}
 

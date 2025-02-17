@@ -3,6 +3,7 @@ import type { AirdropInfo, AirdropResult } from '$lib/types/airdrop';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
+import {ZERO} from "$lib/constants/app.constants";
 
 export const INITIAL_AIRDROP_RESULT = 'initialAirdropResult';
 
@@ -41,4 +42,4 @@ export const isUpcomingCampaign = (startDate: Date) => {
 };
 
 export const getAirdropsBalance = (airdrops: AirdropInfo[]) =>
-	airdrops.reduce((total, { amount }) => total.add(BigNumber.from(amount)), BigNumber.from(0));
+	airdrops.reduce((total, { amount }) => total.add(BigNumber.from(amount)), ZERO);

@@ -11,8 +11,9 @@
 	import { isMobile } from '$lib/utils/device.utils.js';
 	import { formatUSD } from '$lib/utils/format.utils.js';
 	import { networkUrl } from '$lib/utils/nav.utils.js';
+	import type {Token} from "$lib/types/token";
 
-	export let token;
+	export let token: Token | undefined;
 	export let balance: BigNumber | undefined;
 	export let usdBalance: number | undefined;
 </script>
