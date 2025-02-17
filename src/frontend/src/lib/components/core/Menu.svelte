@@ -202,7 +202,6 @@
 			href="mailto:support@oisy.com"
 			ariaLabel={$i18n.navigation.alt.support_email}
 			iconVisible={false}
-			styleClass="nav-item nav-item-condensed"
 		>
 			<IconHelp />
 			{$i18n.navigation.text.support_email}
