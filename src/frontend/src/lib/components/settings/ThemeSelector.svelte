@@ -16,7 +16,7 @@
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
-			updateSelectedTheme()
+			updateSelectedTheme();
 			return;
 		}
 
@@ -31,7 +31,7 @@
 	};
 
 	let selectedTheme: Theme | typeof THEME_SYSTEM;
-	$: $themeStore,updateSelectedTheme()
+	$: $themeStore, updateSelectedTheme();
 </script>
 
 <div class="flex flex-row">
