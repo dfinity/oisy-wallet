@@ -1,6 +1,38 @@
 <!doctype html>
 <html lang="en">
 	<head>
+		<!-- Init theme as fast as possible -->
+		<script theme-loader>
+			try {
+				const isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+				const currentTheme =
+					localStorage.nnsTheme === null ||
+					localStorage.nnsTheme === undefined ||
+					localStorage.nnsTheme === ''
+						? undefined
+						: JSON.parse(localStorage.nnsTheme);
+
+				document.documentElement.setAttribute(
+					'theme',
+					currentTheme ?? (isDarkPreferred ? 'dark' : 'light')
+				);
+			} catch (error) {
+				console.error('Error initializing theme', error);
+			}
+		</script>
+
+		<style>
+			:root {
+				background: #e8f1ff;
+				color: #000;
+			}
+			:root[theme='dark'] {
+				background: #070f1c;
+				color: #f4f6fa;
+			}
+		</style>
+
 		<!-- CONTENT_SECURITY_POLICY -->
 
 		<meta charset="utf-8" />
@@ -54,35 +86,9 @@
 
 		<meta content="#FFFFFF" name="theme-color" />
 		%sveltekit.head%
-
-		<!-- Init theme as fast as possible -->
-		<script theme-loader>
-			try {
-				const isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-				const currentTheme =
-					localStorage.nnsTheme === null ||
-					localStorage.nnsTheme === undefined ||
-					localStorage.nnsTheme === ''
-						? undefined
-						: JSON.parse(localStorage.nnsTheme);
-
-				document.documentElement.setAttribute(
-					'theme',
-					currentTheme ?? (isDarkPreferred ? 'dark' : 'light')
-				);
-			} catch (error) {
-				console.error('Error initializing theme', error);
-			}
-		</script>
-
 		<!-- ROUTE_STYLE -->
 
 		<style>
-			:root {
-				background: #e8f1ff;
-			}
-
 			#app-spinner {
 				--spinner-size: 30px;
 
