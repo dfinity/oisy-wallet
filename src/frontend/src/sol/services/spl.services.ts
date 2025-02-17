@@ -112,13 +112,15 @@ const saveCachedUserTokensToBackend = async ({
 
 		const metadata = await getSplMetadata({ address, network: solNetwork });
 
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		if (nonNullish(metadata)) {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		tokens.push({
-			address,
-			enabled: true,
-			...metadata
-		});
+			tokens.push({
+				address,
+				enabled: true,
+				...metadata
+			});
+		}
 	}
 
 	await setManyCustomTokens({
@@ -208,8 +210,8 @@ export const loadUserTokens = async ({
 			[[], []]
 		);
 
-		const userTokens: SplUserToken[] = await Promise.all(
-			nonExistingTokens.map(async (token) => {
+		const userTokens: SplUserToken[] = await nonExistingTokens.reduce<Promise<SplUserToken[]>>(
+			async (acc, token) => {
 				const { network, address } = token;
 
 				const solNetwork = mapNetworkIdToNetwork(network.id);
@@ -223,11 +225,17 @@ export const loadUserTokens = async ({
 
 				const metadata = await getSplMetadata({ address, network: solNetwork });
 
-				return {
-					...token,
-					...metadata
-				};
-			})
+				return nonNullish(metadata)
+					? [
+							...(await acc),
+							{
+								...token,
+								...metadata
+							}
+						]
+					: acc;
+			},
+			Promise.resolve([])
 		);
 
 		return [...existingTokens, ...userTokens];
@@ -252,27 +260,23 @@ export const getSplMetadata = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<TokenMetadata> => {
+}): Promise<TokenMetadata | undefined> => {
 	const decimals = await getTokenDecimals({ address, network });
 
-	const { result } = await splMetadata({ tokenAddress: address, network });
+	const metadataResult = await splMetadata({ tokenAddress: address, network });
 
-	if (!('content' in result)) {
-		return {
-			decimals,
-			name: address,
-			symbol: address
-		};
+	if (isNullish(metadataResult)) {
+		return;
 	}
 
 	const {
-		content: {
-			metadata,
-			links: { image: icon }
+		result: {
+			content: {
+				metadata: { name, symbol },
+				links: { image: icon }
+			}
 		}
-	} = result;
-
-	const { name, symbol } = metadata;
+	} = metadataResult;
 
 	return {
 		decimals,
