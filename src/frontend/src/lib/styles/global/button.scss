@@ -322,3 +322,61 @@ a.as-button {
 		@include button.icon;
 	}
 }
+
+// DROPDOWN BUTTON
+.dropdown-button:not(.loading) {
+	@apply text-primary;
+	@apply bg-primary;
+	@apply rounded-xl;
+	@apply px-4;
+	@apply py-3;
+	@apply min-w-72;
+	@apply justify-between;
+	@apply gap-2;
+	@apply text-left;
+	@apply font-medium;
+	@apply leading-5;
+
+	&::placeholder {
+		@apply text-tertiary;
+	}
+
+	&:hover:not(.disabled):not([disabled]),
+	&.opened {
+		@apply bg-primary;
+		@apply border-brand-primary;
+	}
+}
+
+.dropdown-button.disabled:not(.loading),
+.dropdown-button[disabled]:not(.loading) {
+	@apply text-disabled;
+	@apply bg-disabled;
+}
+
+// DROPDOWN ITEM
+.dropdown-item:not(.loading) {
+	@apply text-primary;
+	@apply rounded-xl;
+	@apply px-3;
+	@apply py-2;
+
+	margin-bottom: 1px;
+
+	&:hover:not(.disabled):not([disabled]) {
+		@apply bg-secondary;
+	}
+
+	&.selected {
+		@apply bg-brand-subtle-10;
+
+		& > span > svg {
+			color: var(--color-foreground-brand-primary-alt);
+		}
+	}
+}
+
+.dropdown-item.disabled:not(.loading),
+.dropdown-item[disabled]:not(.loading) {
+	@apply text-tertiary-inverted;
+}
