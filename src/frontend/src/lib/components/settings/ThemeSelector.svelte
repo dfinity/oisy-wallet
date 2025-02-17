@@ -24,19 +24,19 @@
 
 	let selectedTheme: Theme | typeof THEME_SYSTEM;
 	$: selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
-			? THEME_SYSTEM
-			: ($themeStore ?? THEME_SYSTEM);
+		? THEME_SYSTEM
+		: ($themeStore ?? THEME_SYSTEM);
 </script>
 
 <div class="flex flex-row">
 	{#each THEME_VALUES as theme}
 		<ThemeSelectorCard
-				label={$i18n.settings.text[`appearance_${theme}`]}
-				selected={selectedTheme === theme}
-				on:click={() => selectTheme(theme)}
-				on:keydown={() => selectTheme(theme)}
-				tabindex={THEME_VALUES.indexOf(theme)}
-				testId={`${THEME_SELECTOR_CARD}-${theme}`}
+			label={$i18n.settings.text[`appearance_${theme}`]}
+			selected={selectedTheme === theme}
+			on:click={() => selectTheme(theme)}
+			on:keydown={() => selectTheme(theme)}
+			tabindex={THEME_VALUES.indexOf(theme)}
+			testId={`${THEME_SELECTOR_CARD}-${theme}`}
 		>
 			{#await import(`$lib/assets/${theme}-theme.png`) then { default: src }}
 				<Img {src} alt={$i18n.settings.alt[`appearance_${theme}`]} />
@@ -45,12 +45,12 @@
 	{/each}
 
 	<ThemeSelectorCard
-			label={$i18n.settings.text.appearance_system}
-			selected={selectedTheme === THEME_SYSTEM}
-			on:click={() => selectTheme(THEME_SYSTEM)}
-			on:keydown={() => selectTheme(THEME_SYSTEM)}
-			tabindex={THEME_VALUES.length}
-			testId={`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`}
+		label={$i18n.settings.text.appearance_system}
+		selected={selectedTheme === THEME_SYSTEM}
+		on:click={() => selectTheme(THEME_SYSTEM)}
+		on:keydown={() => selectTheme(THEME_SYSTEM)}
+		tabindex={THEME_VALUES.length}
+		testId={`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`}
 	>
 		{#await import(`$lib/assets/${THEME_SYSTEM}-theme.png`) then { default: src }}
 			<Img {src} alt={$i18n.settings.alt.appearance_system} />
