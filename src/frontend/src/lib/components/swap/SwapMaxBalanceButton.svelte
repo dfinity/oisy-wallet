@@ -14,7 +14,8 @@
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType = undefined;
 
-	const { sourceTokenBalance, sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceTokenBalance, sourceToken, isSourceTokenIcrc2 } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
@@ -30,7 +31,8 @@
 	$: maxAmount = nonNullish($sourceToken)
 		? getMaxTransactionAmount({
 				balance: $sourceTokenBalance,
-				fee: BigNumber.from(sourceTokenFee ?? 0n),
+				// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)),
 				tokenDecimals: $sourceToken.decimals,
 				tokenStandard: $sourceToken.standard
 			})
