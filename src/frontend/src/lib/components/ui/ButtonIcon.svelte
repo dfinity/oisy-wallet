@@ -2,7 +2,7 @@
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	export let button: HTMLButtonElement | undefined = undefined;
-	export let colorStyle: ButtonColorStyle = 'tertiary-alt';
+	export let colorStyle: ButtonColorStyle = 'tertiary';
 	export let testId: string | undefined = undefined;
 	export let ariaLabel: string;
 	export let disabled = false;
