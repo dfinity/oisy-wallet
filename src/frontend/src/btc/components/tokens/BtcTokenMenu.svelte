@@ -40,6 +40,7 @@
 		<div in:fade>
 			<ExternalLink
 				asMenuItem
+				asMenuItemCondensed
 				fullWidth
 				href={explorerAddressUrl}
 				ariaLabel={$i18n.tokens.alt.open_blockstream}

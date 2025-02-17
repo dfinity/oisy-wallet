@@ -20,6 +20,7 @@
 		<div in:fade>
 			<ExternalLink
 				asMenuItem
+				asMenuItemCondensed
 				fullWidth
 				href={transactionsExplorerUrl}
 				ariaLabel={$i18n.tokens.alt.open_dashboard}
