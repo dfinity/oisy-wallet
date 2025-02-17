@@ -25,25 +25,25 @@ export const themeVariables = {
 			'subtle-10': 'var(--color-background-success-subtle-10)',
 			'subtle-20': 'var(--color-background-success-subtle-20)',
 			'subtle-30': 'var(--color-background-success-subtle-30)',
-			solid: 'var(--color-background-success-solid)',
-			'solid-alt': 'var(--color-background-success-solid-alt)',
-			'solid-alt2': 'var(--color-background-success-solid-alt2)'
+			primary: 'var(--color-background-success-primary)',
+			secondary: 'var(--color-background-success-secondary)',
+			tertiary: 'var(--color-background-success-tertiary)'
 		},
 		warning: {
 			'subtle-10': 'var(--color-background-warning-subtle-10)',
 			'subtle-20': 'var(--color-background-warning-subtle-20)',
 			'subtle-30': 'var(--color-background-warning-subtle-30)',
-			solid: 'var(--color-background-warning-solid)',
-			'solid-alt': 'var(--color-background-warning-solid-alt)',
-			'solid-alt2': 'var(--color-background-warning-solid-alt2)'
+			primary: 'var(--color-background-warning-primary)',
+			secondary: 'var(--color-background-warning-secondary)',
+			tertiary: 'var(--color-background-warning-tertiary)'
 		},
 		error: {
 			'subtle-10': 'var(--color-background-error-subtle-10)',
 			'subtle-20': 'var(--color-background-error-subtle-20)',
 			'subtle-30': 'var(--color-background-error-subtle-30)',
-			solid: 'var(--color-background-error-solid)',
-			'solid-alt': 'var(--color-background-error-solid-alt)',
-			'solid-alt2': 'var(--color-background-error-solid-alt2)'
+			primary: 'var(--color-background-error-primary)',
+			secondary: 'var(--color-background-error-secondary)',
+			tertiary: 'var(--color-background-error-tertiary)'
 		}
 	},
 	border: {
