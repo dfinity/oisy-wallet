@@ -44,10 +44,6 @@ a.as-button {
 		&.padding-sm {
 			--button-padding: var(--padding-1_5x) var(--padding-1_5x);
 		}
-
-		&.loading {
-			background: var(--color-background-disabled);
-		}
 	}
 
 	&.primary,
@@ -121,6 +117,11 @@ a.as-button {
 		@apply bg-disabled;
 	}
 
+	&.primary.loading {
+		@apply text-primary-inverted;
+		@apply bg-brand-primary;
+	}
+
 	// SECONDARY
 	&.secondary:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-primary-inverted-alt;
@@ -146,6 +147,11 @@ a.as-button {
 	&.secondary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
+	}
+
+	&.secondary.loading {
+		@apply text-primary-inverted-alt;
+		@apply bg-primary-inverted;
 	}
 
 	// SECONDARY LIGHT
@@ -175,6 +181,11 @@ a.as-button {
 		@apply bg-disabled;
 	}
 
+	&.secondary-light.loading {
+		@apply text-brand-primary-alt;
+		@apply bg-brand-subtle-10;
+	}
+
 	// TERTIARY
 	&.tertiary:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-primary;
@@ -200,6 +211,11 @@ a.as-button {
 	&.tertiary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
+	}
+
+	&.tertiary.loading {
+		@apply text-primary;
+		@apply bg-primary;
 	}
 
 	// TERTIARY ALT
@@ -229,6 +245,11 @@ a.as-button {
 		@apply bg-disabled;
 	}
 
+	&.tertiary-alt.loading {
+		@apply text-brand-primary-alt;
+		@apply bg-primary;
+	}
+
 	// TERTIARY MAIN CARD
 	&.tertiary-main-card:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-brand-primary-inverted;
@@ -252,6 +273,11 @@ a.as-button {
 	&.tertiary-main-card.disabled:not(.loading),
 	&.tertiary-main-card[disabled]:not(.loading) {
 		@apply text-disabled;
+		@apply bg-primary-alt;
+	}
+
+	&.tertiary-main-card.loading {
+		@apply text-brand-primary-inverted;
 		@apply bg-primary-alt;
 	}
 
@@ -282,6 +308,11 @@ a.as-button {
 		@apply bg-disabled;
 	}
 
+	&.success.loading {
+		@apply text-primary-inverted;
+		@apply bg-success-primary;
+	}
+
 	// ERROR
 	&.error {
 		@apply text-primary-inverted;
@@ -307,6 +338,11 @@ a.as-button {
 	&.error[disabled] {
 		@apply text-disabled;
 		@apply bg-disabled;
+	}
+
+	&.error.loading {
+		@apply text-primary-inverted;
+		@apply bg-error-primary;
 	}
 
 	// OTHERS

@@ -5,6 +5,6 @@
 	export let disabled = false;
 </script>
 
-<Button colorStyle="secondary" type="button" {disabled} on:click>
+<Button colorStyle="secondary-light" type="button" {disabled} on:click>
 	{$i18n.core.text.cancel}
 </Button>
