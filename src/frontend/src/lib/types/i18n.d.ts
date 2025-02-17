@@ -110,13 +110,23 @@ interface I18nDapps {
 interface I18nAirdrops {
 	text: {
 		title: string;
+		active_campaigns: string;
+		upcoming_campaigns: string;
 		active_date: string;
+		participate_title: string;
 		share: string;
+		requirements_title: string;
+		modal_button_text: string;
+		activity_button_text: string;
+		activity_button_text_short: string;
+		no_balance_title: string;
+		no_balance_description: string;
 		open_wallet: string;
 		state_modal_title: string;
 		state_modal_title_jackpot: string;
 		state_modal_content_text: string;
 	};
+	alt: { upcoming_campaigns: string };
 }
 
 interface I18nFooter {
@@ -427,7 +437,7 @@ interface I18nSwap {
 		not_available: string;
 		value_difference: string;
 		total_fee: string;
-		token_fee: string;
+		network_fee: string;
 		approval_fee: string;
 		gas_fee: string;
 		lp_fee: string;
@@ -442,7 +452,7 @@ interface I18nSwap {
 		refreshing_ui: string;
 		swap_provider: string;
 	};
-	error: { unexpected: string; unexpected_missing_data: string };
+	error: { unexpected: string; unexpected_missing_data: string; slippage_exceeded: string };
 }
 
 interface I18nBuy {
