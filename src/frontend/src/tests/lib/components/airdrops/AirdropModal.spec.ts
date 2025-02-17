@@ -1,8 +1,8 @@
 import type { AirdropDescription } from '$env/types/env-airdrop';
 import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte';
+import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
-import {AIRDROPS_MODAL_IMAGE_BANNER} from "$lib/constants/test-ids.constants";
 
 describe('AirdropModal', () => {
 	const imageBannerSelector = `img[data-tid="${AIRDROPS_MODAL_IMAGE_BANNER}"]`;

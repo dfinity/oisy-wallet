@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { IconCheckCircle, Modal } from '@dfinity/gix-components';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import AirdropBanner from '$lib/components/airdrops/AirdropBanner.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import AirdropBanner from "$lib/components/airdrops/AirdropBanner.svelte";
 
 	export let airdrop: AirdropDescription;
 </script>

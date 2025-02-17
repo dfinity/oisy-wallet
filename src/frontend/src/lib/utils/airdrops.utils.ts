@@ -2,7 +2,7 @@ import { getAirdrops } from '$lib/services/reward-code.services';
 import type { AirdropInfo, AirdropResult } from '$lib/types/airdrop';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
-import {BigNumber} from "@ethersproject/bignumber";
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const INITIAL_AIRDROP_RESULT = 'initialAirdropResult';
 

@@ -1,15 +1,15 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
+import type { AirdropInfo } from '$lib/types/airdrop';
 import {
-	getAirdropsBalance,
 	INITIAL_AIRDROP_RESULT,
+	getAirdropsBalance,
 	isOngoingCampaign,
 	isUpcomingCampaign,
 	loadAirdropResult
 } from '$lib/utils/airdrops.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import {BigNumber} from "@ethersproject/bignumber";
-import type {AirdropInfo} from "$lib/types/airdrop";
+import { BigNumber } from '@ethersproject/bignumber';
 
 describe('airdrops utils', () => {
 	describe('loadAirdropResult', () => {
