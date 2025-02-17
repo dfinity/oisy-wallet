@@ -15,7 +15,7 @@ import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { getTokenDecimals } from '$sol/api/solana.api';
+import { getTokenDecimals, getTokenOwner } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import {
@@ -29,6 +29,7 @@ import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -194,6 +195,8 @@ export const loadUserTokens = async ({
 							id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
 							name: tokenAddress,
 							address: tokenAddress,
+							// TODO: save this value to the backend too
+							owner: TOKEN_PROGRAM_ADDRESS,
 							network: tokenNetwork,
 							symbol: fromNullable(symbol) ?? '',
 							decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
@@ -208,8 +211,8 @@ export const loadUserTokens = async ({
 			[[], []]
 		);
 
-		const userTokens: SplUserToken[] = await Promise.all(
-			nonExistingTokens.map(async (token) => {
+		const userTokens: SplUserToken[] = await nonExistingTokens.reduce<Promise<SplUserToken[]>>(
+			async (acc, token) => {
 				const { network, address } = token;
 
 				const solNetwork = mapNetworkIdToNetwork(network.id);
@@ -221,13 +224,26 @@ export const loadUserTokens = async ({
 					})
 				);
 
+				const owner = await getTokenOwner({ address, network: solNetwork });
+
+				if (isNullish(owner)) {
+					return acc;
+				}
+
 				const metadata = await getSplMetadata({ address, network: solNetwork });
 
-				return {
-					...token,
-					...metadata
-				};
-			})
+				return nonNullish(metadata)
+					? [
+							...(await acc),
+							{
+								...token,
+								owner,
+								...metadata
+							}
+						]
+					: acc;
+			},
+			Promise.resolve([])
 		);
 
 		return [...existingTokens, ...userTokens];
