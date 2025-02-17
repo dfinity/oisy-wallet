@@ -18,14 +18,14 @@
 		<!-- TODO display image banner -->
 
 		<span class="text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
-		<p class="m-0 mt-2">{airdrop.description}</p>
+		<p class="mb-0 mt-2">{airdrop.description}</p>
 
 		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="mt-2" />
 
 		{#if airdrop.requirements.length > 0}
 			<Hr spacing="md" />
 
-			<span class="text-md m-0 font-semibold">{$i18n.airdrops.text.requirements_title}</span>
+			<span class="text-md font-semibold">{$i18n.airdrops.text.requirements_title}</span>
 			<ul class="list-none">
 				{#each airdrop.requirements as requirement}
 					<li class="mt-2 gap-2 flex">
