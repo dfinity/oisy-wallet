@@ -10,8 +10,8 @@
 		AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/airdrops.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import {isOngoingCampaign, isUpcomingCampaign} from "$lib/utils/airdrops.utils";
 
 	let ongoingCampaigns: AirdropDescription[];
 	$: ongoingCampaigns = airdropCampaigns.filter(({ startDate, endDate }) =>

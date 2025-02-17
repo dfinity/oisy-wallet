@@ -118,46 +118,46 @@ describe('airdrops utils', () => {
 
 	describe('isOngoingCampaign', () => {
 		it('should return true if the current date is between the start and end dates of the campaign', () => {
-            const startDate = new Date(Date.now() - 86400000);
-            const endDate = new Date(Date.now() + 86400000);
+			const startDate = new Date(Date.now() - 86400000);
+			const endDate = new Date(Date.now() + 86400000);
 
-            const result = isOngoingCampaign({ startDate, endDate });
+			const result = isOngoingCampaign({ startDate, endDate });
 
-            expect(result).toBe(true);
-        });
+			expect(result).toBe(true);
+		});
 
-        it('should return false if the current date is before the start date of the campaign', () => {
-            const startDate = new Date(Date.now() + 86400000);
+		it('should return false if the current date is before the start date of the campaign', () => {
+			const startDate = new Date(Date.now() + 86400000);
 
-            const result = isOngoingCampaign({ startDate, endDate: new Date() });
+			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-            expect(result).toBe(false);
-        });
+			expect(result).toBe(false);
+		});
 
-        it('should return false if the current date is after the end date of the campaign', () => {
-            const startDate = new Date(Date.now() - 86400000);
+		it('should return false if the current date is after the end date of the campaign', () => {
+			const startDate = new Date(Date.now() - 86400000);
 
-            const result = isOngoingCampaign({ startDate, endDate: new Date() });
+			const result = isOngoingCampaign({ startDate, endDate: new Date() });
 
-            expect(result).toBe(false);
-        });
+			expect(result).toBe(false);
+		});
 	});
 
 	describe('isUpcomingCampaign', () => {
 		it('should return true if the current date is before the start date of the campaign', () => {
-            const startDate = new Date(Date.now() + 86400000);
+			const startDate = new Date(Date.now() + 86400000);
 
-            const result = isUpcomingCampaign(startDate);
+			const result = isUpcomingCampaign(startDate);
 
-            expect(result).toBe(true);
-        });
+			expect(result).toBe(true);
+		});
 
-        it('should return false if the current date is after the start date of the campaign', () => {
-            const startDate = new Date(Date.now() - 86400000);
+		it('should return false if the current date is after the start date of the campaign', () => {
+			const startDate = new Date(Date.now() - 86400000);
 
-            const result = isUpcomingCampaign(startDate);
+			const result = isUpcomingCampaign(startDate);
 
-            expect(result).toBe(false);
-        });
+			expect(result).toBe(false);
+		});
 	});
 });
