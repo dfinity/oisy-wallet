@@ -491,5 +491,20 @@
 			"alternativeName": "NFID Wallet",
 			"url": "https://nfid.one/"
 		}
+	},
+	{
+		"ledgerCanisterId": "nfjys-2iaaa-aaaaq-aaena-cai",
+		"rootCanisterId": "nllv2-byaaa-aaaaq-aaema-cai",
+		"indexCanisterId": "nxppl-wyaaa-aaaaq-aaeoa-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "FUEL",
+			"symbol": "FUEL",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "FuelEV",
+			"url": "https://fuelev.ai/"
+		}
 	}
 ]
