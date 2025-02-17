@@ -12,6 +12,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/airdrops.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {modalStore} from "$lib/stores/modal.store";
+	import AirdropModal from "$lib/components/airdrops/AirdropModal.svelte";
+	import {modalAirdropDetails} from "$lib/derived/modal.derived";
+	import {nonNullish} from "@dfinity/utils";
+
+	let selectedAirdrop: AirdropDescription;
+	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
 
 	let ongoingCampaigns: AirdropDescription[];
 	$: ongoingCampaigns = airdropCampaigns.filter(({ startDate, endDate }) =>
@@ -40,3 +47,7 @@
 	altText={replaceOisyPlaceholders($i18n.airdrops.alt.upcoming_campaigns)}
 	testId={AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER}
 />
+
+{#if $modalAirdropDetails && nonNullish(selectedAirdrop)}
+	<AirdropModal airdrop={selectedAirdrop} />
+{/if}
