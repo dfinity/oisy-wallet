@@ -56,10 +56,10 @@
 		class:bg-brand-subtle-20={!slippageValueError && !slippageValueWarning}
 		class:hover:bg-brand-subtle-30={!slippageValueError && !slippageValueWarning}
 		class:text-brand-primary={!slippageValueError && !slippageValueWarning}
-		class:bg-warning-subtle-20={slippageValueWarning}
+		class:bg-warning-subtle-10={slippageValueWarning}
 		class:hover:bg-warning-subtle-30={slippageValueWarning}
 		class:text-warning-primary={slippageValueWarning}
-		class:bg-error-subtle-20={slippageValueError}
+		class:bg-error-subtle-10={slippageValueError}
 		class:hover:bg-error-subtle-30={slippageValueError}
 		class:text-error-primary={slippageValueError}
 	>
@@ -89,7 +89,7 @@
 		{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue}
 			<Button
 				on:click={() => onPresetValueClick(presetValue)}
-				colorStyle="secondary"
+				colorStyle="secondary-light"
 				styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
 				paddingSmall={true}
 			>
