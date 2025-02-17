@@ -8,10 +8,10 @@
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { networkId } from '$lib/derived/network.derived.js';
 	import { i18n } from '$lib/stores/i18n.store.js';
+	import type { Token } from '$lib/types/token';
 	import { isMobile } from '$lib/utils/device.utils.js';
 	import { formatUSD } from '$lib/utils/format.utils.js';
 	import { networkUrl } from '$lib/utils/nav.utils.js';
-	import type {Token} from "$lib/types/token";
 
 	export let token: Token | undefined;
 	export let balance: BigNumber | undefined;

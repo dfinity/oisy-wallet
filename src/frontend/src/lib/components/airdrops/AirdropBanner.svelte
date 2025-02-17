@@ -9,11 +9,11 @@
 	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getAirdrops } from '$lib/services/reward-code.services';
 	import type { AirdropInfo } from '$lib/types/airdrop';
 	import { getAirdropsBalance } from '$lib/utils/airdrops.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import {nullishSignOut} from "$lib/services/auth.services";
 
 	const token = ICP_TOKEN;
 
