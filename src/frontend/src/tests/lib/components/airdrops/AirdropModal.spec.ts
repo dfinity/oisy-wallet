@@ -5,33 +5,33 @@ import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { render } from '@testing-library/svelte';
 
 describe('AirdropModal', () => {
-    const imageBannerSelector = `img[data-tid="${AIRDROPS_MODAL_IMAGE_BANNER}"]`;
+	const imageBannerSelector = `img[data-tid="${AIRDROPS_MODAL_IMAGE_BANNER}"]`;
 
-    it('should render modal content', () => {
-        Object.defineProperty(window, 'navigator', {
-            writable: true,
-            value: {
-                userAgentData: {
-                    mobile: false
-                }
-            }
-        });
+	it('should render modal content', () => {
+		Object.defineProperty(window, 'navigator', {
+			writable: true,
+			value: {
+				userAgentData: {
+					mobile: false
+				}
+			}
+		});
 
-        const mockedAirdrop: AirdropDescription = { ...mockAirdropCampaigns[0] };
+		const mockedAirdrop: AirdropDescription = { ...mockAirdropCampaigns[0] };
 
-        const { container, getByText } = render(AirdropModal, {
-            props: {
-                airdrop: mockedAirdrop
-            }
-        });
+		const { container, getByText } = render(AirdropModal, {
+			props: {
+				airdrop: mockedAirdrop
+			}
+		});
 
-        expect(getByText(mockedAirdrop.title)).toBeInTheDocument();
-        expect(getByText(mockedAirdrop.description)).toBeInTheDocument();
-        mockedAirdrop.requirements.forEach((requirement: string) => {
-            expect(getByText(requirement)).toBeInTheDocument();
-        });
+		expect(getByText(mockedAirdrop.title)).toBeInTheDocument();
+		expect(getByText(mockedAirdrop.description)).toBeInTheDocument();
+		mockedAirdrop.requirements.forEach((requirement: string) => {
+			expect(getByText(requirement)).toBeInTheDocument();
+		});
 
-        const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
-        expect(imageBanner).toBeInTheDocument();
-    });
+		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
+		expect(imageBanner).toBeInTheDocument();
+	});
 });
