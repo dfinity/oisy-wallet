@@ -40,10 +40,7 @@
 
 		padding: 0 0 var(--padding);
 
-		--icon-check-circle-background: var(--positive-emphasis);
-		--icon-check-circle-color: white;
-
-		color: var(--value-color);
+		color: var(--color-foreground-primary);
 		transition: color var(--animation-time-normal) ease-out;
 	}
 
@@ -55,28 +52,28 @@
 	.in_progress,
 	.next {
 		.line {
-			--line-color: var(--progress-color);
+			--line-color: var(--color-background-brand-primary);
 		}
 	}
 
 	.in_progress {
-		color: var(--progress-color);
+		color: var(--color-foreground-primary-inverted);
 
-		--icon-check-circle-background: var(--progress-color);
-		--icon-check-circle-color: var(--progress-color-contrast);
+		--icon-check-circle-background: var(--color-background-brand-primary);
+		--icon-check-circle-color: var(--color-background-brand-primary-alt);
 
 		.state {
-			color: var(--progress-color);
-			background: rgba(var(--progress-color-rgb), 0.3);
+			color: var(--color-foreground-primary-inverted);
+			background: var(--color-background-brand-subtle-20);
 		}
 	}
 
 	.next {
-		color: var(--tertiary);
+		color: var(--color-foreground-primary);
 
 		--icon-check-circle-background: transparent;
-		--icon-check-circle-color: var(--tertiary);
-		--icon-check-circle-border-color: var(--tertiary);
+		--icon-check-circle-color: var(--color-foreground-primary);
+		--icon-check-circle-border-color: var(--color-foreground-primary);
 	}
 
 	.state {
@@ -86,8 +83,8 @@
 		font-size: var(--font-size-small);
 		line-height: var(--line-height-small);
 
-		color: var(--positive-emphasis);
-		background: rgba(var(--positive-emphasis-rgb), 0.3);
+		color: var(--color-foreground-primary-inverted);
+		background: var(--color-background-success-subtle-20);
 
 		width: fit-content;
 
@@ -104,16 +101,16 @@
 	.line {
 		height: 100%;
 		min-height: calc(4 * var(--padding));
-		--line-color: var(--positive-emphasis);
-		background: linear-gradient(var(--line-color), var(--line-color)) no-repeat center/1.5px 100%;
+		--line-color: var(--color-background-success-primary);
+		background: var(--color-background-brand-primary);
 	}
 
 	.checkmark {
 		font-size: var(--font-size-small);
 		line-height: var(--line-height-small);
 
-		color: var(--progress-color);
-		--checkmark-color: var(--progress-color);
+		color: var(--color-foreground-primary);
+		--checkmark-color: var(--color-background-brand-primary);
 	}
 
 	.spinner {
@@ -136,10 +133,10 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		border: 1px solid var(--checkmark-color);
+		border: 1px solid var(--color-background-brand-primary);
 	}
 
 	.completed {
-		color: var(--positive-emphasis);
+		color: var(--color-background-success-primary);
 	}
 </style>
