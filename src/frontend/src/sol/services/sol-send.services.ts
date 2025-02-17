@@ -6,7 +6,7 @@ import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
 import { createAtaInstruction } from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
@@ -24,7 +24,6 @@ import { address as solAddress } from '@solana/addresses';
 import { pipe } from '@solana/functional';
 import type { Signature } from '@solana/keys';
 import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
 import { lamports, type Commitment } from '@solana/rpc-types';
 import {
 	setTransactionMessageFeePayerSigner,
@@ -43,7 +42,7 @@ import {
 import { assertTransactionIsFullySigned } from '@solana/transactions';
 import {
 	getComputeUnitEstimateForTransactionMessageFactory,
-	sendAndConfirmTransactionFactory
+	sendTransactionWithoutConfirmingFactory
 } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
@@ -191,20 +190,18 @@ const createSplTokenTransactionMessage = async ({
 
 export const sendSignedTransaction = async ({
 	rpc,
-	rpcSubscriptions,
 	signedTransaction,
 	commitment = 'confirmed'
 }: {
 	rpc: Rpc<SolanaRpcApi>;
-	rpcSubscriptions: RpcSubscriptions<SolanaRpcSubscriptionsApi>;
 	signedTransaction: SolSignedTransaction;
 	commitment?: Commitment;
 }) => {
 	assertTransactionIsFullySigned(signedTransaction);
 
-	const sendAndConfirmTransaction = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+	const sendTransaction = sendTransactionWithoutConfirmingFactory({ rpc });
 
-	await sendAndConfirmTransaction(signedTransaction, { commitment });
+	await sendTransaction(signedTransaction, { commitment });
 };
 
 /**
@@ -247,7 +244,6 @@ export const sendSol = async ({
 	);
 
 	const rpc = solanaHttpRpc(solNetwork);
-	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
 	const signer: TransactionPartialSigner = createSigner({
 		identity,
@@ -293,9 +289,9 @@ export const sendSol = async ({
 
 	progress(ProgressStepsSendSol.SEND);
 
+	// Explicitly do not await to proceed in the background and allow the UI to continue
 	await sendSignedTransaction({
 		rpc,
-		rpcSubscriptions,
 		signedTransaction
 	});
 
