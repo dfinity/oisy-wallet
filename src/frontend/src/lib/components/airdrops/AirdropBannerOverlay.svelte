@@ -18,7 +18,7 @@
 </script>
 
 <div
-	class="gap-2 sm:gap-4 absolute flex h-full w-full flex-col items-center justify-center bg-black/50 text-center text-white"
+	class="gap-2 sm:gap-4 absolute flex h-full w-full flex-col items-center justify-center bg-black/50 text-white"
 >
 	{#if nonNullish(token) && nonNullish(balance) && nonNullish(usdBalance)}
 		<div class="text-3xl font-semibold sm:text-5xl">
@@ -29,7 +29,7 @@
 			<span>{formatUSD({ value: usdBalance })}</span>
 		</div>
 
-		<div class="flex w-3/5 items-center">
+		<div>
 			<Button
 				on:click={async () => {
 					await goto(
@@ -45,7 +45,7 @@
 				link
 				paddingSmall
 			>
-				<div class="gap-2 flex items-center justify-center">
+				<div class="gap-2 flex items-center">
 					<IconCoins />
 					<span class="text-lg"
 						>{isMobile()
