@@ -24,9 +24,28 @@ global.ResizeObserver = class ResizeObserver {
 	}
 };
 
-Element.prototype.animate = vi
-	.fn()
-	.mockImplementation(() => ({ cancel: vi.fn(), finished: Promise.resolve() }));
+// eslint-disable-next-line local-rules/prefer-object-params
+Element.prototype.animate = (
+	_keyframes: Keyframe[] | PropertyIndexedKeyframes,
+	options?: number | KeyframeAnimationOptions
+): Animation => {
+	const animation = {
+		abort: vi.fn(),
+		cancel: vi.fn(),
+		finished: Promise.resolve()
+		// Svelte v5 register onfinish
+		// Source: https://github.com/sveltejs/svelte/blob/75f81991c27e9602d4bb3eb44aec8775de0713af/packages/svelte/src/internal/client/dom/elements/transitions.js#L386
+		// onfinish: () => undefined
+	} as unknown as Animation;
+
+	setTimeout(
+		// @ts-expect-error We are omitting the parameter of onfinish for simplicity reason and because Svelte v5 do not use those.
+		() => animation.onfinish(),
+		typeof options === 'number' ? options : Number(options?.duration ?? 0)
+	);
+
+	return animation;
+};
 
 vi.mock('$app/stores', () => ({
 	page: mockPage
