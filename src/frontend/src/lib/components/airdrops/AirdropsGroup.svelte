@@ -4,6 +4,7 @@
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import AirdropCard from '$lib/components/airdrops/AirdropCard.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	export let title: string;
 	export let airdrops: AirdropDescription[];
@@ -16,8 +17,11 @@
 
 	{#each airdrops as airdrop}
 		<div in:slide={SLIDE_DURATION} class="mt-4">
-			<!--            TODO open airdrop modal on click -->
-			<AirdropCard {airdrop} testId={nonNullish(testId) ? `${testId}-${airdrop.id}` : undefined} />
+			<AirdropCard
+				on:click={() => modalStore.openAirdropDetails(airdrop)}
+				{airdrop}
+				testId={nonNullish(testId) ? `${testId}-${airdrop.id}` : undefined}
+			/>
 		</div>
 	{/each}
 

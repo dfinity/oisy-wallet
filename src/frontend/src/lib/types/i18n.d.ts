@@ -113,7 +113,10 @@ interface I18nAirdrops {
 		active_campaigns: string;
 		upcoming_campaigns: string;
 		active_date: string;
+		participate_title: string;
 		share: string;
+		requirements_title: string;
+		modal_button_text: string;
 		open_wallet: string;
 		state_modal_title: string;
 		state_modal_title_jackpot: string;
