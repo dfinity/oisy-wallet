@@ -1,12 +1,15 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
+import type { AirdropInfo } from '$lib/types/airdrop';
 import {
 	INITIAL_AIRDROP_RESULT,
+	getAirdropsBalance,
 	isOngoingCampaign,
 	isUpcomingCampaign,
 	loadAirdropResult
 } from '$lib/utils/airdrops.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { BigNumber } from '@ethersproject/bignumber';
 
 describe('airdrops utils', () => {
 	describe('loadAirdropResult', () => {
@@ -158,6 +161,45 @@ describe('airdrops utils', () => {
 			const result = isUpcomingCampaign(startDate);
 
 			expect(result).toBe(false);
+		});
+	});
+
+	describe('getAirdropsBalance', () => {
+		const lastTimestamp = BigInt(Date.now());
+
+		const mockedAirdrop: AirdropInfo = {
+			amount: BigInt(100),
+			timestamp: lastTimestamp,
+			name: 'airdrop',
+			ledger: mockIdentity.getPrincipal()
+		};
+
+		it('should return the correct airdrops balance of multiple airdrops', () => {
+			const mockedAirdrops: AirdropInfo[] = [
+				mockedAirdrop,
+				{ ...mockedAirdrop, amount: BigInt(200) },
+				{ ...mockedAirdrop, amount: BigInt(300) }
+			];
+
+			const result = getAirdropsBalance(mockedAirdrops);
+
+			expect(result).toEqual(BigNumber.from(600));
+		});
+
+		it('should return the correct airdrops balance of a single airdrop', () => {
+			const mockedAirdrops: AirdropInfo[] = [mockedAirdrop];
+
+			const result = getAirdropsBalance(mockedAirdrops);
+
+			expect(result).toEqual(BigNumber.from(100));
+		});
+
+		it('should return zero for an empty list of airdrops', () => {
+			const mockedAirdrops: AirdropInfo[] = [];
+
+			const result = getAirdropsBalance(mockedAirdrops);
+
+			expect(result).toEqual(BigNumber.from(0));
 		});
 	});
 });
