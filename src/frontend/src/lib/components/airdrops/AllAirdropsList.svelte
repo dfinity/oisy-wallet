@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { airdropCampaigns } from '$env/airdrop-campaigns.env';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import airdropBanner from '$lib/assets/airdrops-banner.svg';
+	import AirdropModal from '$lib/components/airdrops/AirdropModal.svelte';
 	import AirdropsGroups from '$lib/components/airdrops/AirdropsGroup.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import {
@@ -9,9 +11,14 @@
 		AIRDROPS_BANNER,
 		AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
+	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/airdrops.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
+	let selectedAirdrop: AirdropDescription;
+	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
 
 	let ongoingCampaigns: AirdropDescription[];
 	$: ongoingCampaigns = airdropCampaigns.filter(({ startDate, endDate }) =>
@@ -40,3 +47,7 @@
 	altText={replaceOisyPlaceholders($i18n.airdrops.alt.upcoming_campaigns)}
 	testId={AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER}
 />
+
+{#if $modalAirdropDetails && nonNullish(selectedAirdrop)}
+	<AirdropModal airdrop={selectedAirdrop} />
+{/if}
