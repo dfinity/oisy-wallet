@@ -14,25 +14,11 @@
 	import { modalAirdropDetails } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/airdrops.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let selectedAirdrop: AirdropDescription;
-	$: selectedAirdrop = $modalStore?.data as AirdropDescription;
-
-	const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
-		const currentDate = new Date(Date.now());
-		let startDiff = startDate.getTime() - currentDate.getTime();
-		let endDiff = endDate.getTime() - currentDate.getTime();
-
-		return startDiff <= 0 && endDiff > 0;
-	};
-
-	const isUpcomingCampaign = (startDate: Date) => {
-		const currentDate = new Date(Date.now());
-		let startDiff = startDate.getTime() - currentDate.getTime();
-
-		return startDiff > 0;
-	};
+    let selectedAirdrop: AirdropDescription;
+    $: selectedAirdrop = $modalStore?.data as AirdropDescription;
 
 	let ongoingCampaigns: AirdropDescription[];
 	$: ongoingCampaigns = airdropCampaigns.filter(({ startDate, endDate }) =>
