@@ -6,7 +6,7 @@
 	export let testId: string | undefined = undefined;
 	export let ariaLabel: string;
 	export let disabled = false;
-	export let link = true;
+	export let link = false;
 </script>
 
 <button
