@@ -101,7 +101,7 @@ const toBaseSnapshot = ({
 	AccountSnapshot_Icrc | AccountSnapshot_Spl,
 	'account' | 'token_address' | 'last_transactions'
 > => ({
-	decimals: Number(decimals),
+	decimals,
 	approx_usd_per_token: exchangeRate,
 	amount: balance.toBigInt(),
 	timestamp: BigInt(timestamp),
