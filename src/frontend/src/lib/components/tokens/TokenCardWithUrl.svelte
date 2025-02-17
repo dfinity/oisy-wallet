@@ -10,8 +10,6 @@
 
 	let url: string;
 	$: url = transactionsUrl({ token });
-
-	export let styleClass = '';
 </script>
 
 <div class={`group gap-3 sm:gap-8 flex ${styleClass}`}>
