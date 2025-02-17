@@ -3,7 +3,7 @@
 
 	export let href: string;
 	export let ariaLabel: string;
-	export let colorStyle: ButtonColorStyle = 'tertiary-alt';
+	export let colorStyle: ButtonColorStyle = 'tertiary';
 </script>
 
 <a
