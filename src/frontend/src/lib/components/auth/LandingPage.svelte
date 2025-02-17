@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { themeStore } from '@dfinity/gix-components';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
+	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 
 	let ariaLabel: string;
 	$: ariaLabel = replaceOisyPlaceholders($i18n.auth.alt.preview);

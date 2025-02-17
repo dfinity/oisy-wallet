@@ -2,7 +2,6 @@
 	import { themeStore, Theme } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
