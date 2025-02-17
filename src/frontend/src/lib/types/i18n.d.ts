@@ -110,6 +110,8 @@ interface I18nDapps {
 interface I18nAirdrops {
 	text: {
 		title: string;
+		active_campaigns: string;
+		upcoming_campaigns: string;
 		active_date: string;
 		share: string;
 		open_wallet: string;
@@ -117,6 +119,7 @@ interface I18nAirdrops {
 		state_modal_title_jackpot: string;
 		state_modal_content_text: string;
 	};
+	alt: { upcoming_campaigns: string };
 }
 
 interface I18nFooter {
