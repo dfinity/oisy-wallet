@@ -117,6 +117,10 @@ interface I18nAirdrops {
 		share: string;
 		requirements_title: string;
 		modal_button_text: string;
+		activity_button_text: string;
+		activity_button_text_short: string;
+		no_balance_title: string;
+		no_balance_description: string;
 		open_wallet: string;
 		state_modal_title: string;
 		state_modal_title_jackpot: string;
