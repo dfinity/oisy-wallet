@@ -65,7 +65,7 @@
 		"@dfinity/gix-components": "^5.0.0-next-2025-02-12.1",
 		"@dfinity/ledger-icp": "^2.6.8-next-2025-02-10",
 		"@dfinity/ledger-icrc": "^2.7.3-next-2025-02-10",
-		"@dfinity/oisy-wallet-signer": "^0.1.5-next-2025-02-10.1",
+		"@dfinity/oisy-wallet-signer": "^0.1.6-next-2025-02-17",
 		"@dfinity/principal": "^2.3.0",
 		"@dfinity/utils": "^2.10.0-next-2025-02-10",
 		"@dfinity/verifiable-credentials": "^0.0.4",
