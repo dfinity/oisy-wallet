@@ -7,6 +7,7 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import AirdropBanner from "$lib/components/airdrops/AirdropBanner.svelte";
 
 	export let airdrop: AirdropDescription;
 </script>
@@ -15,7 +16,7 @@
 	<span class="text-xl text-center" slot="title">{airdrop.title}</span>
 
 	<ContentWithToolbar>
-		<!-- TODO display image banner -->
+		<AirdropBanner />
 
 		<span class="text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
 		<p class="mb-0 mt-2">{airdrop.description}</p>
