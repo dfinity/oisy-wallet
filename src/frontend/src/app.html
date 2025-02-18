@@ -226,6 +226,11 @@
 				width: 100%;
 				min-width: 1728px;
 			}
+
+			/* Color in background image to match dark mode, avoiding additional assets */
+			:root[theme='dark'] #app-background {
+				filter: hue-rotate(25deg) saturate(15) brightness(0.4);
+			}
 		</style>
 
 		<!-- LINKS_PRELOADER -->

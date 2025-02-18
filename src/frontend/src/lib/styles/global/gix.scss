@@ -43,7 +43,11 @@
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
+
+	// General GIX
 	--secondary: var(--color-background-brand-primary);
+	--tertiary: var(--color-foreground-tertiary-inverted);
+	--positive-emphasis: var(--color-background-success-primary);
 
 	// Toast message max height is calculated based on the font-size.
 	--font-size-standard: 1rem;
@@ -220,8 +224,8 @@ div.popover {
 
 		max-width: calc(100vw - (2 * var(--padding)));
 
-		@include media.min-width(xsmall) {
-			max-width: 300px;
+		@media (width >= theme(--breakpoint-sm)) {
+			max-width: 300px !important;
 		}
 	}
 }
@@ -263,24 +267,32 @@ div.segment-button {
 	}
 }
 
-div.step .state {
-	color: var(--color-foreground-brand-primary-alt) !important;
-	background: var(--color-background-brand-subtle-30) !important;
-}
-
-div.step.completed {
-	svg {
-		--icon-check-circle-background: var(--color-background-brand-primary);
-		--icon-check-circle-color: var(--color-foreground-primary-inverted);
-	}
-
-	div.line {
-		--line-color: var(--color-background-brand-primary);
-	}
-
+div.step {
 	.state {
-		color: var(--color-foreground-success-primary) !important;
-		background: var(--color-background-success-subtle-30) !important;
+		color: var(--color-foreground-brand-primary-alt) !important;
+		background: var(--color-background-brand-subtle-30) !important;
+	}
+
+	&.completed {
+		svg {
+			--icon-check-circle-background: var(--color-background-brand-primary);
+			--icon-check-circle-color: var(--color-foreground-primary-inverted);
+		}
+
+		div.line {
+			--line-color: var(--color-background-brand-primary) !important;
+		}
+
+		.state {
+			color: var(--color-foreground-success-primary) !important;
+			background: var(--color-background-success-subtle-30) !important;
+		}
+	}
+
+	&.next {
+		.text {
+			color: var(--color-foreground-primary);
+		}
 	}
 }
 
