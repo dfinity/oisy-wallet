@@ -50,6 +50,7 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import IconGift from "$lib/components/icons/IconGift.svelte";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -146,17 +147,6 @@
 			</ButtonMenu>
 		{/if}
 
-		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_AIRDROPS}
-				ariaLabel={$i18n.navigation.alt.airdrops}
-				on:click={goToAirdrops}
-			>
-				<IconTrophy size="20" />
-				{$i18n.navigation.text.airdrops}
-			</ButtonMenu>
-		{/if}
-
 		{#if !dAppExplorerRoute && !settingsRoute}
 			<ButtonMenu
 				testId={NAVIGATION_ITEM_EXPLORER}
@@ -165,6 +155,17 @@
 			>
 				<IconlyUfo size="20" />
 				{$i18n.navigation.text.dapp_explorer}
+			</ButtonMenu>
+		{/if}
+
+		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
+			<ButtonMenu
+					testId={NAVIGATION_ITEM_AIRDROPS}
+					ariaLabel={$i18n.navigation.alt.airdrops}
+					on:click={goToAirdrops}
+			>
+				<IconGift size="20" />
+				{$i18n.navigation.text.airdrops}
 			</ButtonMenu>
 		{/if}
 
