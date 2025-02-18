@@ -7,7 +7,7 @@
 </script>
 
 <Card {testId}>
-	<span class="sm:w-[200px] inline-block w-[120px] max-w-full"><slot><SkeletonText /></slot></span>
+	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
 	<span class="inline-block w-full max-w-[100px]" slot="amount"><SkeletonText /></span>
 

@@ -17,7 +17,7 @@
 </script>
 
 <footer
-	class="px-4 pt-12 pb-5 sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0 pointer-events-none z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end"
+	class="px-4 pt-12 pb-5 sm:px-8 lg:inset-x-0 lg:bottom-0 pointer-events-none z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between lg:fixed"
 	class:sm:sticky={$authNotSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}
 	class:md:h-md:grid-cols-2={$authNotSignedIn}
@@ -27,12 +27,12 @@
 	class:md:bottom-0={$authSignedIn}
 >
 	<div
-		class="md:flex-row md:gap-4 pointer-events-none flex w-full flex-col items-center justify-between"
+		class="md:gap-4 pointer-events-none flex w-full flex-col items-center justify-between md:flex-row"
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
 	>
 		<div
-			class={`gap-4 pointer-events-auto flex flex-row items-center ${isHomePage ? '' : 'md:flex hidden'}`}
+			class={`gap-4 pointer-events-auto flex flex-row items-center ${isHomePage ? '' : 'hidden md:flex'}`}
 		>
 			<ExternalLinkIcon
 				href={OISY_TWITTER_URL}
@@ -75,14 +75,14 @@
 			class:1.5md:translate-x-0={$authSignedIn}
 			class:1.5md:visible={$authSignedIn}
 		>
-			<div class="pt-2 sm:flex-row sm:items-start sm:gap-2 flex flex-col items-center">
+			<div class="pt-2 sm:gap-2 flex flex-col items-center sm:flex-row sm:items-start">
 				<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 				<span
 					class:md:hidden={$authSignedIn}
 					class:xl:block={$authSignedIn}
 					class:md:h-md:hidden={$authNotSignedIn}
 					class:1.5md:h-md:block={$authNotSignedIn}
-					class="md:text-left text-center"
+					class="text-center md:text-left"
 				>
 					{$i18n.footer.text.incubated_with}
 					<IconHeart styleClass="inline-flex mb-1" />

@@ -170,7 +170,7 @@
 		>
 	</button>
 {:else}
-	<div class="tokens sm:max-h-[26rem] flex flex-col overflow-y-hidden">
+	<div class="tokens flex flex-col overflow-y-hidden sm:max-h-[26rem]">
 		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain">
 			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 				<Card>
