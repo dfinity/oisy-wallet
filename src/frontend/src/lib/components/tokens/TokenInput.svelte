@@ -61,7 +61,7 @@
 
 <div
 	class="rounded-lg p-5 first:mb-2 border border-solid text-left transition"
-	class:bg-brand-subtle-30={focused}
+	class:bg-brand-subtle-10={focused}
 	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
 	class:border-secondary={!focused}
