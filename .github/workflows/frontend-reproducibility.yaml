@@ -1,6 +1,11 @@
 name: Frontend Reproducibility
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
   release:
     types: [released]
   workflow_dispatch:
