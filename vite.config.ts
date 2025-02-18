@@ -24,31 +24,6 @@ const config: UserConfig = {
 	build: {
 		target: 'es2020',
 		rollupOptions: {
-			output: {
-				manualChunks: (id) => {
-					const folder = dirname(id);
-
-					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
-
-					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>
-							folder.includes(lib)
-						) === undefined &&
-						folder.includes('node_modules')
-					) {
-						return 'vendor';
-					}
-
-					if (
-						lazy.find((lib) => folder.includes(lib)) !== undefined &&
-						folder.includes('node_modules')
-					) {
-						return 'lazy';
-					}
-
-					return 'index';
-				}
-			},
 			// Polyfill Buffer for production build
 			plugins: [
 				inject({
