@@ -1,11 +1,24 @@
 <script lang="ts">
+	import type { ComponentType } from 'svelte';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
-	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy } from '$lib/derived/modal.derived';
+
+	let walletConnectComponent: ComponentType;
+
+	const lazyLoadWalletConnect = async (notSignedIn: boolean) => {
+		if (notSignedIn) {
+			return;
+		}
+
+		const WalletConnect = await import('$lib/components/wallet-connect/WalletConnect.svelte');
+		walletConnectComponent = WalletConnect.default;
+	};
+
+	$: lazyLoadWalletConnect($authNotSignedIn);
 </script>
 
 <header
@@ -23,7 +36,7 @@
 
 	<div class="gap-4 pointer-events-auto flex justify-end">
 		{#if $authSignedIn}
-			<WalletConnect />
+			<svelte:component this={walletConnectComponent} />
 		{/if}
 
 		{#if $authSignedIn}
