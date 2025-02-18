@@ -19,12 +19,14 @@
 		"./e2e/**/*.js",
 		"./e2e/**/*.ts",
 		"./scripts/*.mjs",
-		"./scripts/*.ts"
+		"./scripts/*.ts",
+		"./eslint.config.mjs"
 	],
 	"exclude": [
 		"./node_modules/**",
 		"./src/frontend/service-worker.js",
 		"./src/frontend/service-worker.ts",
-		"./src/frontend/service-worker.d.ts"
+		"./src/frontend/service-worker.d.ts",
+		"./eslint-local-rules.cjs"
 	]
 }
