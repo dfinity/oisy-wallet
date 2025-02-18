@@ -9,7 +9,7 @@
 </script>
 
 <div
-	class="flex w-full flex-col items-center md:items-start"
+	class="md:items-start flex w-full flex-col items-center"
 	class:md:items-center={licenseAlignment === 'center'}
 >
 	<ButtonAuthenticate on:click={async () => await signIn({})} {fullWidth} />

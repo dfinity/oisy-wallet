@@ -13,11 +13,11 @@
 	let button: HTMLButtonElement | undefined;
 </script>
 
-<div class="hidden sm:block">
+<div class="sm:block hidden">
 	<TokensZeroBalanceCheckbox />
 </div>
 
-<div class="block sm:hidden">
+<div class="sm:hidden block">
 	<ButtonIcon
 		bind:button
 		on:click={() => (visible = true)}
