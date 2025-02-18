@@ -33,6 +33,7 @@
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -47,6 +48,11 @@
 			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsLoader.DONE,
+			text: replaceOisyPlaceholders($i18n.init.text.done),
+			state: 'done'
 		} as ProgressStep
 	];
 
