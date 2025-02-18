@@ -8,7 +8,7 @@
 
 <div>
 	<div class="gap-3 font-bold flex items-center text-primary">
-		<div class="dark:invert">
+		<div class="text-primary">
 			<slot name="icon" />
 		</div>
 		<Html text={replaceOisyPlaceholders(title)} />

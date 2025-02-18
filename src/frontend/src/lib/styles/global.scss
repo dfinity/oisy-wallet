@@ -21,7 +21,7 @@
 	}
 
 	:root[theme='dark'] {
-		.dark\:invert {
+		.invert-on-dark-theme {
 			filter: invert(1);
 		}
 	}
