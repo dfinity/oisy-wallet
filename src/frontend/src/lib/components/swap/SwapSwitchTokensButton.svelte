@@ -11,7 +11,7 @@
 
 <Button
 	on:click={() => dispatch('icSwitchTokens')}
-	colorStyle="tertiary-main-card"
+	colorStyle="primary"
 	{disabled}
 	ariaLabel={$i18n.swap.text.switch_tokens_button}
 	styleClass="absolute bottom-0 left-0 right-0 top-0 m-auto h-9 w-9 rounded-lg border border-solid border-secondary shadow-sm"
