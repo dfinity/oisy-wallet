@@ -27,6 +27,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -47,6 +48,11 @@
 			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsLoader.DONE,
+			text: replaceOisyPlaceholders($i18n.init.text.done),
+			state: 'completed'
 		} as ProgressStep
 	];
 
