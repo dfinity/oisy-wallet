@@ -55,7 +55,12 @@ interface WaitForModalParams {
 
 interface TakeScreenshotParams {
 	scrollToTop?: boolean;
-  }   
+  }       
+
+
+ 
+ 
+ 
 type TestModalSnapshotParams = {
 	selectorsToMock?: string[];
 } & WaitForModalParams;
