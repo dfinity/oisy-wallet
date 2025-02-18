@@ -230,7 +230,7 @@ abstract class Homepage {
 		return await this.#page.getByTestId(testId);
 	}
 
-	protected async scrollToTopAndBack(): Promise<void> {
+	protected async scrollToTopAndBack(): Promise<void>    {
 		const currentPosition = await this.#page.evaluate(() => window.scrollY);
 
 		await this.#page.evaluate(() => window.scrollTo({ top: 0 }));
