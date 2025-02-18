@@ -52,7 +52,7 @@
 		{
 			step: ProgressStepsLoader.DONE,
 			text: replaceOisyPlaceholders($i18n.init.text.done),
-			state: 'done'
+			state: 'completed'
 		} as ProgressStep
 	];
 
