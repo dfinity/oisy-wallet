@@ -167,9 +167,10 @@
 	},
 	"init": {
 		"text": {
-			"initializing_wallet": "Initializing your wallet",
+			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys"
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
+			"done": "Enjoy $oisy_short"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
