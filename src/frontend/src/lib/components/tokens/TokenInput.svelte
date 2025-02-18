@@ -106,7 +106,7 @@
 			{/if}
 		</div>
 
-		<div class="h-3/4 w-[1px] bg-disabled" />
+		<div class="h-3/4 w-[1px] bg-disabled"></div>
 
 		<button class="gap-1 px-3 flex h-full" on:click disabled={!isSelectable}>
 			{#if token}
