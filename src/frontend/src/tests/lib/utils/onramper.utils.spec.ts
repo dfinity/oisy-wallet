@@ -36,7 +36,8 @@ describe('onramper.utils', () => {
 					{ networkId: 'icp', wallet: mockAccountIdentifierText }
 				],
 				supportRecurringPayments: true,
-				enableCountrySelector: false
+				enableCountrySelector: false,
+				themeName: 'dark'
 			};
 
 			const expectedUrl =
@@ -60,7 +61,8 @@ describe('onramper.utils', () => {
 				wallets: [{ cryptoId: 'btc', wallet: mockBtcAddress }],
 				networkWallets: [{ networkId: 'bitcoin', wallet: mockBtcAddress }],
 				supportRecurringPayments: false,
-				enableCountrySelector: true
+				enableCountrySelector: true,
+				themeName: 'dark'
 			};
 
 			const expectedUrl =
@@ -84,7 +86,8 @@ describe('onramper.utils', () => {
 				wallets: [],
 				networkWallets: [],
 				supportRecurringPayments: false,
-				enableCountrySelector: true
+				enableCountrySelector: true,
+				themeName: 'dark'
 			};
 
 			const expectedUrl =
@@ -107,7 +110,8 @@ describe('onramper.utils', () => {
 				wallets: [{ cryptoId: 'btc', wallet: mockBtcAddress }],
 				networkWallets: [],
 				supportRecurringPayments: false,
-				enableCountrySelector: true
+				enableCountrySelector: true,
+				themeName: 'dark'
 			};
 
 			const expectedUrl =
@@ -131,7 +135,8 @@ describe('onramper.utils', () => {
 				wallets: [],
 				networkWallets: [{ networkId: 'bitcoin', wallet: mockBtcAddress }],
 				supportRecurringPayments: false,
-				enableCountrySelector: true
+				enableCountrySelector: true,
+				themeName: 'dark'
 			};
 
 			const expectedUrl =
@@ -155,7 +160,8 @@ describe('onramper.utils', () => {
 				wallets: [{ cryptoId: 'btc', wallet: mockBtcAddress }],
 				networkWallets: [{ networkId: 'bitcoin', wallet: mockBtcAddress }],
 				supportRecurringPayments: false,
-				enableCountrySelector: true
+				enableCountrySelector: true,
+				themeName: 'dark'
 			};
 
 			const expectedUrl =
