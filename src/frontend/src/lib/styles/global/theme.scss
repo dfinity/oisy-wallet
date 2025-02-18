@@ -59,8 +59,8 @@ a {
 	word-break: break-word;
 }
 a:not(.unstyled):active,
-a:hover {
-	color: var(--color-blue-ribbon);
+a:not(.unstyled):hover {
+	color: var(--color-background-brand-primary);
 }
 a:hover,
 a:focus {

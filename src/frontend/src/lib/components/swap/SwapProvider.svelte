@@ -14,6 +14,7 @@
 	let kongSwapDApp: OisyDappDescription | undefined;
 	$: kongSwapDApp = dAppDescriptions.find(({ id }) => id === 'kongswap');
 
+	// TODO: this state - websiteURL - isn't one and should become a local variable
 	let websiteURL: Option<URL>;
 	let displayURL: OptionString;
 	$: {
@@ -29,7 +30,7 @@
 						? websiteURL.hostname.substring(4)
 						: websiteURL.hostname;
 				}
-			} catch (e: unknown) {
+			} catch (_err: unknown) {
 				websiteURL = null;
 				displayURL = null;
 			}
