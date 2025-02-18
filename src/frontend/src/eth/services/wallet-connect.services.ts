@@ -223,7 +223,7 @@ export const signMessage = ({
 							identity,
 							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 						});
-					} catch (err: unknown) {
+					} catch (_err: unknown) {
 						// If the above failed, it's because JSON.parse throw an exception.
 						// We are assuming that it did so because it tried to parse a string that does not represent an object.
 						// Therefore, we continue with a message as hex string.

@@ -21,7 +21,7 @@
 				unitName: token.decimals,
 				displayDecimals: token.decimals
 			});
-		} catch (err: unknown) {
+		} catch (_err: unknown) {
 			// Infinite amount e.g. 1.157920892373162e+59 will fail parsing
 			amountDisplay = `${amount ?? 0}`;
 		}

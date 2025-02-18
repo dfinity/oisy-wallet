@@ -109,7 +109,7 @@ export const loadIdbTokenAddress = async <T extends Address>({
 		addressStore.set({ data: address, certified: false });
 
 		await updateIdbAddressLastUsage(identity.getPrincipal());
-	} catch (err: unknown) {
+	} catch (_err: unknown) {
 		// We silence the error as the dapp will proceed with a standard lookup of the address.
 		console.error(
 			`Error encountered while searching for locally stored ${tokenId.description} public address in the browser.`
@@ -155,7 +155,7 @@ export const certifyAddress = async <T extends Address>({
 		addressStore.set({ data: address, certified: true });
 
 		await updateIdbAddressLastUsage(identity.getPrincipal());
-	} catch (err: unknown) {
+	} catch (_err: unknown) {
 		addressStore.reset();
 
 		return { success: false, err: `Error while loading the ${tokenId.description} address.` };
