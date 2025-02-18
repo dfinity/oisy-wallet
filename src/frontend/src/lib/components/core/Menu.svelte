@@ -16,7 +16,6 @@
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
-	import IconTrophy from '$lib/components/icons/lucide/IconTrophy.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
