@@ -5,9 +5,9 @@
 </script>
 
 <Card noMargin>
-	<span class="sm:w-[200px] inline-block w-[120px] max-w-full"><slot><SkeletonText /></slot></span>
+	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
-	<span class="mt-1 sm:w-[200px] inline-block w-[120px] max-w-full" slot="description"
+	<span class="mt-1 inline-block w-[120px] max-w-full sm:w-[200px]" slot="description"
 		><SkeletonText /></span
 	>
 
