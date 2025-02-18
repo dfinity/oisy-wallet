@@ -26,7 +26,7 @@
 	};
 
 	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
-	// eslint-disable-next-line local-rules/use-option-type-wrapper
+
 	let host: OptionString;
 	$: host = mapHost(origin);
 </script>
