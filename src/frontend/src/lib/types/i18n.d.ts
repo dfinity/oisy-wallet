@@ -149,7 +149,12 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: { initializing_wallet: string; securing_session: string; retrieving_public_keys: string };
+	text: {
+		initializing_wallet: string;
+		securing_session: string;
+		retrieving_public_keys: string;
+		done: string;
+	};
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
