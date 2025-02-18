@@ -27,13 +27,13 @@
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
 		loadSolAddressTestnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
