@@ -27,7 +27,7 @@
 	<MultipleListeners tokens={tokenGroup.tokens}>
 		<TokenCardWithOnClick
 			on:click={() => toggleIsExpanded(!isExpanded)}
-			styleClass="rounded-xl px-3 py-2 hover:bg-brand-subtle-10 {isExpanded
+			styleClass="px-3 py-2 hover:bg-brand-subtle-10 {isExpanded
 				? 'bg-primary rounded-b-none'
 				: ''}"
 		>
@@ -36,9 +36,9 @@
 	</MultipleListeners>
 
 	{#if isExpanded}
-		<div class="gap-3 rounded-b-xl pt-2 flex flex-col bg-secondary" transition:slide={SLIDE_PARAMS}>
+		<div class="gap-0 flex flex-col bg-secondary" transition:slide={SLIDE_PARAMS}>
 			{#each tokenGroup.tokens as token (token.id)}
-				<TokenCardWithUrl styleClass="rounded-xl px-3 py-2" {token}>
+				<TokenCardWithUrl styleClass="p-3 hover:bg-brand-subtle-10" {token}>
 					<TokenCardContent logoSize="md" data={token} />
 				</TokenCardWithUrl>
 			{/each}
