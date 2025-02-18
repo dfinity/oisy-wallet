@@ -37,8 +37,9 @@
 	let websiteURL: Option<URL>;
 	$: {
 		try {
+			// TODO: use URL.parse
 			websiteURL = new URL(website);
-		} catch (e) {
+		} catch (_err: unknown) {
 			websiteURL = null;
 		}
 	}
