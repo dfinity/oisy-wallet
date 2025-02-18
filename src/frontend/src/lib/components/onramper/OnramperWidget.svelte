@@ -19,7 +19,6 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
-	import { onMount } from 'svelte';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
