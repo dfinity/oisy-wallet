@@ -39,7 +39,7 @@
 	// Input
 	--input-background: var(--color-background-primary);
 	--focus-background: var(--color-background-primary);
-	--focus-border-color: var(--color-brand-base);
+	--focus-border-color: var(---color-border-brand-primary);
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
@@ -53,7 +53,7 @@
 	--font-size-standard: 1rem;
 
 	// Segment
-	--segment-selected-background: var(--color-secondary);
+	--segment-selected-background: var(--color-base-black);
 
 	// Checkbox
 	--checkbox-padding: 0;
