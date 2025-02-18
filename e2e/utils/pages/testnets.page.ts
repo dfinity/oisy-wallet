@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
-export type TestnetsPageParams = HomepageLoggedInParams;
+type TestnetsPageParams = HomepageLoggedInParams;
 
-export interface TestnetConfig {
+interface TestnetConfig {
 	name: string;
 	networkSymbol: string;
 	tokenSymbol: string;
@@ -41,9 +41,10 @@ export const TestnetCases: TestnetConfig[] = [
 		tokenSymbol: 'SOL (Local)'
 	}
 ];
+
 export class TestnetsPage extends HomepageLoggedIn {
-	constructor({ page, iiPage }: TestnetsPageParams) {
-		super({ page, iiPage });
+	constructor(params: TestnetsPageParams) {
+		super(params);
 	}
 
 	async enableTestnets({
