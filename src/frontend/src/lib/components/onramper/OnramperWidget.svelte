@@ -69,7 +69,7 @@
 			supportRecurringPayments: true,
 			enableCountrySelector: true,
 
-			themeName: 'dark' // we always pass dark, as some card elements arent styled correctly in light theme / onramper bug?
+			themeName: 'dark' // we always pass dark, as some card elements arent styled correctly (white text on white background) in light theme / onramper bug?
 		}));
 
 	const changeThemeOnIframeLoad = (e: Event) => {
