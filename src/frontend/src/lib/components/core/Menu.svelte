@@ -9,6 +9,7 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -49,7 +50,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import IconGift from "$lib/components/icons/IconGift.svelte";
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -159,9 +159,9 @@
 
 		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
 			<ButtonMenu
-					testId={NAVIGATION_ITEM_AIRDROPS}
-					ariaLabel={$i18n.navigation.alt.airdrops}
-					on:click={goToAirdrops}
+				testId={NAVIGATION_ITEM_AIRDROPS}
+				ariaLabel={$i18n.navigation.alt.airdrops}
+				on:click={goToAirdrops}
 			>
 				<IconGift size="20" />
 				{$i18n.navigation.text.airdrops}
