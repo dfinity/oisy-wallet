@@ -1,5 +1,4 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
 import { type UserConfig } from 'vite';
@@ -13,7 +12,7 @@ process.env = {
 
 export default defineConfig(
 	(): UserConfig => ({
-		plugins: [sveltekit(), tailwindcss(), svelteTesting()],
+		plugins: [sveltekit(), svelteTesting()],
 		...CSS_CONFIG_OPTIONS,
 		resolve: {
 			alias: [
