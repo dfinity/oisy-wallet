@@ -19,6 +19,11 @@
 		type EthereumFeeContext as EthereumFeeContextType,
 		initEthereumFeeStore
 	} from '$icp/stores/ethereum-fee.store';
+	import {
+		IC_TOKEN_FEE_CONTEXT_KEY,
+		type IcTokenFeeContext,
+		icTokenFeeStore
+	} from '$icp/stores/ic-token-fee.store';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import type { IcToken } from '$icp/types/ic-token';
 	import {
@@ -51,7 +56,6 @@
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
-	import {IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext, icTokenFeeStore} from "$icp/stores/ic-token-fee.store";
 
 	/**
 	 * Props

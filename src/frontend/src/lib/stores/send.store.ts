@@ -1,11 +1,11 @@
+import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
-import {exchanges} from "$lib/derived/exchange.derived";
-import {nonNullish} from "@dfinity/utils";
-import {kongSwapTokensStore} from "$lib/stores/kong-swap-tokens.store";
 
 export type SendData = Token;
 
@@ -42,8 +42,9 @@ export const initSendContext = ({
 		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
 	);
 
-	const sendTokenExchangeRate = derived([exchanges, sendToken],
-		([$exchanges, $sendToken]) => nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined);
+	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>
+		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
+	);
 
 	const isSendTokenIcrc2 = derived(
 		[kongSwapTokensStore, sendToken],

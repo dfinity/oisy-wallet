@@ -1,18 +1,19 @@
 <script lang="ts">
-	import {debounce, nonNullish} from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import type { OptionIcToken } from '$icp/types/ic-token';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { slide } from 'svelte/transition';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import {formatToken, formatUSD} from '$lib/utils/format.utils';
-	import {SWAP_TOTAL_FEE_THRESHOLD} from "$lib/constants/swap.constants";
-	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
+	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	const { sendToken, sendTokenDecimals, sendTokenExchangeRate, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenDecimals, sendTokenExchangeRate, sendBalance } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let decimals: number | undefined;
 	$: decimals = $sendToken?.decimals;
@@ -24,14 +25,16 @@
 	$: fee = ($sendToken as OptionIcToken)?.fee;
 
 	let usdFee: number;
-	$: usdFee = nonNullish($sendTokenExchangeRate) && nonNullish(fee)
+	$: usdFee =
+		nonNullish($sendTokenExchangeRate) && nonNullish(fee)
 			? (Number(fee) / Math.pow(10, decimals)) * $sendTokenExchangeRate
-			: 0
+			: 0;
 
 	let insufficientFeeFunds = false;
 
 	const debounceCheckFeeFunds = debounce(
-			() => (insufficientFeeFunds = nonNullish($sendBalance) && nonNullish(fee) && $sendBalance.lt(fee))
+		() =>
+			(insufficientFeeFunds = nonNullish($sendBalance) && nonNullish(fee) && $sendBalance.lt(fee))
 	);
 
 	$: $sendBalance, fee, debounceCheckFeeFunds();
@@ -40,7 +43,7 @@
 <Value ref="fee">
 	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
-	<div class="flex gap-4">
+	<div class="gap-4 flex">
 		{#if nonNullish(fee) && nonNullish(decimals) && nonNullish(symbol)}
 			{formatToken({
 				value: BigNumber.from(fee),
@@ -56,7 +59,7 @@
 					value: SWAP_TOTAL_FEE_THRESHOLD
 				})} )`}
 			{:else}
-				{`( ${formatUSD({value: usdFee})} )`}
+				{`( ${formatUSD({ value: usdFee })} )`}
 			{/if}
 		</div>
 	</div>
@@ -72,5 +75,4 @@
 			})}
 		</p>
 	{/if}
-
 </Value>
