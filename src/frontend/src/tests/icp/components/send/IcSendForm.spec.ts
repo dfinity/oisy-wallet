@@ -1,19 +1,13 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
 import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
-import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
-import {get} from "svelte/store";
-import {testnetsStore} from "$lib/stores/settings.store";
-import {testnets} from "$lib/derived/testnets.derived";
-import {enabledEthereumNetworks} from "$eth/derived/networks.derived";
-import * as ethEnv from "$env/networks/networks.eth.env";
 
 describe('IcSendForm', () => {
 	const ethereumFeeStore = initEthereumFeeStore();
@@ -24,7 +18,7 @@ describe('IcSendForm', () => {
 		SEND_CONTEXT_KEY,
 		initSendContext({
 			sendPurpose: 'convert-cketh-to-eth',
-			token: ETHEREUM_TOKEN,
+			token: ETHEREUM_TOKEN
 		})
 	);
 	mockContext.set(ETHEREUM_FEE_CONTEXT_KEY, {
