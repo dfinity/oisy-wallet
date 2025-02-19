@@ -20,9 +20,8 @@ import {
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
-import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import {
@@ -69,7 +68,6 @@ interface WaitForLocatorOptions {
 abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
-	private promotionCarousel?: PromotionCarousel;
 
 	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
@@ -286,14 +284,7 @@ abstract class Homepage {
 		await expect(modal).toHaveScreenshot();
 	}
 
-	async setCarouselFirstSlide(): Promise<void> {
-		if (isNullish(this.promotionCarousel)) {
-			this.promotionCarousel = new PromotionCarousel(this.#page);
-		}
-
-		await this.promotionCarousel.navigateToSlide(1);
-		await this.promotionCarousel.freezeCarousel();
-	}
+	async setCarouselFirstSlide(): Promise<void> {}
 
 	async waitForLoadState() {
 		await this.#page.waitForLoadState('networkidle');
