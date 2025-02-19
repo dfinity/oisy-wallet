@@ -30,12 +30,7 @@ for ((n = 0; n < 10; n++)); do
     if cmp -s "$DIR/$file1" "$DIR/$file2"; then
       continue
     else
-      echo "Differences detected between $file1 and $file2."
-
-      # Print the differing files
-      echo "Files with different hashes:"
-      diff -y --suppress-common-lines "$DIR/$file1" "$DIR/$file2" | awk '{print $1}'
-
+      printf 'The file "%s" is different from "%s".\n' "$file1" "$file2"
       exit 1
     fi
   fi
