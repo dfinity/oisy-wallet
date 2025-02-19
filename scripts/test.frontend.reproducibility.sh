@@ -10,7 +10,7 @@ if [ ! -d "$DIR" ]; then
 fi
 
 for ((n = 0; n < 10; n++)); do
-  npm run build && find build -type f -exec sha256sum {} \; | awk '{print $2 " " $1}' | sort >"$DIR/sha256-batch${n}.txt"
+  NODE_ENV=production npm run build && find build -type f -exec sha256sum {} \; | awk '{print $2 " " $1}' | sort >"$DIR/sha256-batch${n}.txt"
 
   # Save results for manual comparison
   rm -r "$DIR/build-batch${n}" 2>/dev/null
