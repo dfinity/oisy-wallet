@@ -72,7 +72,7 @@
 						})}:
 					</p>
 
-					<article class="mt-4 rounded-xs p-4 bg-disabled">
+					<article class="rounded-xs mt-4 bg-disabled p-4">
 						<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
 						<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
@@ -92,7 +92,7 @@
 {:else}
 	<ContentWithToolbar>
 		<div class="stretch">
-			<div class="gap-2 pt-8 flex h-[100%] min-h-[30vh] flex-col items-center justify-center">
+			<div class="flex h-[100%] min-h-[30vh] flex-col items-center justify-center gap-2 pt-8">
 				<div>
 					<Spinner inline />
 				</div>

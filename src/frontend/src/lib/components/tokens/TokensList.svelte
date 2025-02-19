@@ -41,10 +41,10 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		<div class="mb-3 gap-3 flex flex-col">
+		<div class="mb-3 flex flex-col gap-3">
 			{#each tokens ?? [] as token (token.id)}
 				<div
-					class="rounded-xl overflow-hidden"
+					class="overflow-hidden rounded-xl"
 					transition:fade
 					animate:flip={{ duration: 250 }}
 					on:animationstart={handleAnimationStart}

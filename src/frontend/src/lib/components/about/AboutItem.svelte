@@ -7,11 +7,11 @@
 <button
 	class={asMenuItem
 		? `text nav-item ${asMenuItemCondensed ? 'nav-item-condensed' : ''}`
-		: `font-bold text-center whitespace-nowrap text-brand-primary`}
+		: `whitespace-nowrap text-center font-bold text-brand-primary`}
 	on:click
 	data-tid={testId}
 >
-	<div class="gap-2 flex items-center">
+	<div class="flex items-center gap-2">
 		{#if asMenuItem}
 			<slot name="icon" />
 		{/if}

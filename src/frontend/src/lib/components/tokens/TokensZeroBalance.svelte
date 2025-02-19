@@ -4,7 +4,7 @@
 </script>
 
 <div class="content">
-	<span class="text-sm block text-brand-primary">{$i18n.tokens.text.balance}</span>
+	<span class="block text-sm text-brand-primary">{$i18n.tokens.text.balance}</span>
 
 	<div class="flex items-center justify-between">
 		<span>{$i18n.tokens.text.hide_zero_balances}</span>

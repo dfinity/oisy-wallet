@@ -22,7 +22,7 @@
 
 	<TokensList />
 
-	<div in:fade class="mt-12 mb-4 flex w-full justify-center sm:w-auto">
+	<div in:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
 		<ManageTokensButton />
 	</div>
 </div>

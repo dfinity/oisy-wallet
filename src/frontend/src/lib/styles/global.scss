@@ -1,5 +1,8 @@
 @use 'sass:meta';
-@use 'tailwindcss';
+
+// We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
+// Trying to import it with Sass — such as using @use — leads to reproducibility issues.
+@import 'tailwindcss';
 
 @config '../../../../../tailwind.config.ts';
 

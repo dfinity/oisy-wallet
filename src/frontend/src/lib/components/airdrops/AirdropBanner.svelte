@@ -41,7 +41,7 @@
 			: undefined;
 </script>
 
-<div class="mb-5 rounded-2xl relative flex overflow-hidden">
+<div class="relative mb-5 flex overflow-hidden rounded-2xl">
 	<div class="max-h-60">
 		<ImgBanner src={airdropBanner} testId={AIRDROPS_MODAL_IMAGE_BANNER} styleClass="object-cover" />
 	</div>

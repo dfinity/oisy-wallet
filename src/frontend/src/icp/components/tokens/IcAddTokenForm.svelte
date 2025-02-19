@@ -18,7 +18,7 @@
 	placeholder="_____-_____-_____-_____-cai"
 />
 
-<label for="indexCanisterId" class="mt-6 font-bold block"
+<label for="indexCanisterId" class="mt-6 block font-bold"
 	>{$i18n.tokens.import.text.index_canister_id}:</label
 >
 <InputText

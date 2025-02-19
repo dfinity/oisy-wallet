@@ -29,7 +29,7 @@
 	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
-		<div class="gap-3 flex flex-col">
+		<div class="flex flex-col gap-3">
 			<TokensZeroBalance />
 
 			<Hr />

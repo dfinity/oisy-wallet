@@ -7,13 +7,13 @@
 </script>
 
 <div>
-	<div class="gap-3 font-bold flex items-center text-primary">
+	<div class="flex items-center gap-3 font-bold text-primary">
 		<div class="text-primary">
 			<slot name="icon" />
 		</div>
 		<Html text={replaceOisyPlaceholders(title)} />
 	</div>
-	<p class="mt-2 mb-0 text-sm sm:text-base">
+	<p class="mb-0 mt-2 text-sm sm:text-base">
 		<Html text={replaceOisyPlaceholders(description)} />
 	</p>
 </div>

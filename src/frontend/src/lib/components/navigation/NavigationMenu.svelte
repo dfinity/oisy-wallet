@@ -46,8 +46,8 @@
 	});
 </script>
 
-<div class="py-3 pl-4 md:pl-8 flex h-full w-full flex-col justify-between">
-	<div class="gap-3 flex flex-col">
+<div class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
+	<div class="flex flex-col gap-3">
 		<NavigationItem
 			href={networkUrl({
 				path: AppPath.Tokens,

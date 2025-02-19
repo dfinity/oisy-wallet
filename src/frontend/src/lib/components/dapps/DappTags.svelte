@@ -9,7 +9,7 @@
 
 <ul
 	aria-label={replacePlaceholders($i18n.dapps.alt.tags, { $dAppName: dAppName })}
-	class="gap-2 flex list-none flex-wrap"
+	class="flex list-none flex-wrap gap-2"
 >
 	{#each tags as tag}
 		<li class="flex">

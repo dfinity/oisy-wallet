@@ -37,14 +37,14 @@
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
-			class="-right-2.5 bottom-0 h-6 w-6 text-sm font-semibold absolute flex items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-primary"
+			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}
 		</span>
 	{:else if badge?.type === 'network'}
-		<div class="-right-1 -bottom-1 absolute">
+		<div class="absolute -bottom-1 -right-1">
 			<NetworkLogo
 				{network}
 				blackAndWhite={badge.blackAndWhite}
@@ -55,7 +55,7 @@
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged-->
 		<div
-			class="-right-1 -bottom-1 h-6 w-6 p-1 absolute items-center justify-center rounded-full bg-brand-tertiary text-primary-inverted"
+			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
 			aria-label={badge.ariaLabel}
 			data-tid={`icon-${badgeTestId}`}
 		>

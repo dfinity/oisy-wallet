@@ -32,7 +32,7 @@
 			testId={AIRDROPS_STATE_MODAL_IMAGE_BANNER}
 		/>
 
-		<div class="gap-4 flex flex-col items-center text-center">
+		<div class="flex flex-col items-center gap-4 text-center">
 			<h3 class="my-3"
 				>{jackpot
 					? $i18n.airdrops.text.state_modal_title_jackpot

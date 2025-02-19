@@ -123,7 +123,7 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="gap-1 flex flex-col" data-tid={NAVIGATION_MENU}>
+	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
@@ -226,7 +226,7 @@
 
 		<Hr />
 
-		<span class="text-sm text-center text-tertiary">
+		<span class="text-center text-sm text-tertiary">
 			<LicenseLink noUnderline />
 		</span>
 	</div>
