@@ -1,6 +1,7 @@
 name: Frontend Reproducibility
 
 on:
+  pull_request:
   release:
     types: [released]
   workflow_dispatch:
