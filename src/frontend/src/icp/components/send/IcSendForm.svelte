@@ -44,7 +44,7 @@
 	token={$sendToken}
 	balance={$balance}
 	disabled={invalid}
-	hideSource={simplifiedForm}
+	hideSource={true}
 >
 	<div slot="amount">
 		<TokenInput
@@ -78,7 +78,9 @@
 	</div>
 
 	<div slot="destination">
-		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{#if !simplifiedForm}
+			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		{/if}
 	</div>
 
 	<IcFeeDisplay slot="fee" {networkId} />

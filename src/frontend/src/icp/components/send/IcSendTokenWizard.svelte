@@ -78,6 +78,9 @@
 	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	let simplifiedForm = false;
+	$: simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
+
 	/**
 	 * Send
 	 */
@@ -218,7 +221,7 @@
 				bind:networkId
 				on:icQRCodeScan
 				{source}
-				simplifiedForm
+				{simplifiedForm}
 			>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
