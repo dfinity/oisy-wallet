@@ -6,7 +6,6 @@
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
-	import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import Loaders from '$lib/components/loaders/Loaders.svelte';
@@ -60,7 +59,7 @@
 			<NavigationMenu slot="menu">
 				{#if tokensRoute}
 					<div transition:fade class="xl:block hidden">
-						<DappsCarousel />
+
 					</div>
 				{/if}
 			</NavigationMenu>
