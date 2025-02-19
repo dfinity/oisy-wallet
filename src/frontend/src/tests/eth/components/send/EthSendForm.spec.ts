@@ -6,6 +6,9 @@ import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
+import {IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore} from "$icp/stores/ic-token-fee.store";
+import {TOKEN_INPUT_CURRENCY_TOKEN} from "$lib/constants/test-ids.constants";
+import * as ethEnv from '$env/networks/networks.eth.env';
 
 describe('EthSendForm', () => {
 	const mockContext = new Map([]);
@@ -25,6 +28,9 @@ describe('EthSendForm', () => {
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
 		})
 	);
+	mockContext.set(IC_TOKEN_FEE_CONTEXT_KEY, {
+		store: icTokenFeeStore
+	});
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
@@ -35,12 +41,13 @@ describe('EthSendForm', () => {
 	};
 
 	const destinationSelector = 'input[data-tid="destination-input"]';
-	const amountSelector = 'input[data-tid="amount-input"]';
-	const sourceSelector = 'div[id="source"]';
+	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const networkSelector = 'div[id="network"]';
 	const maxFeeEthSelector = 'div[id="max-fee-eth"]';
 	const sendInfoMessageBoxSelector = 'div[data-tid="send-info-message-box"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
+
+	vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 	it('should render all fields', () => {
 		const { container } = render(EthSendForm, {
@@ -71,7 +78,7 @@ describe('EthSendForm', () => {
 
 	it('should not render destination field', () => {
 		const { container } = render(EthSendForm, {
-			props: { ...props, simplifiedForm: true },
+			props: { ...props, destinationEditable: false },
 			context: mockContext
 		});
 
