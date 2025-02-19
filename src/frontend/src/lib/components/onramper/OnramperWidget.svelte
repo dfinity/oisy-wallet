@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
 	import {
 		BTC_MAINNET_NETWORK_ID,
 		ETHEREUM_NETWORK_ID,
