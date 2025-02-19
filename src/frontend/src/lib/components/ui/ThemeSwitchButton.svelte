@@ -1,8 +1,8 @@
 <script lang="ts">
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { themeStore, Theme } from '@dfinity/gix-components';
-	import IconSun from '$lib/components/icons/IconSun.svelte';
 	import IconMoon from '$lib/components/icons/IconMoon.svelte';
+	import IconSun from '$lib/components/icons/IconSun.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ButtonColorStyle } from '$lib/types/style';
 

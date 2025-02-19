@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import {
 		BTC_MAINNET_NETWORK_ID,
