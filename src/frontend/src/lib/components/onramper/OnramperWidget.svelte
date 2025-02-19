@@ -19,6 +19,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
+	import { themeStore } from '@dfinity/gix-components';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
@@ -68,7 +69,7 @@
 			supportRecurringPayments: true,
 			enableCountrySelector: true,
 
-			themeName: 'dark' // we always pass dark, as some card elements arent styled correctly (white text on white background) in light theme / onramper bug?
+			themeName: $themeStore ?? 'dark' // we pass dark as default, as some card elements arent styled correctly (white text on white background) in light theme / onramper bug?
 		}));
 
 	const changeThemeOnIframeLoad = (e: Event) => {
