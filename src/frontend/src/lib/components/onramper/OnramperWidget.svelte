@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import {
 		BTC_MAINNET_NETWORK_ID,
@@ -103,7 +102,6 @@
 <!-- The `allow` prop is set as suggested in the Onramper documentation that can be found at https://docs.onramper.com/docs/customise-the-ux -->
 <!-- When Onramper engineers were inquired about the reason, they answered: -->
 <!-- "In order to do customer verification before purchase, we require the following permissions to be given to the app. So this is definitely merely for the KYC  and also for fraud detection algorithms i suppose" -->
-
 <iframe
 	on:load={changeThemeOnIframeLoad}
 	{src}
