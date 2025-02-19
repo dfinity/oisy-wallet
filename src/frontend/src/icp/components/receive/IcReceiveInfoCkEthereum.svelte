@@ -31,7 +31,7 @@
 			})}</svelte:fragment
 		>
 
-		<p class="py-2 break-normal text-tertiary">
+		<p class="break-normal py-2 text-tertiary">
 			{replacePlaceholders(
 				replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
 				{
@@ -43,7 +43,7 @@
 		</p>
 	</Value>
 
-	<div class="gap-3 flex w-full flex-col" slot="toolbar">
+	<div class="flex w-full flex-col gap-3" slot="toolbar">
 		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icConvert')}>
 			<span class="text-dark-slate-blue font-bold"
 				>{replacePlaceholders(
