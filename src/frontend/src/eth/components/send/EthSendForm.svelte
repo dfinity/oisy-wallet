@@ -26,7 +26,6 @@
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
 	export let amount: OptionAmount = undefined;
-	export const nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
 
