@@ -49,7 +49,7 @@
 />
 
 <div class="my-6 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
-	<div class="tokens-scroll gap-6 flex flex-col overflow-y-auto overscroll-contain">
+	<div class="tokens-scroll flex flex-col gap-6 overflow-y-auto overscroll-contain">
 		{#each filteredTokens as token (token.id)}
 			<TokenCardWithOnClick on:click={() => dispatch('icSelectToken', token)}>
 				<TokenCardContent data={token} />

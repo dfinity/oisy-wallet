@@ -10,10 +10,10 @@
 
 <button
 	on:click
-	class="h-40 rounded-lg p-4 pt-12 shadow relative w-full flex-1 bg-primary"
+	class="relative h-40 w-full flex-1 rounded-lg bg-primary p-4 pt-12 shadow"
 	data-tid={testId}
 >
-	<span class="-top-5 left-4 absolute">
+	<span class="absolute -top-5 left-4">
 		<Logo
 			src={airdrop.logo}
 			size="xl"
@@ -24,12 +24,12 @@
 	</span>
 	<article class="h-full">
 		<section>
-			<p class="m-0 text-lg font-semibold text-start">{airdrop.title}</p>
-			<p class="m-0 mt-2 text-xs text-start text-tertiary">
+			<p class="m-0 text-start text-lg font-semibold">{airdrop.title}</p>
+			<p class="m-0 mt-2 text-start text-xs text-tertiary">
 				{airdrop.oneLiner}
 			</p>
 		</section>
-		<section class="bottom-4 left-4 max-h-6 min-h-6 md:max-h-14 absolute overflow-hidden">
+		<section class="absolute bottom-4 left-4 max-h-6 min-h-6 overflow-hidden md:max-h-14">
 			<AirdropDateBadge
 				date={airdrop.endDate}
 				testId={nonNullish(testId) ? `${testId}-badge` : undefined}

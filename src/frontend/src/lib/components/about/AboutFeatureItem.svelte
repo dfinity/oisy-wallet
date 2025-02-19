@@ -7,7 +7,7 @@
 </script>
 
 <div>
-	<div class="gap-3 font-bold flex items-center text-primary">
+	<div class="flex items-center gap-3 font-bold text-primary">
 		<div class="text-primary">
 			<slot name="icon" />
 		</div>

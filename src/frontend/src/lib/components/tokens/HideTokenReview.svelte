@@ -15,7 +15,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="icon gap-3 flex flex-col items-center">
+	<div class="icon flex flex-col items-center gap-3">
 		<Logo
 			src={$token?.icon}
 			size="xl"
@@ -23,7 +23,7 @@
 			color="off-white"
 		/>
 
-		<p class="font-bold text-center">
+		<p class="text-center font-bold">
 			{#if nonNullish($token)}
 				{$token.name}
 			{:else}
