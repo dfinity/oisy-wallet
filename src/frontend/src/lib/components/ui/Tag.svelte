@@ -4,7 +4,7 @@
 
 <span
 	aria-hidden={ariaHidden}
-	class="rounded-md px-1.5 text-sm border border-primary bg-primary text-primary"
+	class="rounded-md border border-primary bg-primary px-1.5 text-sm text-primary"
 >
 	<slot />
 </span>

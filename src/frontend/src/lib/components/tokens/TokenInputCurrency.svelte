@@ -14,7 +14,7 @@
 </script>
 
 <div
-	class={`token-input-currency font-bold flex h-full w-full items-center ${styleClass}`}
+	class={`token-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
 	class:text-error-primary={error}
 	class:animate-pulse={loading}
 >

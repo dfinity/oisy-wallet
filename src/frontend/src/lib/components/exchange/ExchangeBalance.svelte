@@ -13,8 +13,8 @@
 	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 </script>
 
-<span class="gap-2 flex flex-col items-center">
-	<output class={`mt-8 text-5xl font-bold inline-block break-all`}>
+<span class="flex flex-col items-center gap-2">
+	<output class={`mt-8 inline-block break-all text-5xl font-bold`}>
 		{#if $loaded}
 			{formatUSD({ value: totalUsd })}
 		{:else}
