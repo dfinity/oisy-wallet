@@ -1,6 +1,7 @@
 name: Frontend Reproducibility
 
 on:
+  pull_request:
   release:
     types: [released]
   workflow_dispatch:
@@ -10,8 +11,12 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout
+      - name: Checkout for pull request
+        if: ${{ github.event_name == 'pull_request' }}
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Prepare
         uses: ./.github/actions/prepare
