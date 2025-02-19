@@ -10,8 +10,6 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
 	import {selectedNetwork} from "$lib/derived/network.derived";
-	import NetworkInfo from "$lib/components/networks/NetworkInfo.svelte";
-	import SendSource from "$lib/components/send/SendSource.svelte";
     import {nonNullish} from "@dfinity/utils";
 
 	export let source: string;
