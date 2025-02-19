@@ -88,7 +88,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.0.6",
+		"@dfinity/eslint-config-oisy-wallet": "^0.1.0",
 		"@dfinity/ic-management": "^6.0.4-next-2025-02-10",
 		"@dfinity/identity-secp256k1": "^2.3.0",
 		"@dfinity/internet-identity-playwright": "^0.0.4",
@@ -99,7 +99,6 @@
 		"@sveltejs/kit": "^2.16.1",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@tailwindcss/postcss": "^4.0.7",
-		"@tailwindcss/vite": "^4.0.7",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.6",
 		"@types/dom-view-transitions": "^1.0.5",
