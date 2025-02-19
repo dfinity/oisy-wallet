@@ -48,7 +48,7 @@
 
 <label for="max-fee-eth" class="font-bold"><Html text={$i18n.fee.text.max_fee_eth} /></label>
 
-<div id="max-fee-eth" class="mb-4 min-h-6 font-normal break-all">
+<div id="max-fee-eth" class="mb-4 min-h-6 break-all font-normal">
 	{#if nonNullish(fee) && nonNullish($feeSymbolStore) && nonNullish($feeTokenIdStore) && nonNullish($feeDecimalsStore)}
 		<FeeAmountDisplay
 			{fee}
