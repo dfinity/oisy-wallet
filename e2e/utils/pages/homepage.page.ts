@@ -53,6 +53,10 @@ interface WaitForModalParams {
 	state?: 'detached';
 }
 
+interface TakeScreenshotParams {
+	scrollToTop?: boolean;
+}
+
 type TestModalSnapshotParams = {
 	selectorsToMock?: string[];
 } & WaitForModalParams;
@@ -226,6 +230,14 @@ abstract class Homepage {
 		return await this.#page.getByTestId(testId);
 	}
 
+	protected async scrollToTopAndBack(): Promise<void> {
+		const currentPosition = await this.#page.evaluate(() => window.scrollY);
+
+		await this.#page.evaluate(() => window.scrollTo({ top: 0 }));
+
+		await this.#page.evaluate((y) => window.scrollTo({ top: y }), currentPosition);
+	}
+
 	async waitForTimeout(timeout: number): Promise<void> {
 		await this.#page.waitForTimeout(timeout);
 	}
@@ -316,6 +328,12 @@ abstract class Homepage {
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
+	private async scrollIntoViewCentered(testId: string): Promise<void> {
+		const selector = `[data-tid="${testId}"]`;
+		const locator = this.#page.locator(selector);
+		await locator.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
+	}
+
 	async toggleTokenInList({
 		tokenSymbol,
 		networkSymbol
@@ -323,6 +341,7 @@ abstract class Homepage {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
+		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
@@ -333,9 +352,7 @@ abstract class Homepage {
 	}
 
 	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
-		const dropdownSelector = `[data-tid="${NETWORKS_SWITCHER_DROPDOWN}"]`;
-		const dropdown = this.#page.locator(dropdownSelector);
-		await dropdown.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
+		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
 	}
@@ -350,7 +367,11 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot(): Promise<void> {
+	async takeScreenshot({ scrollToTop = true }: TakeScreenshotParams = {}): Promise<void> {
+		if (scrollToTop) {
+			await this.scrollToTopAndBack();
+		}
+
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
