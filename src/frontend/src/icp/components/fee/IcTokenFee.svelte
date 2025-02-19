@@ -12,8 +12,7 @@
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	const { sendToken, sendTokenDecimals, sendTokenExchangeRate, sendBalance } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenDecimals, sendTokenExchangeRate, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let decimals: number | undefined;
 	$: decimals = $sendToken?.decimals;
@@ -33,8 +32,7 @@
 	let insufficientFeeFunds = false;
 
 	const debounceCheckFeeFunds = debounce(
-		() =>
-			(insufficientFeeFunds = nonNullish($sendBalance) && nonNullish(fee) && $sendBalance.lt(fee))
+		() => (insufficientFeeFunds = nonNullish($sendBalance) && nonNullish(fee) && $sendBalance.lt(fee))
 	);
 
 	$: $sendBalance, fee, debounceCheckFeeFunds();
