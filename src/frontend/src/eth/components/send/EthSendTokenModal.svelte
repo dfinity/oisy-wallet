@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import {createEventDispatcher, getContext, setContext} from 'svelte';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import {
+		IC_TOKEN_FEE_CONTEXT_KEY,
+		type IcTokenFeeContext,
+		icTokenFeeStore
+	} from '$icp/stores/ic-token-fee.store';
 	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -14,7 +19,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import {IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext, icTokenFeeStore} from "$icp/stores/ic-token-fee.store";
 
 	/**
 	 * Props

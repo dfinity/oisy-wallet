@@ -1,14 +1,14 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
+import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
-import {IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore} from "$icp/stores/ic-token-fee.store";
-import {TOKEN_INPUT_CURRENCY_TOKEN} from "$lib/constants/test-ids.constants";
-import * as ethEnv from '$env/networks/networks.eth.env';
 
 describe('EthSendForm', () => {
 	const mockContext = new Map([]);
