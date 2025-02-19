@@ -1,5 +1,6 @@
 @use 'sass:meta';
-@use 'tailwindcss';
+
+@import 'tailwindcss';
 
 @config '../../../../../tailwind.config.ts';
 
