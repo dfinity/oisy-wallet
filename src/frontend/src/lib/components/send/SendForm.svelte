@@ -9,7 +9,6 @@
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
-	import {selectedNetwork} from "$lib/derived/network.derived";
     import {nonNullish} from "@dfinity/utils";
 
 	export let source: string;
