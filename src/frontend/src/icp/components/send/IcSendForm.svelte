@@ -77,9 +77,7 @@
 	</div>
 
 	<div slot="destination">
-		{#if !simplifiedForm}
-			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
-		{/if}
+		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 	</div>
 
 	<IcFeeDisplay slot="fee" {networkId} />

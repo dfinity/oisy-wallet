@@ -27,7 +27,7 @@
     $: isZeroBalance = isNullish($sendBalance) || $sendBalance.isZero();
 
     let maxAmount: number | undefined;
-    $: maxAmount = nonNullish($sendToken)
+    $: maxAmount = nonNullish($sendToken) && nonNullish($sendBalance)
         ? getMaxTransactionAmount({
             balance: $sendBalance,
             // multiply sendTokenFee by two if it's an icrc2 token to cover transfer and approval fees
@@ -61,7 +61,7 @@
         class="font-semibold text-brand-primary transition-all"
         on:click|preventDefault={setMax}
         class:text-error-primary={isZeroBalance || nonNullish(errorType)}
-        class:text-brand-primary={!isZeroBalance & isNullish(errorType)}
+        class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
 >
     {$i18n.send.text.max_balance}:
     {nonNullish(maxAmount) && nonNullish($sendToken)

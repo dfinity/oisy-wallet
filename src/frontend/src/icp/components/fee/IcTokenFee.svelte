@@ -31,7 +31,7 @@
 	let insufficientFeeFunds = false;
 
 	const debounceCheckFeeFunds = debounce(
-			() => (insufficientFeeFunds = nonNullish($sendBalance) && $sendBalance.lt(fee))
+			() => (insufficientFeeFunds = nonNullish($sendBalance) && nonNullish(fee) && $sendBalance.lt(fee))
 	);
 
 	$: $sendBalance, fee, debounceCheckFeeFunds();

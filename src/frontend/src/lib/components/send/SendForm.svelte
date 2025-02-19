@@ -8,6 +8,7 @@
 	import type { OptionToken } from '$lib/types/token';
 	import {selectedNetwork} from "$lib/derived/network.derived";
 	import NetworkInfo from "$lib/components/networks/NetworkInfo.svelte";
+	import SendSource from "$lib/components/send/SendSource.svelte";
 
 	export let source: string;
 	export let disabled: boolean | undefined = false;
@@ -23,6 +24,8 @@
 		<slot name="amount" />
 
 		<slot name="destination" />
+
+		<SendSource {token} {balance} {source} {hideSource} />
 
 		<NetworkInfo network={$selectedNetwork} />
 
