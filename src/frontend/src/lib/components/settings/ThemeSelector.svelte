@@ -5,6 +5,8 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 
 	const THEME_VALUES = [...Object.values(Theme)];
 
@@ -14,27 +16,26 @@
 	const THEME_SYSTEM = 'system';
 
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
-		const oldTheme = $themeStore;
+		selectedTheme = theme;
 
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
-		} else {
-			themeStore.select(theme);
+			return;
 		}
 
-		if ($themeStore === oldTheme) {
-			updateSelectedTheme();
-		}
+		themeStore.select(theme);
 	};
 
-	const updateSelectedTheme = () => {
+	let selectedTheme: Theme | typeof THEME_SYSTEM;
+
+	const initSelectedTheme = () => {
 		selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
 			? THEME_SYSTEM
 			: ($themeStore ?? THEME_SYSTEM);
 	};
 
-	let selectedTheme: Theme | typeof THEME_SYSTEM;
-	$: $themeStore, updateSelectedTheme();
+	onMount(initSelectedTheme);
+	afterNavigate(initSelectedTheme);
 </script>
 
 <div class="flex flex-row">
