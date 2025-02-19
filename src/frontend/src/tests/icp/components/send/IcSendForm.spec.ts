@@ -9,19 +9,22 @@ import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
+import {get} from "svelte/store";
+import {testnetsStore} from "$lib/stores/settings.store";
+import {testnets} from "$lib/derived/testnets.derived";
+import {enabledEthereumNetworks} from "$eth/derived/networks.derived";
+import * as ethEnv from "$env/networks/networks.eth.env";
 
 describe('IcSendForm', () => {
 	const ethereumFeeStore = initEthereumFeeStore();
 	ethereumFeeStore.setFee({ maxTransactionFee: BigInt(300) });
-
-	mockPage.mock({ network: ICP_TOKEN.id.description });
 
 	const mockContext = new Map([]);
 	mockContext.set(
 		SEND_CONTEXT_KEY,
 		initSendContext({
 			sendPurpose: 'convert-cketh-to-eth',
-			token: ETHEREUM_TOKEN
+			token: ETHEREUM_TOKEN,
 		})
 	);
 	mockContext.set(ETHEREUM_FEE_CONTEXT_KEY, {
@@ -47,6 +50,8 @@ describe('IcSendForm', () => {
 	const feeSelector = 'p[id="fee"]';
 	const ethereumEstimatedFeeSelector = 'p[id="kyt-fee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
+
+	vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 	it('should render all fields', () => {
 		const { container } = render(IcSendForm, {
