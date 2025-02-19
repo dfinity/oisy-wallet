@@ -26,7 +26,7 @@
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
 	export let amount: OptionAmount = undefined;
-	export let nativeEthereumToken: Token;
+	export const nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
 
@@ -40,7 +40,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance, sendTokenExchangeRate, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let targetNetwork: Network | undefined;
 	$: targetNetwork = $networks?.find(({id}) => id === sourceNetwork.id);
