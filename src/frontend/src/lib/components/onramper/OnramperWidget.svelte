@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import {
 		BTC_MAINNET_NETWORK_ID,
@@ -19,7 +20,6 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
-	import { Spinner } from '@dfinity/gix-components';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
