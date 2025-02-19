@@ -4,9 +4,6 @@
 	import IconSun from '$lib/components/icons/IconSun.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ButtonColorStyle } from '$lib/types/style';
-
-	let colorStyle: ButtonColorStyle;
 
 	const handleClick = () => {
 		themeStore.select($themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT);
