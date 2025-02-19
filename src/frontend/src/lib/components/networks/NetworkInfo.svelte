@@ -10,7 +10,7 @@
 	$: ({ name, icon } = network);
 </script>
 
-<Value ref="source" element="div">
+<Value ref="network" element="div">
 	<svelte:fragment slot="label">Network</svelte:fragment>
 	<TextWithLogo {name} {icon} />
 </Value>
