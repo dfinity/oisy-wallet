@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendReview from '$lib/components/send/SendReview.svelte';
@@ -8,7 +9,6 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import IcFeeDisplay from "$icp/components/send/IcFeeDisplay.svelte";
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;

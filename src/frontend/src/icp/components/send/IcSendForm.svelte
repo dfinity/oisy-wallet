@@ -22,7 +22,8 @@
 	export let source: string;
 	export let simplifiedForm = false;
 
-	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 	let errorType: ConvertAmountErrorType = undefined;
@@ -37,7 +38,15 @@
 		isNullish(amount);
 </script>
 
-<SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource networkId={$sendTokenNetworkId}>
+<SendForm
+	on:icNext
+	{source}
+	token={$sendToken}
+	balance={$balance}
+	disabled={invalid}
+	hideSource
+	networkId={$sendTokenNetworkId}
+>
 	<div slot="amount">
 		<TokenInput
 			token={$sendToken}
