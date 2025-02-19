@@ -46,7 +46,8 @@ describe('onramper.utils', () => {
 				`&onlyCryptos=btc,eth,icp&onlyCryptoNetworks=bitcoin,ethereum` +
 				`&supportRecurringPayments=true&enableCountrySelector=false` +
 				`&wallets=btc:${mockBtcAddress},icp:${mockAccountIdentifierText}` +
-				`&networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}`;
+				`&networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}` +
+				`&themeName=dark`;
 
 			const result = buildOnramperLink(params);
 			expect(result).toBe(expectedUrl);
