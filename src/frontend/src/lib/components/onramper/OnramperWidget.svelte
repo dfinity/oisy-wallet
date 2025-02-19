@@ -19,7 +19,6 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
-	import { Spinner } from '@dfinity/gix-components';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
@@ -72,7 +71,6 @@
 			themeName: 'dark' // we always pass dark, as some card elements arent styled correctly (white text on white background) in light theme / onramper bug?
 		}));
 
-	$: themeLoaded = false;
 	const changeThemeOnIframeLoad = (e: Event) => {
 		try {
 			const styles = window.getComputedStyle(document.body);
@@ -97,8 +95,6 @@
 			);
 		} catch (error) {
 			console.error('Could not apply onramper widget theme', error);
-		} finally {
-			themeLoaded = true;
 		}
 	};
 </script>
@@ -106,15 +102,6 @@
 <!-- The `allow` prop is set as suggested in the Onramper documentation that can be found at https://docs.onramper.com/docs/customise-the-ux -->
 <!-- When Onramper engineers were inquired about the reason, they answered: -->
 <!-- "In order to do customer verification before purchase, we require the following permissions to be given to the app. So this is definitely merely for the KYC  and also for fraud detection algorithms i suppose" -->
-
-<div
-	class="absolute bottom-0 left-0 right-0 top-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
-	class:opacity-100={!themeLoaded}
-	class:opacity-0={themeLoaded}
-	class:invisible={themeLoaded}
->
-	<Spinner inline />
-</div>
 
 <iframe
 	on:load={changeThemeOnIframeLoad}
