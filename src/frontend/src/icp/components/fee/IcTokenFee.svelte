@@ -43,7 +43,7 @@
 <Value ref="fee">
 	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
-	<div class="gap-4 flex">
+	<div class="flex gap-4">
 		{#if nonNullish(fee) && nonNullish(decimals) && nonNullish(symbol)}
 			{formatToken({
 				value: BigNumber.from(fee),
