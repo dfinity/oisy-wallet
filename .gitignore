@@ -54,3 +54,6 @@ backend-v*.wasm.gz
 pocket-ic
 
 coverage/
+
+# Frontend reproducibility script output folder
+tmp
