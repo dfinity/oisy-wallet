@@ -7,11 +7,11 @@
 </script>
 
 <div class="py-12">
-	<div class="mb-5 p-2 flex justify-center">
-		<span class="-mr-4 z-0">
+	<div class="mb-5 flex justify-center p-2">
+		<span class="z-0 -mr-4">
 			<Logo ring size="lg" src={icpDark}></Logo>
 		</span>
-		<span class="-mr-4 z-1">
+		<span class="z-1 -mr-4">
 			<Logo ring size="lg" src={eth}></Logo>
 		</span>
 		<span class="z-2">
@@ -20,7 +20,7 @@
 	</div>
 
 	<div class="space-y-4">
-		<p class="m-0 text-lg font-bold text-center">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
+		<p class="m-0 text-center text-lg font-bold">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 		<p class="m-0 text-center text-tertiary">{$i18n.tokens.text.buy_or_receive}</p>
 	</div>
 </div>
