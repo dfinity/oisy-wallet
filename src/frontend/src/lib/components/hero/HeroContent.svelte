@@ -71,7 +71,7 @@
 </script>
 
 <div
-	class="bg-pos-0 p-6 ease-in-out flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-linear-to-b text-center text-primary-inverted transition-all duration-500"
+	class="bg-linear-to-b flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-pos-0 p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
 	class:from-brand-primary={$pseudoNetworkChainFusion}
 	class:to-absolute-blue={$pseudoNetworkChainFusion}
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
@@ -91,7 +91,7 @@
 	class:bg-trump-token-hero-image={isTrumpToken}
 >
 	{#if isTransactionsPage}
-		<div in:slide={SLIDE_PARAMS} class="gap-6 flex w-full flex-col">
+		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
 

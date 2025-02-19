@@ -11,7 +11,7 @@
 {#if nonNullish(data)}
 	<label for="data" class="font-bold">{label}:</label>
 
-	<div id="data" class="mb-4 gap-1 font-normal flex items-center">
+	<div id="data" class="mb-4 flex items-center gap-1 font-normal">
 		{shortenWithMiddleEllipsis({ text: data })}<Copy
 			inline
 			value={data}

@@ -10,7 +10,7 @@
 
 <Value ref="network">
 	<svelte:fragment slot="label">{$i18n.tokens.details.network}</svelte:fragment>
-	<span class="gap-1 flex items-center">
+	<span class="flex items-center gap-1">
 		<output>{token.network.name}</output>
 		<Logo
 			src={token.network.icon}
@@ -22,7 +22,7 @@
 
 <Value ref="name">
 	<svelte:fragment slot="label">{$i18n.tokens.details.token}</svelte:fragment>
-	<span class="gap-1 flex items-center">
+	<span class="flex items-center gap-1">
 		<output>{token.name}</output>
 		<Logo
 			src={token.icon}
