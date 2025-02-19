@@ -167,9 +167,10 @@
 	},
 	"init": {
 		"text": {
-			"initializing_wallet": "Initializing your wallet",
+			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys"
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
+			"done": "Enjoy $oisy_short"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
@@ -489,6 +490,7 @@
 			"swap_provider": "Swap provider"
 		},
 		"error": {
+			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
 			"slippage_exceeded": "The swap could not be executed because the expected slippage of $expectedSlippage% exceeded the maximum allowed value of $maxSlippage%.\nYou can change the allowed slippage in the previous form, but this can lead to more unfavorable trades."

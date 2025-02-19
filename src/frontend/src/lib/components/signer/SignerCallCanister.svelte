@@ -35,7 +35,7 @@
 
 		<SignerAlert alertType="ok" />
 
-		<p class="mt-10 font-bold text-center">{$i18n.signer.call_canister.text.close_window}</p>
+		<p class="mt-10 text-center font-bold">{$i18n.signer.call_canister.text.close_window}</p>
 	</SignerCenteredContent>
 {:else if $payload?.status === 'error'}
 	<SignerCenteredContent>
@@ -43,6 +43,6 @@
 
 		<SignerAlert alertType="error" />
 
-		<p class="mt-10 font-bold text-center">{$i18n.signer.call_canister.text.try_again}</p>
+		<p class="mt-10 text-center font-bold">{$i18n.signer.call_canister.text.try_again}</p>
 	</SignerCenteredContent>
 {/if}

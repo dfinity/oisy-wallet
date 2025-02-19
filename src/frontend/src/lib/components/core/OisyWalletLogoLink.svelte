@@ -8,7 +8,7 @@
 <a
 	href="/"
 	data-tid={NAVIGATION_ITEM_HOMEPAGE}
-	class="gap-0 flex w-fit items-center no-underline"
+	class="flex w-fit items-center gap-0 no-underline"
 	aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
 >
 	<OisyWalletLogo />

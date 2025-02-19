@@ -18,7 +18,7 @@
 </script>
 
 <div class="p-3">
-	<label class="text-sm font-bold block" for="btc-wallet-address"
+	<label class="block text-sm font-bold" for="btc-wallet-address"
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 

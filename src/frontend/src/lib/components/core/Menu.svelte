@@ -9,6 +9,7 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -16,7 +17,6 @@
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
-	import IconTrophy from '$lib/components/icons/lucide/IconTrophy.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
@@ -123,7 +123,7 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="gap-1 flex flex-col" data-tid={NAVIGATION_MENU}>
+	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
@@ -146,17 +146,6 @@
 			</ButtonMenu>
 		{/if}
 
-		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_AIRDROPS}
-				ariaLabel={$i18n.navigation.alt.airdrops}
-				on:click={goToAirdrops}
-			>
-				<IconTrophy size="20" />
-				{$i18n.navigation.text.airdrops}
-			</ButtonMenu>
-		{/if}
-
 		{#if !dAppExplorerRoute && !settingsRoute}
 			<ButtonMenu
 				testId={NAVIGATION_ITEM_EXPLORER}
@@ -165,6 +154,17 @@
 			>
 				<IconlyUfo size="20" />
 				{$i18n.navigation.text.dapp_explorer}
+			</ButtonMenu>
+		{/if}
+
+		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
+			<ButtonMenu
+				testId={NAVIGATION_ITEM_AIRDROPS}
+				ariaLabel={$i18n.navigation.alt.airdrops}
+				on:click={goToAirdrops}
+			>
+				<IconGift size="20" />
+				{$i18n.navigation.text.airdrops}
 			</ButtonMenu>
 		{/if}
 
@@ -226,7 +226,7 @@
 
 		<Hr />
 
-		<span class="text-sm text-center text-tertiary">
+		<span class="text-center text-sm text-tertiary">
 			<LicenseLink noUnderline />
 		</span>
 	</div>
