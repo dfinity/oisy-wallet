@@ -38,14 +38,7 @@
 		isNullish(amount);
 </script>
 
-<SendForm
-	on:icNext
-	{source}
-	token={$sendToken}
-	balance={$balance}
-	disabled={invalid}
-	hideSource
->
+<SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource>
 	<div slot="amount">
 		<TokenInput
 			token={$sendToken}
