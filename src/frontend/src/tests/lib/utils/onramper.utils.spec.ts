@@ -45,9 +45,9 @@ describe('onramper.utils', () => {
 				`&mode=buy&defaultFiat=usd&defaultCrypto=icp` +
 				`&onlyCryptos=btc,eth,icp&onlyCryptoNetworks=bitcoin,ethereum` +
 				`&supportRecurringPayments=true&enableCountrySelector=false` +
+				`&themeName=dark` +
 				`&wallets=btc:${mockBtcAddress},icp:${mockAccountIdentifierText}` +
-				`&networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}` +
-				`&themeName=dark`;
+				`&networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}`;
 
 			const result = buildOnramperLink(params);
 			expect(result).toBe(expectedUrl);
@@ -71,6 +71,7 @@ describe('onramper.utils', () => {
 				`&mode=buy&defaultFiat=eur` +
 				`&onlyCryptos=btc&onlyCryptoNetworks=bitcoin` +
 				`&supportRecurringPayments=false&enableCountrySelector=true` +
+				`&themeName=dark` +
 				`&wallets=btc:${mockBtcAddress}` +
 				`&networkWallets=bitcoin:${mockBtcAddress}`;
 
@@ -95,7 +96,8 @@ describe('onramper.utils', () => {
 				`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
 				`&mode=buy&defaultFiat=eur` +
 				`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
-				`&supportRecurringPayments=false&enableCountrySelector=true`;
+				`&supportRecurringPayments=false&enableCountrySelector=true` +
+				`&themeName=dark`;
 
 			const result = buildOnramperLink(params);
 
@@ -120,6 +122,7 @@ describe('onramper.utils', () => {
 				`&mode=buy&defaultFiat=eur` +
 				`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
 				`&supportRecurringPayments=false&enableCountrySelector=true` +
+				`&themeName=dark` +
 				`&wallets=btc:${mockBtcAddress}`;
 
 			const result = buildOnramperLink(params);
@@ -145,6 +148,7 @@ describe('onramper.utils', () => {
 				`&mode=buy&defaultFiat=eur` +
 				`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
 				`&supportRecurringPayments=false&enableCountrySelector=true` +
+				`&themeName=dark` +
 				`&networkWallets=bitcoin:${mockBtcAddress}`;
 
 			const result = buildOnramperLink(params);
@@ -168,7 +172,9 @@ describe('onramper.utils', () => {
 			const expectedUrl =
 				`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
 				`&mode=buy&defaultFiat=usd` +
-				`&supportRecurringPayments=false&enableCountrySelector=true&wallets=btc:${mockBtcAddress}&networkWallets=bitcoin:${mockBtcAddress}`;
+				`&supportRecurringPayments=false&enableCountrySelector=true` +
+				`&themeName=dark` +
+				`&wallets=btc:${mockBtcAddress}&networkWallets=bitcoin:${mockBtcAddress}`;
 
 			const result = buildOnramperLink(params);
 
