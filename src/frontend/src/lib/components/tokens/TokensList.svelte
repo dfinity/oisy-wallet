@@ -44,6 +44,7 @@
 		<div class="mb-3 gap-3 flex flex-col">
 			{#each tokens ?? [] as token (token.id)}
 				<div
+					class="rounded-xl overflow-hidden"
 					transition:fade
 					animate:flip={{ duration: 250 }}
 					on:animationstart={handleAnimationStart}
