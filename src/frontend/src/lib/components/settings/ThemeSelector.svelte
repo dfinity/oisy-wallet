@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { themeStore, Theme } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { onMount } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
 
 	const THEME_VALUES = [...Object.values(Theme)];
 
