@@ -249,7 +249,7 @@
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
 			"github_release": "$oisy_short release notes on GitHub",
-			"appearance_light": "Enabled light mode",
+			"appearance_light": "Enables light mode",
 			"appearance_dark": "Enables dark mode",
 			"appearance_system": "Enables your operating systems color mode"
 		},
