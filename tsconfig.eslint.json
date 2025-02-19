@@ -14,7 +14,7 @@
 		"./vitest.config.ts",
 		"./tailwind.config.ts",
 		"./svelte.config.js",
-		"./postcss.config.js",
+		"./postcss.config.mjs",
 		"./playwright.config.ts",
 		"./e2e/**/*.js",
 		"./e2e/**/*.ts",

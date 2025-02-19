@@ -99,7 +99,6 @@
 		"@sveltejs/kit": "^2.16.1",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@tailwindcss/postcss": "^4.0.7",
-		"@tailwindcss/vite": "^4.0.7",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.6",
 		"@types/dom-view-transitions": "^1.0.5",
