@@ -5,7 +5,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<div class="pt-12 flex justify-center">
+<div class="flex justify-center pt-12">
 	<SignerAnimatedAstronaut />
 </div>
 

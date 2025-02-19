@@ -6,7 +6,7 @@
 </script>
 
 <div class="p-3">
-	<label class="text-sm font-bold block" for="ic-wallet-address"
+	<label class="block text-sm font-bold" for="ic-wallet-address"
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 
