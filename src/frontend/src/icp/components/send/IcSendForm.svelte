@@ -44,7 +44,7 @@
 	token={$sendToken}
 	balance={$balance}
 	disabled={invalid}
-	hideSource={true}
+	hideSource
 >
 	<div slot="amount">
 		<TokenInput

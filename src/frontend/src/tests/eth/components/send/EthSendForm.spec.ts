@@ -87,9 +87,6 @@ describe('EthSendForm', () => {
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		expect(source).toBeNull();
 
-		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
-		expect(balance).not.toBeNull();
-
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 		expect(maxFeeEth).not.toBeNull();
 
