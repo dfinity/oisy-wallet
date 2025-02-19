@@ -26,7 +26,9 @@
 
 		<slot name="destination" />
 
-		<SendSource {token} {balance} {source} {hideSource} />
+		{#if !hideSource}
+			<SendSource {token} {balance} {source} />
+		{/if}
 
 		{#if nonNullish($selectedNetwork)}
 			<NetworkInfo network={$selectedNetwork} />

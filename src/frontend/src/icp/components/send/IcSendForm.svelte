@@ -22,7 +22,7 @@
 	export let source: string;
 	export let simplifiedForm = false;
 
-	const { sendToken, sendBalance, sendTokenExchangeRate } =
+	const { sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;

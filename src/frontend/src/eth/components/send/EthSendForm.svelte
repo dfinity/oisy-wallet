@@ -55,12 +55,13 @@
 
 		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource
-			token={$sendToken}
-			balance={$sendBalance}
-			source={$ethAddress ?? ''}
-			hideSource={simplifiedForm}
-		/>
+		{#if !simplifiedForm}
+			<SendSource
+				token={$sendToken}
+				balance={$sendBalance}
+				source={$ethAddress ?? ''}
+			/>
+		{/if}
 
 		<FeeDisplay />
 
