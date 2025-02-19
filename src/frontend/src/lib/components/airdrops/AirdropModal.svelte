@@ -13,13 +13,13 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<span class="text-xl text-center" slot="title">{airdrop.title}</span>
+	<span class="text-center text-xl" slot="title">{airdrop.title}</span>
 
 	<ContentWithToolbar>
 		<AirdropBanner />
 
 		<span class="text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
-		<p class="mb-0 mt-2">{airdrop.description}</p>
+		<p class="mt-2 mb-0">{airdrop.description}</p>
 
 		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="mt-2" />
 
@@ -29,7 +29,7 @@
 			<span class="text-md font-semibold">{$i18n.airdrops.text.requirements_title}</span>
 			<ul class="list-none">
 				{#each airdrop.requirements as requirement}
-					<li class="mt-2 gap-2 flex">
+					<li class="mt-2 flex gap-2">
 						<IconCheckCircle />
 						<span>{requirement}</span>
 					</li>
