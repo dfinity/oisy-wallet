@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
-	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
+	import {getContext, onMount} from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
-	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
+	import {i18n} from "$lib/stores/i18n.store";
+	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
+	import {SEND_CONTEXT_KEY, type SendContext} from "$lib/stores/send.store";
+	import type {ConvertAmountErrorType} from "$lib/types/convert";
+	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: OptionAmount = undefined;
@@ -19,12 +23,16 @@
 	export let source: string;
 
 	let amountError: BtcAmountAssertionError | undefined;
+	let errorType: ConvertAmountErrorType = undefined;
 	let invalidDestination: boolean;
+
+	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// TODO: check if we can align this validation flag with other SendForm components (e.g IcSendForm)
 	let invalid = true;
 	$: invalid =
 		invalidDestination ||
+		nonNullish(errorType) ||
 		nonNullish(amountError) ||
 		isNullishOrEmpty(destination) ||
 		isNullish(amount);
@@ -40,7 +48,7 @@
 	});
 </script>
 
-<SendForm on:icNext {source} token={$token} balance={$balance} disabled={invalid}>
+<SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource networkId={$sendTokenNetworkId}>
 	<BtcSendDestination
 		slot="destination"
 		bind:destination
@@ -49,7 +57,36 @@
 		on:icQRCodeScan
 	/>
 
-	<BtcSendAmount slot="amount" bind:amount bind:amountError />
+	<div slot="amount">
+		<TokenInput
+				token={$sendToken}
+				bind:amount
+				isSelectable={false}
+				exchangeRate={$sendTokenExchangeRate}
+				bind:errorType
+		>
+			<span slot="title">{$i18n.core.text.amount}</span>
+
+			<svelte:fragment slot="amount-info">
+				{#if nonNullish($sendToken)}
+					<div class="text-tertiary">
+						<TokenInputAmountExchange
+								{amount}
+								exchangeRate={$sendTokenExchangeRate}
+								token={$sendToken}
+								disabled
+						/>
+					</div>
+				{/if}
+			</svelte:fragment>
+
+			<svelte:fragment slot="balance">
+				{#if nonNullish($sendToken)}
+					<SendMaxBalanceButton bind:sendAmount={amount} {errorType} />
+				{/if}
+			</svelte:fragment>
+		</TokenInput>
+	</div>
 
 	<!--	TODO: calculate and display transaction fee	-->
 
