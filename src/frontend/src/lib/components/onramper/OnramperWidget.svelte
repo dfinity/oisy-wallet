@@ -72,26 +72,30 @@
 		}));
 
 	const changeThemeOnIframeLoad = (e: Event) => {
-		const styles = window.getComputedStyle(document.body);
-		const iframeElement = e.currentTarget as HTMLIFrameElement;
-		iframeElement?.contentWindow?.postMessage(
-			{
-				type: 'change-theme',
-				id: 'change-theme',
-				theme: {
-					primaryColor: styles.getPropertyValue('--color-background-brand-primary'),
-					secondaryColor: styles.getPropertyValue('--color-background-brand-subtle-20'),
-					primaryTextColor: styles.getPropertyValue('--color-foreground-primary'),
-					secondaryTextColor: styles.getPropertyValue('--color-foreground-secondary'),
-					containerColor: styles.getPropertyValue('--color-background-surface'),
-					cardColor: styles.getPropertyValue('--color-background-brand-subtle-10'),
-					primaryBtnTextColor: styles.getPropertyValue('--color-foreground-primary-inverted'),
-					borderRadius: '0.5rem',
-					widgetBorderRadius: '0rem'
-				}
-			},
-			'*'
-		);
+		try {
+			const styles = window.getComputedStyle(document.body);
+			const iframeElement = e.currentTarget as HTMLIFrameElement;
+			iframeElement?.contentWindow?.postMessage(
+				{
+					type: 'change-theme',
+					id: 'change-theme',
+					theme: {
+						primaryColor: styles.getPropertyValue('--color-background-brand-primary'),
+						secondaryColor: styles.getPropertyValue('--color-background-brand-subtle-20'),
+						primaryTextColor: styles.getPropertyValue('--color-foreground-primary'),
+						secondaryTextColor: styles.getPropertyValue('--color-foreground-secondary'),
+						containerColor: styles.getPropertyValue('--color-background-surface'),
+						cardColor: styles.getPropertyValue('--color-background-brand-subtle-10'),
+						primaryBtnTextColor: styles.getPropertyValue('--color-foreground-primary-inverted'),
+						borderRadius: '0.5rem',
+						widgetBorderRadius: '0rem'
+					}
+				},
+				'*'
+			);
+		} catch (error) {
+			console.error('Could not apply onramper widget theme', error);
+		}
 	};
 </script>
 
