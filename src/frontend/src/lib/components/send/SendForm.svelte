@@ -7,15 +7,20 @@
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
+	import type {Network, NetworkId} from "$lib/types/network";
+	import {networks} from "$lib/derived/networks.derived";
 
 	export let source: string;
 	export let disabled: boolean | undefined = false;
 	export let token: OptionToken;
 	export let balance: OptionBalance;
 	export let hideSource = false;
+	export let networkId: NetworkId | undefined = undefined;
+
+	let network: Network | undefined;
+	$: network = $networks?.find(({id}) => id === networkId);
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -30,8 +35,8 @@
 			<SendSource {token} {balance} {source} />
 		{/if}
 
-		{#if nonNullish($selectedNetwork)}
-			<NetworkInfo network={$selectedNetwork} />
+		{#if nonNullish(network)}
+			<NetworkInfo {network} />
 		{/if}
 
 		<slot name="fee" />
