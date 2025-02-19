@@ -51,6 +51,7 @@
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
+	import {IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext, icTokenFeeStore} from "$icp/stores/ic-token-fee.store";
 
 	/**
 	 * Props
@@ -186,6 +187,14 @@
 
 	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
 		store: initEthereumFeeStore()
+	});
+
+	/**
+	 * Ic token fee context store
+	 */
+
+	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
+		store: icTokenFeeStore
 	});
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
