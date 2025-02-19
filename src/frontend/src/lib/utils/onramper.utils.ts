@@ -23,6 +23,15 @@ export interface BuildOnramperLinkParams {
 	supportRecurringPayments: boolean;
 	enableCountrySelector: boolean;
 	themeName: 'dark' | 'light' | 'bluey';
+	primaryColor?: string;
+	secondaryColor?: string;
+	primaryTextColor?: string;
+	secondaryTextColor?: string;
+	containerColor?: string;
+	cardColor?: string;
+	primaryBtnTextColor?: string;
+	borderRadius?: string;
+	widgetBorderRadius?: string;
 }
 
 const arrayToParam = (array: OnramperId[] | OnramperNetworkId[]) => array.join(',');
