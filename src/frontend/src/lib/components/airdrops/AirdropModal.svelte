@@ -19,7 +19,7 @@
 		<AirdropBanner />
 
 		<span class="text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
-		<p class="mt-2 mb-0">{airdrop.description}</p>
+		<p class="mb-0 mt-2">{airdrop.description}</p>
 
 		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="mt-2" />
 

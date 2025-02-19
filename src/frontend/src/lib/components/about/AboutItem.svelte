@@ -7,7 +7,7 @@
 <button
 	class={asMenuItem
 		? `text nav-item ${asMenuItemCondensed ? 'nav-item-condensed' : ''}`
-		: `text-center font-bold whitespace-nowrap text-brand-primary`}
+		: `whitespace-nowrap text-center font-bold text-brand-primary`}
 	on:click
 	data-tid={testId}
 >

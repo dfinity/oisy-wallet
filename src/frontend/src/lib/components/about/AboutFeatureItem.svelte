@@ -13,7 +13,7 @@
 		</div>
 		<Html text={replaceOisyPlaceholders(title)} />
 	</div>
-	<p class="mt-2 mb-0 text-sm sm:text-base">
+	<p class="mb-0 mt-2 text-sm sm:text-base">
 		<Html text={replaceOisyPlaceholders(description)} />
 	</p>
 </div>

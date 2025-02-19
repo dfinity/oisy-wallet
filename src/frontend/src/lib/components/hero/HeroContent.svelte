@@ -71,7 +71,7 @@
 </script>
 
 <div
-	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-linear-to-b p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
+	class="bg-linear-to-b flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-pos-0 p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
 	class:from-brand-primary={$pseudoNetworkChainFusion}
 	class:to-absolute-blue={$pseudoNetworkChainFusion}
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}

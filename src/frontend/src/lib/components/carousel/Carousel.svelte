@@ -280,7 +280,7 @@
 
 <div
 	data-tid={CAROUSEL_CONTAINER}
-	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pt-3 pb-10 shadow-sm`}
+	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
 	out:slide={SLIDE_PARAMS}
 >
@@ -291,7 +291,7 @@
 	</div>
 	{#if nonNullish(slides) && slides.length > 1}
 		<div
-			class={`absolute right-0 bottom-2 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
+			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
 			out:slide={SLIDE_PARAMS}
 		>
 			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />

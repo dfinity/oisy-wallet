@@ -44,7 +44,7 @@
 			{badge.count}
 		</span>
 	{:else if badge?.type === 'network'}
-		<div class="absolute -right-1 -bottom-1">
+		<div class="absolute -bottom-1 -right-1">
 			<NetworkLogo
 				{network}
 				blackAndWhite={badge.blackAndWhite}
@@ -55,7 +55,7 @@
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged-->
 		<div
-			class="absolute -right-1 -bottom-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
+			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
 			aria-label={badge.ariaLabel}
 			data-tid={`icon-${badgeTestId}`}
 		>
