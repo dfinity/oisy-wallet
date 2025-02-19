@@ -9,7 +9,7 @@
 	export let dAppDescription: FeaturedOisyDappDescription;
 </script>
 
-<article class="rounded-2xl relative flex items-end overflow-hidden">
+<article class="relative flex items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
 		<div class="max-h-64 bg-brand-subtle-30">
 			<ImgBanner
@@ -18,8 +18,8 @@
 			/>
 		</div>
 	{/if}
-	<div class="start-0 px-4 py-4 backdrop-blur-xs absolute w-full flex-1 bg-black/30">
-		<div class="gap-x-2 flex items-center">
+	<div class="backdrop-blur-xs absolute start-0 w-full flex-1 bg-black/30 px-4 py-4">
+		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img
 					src={dAppDescription.logo}

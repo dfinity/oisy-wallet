@@ -75,7 +75,7 @@
 
 <label for="network" class="font-bold">{$i18n.send.text.network}:</label>
 
-<div id="network" class="mt-1 mb-4 pt-0.5">
+<div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>
 		<option disabled selected value={undefined} class="hidden"
 			>{$i18n.send.placeholder.select_network}</option
