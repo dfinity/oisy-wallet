@@ -19,7 +19,6 @@
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
