@@ -12,17 +12,25 @@
 	import type { TokenId } from '$lib/types/token';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {usdValue} from "$lib/utils/exchange.utils";
+	import {getContext} from "svelte";
+	import {SEND_CONTEXT_KEY, type SendContext} from "$lib/stores/send.store";
 
 	export let fee: BigNumber;
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
 	export let feeDecimals: number;
 
+	const { sendToken, sendTokenExchangeRate } =
+			getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let balance: Exclude<OptionBalance, null>;
 	$: balance = nonNullish($balancesStore) ? ($balancesStore[feeTokenId]?.data ?? ZERO) : undefined;
 
-	let feeAsNumber: number;
-	$: feeAsNumber = Number(Utils.formatUnits(fee, feeDecimals));
+	let usdFee: number;
+	$: usdFee = nonNullish($sendToken) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
+			? usdValue({token: $sendToken, balance: fee, exchangeRate: $sendTokenExchangeRate})
+			: 0;
 
 	let insufficientFeeFunds = false;
 
@@ -41,12 +49,12 @@
 	{feeSymbol}
 
 	<div class="text-tertiary">
-		{#if feeAsNumber < SWAP_TOTAL_FEE_THRESHOLD}
+		{#if usdFee < SWAP_TOTAL_FEE_THRESHOLD}
 			{`( < ${formatUSD({
 				value: SWAP_TOTAL_FEE_THRESHOLD
 			})} )`}
 		{:else}
-			{`( ${formatUSD({ value: feeAsNumber })} )`}
+			{`( ${formatUSD({ value: usdFee })} )`}
 		{/if}
 	</div>
 </div>

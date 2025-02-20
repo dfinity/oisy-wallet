@@ -11,6 +11,7 @@
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
+	import {usdValue} from "$lib/utils/exchange.utils";
 
 	const {
 		feeStore: fee,
@@ -24,14 +25,14 @@
 
 	let usdFee: number;
 	$: usdFee =
-		nonNullish($fee) && nonNullish($decimals) && nonNullish($sendTokenExchangeRate)
-			? (Number($fee) / Math.pow(10, $decimals)) * $sendTokenExchangeRate
+		nonNullish($sendToken) && nonNullish($fee) && nonNullish($sendTokenExchangeRate)
+			? usdValue({token: $sendToken, balance: $fee, exchangeRate: $sendTokenExchangeRate})
 			: 0;
 
 	let usdAtaFee: number;
 	$: usdAtaFee =
-		nonNullish($ataFee) && nonNullish($decimals) && nonNullish($sendTokenExchangeRate)
-			? (Number($ataFee) / Math.pow(10, $decimals)) * $sendTokenExchangeRate
+		nonNullish($sendToken) && nonNullish($ataFee) && nonNullish($sendTokenExchangeRate)
+			? usdValue({token: $sendToken, balance: $ataFee, exchangeRate: $sendTokenExchangeRate})
 			: 0;
 
 	let insufficientFeeFunds = false;

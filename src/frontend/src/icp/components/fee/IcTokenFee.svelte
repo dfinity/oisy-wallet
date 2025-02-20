@@ -11,6 +11,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import {usdValue} from "$lib/utils/exchange.utils";
 
 	const { sendToken, sendTokenDecimals, sendTokenExchangeRate, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -26,8 +27,8 @@
 
 	let usdFee: number;
 	$: usdFee =
-		nonNullish($sendTokenExchangeRate) && nonNullish(fee)
-			? (Number(fee) / Math.pow(10, decimals)) * $sendTokenExchangeRate
+		nonNullish($sendTokenExchangeRate) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
+			? usdValue({token: $sendToken, balance: fee, exchangeRate: $sendTokenExchangeRate})
 			: 0;
 
 	let insufficientFeeFunds = false;
