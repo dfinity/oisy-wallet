@@ -2,7 +2,7 @@ name: Binding Checks
 
 on:
   pull_request:
-#  merge_group:
+  #  merge_group:
   workflow_dispatch:
 
 jobs:
