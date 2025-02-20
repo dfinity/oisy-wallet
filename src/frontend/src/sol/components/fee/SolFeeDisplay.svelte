@@ -6,8 +6,9 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
+	import {SEND_CONTEXT_KEY, type SendContext} from "$lib/stores/send.store";
+	import FeeAmountDisplay from "$icp-eth/components/fee/FeeAmountDisplay.svelte";
 
 	const {
 		feeStore: fee,
@@ -15,34 +16,35 @@
 		feeDecimalsStore: decimals,
 		feeSymbolStore: symbol
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
+
+	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<Value ref="fee">
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+{#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
+	{#if nonNullish($fee)}
+		<Value ref="fee">
+			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
-	{#if nonNullish($fee) && nonNullish($decimals) && nonNullish($symbol)}
-		{formatToken({
-			value: BigNumber.from($fee),
-			unitName: $decimals,
-			displayDecimals: $decimals
-		})}
-		{$symbol}
-	{/if}
-</Value>
-
-{#if nonNullish($ataFee)}
-	<div transition:slide={SLIDE_DURATION}>
-		<Value ref="ataFee">
-			<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
-
-			{#if nonNullish($decimals) && nonNullish($symbol)}
-				{formatToken({
-					value: BigNumber.from($ataFee),
-					unitName: $decimals,
-					displayDecimals: $decimals
-				})}
-				{$symbol}
-			{/if}
+			<FeeAmountDisplay
+					fee={BigNumber.from($fee)}
+					feeSymbol={$symbol}
+					feeTokenId={$sendTokenId}
+					feeDecimals={$decimals}
+			/>
 		</Value>
-	</div>
+	{/if}
+	{#if nonNullish($ataFee)}
+		<div transition:slide={SLIDE_DURATION}>
+			<Value ref="ataFee">
+				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
+
+				<FeeAmountDisplay
+						fee={BigNumber.from($ataFee)}
+						feeSymbol={$symbol}
+						feeTokenId={$sendTokenId}
+						feeDecimals={$decimals}
+				/>
+			</Value>
+		</div>
+	{/if}
 {/if}

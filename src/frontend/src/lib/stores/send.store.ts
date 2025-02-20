@@ -3,6 +3,8 @@ import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { derived, writable, type Readable } from 'svelte/store';
+import {exchanges} from "$lib/derived/exchange.derived";
+import {nonNullish} from "@dfinity/utils";
 
 export type SendData = Token;
 
@@ -39,6 +41,10 @@ export const initSendContext = ({
 		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
 	);
 
+	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>
+		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
+	);
+
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -46,6 +52,7 @@ export const initSendContext = ({
 		sendTokenStandard,
 		sendTokenSymbol,
 		sendBalance,
+		sendTokenExchangeRate,
 		sendTokenNetworkId,
 		...staticContext
 	};
@@ -64,6 +71,7 @@ export interface SendContext {
 	sendTokenStandard: Readable<TokenStandard>;
 	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
+	sendTokenExchangeRate: Readable<number | undefined>;
 	sendPurpose: SendContextPurpose;
 	sendTokenNetworkId: Readable<NetworkId>;
 }

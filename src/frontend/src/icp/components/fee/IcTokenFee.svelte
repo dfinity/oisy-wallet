@@ -6,15 +6,10 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { formatToken } from '$lib/utils/format.utils';
+	import FeeAmountDisplay from "$icp-eth/components/fee/FeeAmountDisplay.svelte";
 
-	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	let decimals: number | undefined;
-	$: decimals = $sendToken?.decimals;
-
-	let symbol: string | undefined;
-	$: symbol = $sendToken?.symbol;
+	const { sendToken, sendTokenDecimals, sendTokenSymbol, sendTokenId } =
+			getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let fee: bigint | undefined;
 	$: fee = ($sendToken as OptionIcToken)?.fee;
@@ -23,12 +18,12 @@
 <Value ref="fee">
 	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
-	{#if nonNullish(fee) && nonNullish(decimals) && nonNullish(symbol)}
-		{formatToken({
-			value: BigNumber.from(fee),
-			unitName: decimals,
-			displayDecimals: $sendTokenDecimals
-		})}
-		{symbol}
+	{#if nonNullish(fee)}
+		<FeeAmountDisplay
+				fee={BigNumber.from(fee)}
+				feeSymbol={$sendTokenSymbol}
+				feeTokenId={$sendTokenId}
+				feeDecimals={$sendTokenDecimals}
+		/>
 	{/if}
 </Value>
