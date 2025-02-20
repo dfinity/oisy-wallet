@@ -18,7 +18,7 @@
 	@use '../../styles/mixins/media';
 
 	a {
-		color: var(--color-white);
+		color: var(--color-base-white);
 		margin: 0 auto;
 
 		:global(svg) {
