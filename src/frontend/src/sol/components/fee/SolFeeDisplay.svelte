@@ -8,10 +8,10 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
-	import {usdValue} from "$lib/utils/exchange.utils";
 
 	const {
 		feeStore: fee,
@@ -26,13 +26,13 @@
 	let usdFee: number;
 	$: usdFee =
 		nonNullish($sendToken) && nonNullish($fee) && nonNullish($sendTokenExchangeRate)
-			? usdValue({token: $sendToken, balance: $fee, exchangeRate: $sendTokenExchangeRate})
+			? usdValue({ token: $sendToken, balance: $fee, exchangeRate: $sendTokenExchangeRate })
 			: 0;
 
 	let usdAtaFee: number;
 	$: usdAtaFee =
 		nonNullish($sendToken) && nonNullish($ataFee) && nonNullish($sendTokenExchangeRate)
-			? usdValue({token: $sendToken, balance: $ataFee, exchangeRate: $sendTokenExchangeRate})
+			? usdValue({ token: $sendToken, balance: $ataFee, exchangeRate: $sendTokenExchangeRate })
 			: 0;
 
 	let insufficientFeeFunds = false;

@@ -2,34 +2,34 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { Utils } from 'alchemy-sdk';
+	import { getContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { TokenId } from '$lib/types/token';
+	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {usdValue} from "$lib/utils/exchange.utils";
-	import {getContext} from "svelte";
-	import {SEND_CONTEXT_KEY, type SendContext} from "$lib/stores/send.store";
 
 	export let fee: BigNumber;
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
 	export let feeDecimals: number;
 
-	const { sendToken, sendTokenExchangeRate } =
-			getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let balance: Exclude<OptionBalance, null>;
 	$: balance = nonNullish($balancesStore) ? ($balancesStore[feeTokenId]?.data ?? ZERO) : undefined;
 
 	let usdFee: number;
-	$: usdFee = nonNullish($sendToken) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
-			? usdValue({token: $sendToken, balance: fee, exchangeRate: $sendTokenExchangeRate})
+	$: usdFee =
+		nonNullish($sendToken) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
+			? usdValue({ token: $sendToken, balance: fee, exchangeRate: $sendTokenExchangeRate })
 			: 0;
 
 	let insufficientFeeFunds = false;

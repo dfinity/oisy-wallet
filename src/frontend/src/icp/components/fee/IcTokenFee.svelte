@@ -9,9 +9,9 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {usdValue} from "$lib/utils/exchange.utils";
 
 	const { sendToken, sendTokenDecimals, sendTokenExchangeRate, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -28,7 +28,7 @@
 	let usdFee: number;
 	$: usdFee =
 		nonNullish($sendTokenExchangeRate) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
-			? usdValue({token: $sendToken, balance: fee, exchangeRate: $sendTokenExchangeRate})
+			? usdValue({ token: $sendToken, balance: fee, exchangeRate: $sendTokenExchangeRate })
 			: 0;
 
 	let insufficientFeeFunds = false;
