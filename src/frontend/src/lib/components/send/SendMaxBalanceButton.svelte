@@ -9,6 +9,7 @@
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import {MAX_BUTTON} from "$lib/constants/test-ids.constants";
 
 	export let sendAmount: OptionAmount;
 	export let amountSetToMax = false;
@@ -61,6 +62,7 @@
 	on:click|preventDefault={setMax}
 	class:text-error-primary={isZeroBalance || nonNullish(errorType)}
 	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
+	id={MAX_BUTTON}
 >
 	{$i18n.send.text.max_balance}:
 	{nonNullish(maxAmount) && nonNullish($sendToken)
