@@ -39,7 +39,7 @@
 	// Input
 	--input-background: var(--color-background-primary);
 	--focus-background: var(--color-background-primary);
-	--focus-border-color: var(--color-brand-base);
+	--focus-border-color: var(---color-border-brand-primary);
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
@@ -48,12 +48,14 @@
 	--secondary: var(--color-background-brand-primary);
 	--tertiary: var(--color-foreground-tertiary-inverted);
 	--positive-emphasis: var(--color-background-success-primary);
+	--negative-emphasis: var(--color-background-error-primary);
+	--warning-emphasis: var(--color-background-warning-primary);
 
 	// Toast message max height is calculated based on the font-size.
 	--font-size-standard: 1rem;
 
 	// Segment
-	--segment-selected-background: var(--color-secondary);
+	--segment-selected-background: var(--color-base-black);
 
 	// Checkbox
 	--checkbox-padding: 0;
@@ -333,6 +335,7 @@ div.checkbox {
 	}
 }
 
+// Native selects
 div.select {
 	& .icon {
 		--disable-contrast: var(--color-foreground-primary);
@@ -342,4 +345,15 @@ div.select {
 		background: var(--color-background-primary);
 		color: var(--color-foreground-primary);
 	}
+}
+
+// TOASTS
+div.error .toast {
+	--overlay-background: var(--color-background-error-subtle-20);
+}
+div.success .toast {
+	--overlay-background: var(--color-background-success-subtle-20);
+}
+div.warn .toast {
+	--overlay-background: var(--color-background-warning-subtle-20);
 }

@@ -15,7 +15,7 @@
 		:global(a) {
 			&:active,
 			&:hover {
-				color: var(--color-off-white);
+				color: var(--color-base-white);
 			}
 		}
 	}
