@@ -170,8 +170,8 @@
 		>
 	</button>
 {:else}
-	<div class="tokens flex flex-col overflow-y-hidden sm:max-h-[26rem]">
-		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain">
+	<div class="flex flex-col overflow-y-hidden py-3 sm:max-h-[26rem]">
+		<div class="my-3 overflow-y-auto overscroll-contain">
 			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 				<Card>
 					<TokenName data={token} />
@@ -210,27 +210,3 @@
 		</Button>
 	</ButtonGroup>
 {/if}
-
-<style lang="scss">
-	@use '../../styles/theme/base-colors' as *;
-
-	.tokens {
-		padding: var(--padding-1_5x) 0;
-	}
-
-	.tokens-scroll {
-		&::-webkit-scrollbar-thumb {
-			background-color: #{$a-dark-20};
-		}
-
-		&::-webkit-scrollbar-track {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-
-		&::-webkit-scrollbar-thumb {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-	}
-</style>
