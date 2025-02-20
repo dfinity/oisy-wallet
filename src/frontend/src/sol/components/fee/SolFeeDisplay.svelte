@@ -1,16 +1,16 @@
 <script lang="ts">
-	import {debounce, nonNullish} from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {formatToken, formatUSD} from '$lib/utils/format.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
-	import {SWAP_TOTAL_FEE_THRESHOLD} from "$lib/constants/swap.constants";
-	import {SEND_CONTEXT_KEY, type SendContext} from "$lib/stores/send.store";
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
 
 	const {
 		feeStore: fee,
@@ -20,31 +20,33 @@
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
-			getContext<SendContext>(SEND_CONTEXT_KEY);
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let usdFee: number;
-	$: usdFee = nonNullish($fee) && nonNullish($decimals) && nonNullish($sendTokenExchangeRate)
+	$: usdFee =
+		nonNullish($fee) && nonNullish($decimals) && nonNullish($sendTokenExchangeRate)
 			? (Number($fee) / Math.pow(10, $decimals)) * $sendTokenExchangeRate
 			: 0;
 
 	let usdAtaFee: number;
-	$: usdAtaFee = nonNullish($ataFee) && nonNullish($decimals) && nonNullish($sendTokenExchangeRate)
+	$: usdAtaFee =
+		nonNullish($ataFee) && nonNullish($decimals) && nonNullish($sendTokenExchangeRate)
 			? (Number($ataFee) / Math.pow(10, $decimals)) * $sendTokenExchangeRate
 			: 0;
 
 	let insufficientFeeFunds = false;
 	const debounceCheckFeeFunds = debounce(
-			() =>
-					(insufficientFeeFunds = nonNullish($sendBalance) && nonNullish($fee) && $sendBalance.lt($fee))
+		() =>
+			(insufficientFeeFunds = nonNullish($sendBalance) && nonNullish($fee) && $sendBalance.lt($fee))
 	);
 
 	$: $sendBalance, $fee, debounceCheckFeeFunds();
 
-
 	let insufficientAtaFeeFunds = false;
 	const debounceCheckAtaFeeFunds = debounce(
-			() =>
-					(insufficientAtaFeeFunds = nonNullish($sendBalance) && nonNullish($ataFee) && $sendBalance.lt($ataFee))
+		() =>
+			(insufficientAtaFeeFunds =
+				nonNullish($sendBalance) && nonNullish($ataFee) && $sendBalance.lt($ataFee))
 	);
 
 	$: $sendBalance, $ataFee, debounceCheckAtaFeeFunds();
