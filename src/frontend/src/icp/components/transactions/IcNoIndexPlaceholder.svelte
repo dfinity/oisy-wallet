@@ -8,7 +8,10 @@
 	export let placeholderType: 'missing' | 'not-working' = 'missing';
 </script>
 
-<div class="py-12" data-tid="ic-no-index-placeholder">
+<div
+	class="rounded-4xl bg-brand-subtle-5 border-2 border-dashed border-brand-subtle-20 py-12"
+	data-tid="ic-no-index-placeholder"
+>
 	<div class="mb-5 flex justify-center">
 		<RoundedIcon icon={placeholderType === 'not-working' ? IconAlertTriangle : IconSearchClose} />
 	</div>
