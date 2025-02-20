@@ -134,7 +134,9 @@ div:not(.input-currency-container) > div.input-block > div.input-field > input {
 		border-color: var(--color-border-brand-primary) !important;
 	}
 
-	&:focus:not(:focus-visible), &:focus-within, &:active {
+	&:focus:not(:focus-visible),
+	&:focus-within,
+	&:active {
 		outline: 1px solid var(--color-border-brand-primary) !important;
 	}
 }

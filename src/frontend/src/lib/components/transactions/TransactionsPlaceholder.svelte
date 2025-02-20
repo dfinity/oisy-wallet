@@ -4,7 +4,7 @@
 </script>
 
 <div
-	class="rounded-4xl bg-brand-subtle-5 border-2 border-dashed border-brand-subtle-20 py-12"
+	class="rounded-4xl border-2 border-dashed border-brand-subtle-20 bg-brand-subtle-5 py-12"
 	data-tid="no-transactions-placeholder"
 >
 	<div class="mb-5 flex justify-center p-2">
