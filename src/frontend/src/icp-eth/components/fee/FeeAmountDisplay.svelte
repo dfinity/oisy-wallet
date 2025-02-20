@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
-	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { balancesStore } from '$lib/stores/balances.store';

@@ -17,33 +17,35 @@
 		feeSymbolStore: symbol
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	const { sendToken, sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-{#if nonNullish($fee)}
-	<Value ref="fee">
-		<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
-
-		<FeeAmountDisplay
-			fee={BigNumber.from($fee)}
-			feeSymbol={$symbol}
-			feeTokenId={$sendTokenId}
-			feeDecimals={$decimals}
-		/>
-	</Value>
-{/if}
-
-{#if nonNullish($ataFee)}
-	<div transition:slide={SLIDE_DURATION}>
-		<Value ref="ataFee">
-			<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
+{#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
+	{#if nonNullish($fee)}
+		<Value ref="fee">
+			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
 			<FeeAmountDisplay
-				fee={BigNumber.from($ataFee)}
+				fee={BigNumber.from($fee)}
 				feeSymbol={$symbol}
 				feeTokenId={$sendTokenId}
 				feeDecimals={$decimals}
 			/>
 		</Value>
-	</div>
+	{/if}
+
+	{#if nonNullish($ataFee)}
+		<div transition:slide={SLIDE_DURATION}>
+			<Value ref="ataFee">
+				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
+
+				<FeeAmountDisplay
+					fee={BigNumber.from($ataFee)}
+					feeSymbol={$symbol}
+					feeTokenId={$sendTokenId}
+					feeDecimals={$decimals}
+				/>
+			</Value>
+		</div>
+	{/if}
 {/if}

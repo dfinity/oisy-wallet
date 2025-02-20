@@ -11,8 +11,6 @@
 	const {
 		sendToken,
 		sendTokenDecimals,
-		sendTokenExchangeRate,
-		sendBalance,
 		sendTokenSymbol,
 		sendTokenId
 	} = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -21,15 +19,15 @@
 	$: fee = ($sendToken as OptionIcToken)?.fee;
 </script>
 
-{#if nonNullish(fee)}
-	<Value ref="fee">
-		<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+<Value ref="fee">
+	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
+	{#if nonNullish(fee)}
 		<FeeAmountDisplay
 			fee={BigNumber.from(fee)}
 			feeSymbol={$sendTokenSymbol}
 			feeTokenId={$sendTokenId}
 			feeDecimals={$sendTokenDecimals}
 		/>
-	</Value>
-{/if}
+	{/if}
+</Value>
