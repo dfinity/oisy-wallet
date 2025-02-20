@@ -28,13 +28,13 @@
 		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
 
 		{#if text}
-			<p class="mb-1.5 break-normal py-2 text-misty-rose">
+			<p class="mb-1.5 break-normal py-2 text-tertiary">
 				<slot name="text" />
 			</p>
 		{/if}
 
 		<div
-			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2"
+			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
 			class:mt-3={!text}
 			data-tid={testId}
 		>

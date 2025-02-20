@@ -53,6 +53,7 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
+export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-airdrops';
 
 export const AMOUNT_DATA = 'amount-data';
 export const AMOUNT_INPUT = 'amount-input';
@@ -97,3 +98,12 @@ export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggl
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
+
+export const THEME_SELECTOR_CARD = 'theme-selector-card';
+
+export const AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-airdrop-campaigns-container';
+export const AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-airdrop-campaigns-container';
+export const AIRDROPS_MODAL_IMAGE_BANNER = 'airdrop-modal-image-banner';
+export const AIRDROPS_STATE_MODAL_IMAGE_BANNER = 'airdrop-state-modal-image-banner';
+export const AIRDROPS_STATE_MODAL_SHARE_BUTTON = 'airdrop-state-modal-share-button';
+export const AIRDROPS_BANNER = 'airdrops-banner';

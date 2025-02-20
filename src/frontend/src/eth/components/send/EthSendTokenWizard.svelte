@@ -240,6 +240,8 @@
 
 <FeeContext
 	bind:this={feeContext}
+	sendToken={$sendToken}
+	sendTokenId={$sendTokenId}
 	{amount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}

@@ -37,7 +37,7 @@
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
-			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-white text-sm font-semibold text-black"
+			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
 			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
@@ -55,7 +55,7 @@
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged-->
 		<div
-			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-white"
+			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
 			aria-label={badge.ariaLabel}
 			data-tid={`icon-${badgeTestId}`}
 		>

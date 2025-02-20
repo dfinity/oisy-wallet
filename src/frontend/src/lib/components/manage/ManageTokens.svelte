@@ -150,7 +150,7 @@
 </div>
 
 {#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pb-2 pt-1 text-misty-rose">
+	<p class="mb-4 pb-2 pt-1 text-tertiary">
 		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
 			$network: $selectedNetwork.name
 		})}

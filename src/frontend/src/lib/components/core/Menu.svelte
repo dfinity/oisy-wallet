@@ -5,9 +5,11 @@
 	import { onMount } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { AIRDROPS_ENABLED } from '$env/airdrops.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -30,7 +32,8 @@
 		NAVIGATION_ITEM_ACTIVITY,
 		NAVIGATION_ITEM_EXPLORER,
 		NAVIGATION_ITEM_SETTINGS,
-		NAVIGATION_MENU_VIP_BUTTON
+		NAVIGATION_MENU_VIP_BUTTON,
+		NAVIGATION_ITEM_AIRDROPS
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
@@ -40,6 +43,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		isRouteActivity,
+		isRouteAirdrops,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
@@ -87,6 +91,8 @@
 
 	const goToActivity = async () => await navigateTo(AppPath.Activity);
 
+	const goToAirdrops = async () => await navigateTo(AppPath.Airdrops);
+
 	let assetsRoute = false;
 	$: assetsRoute = isRouteTokens($page);
 
@@ -99,8 +105,11 @@
 	let activityRoute = false;
 	$: activityRoute = isRouteActivity($page);
 
+	let airdropsRoute = false;
+	$: airdropsRoute = isRouteAirdrops($page);
+
 	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !airdropsRoute;
 </script>
 
 <ButtonIcon
@@ -114,7 +123,7 @@
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
+	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
@@ -148,6 +157,17 @@
 			</ButtonMenu>
 		{/if}
 
+		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
+			<ButtonMenu
+				testId={NAVIGATION_ITEM_AIRDROPS}
+				ariaLabel={$i18n.navigation.alt.airdrops}
+				on:click={goToAirdrops}
+			>
+				<IconGift size="20" />
+				{$i18n.navigation.text.airdrops}
+			</ButtonMenu>
+		{/if}
+
 		{#if !settingsRoute}
 			<ButtonMenu
 				testId={NAVIGATION_ITEM_SETTINGS}
@@ -172,11 +192,13 @@
 			</ButtonMenu>
 		{/if}
 
-		<AboutWhyOisy asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
-		<ChangelogLink />
+		<ChangelogLink asMenuItem asMenuItemCondensed />
 
 		<ExternalLink
+			asMenuItem
+			asMenuItemCondensed
 			href="mailto:support@oisy.com"
 			ariaLabel={$i18n.navigation.alt.support_email}
 			iconVisible={false}
@@ -191,7 +213,7 @@
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="flex items-center gap-2 no-underline"
+			class="nav-item nav-item-condensed"
 			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />

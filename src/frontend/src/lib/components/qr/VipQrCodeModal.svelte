@@ -87,7 +87,7 @@
 		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-full p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
-					<div slot="logo" class="flex items-center justify-center rounded-lg bg-white p-2">
+					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
 						<IconAstronautHelmet />
 					</div>
 				</QRCode>
@@ -95,7 +95,7 @@
 		</div>
 
 		{#if nonNullish(code)}
-			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2">
+			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
 				<output class="break-all">{qrCodeUrl}</output>
 				<ReceiveCopy
 					address={qrCodeUrl}

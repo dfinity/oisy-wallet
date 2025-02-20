@@ -3,6 +3,8 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapMaxBalanceButton from '$lib/components/swap/SwapMaxBalanceButton.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -42,10 +44,13 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		isSourceTokenIcrc2,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	let errorType: ConvertAmountErrorType = undefined;
 	let amountSetToMax = false;
@@ -61,6 +66,11 @@
 					displayDecimals: $destinationToken.decimals
 				})
 			: undefined;
+
+	let sourceTokenFee: bigint | undefined;
+	$: sourceTokenFee = nonNullish($sourceToken)
+		? $icTokenFeeStore?.[$sourceToken.symbol]
+		: undefined;
 
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
@@ -80,6 +90,7 @@
 		isNullish(swapAmount) ||
 		Number(swapAmount) <= 0 ||
 		isNullish(receiveAmount) ||
+		isNullish(sourceTokenFee) ||
 		swapAmountsLoading ||
 		Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE;
 
@@ -99,7 +110,8 @@
 					userAmount,
 					decimals: $sourceToken.decimals,
 					balance: $sourceTokenBalance,
-					totalFee: $sourceToken.fee
+					// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+					totalFee: (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)
 				})
 			: undefined;
 </script>
@@ -159,7 +171,7 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
 						{#if $swapAmountsStore?.swapAmounts === null}
-							<div transition:slide={SLIDE_DURATION} class="text-error"
+							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}

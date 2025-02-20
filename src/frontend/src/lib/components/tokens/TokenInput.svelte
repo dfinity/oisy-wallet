@@ -61,8 +61,8 @@
 
 <div
 	class="rounded-lg border border-solid p-5 text-left transition first:mb-2"
-	class:bg-brand-subtle-alt={focused}
-	class:border-brand-subtle-alt={focused}
+	class:bg-brand-subtle-10={focused}
+	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
 	class:border-secondary={!focused}
 >
@@ -114,7 +114,7 @@
 				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
 			{:else}
 				<span
-					class="flex items-center justify-center rounded-full bg-brand-primary text-white"
+					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
 				>
 					<IconPlus />

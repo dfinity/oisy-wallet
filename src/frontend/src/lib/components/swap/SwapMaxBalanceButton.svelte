@@ -2,6 +2,8 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
+	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
@@ -12,19 +14,25 @@
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType = undefined;
 
-	const { sourceTokenBalance, sourceToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceTokenBalance, sourceToken, isSourceTokenIcrc2 } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
+
+	let sourceTokenFee: bigint | undefined;
+	$: sourceTokenFee = nonNullish($sourceToken)
+		? $icTokenFeeStore?.[$sourceToken.symbol]
+		: undefined;
 
 	let isZeroBalance: boolean;
 	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
-
-	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee = $sourceToken?.fee;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish($sourceToken)
 		? getMaxTransactionAmount({
 				balance: $sourceTokenBalance,
-				fee: BigNumber.from(sourceTokenFee ?? 0n),
+				// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)),
 				tokenDecimals: $sourceToken.decimals,
 				tokenStandard: $sourceToken.standard
 			})
@@ -53,7 +61,7 @@
 <button
 	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
-	class:text-error={isZeroBalance || nonNullish(errorType)}
+	class:text-error-primary={isZeroBalance || nonNullish(errorType)}
 	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
 >
 	{$i18n.swap.text.max_balance}:

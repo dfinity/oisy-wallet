@@ -8,6 +8,20 @@ export default {
 		fontFamily: {
 			sans: ['CircularXX', 'sans-serif', ...defaultTheme.fontFamily.sans]
 		},
+		screens: {
+			// default viewports
+			sm: '640px',
+			md: '768px',
+			lg: '1024px',
+			xl: '1280px',
+			'2xl': '1536px',
+			// custom viewports
+			'1.5md': '896px',
+			'1.5lg': '1152px',
+			'1.5xl': '1408px',
+			'2.5xl': '1728px',
+			'h-md': { raw: '(max-height: 1090px)' }
+		},
 		colors: {
 			inherit: 'inherit',
 			transparent: 'transparent',
@@ -31,7 +45,6 @@ export default {
 			'united-nations-blue': '#627eea',
 			'pale-cornflower-blue': '#b0cdff',
 			'brilliant-azure': '#348afd',
-			'misty-rose': '#937993',
 			'chinese-purple': '#7014a4',
 			'lavander-indigo': '#904efa',
 			goldenrod: '#dfa81b',
@@ -74,13 +87,6 @@ export default {
 			width: {
 				sm: '576px',
 				md: '768px'
-			},
-			screens: {
-				'1.5md': '896px',
-				'1.5lg': '1152px',
-				'1.5xl': '1408px',
-				'2.5xl': '1728px',
-				'h-md': { raw: '(max-height: 1090px)' }
 			}
 		}
 	},

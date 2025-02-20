@@ -33,7 +33,7 @@
 				{/each}
 			</div>
 		{:else}
-			<p class="text-black">
+			<p class="text-primary">
 				{$i18n.tokens.manage.text.all_tokens_zero_balance}
 			</p>
 		{/if}
