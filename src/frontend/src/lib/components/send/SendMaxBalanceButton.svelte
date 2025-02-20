@@ -62,7 +62,7 @@
 	on:click|preventDefault={setMax}
 	class:text-error-primary={isZeroBalance || nonNullish(errorType)}
 	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
-	id={MAX_BUTTON}
+	data-tid={MAX_BUTTON}
 >
 	{$i18n.send.text.max_balance}:
 	{nonNullish(maxAmount) && nonNullish($sendToken)
