@@ -1,10 +1,10 @@
+import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
-import {exchanges} from "$lib/derived/exchange.derived";
-import {nonNullish} from "@dfinity/utils";
 
 export type SendData = Token;
 

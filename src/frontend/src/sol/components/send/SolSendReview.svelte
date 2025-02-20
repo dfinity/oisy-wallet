@@ -5,8 +5,8 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
-	import SolFeeDisplay from "$sol/components/fee/SolFeeDisplay.svelte";
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
