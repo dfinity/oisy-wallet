@@ -110,5 +110,23 @@ export const themeVariables = {
 		'warning-alt': 'var(--color-foreground-warning-alt)',
 		'error-primary': 'var(--color-foreground-error-primary)',
 		'error-alt': 'var(--color-foreground-error-alt)'
+	},
+
+	// custom hard coded gradient colors
+	gradient: {
+		'default-0': '#016DFC',
+		'default-100': '#004EB5',
+		'icp-0': '#3B00B9',
+		'icp-100': '#7014A4',
+		'btc-0': '#F7931A',
+		'btc-100': '#DE7900',
+		'eth-0': '#627EEA',
+		'eth-100': '#E18DFF',
+		'sol-0': '#904EFA',
+		'sol-100': '#1DE59D',
+		'trump-0': '#232BCC',
+		'trump-100': '#000797',
+		'gold-0': '#CCA055',
+		'gold-100': '#EBD27F'
 	}
 };
