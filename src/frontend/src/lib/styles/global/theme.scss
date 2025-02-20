@@ -1,3 +1,5 @@
+@use '../theme/base-colors' as *;
+
 html {
 	-ms-text-size-adjust: 100%;
 	-webkit-text-size-adjust: 100%;
@@ -121,13 +123,13 @@ figcaption {
 
 // TODO: set the scrollbar style for Firefox too. Right now it is not ideal since the modifiable properties are limited and they go in conflict with what we set (https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scrollbars_styling)
 ::-webkit-scrollbar-thumb {
-	border: 1px solid rgba(var(--color-white-rgb), 0.4);
-	background: rgba(var(--color-black-rgb), 0.2);
+	border: 1px solid #{$a-white-40};
+	background: #{$a-dark-20};
 	border-radius: 16px;
 
 	&:hover {
-		border-color: rgba(var(--color-white-rgb), 0.7);
-		background: rgba(var(--color-black-rgb), 0.3);
+		border-color: #{$a-white-70};
+		background: #{$a-dark-30};
 	}
 }
 
