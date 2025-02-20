@@ -8,12 +8,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
-	const {
-		sendToken,
-		sendTokenDecimals,
-		sendTokenSymbol,
-		sendTokenId
-	} = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenDecimals, sendTokenSymbol, sendTokenId } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let fee: bigint | undefined;
 	$: fee = ($sendToken as OptionIcToken)?.fee;

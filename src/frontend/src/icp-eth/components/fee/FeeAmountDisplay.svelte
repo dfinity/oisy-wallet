@@ -28,7 +28,11 @@
 	let usdFee: number;
 	$: usdFee =
 		nonNullish(feeDecimals) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
-			? usdValue({ token: {decimals: feeDecimals}, balance: fee, exchangeRate: $sendTokenExchangeRate })
+			? usdValue({
+					token: { decimals: feeDecimals },
+					balance: fee,
+					exchangeRate: $sendTokenExchangeRate
+				})
 			: 0;
 
 	let insufficientFeeFunds = false;
