@@ -16,7 +16,7 @@ on:
         '.github/workflows/formatting-checks.yml'
       - # Rust format configuration
         'rustfmt.toml'
-  merge_group:
+#  merge_group:
   workflow_dispatch:
 
 jobs:
