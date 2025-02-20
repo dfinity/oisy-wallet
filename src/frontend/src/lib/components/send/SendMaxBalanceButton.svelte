@@ -4,12 +4,12 @@
 	import { getContext } from 'svelte';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
+	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import {MAX_BUTTON} from "$lib/constants/test-ids.constants";
 
 	export let sendAmount: OptionAmount;
 	export let amountSetToMax = false;

@@ -1,6 +1,5 @@
 import {
 	AMOUNT_DATA,
-	AMOUNT_INPUT,
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
@@ -12,7 +11,8 @@ import {
 	SEND_FORM_NEXT_BUTTON,
 	SEND_TOKENS_MODAL,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
-	TOKEN_CARD, TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON
+	TOKEN_CARD,
+	TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { LedgerTransferCommand } from '../commands/ledger-transfer.command';
