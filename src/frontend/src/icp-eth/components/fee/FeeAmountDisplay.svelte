@@ -21,15 +21,15 @@
 	export let feeTokenId: TokenId;
 	export let feeDecimals: number;
 
-	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let balance: Exclude<OptionBalance, null>;
 	$: balance = nonNullish($balancesStore) ? ($balancesStore[feeTokenId]?.data ?? ZERO) : undefined;
 
 	let usdFee: number;
 	$: usdFee =
-		nonNullish($sendToken) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
-			? usdValue({ token: $sendToken, balance: fee, exchangeRate: $sendTokenExchangeRate })
+		nonNullish(feeDecimals) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
+			? usdValue({ token: {decimals: feeDecimals}, balance: fee, exchangeRate: $sendTokenExchangeRate })
 			: 0;
 
 	let insufficientFeeFunds = false;
