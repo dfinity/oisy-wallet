@@ -3,13 +3,19 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import type { OptionIcToken } from '$icp/types/ic-token';
+	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import FeeAmountDisplay from "$icp-eth/components/fee/FeeAmountDisplay.svelte";
 
-	const { sendToken, sendTokenDecimals, sendTokenExchangeRate, sendBalance, sendTokenSymbol, sendTokenId } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {
+		sendToken,
+		sendTokenDecimals,
+		sendTokenExchangeRate,
+		sendBalance,
+		sendTokenSymbol,
+		sendTokenId
+	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let fee: bigint | undefined;
 	$: fee = ($sendToken as OptionIcToken)?.fee;
@@ -27,4 +33,3 @@
 		/>
 	</Value>
 {/if}
-

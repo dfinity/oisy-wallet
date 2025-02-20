@@ -1,22 +1,23 @@
 <script lang="ts">
-	import {nonNullish} from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
-	import FeeAmountDisplay from "$icp-eth/components/fee/FeeAmountDisplay.svelte";
 
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendTokenId, sendTokenDecimals, sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendTokenDecimals, sendTokenSymbol } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let ckBTC = false;
 	$: ckBTC = isTokenCkBtcLedger($tokenWithFallbackAsIcToken);
