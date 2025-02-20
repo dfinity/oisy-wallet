@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { themeStore, Theme } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
@@ -14,6 +16,8 @@
 	const THEME_SYSTEM = 'system';
 
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
+		selectedTheme = theme;
+
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
 			return;
@@ -23,9 +27,15 @@
 	};
 
 	let selectedTheme: Theme | typeof THEME_SYSTEM;
-	$: selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
-		? THEME_SYSTEM
-		: ($themeStore ?? THEME_SYSTEM);
+
+	const initSelectedTheme = () => {
+		selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
+			? THEME_SYSTEM
+			: ($themeStore ?? THEME_SYSTEM);
+	};
+
+	onMount(initSelectedTheme);
+	afterNavigate(initSelectedTheme);
 </script>
 
 <div class="flex flex-row">

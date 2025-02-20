@@ -7,10 +7,8 @@ import { get } from 'svelte/store';
 describe('ThemeSelector', () => {
 	const originalMatchMedia = window.matchMedia;
 
-	enum SystemTheme {
-		SYSTEM = 'system'
-	}
-	const THEME_VALUES = [...Object.values(Theme), ...Object.values(SystemTheme)];
+	const THEME_SYSTEM = 'system';
+	const THEME_VALUES = [...Object.values(Theme), THEME_SYSTEM];
 	const THEME_KEY = 'nnsTheme';
 
 	beforeEach(() => {
@@ -77,7 +75,7 @@ describe('ThemeSelector', () => {
 
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.DARK));
 
-		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${SystemTheme.SYSTEM}`));
+		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`));
 
 		expect(get(themeStore)).toBe(Theme.LIGHT);
 		expect(spy).toHaveBeenCalledOnce();
@@ -91,7 +89,7 @@ describe('ThemeSelector', () => {
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
-		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${SystemTheme.SYSTEM}`));
+		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`));
 
 		expect(localStorage.getItem(THEME_KEY)).toBeNull();
 	});
@@ -110,6 +108,38 @@ describe('ThemeSelector', () => {
 				JSON.stringify(false)
 			);
 		});
+	});
+
+	it('should set correct aria-checked when switching back and forth between themes', async () => {
+		const { getByTestId } = render(ThemeSelector);
+
+		const testIdSystem = `${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`;
+		const testIdDark = `${THEME_SELECTOR_CARD}-${Theme.DARK}`;
+		const testIdLight = `${THEME_SELECTOR_CARD}-${Theme.LIGHT}`;
+
+		await fireEvent.click(getByTestId(testIdSystem));
+		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+
+		await fireEvent.click(getByTestId(testIdDark));
+		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+
+		await fireEvent.click(getByTestId(testIdSystem));
+		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+
+		await fireEvent.click(getByTestId(testIdLight));
+		expect(getByTestId(testIdLight).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+
+		await fireEvent.click(getByTestId(testIdSystem));
+		expect(getByTestId(testIdSystem).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+
+		await fireEvent.click(getByTestId(testIdDark));
+		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+
+		await fireEvent.click(getByTestId(testIdLight));
+		expect(getByTestId(testIdLight).getAttribute('aria-checked')).toBe(JSON.stringify(true));
+
+		await fireEvent.click(getByTestId(testIdDark));
+		expect(getByTestId(testIdDark).getAttribute('aria-checked')).toBe(JSON.stringify(true));
 	});
 
 	it.each(THEME_VALUES.map((theme, index) => ({ theme, index })))(
