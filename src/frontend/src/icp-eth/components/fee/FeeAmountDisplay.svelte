@@ -44,7 +44,8 @@
 <div transition:fade class="flex gap-4">
 	{formatToken({
 		value: fee,
-		displayDecimals: EIGHT_DECIMALS
+		unitName: feeDecimals,
+		displayDecimals: feeDecimals
 	})}
 	{feeSymbol}
 
