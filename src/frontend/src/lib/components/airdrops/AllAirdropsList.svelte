@@ -29,7 +29,7 @@
 	$: upcomingCampaigns = airdropCampaigns.filter(({ startDate }) => isUpcomingCampaign(startDate));
 </script>
 
-<div class="mb-6 rounded-2xl md:mb-10 relative flex items-end overflow-hidden">
+<div class="relative mb-6 flex items-end overflow-hidden rounded-2xl md:mb-10">
 	<div class="max-h-64">
 		<ImgBanner src={airdropBanner} testId={AIRDROPS_BANNER} />
 	</div>

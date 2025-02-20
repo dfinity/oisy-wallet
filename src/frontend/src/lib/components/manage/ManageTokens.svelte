@@ -150,7 +150,7 @@
 </div>
 
 {#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pt-1 pb-2 text-tertiary">
+	<p class="mb-4 pb-2 pt-1 text-tertiary">
 		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
 			$network: $selectedNetwork.name
 		})}
@@ -159,13 +159,13 @@
 
 {#if noTokensMatch}
 	<button
-		class="py-16 flex w-full flex-col items-center justify-center"
+		class="flex w-full flex-col items-center justify-center py-16"
 		in:fade
 		on:click={() => dispatch('icAddToken')}
 	>
 		<span class="text-7xl">🤔</span>
 
-		<span class="py-4 font-bold text-center text-brand-primary no-underline"
+		<span class="py-4 text-center font-bold text-brand-primary no-underline"
 			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
@@ -199,7 +199,7 @@
 	</div>
 
 	<button
-		class="mb-4 pt-4 font-bold flex w-full justify-center text-center text-brand-primary no-underline"
+		class="mb-4 flex w-full justify-center pt-4 text-center font-bold text-brand-primary no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 
