@@ -8,6 +8,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import IcFeeDisplay from "$icp/components/send/IcFeeDisplay.svelte";
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -29,5 +30,7 @@
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={invalid}>
+	<IcFeeDisplay slot="fee" {networkId} />
+
 	<IcReviewNetwork {networkId} slot="network" />
 </SendReview>

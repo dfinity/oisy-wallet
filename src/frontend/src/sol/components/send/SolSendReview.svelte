@@ -6,6 +6,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
+	import SolFeeDisplay from "$sol/components/fee/SolFeeDisplay.svelte";
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -25,6 +26,8 @@
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
 	<ReviewNetwork sourceNetwork={network} slot="network" />
+
+	<SolFeeDisplay slot="fee" />
 
 	<svelte:fragment slot="info">
 		{#if insufficientFundsForFee}

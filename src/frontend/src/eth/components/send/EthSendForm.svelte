@@ -1,46 +1,80 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
-	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type {ConvertAmountErrorType} from "$lib/types/convert";
+	import {networks} from "$lib/derived/networks.derived";
+	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
+	import {i18n} from "$lib/stores/i18n.store";
+	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
+	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
+	import NetworkInfo from "$lib/components/networks/NetworkInfo.svelte";
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
-	export let simplifiedForm = false;
 	export let amount: OptionAmount = undefined;
-	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
 
+	let errorType: ConvertAmountErrorType = undefined;
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
 
 	let invalid = true;
 	$: invalid =
-		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
+		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount) || nonNullish(errorType);;
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let targetNetwork: Network | undefined;
+	$: targetNetwork = $networks?.find(({ id }) => id === sourceNetwork.id);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
+		<TokenInput
+				token={$sendToken}
+				bind:amount
+				isSelectable={false}
+				exchangeRate={$sendTokenExchangeRate}
+				bind:errorType
+		>
+			<span slot="title">{$i18n.core.text.amount}</span>
+
+			<svelte:fragment slot="amount-info">
+				{#if nonNullish($sendToken)}
+					<div class="text-tertiary">
+						<TokenInputAmountExchange
+								{amount}
+								exchangeRate={$sendTokenExchangeRate}
+								token={$sendToken}
+								disabled
+						/>
+					</div>
+				{/if}
+			</svelte:fragment>
+
+			<svelte:fragment slot="balance">
+				{#if nonNullish($sendToken)}
+					<SendMaxBalanceButton bind:sendAmount={amount} {errorType} />
+				{/if}
+			</svelte:fragment>
+		</TokenInput>
+
 		{#if destinationEditable}
 			<EthSendDestination
 				token={$sendToken}
@@ -53,14 +87,9 @@
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
 
-		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
-
-		<SendSource
-			token={$sendToken}
-			balance={$sendBalance}
-			source={$ethAddress ?? ''}
-			hideSource={simplifiedForm}
-		/>
+		{#if nonNullish(targetNetwork)}
+			<NetworkInfo network={targetNetwork} />
+		{/if}
 
 		<FeeDisplay />
 
