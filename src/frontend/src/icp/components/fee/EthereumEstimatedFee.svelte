@@ -13,13 +13,10 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Token } from '$lib/types/token';
 	import type { Option } from '$lib/types/utils';
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
-
-	const { sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let feeToken: Token;
 	$: feeToken = $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken;
