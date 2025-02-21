@@ -199,7 +199,7 @@
 		<ExternalLink
 			asMenuItem
 			asMenuItemCondensed
-			href="mailto:support@oisy.com"
+			href="https://docs.oisy.com/"
 			ariaLabel={$i18n.navigation.alt.support_email}
 			iconVisible={false}
 		>
