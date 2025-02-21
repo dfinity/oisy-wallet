@@ -9,7 +9,7 @@
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
-	import FeeAmountDisplay from '$lib/components/fee/FeeAmountDisplay.svelte';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -35,7 +35,7 @@
 
 			<div>
 				{#if nonNullish(maxTransactionFee)}
-					<FeeAmountDisplay
+					<ExchangeAmountDisplay
 						fee={BigNumber.from(maxTransactionFee)}
 						decimals={feeToken.decimals}
 						symbol={feeToken.symbol}

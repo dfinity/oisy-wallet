@@ -4,14 +4,14 @@
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
-	import FeeAmountDisplay from '$lib/components/fee/FeeAmountDisplay.svelte';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	const { store: storeFeeData } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
-	const { sendTokenId, sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
+	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let bitcoinEstimatedFee: bigint | undefined;
@@ -26,7 +26,7 @@
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
 
-			<FeeAmountDisplay
+			<ExchangeAmountDisplay
 				fee={BigNumber.from(bitcoinEstimatedFee)}
 				decimals={$sendTokenDecimals}
 				symbol={$sendTokenSymbol}

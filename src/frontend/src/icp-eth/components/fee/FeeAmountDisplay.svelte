@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import FeeAmountDisplay from '$lib/components/fee/FeeAmountDisplay.svelte';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -33,7 +33,7 @@
 	$: balance, fee, debounceCheckFeeFunds();
 </script>
 
-<FeeAmountDisplay
+<ExchangeAmountDisplay
 	{fee}
 	decimals={feeDecimals}
 	symbol={feeSymbol}

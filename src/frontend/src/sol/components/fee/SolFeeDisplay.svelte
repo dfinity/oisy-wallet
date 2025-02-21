@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import FeeAmountDisplay from '$lib/components/fee/FeeAmountDisplay.svelte';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -25,7 +25,7 @@
 		<Value ref="fee">
 			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
-			<FeeAmountDisplay
+			<ExchangeAmountDisplay
 				fee={BigNumber.from($fee)}
 				decimals={$decimals}
 				symbol={$symbol}
@@ -38,7 +38,7 @@
 			<Value ref="ataFee">
 				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
 
-				<FeeAmountDisplay
+				<ExchangeAmountDisplay
 					fee={BigNumber.from($ataFee)}
 					decimals={$decimals}
 					symbol={$symbol}

@@ -6,7 +6,7 @@
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
-	import FeeAmountDisplay from '$lib/components/fee/FeeAmountDisplay.svelte';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -36,7 +36,7 @@
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
 
-			<FeeAmountDisplay
+			<ExchangeAmountDisplay
 				fee={BigNumber.from(kytFee)}
 				decimals={$sendTokenDecimals}
 				symbol={$sendTokenSymbol}

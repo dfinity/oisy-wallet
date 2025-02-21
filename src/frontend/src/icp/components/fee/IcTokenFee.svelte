@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import type { OptionIcToken } from '$icp/types/ic-token';
-	import FeeAmountDisplay from '$lib/components/fee/FeeAmountDisplay.svelte';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -19,7 +19,7 @@
 	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
 	{#if nonNullish(fee)}
-		<FeeAmountDisplay
+		<ExchangeAmountDisplay
 			fee={BigNumber.from(fee)}
 			decimals={$sendTokenDecimals}
 			symbol={$sendTokenSymbol}
