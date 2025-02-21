@@ -8,6 +8,7 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
+	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -15,7 +16,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Token } from '$lib/types/token';
 	import type { Option } from '$lib/types/utils';
-	import FeeAmountDisplay from "$icp-eth/components/fee/FeeAmountDisplay.svelte";
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
@@ -36,10 +36,10 @@
 			<div>
 				{#if nonNullish(maxTransactionFee)}
 					<FeeAmountDisplay
-							fee={BigNumber.from(maxTransactionFee)}
-							feeSymbol={feeToken.symbol}
-							feeTokenId={feeToken.id}
-							feeDecimals={feeToken.decimals}
+						fee={BigNumber.from(maxTransactionFee)}
+						feeSymbol={feeToken.symbol}
+						feeTokenId={feeToken.id}
+						feeDecimals={feeToken.decimals}
 					/>
 				{:else}
 					&ZeroWidthSpace;
