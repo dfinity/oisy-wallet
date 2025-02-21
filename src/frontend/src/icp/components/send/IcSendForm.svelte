@@ -17,7 +17,7 @@
 	export let source: string;
 	export let simplifiedForm = false;
 
-	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId, sendBalance } =
+	const { sendToken, sendTokenNetworkId, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;

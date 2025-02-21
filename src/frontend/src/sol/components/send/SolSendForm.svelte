@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { type OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -16,10 +15,8 @@
 	export let destination = '';
 	export let source: string;
 
-	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId, sendBalance, sendTokenStandard } =
+	const { sendToken, sendTokenNetworkId, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
 	let amountError: SolAmountAssertionError | undefined;
 	let invalidDestination: boolean;
@@ -36,7 +33,7 @@
 	on:icNext
 	{source}
 	token={$sendToken}
-	balance={$balance}
+	balance={$sendBalance}
 	disabled={invalid}
 	hideSource
 	networkId={$sendTokenNetworkId}

@@ -21,7 +21,7 @@
 	let amountError: BtcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
 
-	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
+	const { sendToken, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// TODO: check if we can align this validation flag with other SendForm components (e.g IcSendForm)

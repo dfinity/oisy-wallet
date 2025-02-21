@@ -32,7 +32,6 @@
 	const {
 		sendToken,
 		sendBalance,
-		sendTokenDecimals,
 		sendTokenStandard,
 		sendTokenNetworkId,
 		sendTokenExchangeRate

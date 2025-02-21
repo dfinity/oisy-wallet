@@ -35,7 +35,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let targetNetwork: Network | undefined;
 	$: targetNetwork = $networks?.find(({ id }) => id === sourceNetwork.id);

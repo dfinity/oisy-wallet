@@ -35,7 +35,7 @@
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendToken, sendTokenDecimals, sendTokenExchangeRate } =
+	const { sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let fee: bigint | undefined;

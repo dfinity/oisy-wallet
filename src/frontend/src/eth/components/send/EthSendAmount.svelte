@@ -29,14 +29,12 @@
 		feeStore: storeFeeData,
 		minGasFee,
 		maxGasFee,
-		evaluateFee
 	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	const {
 		sendTokenDecimals,
 		sendBalance,
 		sendTokenId,
-		sendTokenStandard,
 		sendToken,
 		sendTokenExchangeRate
 	} = getContext<SendContext>(SEND_CONTEXT_KEY);
