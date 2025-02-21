@@ -10,7 +10,7 @@
 	export let fee: BigNumber;
 	export let decimals: number;
 	export let symbol: string;
-	export let exchangeRate: number;
+	export let exchangeRate: number | undefined;
 
 	let usdFee: number;
 	$: usdFee =
