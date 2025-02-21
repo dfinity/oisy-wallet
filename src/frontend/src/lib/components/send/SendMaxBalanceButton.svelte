@@ -13,7 +13,7 @@
 
 	export let sendAmount: OptionAmount;
 	export let amountSetToMax = false;
-	export let error: Error = undefined;
+	export let error: Error = null;
 
 	const { sendBalance, sendToken, isSendTokenIcrc2 } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
