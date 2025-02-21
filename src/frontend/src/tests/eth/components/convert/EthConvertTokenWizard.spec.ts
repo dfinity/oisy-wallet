@@ -1,6 +1,5 @@
 import { ICP_NETWORK } from '$env/networks/networks.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 import * as tokensDerived from '$eth/derived/token.derived';
 import * as sendServices from '$eth/services/send.services';
@@ -24,7 +23,6 @@ import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
-import { InfuraProvider } from '@ethersproject/providers';
 import { fireEvent, render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { get, readable, writable } from 'svelte/store';
@@ -32,6 +30,17 @@ import { expect } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
+}));
+
+vi.mock('$lib/providers/infura.providers', () => ({
+	infuraProviders: () => {
+		vi.fn().mockResolvedValue({
+			gasPrice: null,
+			maxFeePerGas: null,
+			maxPriorityFeePerGas: null,
+			lastBaseFeePerGas: null
+		});
+	}
 }));
 
 describe('EthConvertTokenWizard', () => {
@@ -43,7 +52,7 @@ describe('EthConvertTokenWizard', () => {
 				CONVERT_CONTEXT_KEY,
 				{
 					sourceToken: readable(ETHEREUM_TOKEN),
-					destinationToken: readable(ICP_TOKEN)
+					destinationToken: readable(SEPOLIA_TOKEN)
 				}
 			]
 		]);
@@ -109,13 +118,6 @@ describe('EthConvertTokenWizard', () => {
 		});
 	};
 	const mockFeeStore = (fees?: FeeStoreData) => {
-		vi.spyOn(InfuraProvider.prototype, 'getFeeData').mockResolvedValue({
-			gasPrice: null,
-			maxFeePerGas: null,
-			maxPriorityFeePerGas: null,
-			lastBaseFeePerGas: null
-		});
-
 		const store = writable<FeeStoreData>(undefined);
 		store.set(fees);
 
@@ -142,6 +144,8 @@ describe('EthConvertTokenWizard', () => {
 		mockPage.reset();
 		vi.resetAllMocks();
 		ethAddressStore.reset();
+
+		mockEthereumToken();
 	});
 
 	it('should call send if all requirements are met', async () => {
@@ -150,7 +154,6 @@ describe('EthConvertTokenWizard', () => {
 		mockAuthStore();
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
-		mockEthereumToken();
 		const feeStore = mockFeeStore(mockFees);
 
 		const { container } = render(EthConvertTokenWizard, {
@@ -191,7 +194,6 @@ describe('EthConvertTokenWizard', () => {
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
-		mockEthereumToken();
 		mockFeeStore(mockFees);
 
 		const { container } = render(EthConvertTokenWizard, {
@@ -231,7 +233,6 @@ describe('EthConvertTokenWizard', () => {
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
-		mockEthereumToken();
 		mockAuthStore();
 		mockFeeStore(mockFees);
 
@@ -253,7 +254,6 @@ describe('EthConvertTokenWizard', () => {
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
-		mockEthereumToken();
 		mockAuthStore();
 		mockFeeStore(undefined);
 
@@ -272,7 +272,6 @@ describe('EthConvertTokenWizard', () => {
 		mockCkEthMinterInfoStore(undefined);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
-		mockEthereumToken();
 		mockAuthStore();
 		mockFeeStore(mockFees);
 
@@ -310,7 +309,6 @@ describe('EthConvertTokenWizard', () => {
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
-		mockEthereumToken();
 		mockAuthStore();
 		mockFeeStore({ ...mockFees, maxPriorityFeePerGas: null });
 
@@ -328,7 +326,6 @@ describe('EthConvertTokenWizard', () => {
 		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockCkEthHelperContractAddress();
-		mockEthereumToken();
 		mockAuthStore();
 		mockFeeStore(mockFees);
 
@@ -346,7 +343,6 @@ describe('EthConvertTokenWizard', () => {
 		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
-		mockEthereumToken();
 		mockAuthStore();
 		mockFeeStore(mockFees);
 
