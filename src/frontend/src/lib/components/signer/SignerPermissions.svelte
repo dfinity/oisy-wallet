@@ -106,7 +106,7 @@
 		</div>
 
 		{#if requestAccountsPermissions}
-			<div class="mb-10 flex gap-4 rounded-lg border border-dust bg-primary p-4">
+			<div class="mb-10 flex gap-4 rounded-lg border border-off-white bg-primary p-4">
 				<IconAstronautHelmet />
 
 				<div>

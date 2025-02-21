@@ -40,7 +40,7 @@
 	exchangeRate={$sendTokenExchangeRate}
 />
 {#if insufficientFeeFunds && nonNullish(balance)}
-	<p in:slide={SLIDE_DURATION} class="text-cyclamen">
+	<p in:slide={SLIDE_DURATION} class="text-error-primary">
 		{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 			$balance: formatToken({
 				value: balance,

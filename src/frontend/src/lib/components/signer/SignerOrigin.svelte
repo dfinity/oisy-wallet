@@ -40,7 +40,8 @@
 					href={origin}
 					iconVisible={false}>{host}</ExternalLink
 				></span
-			>{:else}<span class="font-bold text-cyclamen">{$i18n.signer.origin.text.invalid_origin}</span
+			>{:else}<span class="font-bold text-error-primary"
+				>{$i18n.signer.origin.text.invalid_origin}</span
 			>{/if}
 	</p>
 {/if}

@@ -70,5 +70,5 @@
 </InputCurrency>
 
 {#if nonNullish(error)}
-	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">{error.message}</p>
+	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">{error.message}</p>
 {/if}
