@@ -25,12 +25,12 @@
 	export let disabled = false;
 	export let placeholder = '0';
 	export let errorType: ConvertAmountErrorType = undefined;
-	export let error: Error = null;
+	export let error: Error | undefined = undefined;
 	export let amountSetToMax = false;
 	export let loading = false;
 	export let isSelectable = true;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
-	export let customErrorValidate: (userAmount: BigNumber) => Error = () => null;
+	export let customErrorValidate: (userAmount: BigNumber) => Error = () => undefined;
 
 	const dispatch = createEventDispatcher();
 
