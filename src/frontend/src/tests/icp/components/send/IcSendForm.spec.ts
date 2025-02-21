@@ -1,13 +1,13 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
 import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
+import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
-import {IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore} from "$icp/stores/ic-token-fee.store";
-import {TOKEN_INPUT_CURRENCY_TOKEN} from "$lib/constants/test-ids.constants";
-import * as ethEnv from '$env/networks/networks.eth.env';
 
 describe('IcSendForm', () => {
 	const ethereumFeeStore = initEthereumFeeStore();

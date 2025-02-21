@@ -1,25 +1,25 @@
 <script lang="ts">
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import NetworkInfo from '$lib/components/networks/NetworkInfo.svelte';
+	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { networks } from '$lib/derived/networks.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import type {ConvertAmountErrorType} from "$lib/types/convert";
-	import {networks} from "$lib/derived/networks.derived";
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
-	import {i18n} from "$lib/stores/i18n.store";
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
-	import NetworkInfo from "$lib/components/networks/NetworkInfo.svelte";
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -34,7 +34,11 @@
 
 	let invalid = true;
 	$: invalid =
-		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount) || nonNullish(errorType);;
+		invalidDestination ||
+		insufficientFunds ||
+		isNullishOrEmpty(destination) ||
+		isNullish(amount) ||
+		nonNullish(errorType);
 
 	const dispatch = createEventDispatcher();
 
@@ -47,11 +51,11 @@
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
 		<TokenInput
-				token={$sendToken}
-				bind:amount
-				isSelectable={false}
-				exchangeRate={$sendTokenExchangeRate}
-				bind:errorType
+			token={$sendToken}
+			bind:amount
+			isSelectable={false}
+			exchangeRate={$sendTokenExchangeRate}
+			bind:errorType
 		>
 			<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -59,10 +63,10 @@
 				{#if nonNullish($sendToken)}
 					<div class="text-tertiary">
 						<TokenInputAmountExchange
-								{amount}
-								exchangeRate={$sendTokenExchangeRate}
-								token={$sendToken}
-								disabled
+							{amount}
+							exchangeRate={$sendTokenExchangeRate}
+							token={$sendToken}
+							disabled
 						/>
 					</div>
 				{/if}

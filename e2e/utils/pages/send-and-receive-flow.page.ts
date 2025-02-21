@@ -11,7 +11,8 @@ import {
 	SEND_FORM_NEXT_BUTTON,
 	SEND_TOKENS_MODAL,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
-	TOKEN_CARD, TOKEN_INPUT_CURRENCY_TOKEN
+	TOKEN_CARD,
+	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { LedgerTransferCommand } from '../commands/ledger-transfer.command';

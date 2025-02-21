@@ -1,26 +1,26 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { balance } from '$lib/derived/balances.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
-	import {SEND_CONTEXT_KEY, type SendContext} from "$lib/stores/send.store";
-	import {getContext} from "svelte";
-	import type {ConvertAmountErrorType} from "$lib/types/convert";
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
-	import {i18n} from "$lib/stores/i18n.store";
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
 	export let source: string;
 
 	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
-			getContext<SendContext>(SEND_CONTEXT_KEY);
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: SolAmountAssertionError | undefined;
 	let errorType: ConvertAmountErrorType = undefined;
@@ -35,14 +35,22 @@
 		isNullish(amount);
 </script>
 
-<SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource networkId={$sendTokenNetworkId}>
+<SendForm
+	on:icNext
+	{source}
+	token={$sendToken}
+	balance={$balance}
+	disabled={invalid}
+	hideSource
+	networkId={$sendTokenNetworkId}
+>
 	<div slot="amount">
 		<TokenInput
-				token={$sendToken}
-				bind:amount
-				isSelectable={false}
-				exchangeRate={$sendTokenExchangeRate}
-				bind:errorType
+			token={$sendToken}
+			bind:amount
+			isSelectable={false}
+			exchangeRate={$sendTokenExchangeRate}
+			bind:errorType
 		>
 			<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -50,10 +58,10 @@
 				{#if nonNullish($sendToken)}
 					<div class="text-tertiary">
 						<TokenInputAmountExchange
-								{amount}
-								exchangeRate={$sendTokenExchangeRate}
-								token={$sendToken}
-								disabled
+							{amount}
+							exchangeRate={$sendTokenExchangeRate}
+							token={$sendToken}
+							disabled
 						/>
 					</div>
 				{/if}
