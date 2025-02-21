@@ -10,7 +10,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { TokenId } from '$lib/types/token';
-	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import FeeAmountDisplay from "$lib/components/fee/FeeAmountDisplay.svelte";
@@ -24,16 +23,6 @@
 
 	let balance: Exclude<OptionBalance, null>;
 	$: balance = nonNullish($balancesStore) ? ($balancesStore[feeTokenId]?.data ?? ZERO) : undefined;
-
-	let usdFee: number;
-	$: usdFee =
-		nonNullish(feeDecimals) && nonNullish(fee) && nonNullish($sendTokenExchangeRate)
-			? usdValue({
-					decimals: feeDecimals,
-					balance: fee,
-					exchangeRate: $sendTokenExchangeRate
-				})
-			: 0;
 
 	let insufficientFeeFunds = false;
 
