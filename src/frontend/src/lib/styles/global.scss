@@ -46,4 +46,33 @@
 	// Themes
 	@include meta.load-css('theme/default-theme');
 	@include meta.load-css('theme/dark-theme');
+
+	// Global focus and active states for links, buttons and inputs
+	a,
+	button,
+	div[role='button'],
+	input[type='checkbox'],
+	input[type='radio'],
+	div[role='checkbox'],
+	div[role='radio'] {
+		outline-width: 0;
+
+		&[focus],
+		&:focus {
+			outline-offset: 2px;
+			outline: var(--color-background-brand-primary) solid 2px !important;
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none !important;
+		}
+
+		&[active],
+		&:active {
+			&[focus],
+			&:focus {
+				outline: none !important;
+			}
+		}
+	}
 }

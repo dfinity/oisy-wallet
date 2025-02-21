@@ -126,6 +126,23 @@ div.input-field input[id]::placeholder {
 	color: var(--color-foreground-tertiary) !important;
 }
 
+div:not(.input-currency-container) > div.input-block > div.input-field > input {
+	border-color: var(--input-border-color);
+	border-width: 1px;
+
+	transition: all 0.25s ease-out;
+
+	&:hover {
+		border-color: var(--color-border-brand-primary) !important;
+	}
+
+	&:focus:not(:focus-visible),
+	&:focus-within,
+	&:active {
+		outline: 1px solid var(--color-border-brand-primary) !important;
+	}
+}
+
 div.modal {
 	--overlay-background: var(--color-background-surface);
 	--overlay-background-contrast: var(--color-foreground-primary);

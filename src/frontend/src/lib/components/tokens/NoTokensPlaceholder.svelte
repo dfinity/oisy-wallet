@@ -6,7 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div class="py-12">
+<div class="rounded-4xl border-2 border-dashed border-brand-subtle-20 bg-brand-subtle-5 py-12">
 	<div class="mb-5 flex justify-center p-2">
 		<span class="z-0 -mr-4">
 			<Logo ring size="lg" src={icpDark}></Logo>

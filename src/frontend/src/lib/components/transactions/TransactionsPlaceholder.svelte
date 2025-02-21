@@ -3,7 +3,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div class="py-12" data-tid="no-transactions-placeholder">
+<div
+	class="rounded-4xl border-2 border-dashed border-brand-subtle-20 bg-brand-subtle-5 py-12"
+	data-tid="no-transactions-placeholder"
+>
 	<div class="mb-5 flex justify-center p-2">
 		<IconOisyEmptyState />
 	</div>
