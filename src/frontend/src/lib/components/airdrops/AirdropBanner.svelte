@@ -37,7 +37,7 @@
 	let usdBalance: number | undefined;
 	$: usdBalance =
 		nonNullish(balance) && nonNullish(exchangeRate)
-			? usdValue({ token, balance, exchangeRate })
+			? usdValue({ decimals: token.decimals, balance, exchangeRate })
 			: undefined;
 </script>
 
