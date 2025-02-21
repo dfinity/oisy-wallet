@@ -26,11 +26,26 @@ import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { get, readable, writable } from 'svelte/store';
-import { expect } from 'vitest';
+import { expect, type MockInstance } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
 }));
+
+vi.mock('$eth/services/fee.services', () => ({
+	getErc20FeeData: vi.fn()
+}));
+
+vi.mock('@ethersproject/providers', () => {
+	const provider = vi.fn();
+	provider.prototype.getFeeData = vi.fn().mockResolvedValue({
+		lastBaseFeePerGas: null,
+		maxFeePerGas: null,
+		maxPriorityFeePerGas: null,
+		gasPrice: null
+	});
+	return { InfuraProvider: provider, JsonRpcProvider: provider };
+});
 
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
@@ -82,6 +97,7 @@ describe('EthConvertTokenWizard', () => {
 		sendAmount: sendAmount,
 		receiveAmount: sendAmount
 	};
+	let sendSpy: MockInstance;
 	const mockSendServices = () =>
 		vi.spyOn(sendServices, 'send').mockResolvedValue({ hash: transactionId });
 	const mockCkEthMinterInfoStore = (minterInfo?: MinterInfo) => {
@@ -135,23 +151,10 @@ describe('EthConvertTokenWizard', () => {
 		ethAddressStore.reset();
 
 		mockEthereumToken();
-
-		vi.mock('@ethersproject/providers', () => {
-			const provider = vi.fn();
-			provider.prototype.getFeeData = vi
-				.fn()
-				.mockResolvedValue({
-					lastBaseFeePerGas: null,
-					maxFeePerGas: null,
-					maxPriorityFeePerGas: null,
-					gasPrice: null
-				});
-			return { InfuraProvider: provider, JsonRpcProvider: provider };
-		});
+		sendSpy = mockSendServices();
 	});
 
 	it('should call send if all requirements are met', async () => {
-		const sendSpy = mockSendServices();
 		const ckEthMinterInfoStore = mockCkEthMinterInfoStore(mockMinterInfo);
 		mockAuthStore();
 		mockEthAddressStore();
@@ -192,7 +195,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if authIdentity is not defined', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
@@ -209,7 +211,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if sendAmount is not defined', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
@@ -231,7 +232,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if sendAmount is invalid', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
@@ -252,7 +252,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if feeStore is undefined', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
@@ -270,7 +269,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if minter info assertion failed', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(undefined);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
@@ -288,7 +286,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if maxFeePerGas is null', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
@@ -307,7 +304,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if maxFeePerGas is null', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockCkEthHelperContractAddress();
@@ -325,7 +321,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if ethAddress is not defined', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockCkEthHelperContractAddress();
 		mockAuthStore();
@@ -342,7 +337,6 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should not call send if ckEthHelperContractAddress is not defined', async () => {
-		const sendSpy = mockSendServices();
 		mockCkEthMinterInfoStore(mockMinterInfo);
 		mockEthAddressStore();
 		mockAuthStore();
