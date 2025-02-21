@@ -10,20 +10,22 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<Input
-	{name}
-	inputType="currency"
-	{required}
-	bind:value
-	{decimals}
-	{placeholder}
-	spellcheck={false}
-	autocomplete="off"
-	{testId}
-	{disabled}
-	on:nnsInput
-	on:blur
-	on:focus
->
-	<slot name="inner-end" slot="inner-end" />
-</Input>
+<div class="input-currency-container">
+	<Input
+		{name}
+		inputType="currency"
+		{required}
+		bind:value
+		{decimals}
+		{placeholder}
+		spellcheck={false}
+		autocomplete="off"
+		{testId}
+		{disabled}
+		on:nnsInput
+		on:blur
+		on:focus
+	>
+		<slot name="inner-end" slot="inner-end" />
+	</Input>
+</div>

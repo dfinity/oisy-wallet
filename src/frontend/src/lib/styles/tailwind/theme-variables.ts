@@ -14,6 +14,7 @@ export const themeVariables = {
 		disabled: 'var(--color-background-disabled)',
 		'disabled-alt': 'var(--color-background-disabled-alt)',
 		brand: {
+			'subtle-5': 'var(--color-background-brand-subtle-5)',
 			'subtle-10': 'var(--color-background-brand-subtle-10)',
 			'subtle-20': 'var(--color-background-brand-subtle-20)',
 			'subtle-30': 'var(--color-background-brand-subtle-30)',
