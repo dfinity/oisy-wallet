@@ -349,11 +349,11 @@ div.select {
 
 // TOASTS
 div.error .toast {
-	--overlay-background: var(--color-background-error-subtle-20);
+	--overlay-background: var(--color-background-error-secondary);
 }
 div.success .toast {
-	--overlay-background: var(--color-background-success-subtle-20);
+	--overlay-background: var(--color-background-success-secondary);
 }
 div.warn .toast {
-	--overlay-background: var(--color-background-warning-subtle-20);
+	--overlay-background: var(--color-background-warning-secondary);
 }
