@@ -34,7 +34,7 @@
 </script>
 
 <ExchangeAmountDisplay
-	{fee}
+	amount={fee}
 	decimals={feeDecimals}
 	symbol={feeSymbol}
 	exchangeRate={$sendTokenExchangeRate}

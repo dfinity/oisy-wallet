@@ -20,7 +20,7 @@
 
 	{#if nonNullish(fee)}
 		<ExchangeAmountDisplay
-			fee={BigNumber.from(fee)}
+			amount={BigNumber.from(fee)}
 			decimals={$sendTokenDecimals}
 			symbol={$sendTokenSymbol}
 			exchangeRate={$sendTokenExchangeRate}

@@ -27,7 +27,7 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
 
 			<ExchangeAmountDisplay
-				fee={BigNumber.from(bitcoinEstimatedFee)}
+				amount={BigNumber.from(bitcoinEstimatedFee)}
 				decimals={$sendTokenDecimals}
 				symbol={$sendTokenSymbol}
 				exchangeRate={$sendTokenExchangeRate}

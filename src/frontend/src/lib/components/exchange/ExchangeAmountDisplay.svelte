@@ -7,38 +7,38 @@
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
-	export let fee: BigNumber;
+	export let amount: BigNumber;
 	export let decimals: number;
 	export let symbol: string;
 	export let exchangeRate: number | undefined;
 
-	let usdFee: number;
-	$: usdFee =
-		nonNullish(decimals) && nonNullish(fee) && nonNullish(exchangeRate)
+	let usdAmount: number;
+	$: usdAmount =
+		nonNullish(decimals) && nonNullish(amount) && nonNullish(exchangeRate)
 			? usdValue({
 					decimals,
-					balance: fee,
+					balance: amount,
 					exchangeRate
 				})
 			: 0;
 </script>
 
-{#if nonNullish(fee) && nonNullish(decimals) && nonNullish(symbol)}
+{#if nonNullish(amount) && nonNullish(decimals) && nonNullish(symbol)}
 	<div transition:fade class="flex gap-4">
 		{formatToken({
-			value: fee,
+			value: amount,
 			unitName: decimals,
 			displayDecimals: EIGHT_DECIMALS
 		})}
 		{symbol}
 
 		<div class="text-tertiary">
-			{#if usdFee < SWAP_TOTAL_FEE_THRESHOLD}
+			{#if usdAmount < SWAP_TOTAL_FEE_THRESHOLD}
 				{`( < ${formatUSD({
 					value: SWAP_TOTAL_FEE_THRESHOLD
 				})} )`}
 			{:else}
-				{`( ${formatUSD({ value: usdFee })} )`}
+				{`( ${formatUSD({ value: usdAmount })} )`}
 			{/if}
 		</div>
 	</div>

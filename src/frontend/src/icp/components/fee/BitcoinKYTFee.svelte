@@ -37,7 +37,7 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
 
 			<ExchangeAmountDisplay
-				fee={BigNumber.from(kytFee)}
+				amount={BigNumber.from(kytFee)}
 				decimals={$sendTokenDecimals}
 				symbol={$sendTokenSymbol}
 				exchangeRate={$sendTokenExchangeRate}

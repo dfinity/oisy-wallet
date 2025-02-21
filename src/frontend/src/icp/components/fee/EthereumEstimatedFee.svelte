@@ -36,7 +36,7 @@
 			<div>
 				{#if nonNullish(maxTransactionFee)}
 					<ExchangeAmountDisplay
-						fee={BigNumber.from(maxTransactionFee)}
+						amount={BigNumber.from(maxTransactionFee)}
 						decimals={feeToken.decimals}
 						symbol={feeToken.symbol}
 						exchangeRate={$sendTokenExchangeRate}

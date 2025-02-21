@@ -26,7 +26,7 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
 			<ExchangeAmountDisplay
-				fee={BigNumber.from($fee)}
+				amount={BigNumber.from($fee)}
 				decimals={$decimals}
 				symbol={$symbol}
 				exchangeRate={$sendTokenExchangeRate}
@@ -39,7 +39,7 @@
 				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
 
 				<ExchangeAmountDisplay
-					fee={BigNumber.from($ataFee)}
+					amount={BigNumber.from($ataFee)}
 					decimals={$decimals}
 					symbol={$symbol}
 					exchangeRate={$sendTokenExchangeRate}
