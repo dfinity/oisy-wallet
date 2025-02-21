@@ -3,12 +3,12 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
+	import FeeAmountDisplay from "$lib/components/fee/FeeAmountDisplay.svelte";
 
 	const {
 		feeStore: fee,
@@ -17,7 +17,7 @@
 		feeSymbolStore: symbol
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 {#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
@@ -26,10 +26,10 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
 			<FeeAmountDisplay
-				fee={BigNumber.from($fee)}
-				feeSymbol={$symbol}
-				feeTokenId={$sendTokenId}
-				feeDecimals={$decimals}
+					fee={BigNumber.from($fee)}
+					decimals={$decimals}
+					symbol={$symbol}
+					exchangeRate={$sendTokenExchangeRate}
 			/>
 		</Value>
 	{/if}
@@ -39,10 +39,10 @@
 				<svelte:fragment slot="label">{$i18n.fee.text.ata_fee}</svelte:fragment>
 
 				<FeeAmountDisplay
-					fee={BigNumber.from($ataFee)}
-					feeSymbol={$symbol}
-					feeTokenId={$sendTokenId}
-					feeDecimals={$decimals}
+						fee={BigNumber.from($ataFee)}
+						decimals={$decimals}
+						symbol={$symbol}
+						exchangeRate={$sendTokenExchangeRate}
 				/>
 			</Value>
 		</div>
