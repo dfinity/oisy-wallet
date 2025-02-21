@@ -8,9 +8,9 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import type {ConvertAmountErrorType} from "$lib/types/convert";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: ConvertAmountErrorType | undefined;
