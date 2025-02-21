@@ -4,7 +4,7 @@
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
-	import FeeAmountDisplay from "$lib/components/fee/FeeAmountDisplay.svelte";
+	import FeeAmountDisplay from '$lib/components/fee/FeeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
