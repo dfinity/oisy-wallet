@@ -7,28 +7,25 @@
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import NetworkInfo from '$lib/components/networks/NetworkInfo.svelte';
-	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
-	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
-	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { networks } from '$lib/derived/networks.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import EthSendAmount from "$eth/components/send/EthSendAmount.svelte";
+	import type {Token} from "$lib/types/token";
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
 	export let amount: OptionAmount = undefined;
+	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
 
-	let errorType: ConvertAmountErrorType = undefined;
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
 
@@ -37,8 +34,7 @@
 		invalidDestination ||
 		insufficientFunds ||
 		isNullishOrEmpty(destination) ||
-		isNullish(amount) ||
-		nonNullish(errorType);
+		isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 
@@ -50,34 +46,7 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
-		<TokenInput
-			token={$sendToken}
-			bind:amount
-			isSelectable={false}
-			exchangeRate={$sendTokenExchangeRate}
-			bind:errorType
-		>
-			<span slot="title">{$i18n.core.text.amount}</span>
-
-			<svelte:fragment slot="amount-info">
-				{#if nonNullish($sendToken)}
-					<div class="text-tertiary">
-						<TokenInputAmountExchange
-							{amount}
-							exchangeRate={$sendTokenExchangeRate}
-							token={$sendToken}
-							disabled
-						/>
-					</div>
-				{/if}
-			</svelte:fragment>
-
-			<svelte:fragment slot="balance">
-				{#if nonNullish($sendToken)}
-					<SendMaxBalanceButton bind:sendAmount={amount} {errorType} />
-				{/if}
-			</svelte:fragment>
-		</TokenInput>
+		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
 		{#if destinationEditable}
 			<EthSendDestination

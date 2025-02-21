@@ -13,7 +13,9 @@
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
+	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
+	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -29,7 +31,8 @@
 		maxGasFee,
 		evaluateFee
 	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const { sendTokenDecimals, sendBalance, sendTokenId, sendTokenStandard } =
+
+	const { sendTokenDecimals, sendBalance, sendTokenId, sendTokenStandard, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
@@ -74,19 +77,6 @@
 		}
 	};
 
-	let calculateMax: (() => number | undefined) | undefined;
-	$: calculateMax = isNullish($maxGasFee)
-		? undefined
-		: (): number =>
-				getMaxTransactionAmount({
-					balance: $sendBalance ?? ZERO,
-					fee: $maxGasFee,
-					tokenDecimals: $sendTokenDecimals,
-					tokenStandard: $sendTokenStandard
-				});
-
-	const onInput = () => evaluateFee?.();
-
 	/**
 	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
 	 */
@@ -104,13 +94,32 @@
 		})();
 </script>
 
-<SendInputAmount
-	bind:amount
-	bind:amountSetToMax
-	bind:this={sendInputAmount}
-	tokenDecimals={$sendTokenDecimals}
-	{customValidate}
-	{calculateMax}
-	bind:error={insufficientFundsError}
-	on:nnsInput={onInput}
-/>
+<TokenInput
+		token={$sendToken}
+		bind:amount
+		isSelectable={false}
+		exchangeRate={$sendTokenExchangeRate}
+		bind:errorType={insufficientFundsError}
+		{customValidate}
+>
+	<span slot="title">{$i18n.core.text.amount}</span>
+
+	<svelte:fragment slot="amount-info">
+		{#if nonNullish($sendToken)}
+			<div class="text-tertiary">
+				<TokenInputAmountExchange
+						{amount}
+						exchangeRate={$sendTokenExchangeRate}
+						token={$sendToken}
+						disabled
+				/>
+			</div>
+		{/if}
+	</svelte:fragment>
+
+	<svelte:fragment slot="balance">
+		{#if nonNullish($sendToken)}
+			<SendMaxBalanceButton bind:sendAmount={amount} errorType={insufficientFundsError} />
+		{/if}
+	</svelte:fragment>
+</TokenInput>

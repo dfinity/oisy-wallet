@@ -5,16 +5,11 @@
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
-	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
-	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { balance } from '$lib/derived/balances.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import IcSendAmount from "$icp/components/send/IcSendAmount.svelte";
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -22,17 +17,15 @@
 	export let source: string;
 	export let simplifiedForm = false;
 
-	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
+	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
-	let errorType: ConvertAmountErrorType = undefined;
 	let invalidDestination: boolean;
 
 	let invalid = true;
 	$: invalid =
 		invalidDestination ||
-		nonNullish(errorType) ||
 		nonNullish(amountError) ||
 		isNullishOrEmpty(destination) ||
 		isNullish(amount);
@@ -42,41 +35,12 @@
 	on:icNext
 	{source}
 	token={$sendToken}
-	balance={$balance}
+	balance={$sendBalance}
 	disabled={invalid}
 	hideSource
 	networkId={$sendTokenNetworkId}
 >
-	<div slot="amount">
-		<TokenInput
-			token={$sendToken}
-			bind:amount
-			isSelectable={false}
-			exchangeRate={$sendTokenExchangeRate}
-			bind:errorType
-		>
-			<span slot="title">{$i18n.core.text.amount}</span>
-
-			<svelte:fragment slot="amount-info">
-				{#if nonNullish($sendToken)}
-					<div class="text-tertiary">
-						<TokenInputAmountExchange
-							{amount}
-							exchangeRate={$sendTokenExchangeRate}
-							token={$sendToken}
-							disabled
-						/>
-					</div>
-				{/if}
-			</svelte:fragment>
-
-			<svelte:fragment slot="balance">
-				{#if nonNullish($sendToken)}
-					<SendMaxBalanceButton bind:sendAmount={amount} {errorType} />
-				{/if}
-			</svelte:fragment>
-		</TokenInput>
-	</div>
+    <IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
 
 	<div slot="destination">
 		{#if !simplifiedForm}
