@@ -30,7 +30,7 @@
 	export let loading = false;
 	export let isSelectable = true;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
-	export let customErrorValidate: (userAmount: BigNumber) => Error = () => undefined;
+	export let customErrorValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
 
 	const dispatch = createEventDispatcher();
 
