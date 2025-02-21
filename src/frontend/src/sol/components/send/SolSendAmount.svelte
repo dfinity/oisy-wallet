@@ -8,6 +8,9 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -22,15 +25,18 @@
 	} from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
 
-	const { sendToken, sendBalance, sendTokenDecimals, sendTokenStandard, sendTokenNetworkId, sendTokenExchangeRate } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {
+		sendToken,
+		sendBalance,
+		sendTokenDecimals,
+		sendTokenStandard,
+		sendTokenNetworkId,
+		sendTokenExchangeRate
+	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
@@ -72,12 +78,12 @@
 </script>
 
 <TokenInput
-		token={$sendToken}
-		bind:amount
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
-		bind:errorType={amountError}
-		{customValidate}
+	token={$sendToken}
+	bind:amount
+	isSelectable={false}
+	exchangeRate={$sendTokenExchangeRate}
+	bind:errorType={amountError}
+	{customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -85,10 +91,10 @@
 		{#if nonNullish($sendToken)}
 			<div class="text-tertiary">
 				<TokenInputAmountExchange
-						{amount}
-						exchangeRate={$sendTokenExchangeRate}
-						token={$sendToken}
-						disabled
+					{amount}
+					exchangeRate={$sendTokenExchangeRate}
+					token={$sendToken}
+					disabled
 				/>
 			</div>
 		{/if}
@@ -100,4 +106,3 @@
 		{/if}
 	</svelte:fragment>
 </TokenInput>
-

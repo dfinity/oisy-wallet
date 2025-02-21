@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
+	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
@@ -9,7 +10,6 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import IcSendAmount from "$icp/components/send/IcSendAmount.svelte";
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -40,7 +40,7 @@
 	hideSource
 	networkId={$sendTokenNetworkId}
 >
-    <IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
 
 	<div slot="destination">
 		{#if !simplifiedForm}

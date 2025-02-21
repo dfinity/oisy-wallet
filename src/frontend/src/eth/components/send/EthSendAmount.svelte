@@ -6,6 +6,9 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
+	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,9 +16,6 @@
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -32,8 +32,14 @@
 		evaluateFee
 	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	const { sendTokenDecimals, sendBalance, sendTokenId, sendTokenStandard, sendToken, sendTokenExchangeRate } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {
+		sendTokenDecimals,
+		sendBalance,
+		sendTokenId,
+		sendTokenStandard,
+		sendToken,
+		sendTokenExchangeRate
+	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish($storeFeeData)) {
@@ -95,12 +101,12 @@
 </script>
 
 <TokenInput
-		token={$sendToken}
-		bind:amount
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
-		bind:errorType={insufficientFundsError}
-		{customValidate}
+	token={$sendToken}
+	bind:amount
+	isSelectable={false}
+	exchangeRate={$sendTokenExchangeRate}
+	bind:errorType={insufficientFundsError}
+	{customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -108,10 +114,10 @@
 		{#if nonNullish($sendToken)}
 			<div class="text-tertiary">
 				<TokenInputAmountExchange
-						{amount}
-						exchangeRate={$sendTokenExchangeRate}
-						token={$sendToken}
-						disabled
+					{amount}
+					exchangeRate={$sendTokenExchangeRate}
+					token={$sendToken}
+					disabled
 				/>
 			</div>
 		{/if}

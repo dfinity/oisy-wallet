@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
@@ -14,9 +15,8 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import EthSendAmount from "$eth/components/send/EthSendAmount.svelte";
-	import type {Token} from "$lib/types/token";
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -31,10 +31,7 @@
 
 	let invalid = true;
 	$: invalid =
-		invalidDestination ||
-		insufficientFunds ||
-		isNullishOrEmpty(destination) ||
-		isNullish(amount);
+		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 

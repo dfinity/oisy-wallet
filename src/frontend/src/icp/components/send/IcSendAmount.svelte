@@ -19,6 +19,9 @@
 	} from '$icp/utils/cketh.utils';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -27,15 +30,13 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendToken, sendTokenDecimals, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenDecimals, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let fee: bigint | undefined;
 	$: fee = ($sendToken as OptionIcToken)?.fee;
@@ -121,12 +122,12 @@
 </script>
 
 <TokenInput
-		token={$sendToken}
-		bind:amount
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
-		bind:errorType={amountError}
-		{customValidate}
+	token={$sendToken}
+	bind:amount
+	isSelectable={false}
+	exchangeRate={$sendTokenExchangeRate}
+	bind:errorType={amountError}
+	{customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -134,10 +135,10 @@
 		{#if nonNullish($sendToken)}
 			<div class="text-tertiary">
 				<TokenInputAmountExchange
-						{amount}
-						exchangeRate={$sendTokenExchangeRate}
-						token={$sendToken}
-						disabled
+					{amount}
+					exchangeRate={$sendTokenExchangeRate}
+					token={$sendToken}
+					disabled
 				/>
 			</div>
 		{/if}
