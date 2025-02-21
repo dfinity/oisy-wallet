@@ -32,17 +32,6 @@ vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
 }));
 
-vi.mock('$lib/providers/infura.providers', () => ({
-	infuraProviders: () => {
-		vi.fn().mockResolvedValue({
-			gasPrice: null,
-			maxFeePerGas: null,
-			maxPriorityFeePerGas: null,
-			lastBaseFeePerGas: null
-		});
-	}
-}));
-
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
@@ -146,6 +135,17 @@ describe('EthConvertTokenWizard', () => {
 		ethAddressStore.reset();
 
 		mockEthereumToken();
+
+		vi.mock('$lib/providers/infura.providers', () => ({
+			infuraProviders: () => {
+				vi.fn().mockResolvedValue({
+					gasPrice: null,
+					maxFeePerGas: null,
+					maxPriorityFeePerGas: null,
+					lastBaseFeePerGas: null
+				});
+			}
+		}));
 	});
 
 	it('should call send if all requirements are met', async () => {
