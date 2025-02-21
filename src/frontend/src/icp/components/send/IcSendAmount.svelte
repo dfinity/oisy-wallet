@@ -126,8 +126,8 @@
 	bind:amount
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
-	bind:errorType={amountError}
-	{customValidate}
+	bind:error={amountError}
+	customErrorValidate={customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -146,7 +146,7 @@
 
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken)}
-			<SendMaxBalanceButton bind:sendAmount={amount} errorType={amountError} />
+			<SendMaxBalanceButton bind:sendAmount={amount} error={amountError} />
 		{/if}
 	</svelte:fragment>
 </TokenInput>

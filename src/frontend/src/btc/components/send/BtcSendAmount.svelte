@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
+	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -13,7 +14,7 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let amount: OptionAmount = undefined;
-	export let amountError: ConvertAmountErrorType | undefined;
+	export let amountError: BtcAmountAssertionError | undefined;
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -23,11 +24,11 @@
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
 		if (invalidAmount(userAmount.toNumber()) || userAmount.isZero()) {
-			return new ConvertAmountErrorType($i18n.send.assertion.amount_invalid);
+			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
 		if (userAmount.gt($sendBalance ?? ZERO)) {
-			return new ConvertAmountErrorType($i18n.send.assertion.insufficient_funds);
+			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
 	};
 </script>

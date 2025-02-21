@@ -13,7 +13,7 @@
 
 	export let sendAmount: OptionAmount;
 	export let amountSetToMax = false;
-	export let errorType: ConvertAmountErrorType = undefined;
+	export let error: Error = undefined;
 
 	const { sendBalance, sendToken, isSendTokenIcrc2 } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -60,8 +60,8 @@
 <button
 	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
-	class:text-error-primary={isZeroBalance || nonNullish(errorType)}
-	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
+	class:text-error-primary={isZeroBalance || nonNullish(error)}
+	class:text-brand-primary={!isZeroBalance && isNullish(error)}
 	data-tid={MAX_BUTTON}
 >
 	{$i18n.send.text.max_balance}:
