@@ -8,7 +8,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let data: CardData;
-	export let color: 'off-white' | 'white';
+	export let color: 'off-white' | 'white' = 'off-white';
 	export let badge:
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }

@@ -8,7 +8,7 @@
 	export let src: string | undefined;
 	export let alt = '';
 	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white';
+	export let color: 'off-white' | 'white' = 'off-white';
 	export let ring = false;
 	export let testId: string | undefined = undefined;
 

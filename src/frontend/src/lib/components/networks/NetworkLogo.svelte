@@ -8,7 +8,7 @@
 	export let network: Network;
 	export let blackAndWhite = false;
 	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white';
+	export let color: 'off-white' | 'white' = 'off-white';
 	export let testId: string | undefined = undefined;
 </script>
 
