@@ -24,6 +24,7 @@ import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { InfuraProvider } from '@ethersproject/providers';
 import { fireEvent, render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { get, readable, writable } from 'svelte/store';
@@ -31,12 +32,6 @@ import { expect } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
-}));
-
-vi.mock('$eth/providers/infura.providers', () => ({
-	infuraProviders: () => ({
-		getFeeData: vi.fn()
-	})
 }));
 
 describe('EthConvertTokenWizard', () => {
@@ -114,6 +109,13 @@ describe('EthConvertTokenWizard', () => {
 		});
 	};
 	const mockFeeStore = (fees?: FeeStoreData) => {
+		vi.spyOn(InfuraProvider.prototype, 'getFeeData').mockResolvedValue({
+			gasPrice: null,
+			maxFeePerGas: null,
+			maxPriorityFeePerGas: null,
+			lastBaseFeePerGas: null
+		});
+
 		const store = writable<FeeStoreData>(undefined);
 		store.set(fees);
 
