@@ -34,7 +34,9 @@ vi.mock('$lib/services/auth.services', () => ({
 }));
 
 vi.mock('$eth/providers/infura.providers', () => ({
-	infuraProviders: vi.fn()
+	infuraProviders: () => ({
+		getFeeData: vi.fn()
+	})
 }));
 
 describe('EthConvertTokenWizard', () => {
