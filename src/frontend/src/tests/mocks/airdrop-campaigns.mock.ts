@@ -4,6 +4,7 @@ export const mockAirdropCampaigns: AirdropDescription[] = [
 	{
 		id: 'OISY Airdrop #1',
 		title: 'OISY Airdrop',
+		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
 		description: 'Some short description for the Airdrop. Some short description for the Airdrop.',
 		requirements: [
@@ -24,6 +25,7 @@ export const mockAirdropCampaigns: AirdropDescription[] = [
 	{
 		id: 'OISY Airdrop #2',
 		title: 'OISY Airdrop',
+		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
 		description: 'Some short description for the Airdrop. Some short description for the Airdrop.',
 		requirements: [
