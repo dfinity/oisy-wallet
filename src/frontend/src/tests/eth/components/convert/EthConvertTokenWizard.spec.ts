@@ -136,16 +136,18 @@ describe('EthConvertTokenWizard', () => {
 
 		mockEthereumToken();
 
-		vi.mock('$eth/providers/infura.providers', () => ({
-			infuraProviders: () => {
-				vi.fn().mockResolvedValue({
-					gasPrice: null,
+		vi.mock('@ethersproject/providers', () => {
+			const provider = vi.fn();
+			provider.prototype.getFeeData = vi
+				.fn()
+				.mockResolvedValue({
+					lastBaseFeePerGas: null,
 					maxFeePerGas: null,
 					maxPriorityFeePerGas: null,
-					lastBaseFeePerGas: null
+					gasPrice: null
 				});
-			}
-		}));
+			return { InfuraProvider: provider, JsonRpcProvider: provider };
+		});
 	});
 
 	it('should call send if all requirements are met', async () => {
