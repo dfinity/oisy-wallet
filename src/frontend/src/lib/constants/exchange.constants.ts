@@ -8,3 +8,5 @@ import { SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
  * As a result, we've restricted synchronization to refresh every certain amount of time.
  */
 export const SYNC_EXCHANGE_TIMER_INTERVAL = SECONDS_IN_MINUTE * 1000 * 2; // 2 minute
+
+export const EXCHANGE_USD_AMOUNT_THRESHOLD = 0.01;
