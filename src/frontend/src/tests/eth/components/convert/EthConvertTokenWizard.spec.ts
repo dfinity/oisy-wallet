@@ -136,7 +136,7 @@ describe('EthConvertTokenWizard', () => {
 
 		mockEthereumToken();
 
-		vi.mock('$lib/providers/infura.providers', () => ({
+		vi.mock('$eth/providers/infura.providers', () => ({
 			infuraProviders: () => {
 				vi.fn().mockResolvedValue({
 					gasPrice: null,
