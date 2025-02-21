@@ -30,14 +30,8 @@ export default {
 			black: 'rgb(0, 0, 0)',
 			white: 'rgb(255 255 255)',
 
-			// todo: remove refereces to these hardcoded colors!
+			// keeping off-white since theres currently no matching color var in figma even though its used
 			'off-white': '#fcfaf6',
-			dust: '#dbd9d6',
-			grey: '#c0bbc4',
-			'blue-ribbon': '#0066ff',
-			'info-blue': '#0BA5EC',
-			goldenrod: '#dfa81b',
-			cyclamen: '#ea6c99',
 
 			// custom hero gradient colors
 			...themeVariables.gradient

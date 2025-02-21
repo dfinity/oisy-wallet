@@ -12,6 +12,7 @@ export const themeVariables = {
 		'tertiary-alt': 'var(--color-background-tertiary-alt)',
 		'tertiary-inverted': 'var(--color-background-tertiary-inverted)',
 		disabled: 'var(--color-background-disabled)',
+		'disabled-alt': 'var(--color-background-disabled-alt)',
 		brand: {
 			'subtle-10': 'var(--color-background-brand-subtle-10)',
 			'subtle-20': 'var(--color-background-brand-subtle-20)',
