@@ -3,9 +3,9 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
-	import {EXCHANGE_USD_AMOUNT_THRESHOLD} from "$lib/constants/exchange.constants";
 
 	export let amount: BigNumber;
 	export let decimals: number;
