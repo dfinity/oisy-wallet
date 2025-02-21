@@ -24,7 +24,7 @@
 	</span>
 	<article class="h-full">
 		<section>
-			<p class="m-0 text-start text-lg font-semibold">{airdrop.title}</p>
+			<p class="m-0 text-start text-lg font-semibold">{airdrop.cardTitle}</p>
 			<p class="m-0 mt-2 text-start text-xs text-tertiary">
 				{airdrop.oneLiner}
 			</p>

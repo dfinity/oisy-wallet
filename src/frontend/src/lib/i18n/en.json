@@ -37,7 +37,7 @@
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
-			"airdrops": "Airdrops",
+			"airdrops": "Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -51,7 +51,7 @@
 			"settings": "Open your settings",
 			"dapp_explorer": "Open dapp explorer",
 			"activity": "Open the activity view",
-			"airdrops": "Open the Airdrops view",
+			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -115,17 +115,17 @@
 	},
 	"airdrops": {
 		"text": {
-			"title": "Airdrops",
-			"active_campaigns": "Active campaigns",
-			"upcoming_campaigns": "Upcoming campaigns",
+			"title": "Rewards",
+			"active_campaigns": "Active Opportunities",
+			"upcoming_campaigns": "Upcoming Opportunities",
 			"active_date": "Due on",
 			"participate_title": "How to participate",
-			"share": "Share",
+			"share": "Share on X",
 			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
-			"no_balance_title": "Start earning",
+			"no_balance_title": "Start exploring",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
 			"state_modal_title": "Congratulations on winning today's airdrop!",
@@ -133,7 +133,7 @@
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win."
 		},
 		"alt": {
-			"upcoming_campaigns": "Stay tuned for the upcoming airdrops - subscribe to $oisy_short on X and follow recent updates."
+			"upcoming_campaigns": "Stay tuned for upcoming token rewards - subscribe to $oisy_short on X and follow for the latest updates."
 		}
 	},
 	"footer": {
