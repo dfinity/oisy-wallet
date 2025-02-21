@@ -30,7 +30,7 @@
 	aria-label={ariaLabel}
 >
 	<span
-		class="gap-2 flex"
+		class="flex gap-2"
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
