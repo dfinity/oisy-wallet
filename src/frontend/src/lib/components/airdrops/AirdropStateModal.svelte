@@ -50,7 +50,7 @@
 		</div>
 
 		<ButtonGroup slot="toolbar">
-			<Button on:click={modalStore.close} colorStyle="secondary"
+			<Button on:click={modalStore.close} colorStyle="primary"
 				>{$i18n.airdrops.text.open_wallet}</Button
 			>
 		</ButtonGroup>
