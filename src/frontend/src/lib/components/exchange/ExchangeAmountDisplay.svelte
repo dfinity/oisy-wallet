@@ -3,9 +3,9 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
+	import {EXCHANGE_USD_AMOUNT_THRESHOLD} from "$lib/constants/exchange.constants";
 
 	export let amount: BigNumber;
 	export let decimals: number;
@@ -33,9 +33,9 @@
 		{symbol}
 
 		<div class="text-tertiary">
-			{#if usdAmount < SWAP_TOTAL_FEE_THRESHOLD}
+			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
 				{`( < ${formatUSD({
-					value: SWAP_TOTAL_FEE_THRESHOLD
+					value: EXCHANGE_USD_AMOUNT_THRESHOLD
 				})} )`}
 			{:else}
 				{`( ${formatUSD({ value: usdAmount })} )`}
