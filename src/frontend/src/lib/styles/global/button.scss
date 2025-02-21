@@ -372,6 +372,9 @@ a.as-button {
 	@apply text-left;
 	@apply font-medium;
 	@apply leading-5;
+	@apply border-primary;
+
+	transition: border 0.25s ease-out;
 
 	&::placeholder {
 		@apply text-tertiary;
