@@ -8,7 +8,6 @@
 	import SolFeeDisplay from '$sol/components/fee/SolFeeDisplay.svelte';
 	import SolSendAmount from '$sol/components/send/SolSendAmount.svelte';
 	import SolSendDestination from '$sol/components/send/SolSendDestination.svelte';
-	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
 
 	export let amount: OptionAmount = undefined;
