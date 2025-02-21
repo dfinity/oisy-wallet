@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { fade, slide } from 'svelte/transition';
-	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+	import { getContext } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { TokenId } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -15,6 +18,8 @@
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
 	export let feeDecimals: number;
+
+	const { sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let balance: Exclude<OptionBalance, null>;
 	$: balance = nonNullish($balancesStore) ? ($balancesStore[feeTokenId]?.data ?? ZERO) : undefined;
@@ -28,13 +33,12 @@
 	$: balance, fee, debounceCheckFeeFunds();
 </script>
 
-<div transition:fade>
-	{formatToken({
-		value: fee,
-		displayDecimals: EIGHT_DECIMALS
-	})}
-	{feeSymbol}
-</div>
+<ExchangeAmountDisplay
+	amount={fee}
+	decimals={feeDecimals}
+	symbol={feeSymbol}
+	exchangeRate={$sendTokenExchangeRate}
+/>
 {#if insufficientFeeFunds && nonNullish(balance)}
 	<p in:slide={SLIDE_DURATION} class="text-cyclamen">
 		{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
