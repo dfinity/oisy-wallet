@@ -22,7 +22,7 @@ describe('AirdropCard', () => {
 			}
 		});
 
-		expect(getByText(mockedAirdrop.title)).toBeInTheDocument();
+		expect(getByText(mockedAirdrop.cardTitle)).toBeInTheDocument();
 		expect(getByText(mockedAirdrop.oneLiner)).toBeInTheDocument();
 
 		const logo: HTMLDivElement | null = container.querySelector(logoSelector);
