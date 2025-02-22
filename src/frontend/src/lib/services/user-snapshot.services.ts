@@ -210,9 +210,9 @@ export const registerUserSnapshot = async () => {
 		return;
 	}
 
-	const timestamp = Date.now();
+	const timestamp = BigInt(Date.now()) * 1_000_000n;
 
-	const accounts = takeAccountSnapshots(timestamp);
+	const accounts = takeAccountSnapshots(Number(timestamp));
 
 	if (accounts.length === 0) {
 		return;
