@@ -493,7 +493,7 @@
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
-			"slippage_exceeded": "The swap could not be executed because the expected slippage of $expectedSlippage% exceeded the maximum allowed value of $maxSlippage%.\nYou can change the allowed slippage in the previous form, but this can lead to more unfavorable trades."
+			"slippage_exceeded": "OISY protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
 		}
 	},
 	"buy": {
