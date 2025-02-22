@@ -52,6 +52,19 @@ export const registerAirdropRecipient = async ({
 	return registerAirdropRecipient(userSnapshot);
 };
 
+export const registerSnapshotFor = async ({
+	userSnapshot,
+	identity
+}: CanisterApiFunctionParams<{
+	userSnapshot: UserSnapshot;
+}>): Promise<void> => {
+	assertNonNullish(identity);
+
+	const { registerSnapshotFor } = await rewardCanister({ identity });
+
+	return registerSnapshotFor({ principal: identity.getPrincipal(), userSnapshot });
+};
+
 const rewardCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,

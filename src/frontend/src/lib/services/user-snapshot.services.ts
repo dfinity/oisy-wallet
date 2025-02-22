@@ -11,7 +11,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { isIcToken } from '$icp/validation/ic-token.validation';
-import { registerAirdropRecipient } from '$lib/api/reward.api';
+import { registerAirdropRecipient, registerSnapshotFor } from '$lib/api/reward.api';
 import { solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -219,6 +219,11 @@ export const registerUserSnapshot = async () => {
 	}
 
 	await registerAirdropRecipient({
+		userSnapshot: { accounts, timestamp: toNullable(BigInt(timestamp)) },
+		identity: get(authIdentity)
+	});
+
+	await registerSnapshotFor({
 		userSnapshot: { accounts, timestamp: toNullable(BigInt(timestamp)) },
 		identity: get(authIdentity)
 	});
