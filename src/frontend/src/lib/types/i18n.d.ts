@@ -149,7 +149,12 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: { initializing_wallet: string; securing_session: string; retrieving_public_keys: string };
+	text: {
+		initializing_wallet: string;
+		securing_session: string;
+		retrieving_public_keys: string;
+		done: string;
+	};
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -452,7 +457,12 @@ interface I18nSwap {
 		refreshing_ui: string;
 		swap_provider: string;
 	};
-	error: { unexpected: string; unexpected_missing_data: string; slippage_exceeded: string };
+	error: {
+		kong_not_available: string;
+		unexpected: string;
+		unexpected_missing_data: string;
+		slippage_exceeded: string;
+	};
 }
 
 interface I18nBuy {

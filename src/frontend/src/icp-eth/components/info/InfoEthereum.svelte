@@ -34,7 +34,7 @@
 </script>
 
 <div class="pr-2">
-	<h4 class="gap-2 font-medium flex items-center">
+	<h4 class="flex items-center gap-2 font-medium">
 		<Logo
 			src={eth}
 			alt={replacePlaceholders($i18n.core.alt.logo, {

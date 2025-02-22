@@ -46,6 +46,9 @@ jobs:
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    outputs:
+      ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
+      macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
 
     steps:
       - name: Fail if branch is main
@@ -92,15 +95,6 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Determine OS Suffix
-        id: os_suffix
-        run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            echo "os_suffix=linux" >> $GITHUB_OUTPUT
-          elif [ "$RUNNER_OS" = "macOS" ]; then
-            echo "os_suffix=darwin" >> $GITHUB_OUTPUT
-          fi
-
       - name: Run Playwright tests
         run: npm run e2e:snapshots
 
@@ -121,27 +115,31 @@ jobs:
           retention-days: 3
 
       - name: Check if snapshots changed
+        id: check_snapshots
         run: |
           if [ -n "$(git status --porcelain e2e)" ]; then
-            echo "CHANGES=true" >> $GITHUB_ENV
-            echo "CHANGES=true" > snapshot_status.txt
+            echo "CHANGES=true" >> $GITHUB_OUTPUT
           else
-            echo "CHANGES=false" >> $GITHUB_ENV
-            echo "CHANGES=false" > snapshot_status.txt
+            echo "CHANGES=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Upload snapshot status
-        uses: actions/upload-artifact@v4
-        with:
-          name: snapshot-status-${{ matrix.os }}
-          path: snapshot_status.txt
+      - name: Set snapshot output
+        id: set_snapshot_output
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            echo "ubuntu_status=${{ steps.check_snapshots.outputs.CHANGES }}" >> $GITHUB_OUTPUT
+            echo "os_suffix=linux" >> $GITHUB_OUTPUT
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            echo "macos_status=${{ steps.check_snapshots.outputs.CHANGES }}" >> $GITHUB_OUTPUT
+            echo "os_suffix=darwin" >> $GITHUB_OUTPUT
+          fi
 
       - name: Save changed snapshots
-        if: env.CHANGES == 'true'
+        if: steps.check_snapshots.outputs.CHANGES == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: snapshots-${{ matrix.os }}
-          path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.os_suffix.outputs.os_suffix }}.png
+          path: e2e/**/*.spec.ts-snapshots/**/*-${{ steps.set_snapshot_output.outputs.os_suffix }}.png
           retention-days: 3
 
   finalize_snapshots_update:
@@ -168,39 +166,10 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Download Ubuntu Snapshot Status
-        uses: actions/download-artifact@v4
-        with:
-          name: snapshot-status-ubuntu-24.04
-          path: snapshot-status-ubuntu
-
-      - name: Download macOS Snapshot Status
-        uses: actions/download-artifact@v4
-        with:
-          name: snapshot-status-macos-14
-          path: snapshot-status-macos
-
-      - name: Check snapshot status for Ubuntu
-        id: check_ubuntu_status
+      - name: Set snapshot status from previous jobs
         run: |
-          if [ -f snapshot-status-ubuntu/snapshot_status.txt ]; then
-            status=$(cut -d'=' -f2 snapshot-status-ubuntu/snapshot_status.txt)
-            echo "Ubuntu snapshot status: $status"
-            echo "ubuntu_status=$status" >> $GITHUB_ENV
-          else
-            echo "ubuntu_status=false" >> $GITHUB_ENV
-          fi
-
-      - name: Check snapshot status for macOS
-        id: check_macos_status
-        run: |
-          if [ -f snapshot-status-macos/snapshot_status.txt ]; then
-            status=$(cut -d'=' -f2 snapshot-status-macos/snapshot_status.txt)
-            echo "macOS snapshot status: $status"
-            echo "macos_status=$status" >> $GITHUB_ENV
-          else
-            echo "macos_status=false" >> $GITHUB_ENV
-          fi
+          echo "ubuntu_status=${{ needs.update_snapshots.outputs.ubuntu_status }}" >> $GITHUB_ENV
+          echo "macos_status=${{ needs.update_snapshots.outputs.macos_status }}" >> $GITHUB_ENV
 
       - name: Download Ubuntu Snapshots
         if: env.ubuntu_status == 'true'
