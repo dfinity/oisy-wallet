@@ -53,7 +53,7 @@ const toBaseTransaction = ({
 	'counterparty'
 > => ({
 	transaction_type: toTransactionType(type),
-	timestamp: timestamp ?? 0n,
+	timestamp: (timestamp ?? 0n) * 1_000_000n,
 	amount: value ?? 0n,
 	network: {}
 });
