@@ -230,14 +230,6 @@ abstract class Homepage {
 		return await this.#page.getByTestId(testId);
 	}
 
-	protected async scrollToTopAndBack(): Promise<void> {
-		const currentPosition = await this.#page.evaluate(() => window.scrollY);
-
-		await this.#page.evaluate(() => window.scrollTo({ top: 0 }));
-
-		await this.#page.evaluate((y) => window.scrollTo({ top: y }), currentPosition);
-	}
-
 	async waitForTimeout(timeout: number): Promise<void> {
 		await this.#page.waitForTimeout(timeout);
 	}
@@ -368,8 +360,12 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot({ scrollToTop = true }: TakeScreenshotParams = {}): Promise<void> {
+		const currentPosition = scrollToTop
+			? await this.#page.evaluate(() => window.scrollY)
+			: undefined;
+
 		if (scrollToTop) {
-			await this.scrollToTopAndBack();
+			await this.#page.evaluate(() => window.scrollTo({ top: 0 }));
 		}
 
 		await expect(this.#page).toHaveScreenshot({
@@ -378,6 +374,10 @@ abstract class Homepage {
 			// playwright can retry flaky tests in the amount of time set below.
 			timeout: 5 * 60 * 1000
 		});
+
+		if (nonNullish(currentPosition)) {
+			await this.#page.evaluate((y) => window.scrollTo({ top: y }), currentPosition);
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
