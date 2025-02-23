@@ -21,6 +21,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
+import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplToken } from '$sol/types/spl';
@@ -205,7 +206,11 @@ const takeAccountSnapshots = (timestamp: number): AccountSnapshotFor[] => {
 				: // TODO: adjust the logic when the rewards canister accepts native tokens too.
 					token.id === SOLANA_TOKEN_ID
 					? toSplSnapshot({
-							token: { ...token, address: 'SOL', owner: '' },
+							token: {
+								...token,
+								address: 'So11111111111111111111111111111111111111111',
+								owner: SYSTEM_PROGRAM_ADDRESS
+							},
 							balance,
 							exchangeRate,
 							timestamp
