@@ -3,6 +3,7 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	MANAGE_TOKENS_MODAL,
 	MANAGE_TOKENS_MODAL_BUTTON,
 	MANAGE_TOKENS_MODAL_SAVE,
 	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
@@ -334,6 +335,16 @@ abstract class Homepage {
 		await locator.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
 	}
 
+	protected async waitForManageTokensModal(options?: WaitForLocatorOptions): Promise<void> {
+		await this.waitForByTestId({ testId: MANAGE_TOKENS_MODAL, options });
+	}
+
+	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
+		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
+		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+	}
+
 	async toggleTokenInList({
 		tokenSymbol,
 		networkSymbol
@@ -341,20 +352,14 @@ abstract class Homepage {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
-		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
-		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
-		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.toggleNetworkSelector({ networkSymbol });
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
+		await this.waitForManageTokensModal();
 		await this.clickByTestId({
 			testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}-${networkSymbol}`
 		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
-	}
-
-	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
-		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
-		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
-		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
 	}
 
 	getTokenCardLocator({
