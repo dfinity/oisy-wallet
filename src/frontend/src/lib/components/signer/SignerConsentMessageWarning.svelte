@@ -15,6 +15,8 @@
 
 {#if displayWarning}
 	<MessageBox level="light-warning"
-		>{ replaceOisyPlaceholders(  $i18n.signer.consent_message.warning.token_without_consent_message)}</MessageBox
+		>{replaceOisyPlaceholders(
+			$i18n.signer.consent_message.warning.token_without_consent_message
+		)}</MessageBox
 	>
 {/if}
