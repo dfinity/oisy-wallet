@@ -3,6 +3,7 @@ import * as z from 'zod';
 export const AirdropEventsSchema = z.object({
 	id: z.string(),
 	title: z.string(),
+	cardTitle: z.string(),
 	oneLiner: z.string(),
 	description: z.string(),
 	requirements: z.array(z.string()),

@@ -13,7 +13,7 @@
 	{testId}
 	ariaLabel={text}
 	iconVisible={false}
-	styleClass={`${styleClass ?? ''} border border-grey rounded-xl px-3 py-2`}
+	styleClass={`${styleClass ?? ''} border border-disabled rounded-xl px-3 py-2`}
 >
 	{text}
 	<IconShare />

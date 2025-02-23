@@ -8,13 +8,16 @@
 	export let placeholderType: 'missing' | 'not-working' = 'missing';
 </script>
 
-<div class="py-12" data-tid="ic-no-index-placeholder">
+<div
+	class="rounded-4xl border-2 border-dashed border-brand-subtle-20 bg-brand-subtle-5 py-12"
+	data-tid="ic-no-index-placeholder"
+>
 	<div class="mb-5 flex justify-center">
 		<RoundedIcon icon={placeholderType === 'not-working' ? IconAlertTriangle : IconSearchClose} />
 	</div>
 
 	<div class="space-y-4">
-		<p class="m-0 text-lg font-bold text-center">
+		<p class="m-0 text-center text-lg font-bold">
 			{$i18n.transactions.text.transaction_history_unavailable}
 		</p>
 		<p class="m-0 text-center text-tertiary">

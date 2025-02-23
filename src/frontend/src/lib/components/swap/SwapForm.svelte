@@ -44,6 +44,7 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		isSourceTokenIcrc2,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -109,7 +110,8 @@
 					userAmount,
 					decimals: $sourceToken.decimals,
 					balance: $sourceTokenBalance,
-					totalFee: sourceTokenFee
+					// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+					totalFee: (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)
 				})
 			: undefined;
 </script>
@@ -173,7 +175,7 @@
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
-							<div class="gap-3 flex text-tertiary">
+							<div class="flex gap-3 text-tertiary">
 								<TokenInputAmountExchange
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
@@ -200,7 +202,7 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="gap-3 flex flex-col">
+			<div class="flex flex-col gap-3">
 				<SwapProvider />
 				<SwapFees />
 			</div>

@@ -15,7 +15,7 @@
 	<IconAstronautHelmet />
 </div>
 
-<picture aria-label={ariaLabel} class="w-24 dark:invert">
+<picture aria-label={ariaLabel} class="invert-on-dark-theme w-24">
 	<source srcset={oisyLogoSmall} media="(max-width: 639px)" />
 	<Img src={oisyLogoLarge} alt={ariaLabel} />
 </picture>
