@@ -11,15 +11,23 @@
 	$: isJackpot = $modalAirdropState ? ($modalStore?.data as boolean | undefined) : undefined;
 
 	onMount(async () => {
+		console.log(123)
 		if (isNullish($authIdentity)) {
 			return;
 		}
 
+		console.log(456)
+
 		const { receivedAirdrop, receivedJackpot } = await loadAirdropResult($authIdentity);
+
+		console.log(789, receivedAirdrop, receivedJackpot)
+
 		if (receivedAirdrop) {
 			modalStore.openAirdropState(receivedJackpot);
 		}
 	});
+
+
 </script>
 
 <slot />
