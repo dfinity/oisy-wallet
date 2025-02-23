@@ -12,6 +12,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
+import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
@@ -53,7 +54,7 @@ const toBaseTransaction = ({
 	'counterparty'
 > => ({
 	transaction_type: toTransactionType(type),
-	timestamp: timestamp ?? 0n,
+	timestamp: (timestamp ?? 0n) * NANO_SECONDS_IN_MILLISECOND,
 	amount: value ?? 0n,
 	network: {}
 });
@@ -71,6 +72,7 @@ const toIcrcTransaction = ({
 
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
+		timestamp: timestamp ?? 0n,
 		counterparty: Principal.fromText(address.toText() === from ? to : from)
 	};
 };
@@ -212,9 +214,9 @@ export const registerUserSnapshot = async () => {
 		return;
 	}
 
-	const timestamp = Date.now();
+	const timestamp = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
 
-	const accounts = takeAccountSnapshots(timestamp);
+	const accounts = takeAccountSnapshots(Number(timestamp));
 
 	if (accounts.length === 0) {
 		return;
