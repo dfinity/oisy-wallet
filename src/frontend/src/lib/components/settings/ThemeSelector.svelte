@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
+	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -48,9 +48,10 @@
 			tabindex={THEME_VALUES.indexOf(theme)}
 			testId={`${THEME_SELECTOR_CARD}-${theme}`}
 		>
-			{#await import(`$lib/assets/${theme}-theme.png`) then { default: src }}
-				<Img {src} alt={$i18n.settings.alt[`appearance_${theme}`]} />
-			{/await}
+			<LazyImg
+				src={`$lib/assets/${theme}-theme.png`}
+				alt={$i18n.settings.alt[`appearance_${theme}`]}
+			/>
 		</ThemeSelectorCard>
 	{/each}
 
@@ -62,8 +63,9 @@
 		tabindex={THEME_VALUES.length}
 		testId={`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`}
 	>
-		{#await import(`$lib/assets/${THEME_SYSTEM}-theme.png`) then { default: src }}
-			<Img {src} alt={$i18n.settings.alt.appearance_system} />
-		{/await}
+		<LazyImg
+			src={`$lib/assets/${THEME_SYSTEM}-theme.png`}
+			alt={$i18n.settings.alt.appearance_system}
+		/>
 	</ThemeSelectorCard>
 </div>
