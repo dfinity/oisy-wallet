@@ -9,11 +9,17 @@ export const INITIAL_AIRDROP_RESULT = 'initialAirdropResult';
 
 export const loadAirdropResult = async (identity: Identity): Promise<AirdropResult> => {
 	const initialLoading: string | null = sessionStorage.getItem(INITIAL_AIRDROP_RESULT);
+	console.log('initialLoading', initialLoading);
+
 	if (isNullish(initialLoading)) {
 		const { airdrops, lastTimestamp } = await getAirdrops({ identity });
+		console.log('airdrops', airdrops, lastTimestamp);
+
 		const newAirdrops: AirdropInfo[] = airdrops.filter(
 			({ timestamp }) => timestamp >= lastTimestamp
 		);
+
+		console.log('newAirdrops', newAirdrops);
 
 		sessionStorage.setItem(INITIAL_AIRDROP_RESULT, 'true');
 
