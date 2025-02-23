@@ -37,7 +37,7 @@ interface ToSnapshotParams<T extends Token> {
 	token: T;
 	balance: BigNumber;
 	exchangeRate: number;
-	timestamp: number;
+	timestamp: bigint;
 }
 
 const LAST_TRANSACTIONS_COUNT = 5;
@@ -106,7 +106,7 @@ const toBaseSnapshot = ({
 	decimals,
 	approx_usd_per_token: exchangeRate,
 	amount: balance.toBigInt(),
-	timestamp: BigInt(timestamp),
+	timestamp,
 	network: {}
 });
 
@@ -175,7 +175,7 @@ const toSplSnapshot = ({
 	return isNetworkIdSOLDevnet(networkId) ? { SplDevnet: snapshot } : { SplMainnet: snapshot };
 };
 
-const takeAccountSnapshots = (timestamp: number): AccountSnapshotFor[] => {
+const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 	const balances = get(balancesStore);
 
 	if (isNullish(balances)) {
@@ -216,7 +216,7 @@ export const registerUserSnapshot = async () => {
 
 	const timestamp = BigInt(Date.now()) * NANO_SECONDS_IN_MILLISECOND;
 
-	const accounts = takeAccountSnapshots(Number(timestamp));
+	const accounts = takeAccountSnapshots(timestamp);
 
 	if (accounts.length === 0) {
 		return;
