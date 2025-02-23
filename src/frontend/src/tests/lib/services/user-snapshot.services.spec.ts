@@ -8,6 +8,7 @@ import type {
 import * as airdropEnv from '$env/airdrop-campaigns.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
@@ -52,6 +53,7 @@ describe('user-snapshot.services', () => {
 			...mockTokens,
 			mockValidIcToken,
 			mockValidErc20Token,
+			SOLANA_TOKEN,
 			mockValidSplToken
 		];
 
@@ -107,8 +109,20 @@ describe('user-snapshot.services', () => {
 		const splMainnetAccounts: { SplMainnet: AccountSnapshot_Spl }[] = [
 			{
 				SplMainnet: {
-					decimals: mockValidSplToken.decimals,
+					decimals: SOLANA_TOKEN.decimals,
 					approx_usd_per_token: mockTokens.length + 3,
+					amount: mockSplAmount * 5n,
+					timestamp: BigInt(now),
+					network: {},
+					account: mockSolAddress,
+					token_address: 'So11111111111111111111111111111111111111111',
+					last_transactions: []
+				}
+			},
+			{
+				SplMainnet: {
+					decimals: mockValidSplToken.decimals,
+					approx_usd_per_token: mockTokens.length + 4,
 					amount: mockSplAmount,
 					timestamp: BigInt(now),
 					network: {},
@@ -173,6 +187,10 @@ describe('user-snapshot.services', () => {
 			balancesStore.set({
 				tokenId: ETHEREUM_TOKEN.id,
 				data: { data: BigNumber.from(mockIcAmount + mockSplAmount), certified }
+			});
+			balancesStore.set({
+				tokenId: SOLANA_TOKEN.id,
+				data: { data: BigNumber.from(mockSplAmount * 5n), certified }
 			});
 			balancesStore.set({
 				tokenId: mockValidIcToken.id,
@@ -246,9 +264,6 @@ describe('user-snapshot.services', () => {
 		});
 
 		it('should handle multiple tokens and send correct snapshots', async () => {
-			// mockExchangeStore();
-			// mockAuthStore();
-
 			await registerUserSnapshot();
 
 			expect(registerAirdropRecipient).toHaveBeenCalledWith({
