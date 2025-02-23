@@ -101,15 +101,8 @@
 			const errorDetail = errorDetailToString(err);
 
 			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				const expectedSlippageMatch = errorDetail.match(/(\d+(\.\d+)?)% slippage/);
-
-				const expectedSlippage = nonNullish(expectedSlippageMatch)
-					? expectedSlippageMatch[1]
-					: 'N/A';
-
 				failedSwapError.set(
 					replacePlaceholders($i18n.swap.error.slippage_exceeded, {
-						$expectedSlippage: expectedSlippage,
 						$maxSlippage: slippageValue.toString()
 					})
 				);
