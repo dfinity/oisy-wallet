@@ -22,7 +22,6 @@
 		}
 	};
 
-
 	onMount(checkAirDrop);
 
 	// the below is just temporary pseudo-code
@@ -30,8 +29,6 @@
 	onDestroy(() => {
 		clearInterval(interval);
 	});
-
-
 </script>
 
 <slot />
