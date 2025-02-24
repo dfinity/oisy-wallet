@@ -238,6 +238,4 @@ export const registerUserSnapshot = async () => {
 		userSnapshot: { accounts, timestamp: toNullable(BigInt(timestamp)) },
 		identity: get(authIdentity)
 	});
-
-
 };
