@@ -1,9 +1,6 @@
 name: Frontend Reproducibility
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     paths:
       - package-lock.json
