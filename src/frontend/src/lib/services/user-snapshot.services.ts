@@ -62,7 +62,7 @@ const toBaseTransaction = ({
 });
 
 const toIcrcTransaction = ({
-	transaction: { type, value, timestamp, from, to },
+	transaction: { type, value, timestamp, from, to }
 }: {
 	transaction: IcTransactionUi;
 }): Transaction_Icrc => {
@@ -133,9 +133,7 @@ const toIcrcSnapshot = ({
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
 		token_address: Principal.from(ledgerCanisterId),
-		last_transactions: lastTransactions.map((transaction) =>
-			toIcrcTransaction({ transaction})
-		)
+		last_transactions: lastTransactions.map((transaction) => toIcrcTransaction({ transaction }))
 	};
 
 	return { Icrc: snapshot };
