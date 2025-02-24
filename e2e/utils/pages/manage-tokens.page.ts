@@ -1,3 +1,4 @@
+import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
@@ -53,7 +54,9 @@ export class ManageTokensPage extends HomepageLoggedIn {
 		await this.waitForLoadState();
 		await this.setCarouselFirstSlide();
 		await this.waitForLoadState();
-		await this.takeScreenshot();
+		await this.takeScreenshot({
+			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
+		});
 		await this.toggleTokenInList({
 			tokenSymbol,
 			networkSymbol
