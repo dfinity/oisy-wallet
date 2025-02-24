@@ -75,7 +75,8 @@ const toIcrcTransaction = ({
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
 		timestamp: timestamp ?? 0n,
-		counterparty: Principal.fromHex(address.toHex() === from ? to : from)
+// TODO: use correct value when the Rewards canister is updated to accept account identifiers 
+		counterparty: Principal.anonymous(),
 	};
 };
 
