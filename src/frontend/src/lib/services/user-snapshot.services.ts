@@ -62,21 +62,15 @@ const toBaseTransaction = ({
 });
 
 const toIcrcTransaction = ({
-	transaction: { type, value, timestamp, from, to }
+	transaction: { type, value, timestamp }
 }: {
 	transaction: IcTransactionUi;
-}): Transaction_Icrc => {
-	// This does not happen, but we need it to be type-safe.
-	assertNonNullish(from);
-	assertNonNullish(to);
-
-	return {
-		...toBaseTransaction({ type, value, timestamp }),
-		timestamp: timestamp ?? 0n,
-		// TODO: use correct value when the Rewards canister is updated to accept account identifiers
-		counterparty: Principal.anonymous()
-	};
-};
+}): Transaction_Icrc => ({
+	...toBaseTransaction({ type, value, timestamp }),
+	timestamp: timestamp ?? 0n,
+	// TODO: use correct value when the Rewards canister is updated to accept account identifiers
+	counterparty: Principal.anonymous()
+});
 
 const toSplTransaction = ({
 	transaction: { type, value, timestamp, from, to },
