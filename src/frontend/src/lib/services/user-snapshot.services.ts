@@ -239,8 +239,5 @@ export const registerUserSnapshot = async () => {
 		identity: get(authIdentity)
 	});
 
-	// await registerSnapshotFor({
-	// 	userSnapshot: { accounts, timestamp: toNullable(BigInt(timestamp)) },
-	// 	identity: get(authIdentity)
-	// });
+
 };
