@@ -134,9 +134,9 @@ const toIcrcSnapshot = ({
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
 		token_address: Principal.from(ledgerCanisterId),
-                last_transactions: lastTransactions.map((transaction) => 
-                         toIcrcTransaction({ transaction, address }) 
-                 )
+		last_transactions: lastTransactions.map((transaction) =>
+			toIcrcTransaction({ transaction, address })
+		)
 	};
 
 	return { Icrc: snapshot };
