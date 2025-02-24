@@ -84,7 +84,7 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="mx-auto mb-4 aspect-square h-80 max-h-[44vh] max-w-full p-4">
+		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
 					<div slot="logo" class="flex items-center justify-center rounded-lg bg-primary p-2">
