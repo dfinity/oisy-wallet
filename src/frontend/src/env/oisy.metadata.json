@@ -6,5 +6,6 @@
 	"OISY_REPO_URL": "https://github.com/dfinity/oisy-wallet",
 	"OISY_STATUS_URL": "https://github.com/dfinity/oisy-wallet#status",
 	"OISY_TWITTER_URL": "https://x.com/oisy",
+	"OISY_SUPPORT_URL": "https://docs.oisy.com",
 	"OISY_REWARDS_URL": "https://docs.oisy.com/rewards"
 }
