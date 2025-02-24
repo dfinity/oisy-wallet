@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import {
@@ -13,6 +15,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
+	export let airdrop: AirdropDescription | undefined = undefined;
 	$: ({
 		id: dappId,
 		carousel: { text, callToAction },
@@ -28,7 +31,11 @@
 			}
 		});
 
-		modalStore.openDappDetails(dappsCarouselSlide);
+		if (nonNullish(airdrop)) {
+			modalStore.openAirdropDetails(airdrop);
+		} else {
+			modalStore.openDappDetails(dappsCarouselSlide);
+		}
 	};
 
 	const dispatch = createEventDispatcher();

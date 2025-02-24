@@ -9,3 +9,5 @@ export const airdropCampaigns: AirdropDescription[] = parseResult.success ? pars
 // TODO: remove this feature flag when user snapshot live on production
 export const USER_SNAPSHOT_ENABLED =
 	JSON.parse(import.meta.env.VITE_USER_SNAPSHOT_ENABLED ?? false) === true;
+
+export const FEATURED_AIRDROP_CAROUSEL_SLIDE_ID = 'OISY Airdrop #1';
