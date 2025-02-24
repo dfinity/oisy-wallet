@@ -47,8 +47,6 @@
 <div class="flex flex-col gap-5">
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
 
-	<MessageBox level="warning">HELLOOOOOOOOO TEST</MessageBox>
-
 	{#if $testnetsEnabled}
 		<div>
 			<NetworksSwitcher />
