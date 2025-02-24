@@ -14,9 +14,6 @@ export const loadAirdropResult = async (identity: Identity): Promise<AirdropResu
 		const newAirdrops: AirdropInfo[] = airdrops.filter(
 			({ timestamp }) => timestamp >= lastTimestamp
 		);
-
-		
-
 		sessionStorage.setItem(INITIAL_AIRDROP_RESULT, 'true');
 
 		if (newAirdrops.length > 0) {
