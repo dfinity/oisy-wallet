@@ -83,7 +83,7 @@
 			return;
 		}
 
-		if (invalidAmount(sendAmount) || isNullish(sendAmount)) {
+		if (isNullish(sendAmount) || invalidAmount(sendAmount)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.amount_invalid }
 			});
