@@ -21,7 +21,8 @@ export const themeVariables = {
 			primary: 'var(--color-background-brand-primary)',
 			secondary: 'var(--color-background-brand-secondary)',
 			tertiary: 'var(--color-background-brand-tertiary)',
-			disabled: 'var(--color-background-brand-disabled)'
+			disabled: 'var(--color-background-brand-disabled)',
+			light: 'var(--color-background-brand-light)'
 		},
 		success: {
 			'subtle-10': 'var(--color-background-success-subtle-10)',
@@ -29,7 +30,8 @@ export const themeVariables = {
 			'subtle-30': 'var(--color-background-success-subtle-30)',
 			primary: 'var(--color-background-success-primary)',
 			secondary: 'var(--color-background-success-secondary)',
-			tertiary: 'var(--color-background-success-tertiary)'
+			tertiary: 'var(--color-background-success-tertiary)',
+			light: 'var(--color-background-success-light)'
 		},
 		warning: {
 			'subtle-10': 'var(--color-background-warning-subtle-10)',
@@ -37,7 +39,8 @@ export const themeVariables = {
 			'subtle-30': 'var(--color-background-warning-subtle-30)',
 			primary: 'var(--color-background-warning-primary)',
 			secondary: 'var(--color-background-warning-secondary)',
-			tertiary: 'var(--color-background-warning-tertiary)'
+			tertiary: 'var(--color-background-warning-tertiary)',
+			light: 'var(--color-background-warning-light)'
 		},
 		error: {
 			'subtle-10': 'var(--color-background-error-subtle-10)',
@@ -45,7 +48,8 @@ export const themeVariables = {
 			'subtle-30': 'var(--color-background-error-subtle-30)',
 			primary: 'var(--color-background-error-primary)',
 			secondary: 'var(--color-background-error-secondary)',
-			tertiary: 'var(--color-background-error-tertiary)'
+			tertiary: 'var(--color-background-error-tertiary)',
+			light: 'var(--color-background-error-light)'
 		}
 	},
 	border: {
@@ -108,10 +112,12 @@ export const themeVariables = {
 		},
 		'success-primary': 'var(--color-foreground-success-primary)',
 		'success-alt': 'var(--color-foreground-success-alt)',
+		'success-secondary': 'var(--color-foreground-success-secondary)',
 		'warning-primary': 'var(--color-foreground-warning-primary)',
 		'warning-alt': 'var(--color-foreground-warning-alt)',
 		'error-primary': 'var(--color-foreground-error-primary)',
-		'error-alt': 'var(--color-foreground-error-alt)'
+		'error-alt': 'var(--color-foreground-error-alt)',
+		'error-secondary': 'var(--color-foreground-error-secondary)'
 	},
 
 	// custom hard coded gradient colors

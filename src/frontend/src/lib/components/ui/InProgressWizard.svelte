@@ -42,7 +42,7 @@
 </script>
 
 <div class="stretch" data-tid={IN_PROGRESS_MODAL}>
-	<MessageBox level="light-warning">
+	<MessageBox level="warning">
 		<span>
 			{replaceOisyPlaceholders(
 				warningType === 'manage'
