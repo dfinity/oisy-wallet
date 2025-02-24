@@ -6,8 +6,8 @@
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
-	import LazyImg from '$lib/components/ui/LazyImg.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 	import {
@@ -167,11 +167,9 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						<LazyImg
-							src={`$lib/assets/banner-${$themeStore ?? 'light'}.svg`}
-							styleClass="aspect-auto"
-							asBanner
-						/>
+						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+							<ImgBanner {src} styleClass="aspect-auto" />
+						{/await}
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
