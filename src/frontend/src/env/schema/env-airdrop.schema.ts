@@ -11,6 +11,7 @@ export const AirdropEventsSchema = z.object({
 	campaignHref: z.string(),
 	jackpotHref: z.string(),
 	airdropHref: z.string(),
+	learnMoreHref: z.string(),
 	startDate: z.string().transform((val) => new Date(val)),
 	endDate: z.string().transform((val) => new Date(val))
 });
