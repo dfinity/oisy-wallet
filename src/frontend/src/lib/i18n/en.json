@@ -495,7 +495,7 @@
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
-			"slippage_exceeded": "OISY protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
+			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
 		}
 	},
 	"buy": {
@@ -906,7 +906,7 @@
 				"loading": "Loading consent message..."
 			},
 			"warning": {
-				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by $oisy_short."
 			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
