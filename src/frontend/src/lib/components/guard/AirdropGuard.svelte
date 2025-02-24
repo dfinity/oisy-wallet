@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import {  onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalAirdropState } from '$lib/derived/modal.derived';
@@ -19,9 +19,6 @@
 		if (receivedAirdrop) {
 			modalStore.openAirdropState(receivedJackpot);
 		}
-	
-
-
 	});
 </script>
 

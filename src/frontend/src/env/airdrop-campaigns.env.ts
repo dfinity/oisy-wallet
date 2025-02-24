@@ -7,4 +7,5 @@ const parseResult = z.array(AirdropEventsSchema).safeParse(airdropCampaignsJson)
 export const airdropCampaigns: AirdropDescription[] = parseResult.success ? parseResult.data : [];
 
 // TODO: remove this feature flag when user snapshot live on production
-export const USER_SNAPSHOT_ENABLED =  JSON.parse(import.meta.env.VITE_USER_SNAPSHOT_ENABLED ?? false) === true;
+export const USER_SNAPSHOT_ENABLED =
+	JSON.parse(import.meta.env.VITE_USER_SNAPSHOT_ENABLED ?? false) === true;
