@@ -82,7 +82,7 @@ describe('user-snapshot.services', () => {
 							timestamp: timestamp ?? 0n,
 							amount: value ?? 0n,
 							network: {},
-							counterparty: Principal.anonymous(),
+							counterparty: Principal.anonymous()
 						})
 					)
 				}
