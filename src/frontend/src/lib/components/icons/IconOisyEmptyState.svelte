@@ -1,5 +1,20 @@
+<script lang="ts">
+	import { Theme, themeStore } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
+
+	// soften icon for dark mode
+	let isDarkMode: boolean;
+	$: isDarkMode = nonNullish($themeStore) ? $themeStore === Theme.DARK : false;
+</script>
+
 <!-- source: DFINITY foundation -->
-<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" fill="none">
+<svg
+	xmlns="http://www.w3.org/2000/svg"
+	width="90"
+	height="90"
+	fill="none"
+	class:opacity-50={isDarkMode}
+>
 	<path
 		fill="#C6D1E3"
 		d="m38.39 20.826 2.682-8.297c0-.985-.802-1.785-1.786-1.753-2.147.071-4.272.182-6.352.325a1.74 1.74 0 0 0-1.612 1.742l-2.674 8.545s10.114-.573 9.743-.562Z"
