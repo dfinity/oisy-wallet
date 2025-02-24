@@ -13,7 +13,7 @@
 </script>
 
 {#if displayWarning}
-	<MessageBox level="light-warning"
+	<MessageBox level="warning"
 		>{$i18n.signer.consent_message.warning.token_without_consent_message}</MessageBox
 	>
 {/if}
