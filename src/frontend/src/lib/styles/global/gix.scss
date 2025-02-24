@@ -366,14 +366,14 @@ div.select {
 
 // TOASTS
 div.error .toast {
-	--overlay-background: var(--color-background-error-secondary);
-	--overlay-background-contrast: var(--color-foreground-primary-inverted);
+	--overlay-background: var(--color-background-error-light);
+	--overlay-background-contrast: var(--color-foreground-error-secondary);
 }
 div.success .toast {
-	--overlay-background: var(--color-background-success-secondary);
-	--overlay-background-contrast: var(--color-foreground-primary-inverted);
+	--overlay-background: var(--color-background-success-light);
+	--overlay-background-contrast: var(--color-foreground-success-secondary);
 }
 div.warn .toast {
-	--overlay-background: var(--color-background-warning-secondary);
-	--overlay-background-contrast: var(--color-foreground-primary-inverted);
+	--overlay-background: var(--color-background-warning-light);
+	--overlay-background-contrast: var(--color-foreground-primary);
 }
