@@ -37,7 +37,7 @@
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
-			"airdrops": "Airdrops",
+			"airdrops": "Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -51,7 +51,7 @@
 			"settings": "Open your settings",
 			"dapp_explorer": "Open dapp explorer",
 			"activity": "Open the activity view",
-			"airdrops": "Open the Airdrops view",
+			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -115,25 +115,28 @@
 	},
 	"airdrops": {
 		"text": {
-			"title": "Airdrops",
-			"active_campaigns": "Active campaigns",
-			"upcoming_campaigns": "Upcoming campaigns",
+			"title": "Rewards",
+			"active_campaigns": "Active Opportunities",
+			"upcoming_campaigns": "Upcoming Opportunities",
 			"active_date": "Due on",
 			"participate_title": "How to participate",
-			"share": "Share",
+			"share": "Share on X",
+			"learn_more": "Learn more",
 			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
-			"no_balance_title": "Start earning",
+			"no_balance_title": "Start exploring",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on winning today's airdrop!",
-			"state_modal_title_jackpot": "Congratulations on winning today's highest airdrop!",
-			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win."
+			"state_modal_title": "Congratulations on earning today's reward!",
+			"state_modal_title_jackpot": "Congratulations on earning today's highest reward!",
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
+			"carousel_slide_title": "OISY Rewards Are Now Live!",
+			"carousel_slide_cta": "Learn more"
 		},
 		"alt": {
-			"upcoming_campaigns": "Stay tuned for the upcoming airdrops - subscribe to $oisy_short on X and follow recent updates."
+			"upcoming_campaigns": "Stay tuned for upcoming token rewards - subscribe to $oisy_short on X and follow for the latest updates."
 		}
 	},
 	"footer": {
@@ -144,8 +147,7 @@
 			"copyright": "© 2025"
 		},
 		"alt": {
-			"dfinity": "Go to DFINITY Foundation website",
-			"status": "Find more details about the current status of $oisy_short's development."
+			"dfinity": "Go to DFINITY Foundation website"
 		}
 	},
 	"wallet": {
@@ -249,7 +251,7 @@
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
 			"github_release": "$oisy_short release notes on GitHub",
-			"appearance_light": "Enabled light mode",
+			"appearance_light": "Enables light mode",
 			"appearance_dark": "Enables dark mode",
 			"appearance_system": "Enables your operating systems color mode"
 		},
@@ -493,7 +495,7 @@
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
-			"slippage_exceeded": "The swap could not be executed because the expected slippage of $expectedSlippage% exceeded the maximum allowed value of $maxSlippage%.\nYou can change the allowed slippage in the previous form, but this can lead to more unfavorable trades."
+			"slippage_exceeded": "OISY protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
 		}
 	},
 	"buy": {
