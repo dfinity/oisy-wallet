@@ -16,7 +16,6 @@
 		}
 
 		const { receivedAirdrop, receivedJackpot } = await loadAirdropResult($authIdentity);
-
 		if (receivedAirdrop) {
 			modalStore.openAirdropState(receivedJackpot);
 		}
