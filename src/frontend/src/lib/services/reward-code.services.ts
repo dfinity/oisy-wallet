@@ -66,7 +66,7 @@ const queryAirdrops = async (params: {
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	console.log('usage_awards', usage_awards, last_snapshot_timestamp);
+
 
 	const awards: RewardInfo[] | undefined = fromNullable(usage_awards);
 
