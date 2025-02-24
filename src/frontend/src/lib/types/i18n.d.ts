@@ -132,7 +132,7 @@ interface I18nAirdrops {
 
 interface I18nFooter {
 	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
-	alt: { dfinity: string; status: string };
+	alt: { dfinity: string };
 }
 
 interface I18nWallet {
