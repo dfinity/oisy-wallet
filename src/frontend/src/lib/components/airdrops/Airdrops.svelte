@@ -3,13 +3,14 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
     import ExternalLink from "$lib/components/ui/ExternalLink.svelte";
+    import {OISY_REWARDS_URL} from "$lib/constants/oisy.constants";
 </script>
 
 <div class="flex flex-row items-center">
     <PageTitle>{$i18n.airdrops.text.title}</PageTitle>
 
     <ExternalLink
-            href="https://docs.oisy.com/rewards"
+            href={OISY_REWARDS_URL}
             ariaLabel={$i18n.airdrops.text.learn_more}
             iconVisible={false}
             color="blue"
