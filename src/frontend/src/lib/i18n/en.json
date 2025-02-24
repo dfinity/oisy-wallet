@@ -129,9 +129,9 @@
 			"no_balance_title": "Start exploring",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on winning today's reward!",
-			"state_modal_title_jackpot": "Congratulations on winning today's highest reward!",
-			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win.",
+			"state_modal_title": "Congratulations on earning today's reward!",
+			"state_modal_title_jackpot": "Congratulations on earning today's highest reward!",
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "OISY Rewards Are Now Live!",
 			"carousel_slide_cta": "Learn more"
 		},
