@@ -75,8 +75,8 @@ const toIcrcTransaction = ({
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
 		timestamp: timestamp ?? 0n,
-// TODO: use correct value when the Rewards canister is updated to accept account identifiers 
-		counterparty: Principal.anonymous(),
+		// TODO: use correct value when the Rewards canister is updated to accept account identifiers
+		counterparty: Principal.anonymous()
 	};
 };
 
