@@ -8,17 +8,15 @@ import { BigNumber } from '@ethersproject/bignumber';
 export const INITIAL_AIRDROP_RESULT = 'initialAirdropResult';
 
 export const loadAirdropResult = async (identity: Identity): Promise<AirdropResult> => {
-	const initialLoading = undefined;
-
+	        const initialLoading: string | null = sessionStorage.getItem(INITIAL_AIRDROP_RESULT);
 	if (isNullish(initialLoading)) {
 		const { airdrops, lastTimestamp } = await getAirdrops({ identity });
-		console.log('airdrops', airdrops, lastTimestamp);
 
 		const newAirdrops: AirdropInfo[] = airdrops.filter(
 			({ timestamp }) => timestamp >= lastTimestamp
 		);
 
-		console.log('newAirdrops', newAirdrops);
+		
 
 		sessionStorage.setItem(INITIAL_AIRDROP_RESULT, 'true');
 
