@@ -131,7 +131,9 @@
 			"open_wallet": "Take me to the wallet",
 			"state_modal_title": "Congratulations on winning today's airdrop!",
 			"state_modal_title_jackpot": "Congratulations on winning today's highest airdrop!",
-			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win."
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to win.",
+			"carousel_slide_title": "OISY Rewards Are Now Live!",
+			"carousel_slide_cta": "Learn more"
 		},
 		"alt": {
 			"upcoming_campaigns": "Stay tuned for upcoming token rewards - subscribe to $oisy_short on X and follow for the latest updates."
