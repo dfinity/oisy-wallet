@@ -38,7 +38,7 @@
 </InputTextWithAction>
 
 {#if invalidDestination}
-	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">
+	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">
 		{$i18n.send.assertion.invalid_destination_address}
 	</p>
 {/if}

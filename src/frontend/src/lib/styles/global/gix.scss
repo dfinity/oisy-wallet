@@ -39,7 +39,7 @@
 	// Input
 	--input-background: var(--color-background-primary);
 	--focus-background: var(--color-background-primary);
-	--focus-border-color: var(--color-brand-base);
+	--focus-border-color: var(---color-border-brand-primary);
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
@@ -48,12 +48,14 @@
 	--secondary: var(--color-background-brand-primary);
 	--tertiary: var(--color-foreground-tertiary-inverted);
 	--positive-emphasis: var(--color-background-success-primary);
+	--negative-emphasis: var(--color-background-error-primary);
+	--warning-emphasis: var(--color-background-warning-primary);
 
 	// Toast message max height is calculated based on the font-size.
 	--font-size-standard: 1rem;
 
 	// Segment
-	--segment-selected-background: var(--color-secondary);
+	--segment-selected-background: var(--color-base-black);
 
 	// Checkbox
 	--checkbox-padding: 0;
@@ -122,6 +124,23 @@ div.input-field input[id] {
 
 div.input-field input[id]::placeholder {
 	color: var(--color-foreground-tertiary) !important;
+}
+
+div:not(.input-currency-container) > div.input-block > div.input-field > input {
+	border-color: var(--input-border-color);
+	border-width: 1px;
+
+	transition: all 0.25s ease-out;
+
+	&:hover {
+		border-color: var(--color-border-brand-primary) !important;
+	}
+
+	&:focus:not(:focus-visible),
+	&:focus-within,
+	&:active {
+		outline: 1px solid var(--color-border-brand-primary) !important;
+	}
 }
 
 div.modal {
@@ -333,6 +352,7 @@ div.checkbox {
 	}
 }
 
+// Native selects
 div.select {
 	& .icon {
 		--disable-contrast: var(--color-foreground-primary);
@@ -342,4 +362,12 @@ div.select {
 		background: var(--color-background-primary);
 		color: var(--color-foreground-primary);
 	}
+}
+
+// TOASTS
+// Toasts other than error are not used
+// Also, it seems that gix components dont apply the success and warn classes correctly
+div.error .toast {
+	--overlay-background: var(--color-background-error-light);
+	--overlay-background-contrast: var(--color-foreground-error-secondary);
 }
