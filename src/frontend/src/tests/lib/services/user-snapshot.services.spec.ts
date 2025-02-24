@@ -77,12 +77,12 @@ describe('user-snapshot.services', () => {
 					account: mockIdentity.getPrincipal(),
 					token_address: Principal.from(ICP_TOKEN.ledgerCanisterId),
 					last_transactions: mockIcTransactions.slice(0, 5).map(
-						({ value, timestamp, to }: IcTransactionUi): Transaction_Icrc => ({
+						({ value, timestamp }: IcTransactionUi): Transaction_Icrc => ({
 							transaction_type: { Send: null },
 							timestamp: timestamp ?? 0n,
 							amount: value ?? 0n,
 							network: {},
-							counterparty: Principal.fromText(to ?? '')
+							counterparty: Principal.anonymous()
 						})
 					)
 				}
