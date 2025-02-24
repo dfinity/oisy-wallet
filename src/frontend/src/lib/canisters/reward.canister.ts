@@ -56,15 +56,5 @@ export class RewardCanister extends Canister<RewardService> {
 		return register_airdrop_recipient(userSnapshot);
 	};
 
-	registerSnapshotFor = ({
-		principal,
-		userSnapshot
-	}: {
-		principal: Principal;
-		userSnapshot: UserSnapshot;
-	}): Promise<void> => {
-		const { register_snapshot_for } = this.caller({ certified: true });
-
-		return register_snapshot_for(principal, userSnapshot);
-	};
+	
 }
