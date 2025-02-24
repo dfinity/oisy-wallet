@@ -52,8 +52,6 @@ export const registerAirdropRecipient = async ({
 	return registerAirdropRecipient(userSnapshot);
 };
 
-
-
 const rewardCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,

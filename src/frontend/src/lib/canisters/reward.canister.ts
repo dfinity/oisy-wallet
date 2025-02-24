@@ -10,7 +10,6 @@ import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/r
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
 import { Canister, createServices, type QueryParams } from '@dfinity/utils';
 
 export class RewardCanister extends Canister<RewardService> {
@@ -55,6 +54,4 @@ export class RewardCanister extends Canister<RewardService> {
 
 		return register_airdrop_recipient(userSnapshot);
 	};
-
-	
 }
