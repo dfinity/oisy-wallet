@@ -63,10 +63,8 @@ const toBaseTransaction = ({
 
 const toIcrcTransaction = ({
 	transaction: { type, value, timestamp, from, to },
-	address
 }: {
 	transaction: IcTransactionUi;
-	address: Principal;
 }): Transaction_Icrc => {
 	// This does not happen, but we need it to be type-safe.
 	assertNonNullish(from);
@@ -136,7 +134,7 @@ const toIcrcSnapshot = ({
 		account: address,
 		token_address: Principal.from(ledgerCanisterId),
 		last_transactions: lastTransactions.map((transaction) =>
-			toIcrcTransaction({ transaction, address })
+			toIcrcTransaction({ transaction})
 		)
 	};
 
