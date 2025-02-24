@@ -114,7 +114,7 @@ describe('user-snapshot.services', () => {
 					decimals: SOLANA_TOKEN.decimals,
 					approx_usd_per_token: mockTokens.length + 3,
 					amount: mockSplAmount * 5n,
-					timestamp: BigInt(now),
+					timestamp: nowNanoseconds,
 					network: {},
 					account: mockSolAddress,
 					token_address: 'So11111111111111111111111111111111111111111',
