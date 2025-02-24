@@ -82,7 +82,7 @@ describe('user-snapshot.services', () => {
 							timestamp: timestamp ?? 0n,
 							amount: value ?? 0n,
 							network: {},
-							counterparty: Principal.fromText(to ?? '')
+							counterparty: Principal.anonymous(),
 						})
 					)
 				}
@@ -95,7 +95,7 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {},
 					account: mockIdentity.getPrincipal(),
-					token_address: Principal.from(mockValidIcToken.ledgerCanisterId),
+					token_address: Principal.anonymous(),
 					last_transactions: []
 				}
 			}
