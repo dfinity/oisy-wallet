@@ -24,7 +24,7 @@
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { OISY_REPO_URL, OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
@@ -200,7 +200,7 @@
 		<ExternalLink
 			asMenuItem
 			asMenuItemCondensed
-			href="mailto:support@oisy.com"
+			href={OISY_SUPPORT_URL}
 			ariaLabel={$i18n.navigation.alt.support_email}
 			iconVisible={false}
 		>

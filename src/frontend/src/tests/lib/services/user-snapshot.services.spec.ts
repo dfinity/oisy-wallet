@@ -11,6 +11,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
+import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
@@ -47,6 +48,7 @@ describe('user-snapshot.services', () => {
 		const certified = false;
 
 		const now = Date.now();
+		const nowNanoseconds = BigInt(now) * NANO_SECONDS_IN_MILLISECOND;
 
 		const tokens: Token[] = [
 			...mockTokens,
@@ -68,7 +70,7 @@ describe('user-snapshot.services', () => {
 					decimals: ICP_TOKEN.decimals,
 					approx_usd_per_token: 1,
 					amount: mockIcAmount * 2n,
-					timestamp: BigInt(now),
+					timestamp: nowNanoseconds,
 					network: {},
 					account: mockIdentity.getPrincipal(),
 					token_address: Principal.from(ICP_TOKEN.ledgerCanisterId),
@@ -88,7 +90,7 @@ describe('user-snapshot.services', () => {
 					decimals: mockValidIcToken.decimals,
 					approx_usd_per_token: mockTokens.length + 1,
 					amount: mockIcAmount,
-					timestamp: BigInt(now),
+					timestamp: nowNanoseconds,
 					network: {},
 					account: mockIdentity.getPrincipal(),
 					token_address: Principal.from(mockValidIcToken.ledgerCanisterId),
@@ -110,14 +112,14 @@ describe('user-snapshot.services', () => {
 					decimals: mockValidSplToken.decimals,
 					approx_usd_per_token: mockTokens.length + 3,
 					amount: mockSplAmount,
-					timestamp: BigInt(now),
+					timestamp: nowNanoseconds,
 					network: {},
 					account: mockSolAddress,
 					token_address: mockValidSplToken.address,
 					last_transactions: mockSolTransactions.slice(0, 5).map(
 						({ value, timestamp, to }: SolTransactionUi): Transaction_Spl => ({
 							transaction_type: { Send: null },
-							timestamp: timestamp ?? 0n,
+							timestamp: (timestamp ?? 0n) * NANO_SECONDS_IN_MILLISECOND,
 							amount: value ?? 0n,
 							network: {},
 							counterparty: to ?? ''
@@ -129,7 +131,7 @@ describe('user-snapshot.services', () => {
 
 		const userSnapshot: UserSnapshot = {
 			accounts: [...icrcAccounts, ...splMainnetAccounts],
-			timestamp: toNullable(BigInt(now))
+			timestamp: toNullable(nowNanoseconds)
 		};
 
 		const mockExchangesData: ExchangesData = tokens.reduce<ExchangesData>(
@@ -267,8 +269,8 @@ describe('user-snapshot.services', () => {
 
 			expect(registerAirdropRecipient).toHaveBeenCalledWith({
 				userSnapshot: {
-					accounts: [...icrcAccounts.slice(0, 1), ...splMainnetAccounts],
-					timestamp: toNullable(BigInt(now))
+					...userSnapshot,
+					accounts: [...icrcAccounts.slice(0, 1), ...splMainnetAccounts]
 				},
 				identity: mockIdentity
 			});
