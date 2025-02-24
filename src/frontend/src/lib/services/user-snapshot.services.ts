@@ -7,6 +7,7 @@ import type {
 	TransactionType
 } from '$declarations/rewards/rewards.did';
 import { USER_SNAPSHOT_ENABLED } from '$env/airdrop-campaigns.env';
+import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
@@ -21,6 +22,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
+import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplToken } from '$sol/types/spl';
@@ -203,7 +205,19 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 			? toIcrcSnapshot({ token, balance, exchangeRate, timestamp })
 			: isTokenSpl(token)
 				? toSplSnapshot({ token, balance, exchangeRate, timestamp })
-				: undefined;
+				: // TODO: adjust the logic when the rewards canister accepts native tokens too.
+					token.id === SOLANA_TOKEN_ID
+					? toSplSnapshot({
+							token: {
+								...token,
+								address: 'So11111111111111111111111111111111111111111',
+								owner: SYSTEM_PROGRAM_ADDRESS
+							},
+							balance,
+							exchangeRate,
+							timestamp
+						})
+					: undefined;
 
 		return nonNullish(snapshot) ? [...acc, snapshot] : acc;
 	}, []);
