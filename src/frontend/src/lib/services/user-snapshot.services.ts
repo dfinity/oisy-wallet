@@ -203,7 +203,8 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 			? toIcrcSnapshot({ token, balance, exchangeRate, timestamp })
 			: isTokenSpl(token)
 				? toSplSnapshot({ token, balance, exchangeRate, timestamp })
-				: token.id === SOLANA_TOKEN_ID
+				: // TODO: adjust the logic when the rewards canister accepts native tokens too.
+					token.id === SOLANA_TOKEN_ID
 					? toSplSnapshot({
 							token: {
 								...token,
