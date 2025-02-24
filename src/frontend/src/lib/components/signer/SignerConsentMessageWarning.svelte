@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let consentInfo: ResultConsentInfo | undefined;
 
@@ -14,6 +15,8 @@
 
 {#if displayWarning}
 	<MessageBox level="warning"
-		>{$i18n.signer.consent_message.warning.token_without_consent_message}</MessageBox
+		>{replaceOisyPlaceholders(
+			$i18n.signer.consent_message.warning.token_without_consent_message
+		)}</MessageBox
 	>
 {/if}
