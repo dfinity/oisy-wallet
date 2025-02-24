@@ -62,11 +62,9 @@ const toBaseTransaction = ({
 });
 
 const toIcrcTransaction = ({
-	transaction: { type, value, timestamp, from, to },
-	address
+	transaction: { type, value, timestamp, from, to }
 }: {
 	transaction: IcTransactionUi;
-	address: Principal;
 }): Transaction_Icrc => {
 	// This does not happen, but we need it to be type-safe.
 	assertNonNullish(from);
@@ -75,7 +73,8 @@ const toIcrcTransaction = ({
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
 		timestamp: timestamp ?? 0n,
-		counterparty: Principal.fromText(address.toText() === from ? to : from)
+		// TODO: use correct value when the Rewards canister is updated to accept account identifiers
+		counterparty: Principal.anonymous()
 	};
 };
 
@@ -134,9 +133,7 @@ const toIcrcSnapshot = ({
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
 		token_address: Principal.from(ledgerCanisterId),
-		last_transactions: lastTransactions.map((transaction) =>
-			toIcrcTransaction({ transaction, address })
-		)
+		last_transactions: lastTransactions.map((transaction) => toIcrcTransaction({ transaction }))
 	};
 
 	return { Icrc: snapshot };
