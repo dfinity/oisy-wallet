@@ -95,7 +95,7 @@ describe('user-snapshot.services', () => {
 					timestamp: nowNanoseconds,
 					network: {},
 					account: mockIdentity.getPrincipal(),
-					token_address: Principal.anonymous(),
+					                             token_address: Principal.from(mockValidIcToken.ledgerCanisterId),
 					last_transactions: []
 				}
 			}
