@@ -367,10 +367,13 @@ div.select {
 // TOASTS
 div.error .toast {
 	--overlay-background: var(--color-background-error-secondary);
+	--overlay-background-contrast: var(--color-foreground-primary-inverted);
 }
 div.success .toast {
 	--overlay-background: var(--color-background-success-secondary);
+	--overlay-background-contrast: var(--color-foreground-primary-inverted);
 }
 div.warn .toast {
 	--overlay-background: var(--color-background-warning-secondary);
+	--overlay-background-contrast: var(--color-foreground-primary-inverted);
 }
