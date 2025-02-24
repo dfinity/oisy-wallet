@@ -102,9 +102,9 @@
 
 			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
 				failedSwapError.set(
-						replacePlaceholders(replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded), {
-							$maxSlippage: slippageValue.toString()
-						})
+					replacePlaceholders(replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded), {
+						$maxSlippage: slippageValue.toString()
+					})
 				);
 			} else {
 				failedSwapError.set(undefined);
