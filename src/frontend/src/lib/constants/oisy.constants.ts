@@ -10,6 +10,7 @@ export const {
 	OISY_REPO_URL,
 	OISY_STATUS_URL,
 	OISY_TWITTER_URL,
+	OISY_SUPPORT_URL,
 	OISY_REWARDS_URL
 } = safeParse({
 	schema: OisyMetadataSchema,
@@ -22,6 +23,7 @@ export const {
 		OISY_REPO_URL: '',
 		OISY_STATUS_URL: '',
 		OISY_TWITTER_URL: '',
+		OISY_SUPPORT_URL: '',
 		OISY_REWARDS_URL: ''
 	}
 });
