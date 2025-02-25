@@ -9,7 +9,7 @@
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
-	export let error: boolean = false;
+	export let error = false;
 	export let balance: OptionBalance;
 	export let token: Token | undefined = undefined;
 	export let fee: BigNumber | undefined = undefined;
@@ -51,7 +51,7 @@
 	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
 	class:text-error-primary={isZeroBalance || error}
-	class:text-brand-primary={(!isZeroBalance && !error)}
+	class:text-brand-primary={!isZeroBalance && !error}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)
