@@ -9,14 +9,16 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import type {Token} from "$lib/types/token";
+	import type {OptionBalance} from "$lib/types/balance";
+	import type {Readable} from "svelte/store";
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType = undefined;
 	export let error: Error | undefined = undefined;
-	export let balance: BigNumber;
+	export let balance: OptionBalance;
 	export let token: Token;
-	export let isIcrc2Token: boolean;
+	export let isIcrc2Token: Readable<boolean>;
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
@@ -34,8 +36,8 @@
 				balance,
 				// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
 				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isIcrc2Token ? 2n : 1n)),
-				tokenDecimals: $sourceToken.decimals,
-				tokenStandard: $sourceToken.standard
+				tokenDecimals: token.decimals,
+				tokenStandard: token.standard
 			})
 		: undefined;
 
