@@ -38,7 +38,7 @@
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
 	bind:error={amountError}
-	{customValidate}
+	customErrorValidate={customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
