@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {isNullish} from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
@@ -7,6 +7,7 @@
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import NetworkInfo from '$lib/components/networks/NetworkInfo.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
@@ -17,7 +18,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import NetworkInfo from "$lib/components/networks/NetworkInfo.svelte";
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;

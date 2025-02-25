@@ -1,8 +1,8 @@
 <script lang="ts">
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
-	import {i18n} from "$lib/stores/i18n.store";
 
 	export let network: Network;
 
