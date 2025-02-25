@@ -5,11 +5,11 @@
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionBalance } from '$lib/types/balance';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import type {OptionBalance} from "$lib/types/balance";
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
