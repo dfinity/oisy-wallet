@@ -29,13 +29,8 @@
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
 
-	const {
-		sendToken,
-		sendBalance,
-		sendTokenStandard,
-		sendTokenNetworkId,
-		sendTokenExchangeRate
-	} = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendTokenStandard, sendTokenNetworkId, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 

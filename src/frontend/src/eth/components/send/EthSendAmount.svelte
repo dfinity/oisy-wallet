@@ -27,13 +27,8 @@
 
 	const { feeStore: storeFeeData, minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	const {
-		sendTokenDecimals,
-		sendBalance,
-		sendTokenId,
-		sendToken,
-		sendTokenExchangeRate
-	} = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish($storeFeeData)) {
