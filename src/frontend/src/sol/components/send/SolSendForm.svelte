@@ -34,7 +34,6 @@
 	balance={$sendBalance}
 	disabled={invalid}
 	hideSource
-	networkId={$sendTokenNetworkId}
 >
 	<SolSendAmount slot="amount" bind:amount bind:amountError />
 

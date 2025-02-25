@@ -11,7 +11,6 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { networks } from '$lib/derived/networks.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
@@ -36,9 +35,6 @@
 	const dispatch = createEventDispatcher();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	let targetNetwork: Network | undefined;
-	$: targetNetwork = $networks?.find(({ id }) => id === sourceNetwork.id);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
@@ -57,9 +53,7 @@
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
 
-		{#if nonNullish(targetNetwork)}
-			<NetworkInfo network={targetNetwork} />
-		{/if}
+        <NetworkInfo network={sourceNetwork} />
 
 		<FeeDisplay />
 
