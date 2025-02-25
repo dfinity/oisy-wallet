@@ -35,6 +35,7 @@
 	};
 
 	onMount(initSelectedTheme);
+	themeStore.subscribe(initSelectedTheme);
 	afterNavigate(initSelectedTheme);
 </script>
 
