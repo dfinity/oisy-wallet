@@ -15,6 +15,7 @@
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType | BtcSendErrorType = undefined;
+	// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
 	export let error: Error | undefined = undefined;
 	export let balance: OptionBalance;
 	export let token: Token | undefined = undefined;
