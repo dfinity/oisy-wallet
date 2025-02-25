@@ -10,23 +10,24 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import {BtcAmountAssertionError} from "$btc/types/btc-send";
 
 	export let amount: OptionAmount = undefined;
-	export let errorType: BtcSendErrorType = undefined;
+	export let amountError: BtcAmountAssertionError | undefined;
 
 	const { sendBalance, sendToken, sendTokenExchangeRate, isSendTokenIcrc2 } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
-	$: customValidate = (userAmount: BigNumber): BtcSendErrorType => {
+	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
 		if (invalidAmount(userAmount.toNumber()) || userAmount.isZero()) {
-			return 'invalid-amount';
+			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
 		if (userAmount.gt($sendBalance ?? ZERO)) {
-			return 'insufficient-funds';
+			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
 	};
 </script>
@@ -36,7 +37,7 @@
 	bind:amount
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
-	bind:errorType
+	bind:error={amountError}
 	{customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
@@ -60,7 +61,7 @@
 				bind:amount
 				balance={$sendBalance}
 				token={$sendToken}
-				error={nonNullish(errorType)}
+				error={nonNullish(amountError)}
 				fee={ZERO}
 			/>
 		{/if}

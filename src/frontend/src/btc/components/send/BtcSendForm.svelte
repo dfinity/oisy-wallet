@@ -11,13 +11,14 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type {BtcAmountAssertionError} from "$btc/types/btc-send";
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let destination = '';
 	export let source: string;
 
-	let errorType: BtcSendErrorType = undefined;
+	let amountError: BtcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -26,7 +27,7 @@
 	let invalid = true;
 	$: invalid =
 		invalidDestination ||
-		nonNullish(errorType) ||
+		nonNullish(amountError) ||
 		isNullishOrEmpty(destination) ||
 		isNullish(amount);
 
@@ -58,7 +59,7 @@
 		on:icQRCodeScan
 	/>
 
-	<BtcSendAmount slot="amount" bind:amount bind:errorType />
+	<BtcSendAmount slot="amount" bind:amount bind:amountError />
 
 	<!--	TODO: calculate and display transaction fee	-->
 
