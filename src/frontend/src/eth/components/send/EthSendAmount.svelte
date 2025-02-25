@@ -6,7 +6,6 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
-	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -16,6 +15,7 @@
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import MaxBalanceButton from "$lib/components/common/MaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -27,7 +27,7 @@
 
 	const { feeStore: storeFeeData, minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
+	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate, isSendTokenIcrc2 } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
@@ -114,7 +114,9 @@
 
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken)}
-			<SendMaxBalanceButton bind:sendAmount={amount} error={insufficientFundsError} />
+			<MaxBalanceButton bind:sendAmount={amount} error={insufficientFundsError}
+				balance={$sendBalance} token={$sendToken} isIcrc2Token={isSendTokenIcrc2}
+			/>
 		{/if}
 	</svelte:fragment>
 </TokenInput>

@@ -19,7 +19,6 @@
 	} from '$icp/utils/cketh.utils';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -30,12 +29,13 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import MaxBalanceButton from "$lib/components/common/MaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate, sendBalance, isSendTokenIcrc2 } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let fee: bigint | undefined;
 	$: fee = ($sendToken as OptionIcToken)?.fee;
@@ -145,7 +145,9 @@
 
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken)}
-			<SendMaxBalanceButton bind:sendAmount={amount} error={amountError} />
+			<MaxBalanceButton bind:sendAmount={amount} error={amountError}
+			balance={$sendBalance} token={$sendToken} isIcrc2Token={$isSendTokenIcrc2}
+			/>
 		{/if}
 	</svelte:fragment>
 </TokenInput>

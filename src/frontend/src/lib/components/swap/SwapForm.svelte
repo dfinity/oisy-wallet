@@ -6,7 +6,7 @@
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
-	import SwapMaxBalanceButton from '$lib/components/swap/SwapMaxBalanceButton.svelte';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
@@ -148,7 +148,9 @@
 
 				<svelte:fragment slot="balance">
 					{#if nonNullish($sourceToken)}
-						<SwapMaxBalanceButton bind:amountSetToMax bind:swapAmount {errorType} />
+						<MaxBalanceButton bind:amountSetToMax bind:amount={swapAmount} {errorType} balance={$sourceTokenBalance}
+							token={$sourceToken} isIcrc2Token={$isSourceTokenIcrc2}
+						/>
 					{/if}
 				</svelte:fragment>
 			</TokenInput>

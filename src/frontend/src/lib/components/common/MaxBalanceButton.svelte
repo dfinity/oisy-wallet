@@ -5,34 +5,35 @@
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import type {Token} from "$lib/types/token";
 
-	export let swapAmount: OptionAmount;
+	export let amount: OptionAmount;
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType = undefined;
-
-	const { sourceTokenBalance, sourceToken, isSourceTokenIcrc2 } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	export let error: Error | undefined = undefined;
+	export let balance: BigNumber;
+	export let token: Token;
+	export let isIcrc2Token: boolean;
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee = nonNullish($sourceToken)
-		? $icTokenFeeStore?.[$sourceToken.symbol]
+	$: sourceTokenFee = nonNullish(token)
+		? $icTokenFeeStore?.[token.symbol]
 		: undefined;
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	$: isZeroBalance = isNullish(balance) || balance.isZero();
 
 	let maxAmount: number | undefined;
-	$: maxAmount = nonNullish($sourceToken)
+	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
-				balance: $sourceTokenBalance,
+				balance,
 				// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)),
+				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isIcrc2Token ? 2n : 1n)),
 				tokenDecimals: $sourceToken.decimals,
 				tokenStandard: $sourceToken.standard
 			})
@@ -41,7 +42,7 @@
 	const setMax = () => {
 		if (!isZeroBalance && nonNullish(maxAmount)) {
 			amountSetToMax = true;
-			swapAmount = maxAmount;
+			amount = maxAmount;
 		}
 	};
 
@@ -61,11 +62,11 @@
 <button
 	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
-	class:text-error-primary={isZeroBalance || nonNullish(errorType)}
-	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
+	class:text-error-primary={isZeroBalance || nonNullish(errorType) || nonNullish(error)}
+	class:text-brand-primary={!isZeroBalance && isNullish(errorType) && isNullish(error)}
 >
 	{$i18n.swap.text.max_balance}:
-	{nonNullish(maxAmount) && nonNullish($sourceToken)
-		? `${maxAmount} ${$sourceToken.symbol}`
+	{nonNullish(maxAmount) && nonNullish(token)
+		? `${maxAmount} ${token.symbol}`
 		: $i18n.swap.text.not_available}
 </button>
