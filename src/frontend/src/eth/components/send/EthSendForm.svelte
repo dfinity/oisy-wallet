@@ -53,7 +53,7 @@
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
 
-        <NetworkInfo network={sourceNetwork} />
+		<NetworkInfo network={sourceNetwork} />
 
 		<FeeDisplay />
 
