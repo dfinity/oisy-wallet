@@ -72,9 +72,9 @@
 	<div class="mb-2 text-sm font-bold"><slot name="title" /></div>
 
 	<TokenInputContainer
-			{focused}
-			styleClass="h-14 text-3xl"
-			error={nonNullish(errorType) || nonNullish(error)}
+		{focused}
+		styleClass="h-14 text-3xl"
+		error={nonNullish(errorType) || nonNullish(error)}
 	>
 		<div class="flex h-full w-full items-center">
 			{#if token}
