@@ -18,7 +18,7 @@
 	export let source: string;
 	export let simplifiedForm = false;
 
-	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
@@ -38,7 +38,6 @@
 	balance={$balance}
 	disabled={invalid}
 	hideSource={simplifiedForm}
-	networkId={$sendTokenNetworkId}
 >
 	<div slot="destination">
 		{#if !simplifiedForm}

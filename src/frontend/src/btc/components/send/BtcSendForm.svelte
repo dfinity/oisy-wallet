@@ -40,7 +40,7 @@
 	});
 </script>
 
-<SendForm on:icNext {source} token={$token} balance={$balance} disabled={invalid} {networkId}>
+<SendForm on:icNext {source} token={$token} balance={$balance} disabled={invalid}>
 	<BtcSendDestination
 		slot="destination"
 		bind:destination
