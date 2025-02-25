@@ -3,6 +3,7 @@
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -10,7 +11,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import MaxBalanceButton from "$lib/components/common/MaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
@@ -57,10 +57,12 @@
 
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken)}
-			<MaxBalanceButton bind:sendAmount={amount} error={amountError}
-							  balance={$sendBalance}
-							  token={$sendToken}
-							  isIcrc2Token={$isSendTokenIcrc2}
+			<MaxBalanceButton
+				bind:sendAmount={amount}
+				error={amountError}
+				balance={$sendBalance}
+				token={$sendToken}
+				isIcrc2Token={$isSendTokenIcrc2}
 			/>
 		{/if}
 	</svelte:fragment>

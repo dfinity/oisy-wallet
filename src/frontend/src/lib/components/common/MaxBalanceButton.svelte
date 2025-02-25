@@ -2,15 +2,15 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
+	import type { Readable } from 'svelte/store';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionBalance } from '$lib/types/balance';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import type {Token} from "$lib/types/token";
-	import type {OptionBalance} from "$lib/types/balance";
-	import type {Readable} from "svelte/store";
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
@@ -23,9 +23,7 @@
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee = nonNullish(token)
-		? $icTokenFeeStore?.[token.symbol]
-		: undefined;
+	$: sourceTokenFee = nonNullish(token) ? $icTokenFeeStore?.[token.symbol] : undefined;
 
 	let isZeroBalance: boolean;
 	$: isZeroBalance = isNullish(balance) || balance.isZero();

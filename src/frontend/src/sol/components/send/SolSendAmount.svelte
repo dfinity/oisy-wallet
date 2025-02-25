@@ -8,6 +8,7 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -24,13 +25,18 @@
 	} from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
-	import MaxBalanceButton from "$lib/components/common/MaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
 
-	const { sendToken, sendBalance, sendTokenStandard, sendTokenNetworkId, sendTokenExchangeRate, isSendTokenIcrc2 } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const {
+		sendToken,
+		sendBalance,
+		sendTokenStandard,
+		sendTokenNetworkId,
+		sendTokenExchangeRate,
+		isSendTokenIcrc2
+	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
@@ -96,8 +102,12 @@
 
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken)}
-			<MaxBalanceButton bind:sendAmount={amount} error={amountError}
-				balance={$sendBalance} token={$sendToken} isIcrc2Token={$isSendTokenIcrc2}
+			<MaxBalanceButton
+				bind:sendAmount={amount}
+				error={amountError}
+				balance={$sendBalance}
+				token={$sendToken}
+				isIcrc2Token={$isSendTokenIcrc2}
 			/>
 		{/if}
 	</svelte:fragment>
