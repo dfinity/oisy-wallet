@@ -1,6 +1,5 @@
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
@@ -46,15 +45,6 @@ export const initSendContext = ({
 		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
 	);
 
-	const isSendTokenIcrc2 = derived(
-		[kongSwapTokensStore, sendToken],
-		([$kongSwapTokensStore, $sendToken]) =>
-			nonNullish($sendToken) &&
-			nonNullish($kongSwapTokensStore) &&
-			nonNullish($kongSwapTokensStore[$sendToken.symbol]) &&
-			$kongSwapTokensStore[$sendToken.symbol].icrc2
-	);
-
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -64,7 +54,6 @@ export const initSendContext = ({
 		sendBalance,
 		sendTokenExchangeRate,
 		sendTokenNetworkId,
-		isSendTokenIcrc2,
 		...staticContext
 	};
 };
@@ -85,7 +74,6 @@ export interface SendContext {
 	sendTokenExchangeRate: Readable<number | undefined>;
 	sendPurpose: SendContextPurpose;
 	sendTokenNetworkId: Readable<NetworkId>;
-	isSendTokenIcrc2: Readable<boolean>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

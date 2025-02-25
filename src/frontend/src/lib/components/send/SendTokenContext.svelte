@@ -1,10 +1,5 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
-	import {
-		IC_TOKEN_FEE_CONTEXT_KEY,
-		type IcTokenFeeContext,
-		icTokenFeeStore
-	} from '$icp/stores/ic-token-fee.store';
 	import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import {
 		initSendContext,
@@ -31,10 +26,6 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
 		sendToken,
 		...rest
-	});
-
-	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
-		store: icTokenFeeStore
 	});
 
 	$: sendToken.set(selectedToken);
