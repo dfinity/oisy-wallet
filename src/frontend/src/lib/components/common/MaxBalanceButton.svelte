@@ -62,8 +62,8 @@
 <button
 	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
-	class:text-error-primary={isZeroBalance || nonNullish(errorType) || nonNullish(errorType)}
-	class:text-brand-primary={!isZeroBalance && isNullish(errorType) || isNullish(errorType)}
+	class:text-error-primary={isZeroBalance || nonNullish(errorType) || nonNullish(error)}
+	class:text-brand-primary={!isZeroBalance && isNullish(errorType) || isNullish(error)}
 >
 	{$i18n.swap.text.max_balance}:
 	{nonNullish(maxAmount) && nonNullish(token)
