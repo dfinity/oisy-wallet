@@ -43,13 +43,13 @@
 </script>
 
 <SendForm
-		on:icNext
-		{source}
-		token={$sendToken}
-		balance={$balance}
-		disabled={invalid}
-		hideSource
-		networkId={$sendTokenNetworkId}
+	on:icNext
+	{source}
+	token={$sendToken}
+	balance={$balance}
+	disabled={invalid}
+	hideSource
+	networkId={$sendTokenNetworkId}
 >
 	<BtcSendDestination
 		slot="destination"
