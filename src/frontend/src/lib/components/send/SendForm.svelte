@@ -19,7 +19,7 @@
 	export let hideSource = false;
 
 	let network: Network | undefined;
-	$: network = nonNullish(token) && token.network;
+	$: network = nonNullish(token) ? token.network : undefined;
 
 	const dispatch = createEventDispatcher();
 </script>
