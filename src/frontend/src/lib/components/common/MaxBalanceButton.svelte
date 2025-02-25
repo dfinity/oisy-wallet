@@ -9,12 +9,13 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import type {OptionBalance} from "$lib/types/balance";
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType = undefined;
 	export let error: Error | undefined = undefined;
-	export let balance: BigNumber | undefined = undefined;
+	export let balance: OptionBalance;
 	export let token: Token | undefined = undefined;
 	export let isIcrc2Token: boolean | undefined = undefined;
 

@@ -125,7 +125,7 @@
 				error={insufficientFundsError}
 				balance={$sendBalance}
 				token={$sendToken}
-				isIcrc2Token={isSendTokenIcrc2}
+				isIcrc2Token={$isSendTokenIcrc2}
 			/>
 		{/if}
 	</svelte:fragment>
