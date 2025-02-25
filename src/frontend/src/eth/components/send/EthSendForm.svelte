@@ -7,6 +7,7 @@
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import NetworkInfo from '$lib/components/networks/NetworkInfo.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
@@ -55,6 +56,8 @@
 		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
 		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
+
+		<NetworkInfo network={sourceNetwork} />
 
 		<FeeDisplay />
 
