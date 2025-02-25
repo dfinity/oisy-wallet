@@ -58,7 +58,7 @@
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken)}
 			<MaxBalanceButton
-				bind:sendAmount={amount}
+				bind:amount={amount}
 				error={amountError}
 				balance={$sendBalance}
 				token={$sendToken}

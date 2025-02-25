@@ -30,7 +30,7 @@
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
-				balance,
+				balance: balance ?? undefined,
 				// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
 				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isIcrc2Token ? 2n : 1n)),
 				tokenDecimals: token.decimals,
