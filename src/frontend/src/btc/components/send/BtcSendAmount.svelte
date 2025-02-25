@@ -1,24 +1,24 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
+	import SendMaxBalanceButton from '$lib/components/send/SendMaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import {nonNullish} from "@dfinity/utils";
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import SendMaxBalanceButton from "$lib/components/send/SendMaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
-			getContext<SendContext>(SEND_CONTEXT_KEY);
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
@@ -35,11 +35,11 @@
 </script>
 
 <TokenInput
-		token={$sendToken}
-		bind:amount
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
-		customErrorValidate={customValidate}
+	token={$sendToken}
+	bind:amount
+	isSelectable={false}
+	exchangeRate={$sendTokenExchangeRate}
+	customErrorValidate={customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -47,10 +47,10 @@
 		{#if nonNullish($sendToken)}
 			<div class="text-tertiary">
 				<TokenInputAmountExchange
-						{amount}
-						exchangeRate={$sendTokenExchangeRate}
-						token={$sendToken}
-						disabled
+					{amount}
+					exchangeRate={$sendTokenExchangeRate}
+					token={$sendToken}
+					disabled
 				/>
 			</div>
 		{/if}
