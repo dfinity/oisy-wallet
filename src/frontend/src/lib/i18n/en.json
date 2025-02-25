@@ -17,7 +17,8 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
-			"clear_filter": "Clear filter"
+			"clear_filter": "Clear filter",
+			"not_available": "n/a"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
