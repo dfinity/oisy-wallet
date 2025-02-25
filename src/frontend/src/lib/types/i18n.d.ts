@@ -246,6 +246,7 @@ interface I18nNetworks {
 	test_networks: string;
 	more: string;
 	chain_fusion: string;
+	network: string;
 }
 
 interface I18nReceive {

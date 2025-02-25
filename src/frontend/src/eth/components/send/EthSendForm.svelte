@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import {isNullish} from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
@@ -17,6 +17,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import NetworkInfo from "$lib/components/networks/NetworkInfo.svelte";
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -55,6 +56,8 @@
 		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
 		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
+
+		<NetworkInfo network={sourceNetwork} />
 
 		<FeeDisplay />
 

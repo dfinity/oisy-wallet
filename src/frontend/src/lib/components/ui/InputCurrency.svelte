@@ -10,7 +10,7 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<div class="input-currency-container">
+<div class="input-currency-container mb-4">
 	<Input
 		{name}
 		inputType="currency"
