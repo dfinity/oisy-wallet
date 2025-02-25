@@ -9,39 +9,41 @@
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import type {Token} from "$lib/types/token";
+	import type {OptionBalance} from "$lib/types/balance";
 
-	export let swapAmount: OptionAmount;
+	export let amount: OptionAmount;
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType = undefined;
-
-	const { sourceTokenBalance, sourceToken, isSourceTokenIcrc2 } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
+	export let error: Error | undefined = undefined;
+	export let balance: OptionBalance;
+	export let token: Token | undefined = undefined;
+	export let isIcrc2Token: boolean | undefined = undefined;
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	let sourceTokenFee: bigint | undefined;
-	$: sourceTokenFee = nonNullish($sourceToken)
-		? $icTokenFeeStore?.[$sourceToken.symbol]
-		: undefined;
+	$: sourceTokenFee = nonNullish(token) ? $icTokenFeeStore?.[token.symbol] : undefined;
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	$: isZeroBalance = isNullish(balance) || balance.isZero();
 
 	let maxAmount: number | undefined;
-	$: maxAmount = nonNullish($sourceToken)
+	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
 				balance: $sourceTokenBalance,
 				// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)),
-				tokenDecimals: $sourceToken.decimals,
-				tokenStandard: $sourceToken.standard
+				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isIcrc2Token ? 2n : 1n)),
+				tokenDecimals: token.decimals,
+				tokenStandard: token.standard
 			})
 		: undefined;
 
 	const setMax = () => {
 		if (!isZeroBalance && nonNullish(maxAmount)) {
 			amountSetToMax = true;
-			swapAmount = maxAmount;
+			amount = maxAmount;
 		}
 	};
 
@@ -61,11 +63,11 @@
 <button
 	class="font-semibold text-brand-primary transition-all"
 	on:click|preventDefault={setMax}
-	class:text-error-primary={isZeroBalance || nonNullish(errorType)}
-	class:text-brand-primary={!isZeroBalance && isNullish(errorType)}
+	class:text-error-primary={isZeroBalance || nonNullish(errorType) || nonNullish(errorType)}
+	class:text-brand-primary={!isZeroBalance && isNullish(errorType) || isNullish(errorType)}
 >
 	{$i18n.swap.text.max_balance}:
-	{nonNullish(maxAmount) && nonNullish($sourceToken)
-		? `${maxAmount} ${$sourceToken.symbol}`
+	{nonNullish(maxAmount) && nonNullish(token)
+		? `${maxAmount} ${token.symbol}`
 		: $i18n.swap.text.not_available}
 </button>
