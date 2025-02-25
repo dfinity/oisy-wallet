@@ -11,7 +11,6 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
-	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -19,12 +18,13 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
+	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
+	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { OISY_REPO_URL, OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
@@ -195,18 +195,9 @@
 
 		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
-		<ChangelogLink asMenuItem asMenuItemCondensed />
+		<DocumentationLink asMenuItem asMenuItemCondensed />
 
-		<ExternalLink
-			asMenuItem
-			asMenuItemCondensed
-			href={OISY_SUPPORT_URL}
-			ariaLabel={$i18n.navigation.alt.support_email}
-			iconVisible={false}
-		>
-			<IconHelp />
-			{$i18n.navigation.text.support_email}
-		</ExternalLink>
+		<SupportLink asMenuItem asMenuItemCondensed />
 
 		<Hr />
 
@@ -220,6 +211,8 @@
 			<IconGitHub />
 			{$i18n.navigation.text.source_code}
 		</a>
+
+		<ChangelogLink asMenuItem asMenuItemCondensed />
 
 		<Hr />
 

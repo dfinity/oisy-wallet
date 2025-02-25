@@ -38,7 +38,8 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 	};
@@ -51,7 +52,8 @@ interface I18nNavigation {
 		more_settings: string;
 		menu: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
 	};

@@ -3,6 +3,7 @@
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
+	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
@@ -22,7 +23,7 @@
 		<OisyWalletLogoLink />
 	</div>
 
-	<div class="pointer-events-auto flex justify-end gap-4">
+	<div class="pointer-events-auto flex justify-end gap-5">
 		{#if $authSignedIn}
 			<ThemeSwitchButton />
 			<WalletConnect />
@@ -31,8 +32,9 @@
 		{#if $authSignedIn}
 			<Menu />
 		{:else}
-			<div class="mr-2 flex justify-end gap-4 md:mr-0">
+			<div class="mr-2 flex justify-end gap-5 md:mr-0">
 				<AboutWhyOisy />
+				<DocumentationLink />
 				<ThemeSwitchButton />
 			</div>
 		{/if}

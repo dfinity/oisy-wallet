@@ -36,7 +36,7 @@
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	data-tid={testId}
 	class:as-button={asButton}
-	class:text-brand-primary={color === 'blue' && !asButton && !asMenuItem}
+	class:text-brand-primary={!asButton && !asMenuItem}
 	class:hover:text-inherit={color === 'blue' && !asButton && !asMenuItem}
 	class:active:text-inherit={color === 'blue' && !asButton && !asMenuItem}
 	class:hover:text-brand-primary={color === 'inherit' && !asButton && !asMenuItem}

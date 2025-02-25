@@ -5,9 +5,13 @@
 </script>
 
 <button
-	class={asMenuItem
-		? `text nav-item ${asMenuItemCondensed ? 'nav-item-condensed' : ''}`
-		: `whitespace-nowrap text-center font-bold text-brand-primary`}
+	class:text={asMenuItem}
+	class:nav-item={asMenuItem}
+	class:nav-item-condensed={asMenuItemCondensed}
+	class:whitespace-nowrap={!asMenuItem}
+	class:text-center={!asMenuItem}
+	class:font-bold={!asMenuItem}
+	class:text-brand-primary={!asMenuItem}
 	on:click
 	data-tid={testId}
 >
