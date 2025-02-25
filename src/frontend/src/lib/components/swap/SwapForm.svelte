@@ -158,7 +158,6 @@
 							error={nonNullish(errorType)}
 							balance={$sourceTokenBalance}
 							token={$sourceToken}
-							isIcrc2Token={$isSourceTokenIcrc2}
 							fee={BigNumber.from(totalFee)}
 						/>
 					{/if}
