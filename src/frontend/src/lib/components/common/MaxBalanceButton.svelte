@@ -2,11 +2,9 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import type { Readable } from 'svelte/store';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionBalance } from '$lib/types/balance';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -16,9 +14,9 @@
 	export let amountSetToMax = false;
 	export let errorType: ConvertAmountErrorType = undefined;
 	export let error: Error | undefined = undefined;
-	export let balance: OptionBalance;
-	export let token: Token;
-	export let isIcrc2Token: Readable<boolean>;
+	export let balance: BigNumber | undefined = undefined;
+	export let token: Token | undefined = undefined;
+	export let isIcrc2Token: boolean | undefined = undefined;
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
