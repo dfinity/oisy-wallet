@@ -14,7 +14,7 @@
 	export let destination = '';
 	export let source: string;
 
-	const { sendToken, sendTokenNetworkId, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: SolAmountAssertionError | undefined;
 	let invalidDestination: boolean;
