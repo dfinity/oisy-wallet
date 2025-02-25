@@ -2,7 +2,6 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import type { BtcSendErrorType } from '$btc/types/btc-send';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -14,7 +13,7 @@
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
-	export let errorType: ConvertAmountErrorType | BtcSendErrorType = undefined;
+	export let errorType: ConvertAmountErrorType = undefined;
 	// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
 	export let error: Error | undefined = undefined;
 	export let balance: OptionBalance;
