@@ -18,6 +18,8 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
+	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
+	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -48,8 +50,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
-	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
