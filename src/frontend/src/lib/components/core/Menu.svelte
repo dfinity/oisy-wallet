@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconBack, IconUser, Popover } from '@dfinity/gix-components';
+	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
@@ -11,7 +11,6 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
-	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -22,9 +21,8 @@
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { OISY_REPO_URL, OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
@@ -50,7 +48,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 
