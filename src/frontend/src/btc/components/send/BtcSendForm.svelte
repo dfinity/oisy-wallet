@@ -4,7 +4,7 @@
 	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
-	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import type { BtcSendErrorType} from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
@@ -18,7 +18,7 @@
 	export let destination = '';
 	export let source: string;
 
-	let amountError: BtcAmountAssertionError | undefined;
+	let errorType: BtcSendErrorType = undefined;
 	let invalidDestination: boolean;
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -27,7 +27,7 @@
 	let invalid = true;
 	$: invalid =
 		invalidDestination ||
-		nonNullish(amountError) ||
+		nonNullish(errorType) ||
 		isNullishOrEmpty(destination) ||
 		isNullish(amount);
 
@@ -59,7 +59,7 @@
 		on:icQRCodeScan
 	/>
 
-	<BtcSendAmount slot="amount" bind:amount bind:amountError />
+	<BtcSendAmount slot="amount" bind:amount bind:errorType />
 
 	<!--	TODO: calculate and display transaction fee	-->
 

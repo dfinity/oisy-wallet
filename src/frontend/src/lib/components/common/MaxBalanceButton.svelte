@@ -10,10 +10,11 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import type {BtcSendErrorType} from "$btc/types/btc-send";
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
-	export let errorType: ConvertAmountErrorType = undefined;
+	export let errorType: ConvertAmountErrorType | BtcSendErrorType = undefined;
 	export let error: Error | undefined = undefined;
 	export let balance: OptionBalance;
 	export let token: Token | undefined = undefined;

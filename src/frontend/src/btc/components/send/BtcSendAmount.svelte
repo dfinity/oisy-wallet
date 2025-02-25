@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
-	import { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import {type BtcSendErrorType} from '$btc/types/btc-send';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -13,21 +13,21 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let amount: OptionAmount = undefined;
-	export let amountError: BtcAmountAssertionError | undefined;
+	export let errorType: BtcSendErrorType = undefined;
 
 	const { sendBalance, sendToken, sendTokenExchangeRate, isSendTokenIcrc2 } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// TODO: Enable Max button by passing the `calculateMax` prop - https://dfinity.atlassian.net/browse/GIX-3114
 
-	$: customValidate = (userAmount: BigNumber): Error | undefined => {
+	$: customValidate = (userAmount: BigNumber): BtcSendErrorType => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
 		if (invalidAmount(userAmount.toNumber()) || userAmount.isZero()) {
-			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
+			return 'invalid-amount';
 		}
 
 		if (userAmount.gt($sendBalance ?? ZERO)) {
-			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
+			return 'insufficient-funds';
 		}
 	};
 </script>
@@ -37,8 +37,8 @@
 	bind:amount
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
-	bind:error={amountError}
-	customErrorValidate={customValidate}
+	bind:errorType
+	customValidate={customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -59,10 +59,10 @@
 		{#if nonNullish($sendToken)}
 			<MaxBalanceButton
 				bind:amount
-				error={amountError}
 				balance={$sendBalance}
 				token={$sendToken}
 				isIcrc2Token={$isSendTokenIcrc2}
+				{errorType}
 			/>
 		{/if}
 	</svelte:fragment>
