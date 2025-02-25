@@ -72,20 +72,20 @@ describe('EthSendForm', () => {
 		expect(toolbar).not.toBeNull();
 	});
 
-	it('should not render source field', () => {
+	it('should not render destination field', () => {
 		const { container } = render(EthSendForm, {
-			props: { ...props, simplifiedForm: true },
+			props: { ...props, destinationEditable: false },
 			context: mockContext
 		});
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
-		expect(destination).not.toBeNull();
+		expect(destination).toBeNull();
 
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
 		expect(amount).not.toBeNull();
 
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
-		expect(source).toBeNull();
+		expect(source).not.toBeNull();
 
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 		expect(balance).not.toBeNull();
