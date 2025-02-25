@@ -9,7 +9,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -44,13 +43,13 @@
 </script>
 
 <SendForm
-	on:icNext
-	{source}
-	token={$sendToken}
-	balance={$balance}
-	disabled={invalid}
-	hideSource
-	networkId={$sendTokenNetworkId}
+		on:icNext
+		{source}
+		token={$sendToken}
+		balance={$balance}
+		disabled={invalid}
+		hideSource
+		networkId={$sendTokenNetworkId}
 >
 	<BtcSendDestination
 		slot="destination"
