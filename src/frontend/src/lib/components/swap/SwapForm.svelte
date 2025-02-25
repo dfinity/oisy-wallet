@@ -72,6 +72,10 @@
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
 
+	let totalFee: bigint | undefined;
+	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+	$: totalFee = (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)
+
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
@@ -111,7 +115,7 @@
 					decimals: $sourceToken.decimals,
 					balance: $sourceTokenBalance,
 					// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-					totalFee: (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)
+					totalFee
 				})
 			: undefined;
 </script>
@@ -151,10 +155,11 @@
 						<MaxBalanceButton
 							bind:amountSetToMax
 							bind:amount={swapAmount}
-							{errorType}
+							error={nonNullish(errorType)}
 							balance={$sourceTokenBalance}
 							token={$sourceToken}
 							isIcrc2Token={$isSourceTokenIcrc2}
+							fee={totalFee}
 						/>
 					{/if}
 				</svelte:fragment>
