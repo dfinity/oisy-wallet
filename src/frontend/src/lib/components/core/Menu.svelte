@@ -9,6 +9,7 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelp from '$lib/components/icons/IconHelp.svelte';
@@ -19,6 +20,8 @@
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
+	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
+	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -50,9 +53,6 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
-	import IconBook from '$lib/components/icons/IconBook.svelte';
-	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
-	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;

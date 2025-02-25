@@ -1,9 +1,9 @@
 <script lang="ts">
+	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
-	import IconBook from '$lib/components/icons/IconBook.svelte';
 
 	export let asMenuItem = false;
 	export let asMenuItemCondensed = false;
