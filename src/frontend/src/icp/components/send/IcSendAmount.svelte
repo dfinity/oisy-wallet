@@ -151,7 +151,7 @@
 				error={nonNullish(amountError)}
 				balance={$sendBalance}
 				token={$sendToken}
-				fee={BigNumber.from(fee)}
+				fee={BigNumber.from(fee ?? 0)}
 			/>
 		{/if}
 	</svelte:fragment>
