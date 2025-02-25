@@ -363,7 +363,9 @@
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
 			"open_qr_modal": "Start QR Code scan for transaction details",
-			"scan_qr": "Scan QR Code"
+			"scan_qr": "Scan QR Code",
+			"max_balance": "Max",
+			"not_available": "n/a"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
