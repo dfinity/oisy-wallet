@@ -5,7 +5,6 @@
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
@@ -32,7 +31,7 @@
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
-				balance: $sourceTokenBalance,
+				balance: balance ?? undefined,
 				// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
 				fee: BigNumber.from((sourceTokenFee ?? 0n) * (isIcrc2Token ? 2n : 1n)),
 				tokenDecimals: token.decimals,
