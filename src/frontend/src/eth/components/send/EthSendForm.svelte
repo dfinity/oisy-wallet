@@ -59,7 +59,6 @@
 			token={$sendToken}
 			balance={$sendBalance}
 			source={$ethAddress ?? ''}
-			hideSource={simplifiedForm}
 		/>
 
 		<FeeDisplay />
