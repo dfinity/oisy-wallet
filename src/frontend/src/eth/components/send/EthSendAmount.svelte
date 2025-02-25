@@ -32,8 +32,7 @@
 		sendBalance,
 		sendTokenId,
 		sendToken,
-		sendTokenExchangeRate,
-		isSendTokenIcrc2
+		sendTokenExchangeRate
 	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {

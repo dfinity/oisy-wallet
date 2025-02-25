@@ -34,8 +34,7 @@
 		sendBalance,
 		sendTokenStandard,
 		sendTokenNetworkId,
-		sendTokenExchangeRate,
-		isSendTokenIcrc2
+		sendTokenExchangeRate
 	} = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
