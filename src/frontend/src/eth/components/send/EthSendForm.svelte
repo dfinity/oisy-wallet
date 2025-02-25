@@ -54,11 +54,7 @@
 
 		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource
-			token={$sendToken}
-			balance={$sendBalance}
-			source={$ethAddress ?? ''}
-		/>
+		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
 
 		<FeeDisplay />
 
