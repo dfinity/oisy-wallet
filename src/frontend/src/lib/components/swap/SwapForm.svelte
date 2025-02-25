@@ -159,7 +159,7 @@
 							balance={$sourceTokenBalance}
 							token={$sourceToken}
 							isIcrc2Token={$isSourceTokenIcrc2}
-							fee={totalFee}
+							fee={BigNumber.from(totalFee)}
 						/>
 					{/if}
 				</svelte:fragment>
