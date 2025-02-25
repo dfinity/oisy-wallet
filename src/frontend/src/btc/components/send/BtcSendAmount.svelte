@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
-	import {type BtcSendErrorType} from '$btc/types/btc-send';
+	import { type BtcSendErrorType } from '$btc/types/btc-send';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -38,7 +38,7 @@
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
 	bind:errorType
-	customValidate={customValidate}
+	{customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 

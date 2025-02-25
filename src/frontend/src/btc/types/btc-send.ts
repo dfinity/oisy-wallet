@@ -6,7 +6,4 @@ export type UtxosFee = Omit<SelectedUtxosFeeResponse, 'fee_satoshis'> & {
 	feeSatoshis: SelectedUtxosFeeResponse['fee_satoshis'];
 };
 
-export type BtcSendErrorType =
-	| 'invalid-amount'
-	| 'insufficient-funds'
-	| undefined;
+export type BtcSendErrorType = 'invalid-amount' | 'insufficient-funds' | undefined;

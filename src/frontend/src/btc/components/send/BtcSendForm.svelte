@@ -4,7 +4,7 @@
 	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
-	import type { BtcSendErrorType} from '$btc/types/btc-send';
+	import type { BtcSendErrorType } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
