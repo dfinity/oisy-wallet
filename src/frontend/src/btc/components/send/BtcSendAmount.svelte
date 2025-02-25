@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
-	import { type BtcSendErrorType } from '$btc/types/btc-send';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -61,8 +60,8 @@
 				bind:amount
 				balance={$sendBalance}
 				token={$sendToken}
-				isIcrc2Token={$isSendTokenIcrc2}
-				{errorType}
+				error={nonNullish(errorType)}
+				fee={ZERO}
 			/>
 		{/if}
 	</svelte:fragment>

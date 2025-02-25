@@ -148,10 +148,10 @@
 		{#if nonNullish($sendToken)}
 			<MaxBalanceButton
 				bind:amount
-				error={amountError}
+				error={nonNullish(amountError)}
 				balance={$sendBalance}
 				token={$sendToken}
-				isIcrc2Token={$isSendTokenIcrc2}
+				fee={BigNumber.from(fee)}
 			/>
 		{/if}
 	</svelte:fragment>
