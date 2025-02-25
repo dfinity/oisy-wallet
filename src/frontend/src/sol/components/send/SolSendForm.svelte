@@ -25,13 +25,7 @@
 		isNullish(amount);
 </script>
 
-<SendForm
-	on:icNext
-	{source}
-	token={$token}
-	balance={$balance}
-	disabled={invalid}
->
+<SendForm on:icNext {source} token={$token} balance={$balance} disabled={invalid}>
 	<SolSendDestination slot="destination" bind:destination bind:invalidDestination on:icQRCodeScan />
 
 	<SolSendAmount slot="amount" bind:amount bind:amountError />
