@@ -114,7 +114,6 @@
 					userAmount,
 					decimals: $sourceToken.decimals,
 					balance: $sourceTokenBalance,
-					// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
 					totalFee
 				})
 			: undefined;
