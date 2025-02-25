@@ -65,8 +65,8 @@
 	class:text-error-primary={isZeroBalance || nonNullish(errorType) || nonNullish(error)}
 	class:text-brand-primary={!isZeroBalance && isNullish(errorType) && isNullish(error)}
 >
-	{$i18n.swap.text.max_balance}:
+	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)
 		? `${maxAmount} ${token.symbol}`
-		: $i18n.swap.text.not_available}
+		: $i18n.core.text.not_available}
 </button>
