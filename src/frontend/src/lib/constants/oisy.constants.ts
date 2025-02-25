@@ -9,6 +9,7 @@ export const {
 	OISY_DESCRIPTION,
 	OISY_REPO_URL,
 	OISY_TWITTER_URL,
+	OISY_DOCS_URL,
 	OISY_SUPPORT_URL,
 	OISY_REWARDS_URL
 } = safeParse({
@@ -21,6 +22,7 @@ export const {
 		OISY_DESCRIPTION: '',
 		OISY_REPO_URL: '',
 		OISY_TWITTER_URL: '',
+		OISY_DOCS_URL: '',
 		OISY_SUPPORT_URL: '',
 		OISY_REWARDS_URL: ''
 	}

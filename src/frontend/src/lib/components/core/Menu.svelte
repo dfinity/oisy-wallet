@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconUser, Popover } from '@dfinity/gix-components';
+	import { IconBack, IconUser, Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
@@ -50,6 +50,9 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
+	import IconBook from '$lib/components/icons/IconBook.svelte';
+	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
+	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -195,18 +198,9 @@
 
 		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
-		<ChangelogLink asMenuItem asMenuItemCondensed />
+		<DocumentationLink asMenuItem asMenuItemCondensed />
 
-		<ExternalLink
-			asMenuItem
-			asMenuItemCondensed
-			href={OISY_SUPPORT_URL}
-			ariaLabel={$i18n.navigation.alt.support_email}
-			iconVisible={false}
-		>
-			<IconHelp />
-			{$i18n.navigation.text.support_email}
-		</ExternalLink>
+		<SupportLink asMenuItem asMenuItemCondensed />
 
 		<Hr />
 
@@ -220,6 +214,8 @@
 			<IconGitHub />
 			{$i18n.navigation.text.source_code}
 		</a>
+
+		<ChangelogLink asMenuItem asMenuItemCondensed />
 
 		<Hr />
 
