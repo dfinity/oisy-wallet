@@ -8,6 +8,7 @@
 		type SendContextPurpose
 	} from '$lib/stores/send.store';
 	import type { OptionToken, Token } from '$lib/types/token';
+    import {IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext, icTokenFeeStore} from "$icp/stores/ic-token-fee.store";
 
 	export let token: OptionToken;
 	export let sendPurpose: SendContextPurpose = 'send';
@@ -27,6 +28,10 @@
 		sendToken,
 		...rest
 	});
+
+    setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
+        store: icTokenFeeStore
+    });
 
 	$: sendToken.set(selectedToken);
 </script>
