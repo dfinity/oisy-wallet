@@ -152,12 +152,12 @@
 				<svelte:fragment slot="balance">
 					{#if nonNullish($sourceToken)}
 						<MaxBalanceButton
-								bind:amountSetToMax
-								bind:amount={swapAmount}
-								error={nonNullish(errorType)}
-								balance={$sourceTokenBalance}
-								token={$sourceToken}
-								fee={BigNumber.from(totalFee)}
+							bind:amountSetToMax
+							bind:amount={swapAmount}
+							error={nonNullish(errorType)}
+							balance={$sourceTokenBalance}
+							token={$sourceToken}
+							fee={BigNumber.from(totalFee)}
 						/>
 					{/if}
 				</svelte:fragment>
