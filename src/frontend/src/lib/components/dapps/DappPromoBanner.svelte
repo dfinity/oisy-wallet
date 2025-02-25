@@ -27,7 +27,7 @@
 				/>
 			</div>
 			<div class="flex-1">
-				<h6 class="text-sm font-bold text-info-blue">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-sm font-bold text-brand-primary-alt">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-primary-inverted">{dAppDescription.name}</h4>
 			</div>
 

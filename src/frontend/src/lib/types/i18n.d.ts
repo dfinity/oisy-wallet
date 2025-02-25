@@ -115,6 +115,7 @@ interface I18nAirdrops {
 		active_date: string;
 		participate_title: string;
 		share: string;
+		learn_more: string;
 		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
@@ -125,13 +126,15 @@ interface I18nAirdrops {
 		state_modal_title: string;
 		state_modal_title_jackpot: string;
 		state_modal_content_text: string;
+		carousel_slide_title: string;
+		carousel_slide_cta: string;
 	};
 	alt: { upcoming_campaigns: string };
 }
 
 interface I18nFooter {
 	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
-	alt: { dfinity: string; status: string };
+	alt: { dfinity: string };
 }
 
 interface I18nWallet {

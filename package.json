@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "0.24.0",
+	"version": "0.25.0",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -111,7 +111,7 @@
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
 		"postcss": "^8.5.1",
-		"prettier": "^3.5.0",
+		"prettier": "^3.5.2",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",
