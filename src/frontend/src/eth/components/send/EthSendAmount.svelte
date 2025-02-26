@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
-	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -26,7 +25,6 @@
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
 	const { feeStore: storeFeeData, minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
-
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -71,22 +69,6 @@
 			);
 		}
 	};
-
-	/**
-	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
-	 */
-	let amountSetToMax = false;
-	let sendInputAmount: SendInputAmount | undefined;
-
-	$: $maxGasFee,
-		(() => {
-			if (!amountSetToMax) {
-				return;
-			}
-
-			// Debounce to sync the UI given that the fees' display is animated with a short fade effect.
-			debounce(() => sendInputAmount?.triggerCalculateMax(), 500)();
-		})();
 </script>
 
 <TokenInput

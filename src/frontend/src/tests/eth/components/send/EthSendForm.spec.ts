@@ -1,9 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
-import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthSendForm from '$eth/components/send/EthSendForm.svelte';
 import { FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$eth/stores/fee.store';
-import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
@@ -28,9 +26,6 @@ describe('EthSendForm', () => {
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
 		})
 	);
-	mockContext.set(IC_TOKEN_FEE_CONTEXT_KEY, {
-		store: icTokenFeeStore
-	});
 
 	const props = {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
@@ -46,8 +41,6 @@ describe('EthSendForm', () => {
 	const maxFeeEthSelector = 'div[id="max-fee-eth"]';
 	const sendInfoMessageBoxSelector = 'div[data-tid="send-info-message-box"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
-
-	vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
 	it('should render all fields', () => {
 		const { container } = render(EthSendForm, {
@@ -87,6 +80,9 @@ describe('EthSendForm', () => {
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
 		expect(destination).toBeNull();
+
+		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+		expect(network).not.toBeNull();
 
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 		expect(maxFeeEth).not.toBeNull();
