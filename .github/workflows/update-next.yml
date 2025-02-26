@@ -72,33 +72,3 @@ jobs:
             
             * CI should pass
             * The pulled in changes should have been tested before being committed to their repositories.
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          commit-message: Bump
-          committer: GitHub <noreply@github.com>
-          author: gix-bot <gix-bot@users.noreply.github.com>
-          branch: bot-bump-next
-          branch-suffix: timestamp
-          reviewers: mstrasinskis, dskloetd, yhabib
-          add-paths: |
-            frontend
-          delete-branch: true
-          title: "bot: Bump ${{ inputs.gix_components && 'gix-components' || '' }}${{ inputs.gix_components && inputs.ic_js && ' and ' || '' }}${{ inputs.ic_js && 'ic-js' || '' }}"
-          body: |
-            # Motivation
-
-            We want to pull in the latest changes.
-            This PR was requested by ${{ github.actor }}.
-
-            # Changes
-
-            ${{ inputs.gix_components && '* Ran `npm run update:gix-cmps`' || '' }}
-            ${{ inputs.ic_js && '* Ran `npm run update:ic-js`' || '' }}
-
-            # Tests
-
-            * CI should pass
-            * The pulled in changes should have been tested before being committed to their repositories.
