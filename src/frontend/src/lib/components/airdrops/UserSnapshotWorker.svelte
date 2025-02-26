@@ -16,8 +16,6 @@
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-
-
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
 
