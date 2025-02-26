@@ -8,7 +8,6 @@ import {
 	type FeeContext,
 	type FeeStore
 } from '$eth/stores/fee.store';
-import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
 import {
 	CONVERT_CONTEXT_KEY,
 	initConvertContext,
@@ -17,7 +16,7 @@ import {
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
-import { readable, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 describe('EthConvertForm', () => {
 	let store: FeeStore;
@@ -29,7 +28,8 @@ describe('EthConvertForm', () => {
 					feeStore,
 					feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
 					feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
-					feeTokenIdStore: writable(ETHEREUM_TOKEN.id)
+					feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+					feeExchangeRateStore: writable(100)
 				})
 			],
 			[
@@ -41,14 +41,10 @@ describe('EthConvertForm', () => {
 			]
 		]);
 
-	const mockCkEthStore = (address?: string) =>
-		vi
-			.spyOn(ckEthDerived, 'ckEthHelperContractAddress', 'get')
-			.mockImplementation(() => readable(address));
-
 	const props = {
 		sendAmount: 0.001,
-		receiveAmount: 0.001
+		receiveAmount: 0.001,
+		destination: 'address'
 	};
 	const mockFeeStore = {
 		maxFeePerGas: BigNumber.from(1000n),
@@ -67,7 +63,6 @@ describe('EthConvertForm', () => {
 
 	it('should keep the next button clickable if all requirements are met', () => {
 		store.setFee(mockFeeStore);
-		mockCkEthStore('address');
 
 		const { getByTestId } = render(EthConvertForm, {
 			props,
@@ -79,7 +74,6 @@ describe('EthConvertForm', () => {
 
 	it('should keep the next button disabled if amount is undefined', () => {
 		store.setFee(mockFeeStore);
-		mockCkEthStore('address');
 
 		const { getByTestId } = render(EthConvertForm, {
 			props: {
@@ -94,7 +88,6 @@ describe('EthConvertForm', () => {
 
 	it('should keep the next button disabled if amount is invalid', () => {
 		store.setFee(mockFeeStore);
-		mockCkEthStore('address');
 
 		const { getByTestId } = render(EthConvertForm, {
 			props: {
@@ -107,12 +100,14 @@ describe('EthConvertForm', () => {
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
-	it('should keep the next button disabled if ckEthHelperContractAddress is not available', () => {
+	it('should keep the next button disabled if destination is not provided', () => {
 		store.setFee(mockFeeStore);
-		mockCkEthStore(undefined);
 
 		const { getByTestId } = render(EthConvertForm, {
-			props,
+			props: {
+				...props,
+				destination: undefined
+			},
 			context: mockContext({ feeStore: store })
 		});
 
