@@ -5,8 +5,8 @@
 	import { slide } from 'svelte/transition';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
-	import SwapMaxBalanceButton from '$lib/components/swap/SwapMaxBalanceButton.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
@@ -72,6 +72,10 @@
 		? $icTokenFeeStore?.[$sourceToken.symbol]
 		: undefined;
 
+	let totalFee: bigint | undefined;
+	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+	$: totalFee = (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n);
+
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
@@ -110,8 +114,7 @@
 					userAmount,
 					decimals: $sourceToken.decimals,
 					balance: $sourceTokenBalance,
-					// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-					totalFee: (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n)
+					totalFee
 				})
 			: undefined;
 </script>
@@ -148,7 +151,14 @@
 
 				<svelte:fragment slot="balance">
 					{#if nonNullish($sourceToken)}
-						<SwapMaxBalanceButton bind:amountSetToMax bind:swapAmount {errorType} />
+						<MaxBalanceButton
+							bind:amountSetToMax
+							bind:amount={swapAmount}
+							error={nonNullish(errorType)}
+							balance={$sourceTokenBalance}
+							token={$sourceToken}
+							fee={BigNumber.from(totalFee)}
+						/>
 					{/if}
 				</svelte:fragment>
 			</TokenInput>

@@ -5,6 +5,7 @@
 	"OISY_DESCRIPTION": "OISY Wallet offers a seamless on-chain experience for managing Ethereum, BTC, Solana, and ICP assets. Designed for the modern multi-chain wallet user, it leverages native web technologies and advanced cryptography to eliminate the need for browser extensions or mobile apps. Accessing the wallet is simple and secure, with passkeys available on both computers and mobile devices.",
 	"OISY_REPO_URL": "https://github.com/dfinity/oisy-wallet",
 	"OISY_TWITTER_URL": "https://x.com/oisy",
-	"OISY_SUPPORT_URL": "https://docs.oisy.com",
+	"OISY_DOCS_URL": "https://docs.oisy.com",
+	"OISY_SUPPORT_URL": "https://docs.oisy.com/using-oisy-wallet/support",
 	"OISY_REWARDS_URL": "https://docs.oisy.com/rewards"
 }

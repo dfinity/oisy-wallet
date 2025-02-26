@@ -73,9 +73,6 @@
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose === 'send';
 
-	let simplifiedForm = false;
-	$: simplifiedForm = sendPurpose === 'convert-eth-to-cketh';
-
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
 		to: destination,
@@ -275,7 +272,6 @@
 			{nativeEthereumToken}
 			{destinationEditable}
 			{sourceNetwork}
-			{simplifiedForm}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
