@@ -37,8 +37,9 @@
 	let websiteURL: Option<URL>;
 	$: {
 		try {
+			// TODO: use URL.parse
 			websiteURL = new URL(website);
-		} catch (e) {
+		} catch (_err: unknown) {
 			websiteURL = null;
 		}
 	}
@@ -46,13 +47,13 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">
-		<span class="text-xl text-center">{dAppName}</span>
+		<span class="text-center text-xl">{dAppName}</span>
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<div class="gap-6 flex flex-col">
+		<div class="flex flex-col gap-6">
 			{#if nonNullish(screenshots) && screenshots.length > 0}
-				<div class="rounded-3xl overflow-hidden">
+				<div class="overflow-hidden rounded-3xl">
 					<ImgBanner
 						styleClass="max-h-64"
 						src={screenshots[0]}
@@ -63,7 +64,7 @@
 
 			<article>
 				<div
-					class="gap-x-4 gap-y-2 pb-2 sm:gap-4 sm:pb-4 flex flex-wrap items-center justify-start border-b border-tertiary"
+					class="flex flex-wrap items-center justify-start gap-x-4 gap-y-2 border-b border-tertiary pb-2 sm:gap-4 sm:pb-4"
 				>
 					<Logo
 						size="md"
@@ -83,7 +84,7 @@
 							>
 						{/if}
 					</div>
-					<div class="space-x-3 flex">
+					<div class="flex space-x-3">
 						{#if nonNullish(telegram)}
 							<ExternalLinkIcon
 								href={telegram}
@@ -127,7 +128,7 @@
 					</div>
 				</div>
 
-				<p class="m-0 my-4 text-sm [&_ul]:pl-6 [&_ul]:list-disc">
+				<p class="m-0 my-4 text-sm [&_ul]:list-disc [&_ul]:pl-6">
 					<Html text={description} />
 				</p>
 				<DappTags {dAppName} {tags} />
@@ -140,7 +141,9 @@
 					ariaLabel={replacePlaceholders($i18n.dapps.alt.open_dapp, {
 						$dAppName: dAppName
 					})}
-					styleClass="as-button primary padding-sm flex-1 flex-row-reverse"
+					asButton
+					fullWidth
+					styleClass="primary padding-sm flex-1 flex-row-reverse"
 					href={websiteURL.toString()}
 					trackEvent={{ name: TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK, metadata: { dappId } }}
 					>{callToAction ??

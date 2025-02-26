@@ -9,20 +9,20 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
+	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
-	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
-	import IconTrophy from '$lib/components/icons/lucide/IconTrophy.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
+	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
+	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -117,13 +117,14 @@
 	on:click={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
+	colorStyle="tertiary-alt"
 >
 	<IconUser size="24" slot="icon" />
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="gap-1 flex flex-col" data-tid={NAVIGATION_MENU}>
+	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
@@ -146,17 +147,6 @@
 			</ButtonMenu>
 		{/if}
 
-		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_AIRDROPS}
-				ariaLabel={$i18n.navigation.alt.airdrops}
-				on:click={goToAirdrops}
-			>
-				<IconTrophy size="20" />
-				{$i18n.navigation.text.airdrops}
-			</ButtonMenu>
-		{/if}
-
 		{#if !dAppExplorerRoute && !settingsRoute}
 			<ButtonMenu
 				testId={NAVIGATION_ITEM_EXPLORER}
@@ -165,6 +155,17 @@
 			>
 				<IconlyUfo size="20" />
 				{$i18n.navigation.text.dapp_explorer}
+			</ButtonMenu>
+		{/if}
+
+		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
+			<ButtonMenu
+				testId={NAVIGATION_ITEM_AIRDROPS}
+				ariaLabel={$i18n.navigation.alt.airdrops}
+				on:click={goToAirdrops}
+			>
+				<IconGift size="20" />
+				{$i18n.navigation.text.airdrops}
 			</ButtonMenu>
 		{/if}
 
@@ -194,18 +195,9 @@
 
 		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
-		<ChangelogLink asMenuItem asMenuItemCondensed />
+		<DocumentationLink asMenuItem asMenuItemCondensed />
 
-		<ExternalLink
-			asMenuItem
-			asMenuItemCondensed
-			href="mailto:support@oisy.com"
-			ariaLabel={$i18n.navigation.alt.support_email}
-			iconVisible={false}
-		>
-			<IconHelp />
-			{$i18n.navigation.text.support_email}
-		</ExternalLink>
+		<SupportLink asMenuItem asMenuItemCondensed />
 
 		<Hr />
 
@@ -220,13 +212,15 @@
 			{$i18n.navigation.text.source_code}
 		</a>
 
+		<ChangelogLink asMenuItem asMenuItemCondensed />
+
 		<Hr />
 
 		<SignOut on:icLogoutTriggered={hidePopover} />
 
 		<Hr />
 
-		<span class="text-sm text-center text-tertiary">
+		<span class="text-center text-sm text-tertiary">
 			<LicenseLink noUnderline />
 		</span>
 	</div>

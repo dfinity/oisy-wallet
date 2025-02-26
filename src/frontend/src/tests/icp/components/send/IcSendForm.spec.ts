@@ -70,7 +70,7 @@ describe('IcSendForm', () => {
 		expect(toolbar).not.toBeNull();
 	});
 
-	it('should not render destination and source fields', () => {
+	it('should not render destination field', () => {
 		const { container } = render(IcSendForm, {
 			props: { ...props, simplifiedForm: true },
 			context: mockContext
@@ -86,7 +86,7 @@ describe('IcSendForm', () => {
 		expect(source).toBeNull();
 
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
-		expect(balance).not.toBeNull();
+		expect(balance).toBeNull();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
 		expect(fee).not.toBeNull();

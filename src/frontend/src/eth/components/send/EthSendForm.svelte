@@ -7,6 +7,7 @@
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import NetworkInfo from '$lib/components/networks/NetworkInfo.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
@@ -21,7 +22,6 @@
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
-	export let simplifiedForm = false;
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
@@ -55,12 +55,9 @@
 
 		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource
-			token={$sendToken}
-			balance={$sendBalance}
-			source={$ethAddress ?? ''}
-			hideSource={simplifiedForm}
-		/>
+		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
+
+		<NetworkInfo network={sourceNetwork} />
 
 		<FeeDisplay />
 

@@ -5,13 +5,13 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
 import { createAtaInstruction } from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
@@ -127,13 +127,15 @@ const createSplTokenTransactionMessage = async ({
 	destination,
 	amount,
 	network,
-	tokenAddress
+	tokenAddress,
+	tokenOwnerAddress
 }: {
 	signer: TransactionSigner;
 	destination: SolAddress;
 	amount: BigNumber;
 	network: SolanaNetworkType;
-	tokenAddress: SolAddress;
+	tokenAddress: SplTokenAddress;
+	tokenOwnerAddress: SolAddress;
 }): Promise<SolTransactionMessage> => {
 	const rpc = solanaHttpRpc(network);
 
@@ -178,7 +180,7 @@ const createSplTokenTransactionMessage = async ({
 			authority: signer,
 			amount: amount.toBigInt()
 		},
-		{ programAddress: solAddress(TOKEN_PROGRAM_ADDRESS) }
+		{ programAddress: solAddress(tokenOwnerAddress) }
 	);
 
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
@@ -261,7 +263,8 @@ export const sendSol = async ({
 				destination,
 				amount,
 				network: solNetwork,
-				tokenAddress: token.address
+				tokenAddress: token.address,
+				tokenOwnerAddress: token.owner
 			})
 		: await createSolTransactionMessage({
 				signer,

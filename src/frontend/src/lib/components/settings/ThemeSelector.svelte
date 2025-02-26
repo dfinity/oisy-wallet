@@ -1,21 +1,24 @@
 <script lang="ts">
 	import { themeStore, Theme } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import ThemeSelectorCard from '$lib/components/settings/ThemeSelectorCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	enum SystemTheme {
-		SYSTEM = 'system'
-	}
-	const THEME_VALUES = [...Object.values(Theme), ...Object.values(SystemTheme)];
+	const THEME_VALUES = [...Object.values(Theme)];
 
 	// TODO: use variable exposed from gix-components when it will be exposed.
 	const THEME_KEY = 'nnsTheme';
 
-	const selectTheme = (theme: Theme | SystemTheme) => {
-		if (theme === SystemTheme.SYSTEM) {
+	const THEME_SYSTEM = 'system';
+
+	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
+		selectedTheme = theme;
+
+		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
 			return;
 		}
@@ -23,10 +26,17 @@
 		themeStore.select(theme);
 	};
 
-	let selectedTheme: Theme | SystemTheme;
-	$: selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
-		? SystemTheme.SYSTEM
-		: ($themeStore ?? SystemTheme.SYSTEM);
+	let selectedTheme: Theme | typeof THEME_SYSTEM;
+
+	const initSelectedTheme = () => {
+		selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
+			? THEME_SYSTEM
+			: ($themeStore ?? THEME_SYSTEM);
+	};
+
+	onMount(initSelectedTheme);
+	themeStore.subscribe(initSelectedTheme);
+	afterNavigate(initSelectedTheme);
 </script>
 
 <div class="flex flex-row">
@@ -44,4 +54,17 @@
 			{/await}
 		</ThemeSelectorCard>
 	{/each}
+
+	<ThemeSelectorCard
+		label={$i18n.settings.text.appearance_system}
+		selected={selectedTheme === THEME_SYSTEM}
+		on:click={() => selectTheme(THEME_SYSTEM)}
+		on:keydown={() => selectTheme(THEME_SYSTEM)}
+		tabindex={THEME_VALUES.length}
+		testId={`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`}
+	>
+		{#await import(`$lib/assets/${THEME_SYSTEM}-theme.png`) then { default: src }}
+			<Img {src} alt={$i18n.settings.alt.appearance_system} />
+		{/await}
+	</ThemeSelectorCard>
 </div>

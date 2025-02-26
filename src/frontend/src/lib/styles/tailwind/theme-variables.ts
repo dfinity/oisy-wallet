@@ -3,44 +3,53 @@ export const themeVariables = {
 		page: 'var(--color-background-page)',
 		surface: 'var(--color-background-surface)',
 		primary: 'var(--color-background-primary)',
+		'primary-alt': 'var(--color-background-primary-alt)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
 		secondary: 'var(--color-background-secondary)',
+		'secondary-alt': 'var(--color-background-secondary-alt)',
 		'secondary-inverted': 'var(--color-background-secondary-inverted)',
 		tertiary: 'var(--color-background-tertiary)',
+		'tertiary-alt': 'var(--color-background-tertiary-alt)',
 		'tertiary-inverted': 'var(--color-background-tertiary-inverted)',
 		disabled: 'var(--color-background-disabled)',
+		'disabled-alt': 'var(--color-background-disabled-alt)',
 		brand: {
+			'subtle-5': 'var(--color-background-brand-subtle-5)',
 			'subtle-10': 'var(--color-background-brand-subtle-10)',
 			'subtle-20': 'var(--color-background-brand-subtle-20)',
 			'subtle-30': 'var(--color-background-brand-subtle-30)',
 			primary: 'var(--color-background-brand-primary)',
 			secondary: 'var(--color-background-brand-secondary)',
 			tertiary: 'var(--color-background-brand-tertiary)',
-			disabled: 'var(--color-background-brand-disabled)'
+			disabled: 'var(--color-background-brand-disabled)',
+			light: 'var(--color-background-brand-light)'
 		},
 		success: {
 			'subtle-10': 'var(--color-background-success-subtle-10)',
 			'subtle-20': 'var(--color-background-success-subtle-20)',
 			'subtle-30': 'var(--color-background-success-subtle-30)',
-			solid: 'var(--color-background-success-solid)',
-			'solid-alt': 'var(--color-background-success-solid-alt)',
-			'solid-alt2': 'var(--color-background-success-solid-alt2)'
+			primary: 'var(--color-background-success-primary)',
+			secondary: 'var(--color-background-success-secondary)',
+			tertiary: 'var(--color-background-success-tertiary)',
+			light: 'var(--color-background-success-light)'
 		},
 		warning: {
 			'subtle-10': 'var(--color-background-warning-subtle-10)',
 			'subtle-20': 'var(--color-background-warning-subtle-20)',
 			'subtle-30': 'var(--color-background-warning-subtle-30)',
-			solid: 'var(--color-background-warning-solid)',
-			'solid-alt': 'var(--color-background-warning-solid-alt)',
-			'solid-alt2': 'var(--color-background-warning-solid-alt2)'
+			primary: 'var(--color-background-warning-primary)',
+			secondary: 'var(--color-background-warning-secondary)',
+			tertiary: 'var(--color-background-warning-tertiary)',
+			light: 'var(--color-background-warning-light)'
 		},
 		error: {
 			'subtle-10': 'var(--color-background-error-subtle-10)',
 			'subtle-20': 'var(--color-background-error-subtle-20)',
 			'subtle-30': 'var(--color-background-error-subtle-30)',
-			solid: 'var(--color-background-error-solid)',
-			'solid-alt': 'var(--color-background-error-solid-alt)',
-			'solid-alt2': 'var(--color-background-error-solid-alt2)'
+			primary: 'var(--color-background-error-primary)',
+			secondary: 'var(--color-background-error-secondary)',
+			tertiary: 'var(--color-background-error-tertiary)',
+			light: 'var(--color-background-error-light)'
 		}
 	},
 	border: {
@@ -86,12 +95,15 @@ export const themeVariables = {
 	foreground: {
 		primary: 'var(--color-foreground-primary)',
 		'primary-inverted': 'var(--color-foreground-primary-inverted)',
+		'primary-inverted-alt': 'var(--color-foreground-primary-inverted-alt)',
+		'secondary-inverted': 'var(--color-foreground-secondary-inverted)',
 		tertiary: 'var(--color-foreground-tertiary)',
 		'tertiary-inverted': 'var(--color-foreground-tertiary-inverted)',
 		disabled: 'var(--color-foreground-disabled)',
 		brand: {
 			primary: 'var(--color-foreground-brand-primary)',
 			'primary-alt': 'var(--color-foreground-brand-primary-alt)',
+			'primary-inverted': 'var(--color-foreground-brand-primary-inverted)',
 			secondary: 'var(--color-foreground-brand-secondary)',
 			'secondary-alt': 'var(--color-foreground-brand-secondary-alt)',
 			tertiary: 'var(--color-foreground-brand-tertiary)',
@@ -100,9 +112,29 @@ export const themeVariables = {
 		},
 		'success-primary': 'var(--color-foreground-success-primary)',
 		'success-alt': 'var(--color-foreground-success-alt)',
+		'success-secondary': 'var(--color-foreground-success-secondary)',
 		'warning-primary': 'var(--color-foreground-warning-primary)',
 		'warning-alt': 'var(--color-foreground-warning-alt)',
 		'error-primary': 'var(--color-foreground-error-primary)',
-		'error-alt': 'var(--color-foreground-error-alt)'
+		'error-alt': 'var(--color-foreground-error-alt)',
+		'error-secondary': 'var(--color-foreground-error-secondary)'
+	},
+
+	// custom hard coded gradient colors
+	gradient: {
+		'default-0': '#016DFC',
+		'default-100': '#004EB5',
+		'icp-0': '#3B00B9',
+		'icp-100': '#7014A4',
+		'btc-0': '#F7931A',
+		'btc-100': '#DE7900',
+		'eth-0': '#627EEA',
+		'eth-100': '#E18DFF',
+		'sol-0': '#904EFA',
+		'sol-100': '#1DE59D',
+		'trump-0': '#232BCC',
+		'trump-100': '#000797',
+		'gold-0': '#CCA055',
+		'gold-100': '#EBD27F'
 	}
 };
