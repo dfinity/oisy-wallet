@@ -21,6 +21,7 @@ interface I18nCore {
 		view: string;
 		copy: string;
 		clear_filter: string;
+		not_available: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -38,7 +39,8 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 	};
@@ -51,7 +53,8 @@ interface I18nNavigation {
 		more_settings: string;
 		menu: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
 	};
@@ -246,6 +249,7 @@ interface I18nNetworks {
 	test_networks: string;
 	more: string;
 	chain_fusion: string;
+	network: string;
 }
 
 interface I18nReceive {
