@@ -6,6 +6,7 @@ import { formatToken, formatUSD } from '$lib/utils/format.utils';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
+import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils";
 
 describe('AirdropBannerOverlay', () => {
 	Object.defineProperty(window, 'navigator', {
@@ -55,7 +56,7 @@ describe('AirdropBannerOverlay', () => {
 			}
 		});
 
-		expect(getByText(get(i18n).airdrops.text.no_balance_title)).toBeInTheDocument();
+		expect(getByText(replaceOisyPlaceholders(get(i18n).airdrops.text.no_balance_title))).toBeInTheDocument();
 		expect(getByText(get(i18n).airdrops.text.no_balance_description)).toBeInTheDocument();
 	});
 });
