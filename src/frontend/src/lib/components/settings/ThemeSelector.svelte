@@ -14,6 +14,7 @@
 	const THEME_SYSTEM = 'system';
 
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
+		// even though we call initSelectedTheme on store change, changing to system theme will not update the store
 		selectedTheme = theme;
 
 		if (theme === THEME_SYSTEM) {
@@ -26,6 +27,7 @@
 
 	let selectedTheme: Theme | typeof THEME_SYSTEM;
 
+	// Here we just update the local variable above to update the selected card
 	const initSelectedTheme = (themeStore: ThemeStoreData) => {
 		selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
 			? THEME_SYSTEM
