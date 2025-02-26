@@ -34,9 +34,7 @@
 			: (themeStore ?? THEME_SYSTEM);
 	};
 
-	onMount(() => initSelectedTheme($themeStore));
 	$: initSelectedTheme($themeStore);
-	afterNavigate(() => initSelectedTheme($themeStore));
 </script>
 
 <div class="flex flex-row">
