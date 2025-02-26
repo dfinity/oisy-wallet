@@ -95,13 +95,13 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="balance">
-		{#if nonNullish($sendToken) && nonNullish($fee)}
+		{#if nonNullish($sendToken)}
 			<MaxBalanceButton
 				bind:amount
 				error={nonNullish(amountError)}
 				balance={$sendBalance}
 				token={$sendToken}
-				fee={BigNumber.from($fee)}
+				fee={BigNumber.from($fee ?? 0)}
 			/>
 		{/if}
 	</svelte:fragment>
