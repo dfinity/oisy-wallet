@@ -1,5 +1,6 @@
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
@@ -7,7 +8,6 @@ import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/s
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
-import {TOKEN_INPUT_CURRENCY_TOKEN} from "$lib/constants/test-ids.constants";
 
 describe('SolSendForm', () => {
 	const mockContext = new Map([]);

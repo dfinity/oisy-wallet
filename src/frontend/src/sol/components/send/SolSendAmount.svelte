@@ -8,6 +8,9 @@
 		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -22,9 +25,6 @@
 	} from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import MaxBalanceButton from "$lib/components/common/MaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
@@ -72,12 +72,12 @@
 </script>
 
 <TokenInput
-		token={$sendToken}
-		bind:amount
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
-		bind:error={amountError}
-		customErrorValidate={customValidate}
+	token={$sendToken}
+	bind:amount
+	isSelectable={false}
+	exchangeRate={$sendTokenExchangeRate}
+	bind:error={amountError}
+	customErrorValidate={customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -85,10 +85,10 @@
 		{#if nonNullish($sendToken)}
 			<div class="text-tertiary">
 				<TokenInputAmountExchange
-						{amount}
-						exchangeRate={$sendTokenExchangeRate}
-						token={$sendToken}
-						disabled
+					{amount}
+					exchangeRate={$sendTokenExchangeRate}
+					token={$sendToken}
+					disabled
 				/>
 			</div>
 		{/if}
@@ -97,11 +97,11 @@
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken) && nonNullish($fee)}
 			<MaxBalanceButton
-					bind:amount
-					error={nonNullish(amountError)}
-					balance={$sendBalance}
-					token={$sendToken}
-					fee={BigNumber.from($fee)}
+				bind:amount
+				error={nonNullish(amountError)}
+				balance={$sendBalance}
+				token={$sendToken}
+				fee={BigNumber.from($fee)}
 			/>
 		{/if}
 	</svelte:fragment>
