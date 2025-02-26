@@ -17,8 +17,12 @@
 		initFeeContext,
 		initFeeStore
 	} from '$eth/stores/fee.store';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckErc20HelperContractAddress,
+		ckEthHelperContractAddress
+	} from '$icp-eth/derived/cketh.derived';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -30,6 +34,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -39,7 +44,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
-	import { invalidAmount } from '$lib/utils/input.utils';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let currentStep: WizardStep | undefined;
@@ -53,13 +58,16 @@
 	let feeStore = initFeeStore();
 
 	let feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set($sourceToken.symbol);
+	$: feeSymbolStore.set($ethereumToken.symbol);
 
 	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set($sourceToken.id);
+	$: feeTokenIdStore.set($ethereumToken.id);
 
 	let feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set($sourceToken.decimals);
+	$: feeDecimalsStore.set($ethereumToken.decimals);
+
+	let feeExchangeRateStore = writable<number | undefined>(undefined);
+	$: feeExchangeRateStore.set($exchanges?.[$ethereumToken.id]?.usd);
 
 	let feeContext: FeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
@@ -71,13 +79,26 @@
 			feeSymbolStore,
 			feeTokenIdStore,
 			feeDecimalsStore,
+			feeExchangeRateStore,
 			evaluateFee
 		})
 	);
 
+	let destination = '';
+	$: destination = isTokenErc20($sourceToken)
+		? ($ckErc20HelperContractAddress ?? '')
+		: ($ckEthHelperContractAddress ?? '');
+
 	const dispatch = createEventDispatcher();
 
 	const convert = async () => {
+		if (isNullishOrEmpty(destination)) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.destination_address_invalid }
+			});
+			return;
+		}
+
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
@@ -131,9 +152,7 @@
 		try {
 			await executeSend({
 				from: $ethAddress,
-				to: isErc20Icp($sourceToken)
-					? $ckEthHelperContractAddress
-					: mapAddressStartsWith0x($ckEthHelperContractAddress),
+				to: isErc20Icp($sourceToken) ? destination : mapAddressStartsWith0x(destination),
 				progress: (step: ProgressStepsSend) => (convertProgressStep = step),
 				token: $sourceToken,
 				amount: parseToken({
@@ -177,14 +196,14 @@
 	sendToken={$sourceToken}
 	sendTokenId={$sourceToken.id}
 	amount={sendAmount}
-	destination={$ckEthHelperContractAddress ?? ''}
+	{destination}
 	observe={currentStep?.name !== WizardStepsConvert.CONVERTING}
 	sourceNetwork={$selectedEthereumNetwork}
 	targetNetwork={ICP_NETWORK}
 	nativeEthereumToken={$ethereumToken}
 >
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount>
+		<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
 					<ButtonBack on:click={back} />
@@ -201,7 +220,7 @@
 		<EthConvertProgress
 			bind:convertProgressStep
 			sourceTokenId={$sourceToken.id}
-			destination={$ckEthHelperContractAddress ?? ''}
+			{destination}
 			nativeEthereumToken={$ethereumToken}
 		/>
 	{:else}

@@ -54,7 +54,7 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
-	scrollToTop?: boolean;
+	centeredElementTestId?: string;
 }
 
 type TestModalSnapshotParams = {
@@ -230,14 +230,6 @@ abstract class Homepage {
 		return await this.#page.getByTestId(testId);
 	}
 
-	protected async scrollToTopAndBack(): Promise<void> {
-		const currentPosition = await this.#page.evaluate(() => window.scrollY);
-
-		await this.#page.evaluate(() => window.scrollTo({ top: 0 }));
-
-		await this.#page.evaluate((y) => window.scrollTo({ top: y }), currentPosition);
-	}
-
 	async waitForTimeout(timeout: number): Promise<void> {
 		await this.#page.waitForTimeout(timeout);
 	}
@@ -367,9 +359,9 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot({ scrollToTop = true }: TakeScreenshotParams = {}): Promise<void> {
-		if (scrollToTop) {
-			await this.scrollToTopAndBack();
+	async takeScreenshot({ centeredElementTestId }: TakeScreenshotParams = {}): Promise<void> {
+		if (nonNullish(centeredElementTestId)) {
+			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
 		await expect(this.#page).toHaveScreenshot({
