@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { themeStore, Theme } from '@dfinity/gix-components';
+	import { themeStore, Theme, type ThemeStore, type ThemeStoreData } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
@@ -28,15 +28,15 @@
 
 	let selectedTheme: Theme | typeof THEME_SYSTEM;
 
-	const initSelectedTheme = () => {
+	const initSelectedTheme = (themeStore: ThemeStoreData) => {
 		selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
 			? THEME_SYSTEM
-			: ($themeStore ?? THEME_SYSTEM);
+			: (themeStore ?? THEME_SYSTEM);
 	};
 
-	onMount(initSelectedTheme);
-	themeStore.subscribe(initSelectedTheme);
-	afterNavigate(initSelectedTheme);
+	onMount(() => initSelectedTheme($themeStore));
+	$: initSelectedTheme($themeStore);
+	afterNavigate(() => initSelectedTheme($themeStore));
 </script>
 
 <div class="flex flex-row">
