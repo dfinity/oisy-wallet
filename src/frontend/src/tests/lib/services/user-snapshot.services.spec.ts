@@ -27,6 +27,7 @@ import type { Token } from '$lib/types/token';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
@@ -60,13 +61,14 @@ describe('user-snapshot.services', () => {
 		];
 
 		const mockIcAmount = 123456n;
+		const mockSplAmount = 987654n;
 
 		const mockIcTransactions: IcTransactionUi[] = createMockIcTransactionsUi(7).map((tx) => ({
 			...tx,
 			from: mockPrincipalText
 		}));
 
-		const icrcAccounts: { Icrc: AccountSnapshot_Icrc }[] = [
+		const icrcAccounts: ({ Icrc: AccountSnapshot_Icrc } | { SplMainnet: AccountSnapshot_Spl })[] = [
 			{
 				Icrc: {
 					decimals: ICP_TOKEN.decimals,
@@ -88,6 +90,18 @@ describe('user-snapshot.services', () => {
 				}
 			},
 			{
+				SplMainnet: {
+					decimals: ETHEREUM_TOKEN.decimals,
+					approx_usd_per_token: mockTokens.length,
+					amount: mockIcAmount + mockSplAmount,
+					timestamp: nowNanoseconds,
+					network: {},
+					account: mockEthAddress,
+					token_address: ETHEREUM_TOKEN.symbol.padStart(43, '0'),
+					last_transactions: []
+				}
+			},
+			{
 				Icrc: {
 					decimals: mockValidIcToken.decimals,
 					approx_usd_per_token: mockTokens.length + 1,
@@ -100,8 +114,6 @@ describe('user-snapshot.services', () => {
 				}
 			}
 		];
-
-		const mockSplAmount = 987654n;
 
 		const mockSolTransactions: SolTransactionUi[] = createMockSolTransactionsUi(13).map((tx) => ({
 			...tx,
@@ -174,6 +186,9 @@ describe('user-snapshot.services', () => {
 
 			vi.spyOn(addressStore, 'solAddressMainnet', 'get').mockImplementation(() =>
 				readable(mockSolAddress)
+			);
+			vi.spyOn(addressStore, 'ethAddress', 'get').mockImplementation(() =>
+				readable(mockEthAddress)
 			);
 
 			tokens.forEach(({ id }) => {

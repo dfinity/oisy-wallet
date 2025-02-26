@@ -208,7 +208,20 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 							exchangeRate,
 							timestamp
 						})
-					: undefined;
+					: // TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+						toSplSnapshot({
+							token: {
+								...token,
+								address: token.symbol.padStart(
+									'So11111111111111111111111111111111111111111'.length,
+									'0'
+								),
+								owner: SYSTEM_PROGRAM_ADDRESS
+							},
+							balance,
+							exchangeRate,
+							timestamp
+						});
 
 		return nonNullish(snapshot) ? [...acc, snapshot] : acc;
 	}, []);
