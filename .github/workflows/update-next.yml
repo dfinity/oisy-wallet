@@ -61,14 +61,14 @@ jobs:
           title: "build(frontend): Bump ${{ inputs.gix_components && 'gix-components' || '' }}${{ inputs.gix_components && inputs.ic_js && ' and ' || '' }}${{ inputs.ic_js && 'ic-js' || '' }}"
           body: |
             # Motivation
-            
+
             We want to pull in the latest changes for the ${{ inputs.package }} package.
-            
+
             # Changes
-            
+
             * Ran `npm run update:${{ inputs.package }}${{ inputs.next && ':next' || '' }}`
-            
+
             # Tests
-            
+
             * CI should pass
             * The pulled in changes should have been tested before being committed to their repositories.
