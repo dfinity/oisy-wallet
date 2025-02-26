@@ -66,6 +66,10 @@ interface ToSnapshotParams<T extends Token> {
 
 const LAST_TRANSACTIONS_COUNT = 5;
 
+const filterTransactions = <T extends Transaction_Icrc | Transaction_Spl>(
+	transactions: (T | undefined)[]
+): T[] => transactions.filter(nonNullish).slice(0, LAST_TRANSACTIONS_COUNT);
+
 const toTransactionType = (type: IcTransactionType): TransactionType =>
 	type === 'send' ? { Send: null } : { Receive: null };
 
@@ -171,17 +175,17 @@ const toIcrcSnapshot = ({
 
 	const address = identity.getPrincipal();
 
-	const lastTransactions = (get(icTransactionsStore)?.[id] ?? [])
-		.map(({ data: transaction }) => transaction)
-		.slice(0, LAST_TRANSACTIONS_COUNT);
+	const lastTransactions = (get(icTransactionsStore)?.[id] ?? []).map(
+		({ data: transaction }) => transaction
+	);
 
 	const snapshot: AccountSnapshot_Icrc = {
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
 		token_address: Principal.from(ledgerCanisterId),
-		last_transactions: lastTransactions
-			.map((transaction) => toIcrcTransaction({ transaction }))
-			.filter(nonNullish)
+		last_transactions: filterTransactions(
+			lastTransactions.map((transaction) => toIcrcTransaction({ transaction }))
+		)
 	};
 
 	return { Icrc: snapshot };
@@ -225,7 +229,7 @@ const toSplSnapshot = ({
 		minterInfo: get(ckEthMinterInfoStore)?.[SEPOLIA_TOKEN_ID],
 		networkId: SEPOLIA_NETWORK_ID
 	});
-	const lastTransactions = (
+	const lastTransactions =
 		isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)
 			? (get(ethTransactionsStore)?.[id] ?? []).map((transaction) =>
 					mapEthTransactionUi({
@@ -238,16 +242,15 @@ const toSplSnapshot = ({
 				)
 			: isNetworkIdBTCMainnet(networkId) || isNetworkIdBTCTestnet(networkId)
 				? (get(btcTransactionsStore)?.[id] ?? []).map(({ data: transaction }) => transaction)
-				: (get(solTransactionsStore)?.[id] ?? []).map(({ data: transaction }) => transaction)
-	).slice(0, LAST_TRANSACTIONS_COUNT);
+				: (get(solTransactionsStore)?.[id] ?? []).map(({ data: transaction }) => transaction);
 
 	const snapshot: AccountSnapshot_Spl = {
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
 		token_address: tokenAddress,
-		last_transactions: lastTransactions
-			.map((transaction) => toSplTransaction({ transaction, address, networkId }))
-			.filter(nonNullish)
+		last_transactions: filterTransactions(
+			lastTransactions.map((transaction) => toSplTransaction({ transaction, address, networkId }))
+		)
 	};
 
 	return isNetworkIdSOLDevnet(networkId) ? { SplDevnet: snapshot } : { SplMainnet: snapshot };
