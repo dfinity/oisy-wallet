@@ -1,3 +1,5 @@
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import type { BtcTransactionUi } from '$btc/types/btc';
 import type {
 	AccountSnapshot_Icrc,
 	AccountSnapshot_Spl,
@@ -7,13 +9,20 @@ import type {
 	TransactionType
 } from '$declarations/rewards/rewards.did';
 import { USER_SNAPSHOT_ENABLED } from '$env/airdrop-campaigns.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
+import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
 	btcAddressTestnet,
@@ -26,6 +35,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import {
 	isNetworkIdBTCMainnet,
@@ -41,7 +51,7 @@ import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 // All the functions below will be using stores imperatively, since the service it is not reactive.
@@ -68,7 +78,7 @@ const toBaseTransaction = ({
 	'counterparty'
 > => ({
 	transaction_type: toTransactionType(type),
-	timestamp: (timestamp ?? 0n) * NANO_SECONDS_IN_MILLISECOND,
+	timestamp: (timestamp ?? 0n) * NANO_SECONDS_IN_SECOND,
 	amount: value ?? 0n,
 	network: {}
 });
@@ -85,19 +95,42 @@ const toIcrcTransaction = ({
 });
 
 const toSplTransaction = ({
-	transaction: { type, value, timestamp, from, to },
-	address
+	transaction: { type, value, timestamp, from, to, ...rest },
+	address,
+	networkId
 }: {
-	transaction: SolTransactionUi;
+	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+	transaction: BtcTransactionUi | EthTransactionUi | SolTransactionUi;
 	address: SolAddress;
+	networkId: NetworkId;
 }): Transaction_Spl | undefined => {
 	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 	if (isNullish(from) || isNullish(to)) {
 		return undefined;
 	}
+	if ((isNullish(type) && !('uiType' in rest)) || typeof type === 'number') {
+		return undefined;
+	}
+
+	const transactionType =
+		(isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)) && 'uiType' in rest
+			? rest.uiType
+			: nonNullish(type)
+				? type
+				: 'send';
 
 	return {
-		...toBaseTransaction({ type, value, timestamp }),
+		// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+		...toBaseTransaction({
+			type:
+				transactionType === 'withdraw'
+					? 'send'
+					: transactionType === 'deposit'
+						? 'receive'
+						: transactionType,
+			value: BigNumber.from(value ?? 0n).toBigInt(),
+			timestamp: BigInt(timestamp ?? 0n)
+		}),
 		counterparty: address === from ? to : from
 	};
 };
@@ -175,16 +208,37 @@ const toSplSnapshot = ({
 		return;
 	}
 
-	const lastTransactions = (get(solTransactionsStore)?.[id] ?? [])
-		.map(({ data: transaction }) => transaction)
-		.slice(0, LAST_TRANSACTIONS_COUNT);
+	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
+		minterInfo: get(ckEthMinterInfoStore)?.[ETHEREUM_TOKEN_ID],
+		networkId: ETHEREUM_NETWORK_ID
+	});
+	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
+		minterInfo: get(ckEthMinterInfoStore)?.[SEPOLIA_TOKEN_ID],
+		networkId: SEPOLIA_NETWORK_ID
+	});
+	const lastTransactions = (
+		isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)
+			? (get(ethTransactionsStore)?.[id] ?? []).map((transaction) =>
+					mapEthTransactionUi({
+						transaction,
+						ckMinterInfoAddresses: isNetworkIdSepolia(networkId)
+							? ckEthMinterInfoAddressesSepolia
+							: ckEthMinterInfoAddressesMainnet,
+						$ethAddress: address
+					})
+				)
+			: isNetworkIdBTCMainnet(networkId) || isNetworkIdBTCTestnet(networkId)
+				? (get(btcTransactionsStore)?.[id] ?? []).map(({ data: transaction }) => transaction)
+				: (get(solTransactionsStore)?.[id] ?? []).map(({ data: transaction }) => transaction)
+	).slice(0, LAST_TRANSACTIONS_COUNT);
 
 	const snapshot: AccountSnapshot_Spl = {
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
 		token_address: tokenAddress,
 		last_transactions: lastTransactions
-			.map((transaction) => toSplTransaction({ transaction, address }))
+			.map((transaction) => toSplTransaction({ transaction, address, networkId }))
 			.filter(nonNullish)
 	};
 
