@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -9,7 +12,8 @@
 		btcAddressTestnet,
 		ethAddress,
 		solAddressDevnet,
-		solAddressMainnet, solAddressTestnet
+		solAddressMainnet,
+		solAddressTestnet
 	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
@@ -21,9 +25,6 @@
 	import { splTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 
 	// TODO: use scheduler instead of setInterval, when we find a way to use the svelte store in the worker,
 	//  or pass their value in a way that the worker understands (for example, without BigNumber types),
