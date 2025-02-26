@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { themeStore, Theme, type ThemeStore, type ThemeStoreData } from '@dfinity/gix-components';
+	import { themeStore, Theme, type ThemeStoreData } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
