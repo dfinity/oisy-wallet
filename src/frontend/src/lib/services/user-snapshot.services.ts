@@ -91,11 +91,10 @@ const toSplTransaction = ({
 	transaction: SolTransactionUi;
 	address: SolAddress;
 }): Transaction_Spl | undefined => {
-
-// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
-if (isNullish(from) || isNullish(to)) {
-return undefined 
-}
+	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+	if (isNullish(from) || isNullish(to)) {
+		return undefined;
+	}
 
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
@@ -184,9 +183,9 @@ const toSplSnapshot = ({
 		...toBaseSnapshot({ token, balance, exchangeRate, timestamp }),
 		account: address,
 		token_address: tokenAddress,
-		last_transactions: lastTransactions.map((transaction) =>
-			toSplTransaction({ transaction, address })
-		).filter(nonNullish)
+		last_transactions: lastTransactions
+			.map((transaction) => toSplTransaction({ transaction, address }))
+			.filter(nonNullish)
 	};
 
 	return isNetworkIdSOLDevnet(networkId) ? { SplDevnet: snapshot } : { SplMainnet: snapshot };
