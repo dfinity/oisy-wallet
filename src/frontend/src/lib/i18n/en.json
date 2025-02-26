@@ -129,17 +129,17 @@
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
-			"no_balance_title": "Start exploring",
+			"no_balance_title": "Earn $oisy_short Sprinkles",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on earning today's reward!",
-			"state_modal_title_jackpot": "Congratulations on earning today's highest reward!",
+			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
+			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
-			"carousel_slide_title": "OISY Rewards Are Now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
 			"carousel_slide_cta": "Learn more"
 		},
 		"alt": {
-			"upcoming_campaigns": "Stay tuned for upcoming token rewards - subscribe to $oisy_short on X and follow for the latest updates."
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
 		}
 	},
 	"footer": {

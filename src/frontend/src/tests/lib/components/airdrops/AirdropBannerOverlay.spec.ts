@@ -3,6 +3,7 @@ import AirdropBannerOverlay from '$lib/components/airdrops/AirdropBannerOverlay.
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, formatUSD } from '$lib/utils/format.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
@@ -55,7 +56,9 @@ describe('AirdropBannerOverlay', () => {
 			}
 		});
 
-		expect(getByText(get(i18n).airdrops.text.no_balance_title)).toBeInTheDocument();
+		expect(
+			getByText(replaceOisyPlaceholders(get(i18n).airdrops.text.no_balance_title))
+		).toBeInTheDocument();
 		expect(getByText(get(i18n).airdrops.text.no_balance_description)).toBeInTheDocument();
 	});
 });

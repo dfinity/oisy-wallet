@@ -17,6 +17,7 @@
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	export let styleClass: string | undefined = undefined;
 
@@ -39,7 +40,7 @@
 		? ({
 				id: featuredAirdrop.id,
 				carousel: {
-					text: $i18n.airdrops.text.carousel_slide_title,
+					text: replaceOisyPlaceholders($i18n.airdrops.text.carousel_slide_title),
 					callToAction: $i18n.airdrops.text.carousel_slide_cta
 				},
 				logo: featuredAirdrop.logo,
