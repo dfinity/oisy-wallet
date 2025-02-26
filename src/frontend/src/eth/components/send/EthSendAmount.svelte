@@ -5,6 +5,9 @@
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,9 +15,6 @@
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
-	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
-	import MaxBalanceButton from "$lib/components/common/MaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -24,11 +24,7 @@
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
-	const {
-		feeStore: storeFeeData,
-		minGasFee,
-		maxGasFee
-	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore: storeFeeData, minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -76,12 +72,12 @@
 </script>
 
 <TokenInput
-		token={$sendToken}
-		bind:amount
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
-		bind:error={insufficientFundsError}
-		customErrorValidate={customValidate}
+	token={$sendToken}
+	bind:amount
+	isSelectable={false}
+	exchangeRate={$sendTokenExchangeRate}
+	bind:error={insufficientFundsError}
+	customErrorValidate={customValidate}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -89,10 +85,10 @@
 		{#if nonNullish($sendToken)}
 			<div class="text-tertiary">
 				<TokenInputAmountExchange
-						{amount}
-						exchangeRate={$sendTokenExchangeRate}
-						token={$sendToken}
-						disabled
+					{amount}
+					exchangeRate={$sendTokenExchangeRate}
+					token={$sendToken}
+					disabled
 				/>
 			</div>
 		{/if}
@@ -101,11 +97,11 @@
 	<svelte:fragment slot="balance">
 		{#if nonNullish($sendToken)}
 			<MaxBalanceButton
-					bind:amount
-					error={nonNullish(insufficientFundsError)}
-					balance={$sendBalance}
-					token={$sendToken}
-					fee={$maxGasFee}
+				bind:amount
+				error={nonNullish(insufficientFundsError)}
+				balance={$sendBalance}
+				token={$sendToken}
+				fee={$maxGasFee}
 			/>
 		{/if}
 	</svelte:fragment>
