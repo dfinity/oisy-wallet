@@ -1,6 +1,5 @@
 import {
 	AMOUNT_DATA,
-	AMOUNT_INPUT,
 	DESTINATION_INPUT,
 	IN_PROGRESS_MODAL,
 	MAX_BUTTON,
@@ -12,7 +11,8 @@ import {
 	SEND_FORM_NEXT_BUTTON,
 	SEND_TOKENS_MODAL,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
-	TOKEN_CARD
+	TOKEN_CARD,
+	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { LedgerTransferCommand } from '../commands/ledger-transfer.command';
@@ -59,7 +59,7 @@ export class FlowPage extends HomepageLoggedIn {
 			value: 'tjgkf-baw6u-7lmw2-cbwoi-omgia-jk4kg-yvfcw-jni6g-k7spl-552th-jae'
 		});
 		await this.setInputValueByTestId({
-			testId: AMOUNT_INPUT,
+			testId: TOKEN_INPUT_CURRENCY_TOKEN,
 			value: '1'
 		});
 		await this.clickByTestId({ testId: SEND_FORM_NEXT_BUTTON });
