@@ -32,7 +32,6 @@ jobs:
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
       - name: Checkout code
-        if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@v4
 
       - name: Prepare
