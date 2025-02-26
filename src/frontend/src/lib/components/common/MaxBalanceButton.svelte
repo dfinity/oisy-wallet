@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import {MAX_BUTTON} from "$lib/constants/test-ids.constants";
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
