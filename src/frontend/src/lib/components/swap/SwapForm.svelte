@@ -112,9 +112,9 @@
 		nonNullish($sourceToken)
 			? validateConvertAmount({
 					userAmount,
-					decimals: $sourceToken.decimals,
+					token: $sourceToken,
 					balance: $sourceTokenBalance,
-					totalFee
+					fee: totalFee
 				})
 			: undefined;
 </script>

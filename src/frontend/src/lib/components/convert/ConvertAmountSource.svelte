@@ -2,9 +2,12 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
+	import { ethereumToken } from '$eth/derived/token.derived';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
@@ -32,11 +35,12 @@
 	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
 		validateConvertAmount({
 			userAmount,
-			decimals: $sourceToken.decimals,
+			token: $sourceToken,
 			balance: $sourceTokenBalance,
+			ethBalance: $balancesStore?.[$ethereumToken.id]?.data ?? ZERO,
 			// If ETH, the balance should cover the user entered amount plus the min gas fee
 			// If other tokens - the balance plus total (max) fee
-			totalFee: isSupportedEthTokenId($sourceToken.id) ? minFee : totalFee
+			fee: isSupportedEthTokenId($sourceToken.id) ? minFee : totalFee
 		});
 
 	let isZeroBalance: boolean;
