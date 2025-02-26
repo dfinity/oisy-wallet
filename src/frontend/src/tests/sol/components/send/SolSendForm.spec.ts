@@ -1,5 +1,6 @@
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import * as solanaApi from '$sol/api/solana.api';
 import SolSendForm from '$sol/components/send/SolSendForm.svelte';
@@ -21,10 +22,9 @@ describe('SolSendForm', () => {
 		source: mockSolAddress
 	};
 
+	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
 	const destinationSelector = 'input[data-tid="destination-input"]';
-	const amountSelector = 'input[data-tid="amount-input"]';
-	const sourceSelector = 'div[id="source"]';
-	const balanceSelector = 'div[id="balance"]';
+	const networkSelector = 'div[id="network"]';
 	const feeSelector = 'p[id="fee"]';
 	const ataFeeSelector = 'p[id="ataFee"]';
 	const toolbarSelector = 'div[data-tid="toolbar"]';
@@ -65,17 +65,14 @@ describe('SolSendForm', () => {
 			context: mockContext
 		});
 
-		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
-		expect(destination).not.toBeNull();
-
 		const amount: HTMLInputElement | null = container.querySelector(amountSelector);
 		expect(amount).not.toBeNull();
 
-		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
-		expect(source).not.toBeNull();
+		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
+		expect(destination).not.toBeNull();
 
-		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
-		expect(balance).not.toBeNull();
+		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+		expect(network).not.toBeNull();
 
 		const fee: HTMLParagraphElement | null = container.querySelector(feeSelector);
 		expect(fee).not.toBeNull();
