@@ -10,7 +10,7 @@
 
 <button
 	on:click
-	class="relative h-40 w-full flex-1 rounded-lg bg-primary p-4 pt-12 shadow"
+	class="relative w-full flex-1 rounded-lg bg-primary p-4 pt-12 shadow"
 	data-tid={testId}
 >
 	<span class="absolute -top-5 left-4">
@@ -29,11 +29,13 @@
 				{airdrop.oneLiner}
 			</p>
 		</section>
-		<section class="absolute bottom-4 left-4 max-h-6 min-h-6 overflow-hidden md:max-h-14">
-			<AirdropDateBadge
-				date={airdrop.endDate}
-				testId={nonNullish(testId) ? `${testId}-badge` : undefined}
-			/>
+		<section class="bottom-4 left-4 mt-3 flex">
+			<span class="flex">
+				<AirdropDateBadge
+					date={airdrop.endDate}
+					testId={nonNullish(testId) ? `${testId}-badge` : undefined}
+				/></span
+			>
 		</section>
 	</article>
 </button>
