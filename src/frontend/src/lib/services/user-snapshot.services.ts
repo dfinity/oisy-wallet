@@ -14,14 +14,26 @@ import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transacti
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
-import { solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
+import {
+	btcAddressMainnet,
+	btcAddressTestnet,
+	ethAddress,
+	solAddressDevnet,
+	solAddressMainnet
+} from '$lib/derived/address.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
+import {
+	isNetworkIdBTCMainnet,
+	isNetworkIdBTCTestnet,
+	isNetworkIdEthereum,
+	isNetworkIdSepolia,
+	isNetworkIdSOLDevnet
+} from '$lib/utils/network.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -145,7 +157,17 @@ const toSplSnapshot = ({
 		network: { id: networkId }
 	} = token;
 
-	const address = isNetworkIdSOLDevnet(networkId) ? get(solAddressDevnet) : get(solAddressMainnet);
+	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+	const address =
+		isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)
+			? get(ethAddress)
+			: isNetworkIdBTCTestnet(networkId)
+				? get(btcAddressTestnet)
+				: isNetworkIdBTCMainnet(networkId)
+					? get(btcAddressMainnet)
+					: isNetworkIdSOLDevnet(networkId)
+						? get(solAddressDevnet)
+						: get(solAddressMainnet);
 
 	// This may happen if the user has not loaded the testnets yet, so the address is not available.
 	if (isNullish(address)) {
@@ -209,19 +231,24 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 							timestamp
 						})
 					: // TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
-						toSplSnapshot({
-							token: {
-								...token,
-								address: token.symbol.padStart(
-									'So11111111111111111111111111111111111111111'.length,
-									'0'
-								),
-								owner: SYSTEM_PROGRAM_ADDRESS
-							},
-							balance,
-							exchangeRate,
-							timestamp
-						});
+						isNetworkIdEthereum(token.network.id) ||
+						  isNetworkIdSepolia(token.network.id) ||
+						  isNetworkIdBTCMainnet(token.network.id) ||
+						  isNetworkIdBTCTestnet(token.network.id)
+						? toSplSnapshot({
+								token: {
+									...token,
+									address: token.symbol.padStart(
+										'So11111111111111111111111111111111111111111'.length,
+										'0'
+									),
+									owner: SYSTEM_PROGRAM_ADDRESS
+								},
+								balance,
+								exchangeRate,
+								timestamp
+							})
+						: undefined;
 
 		return nonNullish(snapshot) ? [...acc, snapshot] : acc;
 	}, []);
