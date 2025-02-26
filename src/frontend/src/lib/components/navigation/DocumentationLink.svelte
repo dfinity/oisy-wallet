@@ -7,6 +7,9 @@
 
 	export let asMenuItem = false;
 	export let asMenuItemCondensed = false;
+
+	// We display an alternative "Docs" text instead of "Documentation" to avoid design breaks on small screens
+	export let shortTextOnMobile = false;
 </script>
 
 <ExternalLink
@@ -20,5 +23,10 @@
 	{#if asMenuItem}
 		<IconBook />
 	{/if}
-	{replaceOisyPlaceholders($i18n.navigation.text.documentation)}
+	<span class:hidden={shortTextOnMobile} class:md:inline={shortTextOnMobile}
+		>{replaceOisyPlaceholders($i18n.navigation.text.documentation)}</span
+	>
+	<span class="hidden" class:inline={shortTextOnMobile} class:md:hidden={shortTextOnMobile}
+		>{replaceOisyPlaceholders($i18n.navigation.short.documentation)}</span
+	>
 </ExternalLink>

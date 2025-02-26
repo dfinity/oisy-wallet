@@ -34,7 +34,7 @@
 		{:else}
 			<div class="mr-2 flex justify-end gap-5 md:mr-0">
 				<AboutWhyOisy />
-				<DocumentationLink />
+				<DocumentationLink shortTextOnMobile />
 				<ThemeSwitchButton />
 			</div>
 		{/if}
