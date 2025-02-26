@@ -6,9 +6,7 @@
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let exchangeRate: number | undefined = undefined;
-
-	const { maxGasFee, feeSymbolStore, feeDecimalsStore }: FeeContext =
+	const { maxGasFee, feeSymbolStore, feeDecimalsStore, feeExchangeRateStore }: FeeContext =
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let fee: bigint | undefined = undefined;
@@ -45,7 +43,12 @@
 </script>
 
 {#if nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
-	<FeeDisplay feeAmount={fee} decimals={$feeDecimalsStore} symbol={$feeSymbolStore} {exchangeRate}>
+	<FeeDisplay
+		feeAmount={fee}
+		decimals={$feeDecimalsStore}
+		symbol={$feeSymbolStore}
+		exchangeRate={$feeExchangeRateStore}
+	>
 		<Html slot="label" text={$i18n.fee.text.convert_fee} />
 	</FeeDisplay>
 {/if}
