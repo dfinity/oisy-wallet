@@ -506,5 +506,20 @@
 			"alternativeName": "FuelEV",
 			"url": "https://fuelev.ai/"
 		}
+	},
+	{
+		"ledgerCanisterId": "ifwyg-gaaaa-aaaaq-aaeqq-cai",
+		"rootCanisterId": "n6mex-aqaaa-aaaaq-aaepq-cai",
+		"indexCanisterId": "iluvo-5qaaa-aaaaq-aaerq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICExplorer",
+			"symbol": "ICE",
+			"fee": {
+				"__bigint__": "100000"
+			},
+			"alternativeName": "IC Explorer",
+			"url": "https://icexplorer.io"
+		}
 	}
 ]
