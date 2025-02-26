@@ -3,9 +3,9 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';
 import { ETHEREUM_FEE_CONTEXT_KEY, initEthereumFeeStore } from '$icp/stores/ethereum-fee.store';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
-import {TOKEN_INPUT_CURRENCY_TOKEN} from "$lib/constants/test-ids.constants";
 
 describe('IcSendForm', () => {
 	const ethereumFeeStore = initEthereumFeeStore();
