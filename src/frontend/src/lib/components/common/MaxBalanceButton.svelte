@@ -6,6 +6,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import {MAX_BUTTON} from "$lib/constants/test-ids.constants";
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
@@ -52,6 +53,7 @@
 	on:click|preventDefault={setMax}
 	class:text-error-primary={isZeroBalance || error}
 	class:text-brand-primary={!isZeroBalance && !error}
+	data-tid={MAX_BUTTON}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)
