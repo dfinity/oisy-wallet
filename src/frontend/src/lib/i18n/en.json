@@ -17,7 +17,8 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
-			"clear_filter": "Clear filter"
+			"clear_filter": "Clear filter",
+			"not_available": "n/a"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -42,7 +43,8 @@
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"support_email": "Support",
+			"documentation": "Documentation",
+			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes"
 		},
@@ -55,7 +57,8 @@
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"support_email": "Reach out to the team",
+			"documentation": "Open the $oisy_name documentation",
+			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link"
 		}
@@ -263,7 +266,8 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)"
+		"chain_fusion": "Chain Fusion (all networks)",
+		"network": "Network"
 	},
 	"receive": {
 		"text": {
