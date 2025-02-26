@@ -7,6 +7,7 @@ import {
 	AIRDROPS_STATE_MODAL_SHARE_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -28,7 +29,9 @@ describe('AirdropStateModal', () => {
 			}
 		});
 
-		expect(getByText(get(i18n).airdrops.text.state_modal_title)).toBeInTheDocument();
+		expect(
+			getByText(replaceOisyPlaceholders(get(i18n).airdrops.text.state_modal_title))
+		).toBeInTheDocument();
 		expect(getByText(get(i18n).airdrops.text.state_modal_content_text)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
@@ -52,7 +55,9 @@ describe('AirdropStateModal', () => {
 			}
 		});
 
-		expect(getByText(get(i18n).airdrops.text.state_modal_title_jackpot)).toBeInTheDocument();
+		expect(
+			getByText(replaceOisyPlaceholders(get(i18n).airdrops.text.state_modal_title_jackpot))
+		).toBeInTheDocument();
 		expect(getByText(get(i18n).airdrops.text.state_modal_content_text)).toBeInTheDocument();
 
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
