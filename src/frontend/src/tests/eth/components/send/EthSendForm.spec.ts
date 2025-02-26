@@ -54,6 +54,9 @@ describe('EthSendForm', () => {
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
 		expect(destination).not.toBeNull();
 
+		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+		expect(network).not.toBeNull();
+
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 		expect(maxFeeEth).not.toBeNull();
 
@@ -77,6 +80,9 @@ describe('EthSendForm', () => {
 
 		const destination: HTMLInputElement | null = container.querySelector(destinationSelector);
 		expect(destination).toBeNull();
+
+		const network: HTMLDivElement | null = container.querySelector(networkSelector);
+		expect(network).not.toBeNull();
 
 		const maxFeeEth: HTMLDivElement | null = container.querySelector(maxFeeEthSelector);
 		expect(maxFeeEth).not.toBeNull();
