@@ -91,12 +91,18 @@ const toIcrcTransaction = ({
 	transaction: { type, value, timestamp }
 }: {
 	transaction: IcTransactionUi;
-}): Transaction_Icrc => ({
-	...toBaseTransaction({ type, value, timestamp }),
-	timestamp: timestamp ?? 0n,
-	// TODO: use correct value when the Rewards canister is updated to accept account identifiers
-	counterparty: Principal.anonymous()
-});
+}): Transaction_Icrc | undefined => {
+	if (type === 'approve') {
+		return undefined;
+	}
+
+	return {
+		...toBaseTransaction({ type, value, timestamp }),
+		timestamp: timestamp ?? 0n,
+		// TODO: use correct value when the Rewards canister is updated to accept account identifiers
+		counterparty: Principal.anonymous()
+	};
+};
 
 const toSplTransaction = ({
 	transaction: { type, value, timestamp, from, to, ...rest },
