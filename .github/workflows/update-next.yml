@@ -2,11 +2,13 @@
 name: Update npm package dependencies
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       package:
         required: true
         type: choice
+        default: 'gix-components'
         description: 'Select the package(s) to update.'
         options:
           - gix-components
