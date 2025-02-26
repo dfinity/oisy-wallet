@@ -2,9 +2,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-	import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import {
@@ -22,8 +20,6 @@
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { splTokens } from '$sol/derived/spl.derived';
-	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
 	// TODO: use scheduler instead of setInterval, when we find a way to use the svelte store in the worker,
