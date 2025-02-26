@@ -36,11 +36,13 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
+		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
+
 		{#if destinationEditable}
 			<EthSendDestination
 				token={$sendToken}
@@ -52,10 +54,6 @@
 
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
-
-		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
-
-		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
 
 		<NetworkInfo network={sourceNetwork} />
 

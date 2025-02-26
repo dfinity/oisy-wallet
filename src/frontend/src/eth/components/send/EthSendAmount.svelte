@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,7 +12,9 @@
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import TokenInput from "$lib/components/tokens/TokenInput.svelte";
+	import TokenInputAmountExchange from "$lib/components/tokens/TokenInputAmountExchange.svelte";
+	import MaxBalanceButton from "$lib/components/common/MaxBalanceButton.svelte";
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -26,10 +27,9 @@
 	const {
 		feeStore: storeFeeData,
 		minGasFee,
-		maxGasFee,
-		evaluateFee
+		maxGasFee
 	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const { sendTokenDecimals, sendBalance, sendTokenId, sendTokenStandard } =
+	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
@@ -73,44 +73,40 @@
 			);
 		}
 	};
-
-	let calculateMax: (() => number | undefined) | undefined;
-	$: calculateMax = isNullish($maxGasFee)
-		? undefined
-		: (): number =>
-				getMaxTransactionAmount({
-					balance: $sendBalance ?? ZERO,
-					fee: $maxGasFee,
-					tokenDecimals: $sendTokenDecimals,
-					tokenStandard: $sendTokenStandard
-				});
-
-	const onInput = () => evaluateFee?.();
-
-	/**
-	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
-	 */
-	let amountSetToMax = false;
-	let sendInputAmount: SendInputAmount | undefined;
-
-	$: $maxGasFee,
-		(() => {
-			if (!amountSetToMax) {
-				return;
-			}
-
-			// Debounce to sync the UI given that the fees' display is animated with a short fade effect.
-			debounce(() => sendInputAmount?.triggerCalculateMax(), 500)();
-		})();
 </script>
 
-<SendInputAmount
-	bind:amount
-	bind:amountSetToMax
-	bind:this={sendInputAmount}
-	tokenDecimals={$sendTokenDecimals}
-	{customValidate}
-	{calculateMax}
-	bind:error={insufficientFundsError}
-	on:nnsInput={onInput}
-/>
+<TokenInput
+		token={$sendToken}
+		bind:amount
+		isSelectable={false}
+		exchangeRate={$sendTokenExchangeRate}
+		bind:error={insufficientFundsError}
+		customErrorValidate={customValidate}
+>
+	<span slot="title">{$i18n.core.text.amount}</span>
+
+	<svelte:fragment slot="amount-info">
+		{#if nonNullish($sendToken)}
+			<div class="text-tertiary">
+				<TokenInputAmountExchange
+						{amount}
+						exchangeRate={$sendTokenExchangeRate}
+						token={$sendToken}
+						disabled
+				/>
+			</div>
+		{/if}
+	</svelte:fragment>
+
+	<svelte:fragment slot="balance">
+		{#if nonNullish($sendToken)}
+			<MaxBalanceButton
+					bind:amount
+					error={nonNullish(insufficientFundsError)}
+					balance={$sendBalance}
+					token={$sendToken}
+					fee={$maxGasFee}
+			/>
+		{/if}
+	</svelte:fragment>
+</TokenInput>
