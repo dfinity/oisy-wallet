@@ -9,7 +9,7 @@
 	export let asMenuItemCondensed = false;
 
 	// We display an alternative "Docs" text instead of "Documentation" to avoid design breaks on small screens
-	export let shortTextOnMobile: boolean = false;
+	export let shortTextOnMobile = false;
 </script>
 
 <ExternalLink
