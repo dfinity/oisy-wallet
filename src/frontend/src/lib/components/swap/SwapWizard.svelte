@@ -24,7 +24,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { errorDetailToString } from '$lib/utils/error.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -101,15 +101,8 @@
 			const errorDetail = errorDetailToString(err);
 
 			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
-				const expectedSlippageMatch = errorDetail.match(/(\d+(\.\d+)?)% slippage/);
-
-				const expectedSlippage = nonNullish(expectedSlippageMatch)
-					? expectedSlippageMatch[1]
-					: 'N/A';
-
 				failedSwapError.set(
-					replacePlaceholders($i18n.swap.error.slippage_exceeded, {
-						$expectedSlippage: expectedSlippage,
+					replacePlaceholders(replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded), {
 						$maxSlippage: slippageValue.toString()
 					})
 				);

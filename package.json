@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "0.24.0",
+	"version": "0.25.0",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -54,7 +54,9 @@
 		"update:signer": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer",
 		"update:signer:next": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer@next",
 		"update:agent:ic-js": "npm run update:ic-js && npm run update:agent",
-		"update:agent:ic-js:next": "npm run update:ic-js:next && npm run update:agent"
+		"update:agent:ic-js:next": "npm run update:ic-js:next && npm run update:agent",
+		"update:gix-cmp": "npm rm @dfinity/gix-components && npm i @dfinity/gix-components",
+		"update:gix-cmp:next": "npm rm @dfinity/gix-components && npm i @dfinity/gix-components@next"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^2.3.0",
@@ -62,7 +64,7 @@
 		"@dfinity/candid": "^2.3.0",
 		"@dfinity/ckbtc": "^3.1.8",
 		"@dfinity/cketh": "^3.4.5",
-		"@dfinity/gix-components": "^5.0.0-next-2025-02-12.1",
+		"@dfinity/gix-components": "^5.1.0-next-2025-02-26",
 		"@dfinity/ledger-icp": "^2.6.9",
 		"@dfinity/ledger-icrc": "^2.7.4",
 		"@dfinity/oisy-wallet-signer": "^0.1.6-next-2025-02-17",
@@ -111,7 +113,7 @@
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
 		"postcss": "^8.5.1",
-		"prettier": "^3.5.0",
+		"prettier": "^3.5.2",
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",

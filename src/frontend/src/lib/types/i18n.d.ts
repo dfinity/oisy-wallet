@@ -21,6 +21,7 @@ interface I18nCore {
 		view: string;
 		copy: string;
 		clear_filter: string;
+		not_available: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -38,7 +39,8 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 	};
@@ -51,10 +53,12 @@ interface I18nNavigation {
 		more_settings: string;
 		menu: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
 	};
+	short: { documentation: string };
 }
 
 interface I18nAuth {
@@ -115,6 +119,7 @@ interface I18nAirdrops {
 		active_date: string;
 		participate_title: string;
 		share: string;
+		learn_more: string;
 		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
@@ -125,13 +130,15 @@ interface I18nAirdrops {
 		state_modal_title: string;
 		state_modal_title_jackpot: string;
 		state_modal_content_text: string;
+		carousel_slide_title: string;
+		carousel_slide_cta: string;
 	};
 	alt: { upcoming_campaigns: string };
 }
 
 interface I18nFooter {
 	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
-	alt: { dfinity: string; status: string };
+	alt: { dfinity: string };
 }
 
 interface I18nWallet {
@@ -243,6 +250,7 @@ interface I18nNetworks {
 	test_networks: string;
 	more: string;
 	chain_fusion: string;
+	network: string;
 }
 
 interface I18nReceive {
