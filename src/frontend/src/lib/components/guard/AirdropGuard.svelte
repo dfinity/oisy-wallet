@@ -6,12 +6,14 @@
 	import { modalAirdropState } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadAirdropResult } from '$lib/utils/airdrops.utils';
+	import {nullishSignOut} from "$lib/services/auth.services";
 
 	let isJackpot: boolean | undefined;
 	$: isJackpot = $modalAirdropState ? ($modalStore?.data as boolean | undefined) : undefined;
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
+			nullishSignOut()
 			return;
 		}
 
