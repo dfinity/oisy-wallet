@@ -12,6 +12,7 @@
 	import { isMobile } from '$lib/utils/device.utils.js';
 	import { formatUSD } from '$lib/utils/format.utils.js';
 	import { networkUrl } from '$lib/utils/nav.utils.js';
+	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils.js";
 
 	export let token: Token | undefined;
 	export let balance: BigNumber | undefined;
@@ -58,7 +59,7 @@
 		</div>
 	{:else}
 		<div class="text-3xl font-semibold sm:text-5xl">
-			<span>{$i18n.airdrops.text.no_balance_title}</span>
+			<span>{replaceOisyPlaceholders($i18n.airdrops.text.no_balance_title)}</span>
 		</div>
 
 		<div class="text-lg sm:text-xl">
