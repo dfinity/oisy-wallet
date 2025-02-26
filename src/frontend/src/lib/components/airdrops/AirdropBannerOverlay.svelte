@@ -11,8 +11,8 @@
 	import type { Token } from '$lib/types/token';
 	import { isMobile } from '$lib/utils/device.utils.js';
 	import { formatUSD } from '$lib/utils/format.utils.js';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 	import { networkUrl } from '$lib/utils/nav.utils.js';
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils.js";
 
 	export let token: Token | undefined;
 	export let balance: BigNumber | undefined;

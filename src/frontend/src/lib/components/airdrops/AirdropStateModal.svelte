@@ -16,7 +16,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {replaceOisyPlaceholders} from "$lib/utils/i18n.utils.js";
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	export let jackpot = false;
 
