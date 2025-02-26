@@ -6,6 +6,9 @@ import type {
 	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import * as airdropEnv from '$env/airdrop-campaigns.env';
+import * as networkEnv from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -27,6 +30,7 @@ import type { Token } from '$lib/types/token';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
@@ -60,13 +64,14 @@ describe('user-snapshot.services', () => {
 		];
 
 		const mockIcAmount = 123456n;
+		const mockSplAmount = 987654n;
 
 		const mockIcTransactions: IcTransactionUi[] = createMockIcTransactionsUi(7).map((tx) => ({
 			...tx,
 			from: mockPrincipalText
 		}));
 
-		const icrcAccounts: { Icrc: AccountSnapshot_Icrc }[] = [
+		const icrcAccounts: ({ Icrc: AccountSnapshot_Icrc } | { SplMainnet: AccountSnapshot_Spl })[] = [
 			{
 				Icrc: {
 					decimals: ICP_TOKEN.decimals,
@@ -87,6 +92,19 @@ describe('user-snapshot.services', () => {
 					)
 				}
 			},
+			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+			{
+				SplMainnet: {
+					decimals: ETHEREUM_TOKEN.decimals,
+					approx_usd_per_token: mockTokens.length,
+					amount: mockIcAmount + mockSplAmount,
+					timestamp: nowNanoseconds,
+					network: {},
+					account: mockEthAddress,
+					token_address: ETHEREUM_TOKEN.symbol.padStart(43, '0'),
+					last_transactions: []
+				}
+			},
 			{
 				Icrc: {
 					decimals: mockValidIcToken.decimals,
@@ -100,8 +118,6 @@ describe('user-snapshot.services', () => {
 				}
 			}
 		];
-
-		const mockSplAmount = 987654n;
 
 		const mockSolTransactions: SolTransactionUi[] = createMockSolTransactionsUi(13).map((tx) => ({
 			...tx,
@@ -174,6 +190,15 @@ describe('user-snapshot.services', () => {
 
 			vi.spyOn(addressStore, 'solAddressMainnet', 'get').mockImplementation(() =>
 				readable(mockSolAddress)
+			);
+			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
+			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+				ETHEREUM_NETWORK_ID,
+				SEPOLIA_NETWORK_ID
+			]);
+			vi.spyOn(addressStore, 'ethAddress', 'get').mockImplementation(() =>
+				readable(mockEthAddress)
 			);
 
 			tokens.forEach(({ id }) => {
@@ -277,6 +302,10 @@ describe('user-snapshot.services', () => {
 		it('should not include tokens with zero balance', async () => {
 			balancesStore.set({
 				tokenId: mockValidIcToken.id,
+				data: { data: BigNumber.from(0), certified }
+			});
+			balancesStore.set({
+				tokenId: ETHEREUM_TOKEN.id,
 				data: { data: BigNumber.from(0), certified }
 			});
 
