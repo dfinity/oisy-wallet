@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
-	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
+	export let destination = '';
 
-	const { sourceTokenExchangeRate } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	const { minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -23,7 +27,7 @@
 		insufficientFunds ||
 		insufficientFundsForFee ||
 		invalidAmount(sendAmount) ||
-		isNullishOrEmpty($ckEthHelperContractAddress);
+		isNullishOrEmpty(destination);
 </script>
 
 <ConvertForm
@@ -36,7 +40,17 @@
 	minFee={$minGasFee?.toBigInt()}
 	disabled={invalid}
 >
-	<EthFeeDisplay exchangeRate={$sourceTokenExchangeRate} slot="fee" />
+	<svelte:fragment slot="message">
+		{#if isTokenErc20($sourceToken) && insufficientFundsForFee}
+			<div in:fade>
+				<MessageBox level="error"
+					>{$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees}</MessageBox
+				>
+			</div>
+		{/if}
+	</svelte:fragment>
+
+	<EthFeeDisplay slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </ConvertForm>

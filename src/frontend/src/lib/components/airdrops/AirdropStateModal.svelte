@@ -16,6 +16,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	export let jackpot = false;
 
@@ -35,8 +36,8 @@
 		<div class="flex flex-col items-center gap-4 text-center">
 			<h3 class="my-3"
 				>{jackpot
-					? $i18n.airdrops.text.state_modal_title_jackpot
-					: $i18n.airdrops.text.state_modal_title}</h3
+					? replaceOisyPlaceholders($i18n.airdrops.text.state_modal_title_jackpot)
+					: replaceOisyPlaceholders($i18n.airdrops.text.state_modal_title)}</h3
 			>
 			<span class="block w-full">{$i18n.airdrops.text.state_modal_content_text}</span>
 
