@@ -129,14 +129,14 @@
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
 
-		{#if !assetsRoute && !settingsRoute}
+		{#if !assetsRoute}
 			<ButtonMenu ariaLabel={$i18n.navigation.alt.tokens} on:click={goToTokens}>
 				<IconWallet size="20" />
 				{$i18n.navigation.text.tokens}
 			</ButtonMenu>
 		{/if}
 
-		{#if !activityRoute && !settingsRoute}
+		{#if !activityRoute}
 			<ButtonMenu
 				testId={NAVIGATION_ITEM_ACTIVITY}
 				ariaLabel={$i18n.navigation.alt.activity}
@@ -147,18 +147,7 @@
 			</ButtonMenu>
 		{/if}
 
-		{#if !dAppExplorerRoute && !settingsRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_EXPLORER}
-				ariaLabel={$i18n.navigation.alt.dapp_explorer}
-				on:click={goToDappExplorer}
-			>
-				<IconlyUfo size="20" />
-				{$i18n.navigation.text.dapp_explorer}
-			</ButtonMenu>
-		{/if}
-
-		{#if AIRDROPS_ENABLED && !airdropsRoute && !settingsRoute}
+		{#if AIRDROPS_ENABLED && !airdropsRoute}
 			<ButtonMenu
 				testId={NAVIGATION_ITEM_AIRDROPS}
 				ariaLabel={$i18n.navigation.alt.airdrops}
@@ -166,6 +155,17 @@
 			>
 				<IconGift size="20" />
 				{$i18n.navigation.text.airdrops}
+			</ButtonMenu>
+		{/if}
+
+		{#if !dAppExplorerRoute}
+			<ButtonMenu
+				testId={NAVIGATION_ITEM_EXPLORER}
+				ariaLabel={$i18n.navigation.alt.dapp_explorer}
+				on:click={goToDappExplorer}
+			>
+				<IconlyUfo size="20" />
+				{$i18n.navigation.text.dapp_explorer}
 			</ButtonMenu>
 		{/if}
 
@@ -178,9 +178,9 @@
 				<IconlySettings size="20" />
 				{$i18n.settings.text.title}
 			</ButtonMenu>
-
-			<Hr />
 		{/if}
+
+		<Hr />
 
 		{#if isVip}
 			<ButtonMenu
