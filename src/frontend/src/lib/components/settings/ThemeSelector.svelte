@@ -14,8 +14,8 @@
 	const THEME_SYSTEM = 'system';
 
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
-		// even though we call initSelectedTheme on store change, changing to system theme will not update the store
-		selectedTheme = theme;
+		// even though we call initSelectedTheme on store change, changing to system theme will not update the store so we manually update the selectedCard
+		selectedCard = theme;
 
 		if (theme === THEME_SYSTEM) {
 			themeStore.resetToSystemSettings();
@@ -25,23 +25,23 @@
 		themeStore.select(theme);
 	};
 
-	let selectedTheme: Theme | typeof THEME_SYSTEM;
+	let selectedCard: Theme | typeof THEME_SYSTEM;
 
 	// Here we just update the local variable above to update the selected card
-	const initSelectedTheme = (themeStore: ThemeStoreData) => {
-		selectedTheme = isNullish(localStorage.getItem(THEME_KEY))
+	const updateSelectedCard = (themeStore: ThemeStoreData) => {
+		selectedCard = isNullish(localStorage.getItem(THEME_KEY))
 			? THEME_SYSTEM
 			: (themeStore ?? THEME_SYSTEM);
 	};
 
-	$: initSelectedTheme($themeStore);
+	$: updateSelectedCard($themeStore);
 </script>
 
 <div class="flex flex-row">
 	{#each THEME_VALUES as theme}
 		<ThemeSelectorCard
 			label={$i18n.settings.text[`appearance_${theme}`]}
-			selected={selectedTheme === theme}
+			selected={selectedCard === theme}
 			on:click={() => selectTheme(theme)}
 			on:keydown={() => selectTheme(theme)}
 			tabindex={THEME_VALUES.indexOf(theme)}
@@ -55,7 +55,7 @@
 
 	<ThemeSelectorCard
 		label={$i18n.settings.text.appearance_system}
-		selected={selectedTheme === THEME_SYSTEM}
+		selected={selectedCard === THEME_SYSTEM}
 		on:click={() => selectTheme(THEME_SYSTEM)}
 		on:keydown={() => selectTheme(THEME_SYSTEM)}
 		tabindex={THEME_VALUES.length}
