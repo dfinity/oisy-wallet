@@ -4,7 +4,6 @@
 	import AirdropStateModal from '$lib/components/airdrops/AirdropStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalAirdropState } from '$lib/derived/modal.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadAirdropResult } from '$lib/utils/airdrops.utils';
 
@@ -13,7 +12,6 @@
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
-			nullishSignOut();
 			return;
 		}
 
