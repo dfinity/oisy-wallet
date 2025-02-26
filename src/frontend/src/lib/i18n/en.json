@@ -61,6 +61,9 @@
 			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link"
+		},
+		"short": {
+			"documentation": "Docs"
 		}
 	},
 	"auth": {
