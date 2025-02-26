@@ -1,10 +1,18 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
-	import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-	import { solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressTestnet,
+		ethAddress,
+		solAddressDevnet,
+		solAddressMainnet,
+		solAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { noPositiveBalanceAndNotAllBalancesZero } from '$lib/derived/balances.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
@@ -12,8 +20,6 @@
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { splTokens } from '$sol/derived/spl.derived';
-	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
 	// TODO: use scheduler instead of setInterval, when we find a way to use the svelte store in the worker,
@@ -68,6 +74,8 @@
 		if (
 			$authNotSignedIn ||
 			$isBusy ||
+			isNullish($btcAddressMainnet) ||
+			isNullish($ethAddress) ||
 			isNullish($solAddressMainnet) ||
 			isNullish($tokens) ||
 			$exchangeNotInitialized ||
@@ -91,19 +99,23 @@
 
 	// The snapshot should be triggered for any change in the following variables (for now).
 	// Auth: We should trigger the snapshot when the user is signed in. If the user is not signed in, we should not trigger the snapshot. We should also not trigger the snapshot if the user is busy.
-	// Addresses: IC principal and Solana addresses.
-	// Tokens: ICRC tokens and Solana tokens.
+	// Addresses: the addresses of each network.
+	// Tokens: any new token added to the list of tokens or any change in the token list.
 	// Balances: All balances (since we need to check if the user has any balance).
 	// Exchanges: All exchanges initialized (since we have no disclaimer specific for the tokens we are interested in).
-	// Transactions: IC and Solana transactions.
+	// Transactions: all transactions related to each network.
 	$: $authSignedIn,
+		$btcAddressMainnet,
+		$btcAddressTestnet,
+		$ethAddress,
 		$solAddressMainnet,
+		$solAddressTestnet,
 		$solAddressDevnet,
-		$sortedIcrcTokens,
-		$splTokens,
-		$enabledSolanaTokens,
+		$tokens,
 		$balancesStore,
 		$exchangeNotInitialized,
+		$btcTransactionsStore,
+		$ethTransactionsStore,
 		$icTransactionsStore,
 		$solTransactionsStore,
 		triggerTimer();
