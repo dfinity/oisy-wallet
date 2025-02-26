@@ -58,6 +58,7 @@ interface I18nNavigation {
 		open_twitter: string;
 		vip_qr_code: string;
 	};
+	short: { documentation: string };
 }
 
 interface I18nAuth {
