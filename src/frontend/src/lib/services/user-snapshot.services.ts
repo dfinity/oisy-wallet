@@ -68,7 +68,7 @@ const LAST_TRANSACTIONS_COUNT = 5;
 
 const filterTransactions = <T extends Transaction_Icrc | Transaction_Spl>(
 	transactions: (T | undefined)[]
-) => transactions.filter(nonNullish).slice(0, LAST_TRANSACTIONS_COUNT);
+): T[] => transactions.filter(nonNullish).slice(0, LAST_TRANSACTIONS_COUNT);
 
 const toTransactionType = (type: IcTransactionType): TransactionType =>
 	type === 'send' ? { Send: null } : { Receive: null };
