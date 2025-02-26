@@ -18,7 +18,7 @@
 	export let source: string;
 	export let simplifiedForm = false;
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
@@ -35,17 +35,17 @@
 	on:icNext
 	{source}
 	token={$sendToken}
-	balance={$balance}
+	balance={$sendBalance}
 	disabled={invalid}
-	hideSource={simplifiedForm}
+	hideSource
 >
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+
 	<div slot="destination">
 		{#if !simplifiedForm}
 			<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 		{/if}
 	</div>
-
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
 
 	<IcFeeDisplay slot="fee" {networkId} />
 
