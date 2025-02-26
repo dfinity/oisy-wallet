@@ -63,7 +63,5 @@ export class TestnetsPage extends HomepageLoggedIn {
 			})
 		).toBeVisible();
 		await this.waitForLoadState();
-		await this.setCarouselFirstSlide();
-		await this.waitForLoadState();
 	}
 }

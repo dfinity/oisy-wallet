@@ -54,6 +54,7 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
+	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
 }
 
@@ -359,7 +360,16 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot({ centeredElementTestId }: TakeScreenshotParams = {}): Promise<void> {
+	async takeScreenshot(
+		{ freezeCarousel = false, centeredElementTestId }: TakeScreenshotParams = {
+			freezeCarousel: false
+		}
+	): Promise<void> {
+		if (freezeCarousel) {
+			await this.setCarouselFirstSlide();
+			await this.waitForLoadState();
+		}
+
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
