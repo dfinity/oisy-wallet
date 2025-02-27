@@ -1,26 +1,25 @@
-use crate::types::custom_token::{
-    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token,
-};
-use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
-use crate::types::settings::Settings;
-use crate::types::token::UserToken;
-use crate::types::user_profile::{
-    AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
-};
-use crate::types::{
-    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
-    Timestamp, TokenVersion, Version,
-};
-use crate::validate::validate_on_deserialize;
-use crate::validate::Validate;
-use candid::Deserialize;
-use candid::Principal;
+use std::{collections::BTreeMap, fmt};
+
+use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
-use std::collections::BTreeMap;
-use std::fmt;
 #[cfg(test)]
 use strum::IntoEnumIterator;
+
+use crate::{
+    types::{
+        custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        settings::Settings,
+        token::UserToken,
+        user_profile::{
+            AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
+        },
+        ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
+        Timestamp, TokenVersion, Version,
+    },
+    validate::{validate_on_deserialize, Validate},
+};
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -268,6 +267,7 @@ impl ApiEnabled {
     pub fn readable(&self) -> bool {
         matches!(self, Self::Enabled | Self::ReadOnly)
     }
+
     #[must_use]
     pub fn writable(&self) -> bool {
         matches!(self, Self::Enabled)
@@ -287,15 +287,15 @@ impl MigrationProgress {
     /// The next phase in the migration process.
     ///
     /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
-    /// The code for that phase will have to keep track of those steps by means of the data in the variant.
+    /// The code for that phase will have to keep track of those steps by means of the data in the
+    /// variant.
     ///
     /// Prior art:
-    /// - There is an `enum_iterator` crate, however it deals only with simple enums
-    ///   without variant fields.  In this implementation, `next()` always uses the default value for
-    ///   the new field, which is always None.  `next()` does NOT step through the values of the
-    ///   variant field.
-    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not on the
-    ///   enum itself, so stepping from one variant to the next is not straightforward.
+    /// - There is an `enum_iterator` crate, however it deals only with simple enums without variant
+    ///   fields.  In this implementation, `next()` always uses the default value for the new field,
+    ///   which is always None.  `next()` does NOT step through the values of the variant field.
+    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not
+    ///   on the enum itself, so stepping from one variant to the next is not straightforward.
     ///
     /// Note: The next state after Completed is Completed, so the the iterator will run
     /// indefinitely.  In our case returning an option and ending with None would be fine but needs
@@ -328,7 +328,8 @@ impl MigrationProgress {
     }
 }
 
-// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at Completed.
+// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at
+// Completed.
 #[test]
 fn next_matches_strum_iter() {
     let mut iter = MigrationProgress::iter();
@@ -382,7 +383,8 @@ impl Validate for SplTokenId {
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
-            CustomTokenId::Icrc(_) => Ok(()), // This is a principal.  In principle we could check the exact type of principal.
+            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle we could */
+            // check the exact type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
             }
@@ -422,7 +424,8 @@ impl Validate for IcrcToken {
     ///
     /// - Checks that the ledger principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
-    /// - If an index principal is present, checks that it is also the type of principal used for a canister.
+    /// - If an index principal is present, checks that it is also the type of principal used for a
+    ///   canister.
     fn validate(&self) -> Result<(), candid::Error> {
         let IcrcToken {
             ledger_id,

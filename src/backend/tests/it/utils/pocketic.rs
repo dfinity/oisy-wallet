@@ -1,23 +1,27 @@
 //! Utilities for setting up a test environment using `PocketIC`.
 pub mod pic_canister;
-pub use pic_canister::PicCanisterTrait;
+use std::{
+    env,
+    fs::read,
+    ops::RangeBounds,
+    sync::Arc,
+    time::{Duration, UNIX_EPOCH},
+};
 
-use crate::utils::mock::CALLER;
 use candid::{encode_one, CandidType, Principal};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
-use shared::types::user_profile::{OisyUser, UserProfile};
-use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
-use std::fs::read;
-use std::ops::RangeBounds;
-use std::sync::Arc;
-use std::time::UNIX_EPOCH;
-use std::{env, time::Duration};
+use shared::types::{
+    user_profile::{OisyUser, UserProfile},
+    Arg, CredentialType, InitArg, SupportedCredential,
+};
 
 use super::mock::{
     CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, SIGNER_CANISTER_ID,
     VC_DERIVATION_ORIGIN,
 };
+use crate::utils::mock::CALLER;
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
@@ -27,7 +31,8 @@ const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
 // This is a struct based on the `InitConfig` from the Bitcoin canister.
 // Reference: https://github.com/dfinity/bitcoin-canister/blob/52c160168c478d5bce34b7dc5bacb78243c9d8aa/interface/src/lib.rs#L553
 //
-// The only field that matters is `network`. The others are considered dummy and set to `None` anyway.
+// The only field that matters is `network`. The others are considered dummy and set to `None`
+// anyway.
 #[derive(CandidType)]
 struct BitcoinInitConfig {
     stability_threshold: Option<u64>,
@@ -42,7 +47,8 @@ struct BitcoinInitConfig {
     lazily_evaluate_fee_percentiles: Option<String>,
 }
 
-/// Backend canister installer, using the builder pattern, for use in test environmens using `PocketIC`.
+/// Backend canister installer, using the builder pattern, for use in test environmens using
+/// `PocketIC`.
 ///
 /// # Example
 /// For a default test environment:
@@ -91,6 +97,7 @@ impl BackendBuilder {
     ///
     /// To override, please use `with_cycles()`.
     pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
+
     /// The default Wasm file to deploy:
     /// - If the environment variable `BACKEND_WASM_PATH` is set, it will use that path.
     /// - Otherwise, it will use the `BACKEND_WASM` constant.
@@ -99,6 +106,7 @@ impl BackendBuilder {
     pub fn default_wasm_path() -> String {
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string())
     }
+
     /// The default Wasm file to deploy the bitcoin canister:
     /// - If the environment variable `BITCOIN_CANISTER_WASM_FILE` is set, it will use that path.
     /// - Otherwise, it will use the `DEFAULT_BITCOIN_WASM` constant.
@@ -107,6 +115,7 @@ impl BackendBuilder {
     pub fn default_bitcoin_wasm_path() -> String {
         env::var("BITCOIN_CANISTER_WASM_FILE").unwrap_or_else(|_| DEFAULT_BITCOIN_WASM.to_string())
     }
+
     /// The default arguments to deploy the bitcoin canister.
     pub fn default_bitcoin_arg() -> Vec<u8> {
         let init_config = BitcoinInitConfig {
@@ -123,6 +132,7 @@ impl BackendBuilder {
         };
         encode_one(init_config).unwrap()
     }
+
     /// The default argument to pass to the backend canister.
     ///
     /// Please see `init_arg()` for details.
@@ -131,6 +141,7 @@ impl BackendBuilder {
     pub fn default_arg() -> Vec<u8> {
         encode_one(&init_arg()).unwrap()
     }
+
     /// The default controllers of the backend canister.
     ///
     /// To override, please use `with_controllers()`.
@@ -158,6 +169,7 @@ impl BackendBuilder {
         self.controllers = controllers;
         self
     }
+
     /// Configures the deployment to use a custom Wasm file.
     pub fn with_wasm(mut self, wasm_path: &str) -> Self {
         self.wasm_path = wasm_path.to_string();
@@ -173,6 +185,7 @@ impl BackendBuilder {
             self.wasm_path
         ))
     }
+
     /// Reads the bitcoin Wasm bytes from the configured path.
     fn bitcoin_wasm_bytes(&self) -> Vec<u8> {
         read(self.bitcoin_wasm_path.clone()).expect(&format!(
@@ -197,6 +210,7 @@ impl BackendBuilder {
             canister_id
         }
     }
+
     /// Add cycles to the backend canister.
     fn add_cycles(&mut self, pic: &PocketIc) {
         if self.cycles > 0 {
@@ -204,6 +218,7 @@ impl BackendBuilder {
             pic.add_cycles(canister_id, self.cycles);
         }
     }
+
     /// Install the backend canister.
     fn install_backend(&mut self, pic: &PocketIc) {
         let wasm_bytes = self.wasm_bytes();
@@ -211,6 +226,7 @@ impl BackendBuilder {
         let arg = self.arg.clone();
         pic.install_canister(canister_id, wasm_bytes, arg, None);
     }
+
     fn install_bitcoin(&mut self, pic: &PocketIc) {
         let canister_id =
             Principal::from_text(BITCOIN_CANISTER_ID).expect("Unexpected bitcoin canister id");
@@ -219,12 +235,14 @@ impl BackendBuilder {
         let wasm_bytes = self.bitcoin_wasm_bytes();
         pic.install_canister(canister_id, wasm_bytes, Self::default_bitcoin_arg(), None);
     }
+
     /// Set controllers of the backend canister.
     fn set_controllers(&mut self, pic: &PocketIc) {
         let canister_id = self.canister_id(pic);
         pic.set_controllers(canister_id.clone(), None, self.controllers.clone())
             .expect("Test setup error: Failed to set controllers");
     }
+
     pub fn deploy_backend(&mut self, pic: &PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
         self.add_cycles(pic);
@@ -232,11 +250,13 @@ impl BackendBuilder {
         self.set_controllers(pic);
         canister_id
     }
+
     /// Setup the backend canister.
     pub fn deploy_to(&mut self, pic: &PocketIc) -> Principal {
         self.install_bitcoin(pic);
         self.deploy_backend(pic)
     }
+
     /// Deploy to a new pic.
     pub fn deploy(&mut self) -> PicBackend {
         let pic = PocketIcBuilder::new()
@@ -282,8 +302,9 @@ impl PicBackend {
         let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
         // Upgrades burn a lot of cycles.
-        // If too many cycles are burnt in a short time, the canister will be throttled, so we advance time.
-        // The delay here is extremely conservative and can be reduced if needed.
+        // If too many cycles are burnt in a short time, the canister will be throttled, so we
+        // advance time. The delay here is extremely conservative and can be reduced if
+        // needed.
         self.pic.advance_time(Duration::from_secs(100_000));
 
         self.pic
@@ -327,7 +348,8 @@ pub(crate) fn init_arg() -> Arg {
     })
 }
 
-/// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed on.
+/// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed
+/// on.
 pub struct PicBackend {
     pub pic: Arc<PocketIc>,
     pub canister_id: Principal,
@@ -336,6 +358,7 @@ impl PicCanisterTrait for PicBackend {
     fn pic(&self) -> Arc<PocketIc> {
         self.pic.clone()
     }
+
     fn canister_id(&self) -> Principal {
         self.canister_id.clone()
     }

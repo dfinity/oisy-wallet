@@ -1,12 +1,14 @@
-use crate::types::{Candid, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap};
 use shared::types::{user_profile::StoredUserProfile, Timestamp};
+
+use crate::types::{Candid, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap};
 
 pub struct UserProfileModel<'a> {
     user_profile_map: &'a mut UserProfileMap,
     user_profile_updated_map: &'a mut UserProfileUpdatedMap,
 }
 
-/// `UserProfileModel` should be used to access and manage the state to user profiles in the stable memory
+/// `UserProfileModel` should be used to access and manage the state to user profiles in the stable
+/// memory
 impl<'a> UserProfileModel<'a> {
     pub fn new(
         user_profile_map: &'a mut UserProfileMap,
@@ -64,14 +66,16 @@ impl<'a> UserProfileModel<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::cell::RefCell;
+
     use candid::Principal;
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
     };
     use shared::types::{user_profile::StoredUserProfile, Timestamp};
-    use std::cell::RefCell;
+
+    use super::*;
 
     const USER_1: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
     const USER_2: &str = "ufjdl-kewp5-bgfaq-d7k34-e5w62-nyad4-7r3s5-m2pt2-owqga-kcr5z-jae";

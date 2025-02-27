@@ -48,6 +48,11 @@ jobs:
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@v4
 
+      - name: Install nightly rust
+        run: |
+          rustup toolchain install nightly
+          rustup component add rustfmt --toolchain nightly
+
       - name: Install shfmt
         run: scripts/setup shfmt
 

@@ -1,9 +1,8 @@
 //! Tests that the validation functions work as expected.
-use crate::validate::test_validate_on_deserialize;
-use crate::validate::validate_on_deserialize;
-use crate::validate::Validate;
 use candid::{CandidType, Decode, Deserialize, Encode};
 use serde::{de, Deserializer};
+
+use crate::validate::{test_validate_on_deserialize, validate_on_deserialize, Validate};
 
 /// A toy type to test the validation macro
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

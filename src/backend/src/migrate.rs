@@ -1,7 +1,5 @@
-use crate::{
-    mutate_state, read_state,
-    types::{Candid, StoredPrincipal},
-};
+use std::ops::Bound;
+
 use candid::{decode_one, encode_one, CandidType, Principal};
 use ic_cdk::eprintln;
 use ic_cdk_timers::clear_timer;
@@ -13,17 +11,21 @@ use shared::{
         MigrationError, MigrationProgress, Timestamp,
     },
 };
-use std::ops::Bound;
 use steps::{
     assert_target_empty, assert_target_has_all_data, lock_migration_target, make_this_readonly,
     unlock_local, unlock_target,
+};
+
+use crate::{
+    mutate_state, read_state,
+    types::{Candid, StoredPrincipal},
 };
 pub mod steps;
 
 /// A chunk of data to be migrated.
 ///
-/// Note: Given that the migration moves data types that may be private, data is transferred with candid type `Vec<u8>`
-/// rather than littering the .did file with private types.
+/// Note: Given that the migration moves data types that may be private, data is transferred with
+/// candid type `Vec<u8>` rather than littering the .did file with private types.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum MigrationChunk {
     UserToken(Vec<(Principal, Vec<UserToken>)>),

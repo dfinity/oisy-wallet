@@ -4,14 +4,12 @@ mod custom_token {
     //! Tests for the custom_token module.
     use candid::{Decode, Encode};
 
-    use crate::types::custom_token::*;
-    use crate::validate::Validate;
+    use crate::{types::custom_token::*, validate::Validate};
 
     mod spl {
         //! Tests for the spl module.
-        use crate::{types::MAX_SYMBOL_LENGTH, validate::test_validate_on_deserialize};
-
         use super::*;
+        use crate::{types::MAX_SYMBOL_LENGTH, validate::test_validate_on_deserialize};
 
         struct TestVector {
             input: SplToken,
@@ -82,9 +80,10 @@ mod custom_token {
 
     mod icrc {
         //! Tests for the icrc module.
+        use candid::Principal;
+
         use super::*;
         use crate::validate::test_validate_on_deserialize;
-        use candid::Principal;
         struct TestVector {
             input: IcrcToken,
             valid: bool,

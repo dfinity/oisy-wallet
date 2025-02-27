@@ -1,12 +1,14 @@
 //! Canister health metrics.
 
-use crate::http::HttpResponse;
 #[cfg(target_arch = "wasm32")]
 use core::arch::wasm32::memory_size as wasm_memory_size;
+
 #[cfg(target_arch = "wasm32")]
 use ic_cdk::api::stable::stable_size;
 use ic_metrics_encoder::MetricsEncoder;
 use serde_bytes::ByteBuf;
+
+use crate::http::HttpResponse;
 /// The Wasm page size as defined in [the Wasm Spec](https://webassembly.github.io/spec/core/exec/runtime.html#memory-instances).
 #[cfg(target_arch = "wasm32")]
 const WASM_PAGE_SIZE: u64 = 65536;

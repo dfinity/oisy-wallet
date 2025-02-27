@@ -1,12 +1,15 @@
-use crate::utils::assertion::assert_tokens_data_eq;
-use crate::utils::mock::{
-    CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
-};
-use crate::utils::pocketic::{setup, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::{UserToken, UserTokenId};
-use shared::types::TokenVersion;
+use shared::types::{
+    token::{UserToken, UserTokenId},
+    TokenVersion,
+};
+
+use crate::utils::{
+    assertion::assert_tokens_data_eq,
+    mock::{CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL},
+    pocketic::{setup, PicCanisterTrait},
+};
 
 lazy_static! {
     pub static ref MOCK_TOKEN: UserToken = UserToken {

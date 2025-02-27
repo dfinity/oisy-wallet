@@ -1,12 +1,14 @@
 //! Tests the ledger account logic.
 
-use crate::utils::pocketic::controller;
-use crate::utils::pocketic::pic_canister::PicCanisterTrait;
-use crate::utils::{mock::VC_HOLDER, pocketic::setup};
 use candid::Principal;
 use shared::types::signer::topup::{
     TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult, MAX_PERCENTAGE,
     MIN_PERCENTAGE,
+};
+
+use crate::utils::{
+    mock::VC_HOLDER,
+    pocketic::{controller, pic_canister::PicCanisterTrait, setup},
 };
 
 #[test]

@@ -1,10 +1,12 @@
+use std::time::Duration;
+
+use candid::Principal;
+use shared::types::user_profile::{GetUserProfileError, UserProfile};
+
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicCanisterTrait},
 };
-use candid::Principal;
-use shared::types::user_profile::{GetUserProfileError, UserProfile};
-use std::time::Duration;
 
 #[test]
 fn test_create_user_profile_creates_default_profile() {

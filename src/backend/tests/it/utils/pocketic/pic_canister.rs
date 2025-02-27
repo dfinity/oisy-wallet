@@ -1,14 +1,16 @@
 //! Common methods for interacting with a canister using `PocketIc`.
+use std::sync::Arc;
+
 use candid::{decode_one, encode_one, CandidType, Principal};
 use pocket_ic::{PocketIc, WasmResult};
 use serde::Deserialize;
-use std::sync::Arc;
 
 /// Common methods for interacting with a canister using `PocketIc`.
 pub trait PicCanisterTrait {
     /// A shared PocketIc instance.
     ///
-    /// Note: `PocketIc` uses interior mutability for query and update calls.  No external mut annotation or locks appear to be necessary.
+    /// Note: `PocketIc` uses interior mutability for query and update calls.  No external mut
+    /// annotation or locks appear to be necessary.
     fn pic(&self) -> Arc<PocketIc>;
 
     /// The ID of this canister.
