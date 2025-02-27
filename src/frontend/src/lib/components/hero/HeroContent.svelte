@@ -20,12 +20,13 @@
 		balanceZero,
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
-	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
+	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkBitcoin,
 		networkEthereum,
 		networkICP,
-		networkSolana
+		networkSolana,
+		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -54,7 +55,7 @@
 	$: loading.set(
 		isRouteTransactions($page)
 			? isNullish(pageTokenUi?.balance)
-			: !$exchangeInitialized || $noPositiveBalanceAndNotAllBalancesZero
+			: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
 	);
 
 	let isTransactionsPage = false;
@@ -70,22 +71,27 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-gradient-to-b from-brand-primary via-absolute-blue bg-pos-0 p-6 text-center text-white transition-all duration-500 ease-in-out"
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-pos-0 p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
+	class:from-default-0={$pseudoNetworkChainFusion}
+	class:to-default-100={$pseudoNetworkChainFusion}
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
 	class:bg-cover={isTrumpToken}
+	class:from-trump-0={isTrumpToken}
+	class:to-trump-100={isTrumpToken}
 	class:bg-size-200={!isTrumpToken}
-	class:via-interdimensional-blue={$networkICP && !isGLDTToken}
-	class:to-chinese-purple={$networkICP && !isGLDTToken}
-	class:via-bright-gold={isGLDTToken}
-	class:to-golden-sap={isGLDTToken}
-	class:via-beer={$networkBitcoin}
-	class:to-fulvous={$networkBitcoin}
-	class:via-united-nations-blue={$networkEthereum}
-	class:to-bright-lilac={$networkEthereum}
-	class:bg-gradient-to-r={($networkSolana && !isTrumpToken) || isGLDTToken}
-	class:via-lavander-indigo={$networkSolana && !isTrumpToken}
-	class:to-medium-spring-green={$networkSolana && !isTrumpToken}
+	class:from-icp-0={$networkICP && !isGLDTToken}
+	class:to-icp-100={$networkICP && !isGLDTToken}
+	class:from-gold-0={isGLDTToken}
+	class:to-gold-100={isGLDTToken}
+	class:from-btc-0={$networkBitcoin}
+	class:to-btc-100={$networkBitcoin}
+	class:from-eth-0={$networkEthereum}
+	class:to-eth-100={$networkEthereum}
+	class:from-sol-0={$networkSolana && !isTrumpToken}
+	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
+	class:bg-linear-to-b={!(($networkSolana && !isTrumpToken) || isGLDTToken)}
+	class:bg-gradient-to-r={($networkSolana && !isTrumpToken) || isGLDTToken}
 >
 	{#if isTransactionsPage}
 		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">

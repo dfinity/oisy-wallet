@@ -2,11 +2,12 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
+	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -19,6 +20,17 @@
 
 {#if isNetworkIdBitcoin($sourceToken?.network.id)}
 	<BtcConvertTokenWizard
+		{currentStep}
+		{formCancelAction}
+		bind:sendAmount
+		bind:receiveAmount
+		bind:convertProgressStep
+		on:icBack
+		on:icNext
+		on:icClose
+	/>
+{:else if isNetworkIdEthereum($sourceToken?.network.id)}
+	<EthConvertTokenWizard
 		{currentStep}
 		{formCancelAction}
 		bind:sendAmount

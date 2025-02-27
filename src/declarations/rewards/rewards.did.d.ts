@@ -12,6 +12,7 @@ export type AccountSnapshotFor =
 	| { SplMainnet: AccountSnapshot_Spl };
 export interface AccountSnapshot_Icrc {
 	decimals: number;
+	token_address: Principal;
 	network: {};
 	approx_usd_per_token: number;
 	last_transactions: Array<Transaction_Icrc>;
@@ -21,6 +22,7 @@ export interface AccountSnapshot_Icrc {
 }
 export interface AccountSnapshot_Spl {
 	decimals: number;
+	token_address: string;
 	network: {};
 	approx_usd_per_token: number;
 	last_transactions: Array<Transaction_Spl>;
@@ -40,11 +42,19 @@ export interface BatchSizes {
 	airdrop: number;
 	block_fetching: number;
 }
+export type CandidDuration =
+	| { Minutes: bigint }
+	| { Seconds: bigint }
+	| { Days: bigint }
+	| { Forever: null }
+	| { Hours: bigint }
+	| { Nanoseconds: bigint };
 export type ClaimVipRewardResponse =
 	| { AlreadyClaimed: null }
 	| { Success: null }
 	| { InvalidCode: null };
 export interface Config {
+	usage_awards_config: [] | [UsageAwardConfig];
 	batch_sizes: [] | [BatchSizes];
 	airdrop_config: [] | [AirDropConfig];
 	index_canisters: Array<Principal>;
@@ -79,6 +89,7 @@ export interface PublicSprinkleInfo {
 	ledger: Principal;
 }
 export interface RewardInfo {
+	name: [] | [string];
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
@@ -127,13 +138,44 @@ export interface Transaction_Spl {
 	timestamp: bigint;
 	amount: bigint;
 }
+export interface UsageAwardConfig {
+	cycle_duration: CandidDuration;
+	awards: Array<UsageAwardEvent>;
+	eligibility_criteria: UsageCriteria;
+}
+export interface UsageAwardEvent {
+	name: string;
+	num_events_per_cycle: number;
+	awards: Array<TokenConfig>;
+	num_users_per_event: number;
+}
+export interface UsageAwardState {
+	snapshots: Array<UserSnapshot>;
+}
+export interface UsageAwardStats {
+	user_count: bigint;
+	eligible_user_count: bigint;
+	snapshot_count: bigint;
+	awarded_count: bigint;
+	award_events: bigint;
+	eligible_snapshots: bigint;
+}
+export interface UsageCriteria {
+	measurement_duration: CandidDuration;
+	min_transactions: number;
+	min_logins: number;
+	min_valuation_usd: bigint;
+}
 export interface UserData {
 	airdrops: Array<RewardInfo>;
+	usage_awards: [] | [Array<RewardInfo>];
+	last_snapshot_timestamp: [] | [bigint];
 	is_vip: [] | [boolean];
 	sprinkles: Array<RewardInfo>;
 }
 export interface UserSnapshot {
 	accounts: Array<AccountSnapshotFor>;
+	timestamp: [] | [bigint];
 }
 export interface VipConfig {
 	code_validity_duration: bigint;
@@ -149,15 +191,22 @@ export interface VipStats {
 	total_issued: number;
 }
 export interface _SERVICE {
+	claim_usage_award: ActorMethod<[UsageAwardEvent, Principal], undefined>;
 	claim_vip_reward: ActorMethod<[VipReward], ClaimVipRewardResponse>;
 	config: ActorMethod<[], Config>;
+	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
 	new_vip_reward: ActorMethod<[], NewVipRewardResponse>;
 	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
+	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
 	set_sprinkle_timestamp: ActorMethod<[SetSprinkleTimestampArg], undefined>;
 	status: ActorMethod<[], StatusResponse>;
+	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
+	usage_eligible: ActorMethod<[Principal], boolean>;
+	usage_stats: ActorMethod<[], UsageAwardStats>;
 	user_info: ActorMethod<[], UserData>;
+	user_stats: ActorMethod<[Principal], UsageAwardState>;
 	vip_stats: ActorMethod<[], VipStats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;

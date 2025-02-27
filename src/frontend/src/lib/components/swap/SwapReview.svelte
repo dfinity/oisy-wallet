@@ -9,6 +9,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
@@ -20,8 +21,13 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sourceToken, destinationToken, sourceTokenExchangeRate, destinationTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		sourceTokenExchangeRate,
+		destinationTokenExchangeRate,
+		failedSwapError
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
@@ -54,6 +60,14 @@
 		</ModalValue>
 		<SwapProvider />
 		<SwapFees />
+
+		{#if nonNullish($failedSwapError)}
+			<div class="mt-4">
+				<MessageBox>
+					{$failedSwapError}
+				</MessageBox>
+			</div>
+		{/if}
 	</div>
 
 	<ButtonGroup slot="toolbar">
