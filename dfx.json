@@ -204,6 +204,21 @@
 				}
 			}
 		},
+		"e2e_ledger": {
+			"type": "custom",
+			"build": "scripts/build.e2e_ledger.sh",
+			"candid": "target/ic/icp_ledger.did",
+			"wasm": "target/ic/icp_ledger.wasm",
+			"init_arg_file": "scripts/build.e2e_ledger.args.did"
+		},
+		"e2e_index": {
+			"dependencies": ["e2e_ledger"],
+			"type": "custom",
+			"build": "scripts/build.e2e_index.sh",
+			"candid": "target/ic/icp_index.did",
+			"wasm": "target/ic/icp_index.wasm",
+			"init_arg_file": "target/ic/e2e_index.args.did"
+		},
 		"ckbtc_minter": {
 			"type": "custom",
 			"candid": "target/ic/ckbtc_minter.did",
