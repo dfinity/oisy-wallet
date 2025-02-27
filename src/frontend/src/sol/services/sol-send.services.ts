@@ -159,12 +159,18 @@ const createSplTokenTransactionMessage = async ({
 
 	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
-	const { ataInstruction, ataAddress: calculatedDestinationTokenAccountAddress } =
-		await createAtaInstruction({
-			signer,
-			destination,
-			tokenAddress
+	const calculatedDestinationTokenAccountAddress: SolAddress =
+		await calculateAssociatedTokenAddress({
+			owner: destination,
+			tokenAddress,
+			tokenOwnerAddress
 		});
+
+	const ataInstruction = await createAtaInstruction({
+		signer,
+		destination,
+		tokenAddress
+	});
 
 	const transferInstruction = getTransferInstruction(
 		{

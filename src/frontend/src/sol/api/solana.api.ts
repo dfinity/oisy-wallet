@@ -33,20 +33,22 @@ export const loadSolLamportsBalance = async ({
 export const loadSplTokenBalance = async ({
 	address,
 	network,
-	tokenAddress
+	tokenAddress,
+	tokenOwnerAddress
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-	tokenAddress: SolAddress;
+	tokenAddress: SplTokenAddress;
+	tokenOwnerAddress: SolAddress;
 }): Promise<bigint> => {
 	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
-	const relevantTokenAddress = solAddress(tokenAddress);
 
 	const response = await getTokenAccountsByOwner(
 		wallet,
 		{
-			mint: relevantTokenAddress
+			mint: solAddress(tokenAddress),
+			programId: solAddress(tokenOwnerAddress)
 		},
 		{ encoding: 'jsonParsed' }
 	).send();

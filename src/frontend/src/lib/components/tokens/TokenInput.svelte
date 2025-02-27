@@ -3,12 +3,14 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
 	import TokenInputCurrencyUsd from '$lib/components/tokens/TokenInputCurrencyUsd.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
@@ -64,7 +66,7 @@
 </script>
 
 <div
-	class="rounded-lg border border-solid p-5 text-left transition first:mb-2"
+	class="rounded-lg border border-solid p-5 text-left duration-300 first:mb-2"
 	class:bg-brand-subtle-10={focused}
 	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
@@ -141,3 +143,7 @@
 		<slot name="balance" />
 	</div>
 </div>
+
+{#if nonNullish(error)}
+	<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{error.message}</p>
+{/if}

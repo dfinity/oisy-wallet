@@ -1,15 +1,16 @@
 use std::time::{Duration, UNIX_EPOCH};
 
-use crate::utils::{
-    assertion::assert_user_profiles_eq,
-    mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
-    pocketic::{setup, PicCanisterTrait},
-};
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUsersResponse,
     OisyUser, UserProfile,
+};
+
+use crate::utils::{
+    assertion::assert_user_profiles_eq,
+    mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
+    pocketic::{setup, PicCanisterTrait},
 };
 
 #[test]
