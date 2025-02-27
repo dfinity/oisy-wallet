@@ -8,7 +8,7 @@
 	export let src: string | undefined;
 	export let alt = '';
 	export let size: LogoSize = 'xxs';
-	export let color: 'dust' | 'off-white' | 'white' = 'dust';
+	export let color: 'off-white' | 'white' = 'off-white';
 	export let ring = false;
 	export let testId: string | undefined = undefined;
 
@@ -30,8 +30,7 @@
 </script>
 
 <div
-	class="flex items-center justify-center overflow-hidden rounded-full ring-white"
-	class:bg-dust={color === 'dust' && !loaded}
+	class="flex items-center justify-center overflow-hidden rounded-full ring-primary"
 	class:bg-off-white={color === 'off-white' && !loaded}
 	class:bg-white={color === 'white' && !loaded}
 	class:opacity-10={!loaded}

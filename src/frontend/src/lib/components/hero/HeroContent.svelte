@@ -20,7 +20,7 @@
 		balanceZero,
 		noPositiveBalanceAndNotAllBalancesZero
 	} from '$lib/derived/balances.derived';
-	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
+	import { exchangeNotInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkBitcoin,
 		networkEthereum,
@@ -55,7 +55,7 @@
 	$: loading.set(
 		isRouteTransactions($page)
 			? isNullish(pageTokenUi?.balance)
-			: !$exchangeInitialized || $noPositiveBalanceAndNotAllBalancesZero
+			: $exchangeNotInitialized || $noPositiveBalanceAndNotAllBalancesZero
 	);
 
 	let isTransactionsPage = false;
@@ -71,27 +71,30 @@
 </script>
 
 <div
-	class="bg-pos-0 p-6 ease-in-out flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-linear-to-b text-center text-white transition-all duration-500"
-	class:from-brand-primary={$pseudoNetworkChainFusion}
-	class:to-absolute-blue={$pseudoNetworkChainFusion}
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brand-primary bg-pos-0 p-6 text-center text-primary-inverted transition-all duration-500 ease-in-out"
+	class:from-default-0={$pseudoNetworkChainFusion}
+	class:to-default-100={$pseudoNetworkChainFusion}
 	class:bg-pos-100={$networkICP || $networkBitcoin || $networkEthereum || $networkSolana}
 	class:bg-cover={isTrumpToken}
+	class:from-trump-0={isTrumpToken}
+	class:to-trump-100={isTrumpToken}
 	class:bg-size-200={!isTrumpToken}
-	class:from-interdimensional-blue={$networkICP && !isGLDTToken}
-	class:to-chinese-purple={$networkICP && !isGLDTToken}
-	class:from-bright-gold={isGLDTToken}
-	class:to-golden-sap={isGLDTToken}
-	class:from-beer={$networkBitcoin}
-	class:to-fulvous={$networkBitcoin}
-	class:from-united-nations-blue={$networkEthereum}
-	class:to-bright-lilac={$networkEthereum}
-	class:bg-gradient-to-r={($networkSolana && !isTrumpToken) || isGLDTToken}
-	class:from-lavander-indigo={$networkSolana && !isTrumpToken}
-	class:to-medium-spring-green={$networkSolana && !isTrumpToken}
+	class:from-icp-0={$networkICP && !isGLDTToken}
+	class:to-icp-100={$networkICP && !isGLDTToken}
+	class:from-gold-0={isGLDTToken}
+	class:to-gold-100={isGLDTToken}
+	class:from-btc-0={$networkBitcoin}
+	class:to-btc-100={$networkBitcoin}
+	class:from-eth-0={$networkEthereum}
+	class:to-eth-100={$networkEthereum}
+	class:from-sol-0={$networkSolana && !isTrumpToken}
+	class:to-sol-100={$networkSolana && !isTrumpToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
+	class:bg-linear-to-b={!(($networkSolana && !isTrumpToken) || isGLDTToken)}
+	class:bg-gradient-to-r={($networkSolana && !isTrumpToken) || isGLDTToken}
 >
 	{#if isTransactionsPage}
-		<div in:slide={SLIDE_PARAMS} class="gap-6 flex w-full flex-col">
+		<div in:slide={SLIDE_PARAMS} class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
 

@@ -2,6 +2,7 @@
 	export let label: string;
 	export let selected: boolean;
 	export let tabindex: number;
+	export let testId: string | undefined = undefined;
 </script>
 
 <div
@@ -11,23 +12,24 @@
 	role="radio"
 	aria-checked={selected}
 	{tabindex}
+	data-tid={testId}
 >
 	<div
-		class="mb-2 rounded-xl sm:rounded-2xl border-4 transition-all duration-250"
+		class="duration-250 mb-2 rounded-xl border-4 transition-all sm:rounded-2xl"
 		class:border-brand-primary={selected}
 		class:border-transparent={!selected}
 	>
-		<div class="rounded-lg shadow-sm sm:rounded-xl relative overflow-hidden">
+		<div class="relative overflow-hidden rounded-lg shadow-sm sm:rounded-xl">
 			<slot />
 
 			<span
-				class="right-2 bottom-2 p-1 shadow-sm absolute rounded-full border-4"
+				class="absolute bottom-2 right-2 rounded-full border-4 p-1 shadow-sm"
 				class:border-brand-primary={selected}
-				class:border-page={!selected}
-				class:bg-white={selected}
-				class:bg-page={!selected}
+				class:bg-off-white={selected}
+				class:border-primary-inverted={!selected}
+				class:bg-primary={!selected}
 			></span>
 		</div>
 	</div>
-	<div class="text-primary text-center">{label}</div>
+	<div class="text-center text-primary">{label}</div>
 </div>

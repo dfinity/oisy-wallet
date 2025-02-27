@@ -141,6 +141,14 @@ export const modalRewardState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'reward-state'
 );
+export const modalAirdropDetails: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'airdrop-details'
+);
+export const modalAirdropState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'airdrop-state'
+);
 
 export const modalWalletConnect: Readable<boolean> = derived(
 	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],

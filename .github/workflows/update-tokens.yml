@@ -23,15 +23,8 @@ jobs:
       - name: Update
         run: npm run build:tokens-sns
 
-      - name: Check for Changes
-        run: |
-          if ! git diff --quiet; then
-            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
-          fi
-
       # This action creates a PR only if there are changes.
       - name: Create Pull Request
-        if: env.CHANGES_DETECTED == 'true'
         uses: ./.github/actions/create-pr
         with:
           token: ${{ steps.app-token.outputs.token }}
@@ -56,18 +49,8 @@ jobs:
       - name: Update
         run: npm run build:tokens-ckerc20
 
-      - name: Stage Changes
-        run: git add .
-
-      - name: Check for Changes
-        run: |
-          if ! git diff --cached --quiet; then
-            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
-          fi
-
       # This action creates a PR only if there are changes.
       - name: Create Pull Request
-        if: env.CHANGES_DETECTED == 'true'
         uses: ./.github/actions/create-pr
         with:
           token: ${{ steps.app-token.outputs.token }}

@@ -17,7 +17,8 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
-			"clear_filter": "Clear filter"
+			"clear_filter": "Clear filter",
+			"not_available": "n/a"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -37,12 +38,13 @@
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
-			"airdrops": "Airdrops",
+			"airdrops": "Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"support_email": "Support",
+			"documentation": "Documentation",
+			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes"
 		},
@@ -51,13 +53,17 @@
 			"settings": "Open your settings",
 			"dapp_explorer": "Open dapp explorer",
 			"activity": "Open the activity view",
-			"airdrops": "Open the Airdrops view",
+			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"support_email": "Reach out to the team",
+			"documentation": "Open the $oisy_name documentation",
+			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link"
+		},
+		"short": {
+			"documentation": "Docs"
 		}
 	},
 	"auth": {
@@ -66,7 +72,7 @@
 			"title_part_2": "Safe. Seamless. Sovereign.",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"asset_types": "Bitcoin, Ethereum, ICP and more",
+			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
@@ -115,7 +121,28 @@
 	},
 	"airdrops": {
 		"text": {
-			"title": "Airdrops"
+			"title": "Rewards",
+			"active_campaigns": "Active Opportunities",
+			"upcoming_campaigns": "Upcoming Opportunities",
+			"active_date": "Due on",
+			"participate_title": "How to participate",
+			"share": "Share on X",
+			"learn_more": "Learn more",
+			"requirements_title": "Requirements",
+			"modal_button_text": "Got it",
+			"activity_button_text": "Check on Recent Activity",
+			"activity_button_text_short": "Check activity",
+			"no_balance_title": "Earn $oisy_short Sprinkles",
+			"no_balance_description": "Check back later to see your rewards",
+			"open_wallet": "Take me to the wallet",
+			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
+			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
+			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
+			"carousel_slide_cta": "Learn more"
+		},
+		"alt": {
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
 		}
 	},
 	"footer": {
@@ -126,8 +153,7 @@
 			"copyright": "© 2025"
 		},
 		"alt": {
-			"dfinity": "Go to DFINITY Foundation website",
-			"status": "Find more details about the current status of $oisy_short's development."
+			"dfinity": "Go to DFINITY Foundation website"
 		}
 	},
 	"wallet": {
@@ -149,9 +175,10 @@
 	},
 	"init": {
 		"text": {
-			"initializing_wallet": "Initializing your wallet",
+			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys"
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
+			"done": "Enjoy $oisy_short"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
@@ -230,7 +257,7 @@
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
 			"github_release": "$oisy_short release notes on GitHub",
-			"appearance_light": "Enabled light mode",
+			"appearance_light": "Enables light mode",
 			"appearance_dark": "Enables dark mode",
 			"appearance_system": "Enables your operating systems color mode"
 		},
@@ -242,7 +269,8 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)"
+		"chain_fusion": "Chain Fusion (all networks)",
+		"network": "Network"
 	},
 	"receive": {
 		"text": {
@@ -455,7 +483,8 @@
 			"not_available": "n/a",
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
-			"token_fee": "Token fee",
+			"network_fee": "Network fee",
+			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
 			"max_slippage_info": "Enter value between 0% and 50%",
@@ -470,8 +499,10 @@
 			"swap_provider": "Swap provider"
 		},
 		"error": {
+			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
-			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
 		}
 	},
 	"buy": {
@@ -789,7 +820,7 @@
 				"title": "Why $oisy_short",
 				"hold_crypto": {
 					"title": "Unified Management of All Your Digital Assets",
-					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Solana, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
 				},
 				"network_custody": {
 					"title": "No more private key anxiety with Network Custody",
@@ -882,7 +913,7 @@
 				"loading": "Loading consent message..."
 			},
 			"warning": {
-				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by $oisy_short."
 			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
