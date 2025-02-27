@@ -22,10 +22,6 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-	// TODO: use scheduler instead of setInterval, when we find a way to use the svelte store in the worker,
-	//  or pass their value in a way that the worker understands (for example, without BigNumber types),
-	//  or even when we cache them and we can fetch them
-
 	let timer: NodeJS.Timeout | undefined = undefined;
 	let syncInProgress = false;
 
