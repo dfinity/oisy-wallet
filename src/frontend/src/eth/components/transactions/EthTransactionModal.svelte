@@ -4,17 +4,15 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
-	import type { EthTransactionType } from '$eth/types/eth-transaction';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { Transaction } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -22,7 +20,7 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let transaction: Transaction;
+	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
 
 	let from: string;
@@ -32,10 +30,7 @@
 	let hash: string | undefined;
 	let blockNumber: number | undefined;
 
-	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
-
-	let type: EthTransactionType;
-	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
+	$: ({ from, value, timestamp, hash, blockNumber, to, type } = transaction);
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined;
