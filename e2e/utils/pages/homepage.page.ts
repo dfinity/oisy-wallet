@@ -3,6 +3,7 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	MANAGE_TOKENS_MODAL,
 	MANAGE_TOKENS_MODAL_BUTTON,
 	MANAGE_TOKENS_MODAL_SAVE,
 	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
@@ -54,7 +55,8 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
-	scrollToTop?: boolean;
+	freezeCarousel?: boolean;
+	centeredElementTestId?: string;
 }
 
 type TestModalSnapshotParams = {
@@ -226,16 +228,8 @@ abstract class Homepage {
 		await this.#page.locator(selector).click();
 	}
 
-	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
-		return await this.#page.getByTestId(testId);
-	}
-
-	protected async scrollToTopAndBack(): Promise<void> {
-		const currentPosition = await this.#page.evaluate(() => window.scrollY);
-
-		await this.#page.evaluate(() => window.scrollTo({ top: 0 }));
-
-		await this.#page.evaluate((y) => window.scrollTo({ top: y }), currentPosition);
+	protected getLocatorByTestId({ testId }: TestIdOperationParams): Locator {
+		return this.#page.getByTestId(testId);
 	}
 
 	async waitForTimeout(timeout: number): Promise<void> {
@@ -334,6 +328,19 @@ abstract class Homepage {
 		await locator.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
 	}
 
+	protected async waitForManageTokensModal(options?: WaitForLocatorOptions): Promise<void> {
+		await this.waitForByTestId({ testId: MANAGE_TOKENS_MODAL, options });
+	}
+
+	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
+		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
+		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.getLocatorByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN }).evaluate((el) =>
+			el.blur()
+		);
+	}
+
 	async toggleTokenInList({
 		tokenSymbol,
 		networkSymbol
@@ -341,20 +348,14 @@ abstract class Homepage {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
-		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
-		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
-		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.toggleNetworkSelector({ networkSymbol });
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
+		await this.waitForManageTokensModal();
 		await this.clickByTestId({
 			testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}-${networkSymbol}`
 		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
-	}
-
-	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
-		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
-		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
-		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
 	}
 
 	getTokenCardLocator({
@@ -367,9 +368,18 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot({ scrollToTop = true }: TakeScreenshotParams = {}): Promise<void> {
-		if (scrollToTop) {
-			await this.scrollToTopAndBack();
+	async takeScreenshot(
+		{ freezeCarousel = false, centeredElementTestId }: TakeScreenshotParams = {
+			freezeCarousel: false
+		}
+	): Promise<void> {
+		if (freezeCarousel) {
+			await this.setCarouselFirstSlide();
+			await this.waitForLoadState();
+		}
+
+		if (nonNullish(centeredElementTestId)) {
+			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
 		await expect(this.#page).toHaveScreenshot({
@@ -451,7 +461,7 @@ export class HomepageLoggedIn extends Homepage {
 			})
 		});
 
-		const qrCodeOutputLocator = await this.getLocatorByTestId({
+		const qrCodeOutputLocator = this.getLocatorByTestId({
 			testId: RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT
 		});
 		await qrCodeOutputLocator.waitFor();
