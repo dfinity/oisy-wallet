@@ -14,8 +14,6 @@
 	<ExternalLink
 		href={releaseUrl}
 		ariaLabel={replaceOisyPlaceholders($i18n.settings.alt.github_release)}
-		iconVisible={false}
+		iconVisible={false}>{version}</ExternalLink
 	>
-		{version}
-	</ExternalLink>
 </p>
