@@ -4,11 +4,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { execute } from '$lib/services/wallet-connect.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
-import {
-	decode,
-	sign,
-	type WalletConnectSignTransactionParams
-} from '$sol/services/wallet-connect.services';
+import { decode, sign } from '$sol/services/wallet-connect.services';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solTransactionsUtils from '$sol/utils/sol-transactions.utils';
 import {
@@ -17,17 +13,33 @@ import {
 } from '$sol/utils/sol-transactions.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import type { CompilableTransactionMessage } from '@solana/transaction-messages';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import type { MockInstance } from 'vitest';
 
 describe('wallet-connect.services', () => {
-	describe('decode', () => {
-		beforeEach(() => {
-			vi.resetAllMocks();
-		});
+	const parsedTransaction = { mock: 'parsedTransaction' };
+	const mappedTransaction = { mock: 'mappedTransaction' };
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.resetAllMocks();
+
+		vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValue(
+			parsedTransaction as unknown as CompilableTransactionMessage
+		);
+		vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockResolvedValue(
+			mappedTransaction as unknown as MappedSolTransaction
+		);
+		vi.spyOn(solTransactionsUtils, 'decodeTransactionMessage').mockImplementation(
+			() => mockSolSignedTransaction
+		);
+		vi.spyOn(solTransactionsUtils, 'transactionMessageHasBlockhashLifetime').mockReturnValue(true);
+	});
+
+	describe('decode', () => {
 		it('should throw an error if the networkId is invalid', async () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = ICP_NETWORK_ID;
@@ -40,15 +52,6 @@ describe('wallet-connect.services', () => {
 		it('should parse and map a transaction successfully for a valid network', async () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = SOLANA_MAINNET_NETWORK_ID;
-			const parsedTransaction = { mock: 'parsedTransaction' };
-			const mappedTransaction = { mock: 'mappedTransaction' };
-
-			vi.spyOn(solTransactionsUtils, 'parseSolBase64TransactionMessage').mockResolvedValueOnce(
-				parsedTransaction as unknown as CompilableTransactionMessage
-			);
-			vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockResolvedValueOnce(
-				mappedTransaction as unknown as MappedSolTransaction
-			);
 
 			const result = await decode({ base64EncodedTransactionMessage, networkId });
 
@@ -71,12 +74,15 @@ describe('wallet-connect.services', () => {
 			token: SOLANA_TOKEN,
 			progress: vi.fn(),
 			identity: mockIdentity,
-			request: {} as Web3WalletTypes.SessionRequest,
-			listener: {} as WalletConnectListener
+			request: {
+				params: { request: { method: 'mockMethod', params: { transaction: 'mock-transaction' } } }
+			} as Web3WalletTypes.SessionRequest,
+			listener: {
+				rejectRequest: vi.fn()
+			} as unknown as WalletConnectListener
 		};
 
 		beforeEach(() => {
-			vi.clearAllMocks();
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
@@ -99,7 +105,7 @@ describe('wallet-connect.services', () => {
 				destination: 'mockDestination'
 			};
 
-			const result = await sign(mockParams as WalletConnectSignTransactionParams);
+			const result = await sign(mockParams);
 
 			expect(result).toEqual(mockCallbackResponse);
 			expect(mockParams.modalNext).toHaveBeenCalled();

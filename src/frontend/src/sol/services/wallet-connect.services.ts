@@ -46,7 +46,7 @@ interface WalletConnectDecodeTransactionParams {
 	networkId: NetworkId;
 }
 
-export type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
+type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
 	modalNext: () => void;
