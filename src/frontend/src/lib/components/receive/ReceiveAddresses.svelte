@@ -254,7 +254,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="gap-2 flex flex-col">
+	<div class="flex flex-col gap-2">
 		{#each receiveAddressList as { title, text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
 				{#if nonNullish(text)}
@@ -268,7 +268,7 @@
 						{qrCodeAction}
 					>
 						<svelte:fragment slot="title">{title}</svelte:fragment>
-						<span slot="text" class="text-sm text-black">{text}</span>
+						<span slot="text" class="text-sm">{text}</span>
 					</ReceiveAddress>
 				{:else}
 					<ReceiveAddress

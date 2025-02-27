@@ -3,8 +3,10 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
+	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
-	import SwapMaxBalanceButton from '$lib/components/swap/SwapMaxBalanceButton.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapSlippage from '$lib/components/swap/SwapSlippage.svelte';
 	import SwapSwitchTokensButton from '$lib/components/swap/SwapSwitchTokensButton.svelte';
@@ -42,10 +44,13 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
+		isSourceTokenIcrc2,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
 	let errorType: ConvertAmountErrorType = undefined;
 	let amountSetToMax = false;
@@ -61,6 +66,15 @@
 					displayDecimals: $destinationToken.decimals
 				})
 			: undefined;
+
+	let sourceTokenFee: bigint | undefined;
+	$: sourceTokenFee = nonNullish($sourceToken)
+		? $icTokenFeeStore?.[$sourceToken.symbol]
+		: undefined;
+
+	let totalFee: bigint | undefined;
+	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
+	$: totalFee = (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n);
 
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
@@ -80,6 +94,7 @@
 		isNullish(swapAmount) ||
 		Number(swapAmount) <= 0 ||
 		isNullish(receiveAmount) ||
+		isNullish(sourceTokenFee) ||
 		swapAmountsLoading ||
 		Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE;
 
@@ -97,9 +112,9 @@
 		nonNullish($sourceToken)
 			? validateConvertAmount({
 					userAmount,
-					decimals: $sourceToken.decimals,
+					token: $sourceToken,
 					balance: $sourceTokenBalance,
-					totalFee: $sourceToken.fee
+					fee: totalFee
 				})
 			: undefined;
 </script>
@@ -136,7 +151,14 @@
 
 				<svelte:fragment slot="balance">
 					{#if nonNullish($sourceToken)}
-						<SwapMaxBalanceButton bind:amountSetToMax bind:swapAmount {errorType} />
+						<MaxBalanceButton
+							bind:amountSetToMax
+							bind:amount={swapAmount}
+							error={nonNullish(errorType)}
+							balance={$sourceTokenBalance}
+							token={$sourceToken}
+							fee={BigNumber.from(totalFee)}
+						/>
 					{/if}
 				</svelte:fragment>
 			</TokenInput>
@@ -159,11 +181,11 @@
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
 						{#if $swapAmountsStore?.swapAmounts === null}
-							<div transition:slide={SLIDE_DURATION} class="text-error"
+							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
-							<div class="gap-3 flex text-tertiary">
+							<div class="flex gap-3 text-tertiary">
 								<TokenInputAmountExchange
 									amount={receiveAmount}
 									exchangeRate={$destinationTokenExchangeRate}
@@ -190,7 +212,7 @@
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
-			<div class="gap-3 flex flex-col">
+			<div class="flex flex-col gap-3">
 				<SwapProvider />
 				<SwapFees />
 			</div>

@@ -22,6 +22,7 @@ export interface BuildOnramperLinkParams {
 	networkWallets: OnramperNetworkWallet[];
 	supportRecurringPayments: boolean;
 	enableCountrySelector: boolean;
+	themeName: 'dark' | 'light' | 'bluey';
 }
 
 const arrayToParam = (array: OnramperId[] | OnramperNetworkId[]) => array.join(',');

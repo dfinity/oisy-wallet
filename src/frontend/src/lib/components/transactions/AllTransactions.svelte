@@ -44,7 +44,7 @@
 	}
 </script>
 
-<div class="gap-5 flex flex-col">
+<div class="flex flex-col gap-5">
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
 
 	{#if $testnetsEnabled}
@@ -54,7 +54,7 @@
 	{/if}
 
 	{#if notEmptyString(tokenListWithoutCanister)}
-		<MessageBox level="light-warning" closableKey="oisy_ic_hide_transaction_no_canister">
+		<MessageBox level="warning" closableKey="oisy_ic_hide_transaction_no_canister">
 			{replacePlaceholders($i18n.activity.warning.no_index_canister, {
 				$token_list: tokenListWithoutCanister
 			})}
@@ -62,7 +62,7 @@
 	{/if}
 
 	{#if notEmptyString(tokenListWithUnavailableCanister)}
-		<MessageBox level="light-warning" closableKey="oisy_ic_hide_transaction_unavailable_canister">
+		<MessageBox level="warning" closableKey="oisy_ic_hide_transaction_unavailable_canister">
 			{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 				$token_list: tokenListWithUnavailableCanister
 			})}

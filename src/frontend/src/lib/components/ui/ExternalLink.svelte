@@ -14,6 +14,9 @@
 	export let styleClass = '';
 	export let trackEvent: TrackEventParams | undefined = undefined;
 	export let testId: string | undefined = undefined;
+	export let asMenuItem = false;
+	export let asMenuItemCondensed = false;
+	export let asButton = false;
 
 	const onClick = async () => {
 		if (isNullish(trackEvent)) {
@@ -28,16 +31,19 @@
 	{href}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="gap-2 inline-flex items-center no-underline {styleClass}"
+	class="inline-flex items-center gap-2 no-underline {styleClass}"
 	aria-label={ariaLabel}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	data-tid={testId}
-	class:text-brand-primary={color === 'blue'}
-	class:hover:text-inherit={color === 'blue'}
-	class:active:text-inherit={color === 'blue'}
-	class:hover:text-brand-primary={color === 'inherit'}
-	class:active:text-brand-primary={color === 'inherit'}
+	class:as-button={asButton}
+	class:text-brand-primary={!asButton && !asMenuItem}
+	class:hover:text-inherit={color === 'blue' && !asButton && !asMenuItem}
+	class:active:text-inherit={color === 'blue' && !asButton && !asMenuItem}
+	class:hover:text-brand-primary={color === 'inherit' && !asButton && !asMenuItem}
+	class:active:text-brand-primary={color === 'inherit' && !asButton && !asMenuItem}
 	class:w-full={fullWidth}
+	class:nav-item={asMenuItem}
+	class:nav-item-condensed={asMenuItemCondensed}
 	on:click={onClick}
 >
 	{#if iconVisible}

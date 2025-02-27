@@ -8,7 +8,7 @@
 	href={ERC20_ICP_REPO_URL}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="gap-2 pt-6 pb-3 text-xs font-bold md:text-base inline-flex items-center text-center no-underline"
+	class="inline-flex items-center gap-2 pb-3 pt-6 text-center text-xs font-bold no-underline md:text-base"
 >
 	<IconInfo />
 	<span class="pl-1">{$i18n.hero.text.learn_more_about_erc20_icp}</span>
@@ -18,7 +18,7 @@
 	@use '../../styles/mixins/media';
 
 	a {
-		color: var(--color-white);
+		color: var(--color-base-white);
 		margin: 0 auto;
 
 		:global(svg) {
