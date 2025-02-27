@@ -43,7 +43,7 @@ impl TokenVersion for UserToken {
 
     fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
@@ -94,7 +94,7 @@ impl TokenVersion for CustomToken {
 
     fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
@@ -120,7 +120,7 @@ impl TokenVersion for StoredUserProfile {
 
     fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
