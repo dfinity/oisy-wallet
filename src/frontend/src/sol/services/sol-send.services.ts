@@ -7,7 +7,10 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
-import { createAtaInstruction } from '$sol/services/spl-accounts.services';
+import {
+	calculateAssociatedTokenAddress,
+	createAtaInstruction
+} from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
@@ -162,12 +165,18 @@ const createSplTokenTransactionMessage = async ({
 
 	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
-	const { ataInstruction, ataAddress: calculatedDestinationTokenAccountAddress } =
-		await createAtaInstruction({
-			signer,
-			destination,
-			tokenAddress
+	const calculatedDestinationTokenAccountAddress: SolAddress =
+		await calculateAssociatedTokenAddress({
+			owner: destination,
+			tokenAddress,
+			tokenOwnerAddress
 		});
+
+	const ataInstruction = await createAtaInstruction({
+		signer,
+		destination,
+		tokenAddress
+	});
 
 	const transferInstruction = getTransferInstruction(
 		{

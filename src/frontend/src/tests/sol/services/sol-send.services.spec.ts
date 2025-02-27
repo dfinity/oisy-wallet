@@ -87,6 +87,7 @@ describe('sol-send.services', () => {
 		let spyMapNetworkIdToNetwork: MockInstance;
 		let spyPipe: MockInstance;
 
+		let spyCalculateAssociatedTokenAddress: MockInstance;
 		let spyCreateAtaInstruction: MockInstance;
 
 		beforeEach(() => {
@@ -103,12 +104,12 @@ describe('sol-send.services', () => {
 			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'mapNetworkIdToNetwork');
 			spyPipe = vi.spyOn(solanaFunctional, 'pipe').mockImplementation(vi.fn());
 
+			spyCalculateAssociatedTokenAddress = vi
+				.spyOn(accountServices, 'calculateAssociatedTokenAddress')
+				.mockResolvedValue(mockSplAddress);
 			spyCreateAtaInstruction = vi
 				.spyOn(accountServices, 'createAtaInstruction')
-				.mockResolvedValue({
-					ataInstruction: { keys: 'mock-instruction' } as unknown as SolInstruction,
-					ataAddress: mockSplAddress
-				});
+				.mockResolvedValue({ keys: 'mock-instruction' } as unknown as SolInstruction);
 		});
 
 		it('should send SOL successfully', async () => {
@@ -145,6 +146,7 @@ describe('sol-send.services', () => {
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 			expect(spyPipe).toHaveBeenCalled();
+			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledOnce();
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 		});
 
