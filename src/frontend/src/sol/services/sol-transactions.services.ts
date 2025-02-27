@@ -138,18 +138,10 @@ export const fetchSolTransactionsForSignature = async ({
 };
 
 export const loadNextSolTransactions = async ({
-	address,
-	network,
-	before,
-	limit,
-	signalEnd
+	signalEnd,
+	...rest
 }: LoadNextSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
-	const transactions = await loadSolTransactions({
-		address,
-		network,
-		before,
-		limit
-	});
+	const transactions = await loadSolTransactions(rest);
 
 	if (transactions.length === 0) {
 		signalEnd();
@@ -167,19 +159,15 @@ const networkToSolTokenIdMap = {
 };
 
 const loadSolTransactions = async ({
-	address,
 	network,
-	before,
-	limit
+	...rest
 }: GetSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	const solTokenIdForNetwork = networkToSolTokenIdMap[network];
 
 	try {
 		const transactions = await getSolTransactions({
-			address,
 			network,
-			before,
-			limit
+			...rest
 		});
 
 		const certifiedTransactions = transactions.map((transaction) => ({
