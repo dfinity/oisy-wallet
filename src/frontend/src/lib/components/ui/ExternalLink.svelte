@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { trackEvent as trackEventServices } from '$lib/services/analytics.services';
 	import type { TrackEventParams } from '$lib/types/analytics';
@@ -23,7 +23,7 @@
 	export let onClick: undefined | ((e: MouseEvent) => void) = undefined;
 
 	const doTrackEvent = async () => {
-		if (!isNullish(trackEvent)) {
+		if (nonNullish(trackEvent)) {
 			await trackEventServices(trackEvent);
 		}
 	};
@@ -48,7 +48,7 @@
 	class:nav-item-condensed={asMenuItemCondensed}
 	on:click={(e) => {
 		doTrackEvent();
-		if (onClick) {
+		if (nonNullish(onClick)) {
 			onClick(e);
 		}
 	}}
