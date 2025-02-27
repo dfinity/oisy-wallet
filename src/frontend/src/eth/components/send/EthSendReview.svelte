@@ -36,7 +36,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
