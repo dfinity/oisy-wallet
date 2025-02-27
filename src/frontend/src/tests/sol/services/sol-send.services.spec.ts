@@ -77,11 +77,7 @@ describe('sol-send.services', () => {
 			progress: vi.fn()
 		};
 
-		const mockRpc = {
-			getTokenAccountsByOwner: vi.fn(() => ({
-				send: vi.fn(() => Promise.resolve({ value: [{ pubkey: mockSplAddress }] }))
-			}))
-		} as unknown as Rpc<SolanaRpcApi>;
+		const mockRpc = {} as unknown as Rpc<SolanaRpcApi>;
 		const mockRpcSubscriptions = {} as RpcSubscriptions<SolanaRpcSubscriptionsApi>;
 
 		let spyMapNetworkIdToNetwork: MockInstance;
