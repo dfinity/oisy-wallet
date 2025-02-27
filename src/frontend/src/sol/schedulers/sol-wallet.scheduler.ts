@@ -62,26 +62,29 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private loadBalance = async ({
 		address,
-		solanaNetwork,
-		tokenAddress
+		solanaNetwork: network,
+		tokenAddress,
+		tokenOwnerAddress
 	}: LoadSolWalletParams): Promise<CertifiedData<SolBalance | null>> => ({
-		data: nonNullish(tokenAddress)
-			? await loadSplTokenBalance({ address, network: solanaNetwork, tokenAddress })
-			: await loadSolLamportsBalance({ address, network: solanaNetwork }),
+		data:
+			nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
+				? await loadSplTokenBalance({
+						address,
+						network,
+						tokenAddress,
+						tokenOwnerAddress
+					})
+				: await loadSolLamportsBalance({ address, network }),
 		certified: false
 	});
 
 	private loadTransactions = async ({
-		address,
-		solanaNetwork,
-		tokenAddress,
-		tokenOwnerAddress
+		solanaNetwork: network,
+		...rest
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
 		const transactions = await getSolTransactions({
-			network: solanaNetwork,
-			address,
-			tokenAddress,
-			tokenOwnerAddress
+			network,
+			...rest
 		});
 
 		const transactionsUi = transactions.map((transaction) => ({
@@ -98,22 +101,17 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		try {
 			const {
 				address: { data: address },
-				solanaNetwork,
-				tokenAddress,
-				tokenOwnerAddress
+				...rest
 			} = data;
 
 			const [balance, transactions] = await Promise.all([
 				this.loadBalance({
 					address,
-					solanaNetwork,
-					tokenAddress
+					...rest
 				}),
 				this.loadTransactions({
 					address,
-					solanaNetwork,
-					tokenAddress,
-					tokenOwnerAddress
+					...rest
 				})
 			]);
 
