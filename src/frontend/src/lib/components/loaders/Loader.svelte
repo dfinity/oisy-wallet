@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { Modal, type ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
-	import { SOLANA_NETWORK_ENABLED } from '$env/networks/networks.sol.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import banner from '$lib/assets/banner.svg';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -29,6 +27,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -49,6 +48,11 @@
 			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsLoader.DONE,
+			text: replaceOisyPlaceholders($i18n.init.text.done),
+			state: 'completed'
 		} as ProgressStep
 	];
 
@@ -99,14 +103,12 @@
 				debounceLoadBtcAddressTestnet();
 			}
 
-			if (SOLANA_NETWORK_ENABLED) {
-				if (isNullish($solAddressTestnet)) {
-					debounceLoadSolAddressTestnet();
-				}
+			if (isNullish($solAddressTestnet)) {
+				debounceLoadSolAddressTestnet();
+			}
 
-				if (isNullish($solAddressDevnet)) {
-					debounceLoadSolAddressDevnet();
-				}
+			if (isNullish($solAddressDevnet)) {
+				debounceLoadSolAddressDevnet();
 			}
 
 			if (LOCAL) {
@@ -114,7 +116,7 @@
 					debounceLoadBtcAddressRegtest();
 				}
 
-				if (isNullish($solAddressLocal) && SOLANA_NETWORK_ENABLED) {
+				if (isNullish($solAddressLocal)) {
 					debounceLoadSolAddressLocal();
 				}
 			}
@@ -165,7 +167,9 @@
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
 					<div class="mb-8 block">
-						<ImgBanner src={banner} styleClass="aspect-auto" />
+						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+							<ImgBanner {src} styleClass="aspect-auto" />
+						{/await}
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>

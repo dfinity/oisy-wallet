@@ -1,7 +1,5 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import { fetchSignatures } from '$sol/api/solana.api';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
@@ -17,16 +15,28 @@ export const getSolTransactions = async ({
 	address,
 	network,
 	tokenAddress,
+	tokenOwnerAddress,
 	before,
 	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams & {
-	tokenAddress?: SolAddress;
-}): Promise<SolTransactionUi[]> => {
+}: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
 	if (nonNullish(tokenAddress)) {
 		assertIsAddress(tokenAddress);
 	}
 
-	const wallet = solAddress(address);
+	if (nonNullish(tokenOwnerAddress)) {
+		assertIsAddress(tokenOwnerAddress);
+	}
+
+	const [relevantAddress] =
+		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
+			? await findAssociatedTokenPda({
+					owner: solAddress(address),
+					tokenProgram: solAddress(tokenOwnerAddress),
+					mint: solAddress(tokenAddress)
+				})
+			: [address];
+
+	const wallet = solAddress(relevantAddress);
 
 	const beforeSignature = nonNullish(before) ? signature(before) : undefined;
 
@@ -37,34 +47,15 @@ export const getSolTransactions = async ({
 		limit
 	});
 
-	// Fetch signatures for the associated token address if provided, since they may be not included in the wallet signatures.
-	const [ataAddress] = nonNullish(tokenAddress)
-		? await findAssociatedTokenPda({
-				owner: solAddress(address),
-				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
-				mint: solAddress(tokenAddress)
-			})
-		: [undefined];
-
-	const tokenSignatures: SolSignature[] = nonNullish(ataAddress)
-		? await fetchSignatures({
-				network,
-				wallet: solAddress(ataAddress),
-				before: beforeSignature,
-				limit
-			})
-		: [];
-
-	const allSignatures: SolSignature[] = Array.from(new Set([...signatures, ...tokenSignatures]));
-
-	return await allSignatures.reduce(
+	return await signatures.reduce(
 		async (accPromise, signature) => {
 			const acc = await accPromise;
 			const parsedTransactions = await fetchSolTransactionsForSignature({
 				signature,
 				network,
 				address,
-				tokenAddress
+				tokenAddress,
+				tokenOwnerAddress
 			});
 
 			return [...acc, ...parsedTransactions];

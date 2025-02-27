@@ -2,6 +2,7 @@ import type {
 	ClaimVipRewardResponse,
 	NewVipRewardResponse,
 	UserData,
+	UserSnapshot,
 	VipReward
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
@@ -38,6 +39,17 @@ export const claimVipReward = async ({
 	const { claimVipReward } = await rewardCanister({ identity });
 
 	return claimVipReward(vipReward);
+};
+
+export const registerAirdropRecipient = async ({
+	userSnapshot,
+	identity
+}: CanisterApiFunctionParams<{
+	userSnapshot: UserSnapshot;
+}>): Promise<void> => {
+	const { registerAirdropRecipient } = await rewardCanister({ identity });
+
+	return registerAirdropRecipient(userSnapshot);
 };
 
 const rewardCanister = async ({

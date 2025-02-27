@@ -123,7 +123,7 @@ export const calculateTokenUsdBalance = ({
 
 	return nonNullish(exchangeRate)
 		? usdValue({
-				token,
+				decimals: token.decimals,
 				balance: $balances?.[token.id]?.data,
 				exchangeRate
 			})

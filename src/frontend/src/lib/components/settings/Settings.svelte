@@ -5,6 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
+	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -131,5 +132,10 @@
 		</div>
 	</div>
 {/if}
+
+<div class="mt-10">
+	<h2 class="mb-4 pb-1 text-base">{$i18n.settings.text.appearance}:</h2>
+	<ThemeSelector />
+</div>
 
 <SettingsVersion />

@@ -4,6 +4,7 @@ import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSignature } from '$sol/types/sol-transaction';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address, address as solAddress, type Address } from '@solana/addresses';
 import { type Signature } from '@solana/keys';
@@ -32,20 +33,22 @@ export const loadSolLamportsBalance = async ({
 export const loadSplTokenBalance = async ({
 	address,
 	network,
-	tokenAddress
+	tokenAddress,
+	tokenOwnerAddress
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-	tokenAddress: SolAddress;
+	tokenAddress: SplTokenAddress;
+	tokenOwnerAddress: SolAddress;
 }): Promise<bigint> => {
 	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
 	const wallet = solAddress(address);
-	const relevantTokenAddress = solAddress(tokenAddress);
 
 	const response = await getTokenAccountsByOwner(
 		wallet,
 		{
-			mint: relevantTokenAddress
+			mint: solAddress(tokenAddress),
+			programId: solAddress(tokenOwnerAddress)
 		},
 		{ encoding: 'jsonParsed' }
 	).send();
@@ -205,7 +208,7 @@ export const getTokenDecimals = async ({
 	address,
 	network
 }: {
-	address: SolAddress;
+	address: SplTokenAddress;
 	network: SolanaNetworkType;
 }): Promise<number> => {
 	const { getAccountInfo } = solanaHttpRpc(network);
@@ -224,4 +227,19 @@ export const getTokenDecimals = async ({
 	}
 
 	return 0;
+};
+
+export const getTokenOwner = async ({
+	address,
+	network
+}: {
+	address: SplTokenAddress;
+	network: SolanaNetworkType;
+}): Promise<SplTokenAddress | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const token = solAddress(address);
+
+	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
+
+	return value?.owner?.toString();
 };

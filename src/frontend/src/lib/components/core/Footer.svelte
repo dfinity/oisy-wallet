@@ -4,10 +4,9 @@
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
-	import { OISY_REPO_URL, OISY_STATUS_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
+	import { OISY_REPO_URL, OISY_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -17,7 +16,7 @@
 </script>
 
 <footer
-	class="z-1 pointer-events-none mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-12 sm:flex-1 sm:flex-grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0"
+	class="z-1 pointer-events-none mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-12 sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0"
 	class:sm:sticky={$authNotSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}
 	class:md:h-md:grid-cols-2={$authNotSignedIn}
@@ -47,16 +46,6 @@
 			>
 				<IconGitHub />
 			</ExternalLinkIcon>
-
-			<a
-				href={OISY_STATUS_URL}
-				rel="external noopener noreferrer"
-				target="_blank"
-				class="mx-auto no-underline"
-				aria-label={replaceOisyPlaceholders($i18n.footer.alt.status)}
-			>
-				<Badge variant="warning">beta</Badge>
-			</a>
 		</div>
 
 		<div

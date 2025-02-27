@@ -1,5 +1,4 @@
 import { BTC_MAINNET_NETWORK, ICP_NETWORK } from '$env/networks/networks.env';
-import * as solEnv from '$env/networks/networks.sol.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
@@ -56,7 +55,6 @@ describe('ContextMenu', () => {
 
 	it('renders the sol token menu', () => {
 		mockPage.mock({ network: SOLANA_MAINNET_NETWORK.id.description });
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 
 		const { container } = render(ContextMenu);
 

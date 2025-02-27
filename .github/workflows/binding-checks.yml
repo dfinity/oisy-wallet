@@ -2,6 +2,7 @@ name: Binding Checks
 
 on:
   pull_request:
+  merge_group:
   workflow_dispatch:
 
 jobs:
@@ -66,6 +67,11 @@ jobs:
       - name: Prepare
         if: steps.changes.outputs.src == 'true'
         uses: ./.github/actions/prepare
+
+      - name: Install nightly rust
+        run: |
+          rustup toolchain install nightly
+          rustup component add rustfmt --toolchain nightly
 
       - name: Install dfx
         if: steps.changes.outputs.src == 'true'

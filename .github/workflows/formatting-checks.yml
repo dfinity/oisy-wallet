@@ -16,6 +16,7 @@ on:
         '.github/workflows/formatting-checks.yml'
       - # Rust format configuration
         'rustfmt.toml'
+  merge_group:
   workflow_dispatch:
 
 jobs:
@@ -46,6 +47,11 @@ jobs:
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
         uses: actions/checkout@v4
+
+      - name: Install nightly rust
+        run: |
+          rustup toolchain install nightly
+          rustup component add rustfmt --toolchain nightly
 
       - name: Install shfmt
         run: scripts/setup shfmt
