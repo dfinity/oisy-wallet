@@ -7,7 +7,10 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
-import { createAtaInstruction } from '$sol/services/spl-accounts.services';
+import {
+	calculateAssociatedTokenAddress,
+	createAtaInstruction
+} from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
@@ -141,18 +144,12 @@ const createSplTokenTransactionMessage = async ({
 
 	const source = signer.address;
 
-	const sourceTokenAccountAddress = await loadTokenAccount({
-		address: source,
-		network,
-		tokenAddress
+	// To be sure which token account is used, we calculate the associated token account address
+	const sourceTokenAccountAddress: SolAddress = await calculateAssociatedTokenAddress({
+		owner: source,
+		tokenAddress,
+		tokenOwnerAddress
 	});
-
-	// This should not happen since we are sending from an existing account.
-	// But we need it to return a non-nullish value.
-	assertNonNullish(
-		sourceTokenAccountAddress,
-		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
-	);
 
 	const destinationTokenAccountAddress = await loadTokenAccount({
 		address: destination,

@@ -87,6 +87,7 @@ describe('sol-send.services', () => {
 		let spyMapNetworkIdToNetwork: MockInstance;
 		let spyPipe: MockInstance;
 
+		let spyCalculateAssociatedTokenAddress: MockInstance;
 		let spyCreateAtaInstruction: MockInstance;
 
 		beforeEach(() => {
@@ -160,18 +161,6 @@ describe('sol-send.services', () => {
 				replacePlaceholders(en.init.error.no_solana_network, {
 					$network: SOLANA_TOKEN.network.id.description ?? ''
 				})
-			);
-		});
-
-		it('should throw an error if no token accounts are found', async () => {
-			vi.mocked(solanaHttpRpc).mockReturnValue({
-				getTokenAccountsByOwner: vi.fn(() => ({
-					send: vi.fn(() => Promise.resolve({ value: [] }))
-				}))
-			} as unknown as Rpc<SolanaRpcApi>);
-
-			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrowError(
-				`Token account not found for wallet ${mockSource} and token ${DEVNET_USDC_TOKEN.address} on devnet network`
 			);
 		});
 	});
