@@ -17,7 +17,8 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
-			"clear_filter": "Clear filter"
+			"clear_filter": "Clear filter",
+			"not_available": "n/a"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -42,7 +43,8 @@
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"support_email": "Support",
+			"documentation": "Documentation",
+			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes"
 		},
@@ -55,9 +57,13 @@
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"support_email": "Reach out to the team",
+			"documentation": "Open the $oisy_name documentation",
+			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link"
+		},
+		"short": {
+			"documentation": "Docs"
 		}
 	},
 	"auth": {
@@ -126,17 +132,17 @@
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
-			"no_balance_title": "Start exploring",
+			"no_balance_title": "Earn $oisy_short Sprinkles",
 			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on earning today's reward!",
-			"state_modal_title_jackpot": "Congratulations on earning today's highest reward!",
+			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
+			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
-			"carousel_slide_title": "OISY Rewards Are Now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
 			"carousel_slide_cta": "Learn more"
 		},
 		"alt": {
-			"upcoming_campaigns": "Stay tuned for upcoming token rewards - subscribe to $oisy_short on X and follow for the latest updates."
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
 		}
 	},
 	"footer": {
@@ -263,7 +269,8 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)"
+		"chain_fusion": "Chain Fusion (all networks)",
+		"network": "Network"
 	},
 	"receive": {
 		"text": {
