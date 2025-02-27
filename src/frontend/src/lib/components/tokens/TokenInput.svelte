@@ -25,10 +25,13 @@
 	export let disabled = false;
 	export let placeholder = '0';
 	export let errorType: ConvertAmountErrorType = undefined;
+	// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
+	export let error: Error | undefined = undefined;
 	export let amountSetToMax = false;
 	export let loading = false;
 	export let isSelectable = true;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
+	export let customErrorValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -53,6 +56,7 @@
 		});
 
 		errorType = customValidate(parsedValue);
+		error = customErrorValidate(parsedValue);
 	};
 
 	const debounceValidate = debounce(validate, 300);
@@ -61,14 +65,18 @@
 
 <div
 	class="rounded-lg border border-solid p-5 text-left transition first:mb-2"
-	class:bg-brand-subtle-alt={focused}
-	class:border-brand-subtle-alt={focused}
+	class:bg-brand-subtle-10={focused}
+	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
 	class:border-secondary={!focused}
 >
 	<div class="mb-2 text-sm font-bold"><slot name="title" /></div>
 
-	<TokenInputContainer {focused} styleClass="h-14 text-3xl" error={nonNullish(errorType)}>
+	<TokenInputContainer
+		{focused}
+		styleClass="h-14 text-3xl"
+		error={nonNullish(errorType) || nonNullish(error)}
+	>
 		<div class="flex h-full w-full items-center">
 			{#if token}
 				{#if displayUnit === 'token'}
@@ -114,7 +122,7 @@
 				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
 			{:else}
 				<span
-					class="flex items-center justify-center rounded-full bg-brand-primary text-white"
+					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
 				>
 					<IconPlus />

@@ -4,9 +4,9 @@
 	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
+	import ConvertToCkETH from '$eth/components/convert/ConvertToCkETH.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
-	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';

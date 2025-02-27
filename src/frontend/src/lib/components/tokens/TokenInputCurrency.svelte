@@ -15,7 +15,7 @@
 
 <div
 	class={`token-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
-	class:text-error={error}
+	class:text-error-primary={error}
 	class:animate-pulse={loading}
 >
 	<slot name="prefix"></slot>

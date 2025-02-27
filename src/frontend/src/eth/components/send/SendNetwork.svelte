@@ -73,7 +73,7 @@
 		})();
 </script>
 
-<label for="network" class="px-4.5 font-bold">{$i18n.send.text.network}:</label>
+<label for="network" class="font-bold">{$i18n.send.text.network}:</label>
 
 <div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>

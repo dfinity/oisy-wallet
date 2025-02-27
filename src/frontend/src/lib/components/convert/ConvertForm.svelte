@@ -11,6 +11,7 @@
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
+	export let minFee: bigint | undefined = undefined;
 	export let disabled: boolean;
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
@@ -28,6 +29,7 @@
 		bind:insufficientFundsForFee
 		bind:exchangeValueUnit
 		{totalFee}
+		{minFee}
 	/>
 
 	<div class="mt-6">
