@@ -9,8 +9,8 @@
 </script>
 
 {#if STAGING && visible}
-	<div class="gap-4 flex justify-between">
-		<span class="gap-4 flex items-center justify-center">
+	<div class="flex justify-between gap-4">
+		<span class="flex items-center justify-center gap-4">
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
@@ -27,7 +27,7 @@
 
 		z-index: calc(var(--overlay-z-index) + 10);
 
-		background: var(--negative-emphasis);
+		background: var(--color-background-error-primary);
 
 		padding: var(--padding-2x) var(--padding-3x);
 		margin: var(--padding-3x) 0;

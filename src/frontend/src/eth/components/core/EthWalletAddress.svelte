@@ -12,8 +12,8 @@
 		: undefined;
 </script>
 
-<div>
-	<label class="text-sm font-bold block" for="eth-wallet-address"
+<div class="p-3">
+	<label class="block text-sm font-bold" for="eth-wallet-address"
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 
@@ -23,7 +23,7 @@
 </div>
 
 {#if nonNullish(explorerUrl)}
-	<ExternalLink href={explorerUrl} ariaLabel={$i18n.wallet.alt.open_etherscan}>
+	<ExternalLink asMenuItem href={explorerUrl} ariaLabel={$i18n.wallet.alt.open_etherscan}>
 		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}
