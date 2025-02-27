@@ -10,14 +10,14 @@
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import Loaders from '$lib/components/loaders/Loaders.svelte';
+	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
+	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
-	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
-	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 
 	let tokensRoute: boolean;
 	$: tokensRoute = isRouteTokens($page);
