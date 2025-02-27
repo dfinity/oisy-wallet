@@ -71,7 +71,6 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		certified: false
 	});
 
-	// TODO add unit tests for spl txns
 	private loadTransactions = async ({
 		address,
 		solanaNetwork,
