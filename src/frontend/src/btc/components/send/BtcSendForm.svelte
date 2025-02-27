@@ -43,6 +43,8 @@
 </script>
 
 <SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource>
+	<BtcSendAmount slot="amount" bind:amount bind:amountError />
+
 	<BtcSendDestination
 		slot="destination"
 		bind:destination
@@ -50,8 +52,6 @@
 		{networkId}
 		on:icQRCodeScan
 	/>
-
-	<BtcSendAmount slot="amount" bind:amount bind:amountError />
 
 	<!--	TODO: calculate and display transaction fee	-->
 
