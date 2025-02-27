@@ -6,7 +6,7 @@ export type EthTransactionType = Extract<
 	(typeof ethTransactionTypes.options)[number]
 >;
 
-export interface EthTransactionUi extends Transaction {
+export interface EthTransactionUi extends Omit<Transaction, 'type'> {
 	id: string | undefined;
-	uiType: EthTransactionType;
+	type: EthTransactionType;
 }

@@ -6,7 +6,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
 
-export const isTransactionPending = ({ blockNumber }: Transaction): boolean =>
+export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean =>
 	isNullish(blockNumber);
 
 export const isErc20TransactionApprove = (data: string | undefined): boolean =>
@@ -38,7 +38,7 @@ export const mapEthTransactionUi = ({
 	return {
 		...transaction,
 		id: transaction.hash,
-		uiType: ckMinterInfoAddresses.includes(from.toLowerCase())
+		type: ckMinterInfoAddresses.includes(from.toLowerCase())
 			? 'withdraw'
 			: ckMinterInfoAddresses.includes(to?.toLowerCase())
 				? 'deposit'
