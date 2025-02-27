@@ -69,7 +69,9 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Install nightly rust
-        run: rustup toolchain install nightly
+        run: |
+          rustup toolchain install nightly
+          rustup component add rustfmt --toolchain nightly
 
       - name: Install dfx
         if: steps.changes.outputs.src == 'true'
