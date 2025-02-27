@@ -1,13 +1,14 @@
 use std::time::Duration;
 
-use crate::utils::{
-    mock::{ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
-    pocketic::{setup, PicCanisterTrait},
-};
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, UserProfile,
+};
+
+use crate::utils::{
+    mock::{ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
+    pocketic::{setup, PicCanisterTrait},
 };
 
 #[test]
