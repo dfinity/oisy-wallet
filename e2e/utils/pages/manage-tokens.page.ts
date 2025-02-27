@@ -25,6 +25,16 @@ export const ManageTokensCases: ManageTokensConfig[] = [
 		type: 'SepoliaERC20',
 		tokenSymbol: 'USDC',
 		networkSymbol: 'SepoliaETH'
+	},
+	{
+		type: 'SPL',
+		tokenSymbol: 'EURC',
+		networkSymbol: 'SOL'
+	},
+	{
+		type: 'DevnetSPL',
+		tokenSymbol: 'DevnetUSDC',
+		networkSymbol: 'SOL (Devnet)'
 	}
 ];
 

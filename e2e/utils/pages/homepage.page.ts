@@ -356,6 +356,8 @@ abstract class Homepage {
 		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
+		// We want to remove the focus from the button to avoid the focus box to be visible in the screenshot
+		await this.#page.keyboard.press('Escape');
 	}
 
 	getTokenCardLocator({
