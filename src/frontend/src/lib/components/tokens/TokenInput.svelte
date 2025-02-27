@@ -3,12 +3,14 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
 	import TokenInputCurrencyUsd from '$lib/components/tokens/TokenInputCurrencyUsd.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
@@ -16,8 +18,6 @@
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
-	import { slide } from 'svelte/transition';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
