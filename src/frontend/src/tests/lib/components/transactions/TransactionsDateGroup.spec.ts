@@ -30,7 +30,7 @@ describe('TransactionsDateGroup', () => {
 		transaction: {
 			...transaction,
 			id: transaction.hash,
-			uiType: 'send'
+			type: 'send'
 		},
 		timestamp: todayTimestamp,
 		token: ETHEREUM_TOKEN,

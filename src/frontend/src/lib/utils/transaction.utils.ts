@@ -10,7 +10,6 @@ import type { OptionToken } from '$lib/types/token';
 import type {
 	AnyTransactionUi,
 	AnyTransactionUiWithCmp,
-	Transaction,
 	TransactionStatus,
 	TransactionsUiDateGroup,
 	TransactionType
@@ -74,7 +73,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 	}, {});
 };
 
-export const mapTransactionModalData = <T extends AnyTransactionUi | Transaction>({
+export const mapTransactionModalData = <T extends AnyTransactionUi>({
 	$modalOpen,
 	$modalStore
 }: {
