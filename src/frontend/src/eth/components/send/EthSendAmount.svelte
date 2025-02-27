@@ -3,20 +3,20 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
-	import { slide } from 'svelte/transition';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -117,5 +117,7 @@
 </TokenInput>
 
 {#if nonNullish(insufficientFundsError)}
-	<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{insufficientFundsError.message}</p>
+	<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary"
+		>{insufficientFundsError.message}</p
+	>
 {/if}

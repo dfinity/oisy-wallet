@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
-	import { slide } from 'svelte/transition';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: OptionAmount = undefined;
