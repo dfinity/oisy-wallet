@@ -8,8 +8,7 @@ on:
       - v*
   workflow_run:
     workflows: ['Tag on Merge from Release Branch']
-    types:
-      - completed
+    types: [completed]
   workflow_dispatch:
     inputs:
       network:
