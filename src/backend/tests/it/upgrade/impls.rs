@@ -1,5 +1,6 @@
-use crate::upgrade::types::UserTokenV0_0_19;
 use shared::types::{TokenVersion, Version};
+
+use crate::upgrade::types::UserTokenV0_0_19;
 
 impl TokenVersion for UserTokenV0_0_19 {
     fn get_version(&self) -> Option<Version> {
