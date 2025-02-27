@@ -1,12 +1,12 @@
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type {
+	AccountSnapshotFor,
 	AccountSnapshot_Icrc,
 	AccountSnapshot_Spl,
-	AccountSnapshotFor,
+	TransactionType as RcTransactionType,
 	Transaction_Icrc,
-	Transaction_Spl,
-	TransactionType
+	Transaction_Spl
 } from '$declarations/rewards/rewards.did';
 import { USER_SNAPSHOT_ENABLED } from '$env/airdrop-campaigns.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
@@ -19,7 +19,7 @@ import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
-import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
@@ -35,14 +35,14 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
-import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import type { TransactionType } from '$lib/types/transaction';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCTestnet,
 	isNetworkIdEthereum,
-	isNetworkIdSepolia,
-	isNetworkIdSOLDevnet
+	isNetworkIdSOLDevnet,
+	isNetworkIdSepolia
 } from '$lib/utils/network.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -70,17 +70,17 @@ const filterTransactions = <T extends Transaction_Icrc | Transaction_Spl>(
 	transactions: (T | undefined)[]
 ): T[] => transactions.filter(nonNullish).slice(0, LAST_TRANSACTIONS_COUNT);
 
-const toTransactionType = (type: IcTransactionType): TransactionType =>
-	type === 'send' ? { Send: null } : { Receive: null };
+const toTransactionType = (type: Exclude<TransactionType, 'approve'>): RcTransactionType =>
+	type === 'send' || type === 'deposit' || type === 'burn' ? { Send: null } : { Receive: null };
 
 const toBaseTransaction = ({
 	type,
 	value,
 	timestamp
-}: Pick<IcTransactionUi | SolTransactionUi, 'type' | 'value' | 'timestamp'>): Omit<
-	Transaction_Icrc | Transaction_Spl,
-	'counterparty'
-> => ({
+}: { type: Exclude<TransactionType, 'approve'> } & Pick<
+	IcTransactionUi | SolTransactionUi,
+	'value' | 'timestamp'
+>): Omit<Transaction_Icrc | Transaction_Spl, 'counterparty'> => ({
 	transaction_type: toTransactionType(type),
 	timestamp: (timestamp ?? 0n) * NANO_SECONDS_IN_SECOND,
 	amount: value ?? 0n,
@@ -105,39 +105,22 @@ const toIcrcTransaction = ({
 };
 
 const toSplTransaction = ({
-	transaction: { type, value, timestamp, from, to, ...rest },
-	address,
-	networkId
+	transaction: { type, value, timestamp, from, to },
+	address
 }: {
 	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 	transaction: BtcTransactionUi | EthTransactionUi | SolTransactionUi;
 	address: SolAddress;
-	networkId: NetworkId;
 }): Transaction_Spl | undefined => {
 	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 	if (isNullish(from) || isNullish(to)) {
 		return undefined;
 	}
-	if ((isNullish(type) && !('uiType' in rest)) || typeof type === 'number') {
-		return undefined;
-	}
-
-	const transactionType =
-		(isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)) && 'uiType' in rest
-			? rest.uiType
-			: nonNullish(type)
-				? type
-				: 'send';
 
 	return {
 		// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 		...toBaseTransaction({
-			type:
-				transactionType === 'withdraw'
-					? 'send'
-					: transactionType === 'deposit'
-						? 'receive'
-						: transactionType,
+			type: type === 'deposit' ? 'send' : type === 'withdraw' ? 'receive' : type,
 			value: BigNumber.from(value ?? 0n).toBigInt(),
 			timestamp: BigInt(timestamp ?? 0n)
 		}),
@@ -249,7 +232,7 @@ const toSplSnapshot = ({
 		account: address,
 		token_address: tokenAddress,
 		last_transactions: filterTransactions(
-			lastTransactions.map((transaction) => toSplTransaction({ transaction, address, networkId }))
+			lastTransactions.map((transaction) => toSplTransaction({ transaction, address }))
 		)
 	};
 

@@ -1,15 +1,18 @@
-use crate::{types::UserProfileMap, StoredPrincipal};
+use std::ops::Bound;
+
 use candid::Principal;
 use shared::types::{
     user_profile::{ListUsersRequest, OisyUser},
     Timestamp,
 };
-use std::ops::Bound;
+
+use crate::{types::UserProfileMap, StoredPrincipal};
 
 const DEFAULT_LIMIT_LIST_USERS_RESPONSE: usize = 10_000;
 const PRINCIPAL_MIN: Principal = Principal::from_slice(&[]);
 
-/// The maximum number of users to list in one response.  Returns the default limit if the requested limit is invalid or too large.
+/// The maximum number of users to list in one response.  Returns the default limit if the requested
+/// limit is invalid or too large.
 fn limit_users_size(request: &ListUsersRequest) -> usize {
     request
         .matches_max_length

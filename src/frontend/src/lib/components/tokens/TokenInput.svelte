@@ -66,7 +66,7 @@
 </script>
 
 <div
-	class="rounded-lg border border-solid p-5 text-left transition first:mb-2"
+	class="rounded-lg border border-solid p-5 text-left duration-300 first:mb-2"
 	class:bg-brand-subtle-10={focused}
 	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
