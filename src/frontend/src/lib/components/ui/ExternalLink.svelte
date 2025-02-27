@@ -18,12 +18,14 @@
 	export let asMenuItemCondensed = false;
 	export let asButton = false;
 
-	const onClick = async () => {
-		if (isNullish(trackEvent)) {
-			return;
-		}
+	// Has to be passed as prop since we potentially want to additionally execute the doTrackEvent
+	// function. There seems no other way to call the on:click passed to this component manually
+	export let onClick: undefined | ((e: MouseEvent) => void);
 
-		await trackEventServices(trackEvent);
+	const doTrackEvent = async () => {
+		if (!isNullish(trackEvent)) {
+			await trackEventServices(trackEvent);
+		}
 	};
 </script>
 
@@ -44,7 +46,10 @@
 	class:w-full={fullWidth}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
-	on:click={onClick}
+	on:click={(e) => {
+		doTrackEvent();
+		if (onClick) onClick(e);
+	}}
 >
 	{#if iconVisible}
 		<IconExternalLink size={iconSize} />

@@ -7,6 +7,9 @@
 
 	export let asMenuItem = false;
 	export let asMenuItemCondensed = false;
+
+	// See comment on onClick property in ExternalLink.svelte
+	export let onClick: undefined | ((e: MouseEvent) => void);
 </script>
 
 <ExternalLink
@@ -16,6 +19,7 @@
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
 	iconVisible={false}
 	styleClass={asMenuItem ? '' : 'font-bold'}
+	bind:onClick
 >
 	<IconHelp />
 	{replaceOisyPlaceholders($i18n.navigation.text.support)}

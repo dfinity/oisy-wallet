@@ -6,6 +6,9 @@
 
 	export let asMenuItem = false;
 	export let asMenuItemCondensed = false;
+
+	// See comment on onClick property in ExternalLink.svelte
+	export let onClick: undefined | ((e: MouseEvent) => void);
 </script>
 
 <ExternalLink
@@ -14,6 +17,7 @@
 	href="https://github.com/dfinity/oisy-wallet/releases"
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	iconVisible={false}
+	bind:onClick
 >
 	<IconChangelog />
 	{replaceOisyPlaceholders($i18n.navigation.text.changelog)}
