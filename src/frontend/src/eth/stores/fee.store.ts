@@ -30,6 +30,7 @@ export interface FeeContext {
 	feeDecimalsStore: Writable<number | undefined>;
 	maxGasFee: Readable<BigNumber | undefined>;
 	minGasFee: Readable<BigNumber | undefined>;
+	feeExchangeRateStore?: Writable<number | undefined>;
 	evaluateFee?: () => void;
 }
 

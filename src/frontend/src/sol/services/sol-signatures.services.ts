@@ -1,10 +1,8 @@
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import { fetchSignatures } from '$sol/api/solana.api';
 import { fetchSolTransactionsForSignature } from '$sol/services/sol-transactions.services';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
-import type { SplTokenAddress } from '$sol/types/spl';
 import { nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
 import { assertIsAddress, address as solAddress } from '@solana/addresses';
@@ -20,10 +18,7 @@ export const getSolTransactions = async ({
 	tokenOwnerAddress,
 	before,
 	limit = Number(WALLET_PAGINATION)
-}: GetSolTransactionsParams & {
-	tokenAddress?: SplTokenAddress;
-	tokenOwnerAddress?: SolAddress;
-}): Promise<SolTransactionUi[]> => {
+}: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
 	if (nonNullish(tokenAddress)) {
 		assertIsAddress(tokenAddress);
 	}
