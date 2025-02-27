@@ -10,6 +10,8 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { slide } from 'svelte/transition';
+	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
@@ -38,7 +40,12 @@
 	disabled={invalid}
 	hideSource
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+	<div slot="amount">
+		<IcSendAmount bind:amount bind:amountError {networkId} />
+		{#if nonNullish(amountError)}
+			<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{amountError.message}</p>
+		{/if}
+	</div>
 
 	<div slot="destination">
 		{#if !simplifiedForm}

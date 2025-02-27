@@ -12,6 +12,8 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
+	import { slide } from 'svelte/transition';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: OptionAmount = undefined;
@@ -43,6 +45,13 @@
 </script>
 
 <SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource>
+	<div slot="amount">
+		<BtcSendAmount bind:amount bind:amountError />
+		{#if nonNullish(amountError)}
+			<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{amountError.message}</p>
+		{/if}
+	</div>
+
 	<BtcSendDestination
 		slot="destination"
 		bind:destination
@@ -50,8 +59,6 @@
 		{networkId}
 		on:icQRCodeScan
 	/>
-
-	<BtcSendAmount slot="amount" bind:amount bind:amountError />
 
 	<!--	TODO: calculate and display transaction fee	-->
 

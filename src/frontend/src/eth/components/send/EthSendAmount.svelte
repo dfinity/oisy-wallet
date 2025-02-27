@@ -15,6 +15,8 @@
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
+	import { slide } from 'svelte/transition';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
@@ -113,3 +115,7 @@
 		{/if}
 	</svelte:fragment>
 </TokenInput>
+
+{#if nonNullish(insufficientFundsError)}
+	<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{insufficientFundsError.message}</p>
+{/if}
