@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
@@ -40,12 +38,7 @@
 	disabled={invalid}
 	hideSource
 >
-	<div slot="amount">
-		<IcSendAmount bind:amount bind:amountError {networkId} />
-		{#if nonNullish(amountError)}
-			<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{amountError.message}</p>
-		{/if}
-	</div>
+	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
 
 	<div slot="destination">
 		{#if !simplifiedForm}

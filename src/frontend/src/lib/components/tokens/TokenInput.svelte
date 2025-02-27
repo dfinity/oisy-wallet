@@ -16,6 +16,8 @@
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import {SLIDE_DURATION} from "$lib/constants/transition.constants";
+	import { slide } from 'svelte/transition';
 
 	export let token: Token | undefined = undefined;
 	export let amount: OptionAmount;
@@ -141,3 +143,7 @@
 		<slot name="balance" />
 	</div>
 </div>
+
+{#if nonNullish(error)}
+	<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{error.message}</p>
+{/if}

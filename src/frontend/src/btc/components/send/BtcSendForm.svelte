@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onMount } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -45,12 +43,7 @@
 </script>
 
 <SendForm on:icNext {source} token={$sendToken} balance={$balance} disabled={invalid} hideSource>
-	<div slot="amount">
-		<BtcSendAmount bind:amount bind:amountError />
-		{#if nonNullish(amountError)}
-			<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{amountError.message}</p>
-		{/if}
-	</div>
+	<BtcSendAmount slot="amount" bind:amount bind:amountError />
 
 	<BtcSendDestination
 		slot="destination"

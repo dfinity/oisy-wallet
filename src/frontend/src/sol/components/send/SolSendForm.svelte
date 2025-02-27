@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { slide } from 'svelte/transition';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -37,12 +35,7 @@
 	disabled={invalid}
 	hideSource
 >
-	<div slot="amount">
-		<SolSendAmount bind:amount bind:amountError />
-		{#if nonNullish(amountError)}
-			<p transition:slide={SLIDE_DURATION} class="pb-2 text-error-primary">{amountError.message}</p>
-		{/if}
-	</div>
+	<SolSendAmount slot="amount" bind:amount bind:amountError />
 
 	<SolSendDestination slot="destination" bind:destination bind:invalidDestination on:icQRCodeScan />
 
