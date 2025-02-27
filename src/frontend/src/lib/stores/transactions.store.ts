@@ -17,6 +17,7 @@ export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>
 	append: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
 	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
 	nullify: (tokenId: TokenId) => void;
+	resetAll: () => void;
 }
 
 export const initTransactionsStore = <
@@ -65,6 +66,7 @@ export const initTransactionsStore = <
 				[tokenId]: null
 			})),
 		reset,
+		resetAll: () => update(() => ({})),
 		subscribe
 	};
 };
