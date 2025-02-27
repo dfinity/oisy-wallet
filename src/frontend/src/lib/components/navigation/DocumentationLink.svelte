@@ -12,7 +12,7 @@
 	export let shortTextOnMobile = false;
 
 	// See comment on onClick property in ExternalLink.svelte
-	export let onClick: undefined | ((e: MouseEvent) => void);
+	export let onClick: undefined | ((e: MouseEvent) => void) = undefined;
 </script>
 
 <ExternalLink

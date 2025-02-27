@@ -20,7 +20,7 @@
 
 	// Has to be passed as prop since we potentially want to additionally execute the doTrackEvent
 	// function. There seems no other way to call the on:click passed to this component manually
-	export let onClick: undefined | ((e: MouseEvent) => void);
+	export let onClick: undefined | ((e: MouseEvent) => void) = undefined;
 
 	const doTrackEvent = async () => {
 		if (!isNullish(trackEvent)) {
