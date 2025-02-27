@@ -385,7 +385,7 @@ abstract class Homepage {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
-		await disableAnimationsAndFocusStyles({ page: this.#page });
+		await disableAnimationsAndFocusStyles(this.#page);
 
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
