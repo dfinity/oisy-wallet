@@ -1,5 +1,6 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as solanaApi from '$sol/api/solana.api';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
 import {
 	fetchSolTransactionsForSignature,
@@ -196,7 +197,11 @@ describe('sol-transactions.services', () => {
 			});
 
 			await expect(
-				fetchSolTransactionsForSignature({ ...mockParams, tokenAddress: mockSplAddress })
+				fetchSolTransactionsForSignature({
+					...mockParams,
+					tokenAddress: mockSplAddress,
+					tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
+				})
 			).resolves.toEqual([]);
 			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
 		});

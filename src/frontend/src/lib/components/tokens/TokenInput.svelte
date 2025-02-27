@@ -25,10 +25,13 @@
 	export let disabled = false;
 	export let placeholder = '0';
 	export let errorType: ConvertAmountErrorType = undefined;
+	// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
+	export let error: Error | undefined = undefined;
 	export let amountSetToMax = false;
 	export let loading = false;
 	export let isSelectable = true;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
+	export let customErrorValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -53,6 +56,7 @@
 		});
 
 		errorType = customValidate(parsedValue);
+		error = customErrorValidate(parsedValue);
 	};
 
 	const debounceValidate = debounce(validate, 300);
@@ -60,15 +64,19 @@
 </script>
 
 <div
-	class="rounded-lg p-5 first:mb-2 border border-solid text-left transition"
-	class:bg-brand-subtle-alt={focused}
-	class:border-brand-subtle-alt={focused}
+	class="rounded-lg border border-solid p-5 text-left transition first:mb-2"
+	class:bg-brand-subtle-10={focused}
+	class:border-brand-subtle-20={focused}
 	class:bg-secondary={!focused}
 	class:border-secondary={!focused}
 >
 	<div class="mb-2 text-sm font-bold"><slot name="title" /></div>
 
-	<TokenInputContainer {focused} styleClass="h-14 text-3xl" error={nonNullish(errorType)}>
+	<TokenInputContainer
+		{focused}
+		styleClass="h-14 text-3xl"
+		error={nonNullish(errorType) || nonNullish(error)}
+	>
 		<div class="flex h-full w-full items-center">
 			{#if token}
 				{#if displayUnit === 'token'}
@@ -100,7 +108,7 @@
 					/>
 				{/if}
 			{:else}
-				<button on:click class="pl-3 text-base h-full w-full"
+				<button on:click class="h-full w-full pl-3 text-base"
 					>{$i18n.tokens.text.select_token}</button
 				>
 			{/if}
@@ -108,13 +116,13 @@
 
 		<div class="h-3/4 w-[1px] bg-disabled" />
 
-		<button class="gap-1 px-3 flex h-full" on:click disabled={!isSelectable}>
+		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
 			{#if token}
 				<TokenLogo data={token} logoSize="xs" />
 				<div class="ml-2 text-sm font-semibold">{token.symbol}</div>
 			{:else}
 				<span
-					class="flex items-center justify-center rounded-full bg-brand-primary text-white"
+					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
 				>
 					<IconPlus />
@@ -127,7 +135,7 @@
 		</button>
 	</TokenInputContainer>
 
-	<div class="mt-2 min-h-6 text-sm flex items-center justify-between">
+	<div class="mt-2 flex min-h-6 items-center justify-between text-sm">
 		<slot name="amount-info" />
 
 		<slot name="balance" />

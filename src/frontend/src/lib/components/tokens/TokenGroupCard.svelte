@@ -27,8 +27,8 @@
 	<MultipleListeners tokens={tokenGroup.tokens}>
 		<TokenCardWithOnClick
 			on:click={() => toggleIsExpanded(!isExpanded)}
-			styleClass="rounded-xl px-3 py-2 hover:bg-white active:bg-white {isExpanded
-				? 'bg-white rounded-b-none'
+			styleClass="px-3 py-2 hover:bg-brand-subtle-10 {isExpanded
+				? 'bg-primary rounded-b-none'
 				: ''}"
 		>
 			<TokenCardContent data={headerData} hideNetworkLogo testIdPrefix={TOKEN_GROUP} />
@@ -36,9 +36,9 @@
 	</MultipleListeners>
 
 	{#if isExpanded}
-		<div class="gap-3 rounded-b-xl pt-2 flex flex-col bg-white/40" transition:slide={SLIDE_PARAMS}>
+		<div class="flex flex-col gap-0 bg-secondary" transition:slide={SLIDE_PARAMS}>
 			{#each tokenGroup.tokens as token (token.id)}
-				<TokenCardWithUrl {token}>
+				<TokenCardWithUrl styleClass="p-3 hover:bg-brand-subtle-10" {token}>
 					<TokenCardContent logoSize="md" data={token} />
 				</TokenCardWithUrl>
 			{/each}

@@ -1,58 +1,38 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
+	import SwapFee from '$lib/components/swap/SwapFee.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {
-		SWAP_AMOUNTS_CONTEXT_KEY,
-		type SwapAmountsContext
-	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
 
-	const { destinationToken, destinationTokenExchangeRate, sourceToken, sourceTokenExchangeRate } =
+	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let liquidityProvidersFee: number;
-	$: liquidityProvidersFee = nonNullish($destinationToken)
-		? formatTokenBigintToNumber({
-				value: $swapAmountsStore?.swapAmounts?.liquidityProvidersFee ?? 0n,
-				displayDecimals: $destinationToken.decimals,
-				unitName: $destinationToken.decimals
-			})
-		: 0;
-
-	let gasFee: number;
-	$: gasFee = nonNullish($destinationToken)
-		? formatTokenBigintToNumber({
-				value: $swapAmountsStore?.swapAmounts?.gasFee ?? 0n,
-				displayDecimals: $destinationToken.decimals,
-				unitName: $destinationToken.decimals
-			})
-		: 0;
-
-	let sourceTokenFee: number;
-	$: sourceTokenFee =
-		nonNullish($sourceToken) && nonNullish($sourceToken.fee)
+	let sourceTokenTransferFee: number;
+	$: sourceTokenTransferFee =
+		nonNullish($sourceToken) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])
 			? formatTokenBigintToNumber({
-					value: $sourceToken.fee,
+					value: $icTokenFeeStore?.[$sourceToken.symbol],
 					displayDecimals: $sourceToken.decimals,
 					unitName: $sourceToken.decimals
 				})
 			: 0;
 
-	let destinationTokenTotalFeeUSD: number;
-	$: destinationTokenTotalFeeUSD = nonNullish($destinationTokenExchangeRate)
-		? (liquidityProvidersFee + gasFee) * $destinationTokenExchangeRate
-		: 0;
+	let sourceTokenApproveFee: number;
+	$: sourceTokenApproveFee = isSourceTokenIcrc2 ? sourceTokenTransferFee : 0;
 
 	let sourceTokenTotalFeeUSD: number;
 	$: sourceTokenTotalFeeUSD = nonNullish($sourceTokenExchangeRate)
-		? sourceTokenFee * $sourceTokenExchangeRate
+		? (sourceTokenTransferFee + sourceTokenApproveFee) * $sourceTokenExchangeRate
 		: 0;
 </script>
 
@@ -62,47 +42,38 @@
 			<svelte:fragment slot="label">{$i18n.swap.text.total_fee}</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
-				{#if destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
+				{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
+					<div class="w-14 sm:w-16">
+						<SkeletonText />
+					</div>
+				{:else if isNullish($sourceTokenExchangeRate)}
+					{sourceTokenTransferFee + sourceTokenApproveFee} {$sourceToken.symbol}
+				{:else if sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
 					{`< ${formatUSD({
 						value: SWAP_TOTAL_FEE_THRESHOLD
 					})}`}
 				{:else}
 					{formatUSD({
-						value: destinationTokenTotalFeeUSD + sourceTokenTotalFeeUSD
+						value: sourceTokenTotalFeeUSD
 					})}
 				{/if}
 			</svelte:fragment>
 		</ModalValue>
 
 		<svelte:fragment slot="list-items">
-			{#if nonNullish(sourceTokenFee)}
-				<ModalValue>
-					<svelte:fragment slot="label">{$i18n.swap.text.token_fee}</svelte:fragment>
-
-					<svelte:fragment slot="main-value">
-						{sourceTokenFee}
-						{$sourceToken.symbol}
-					</svelte:fragment>
-				</ModalValue>
+			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
+				<SwapFee
+					fee={sourceTokenApproveFee}
+					symbol={$sourceToken.symbol}
+					label={$i18n.swap.text.approval_fee}
+				/>
 			{/if}
 
-			<ModalValue>
-				<svelte:fragment slot="label">{$i18n.swap.text.gas_fee}</svelte:fragment>
-
-				<svelte:fragment slot="main-value">
-					{gasFee}
-					{$destinationToken.symbol}
-				</svelte:fragment>
-			</ModalValue>
-
-			<ModalValue>
-				<svelte:fragment slot="label">{$i18n.swap.text.lp_fee}</svelte:fragment>
-
-				<svelte:fragment slot="main-value">
-					{liquidityProvidersFee}
-					{$destinationToken.symbol}
-				</svelte:fragment>
-			</ModalValue>
+			<SwapFee
+				fee={sourceTokenTransferFee}
+				symbol={$sourceToken.symbol}
+				label={$i18n.swap.text.network_fee}
+			/>
 		</svelte:fragment>
 	</ModalExpandableValues>
 {/if}

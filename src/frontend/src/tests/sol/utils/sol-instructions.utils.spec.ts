@@ -2,6 +2,7 @@ import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
+	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
 } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -216,6 +217,89 @@ describe('sol-instructions.utils', () => {
 					value: 0n,
 					from: mockSolAddress,
 					to: mockSolAddress2,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should return undefined for non-mapped instruction', async () => {
+				const result = await mapSolParsedInstruction({
+					instruction: { ...mockTokenInstruction, parsed: { type: 'other-type', info: {} } },
+					network
+				});
+
+				expect(result).toBeUndefined();
+			});
+		});
+
+		describe('with a Token-2022 parsed instruction', () => {
+			const mockTokenAddress: SplTokenAddress = JUP_TOKEN.address;
+
+			const mockTokenInstruction: SolRpcInstruction = {
+				...mockInstruction,
+				programAddress: address(TOKEN_2022_PROGRAM_ADDRESS),
+				parsed: {
+					type: 'transfer',
+					info: {
+						destination: mockSolAddress2,
+						amount: '50',
+						source: mockSolAddress
+					}
+				}
+			};
+
+			beforeEach(() => {
+				const mockRpc = {
+					getAccountInfo: vi.fn((address) => ({
+						send: vi.fn(() => ({
+							value: {
+								data: { parsed: { info: { mint: mockTokenAddress, owner: `${address}-owner` } } }
+							}
+						}))
+					}))
+				} as unknown as Rpc<SolanaRpcApi>;
+
+				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
+			});
+
+			it('should map a valid `transfer` instruction', async () => {
+				const result = await mapSolParsedInstruction({
+					instruction: mockTokenInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 50n,
+					from: `${mockSolAddress}-owner`,
+					to: `${mockSolAddress2}-owner`,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `transferChecked` instruction', async () => {
+				const mockTransferCheckedInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'transferChecked',
+						info: {
+							destination: mockSolAddress2,
+							tokenAmount: {
+								amount: '50'
+							},
+							source: mockSolAddress,
+							mint: mockTokenAddress
+						}
+					}
+				};
+
+				const result = await mapSolParsedInstruction({
+					instruction: mockTransferCheckedInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 50n,
+					from: `${mockSolAddress}-owner`,
+					to: `${mockSolAddress2}-owner`,
 					tokenAddress: mockTokenAddress
 				});
 			});

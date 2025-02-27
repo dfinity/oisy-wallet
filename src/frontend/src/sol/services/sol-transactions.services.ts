@@ -6,7 +6,6 @@ import {
 } from '$env/tokens/tokens.sol.env';
 import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
-import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
@@ -30,12 +29,14 @@ export const fetchSolTransactionsForSignature = async ({
 	signature,
 	network,
 	address,
-	tokenAddress
+	tokenAddress,
+	tokenOwnerAddress
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
 	tokenAddress?: SplTokenAddress;
+	tokenOwnerAddress?: SolAddress;
 }): Promise<SolTransactionUi[]> => {
 	const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
 
@@ -61,13 +62,14 @@ export const fetchSolTransactionsForSignature = async ({
 		...putativeInnerInstructions.flatMap(({ instructions }) => instructions)
 	];
 
-	const [ataAddress] = nonNullish(tokenAddress)
-		? await findAssociatedTokenPda({
-				owner: solAddress(address),
-				tokenProgram: solAddress(TOKEN_PROGRAM_ADDRESS),
-				mint: solAddress(tokenAddress)
-			})
-		: [undefined];
+	const [ataAddress] =
+		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
+			? await findAssociatedTokenPda({
+					owner: solAddress(address),
+					tokenProgram: solAddress(tokenOwnerAddress),
+					mint: solAddress(tokenAddress)
+				})
+			: [undefined];
 
 	// The instructions are received in the order they were executed, meaning the first instruction
 	// in the list was executed first, and the last instruction was executed last.
@@ -136,18 +138,10 @@ export const fetchSolTransactionsForSignature = async ({
 };
 
 export const loadNextSolTransactions = async ({
-	address,
-	network,
-	before,
-	limit,
-	signalEnd
+	signalEnd,
+	...rest
 }: LoadNextSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
-	const transactions = await loadSolTransactions({
-		address,
-		network,
-		before,
-		limit
-	});
+	const transactions = await loadSolTransactions(rest);
 
 	if (transactions.length === 0) {
 		signalEnd();
@@ -165,19 +159,15 @@ const networkToSolTokenIdMap = {
 };
 
 const loadSolTransactions = async ({
-	address,
 	network,
-	before,
-	limit
+	...rest
 }: GetSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	const solTokenIdForNetwork = networkToSolTokenIdMap[network];
 
 	try {
 		const transactions = await getSolTransactions({
-			address,
 			network,
-			before,
-			limit
+			...rest
 		});
 
 		const certifiedTransactions = transactions.map((transaction) => ({

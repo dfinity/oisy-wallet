@@ -25,13 +25,12 @@
 	class:duration-500={loading}
 	class:ease-in-out={loading}
 	class:animate-pulse={loading}
-	class:opacity-40={loading}
 	on:click
 	data-tid={testId}
 	aria-label={ariaLabel}
 >
 	<span
-		class="gap-2 flex"
+		class="flex gap-2"
 		class:transition={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}

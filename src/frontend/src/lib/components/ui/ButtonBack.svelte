@@ -6,6 +6,6 @@
 	export let fullWidth = false;
 </script>
 
-<Button colorStyle="secondary" type="button" {disabled} {fullWidth} on:click>
+<Button colorStyle="secondary-light" type="button" {disabled} {fullWidth} on:click>
 	{$i18n.core.text.back}
 </Button>

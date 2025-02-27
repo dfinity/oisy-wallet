@@ -41,9 +41,10 @@
 
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
-		<div class="mb-3 gap-3 flex flex-col">
+		<div class="mb-3 flex flex-col gap-3">
 			{#each tokens ?? [] as token (token.id)}
 				<div
+					class="overflow-hidden rounded-xl"
 					transition:fade
 					animate:flip={{ duration: 250 }}
 					on:animationstart={handleAnimationStart}
@@ -54,7 +55,7 @@
 						<TokenGroupCard tokenGroup={token} />
 					{:else}
 						<Listener {token}>
-							<TokenCardWithUrl {token}>
+							<TokenCardWithUrl styleClass="rounded-xl px-3 py-2 hover:bg-brand-subtle-10" {token}>
 								<TokenCardContent data={token} />
 							</TokenCardWithUrl>
 						</Listener>
