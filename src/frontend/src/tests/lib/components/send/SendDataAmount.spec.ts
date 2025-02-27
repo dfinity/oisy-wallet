@@ -51,7 +51,7 @@ describe('SendDataAmount', () => {
 		});
 
 		it('should render usd value if amount and exchange rate is given', () => {
-			const exchangeRate: number = 2;
+			const exchangeRate = 2;
 			const { container } = render(SendDataAmount, {
 				props: { amount: 1, token: mockToken, exchangeRate }
 			});
@@ -64,7 +64,7 @@ describe('SendDataAmount', () => {
 		});
 
 		it('should render special usd value if exchange rate is smaller than the threshold', () => {
-			const exchangeRate: number = 0.001;
+			const exchangeRate = 0.001;
 			const { container } = render(SendDataAmount, {
 				props: { amount: 1, token: mockToken, exchangeRate }
 			});
