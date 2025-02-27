@@ -188,7 +188,7 @@ jobs:
 
       - name: Deploy Frontend to Environment
         run: |
-          if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ]; then
+          if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" ]; then
             dfx deploy frontend --network $NETWORK
           fi
 
