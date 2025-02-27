@@ -16,6 +16,8 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
+	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 
 	let tokensRoute: boolean;
 	$: tokensRoute = isRouteTokens($page);
@@ -44,7 +46,7 @@
 </script>
 
 <div
-	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
+	class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
 	class:overflow-hidden={$authNotSignedIn}
 	class:flex={$authSignedIn}
 	class:h-full={$authSignedIn}
@@ -73,6 +75,10 @@
 				<slot />
 			</Loaders>
 		</SplitPane>
+
+		<MobileNavigationMenu>
+			<NavigationMenuMainItems />
+		</MobileNavigationMenu>
 
 		<Modals />
 	</AuthGuard>
