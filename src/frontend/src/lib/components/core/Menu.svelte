@@ -129,59 +129,6 @@
 			<MenuAddresses on:icMenuClick={hidePopover} />
 		{/if}
 
-		{#if !assetsRoute}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.tokens} on:click={goToTokens}>
-				<IconWallet size="20" />
-				{$i18n.navigation.text.tokens}
-			</ButtonMenu>
-		{/if}
-
-		{#if !activityRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_ACTIVITY}
-				ariaLabel={$i18n.navigation.alt.activity}
-				on:click={goToActivity}
-			>
-				<IconActivity size="20" />
-				{$i18n.navigation.text.activity}
-			</ButtonMenu>
-		{/if}
-
-		{#if AIRDROPS_ENABLED && !airdropsRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_AIRDROPS}
-				ariaLabel={$i18n.navigation.alt.airdrops}
-				on:click={goToAirdrops}
-			>
-				<IconGift size="20" />
-				{$i18n.navigation.text.airdrops}
-			</ButtonMenu>
-		{/if}
-
-		{#if !dAppExplorerRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_EXPLORER}
-				ariaLabel={$i18n.navigation.alt.dapp_explorer}
-				on:click={goToDappExplorer}
-			>
-				<IconlyUfo size="20" />
-				{$i18n.navigation.text.dapp_explorer}
-			</ButtonMenu>
-		{/if}
-
-		{#if !settingsRoute}
-			<ButtonMenu
-				testId={NAVIGATION_ITEM_SETTINGS}
-				ariaLabel={$i18n.navigation.alt.more_settings}
-				on:click={gotoSettings}
-			>
-				<IconlySettings size="20" />
-				{$i18n.settings.text.title}
-			</ButtonMenu>
-		{/if}
-
-		<Hr />
-
 		{#if isVip}
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.vip_qr_code}
