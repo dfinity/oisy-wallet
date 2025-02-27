@@ -69,11 +69,17 @@
 			);
 		}
 	};
+
+	/**
+	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
+	 */
+	let amountSetToMax = false;
 </script>
 
 <TokenInput
 	token={$sendToken}
 	bind:amount
+	bind:amountSetToMax
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
 	bind:error={insufficientFundsError}
@@ -98,6 +104,7 @@
 		{#if nonNullish($sendToken)}
 			<MaxBalanceButton
 				bind:amount
+				bind:amountSetToMax
 				error={nonNullish(insufficientFundsError)}
 				balance={$sendBalance}
 				token={$sendToken}
