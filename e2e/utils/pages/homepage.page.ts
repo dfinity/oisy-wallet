@@ -25,12 +25,12 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
+import { disableAnimationsAndFocusStyles } from '../helper/disable-animations';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import {
 	getReceiveTokensModalAddressLabelSelector,
 	getReceiveTokensModalQrCodeButtonSelector
 } from '../selectors.utils';
-import { disableAnimationsAndFocusStyles } from '../helper/disable-animations';
 
 interface HomepageParams {
 	page: Page;

@@ -1,8 +1,8 @@
 import { type Page } from '@playwright/test';
 
 export const disableAnimationsAndFocusStyles = async ({ page }: { page: Page }): Promise<void> => {
-  await page.addStyleTag({
-    content: `
+	await page.addStyleTag({
+		content: `
       *:focus {
         outline: none !important;
       }
@@ -15,6 +15,6 @@ export const disableAnimationsAndFocusStyles = async ({ page }: { page: Page }):
         caret-color: transparent !important;
         transition: none !important;
       }
-    `,
-  });
+    `
+	});
 };
