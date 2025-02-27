@@ -19,6 +19,7 @@
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
 	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	export let token: Token;
 
@@ -52,9 +53,15 @@
 			return;
 		}
 
+		const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
+			? token
+			: { address: undefined, owner: undefined };
+
 		await loadNextSolTransactions({
-			network: network,
-			address: address,
+			network,
+			address,
+			tokenAddress,
+			tokenOwnerAddress,
 			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
