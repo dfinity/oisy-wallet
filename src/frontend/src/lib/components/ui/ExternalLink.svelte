@@ -48,7 +48,9 @@
 	class:nav-item-condensed={asMenuItemCondensed}
 	on:click={(e) => {
 		doTrackEvent();
-		if (onClick) {onClick(e);}
+		if (onClick) {
+			onClick(e);
+		}
 	}}
 >
 	{#if iconVisible}
