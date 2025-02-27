@@ -30,6 +30,7 @@ import {
 	getReceiveTokensModalAddressLabelSelector,
 	getReceiveTokensModalQrCodeButtonSelector
 } from '../selectors.utils';
+import { disableAnimationsAndFocusStyles } from '../helper/disable-animations';
 
 interface HomepageParams {
 	page: Page;
@@ -383,6 +384,8 @@ abstract class Homepage {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
+
+		await disableAnimationsAndFocusStyles({ page: this.#page });
 
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
