@@ -32,14 +32,16 @@
 		})}
 		{symbol}
 
-		<div class="text-tertiary">
-			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
-				{`( < ${formatUSD({
-					value: EXCHANGE_USD_AMOUNT_THRESHOLD
-				})} )`}
-			{:else}
-				{`( ${formatUSD({ value: usdAmount })} )`}
-			{/if}
-		</div>
+		{#if nonNullish(exchangeRate)}
+			<div class="text-tertiary">
+				{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
+					{`( < ${formatUSD({
+						value: EXCHANGE_USD_AMOUNT_THRESHOLD
+					})} )`}
+				{:else}
+					{`( ${formatUSD({ value: usdAmount })} )`}
+				{/if}
+			</div>
+		{/if}
 	</div>
 {/if}
