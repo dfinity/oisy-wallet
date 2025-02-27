@@ -77,7 +77,11 @@ describe('sol-send.services', () => {
 			progress: vi.fn()
 		};
 
-		const mockRpc = {} as unknown as Rpc<SolanaRpcApi>;
+		const mockRpc = {
+			getTokenAccountsByOwner: vi.fn(() => ({
+				send: vi.fn(() => Promise.resolve({ value: [{ pubkey: mockSplAddress }] }))
+			}))
+		} as unknown as Rpc<SolanaRpcApi>;
 		const mockRpcSubscriptions = {} as RpcSubscriptions<SolanaRpcSubscriptionsApi>;
 
 		let spyMapNetworkIdToNetwork: MockInstance;
@@ -142,7 +146,7 @@ describe('sol-send.services', () => {
 
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
 			expect(spyPipe).toHaveBeenCalled();
-			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledOnce();
+			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledTimes(2);
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 		});
 
