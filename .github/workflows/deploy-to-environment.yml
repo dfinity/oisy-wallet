@@ -10,7 +10,6 @@ on:
     workflows: ['Tag on Merge from Release Branch']
     types:
       - completed
-
   workflow_dispatch:
     inputs:
       network:
@@ -41,6 +40,7 @@ on:
 run-name: >-
   ${{ 
     github.event_name == 'push' && 'Deploying Frontend / Backend to Staging'
+    || github.event_name == 'workflow_run' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
     || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
@@ -70,6 +70,7 @@ jobs:
             echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_run" ]; then
             echo "NETWORK=beta" >> $GITHUB_ENV
+            echo "CANISTER=frontend" >> $GITHUB_ENV
           else
             echo "Error: Unsupported event type."
             exit 1
@@ -197,7 +198,7 @@ jobs:
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
-          if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ]; then
+          if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
