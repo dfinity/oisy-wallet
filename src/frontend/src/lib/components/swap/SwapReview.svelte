@@ -31,52 +31,51 @@
 </script>
 
 <ContentWithToolbar>
-		<TokensReview
-			sendAmount={swapAmount}
-			{receiveAmount}
-			sourceToken={$sourceToken}
-			destinationToken={$destinationToken}
-			sourceTokenExchangeRate={$sourceTokenExchangeRate}
-			destinationTokenExchangeRate={$destinationTokenExchangeRate}
-		/>
+	<TokensReview
+		sendAmount={swapAmount}
+		{receiveAmount}
+		sourceToken={$sourceToken}
+		destinationToken={$destinationToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
+		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+	/>
 
-		{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
-			<ModalValue>
-				<svelte:fragment slot="label">{$i18n.swap.text.value_difference}</svelte:fragment>
-
-				<svelte:fragment slot="main-value">
-					<SwapImpact {swapAmount} {receiveAmount} />
-				</svelte:fragment>
-			</ModalValue>
-
-			<SwapProvider />
-			<SwapFees />
-		{/if}
-
+	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 		<ModalValue>
-			<svelte:fragment slot="label">{$i18n.swap.text.max_slippage}</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.swap.text.value_difference}</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
-				{slippageValue}%
+				<SwapImpact {swapAmount} {receiveAmount} />
 			</svelte:fragment>
 		</ModalValue>
 
+		<SwapProvider />
 		<SwapFees />
+	{/if}
 
-		{#if nonNullish($failedSwapError)}
-			<div class="mt-4">
-				<MessageBox>
-					{$failedSwapError}
-				</MessageBox>
-			</div>
-		{/if}
+	<ModalValue>
+		<svelte:fragment slot="label">{$i18n.swap.text.max_slippage}</svelte:fragment>
 
-		<ButtonGroup slot="toolbar">
-			<ButtonBack on:click={() => dispatch('icBack')} />
+		<svelte:fragment slot="main-value">
+			{slippageValue}%
+		</svelte:fragment>
+	</ModalValue>
 
-			<Button on:click={() => dispatch('icSwap')}>
-				{$i18n.swap.text.swap_button}
-			</Button>
-		</ButtonGroup>
-	</div></ContentWithToolbar
->
+	<SwapFees />
+
+	{#if nonNullish($failedSwapError)}
+		<div class="mt-4">
+			<MessageBox>
+				{$failedSwapError}
+			</MessageBox>
+		</div>
+	{/if}
+
+	<ButtonGroup slot="toolbar">
+		<ButtonBack on:click={() => dispatch('icBack')} />
+
+		<Button on:click={() => dispatch('icSwap')}>
+			{$i18n.swap.text.swap_button}
+		</Button>
+	</ButtonGroup>
+</ContentWithToolbar>
