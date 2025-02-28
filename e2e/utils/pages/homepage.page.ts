@@ -356,8 +356,6 @@ abstract class Homepage {
 		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
-		// We want to remove the focus from the button to avoid the focus box to be visible in the screenshot
-		await this.#page.keyboard.press('Escape');
 	}
 
 	getTokenCardLocator({
@@ -385,6 +383,10 @@ abstract class Homepage {
 		}
 
 		await this.#page.focus('body');
+		await this.#page.evaluate(() => {
+			const activeElement = document.activeElement as HTMLElement | null;
+			activeElement?.blur();
+		});
 
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
