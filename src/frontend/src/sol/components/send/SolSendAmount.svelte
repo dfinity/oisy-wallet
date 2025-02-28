@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import {
@@ -28,6 +29,10 @@
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
+
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenNetworkId, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -74,6 +79,7 @@
 <TokenInput
 	token={$sendToken}
 	bind:amount
+	displayUnit={inputUnit}
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
 	bind:error={amountError}
@@ -88,7 +94,7 @@
 					{amount}
 					exchangeRate={$sendTokenExchangeRate}
 					token={$sendToken}
-					disabled
+					bind:displayUnit={exchangeValueUnit}
 				/>
 			</div>
 		{/if}
