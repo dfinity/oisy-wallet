@@ -25,7 +25,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
-import { disableAnimationsAndFocusStyles } from '../helper/disable-animations';
+import { DisableAnimations } from '../helper/disable-animations';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import {
 	getReceiveTokensModalAddressLabelSelector,
@@ -77,6 +77,7 @@ abstract class Homepage {
 	readonly #page: Page;
 	readonly #viewportSize?: ViewportSize;
 	private promotionCarousel?: PromotionCarousel;
+	private disableAnimations?: DisableAnimations;
 
 	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
@@ -376,6 +377,8 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		this.disableAnimations = new DisableAnimations(this.#page);
+		await this.disableAnimations.disableAnimationsAndFocusStyles();
 		if (freezeCarousel) {
 			await this.setCarouselFirstSlide();
 			await this.waitForLoadState();
@@ -384,8 +387,6 @@ abstract class Homepage {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
-
-		await disableAnimationsAndFocusStyles(this.#page);
 
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.

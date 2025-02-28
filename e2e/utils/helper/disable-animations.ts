@@ -1,28 +1,36 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-export async function disableAnimationsAndFocusStyles(page: Page) {
-	await page.evaluate(() => {
-		const activeElement = document.activeElement as HTMLElement;
-		if (activeElement) {
-			activeElement.blur();
-		}
-	});
+export class DisableAnimations {
+	#page: Page;
 
-	await page.addStyleTag({
-		content: `
-      *:focus,
-      *:focus-visible {
-        outline: none !important;
-        box-shadow: none !important;
-        border: none !important;
-      }
-      *,
-      *::before,
-      *::after {
-        animation: none !important;
-        transition: none !important;
-        caret-color: transparent !important;
-      }
-    `
-	});
+	constructor(page: Page) {
+		this.#page = page;
+	}
+
+  public async disableAnimationsAndFocusStyles(): Promise<void> {
+	  await this.#page.evaluate(() => {
+		  const activeElement = document.activeElement as HTMLElement;
+		  if (activeElement) {
+			  activeElement.blur();
+		  }
+	  });
+
+	  await this.#page.addStyleTag({
+		  content: `
+        *:focus,
+        *:focus-visible {
+          outline: none !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          caret-color: transparent !important;
+        }
+      `
+	  });
+  }
 }
