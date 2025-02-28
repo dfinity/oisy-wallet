@@ -6,10 +6,9 @@ use crate::{
     user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
     utils::{
         mock::USER_1,
-        pocketic::{controller, BackendBuilder, PicCanisterTrait},
+        pocketic::{controller, limited_user, BackendBuilder, PicCanisterTrait},
     },
 };
-use crate::utils::pocketic::limited_user;
 
 #[test]
 fn stats_returns_correct_number_of_users() {
@@ -50,7 +49,9 @@ fn stats_endpoint_is_accessible_to_limited_or_allowed_callers_only() {
         "Controller should be able to call stats"
     );
     assert!(
-        pic_setup.query::<Stats>(limited_user(), "stats", ()).is_ok(),
+        pic_setup
+            .query::<Stats>(limited_user(), "stats", ())
+            .is_ok(),
         "Controller should be able to call stats"
     );
     assert!(
