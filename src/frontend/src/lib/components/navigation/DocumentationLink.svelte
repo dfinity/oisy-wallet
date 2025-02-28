@@ -10,9 +10,6 @@
 
 	// We display an alternative "Docs" text instead of "Documentation" to avoid design breaks on small screens
 	export let shortTextOnMobile = false;
-
-	// See comment on onClick property in ExternalLink.svelte
-	export let onClick: undefined | ((e: MouseEvent) => void) = undefined;
 </script>
 
 <ExternalLink
@@ -22,7 +19,6 @@
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.documentation)}
 	iconVisible={false}
 	styleClass={asMenuItem ? '' : 'font-bold'}
-	bind:onClick
 >
 	{#if asMenuItem}
 		<IconBook />

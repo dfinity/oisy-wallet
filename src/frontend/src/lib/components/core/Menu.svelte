@@ -123,7 +123,7 @@
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
-<Popover bind:visible anchor={button} direction="rtl">
+<Popover bind:visible anchor={button} direction="rtl" on:click={hidePopover}>
 	<div class="flex flex-col gap-1" data-tid={NAVIGATION_MENU}>
 		{#if addressesOption}
 			<MenuAddresses on:icMenuClick={hidePopover} />
@@ -195,9 +195,9 @@
 
 		<AboutWhyOisy asMenuItem asMenuItemCondensed on:icOpenAboutModal={hidePopover} />
 
-		<DocumentationLink asMenuItem asMenuItemCondensed onClick={hidePopover} />
+		<DocumentationLink asMenuItem asMenuItemCondensed />
 
-		<SupportLink asMenuItem asMenuItemCondensed onClick={hidePopover} />
+		<SupportLink asMenuItem asMenuItemCondensed />
 
 		<Hr />
 
@@ -207,13 +207,12 @@
 			target="_blank"
 			class="nav-item nav-item-condensed"
 			aria-label={$i18n.navigation.text.source_code_on_github}
-			on:click={hidePopover}
 		>
 			<IconGitHub />
 			{$i18n.navigation.text.source_code}
 		</a>
 
-		<ChangelogLink asMenuItem asMenuItemCondensed onClick={hidePopover} />
+		<ChangelogLink asMenuItem asMenuItemCondensed />
 
 		<Hr />
 
