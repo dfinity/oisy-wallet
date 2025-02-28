@@ -71,8 +71,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 				? await loadSplTokenBalance({
 						address,
 						network,
-						tokenAddress,
-						tokenOwnerAddress
+						tokenAddress
 					})
 				: await loadSolLamportsBalance({ address, network }),
 		certified: false
