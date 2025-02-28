@@ -12,6 +12,7 @@
 
 <ButtonIcon
 	colorStyle="tertiary-alt"
+	testId={`theme-selector-button-${$themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT}`}
 	ariaLabel={$i18n.settings.alt[
 		`appearance_${$themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT}`
 	]}
