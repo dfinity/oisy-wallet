@@ -249,8 +249,7 @@ describe('solana.api', () => {
 			const balance = await loadSplTokenBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
-				tokenAddress: DEVNET_EURC_TOKEN.address,
-				tokenOwnerAddress: DEVNET_EURC_TOKEN.owner
+				tokenAddress: DEVNET_EURC_TOKEN.address
 			});
 
 			expect(balance).toEqual(500000000n);
@@ -263,8 +262,7 @@ describe('solana.api', () => {
 			const balance = await loadSplTokenBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
-				tokenAddress: DEVNET_EURC_TOKEN.address,
-				tokenOwnerAddress: DEVNET_EURC_TOKEN.owner
+				tokenAddress: DEVNET_EURC_TOKEN.address
 			});
 
 			expect(balance).toEqual(0n);
@@ -278,8 +276,7 @@ describe('solana.api', () => {
 			const balance = await loadSplTokenBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
-				tokenAddress: DEVNET_EURC_TOKEN.address,
-				tokenOwnerAddress: DEVNET_EURC_TOKEN.owner
+				tokenAddress: DEVNET_EURC_TOKEN.address
 			});
 
 			expect(balance).toEqual(0n);
@@ -292,8 +289,7 @@ describe('solana.api', () => {
 				loadSplTokenBalance({
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet,
-					tokenAddress: DEVNET_EURC_TOKEN.address,
-					tokenOwnerAddress: DEVNET_EURC_TOKEN.owner
+					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
 			).rejects.toThrow(mockError);
 		});
@@ -303,8 +299,7 @@ describe('solana.api', () => {
 				loadSplTokenBalance({
 					address: '',
 					network: SolanaNetworks.mainnet,
-					tokenAddress: DEVNET_EURC_TOKEN.address,
-					tokenOwnerAddress: DEVNET_EURC_TOKEN.owner
+					tokenAddress: DEVNET_EURC_TOKEN.address
 				})
 			).rejects.toThrow();
 		});
@@ -314,8 +309,7 @@ describe('solana.api', () => {
 				loadSplTokenBalance({
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet,
-					tokenAddress: '',
-					tokenOwnerAddress: DEVNET_EURC_TOKEN.owner
+					tokenAddress: ''
 				})
 			).rejects.toThrow();
 		});
