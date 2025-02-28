@@ -336,9 +336,6 @@ abstract class Homepage {
 		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
-		await this.getLocatorByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN }).evaluate((el) =>
-			el.blur()
-		);
 	}
 
 	async toggleTokenInList({
