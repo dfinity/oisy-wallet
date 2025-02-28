@@ -336,6 +336,7 @@ pub(crate) fn init_arg() -> Arg {
     Arg::Init(InitArg {
         ecdsa_key_name: format!("test_key_1"),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
+        limited_callers: vec![Principal::from_text(LIMITED_USER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {
             ii_canister_id: Principal::from_text(II_CANISTER_ID.to_string())

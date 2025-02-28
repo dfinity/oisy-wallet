@@ -33,6 +33,7 @@ echo "(variant {
   Init = record {
         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
         allowed_callers = vec {};
+        limited_callers = vec {};
         cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
         supported_credentials = opt vec {
           record {
