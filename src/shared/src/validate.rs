@@ -36,7 +36,8 @@ macro_rules! validate_on_deserialize {
 pub(crate) use validate_on_deserialize;
 
 /// To test validation when deserializing, create:
-/// - A `TestVector` struct with an `input` field of the type being tested, a `valid` field and a description.
+/// - A `TestVector` struct with an `input` field of the type being tested, a `valid` field and a
+///   description.
 /// - A `test_vectors` function that returns a `Vec<TestVector>`.
 /// - Run `test_validate_on_deserialize!($type)` to test the validation.
 #[cfg(test)]

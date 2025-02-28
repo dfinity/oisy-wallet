@@ -24,7 +24,7 @@ describe('mapEthTransactionUi', () => {
 
 		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-		expect(result.uiType).toBe('withdraw');
+		expect(result.type).toBe('withdraw');
 	});
 
 	it('should map to "deposit" when the "to" address is in ckMinterInfoAddresses', () => {
@@ -32,7 +32,7 @@ describe('mapEthTransactionUi', () => {
 
 		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-		expect(result.uiType).toBe('deposit');
+		expect(result.type).toBe('deposit');
 	});
 
 	it('should map to "send" when the "from" address matches the $ethAddress', () => {
@@ -42,13 +42,13 @@ describe('mapEthTransactionUi', () => {
 			$ethAddress: '0x1234'
 		});
 
-		expect(result.uiType).toBe('send');
+		expect(result.type).toBe('send');
 	});
 
 	it('should map to "receive" when none of the other conditions match', () => {
 		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-		expect(result.uiType).toBe('receive');
+		expect(result.type).toBe('receive');
 	});
 
 	it('should map to "receive" when it does not match MinterInfoAddresses and $ethAddress is undefined', () => {
@@ -58,7 +58,7 @@ describe('mapEthTransactionUi', () => {
 			$ethAddress: undefined
 		});
 
-		expect(result.uiType).toBe('receive');
+		expect(result.type).toBe('receive');
 	});
 
 	it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are empty', () => {
@@ -66,8 +66,8 @@ describe('mapEthTransactionUi', () => {
 
 		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-		expect(result.uiType).not.toBe('withdraw');
-		expect(result.uiType).not.toBe('deposit');
+		expect(result.type).not.toBe('withdraw');
+		expect(result.type).not.toBe('deposit');
 	});
 
 	it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are undefined', () => {
@@ -79,8 +79,8 @@ describe('mapEthTransactionUi', () => {
 			$ethAddress: undefined
 		});
 
-		expect(result.uiType).not.toBe('withdraw');
-		expect(result.uiType).not.toBe('deposit');
+		expect(result.type).not.toBe('withdraw');
+		expect(result.type).not.toBe('deposit');
 	});
 
 	it('should map an ID to the transaction hash if it exists', () => {
