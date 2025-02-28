@@ -20,6 +20,16 @@ pub fn caller_is_allowed() -> Result<(), String> {
     }
 }
 
+pub fn caller_is_limited_or_allowed() -> Result<(), String> {
+    let caller = caller();
+    if caller_is_allowed().is_ok() || read_config(|s| s.limited_callers.contains(&caller)) {
+        Ok(())
+    } else {
+        Err("Caller is not limited nor allowed.".to_string())
+    }
+}
+
+
 /// User data writes are locked during and after a migration away to another canister.
 pub fn may_write_user_data() -> Result<(), String> {
     caller_is_not_anonymous()?;
