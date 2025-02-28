@@ -380,6 +380,7 @@ abstract class Homepage {
 		}
 
 		await expect(this.#page).toHaveScreenshot({
+			animations: 'disabled',
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
 			// playwright can retry flaky tests in the amount of time set below.
