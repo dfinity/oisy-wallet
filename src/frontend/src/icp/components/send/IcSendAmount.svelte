@@ -30,6 +30,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import type {DisplayUnit} from "$lib/types/swap";
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -40,6 +41,10 @@
 
 	let fee: bigint | undefined;
 	$: fee = ($sendToken as OptionIcToken)?.fee;
+
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
@@ -124,6 +129,7 @@
 <TokenInput
 	token={$sendToken}
 	bind:amount
+	displayUnit={inputUnit}
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
 	bind:error={amountError}
@@ -138,7 +144,7 @@
 					{amount}
 					exchangeRate={$sendTokenExchangeRate}
 					token={$sendToken}
-					disabled
+					bind:displayUnit={exchangeValueUnit}
 				/>
 			</div>
 		{/if}
