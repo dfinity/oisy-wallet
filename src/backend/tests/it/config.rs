@@ -1,7 +1,7 @@
-use crate::utils::pocketic::{controller, init_arg, setup, PicCanisterTrait};
 use candid::Principal;
-use shared::types::user_profile::UserProfile;
-use shared::types::{Arg, Config};
+use shared::types::{user_profile::UserProfile, Arg, Config};
+
+use crate::utils::pocketic::{controller, init_arg, setup, PicCanisterTrait};
 
 #[test]
 fn config_is_available_to_allowed_users_only() {

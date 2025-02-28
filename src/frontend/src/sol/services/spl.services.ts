@@ -1,6 +1,9 @@
-import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import type { CustomToken } from '$declarations/backend/backend.did';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { listCustomTokens, setManyCustomTokens } from '$lib/api/backend.api';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -8,10 +11,11 @@ import type { SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenMetadata } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { getTokenDecimals } from '$sol/api/solana.api';
+import { getTokenDecimals, getTokenOwner } from '$sol/api/solana.api';
 import { splMetadata } from '$sol/rest/quicknode.rest';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
 import {
@@ -23,7 +27,9 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { SplUserToken } from '$sol/types/spl-user-token';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@dfinity/agent';
+import { assertNonNullish, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import { get } from 'svelte/store';
 
 export const loadSplTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -63,44 +69,153 @@ export const loadSplUserTokens = ({ identity }: { identity: OptionIdentity }): P
 		strategy: 'query'
 	});
 
+// This function is a temporary solution: save the user tokens that we were caching in the browser into the backend.
+// This is done to avoid any disruptions to the user experience, as the user tokens are not yet stored in the backend.
+// However, it is acceptable to remove it after a certain amount of time, since we expect that most of the users
+// that consider this part relevant will log in before that time.
+// So, as timeline, we define a period of 1 month, more or less, to remove this function and its usage.
+// That is enough time for the users to log in and have their tokens saved in the backend.
+// The release before this change was v0.22.0, as reference.
+// TODO: remove this function and its usage starting from the 1st of March 2025
+const saveCachedUserTokensToBackend = async ({
+	identity,
+	savedTokens
+}: {
+	identity: Identity;
+	savedTokens: CustomToken[];
+}): Promise<SplTokenAddress[]> => {
+	const savedTokenAddresses = savedTokens.reduce<SplTokenAddress[]>(
+		(acc, { token }) => [
+			...acc,
+			...('SplMainnet' in token ? [token.SplMainnet.token_address] : [])
+		],
+		[]
+	);
+
+	const contractsMap: SplAddressMap = getStorage<SplAddressMap>({ key: SPL_USER_TOKENS_KEY }) ?? {};
+	const principal = identity.getPrincipal().toString();
+	const contracts = nonNullish(principal) ? (contractsMap[principal] ?? []) : [];
+
+	const tokens = [];
+
+	// We are using a for loop instead of a functional approach to avoid the async/await issue due to the limit  of the Quicknode API calls.
+	// This is acceptable since this is just a temporary solution that shall be removed soon.
+	for (const address of contracts.filter((address) => !savedTokenAddresses.includes(address))) {
+		const network = SOLANA_MAINNET_NETWORK;
+		const solNetwork = mapNetworkIdToNetwork(network.id);
+
+		assertNonNullish(
+			solNetwork,
+			replacePlaceholders(get(i18n).init.error.no_solana_network, {
+				$network: network.id.description ?? ''
+			})
+		);
+
+		const metadata = await getSplMetadata({ address, network: solNetwork });
+
+		if (nonNullish(metadata)) {
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+
+			tokens.push({
+				address,
+				enabled: true,
+				...metadata
+			});
+		}
+	}
+
+	await setManyCustomTokens({
+		identity,
+		tokens: tokens.map((token) => toCustomToken({ ...token, networkKey: 'SplMainnet' })),
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	return contracts;
+};
+
+const loadSplCustomTokens = async (params: {
+	identity: OptionIdentity;
+	certified: boolean;
+}): Promise<CustomToken[]> => {
+	const tokens = await listCustomTokens({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	// We filter the custom tokens that are Spl (the backend "Custom Token" potentially supports other types).
+	return tokens.filter(({ token }) => 'SplMainnet' in token || 'SplDevnet' in token);
+};
+
 export const loadUserTokens = async ({
 	identity
 }: {
 	identity: OptionIdentity;
 }): Promise<SplUserToken[]> => {
-	// TODO: use the backend method when we add the SPL tokens to the backend, similar to ERC20
 	const loadUserContracts = async (): Promise<SplUserToken[]> => {
 		if (isNullish(identity)) {
 			await nullishSignOut();
 			return [];
 		}
 
-		const contractsMap: SplAddressMap =
-			getStorage<SplAddressMap>({ key: SPL_USER_TOKENS_KEY }) ?? {};
-		const principal = identity.getPrincipal().toString();
-		const contracts = nonNullish(principal) ? (contractsMap[principal] ?? []) : [];
+		const splCustomTokens = await loadSplCustomTokens({ identity, certified: true });
 
-		const [existingTokens, userTokenAddresses] = contracts.reduce<
-			[SplUserToken[], SplTokenAddress[]]
+		await saveCachedUserTokensToBackend({ identity, savedTokens: splCustomTokens });
+
+		const [existingTokens, nonExistingTokens] = splCustomTokens.reduce<
+			[SplUserToken[], SplUserToken[]]
 		>(
-			([accExisting, accUser], address) => {
-				const existingTokens = SPL_TOKENS.reduce<SplUserToken[]>(
-					(acc, token) =>
-						contracts.includes(token.address) ? [...acc, { ...token, enabled: true }] : acc,
-					[]
+			([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
+				if (!('SplMainnet' in token || 'SplDevnet' in token)) {
+					return [accExisting, accNonExisting];
+				}
+
+				const version = fromNullable(versionNullable);
+
+				const {
+					network: tokenNetwork,
+					symbol,
+					decimals,
+					token_address: tokenAddress
+				} = 'SplDevnet' in token
+					? { ...token.SplDevnet, network: SOLANA_DEVNET_NETWORK }
+					: { ...token.SplMainnet, network: SOLANA_MAINNET_NETWORK };
+
+				const existingToken = SPL_TOKENS.find(
+					({ address, network: { id: networkId } }) =>
+						address === tokenAddress && networkId === tokenNetwork.id
 				);
 
-				return existingTokens.length > 0
-					? [[...accExisting, ...existingTokens], accUser]
-					: [accExisting, [...accUser, address]];
+				if (nonNullish(existingToken)) {
+					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
+				}
+
+				return [
+					accExisting,
+					[
+						...accNonExisting,
+						{
+							id: parseTokenId(`custom-token#${fromNullable(symbol)}#${tokenNetwork.chainId}`),
+							name: tokenAddress,
+							address: tokenAddress,
+							// TODO: save this value to the backend too
+							owner: TOKEN_PROGRAM_ADDRESS,
+							network: tokenNetwork,
+							symbol: fromNullable(symbol) ?? '',
+							decimals: fromNullable(decimals) ?? SOLANA_DEFAULT_DECIMALS,
+							standard: 'spl' as const,
+							category: 'custom' as const,
+							enabled,
+							version
+						}
+					]
+				];
 			},
 			[[], []]
 		);
 
-		const userTokens = await Promise.all(
-			userTokenAddresses.map(async (address) => {
-				// TODO: add checks for the network, when we have the backend
-				const network = SOLANA_MAINNET_NETWORK;
+		const userTokens: SplUserToken[] = await nonExistingTokens.reduce<Promise<SplUserToken[]>>(
+			async (acc, token) => {
+				const { network, address } = token;
 
 				const solNetwork = mapNetworkIdToNetwork(network.id);
 
@@ -111,18 +226,26 @@ export const loadUserTokens = async ({
 					})
 				);
 
+				const owner = await getTokenOwner({ address, network: solNetwork });
+
+				if (isNullish(owner)) {
+					return acc;
+				}
+
 				const metadata = await getSplMetadata({ address, network: solNetwork });
 
-				return {
-					id: parseTokenId(`user-token#${metadata.symbol}#${network.chainId}`),
-					network,
-					address,
-					standard: 'spl' as const,
-					category: 'custom' as const,
-					enabled: true,
-					...metadata
-				};
-			})
+				return nonNullish(metadata)
+					? [
+							...(await acc),
+							{
+								...token,
+								owner,
+								...metadata
+							}
+						]
+					: acc;
+			},
+			Promise.resolve([])
 		);
 
 		return [...existingTokens, ...userTokens];
@@ -147,24 +270,33 @@ export const getSplMetadata = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<TokenMetadata> => {
+}): Promise<TokenMetadata | undefined> => {
 	const decimals = await getTokenDecimals({ address, network });
 
-	const {
-		result: {
-			content: {
-				metadata,
-				links: { image: icon }
-			}
+	try {
+		const metadataResult = await splMetadata({ tokenAddress: address, network });
+
+		if (isNullish(metadataResult)) {
+			return;
 		}
-	} = await splMetadata({ tokenAddress: address });
 
-	const { name, symbol } = metadata;
+		const {
+			result: {
+				content: {
+					metadata: { name, symbol },
+					links: { image: icon }
+				}
+			}
+		} = metadataResult;
 
-	return {
-		decimals,
-		name,
-		symbol,
-		icon
-	};
+		return {
+			decimals,
+			name,
+			symbol,
+			icon
+		};
+	} catch (err: unknown) {
+		// We care only for development purposes.
+		console.warn(`Failed to fetch SPL metadata for token ${address} on ${network} network`, err);
+	}
 };

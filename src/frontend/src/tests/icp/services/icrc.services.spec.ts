@@ -6,7 +6,6 @@ import {
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import * as agent from '$lib/actors/agents.ic';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -19,7 +18,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { fromNullable, nonNullish } from '@dfinity/utils';
@@ -69,8 +67,6 @@ describe('icrc.services', () => {
 
 			// eslint-disable-next-line require-await
 			vi.spyOn(BackendCanister, 'create').mockImplementation(async () => backendCanisterMock);
-
-			vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 
 			icrcCustomTokensStore.resetAll();
 		});
@@ -318,7 +314,6 @@ describe('icrc.services', () => {
 			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 
 			ledgerCanisterMock.balance.mockResolvedValue(balance);
-			vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 		});
 
 		it('should load tokens balances for the provided tokens', async () => {

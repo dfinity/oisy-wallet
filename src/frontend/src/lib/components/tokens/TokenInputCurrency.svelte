@@ -14,8 +14,8 @@
 </script>
 
 <div
-	class={`swap-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
-	class:text-error={error}
+	class={`token-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
+	class:text-error-primary={error}
 	class:animate-pulse={loading}
 >
 	<slot name="prefix"></slot>
@@ -35,7 +35,7 @@
 </div>
 
 <style lang="scss">
-	:global(.swap-input-currency div.input-block) {
+	:global(.token-input-currency div.input-block) {
 		display: block;
 		height: 100%;
 		justify-content: center;
@@ -43,7 +43,7 @@
 		--input-width: 100%;
 	}
 
-	:global(.swap-input-currency div.input-field input[id]) {
+	:global(.token-input-currency div.input-field input[id]) {
 		height: 100%;
 		border: none;
 		border-radius: 0;

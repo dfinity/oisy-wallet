@@ -5,16 +5,18 @@
 	export let button: HTMLButtonElement | undefined = undefined;
 	export let ariaLabel: string;
 	export let opened = false;
+	export let testId: string | undefined = undefined;
 </script>
 
 <button
-	class="min-w-72 justify-between gap-2 rounded-xl border border-tertiary bg-white px-4 py-3 text-left font-medium leading-5 text-black text-inherit hover:border-brand-primary"
+	class="dropdown-button"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
+	data-tid={testId}
 	{disabled}
-	class:opacity-50={disabled}
-	class:border-brand-primary={opened}
+	class:disabled
+	class:opened
 >
 	<slot />
 	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>

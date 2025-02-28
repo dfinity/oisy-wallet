@@ -1,14 +1,17 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import {
 	estimatePriorityFee,
+	fetchSignatures,
 	getSolCreateAccountFee,
-	getSolTransactions,
 	getTokenDecimals,
+	getTokenOwner,
 	loadSolLamportsBalance,
 	loadSplTokenBalance,
 	loadTokenAccount
 } from '$sol/api/solana.api';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import * as solRpcProviders from '$sol/providers/sol-rpc.providers';
 import { SolanaNetworks } from '$sol/types/network';
 import {
@@ -17,12 +20,11 @@ import {
 	mockTokenAccountResponseZeroBalance
 } from '$tests/mocks/sol-balance.mock';
 import {
-	mockSolSignature,
 	mockSolSignatureResponse,
 	mockSolSignatureWithErrorResponse
 } from '$tests/mocks/sol-signatures.mock';
-import { mockSolRpcSendTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
+import { address } from '@solana/addresses';
 import { lamports } from '@solana/rpc-types';
 import { describe, type MockInstance } from 'vitest';
 
@@ -31,7 +33,6 @@ vi.mock('$sol/providers/sol-rpc.providers');
 describe('solana.api', () => {
 	let mockGetBalance: MockInstance;
 	let mockGetSignaturesForAddress: MockInstance;
-	let mockGetTransaction: MockInstance;
 	let mockGetMinimumBalanceForRentExemption: MockInstance;
 	let mockGetRecentPrioritizationFees: MockInstance;
 	let mockGetAccountInfo: MockInstance;
@@ -53,6 +54,7 @@ describe('solana.api', () => {
 	];
 	const mockAccountInfo = {
 		value: {
+			owner: TOKEN_PROGRAM_ADDRESS,
 			data: {
 				parsed: {
 					info: {
@@ -76,10 +78,6 @@ describe('solana.api', () => {
 			send: () => Promise.resolve([mockSolSignatureResponse(), mockSolSignatureResponse()])
 		});
 
-		mockGetTransaction = vi.fn().mockReturnValue({
-			send: () => Promise.resolve(mockSolRpcSendTransaction)
-		});
-
 		mockGetMinimumBalanceForRentExemption = vi.fn().mockReturnValue({
 			send: () => Promise.resolve(lamports(mockCreateAccountFee))
 		});
@@ -95,7 +93,6 @@ describe('solana.api', () => {
 		const mockSolanaHttpRpc = vi.fn().mockReturnValue({
 			getBalance: mockGetBalance,
 			getSignaturesForAddress: mockGetSignaturesForAddress,
-			getTransaction: mockGetTransaction,
 			getMinimumBalanceForRentExemption: mockGetMinimumBalanceForRentExemption,
 			getRecentPrioritizationFees: mockGetRecentPrioritizationFees,
 			getAccountInfo: mockGetAccountInfo
@@ -146,49 +143,7 @@ describe('solana.api', () => {
 		});
 	});
 
-	describe('getSolTransactions', () => {
-		it('should fetch transactions successfully', async () => {
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(transactions).toHaveLength(2);
-			expect(mockGetSignaturesForAddress).toHaveBeenCalledTimes(1);
-			expect(mockGetTransaction).toHaveBeenCalledTimes(2);
-		});
-
-		it('should handle before parameter', async () => {
-			const signature = mockSolSignature();
-			await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				before: signature
-			});
-
-			expect(mockGetSignaturesForAddress).toHaveBeenCalledWith(
-				expect.anything(),
-				expect.objectContaining({
-					before: signature
-				})
-			);
-		});
-
-		it('should handle limit parameter', async () => {
-			await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				limit: 5
-			});
-
-			expect(mockGetSignaturesForAddress).toHaveBeenCalledWith(
-				expect.anything(),
-				expect.objectContaining({
-					limit: 5
-				})
-			);
-		});
-
+	describe('fetchSignatures', () => {
 		it('should fetch transactions in multiple batches until limit is reached', async () => {
 			const lastSignatureFromFirstBatch = mockSolSignatureResponse();
 
@@ -207,8 +162,8 @@ describe('solana.api', () => {
 					send: () => Promise.resolve([mockSolSignatureResponse(), mockSolSignatureResponse()])
 				});
 
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
+			const transactions = await fetchSignatures({
+				wallet: address(mockSolAddress),
 				network: SolanaNetworks.mainnet,
 				limit: 5
 			});
@@ -224,27 +179,6 @@ describe('solana.api', () => {
 			);
 		});
 
-		it('should not return transactions that do not change SOL balance', async () => {
-			mockGetTransaction.mockReturnValue({
-				send: () =>
-					Promise.resolve({
-						...mockSolRpcSendTransaction,
-						meta: {
-							...mockSolRpcSendTransaction.meta,
-							postBalances: mockSolRpcSendTransaction.meta?.postBalances,
-							preBalances: mockSolRpcSendTransaction.meta?.postBalances
-						}
-					})
-			});
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet,
-				limit: 5
-			});
-
-			expect(transactions).toHaveLength(0);
-		});
-
 		it('should stop fetching when no more signatures are available', async () => {
 			mockGetSignaturesForAddress
 				.mockReturnValueOnce({
@@ -255,8 +189,8 @@ describe('solana.api', () => {
 					send: () => Promise.resolve([])
 				});
 
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
+			const transactions = await fetchSignatures({
+				wallet: address(mockSolAddress),
 				network: SolanaNetworks.mainnet,
 				limit: 5
 			});
@@ -270,13 +204,13 @@ describe('solana.api', () => {
 				send: () => Promise.resolve([])
 			});
 
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet
+			const transactions = await fetchSignatures({
+				wallet: address(mockSolAddress),
+				network: SolanaNetworks.mainnet,
+				limit: Number(WALLET_PAGINATION)
 			});
 
 			expect(transactions).toHaveLength(0);
-			expect(mockGetTransaction).not.toHaveBeenCalled();
 		});
 
 		it('should filter out signatures with errors', async () => {
@@ -285,42 +219,13 @@ describe('solana.api', () => {
 					Promise.resolve([mockSolSignatureResponse(), mockSolSignatureWithErrorResponse()])
 			});
 
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet
+			const transactions = await fetchSignatures({
+				wallet: address(mockSolAddress),
+				network: SolanaNetworks.mainnet,
+				limit: Number(WALLET_PAGINATION)
 			});
 
 			expect(transactions).toHaveLength(1);
-			expect(mockGetTransaction).toHaveBeenCalledTimes(1);
-		});
-
-		it('should handle null transaction responses', async () => {
-			mockGetSignaturesForAddress.mockReturnValue({
-				send: () => Promise.resolve([mockSolSignatureResponse()])
-			});
-			mockGetTransaction.mockReturnValue({
-				send: () => Promise.resolve(null)
-			});
-
-			const transactions = await getSolTransactions({
-				address: mockSolAddress,
-				network: SolanaNetworks.mainnet
-			});
-
-			expect(transactions).toHaveLength(0);
-		});
-
-		it('should handle RPC errors gracefully', async () => {
-			mockGetSignaturesForAddress.mockReturnValue({
-				send: () => Promise.reject(mockError)
-			});
-
-			await expect(
-				getSolTransactions({
-					address: mockSolAddress,
-					network: SolanaNetworks.mainnet
-				})
-			).rejects.toThrow(mockError);
 		});
 	});
 
@@ -629,6 +534,42 @@ describe('solana.api', () => {
 			});
 
 			expect(decimals).toEqual(0);
+		});
+	});
+
+	describe('getTokenOwner', () => {
+		it('should get token owner successfully', async () => {
+			const owner = await getTokenOwner({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(owner).toEqual(TOKEN_PROGRAM_ADDRESS);
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			await expect(
+				getTokenOwner({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				})
+			).rejects.toThrow(mockError);
+		});
+
+		it('should return undefined when owner is not found', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({})
+			});
+
+			const owner = await getTokenOwner({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(owner).toBeUndefined();
 		});
 	});
 });

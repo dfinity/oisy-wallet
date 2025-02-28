@@ -73,9 +73,6 @@
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose === 'send';
 
-	let simplifiedForm = false;
-	$: simplifiedForm = sendPurpose === 'convert-eth-to-cketh';
-
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
 		to: destination,
@@ -240,6 +237,8 @@
 
 <FeeContext
 	bind:this={feeContext}
+	sendToken={$sendToken}
+	sendTokenId={$sendTokenId}
 	{amount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
@@ -273,7 +272,6 @@
 			{nativeEthereumToken}
 			{destinationEditable}
 			{sourceNetwork}
-			{simplifiedForm}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}

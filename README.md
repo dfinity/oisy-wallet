@@ -1,6 +1,6 @@
 <div style="display:flex;flex-direction:column;">
   <a href="https://oisy.com/">
-    <img src="./src/frontend/static/images/meta-share-v2.jpg" alt="OISY Wallet logo" role="presentation"/>
+    <img src="./src/frontend/static/images/meta-share-v3.jpg" alt="OISY Wallet logo" role="presentation"/>
   </a>
 
 <br/>
@@ -54,7 +54,6 @@ To file a request to have your dApp listed in the dApps explorer of OISY Wallet,
 
 ## Status
 
-Please note that this is a **beta version** of OISY Wallet which is still undergoing final testing before its official release.
 The platform, its software and all content found on it are provided on an “as is” and “as available” basis.
 OISY Wallet does not give any warranties, whether express or implied, as to the suitability or usability of the application, its software or any of its content.
 

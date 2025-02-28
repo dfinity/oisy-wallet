@@ -50,22 +50,22 @@
 	<span class="text-sm text-tertiary">{$i18n.swap.text.max_slippage}</span>
 
 	<button
-		class="ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold hover:bg-brand-subtle-alt"
+		class="ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold hover:bg-brand-subtle-30"
 		aria-label={$i18n.swap.text.max_slippage}
 		on:click={extendedToggleContent}
-		class:bg-brand-subtle={!slippageValueError && !slippageValueWarning}
-		class:hover:bg-brand-subtle-alt={!slippageValueError && !slippageValueWarning}
+		class:bg-brand-subtle-20={!slippageValueError && !slippageValueWarning}
+		class:hover:bg-brand-subtle-30={!slippageValueError && !slippageValueWarning}
 		class:text-brand-primary={!slippageValueError && !slippageValueWarning}
-		class:bg-warning-subtle={slippageValueWarning}
-		class:hover:bg-warning-subtle-alt={slippageValueWarning}
-		class:text-warning={slippageValueWarning}
-		class:bg-error-subtle={slippageValueError}
-		class:hover:bg-error-subtle-alt={slippageValueError}
-		class:text-error={slippageValueError}
+		class:bg-warning-subtle-10={slippageValueWarning}
+		class:hover:bg-warning-subtle-30={slippageValueWarning}
+		class:text-warning-primary={slippageValueWarning}
+		class:bg-error-subtle-10={slippageValueError}
+		class:hover:bg-error-subtle-30={slippageValueError}
+		class:text-error-primary={slippageValueError}
 	>
 		<span>{parsedValue}%</span>
 
-		<span class="text-black transition" class:rotate-180={expanded}>
+		<span class="text-primary transition" class:rotate-180={expanded}>
 			<IconExpandMore size="16" />
 		</span>
 	</button>
@@ -89,7 +89,7 @@
 		{#each SWAP_SLIPPAGE_PRESET_VALUES as presetValue}
 			<Button
 				on:click={() => onPresetValueClick(presetValue)}
-				colorStyle="secondary"
+				colorStyle="secondary-light"
 				styleClass={`${nonNullish(slippageValue) && presetValue === Number(slippageValue) ? 'border border-brand-primary' : ''} min-w-16 ml-3 h-12 flex-initial`}
 				paddingSmall={true}
 			>
@@ -101,8 +101,8 @@
 	<div
 		class="mt-2 text-sm text-tertiary"
 		class:text-tertiary={!slippageValueError && !slippageValueWarning}
-		class:text-warning={slippageValueWarning}
-		class:text-error={slippageValueError}
+		class:text-warning-primary={slippageValueWarning}
+		class:text-error-primary={slippageValueError}
 	>
 		{#if slippageValueError}
 			<div in:fade>{$i18n.swap.text.max_slippage_error}</div>
