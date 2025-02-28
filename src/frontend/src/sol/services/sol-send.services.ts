@@ -16,6 +16,7 @@ import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -157,20 +158,25 @@ const createSplTokenTransactionMessage = async ({
 		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
 	);
 
-	const destinationTokenAccountAddress = await loadTokenAccount({
-		address: destination,
-		network,
-		tokenAddress
-	});
+	const destinationIsAtaAddress = await isAtaAddress({ address: destination, network });
+
+	const destinationTokenAccountAddress = destinationIsAtaAddress
+		? destination
+		: await loadTokenAccount({
+				address: destination,
+				network,
+				tokenAddress
+			});
 
 	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
-	const calculatedDestinationTokenAccountAddress: SolAddress =
-		await calculateAssociatedTokenAddress({
-			owner: destination,
-			tokenAddress,
-			tokenOwnerAddress
-		});
+	const calculatedDestinationTokenAccountAddress: SolAddress = destinationIsAtaAddress
+		? destination
+		: await calculateAssociatedTokenAddress({
+				owner: destination,
+				tokenAddress,
+				tokenOwnerAddress
+			});
 
 	const ataInstruction = await createAtaInstruction({
 		signer,
@@ -182,9 +188,11 @@ const createSplTokenTransactionMessage = async ({
 		{
 			source: solAddress(sourceTokenAccountAddress),
 			destination: solAddress(
-				mustCreateDestinationTokenAccount
-					? calculatedDestinationTokenAccountAddress
-					: destinationTokenAccountAddress
+				destinationIsAtaAddress
+					? destination
+					: mustCreateDestinationTokenAccount
+						? calculatedDestinationTokenAccountAddress
+						: destinationTokenAccountAddress
 			),
 			authority: signer,
 			amount: amount.toBigInt()
