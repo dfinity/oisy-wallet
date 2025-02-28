@@ -1,3 +1,4 @@
+import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
@@ -24,6 +25,16 @@ export const ManageTokensCases: ManageTokensConfig[] = [
 		type: 'SepoliaERC20',
 		tokenSymbol: 'USDC',
 		networkSymbol: 'SepoliaETH'
+	},
+	{
+		type: 'SPL',
+		tokenSymbol: 'EURC',
+		networkSymbol: 'SOL'
+	},
+	{
+		type: 'DevnetSPL',
+		tokenSymbol: 'DevnetUSDC',
+		networkSymbol: 'SOL (Devnet)'
 	}
 ];
 
@@ -51,9 +62,10 @@ export class ManageTokensPage extends HomepageLoggedIn {
 			})
 		).toBeVisible();
 		await this.waitForLoadState();
-		await this.setCarouselFirstSlide();
-		await this.waitForLoadState();
-		await this.takeScreenshot();
+		await this.takeScreenshot({
+			freezeCarousel: true,
+			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
+		});
 		await this.toggleTokenInList({
 			tokenSymbol,
 			networkSymbol
