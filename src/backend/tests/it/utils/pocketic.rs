@@ -305,7 +305,9 @@ impl PicBackend {
             backend_wasm_path
         ));
 
-        let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
+        let mut modified_arg = init_arg();
+        modified_arg.limited_callers = vec![];
+        let arg = encoded_arg.unwrap_or(encode_one(&modified_arg).unwrap());
 
         // Upgrades burn a lot of cycles.
         // If too many cycles are burnt in a short time, the canister will be throttled, so we
