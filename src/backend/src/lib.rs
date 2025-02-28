@@ -49,7 +49,9 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
-    guards::{caller_is_allowed, caller_is_limited_or_allowed, may_read_user_data, may_write_user_data},
+    guards::{
+        caller_is_allowed, caller_is_limited_or_allowed, may_read_user_data, may_write_user_data,
+    },
     token::{add_to_user_token, remove_from_user_token},
     user_profile::add_hidden_dapp_id,
 };
