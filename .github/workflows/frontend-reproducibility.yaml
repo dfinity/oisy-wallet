@@ -1,6 +1,10 @@
 name: Frontend Reproducibility
 
 on:
+  pull_request:
+    paths:
+      - package-lock.json
+  merge_group:
   release:
     types: [released]
   workflow_dispatch:
