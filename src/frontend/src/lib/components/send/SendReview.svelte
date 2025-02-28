@@ -18,12 +18,20 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
 	{#if nonNullish($sendToken)}
-		<SendData {amount} {destination} token={$sendToken} balance={$sendBalance} {source}>
+		<SendData
+			{amount}
+			{destination}
+			token={$sendToken}
+			balance={$sendBalance}
+			exchangeRate={$sendTokenExchangeRate}
+			{source}
+		>
 			<slot name="fee" slot="fee" />
 
 			<slot name="network" slot="network" />
