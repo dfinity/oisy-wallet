@@ -384,8 +384,10 @@ abstract class Homepage {
 			const activeElement = document.activeElement as HTMLElement | null;
 			activeElement?.blur();
 		});
+		await this.#page.mouse.move(0, 0);
 
 		await expect(this.#page).toHaveScreenshot({
+			animations: 'disabled',
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
 			// playwright can retry flaky tests in the amount of time set below.
