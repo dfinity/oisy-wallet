@@ -48,4 +48,4 @@ jobs:
         with:
           add: package-lock.json
           default_author: github_actions
-          message: '🤖 update package-lock.json'
+          message: '🤖 Update package-lock.json'
