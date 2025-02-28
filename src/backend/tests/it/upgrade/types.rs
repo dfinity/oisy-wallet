@@ -30,6 +30,7 @@ pub struct AddUserTokenAfterUpgradeOptions {
 pub struct InitArgV0_0_25 {
     pub ecdsa_key_name: String,
     pub allowed_callers: Vec<Principal>,
+    pub limited_callers: Vec<Principal>,
 }
 
 #[derive(CandidType, Deserialize)]
