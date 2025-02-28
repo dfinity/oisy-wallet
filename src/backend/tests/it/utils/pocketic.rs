@@ -14,12 +14,12 @@ pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
 use shared::types::{
     user_profile::{OisyUser, UserProfile},
-    Arg, CredentialType, InitArg, SupportedCredential,
+    Arg, ArgUpdate, CredentialType, InitArg, InitArgUpdate, SupportedCredential,
 };
 
 use super::mock::{
-    CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, SIGNER_CANISTER_ID,
-    VC_DERIVATION_ORIGIN,
+    CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, LIMITED_USER,
+    SIGNER_CANISTER_ID, VC_DERIVATION_ORIGIN,
 };
 use crate::utils::mock::CALLER;
 
@@ -277,6 +277,12 @@ pub fn controller() -> Principal {
         .expect("Test setup error: Failed to parse controller principal")
 }
 
+#[inline]
+pub fn limited_user() -> Principal {
+    Principal::from_text(LIMITED_USER)
+        .expect("Test setup error: Failed to parse limited user principal")
+}
+
 pub fn setup() -> PicBackend {
     BackendBuilder::default().deploy()
 }
@@ -299,7 +305,7 @@ impl PicBackend {
             backend_wasm_path
         ));
 
-        let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
+        let arg = encoded_arg.unwrap_or(encode_one(&init_arg_update()).unwrap());
 
         // Upgrades burn a lot of cycles.
         // If too many cycles are burnt in a short time, the canister will be throttled, so we
@@ -330,6 +336,7 @@ pub(crate) fn init_arg() -> Arg {
     Arg::Init(InitArg {
         ecdsa_key_name: format!("test_key_1"),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
+        limited_callers: vec![Principal::from_text(LIMITED_USER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {
             ii_canister_id: Principal::from_text(II_CANISTER_ID.to_string())
@@ -346,6 +353,22 @@ pub(crate) fn init_arg() -> Arg {
         ),
         derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
     })
+}
+
+pub(crate) fn init_arg_update() -> ArgUpdate {
+    if let Arg::Init(original) = init_arg() {
+        ArgUpdate::Init(InitArgUpdate {
+            ecdsa_key_name: original.ecdsa_key_name,
+            allowed_callers: original.allowed_callers,
+            ic_root_key_der: original.ic_root_key_der,
+            supported_credentials: original.supported_credentials,
+            api: original.api,
+            cfs_canister_id: original.cfs_canister_id,
+            derivation_origin: original.derivation_origin,
+        })
+    } else {
+        panic!("Unexpected Arg variant");
+    }
 }
 
 /// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed
