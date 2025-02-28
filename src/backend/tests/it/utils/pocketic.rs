@@ -12,7 +12,10 @@ use candid::{encode_one, CandidType, Principal};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
-use shared::types::{user_profile::{OisyUser, UserProfile}, Arg, ArgUpdate, CredentialType, InitArg, InitArgUpdate, SupportedCredential};
+use shared::types::{
+    user_profile::{OisyUser, UserProfile},
+    Arg, ArgUpdate, CredentialType, InitArg, InitArgUpdate, SupportedCredential,
+};
 
 use super::mock::{
     CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, LIMITED_USER,
