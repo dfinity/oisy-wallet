@@ -12,10 +12,7 @@ use candid::{encode_one, CandidType, Principal};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
-use shared::types::{
-    user_profile::{OisyUser, UserProfile},
-    Arg, CredentialType, InitArg, SupportedCredential,
-};
+use shared::types::{user_profile::{OisyUser, UserProfile}, Arg, ArgWithoutLimitedCallers, CredentialType, InitArg, InitArgWithoutLimitedCallers, SupportedCredential};
 
 use super::mock::{
     CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, LIMITED_USER,
@@ -305,9 +302,7 @@ impl PicBackend {
             backend_wasm_path
         ));
 
-        let mut modified_arg = init_arg();
-        modified_arg.limited_callers = vec![];
-        let arg = encoded_arg.unwrap_or(encode_one(&modified_arg).unwrap());
+        let arg = encoded_arg.unwrap_or(encode_one(&init_arg_without_limited_callers()).unwrap());
 
         // Upgrades burn a lot of cycles.
         // If too many cycles are burnt in a short time, the canister will be throttled, so we
@@ -355,6 +350,22 @@ pub(crate) fn init_arg() -> Arg {
         ),
         derivation_origin: Some(VC_DERIVATION_ORIGIN.to_string()),
     })
+}
+
+pub(crate) fn init_arg_without_limited_callers() -> ArgWithoutLimitedCallers {
+    if let Arg::Init(original) = init_arg() {
+        ArgWithoutLimitedCallers::Init(InitArgWithoutLimitedCallers {
+            ecdsa_key_name: original.ecdsa_key_name,
+            allowed_callers: original.allowed_callers,
+            ic_root_key_der: original.ic_root_key_der,
+            supported_credentials: original.supported_credentials,
+            api: original.api,
+            cfs_canister_id: original.cfs_canister_id,
+            derivation_origin: original.derivation_origin,
+        })
+    } else {
+        panic!("Unexpected Arg variant");
+    }
 }
 
 /// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed
