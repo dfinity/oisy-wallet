@@ -43,7 +43,7 @@ pub struct InitArg {
 }
 
 #[derive(CandidType, Deserialize)]
-pub struct InitArgWithoutLimitedCallers {
+pub struct InitArgUpdate {
     pub ecdsa_key_name: String,
     pub allowed_callers: Vec<Principal>,
     pub supported_credentials: Option<Vec<SupportedCredential>>,
@@ -91,8 +91,8 @@ pub enum Arg {
 }
 
 #[derive(CandidType, Deserialize)]
-pub enum ArgWithoutLimitedCallers {
-    Init(InitArgWithoutLimitedCallers),
+pub enum ArgUpdate {
+    Init(InitArgUpdate),
     Upgrade,
 }
 

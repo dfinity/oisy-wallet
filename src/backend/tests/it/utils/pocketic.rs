@@ -14,7 +14,7 @@ pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
 use shared::types::{
     user_profile::{OisyUser, UserProfile},
-    Arg, ArgWithoutLimitedCallers, CredentialType, InitArg, InitArgWithoutLimitedCallers,
+    Arg, CredentialType, InitArg,
     SupportedCredential,
 };
 
@@ -306,7 +306,7 @@ impl PicBackend {
             backend_wasm_path
         ));
 
-        let arg = encoded_arg.unwrap_or(encode_one(&init_arg_without_limited_callers()).unwrap());
+        let arg = encoded_arg.unwrap_or(encode_one(&init_arg_update()).unwrap());
 
         // Upgrades burn a lot of cycles.
         // If too many cycles are burnt in a short time, the canister will be throttled, so we
@@ -356,9 +356,9 @@ pub(crate) fn init_arg() -> Arg {
     })
 }
 
-pub(crate) fn init_arg_without_limited_callers() -> ArgWithoutLimitedCallers {
+pub(crate) fn init_arg_update() -> ArgUpdate {
     if let Arg::Init(original) = init_arg() {
-        ArgWithoutLimitedCallers::Init(InitArgWithoutLimitedCallers {
+        ArgUpdate::Init(InitArgUpdate {
             ecdsa_key_name: original.ecdsa_key_name,
             allowed_callers: original.allowed_callers,
             ic_root_key_der: original.ic_root_key_der,
