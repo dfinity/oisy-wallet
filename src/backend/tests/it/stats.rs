@@ -49,7 +49,9 @@ fn stats_endpoint_is_accessible_to_limited_or_allowed_callers_only() {
         "Controller should be able to call stats"
     );
     assert!(
-        pic_setup.query::<Stats>(limited_user(), "stats", ()).is_ok(),
+        pic_setup
+            .query::<Stats>(limited_user(), "stats", ())
+            .is_ok(),
         "Limited user should be able to call stats"
     );
     assert!(
