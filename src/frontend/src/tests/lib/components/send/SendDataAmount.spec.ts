@@ -25,7 +25,7 @@ describe('SendDataAmount', () => {
 			const renderedElement = container.querySelector(`#amount`);
 			assertNonNullish(renderedElement, 'Element not found');
 
-			expect(renderedElement.textContent).toBe(`0 ${mockToken.symbol}`);
+			expect(renderedElement.textContent).toContain(`0 ${mockToken.symbol}`);
 		});
 
 		it('should render the correct amount when provided as number', () => {
@@ -36,7 +36,7 @@ describe('SendDataAmount', () => {
 			const renderedElement = container.querySelector(`#amount`);
 			assertNonNullish(renderedElement, 'Element not found');
 
-			expect(renderedElement.textContent).toBe(`1234.56789 ${mockToken.symbol}`);
+			expect(renderedElement.textContent).toContain(`1234.56789 ${mockToken.symbol}`);
 		});
 
 		it('should render the correct amount when provided as string', () => {
@@ -47,7 +47,33 @@ describe('SendDataAmount', () => {
 			const renderedElement = container.querySelector(`#amount`);
 			assertNonNullish(renderedElement, 'Element not found');
 
-			expect(renderedElement.textContent).toBe(`1234.56789 ${mockToken.symbol}`);
+			expect(renderedElement.textContent).toContain(`1234.56789 ${mockToken.symbol}`);
+		});
+
+		it('should render usd value if amount and exchange rate is given', () => {
+			const exchangeRate = 2;
+			const { container } = render(SendDataAmount, {
+				props: { amount: 1, token: mockToken, exchangeRate }
+			});
+
+			const renderedElement = container.querySelector(`#amount`);
+			assertNonNullish(renderedElement, 'Element not found');
+
+			expect(renderedElement.textContent).toContain(`1 ${mockToken.symbol}`);
+			expect(renderedElement.textContent).toContain(`( $${exchangeRate}.00 )`);
+		});
+
+		it('should render special usd value if exchange rate is smaller than the threshold', () => {
+			const exchangeRate = 0.001;
+			const { container } = render(SendDataAmount, {
+				props: { amount: 1, token: mockToken, exchangeRate }
+			});
+
+			const renderedElement = container.querySelector(`#amount`);
+			assertNonNullish(renderedElement, 'Element not found');
+
+			expect(renderedElement.textContent).toContain(`1 ${mockToken.symbol}`);
+			expect(renderedElement.textContent).toContain(`( < $0.01 )`);
 		});
 	});
 });
