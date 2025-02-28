@@ -163,8 +163,6 @@ const createSplTokenTransactionMessage = async ({
 		tokenAddress
 	});
 
-	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
-
 	const calculatedDestinationTokenAccountAddress: SolAddress =
 		await calculateAssociatedTokenAddress({
 			owner: destination,
@@ -184,6 +182,8 @@ const createSplTokenTransactionMessage = async ({
 		destination,
 		tokenAddress
 	});
+
+	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
 	const transferInstruction = getTransferInstruction(
 		{
