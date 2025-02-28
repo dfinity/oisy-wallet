@@ -29,7 +29,6 @@ pub fn caller_is_limited_or_allowed() -> Result<(), String> {
     }
 }
 
-
 /// User data writes are locked during and after a migration away to another canister.
 pub fn may_write_user_data() -> Result<(), String> {
     caller_is_not_anonymous()?;
