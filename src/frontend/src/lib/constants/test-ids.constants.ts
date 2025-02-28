@@ -101,8 +101,8 @@ export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
 
 export const THEME_SELECTOR_CARD = 'theme-selector-card';
-export const THEME_SELECTOR_BUTTON_DARK = 'theme-selector-button-dark'
-export const THEME_SELECTOR_BUTTON_LIGHT = 'theme-selector-button-light'
+export const THEME_SELECTOR_BUTTON_DARK = 'theme-selector-button-dark';
+export const THEME_SELECTOR_BUTTON_LIGHT = 'theme-selector-button-light';
 
 export const AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-airdrop-campaigns-container';
 export const AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-airdrop-campaigns-container';
