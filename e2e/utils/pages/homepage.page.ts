@@ -384,6 +384,8 @@ abstract class Homepage {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
+		await this.#page.focus('body');
+
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
