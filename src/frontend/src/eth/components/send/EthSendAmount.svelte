@@ -13,9 +13,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import type {DisplayUnit} from "$lib/types/swap";
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
