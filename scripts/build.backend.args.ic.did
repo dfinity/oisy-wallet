@@ -1,7 +1,7 @@
 (variant {
     Init = record {
          ecdsa_key_name = "key_1";
-         allowed_callers = vec{ principal "nynz6-haaaa-aaaan-qzqda-cai"; principal "bzhxb-2565m-do3pw-yqhb3-jon2m-phepr-lccqh-zv7qq-q52q2-ognw4-yqe"; };
+         allowed_callers = vec{ principal "nynz6-haaaa-aaaan-qzqda-cai" };
          cfs_canister_id = opt principal "grghe-syaaa-aaaar-qabyq-cai";
          derivation_origin = opt "https://oisy.com";
          supported_credentials = opt vec {
