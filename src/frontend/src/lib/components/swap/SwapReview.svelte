@@ -30,7 +30,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="mx-6">
+	<div>
 		<TokensReview
 			sendAmount={swapAmount}
 			{receiveAmount}
