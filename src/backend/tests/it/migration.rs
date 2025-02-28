@@ -2,15 +2,16 @@
 
 use std::sync::Arc;
 
-use crate::{
-    user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
-    utils::pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait},
-};
 use candid::Principal;
 use pocket_ic::PocketIcBuilder;
 use shared::types::{
     custom_token::{CustomToken, IcrcToken, Token},
     ApiEnabled, Guards, MigrationProgress, MigrationReport, Stats,
+};
+
+use crate::{
+    user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
+    utils::pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 
 struct MigrationTestEnv {
@@ -104,16 +105,19 @@ impl MigrationTestEnv {
             .query::<Option<MigrationReport>>(controller(), "migration", ())
             .expect("Failed to get migration report")
     }
+
     /// Steps the migration.
     fn step_migration(&self) {
         self.old_backend
             .update::<()>(controller(), "step_migration", ())
             .expect("Failed to stop migration timer")
     }
+
     /// Verifies that the migration is in an expected state.
     fn assert_migration_is(&self, expected: Option<MigrationReport>) {
         assert_eq!(self.migration_state(), expected,);
     }
+
     /// Verifies that migration progress is as expected.
     fn assert_migration_progress_is(&self, expected: MigrationProgress) {
         assert_eq!(
@@ -125,6 +129,7 @@ impl MigrationTestEnv {
             expected,
         );
     }
+
     /// Verifies that old and new canister locks are as expected.
     fn assert_canister_locks_are(&self, old: Option<Guards>, new: Option<Guards>, context: &str) {
         assert_eq!(
