@@ -2,6 +2,8 @@ pub const CALLER: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-
 
 /// An admin user.  Typically, controls the backend canister.
 pub const CONTROLLER: &str = "l3lfs-gak7g-xrbil-j4v4h-aztjn-4jyki-wprso-m27h3-ibcl3-2cwuz-oqe";
+/// A limited user.  Typically, it is allowed to do some more calls that the normal user.
+pub const LIMITED_USER: &str = "f3nz4-nfctl-nevt5-xiq66-eu3ra-kr43e-horgp-zlhb4-34bdu-iisbg-qae";
 /// A normal user, without any special permissions.
 pub const USER_1: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
 

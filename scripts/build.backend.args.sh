@@ -68,6 +68,9 @@ else
   ALLOWED_CALLERS="vec{ principal \"$CANISTER_ID_REWARDS\"; principal \"bzhxb-2565m-do3pw-yqhb3-jon2m-phepr-lccqh-zv7qq-q52q2-ognw4-yqe\";  }"
 fi
 
+# For less critical methods, we include some OISY team's users in the limited_callers list, for example to fetch statistics data.
+LIMITED_CALLERS="vec{ principal \"bzhxb-2565m-do3pw-yqhb3-jon2m-phepr-lccqh-zv7qq-q52q2-ognw4-yqe\";  }"
+
 # URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
 # Represents more an ID than a URL
 II_VC_URL="https://identity.ic0.app"
@@ -78,6 +81,7 @@ echo "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = $ALLOWED_CALLERS;
+         limited_callers = $LIMITED_CALLERS;
          cfs_canister_id = opt principal \"$CANISTER_ID_SIGNER\";
          derivation_origin = opt \"$DERIVATION_ORIGIN\";
          supported_credentials = opt vec {

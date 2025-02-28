@@ -647,7 +647,7 @@ pub fn set_guards(guards: Guards) {
 ///
 /// Note: This is a private method, restricted to authorized users, as some stats may not be
 /// suitable for public consumption.
-#[query(guard = "caller_is_allowed")]
+#[query(guard = "caller_is_limited_or_allowed")]
 #[must_use]
 pub fn stats() -> Stats {
     read_state(|s| Stats::from(s))

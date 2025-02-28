@@ -62,6 +62,7 @@ impl From<InitArg> for Config {
         let InitArg {
             ecdsa_key_name,
             allowed_callers,
+            limited_callers,
             supported_credentials,
             ic_root_key_der,
             api,
@@ -77,6 +78,7 @@ impl From<InitArg> for Config {
         Config {
             ecdsa_key_name,
             allowed_callers,
+            limited_callers,
             cfs_canister_id,
             supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),

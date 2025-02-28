@@ -17,10 +17,7 @@ use shared::types::{
     Arg, CredentialType, InitArg, SupportedCredential,
 };
 
-use super::mock::{
-    CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, SIGNER_CANISTER_ID,
-    VC_DERIVATION_ORIGIN,
-};
+use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, LIMITED_USER, SIGNER_CANISTER_ID, VC_DERIVATION_ORIGIN};
 use crate::utils::mock::CALLER;
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
@@ -275,6 +272,12 @@ impl BackendBuilder {
 pub fn controller() -> Principal {
     Principal::from_text(CONTROLLER)
         .expect("Test setup error: Failed to parse controller principal")
+}
+
+#[inline]
+pub fn limited_user() -> Principal {
+    Principal::from_text(LIMITED_USER)
+        .expect("Test setup error: Failed to parse limited user principal")
 }
 
 pub fn setup() -> PicBackend {
