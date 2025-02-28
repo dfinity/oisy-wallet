@@ -31,44 +31,43 @@
 </script>
 
 <ContentWithToolbar>
-	<div slot="outer-content" class="mx-6 mb-12">
-		<TokensReview
-			sendAmount={swapAmount}
-			{receiveAmount}
-			sourceToken={$sourceToken}
-			destinationToken={$destinationToken}
-			sourceTokenExchangeRate={$sourceTokenExchangeRate}
-			destinationTokenExchangeRate={$destinationTokenExchangeRate}
-		/>
+	<TokensReview
+		sendAmount={swapAmount}
+		{receiveAmount}
+		sourceToken={$sourceToken}
+		destinationToken={$destinationToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
+		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+	/>
 
-		{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
-			<ModalValue>
-				<svelte:fragment slot="label">{$i18n.swap.text.value_difference}</svelte:fragment>
-
-				<svelte:fragment slot="main-value">
-					<SwapImpact {swapAmount} {receiveAmount} />
-				</svelte:fragment>
-			</ModalValue>
-		{/if}
-
+	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 		<ModalValue>
-			<svelte:fragment slot="label">{$i18n.swap.text.max_slippage}</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.swap.text.value_difference}</svelte:fragment>
 
 			<svelte:fragment slot="main-value">
-				{slippageValue}%
+				<SwapImpact {swapAmount} {receiveAmount} />
 			</svelte:fragment>
 		</ModalValue>
-		<SwapProvider />
-		<SwapFees />
+	{/if}
 
-		{#if nonNullish($failedSwapError)}
-			<div class="mt-4">
-				<MessageBox>
-					{$failedSwapError}
-				</MessageBox>
-			</div>
-		{/if}
-	</div>
+	<ModalValue>
+		<svelte:fragment slot="label">{$i18n.swap.text.max_slippage}</svelte:fragment>
+
+		<svelte:fragment slot="main-value">
+			{slippageValue}%
+		</svelte:fragment>
+	</ModalValue>
+
+	<SwapProvider />
+	<SwapFees />
+
+	{#if nonNullish($failedSwapError)}
+		<div class="mt-4">
+			<MessageBox>
+				{$failedSwapError}
+			</MessageBox>
+		</div>
+	{/if}
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />
