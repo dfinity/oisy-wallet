@@ -7,16 +7,16 @@ export class DisableAnimations {
 		this.#page = page;
 	}
 
-  public async disableAnimationsAndFocusStyles(): Promise<void> {
-	  await this.#page.evaluate(() => {
-		  const activeElement = document.activeElement as HTMLElement;
-		  if (activeElement) {
-			  activeElement.blur();
-		  }
-	  });
+	public async disableAnimationsAndFocusStyles(): Promise<void> {
+		await this.#page.evaluate(() => {
+			const activeElement = document.activeElement as HTMLElement;
+			if (activeElement) {
+				activeElement.blur();
+			}
+		});
 
-	  await this.#page.addStyleTag({
-		  content: `
+		await this.#page.addStyleTag({
+			content: `
         *:focus,
         *:focus-visible {
           outline: none !important;
@@ -31,6 +31,6 @@ export class DisableAnimations {
           caret-color: transparent !important;
         }
       `
-	  });
-  }
+		});
+	}
 }
