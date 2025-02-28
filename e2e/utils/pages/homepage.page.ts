@@ -17,6 +17,7 @@ import {
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	TESTNET_TOGGLE,
+	THEME_SELECTOR_BUTTON_DARK,
 	TOKEN_BALANCE,
 	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
@@ -384,6 +385,13 @@ abstract class Homepage {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
+		await expect(this.#page).toHaveScreenshot({
+			// creates a snapshot as a fullPage and not just certain parts.
+			fullPage: true,
+			// playwright can retry flaky tests in the amount of time set below.
+			timeout: 5 * 60 * 1000
+		});
+		await this.clickByTestId({testId: THEME_SELECTOR_BUTTON_DARK});
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
