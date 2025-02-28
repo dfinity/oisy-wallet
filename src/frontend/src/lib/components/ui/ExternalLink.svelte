@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { trackEvent as trackEventServices } from '$lib/services/analytics.services';
 	import type { TrackEventParams } from '$lib/types/analytics';
@@ -19,9 +19,11 @@
 	export let asButton = false;
 
 	const onClick = async () => {
-		if (nonNullish(trackEvent)) {
-			await trackEventServices(trackEvent);
+		if (isNullish(trackEvent)) {
+			return;
 		}
+
+		await trackEventServices(trackEvent);
 	};
 </script>
 
