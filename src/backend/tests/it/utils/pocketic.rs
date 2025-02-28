@@ -14,8 +14,7 @@ pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
 use shared::types::{
     user_profile::{OisyUser, UserProfile},
-    Arg, CredentialType, InitArg,
-    SupportedCredential,
+    Arg, CredentialType, InitArg, SupportedCredential,
 };
 
 use super::mock::{
