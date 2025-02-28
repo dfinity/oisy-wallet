@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -57,7 +58,7 @@
 				{slippageValue}%
 			</svelte:fragment>
 		</ModalValue>
-
+		<SwapProvider />
 		<SwapFees />
 
 		{#if nonNullish($failedSwapError)}
