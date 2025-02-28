@@ -378,7 +378,6 @@ abstract class Homepage {
 		}
 	): Promise<void> {
 		this.disableAnimations = new DisableAnimations(this.#page);
-		await this.disableAnimations.disableAnimationsAndFocusStyles();
 		if (freezeCarousel) {
 			await this.setCarouselFirstSlide();
 			await this.waitForLoadState();
@@ -387,7 +386,7 @@ abstract class Homepage {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
-
+		await this.disableAnimations.disableHoverEffects();
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
