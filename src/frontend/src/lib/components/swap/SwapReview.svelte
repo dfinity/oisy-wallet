@@ -48,9 +48,6 @@
 				<SwapImpact {swapAmount} {receiveAmount} />
 			</svelte:fragment>
 		</ModalValue>
-
-		<SwapProvider />
-		<SwapFees />
 	{/if}
 
 	<ModalValue>
@@ -61,6 +58,7 @@
 		</svelte:fragment>
 	</ModalValue>
 
+	<SwapProvider />
 	<SwapFees />
 
 	{#if nonNullish($failedSwapError)}
