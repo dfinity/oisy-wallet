@@ -144,18 +144,13 @@ const createSplTokenTransactionMessage = async ({
 
 	const source = signer.address;
 
-	const sourceTokenAccountAddress = await loadTokenAccount({
-		address: source,
-		network,
-		tokenAddress
+	// Instead of fetching the token account, we calculate the associated token account.
+	// This is to guarantee that the token account is the correct one, without risk of being injected.
+	const sourceTokenAccountAddress: SolAddress = await calculateAssociatedTokenAddress({
+		owner: source,
+		tokenAddress,
+		tokenOwnerAddress
 	});
-
-	// This should not happen since we are sending from an existing account.
-	// But we need it to return a non-nullish value.
-	assertNonNullish(
-		sourceTokenAccountAddress,
-		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
-	);
 
 	const destinationTokenAccountAddress = await loadTokenAccount({
 		address: destination,
