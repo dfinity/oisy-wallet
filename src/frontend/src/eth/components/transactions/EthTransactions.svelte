@@ -22,7 +22,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionToken } from '$lib/types/token';
-	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
@@ -40,10 +39,10 @@
 		})
 	);
 
-	let selectedTransaction: TransactionType | undefined;
+	let selectedTransaction: EthTransactionUi | undefined;
 	let selectedToken: OptionToken;
 	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<TransactionType>({
+		mapTransactionModalData<EthTransactionUi>({
 			$modalOpen: $modalEthTransaction,
 			$modalStore: $modalStore
 		}));
