@@ -242,8 +242,7 @@ describe('sol-wallet.scheduler', () => {
 			expect(spyLoadBalance).toHaveBeenCalledWith({
 				address: mockSolAddress,
 				network: startData?.solanaNetwork,
-				tokenAddress: startData?.tokenAddress,
-				tokenOwnerAddress: startData?.tokenOwnerAddress
+				tokenAddress: startData?.tokenAddress
 			});
 		});
 
