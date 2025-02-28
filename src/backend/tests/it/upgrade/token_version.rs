@@ -1,12 +1,18 @@
-use crate::upgrade::constants::{BACKEND_V0_0_13_WASM_PATH, BACKEND_V0_0_19_WASM_PATH};
-use crate::upgrade::types::{AddUserTokenAfterUpgradeOptions, UserTokenV0_0_13, UserTokenV0_0_19};
-use crate::utils::assertion::assert_tokens_data_eq;
-use crate::utils::mock::{CALLER, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL};
-use crate::utils::pocketic::{BackendBuilder, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::UserToken;
-use shared::types::TokenVersion;
+use shared::types::{token::UserToken, TokenVersion};
+
+use crate::{
+    upgrade::{
+        constants::{BACKEND_V0_0_13_WASM_PATH, BACKEND_V0_0_19_WASM_PATH},
+        types::{AddUserTokenAfterUpgradeOptions, UserTokenV0_0_13, UserTokenV0_0_19},
+    },
+    utils::{
+        assertion::assert_tokens_data_eq,
+        mock::{CALLER, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL},
+        pocketic::{BackendBuilder, PicCanisterTrait},
+    },
+};
 
 lazy_static! {
     static ref PRE_UPGRADE_TOKEN: UserTokenV0_0_13 = UserTokenV0_0_13 {
