@@ -1,8 +1,9 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
-import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks.eth.env';
-import type { WebSocketListener } from '$eth/types/listener';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
+import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks/networks.eth.env';
+import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
+import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
@@ -10,15 +11,13 @@ import type { Listener, TransactionResponse } from '@ethersproject/abstract-prov
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
-const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
-
 const configs: Record<NetworkId, AlchemySettings> = {
 	[ETHEREUM_NETWORK_ID]: {
-		apiKey: API_KEY,
+		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_MAINNET
 	},
 	[SEPOLIA_NETWORK_ID]: {
-		apiKey: API_KEY,
+		apiKey: ALCHEMY_API_KEY,
 		network: ALCHEMY_NETWORK_SEPOLIA
 	}
 };
@@ -102,7 +101,7 @@ export class AlchemyProvider {
 
 	constructor(private readonly network: Network) {
 		this.provider = new Alchemy({
-			apiKey: API_KEY,
+			apiKey: ALCHEMY_API_KEY,
 			network: this.network
 		});
 	}

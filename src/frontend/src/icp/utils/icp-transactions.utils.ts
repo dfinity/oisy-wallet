@@ -56,11 +56,11 @@ export const mapIcpTransaction = ({
 	transaction: IcpTransaction;
 	identity: OptionIdentity;
 }): IcTransactionUi => {
-	const { operation, created_at_time, transferToSelf } = transaction;
+	const { operation, timestamp, transferToSelf } = transaction;
 
 	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status' | 'txExplorerUrl'> = {
 		id,
-		timestamp: fromNullable(created_at_time)?.timestamp_nanos,
+		timestamp: fromNullable(timestamp)?.timestamp_nanos,
 		status: 'executed',
 		txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${id}`
 	};

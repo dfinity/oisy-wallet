@@ -5,12 +5,8 @@ description: Build and deploy the backend after having installed dfx
 # TODO: improve this action, caching the built Cargo packages, maybe with Docker
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Restore cargo cache
       uses: actions/cache@v4
       with:
@@ -21,7 +17,7 @@ runs:
           ~/.cargo/bin/
         key: ${{ runner.os }}-e2e-cargo-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
         restore-keys: |
-            ${{ runner.os }}-e2e-cargo-
+          ${{ runner.os }}-e2e-cargo-
 
     - name: Prepare
       uses: ./.github/actions/prepare
@@ -35,4 +31,4 @@ runs:
 
     - name: Deploy backend
       shell: bash
-      run: npm run deploy
+      run: BACKEND_BUILD_STRATEGY=args npm run deploy

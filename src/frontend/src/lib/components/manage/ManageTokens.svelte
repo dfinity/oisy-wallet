@@ -1,24 +1,14 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
-	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import { ICP_TOKEN } from '$env/tokens.env';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
+	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import type { IcCkToken } from '$icp/types/ic-token';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
-	import IconSearch from '$lib/components/icons/IconSearch.svelte';
+	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
@@ -26,31 +16,26 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import {
-		networkEthereum,
-		networkICP,
-		pseudoNetworkChainFusion,
-		selectedNetwork
-	} from '$lib/derived/network.derived';
+	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-
-	import { parseTokenId } from '$lib/validation/token.validation';
+	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import SolManageTokenToggle from '$sol/components/tokens/SolManageTokenToggle.svelte';
+	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
+	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
+	import { isSolanaToken } from '$sol/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
-
-	// The list of ICRC tokens (SNSes) is defined as environment variables.
-	// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
-	let icrcEnvTokens: IcrcCustomToken[] = [];
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
@@ -58,49 +43,12 @@
 	let exchangesStaticData: ExchangesData | undefined;
 
 	onMount(() => {
-		const tokens = buildIcrcCustomTokens();
-		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: parseTokenId(token.symbol), enabled: false })) ?? [];
-
 		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
-	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
-	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
-	$: knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
-
-	// The entire list of ICRC tokens to display to the user:
-	// This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled), and the environment tokens that have never been used.
-	let allIcrcTokens: IcrcCustomToken[] = [];
-	$: allIcrcTokens = [
-		...$icrcTokens,
-		...icrcEnvTokens.filter(
-			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
-		)
-	].sort(sortIcTokens);
-
-	// The entire list of Erc20 tokens to display to the user.
-	let allErc20Tokens: EthereumUserToken[] = [];
-	$: allErc20Tokens = $erc20Tokens;
-
-	let manageIcTokens = false;
-	$: manageIcTokens = $pseudoNetworkChainFusion || $networkICP;
-
-	let manageEthereumTokens = false;
-	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
-
-	let allTokens: TokenToggleable<Token>[] = [];
-	$: allTokens = filterTokensForSelectedNetwork([
-		[
-			{
-				...ICP_TOKEN,
-				enabled: true
-			},
-			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-			...(manageEthereumTokens ? allErc20Tokens : []),
-			...(manageIcTokens ? allIcrcTokens : [])
-		],
+	let allTokensForSelectedNetwork: TokenToggleable<Token>[] = [];
+	$: allTokensForSelectedNetwork = filterTokensForSelectedNetwork([
+		$allTokens,
 		$selectedNetwork,
 		$pseudoNetworkChainFusion
 	]);
@@ -109,33 +57,22 @@
 	$: allTokensSorted = nonNullish(exchangesStaticData)
 		? pinEnabledTokensAtTop(
 				sortTokens({
-					$tokens: allTokens,
+					$tokens: allTokensForSelectedNetwork,
 					$exchanges: exchangesStaticData,
 					$tokensToPin: $tokensToPin
 				})
 			)
 		: [];
 
-	let filterTokens = '';
-	const updateFilter = () => (filterTokens = filter);
+	let tokensFilter = '';
+	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	const matchingToken = (token: Token): boolean =>
-		token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
-		token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()));
-
 	let filteredTokens: Token[] = [];
-	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? allTokensSorted
-		: allTokensSorted.filter((token) => {
-				const twinToken = (token as IcCkToken).twinToken;
-				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
-			});
+	$: filteredTokens = filterTokens({ tokens: allTokensSorted, filter: tokensFilter });
 
 	let tokens: Token[] = [];
 	$: tokens = filteredTokens.map((token) => {
@@ -173,22 +110,29 @@
 	let saveDisabled = true;
 	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
 
-	let groupModifiedTokens: { icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] } = {
+	let groupModifiedTokens: {
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
+	} = {
 		icrc: [],
-		erc20: []
+		erc20: [],
+		spl: []
 	};
 	$: groupModifiedTokens = Object.values(modifiedTokens).reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
+		spl: SplTokenToggleable[];
 	}>(
-		({ icrc, erc20 }, token) => ({
+		({ icrc, erc20, spl }, token) => ({
 			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
 			erc20: [
 				...erc20,
 				...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
-			]
+			],
+			spl: [...spl, ...(isTokenSplToggleable(token) ? [token] : [])]
 		}),
-		{ icrc: [], erc20: [] }
+		{ icrc: [], erc20: [], spl: [] }
 	);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
@@ -197,26 +141,16 @@
 </script>
 
 <div class="mb-4">
-	<InputTextWithAction
-		name="filter"
-		required={false}
-		bind:value={filter}
+	<InputSearch
+		bind:filter
+		noMatch={noTokensMatch}
 		placeholder={$i18n.tokens.placeholder.search_token}
-	>
-		<svelte:fragment slot="inner-end">
-			{#if noTokensMatch}
-				<button on:click={() => (filter = '')} aria-label={$i18n.tokens.manage.text.clear_filter}>
-					<IconClose />
-				</button>
-			{:else}
-				<IconSearch />
-			{/if}
-		</svelte:fragment>
-	</InputTextWithAction>
+		autofocus={isDesktop()}
+	/>
 </div>
 
 {#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pb-2 pt-1 text-misty-rose">
+	<p class="mb-4 pb-2 pt-1 text-tertiary">
 		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
 			$network: $selectedNetwork.name
 		})}
@@ -236,8 +170,8 @@
 		>
 	</button>
 {:else}
-	<div class="tokens flex flex-col overflow-y-hidden md:max-h-[26rem]">
-		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain pl-4 pr-2 pt-1">
+	<div class="flex flex-col overflow-y-hidden py-3 sm:max-h-[26rem]">
+		<div class="my-3 overflow-y-auto overscroll-contain">
 			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 				<Card>
 					<TokenName data={token} />
@@ -251,10 +185,12 @@
 					<svelte:fragment slot="action">
 						{#if icTokenIcrcCustomToken(token)}
 							<IcManageTokenToggle {token} on:icToken={onToggle} />
-						{:else if icTokenEthereumUserToken(token)}
+						{:else if icTokenEthereumUserToken(token) || isTokenSplToggleable(token)}
 							<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 						{:else if isBitcoinToken(token)}
 							<BtcManageTokenToggle />
+						{:else if isSolanaToken(token)}
+							<SolManageTokenToggle />
 						{/if}
 					</svelte:fragment>
 				</Card>
@@ -269,34 +205,8 @@
 
 	<ButtonGroup>
 		<ButtonCancel on:click={() => dispatch('icClose')} />
-		<Button disabled={saveDisabled} on:click={save}>
+		<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
 		</Button>
 	</ButtonGroup>
 {/if}
-
-<style lang="scss">
-	@use '../../styles/mixins/modal';
-
-	.tokens {
-		padding: var(--padding-1_5x) 0;
-
-		@include modal.content;
-	}
-
-	.tokens-scroll {
-		&::-webkit-scrollbar-thumb {
-			background-color: rgba(var(--color-black-rgb), 0.2);
-		}
-
-		&::-webkit-scrollbar-track {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-
-		&::-webkit-scrollbar-thumb {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-	}
-</style>

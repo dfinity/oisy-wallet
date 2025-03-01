@@ -10,6 +10,7 @@
 
 	export let transaction: BtcTransactionUi;
 	export let token: Token;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
@@ -20,15 +21,21 @@
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
+
+	let amount: BigNumber | undefined;
+	$: amount = nonNullish(value)
+		? BigNumber.from(type === 'send' ? value * BigInt(-1) : value)
+		: undefined;
 </script>
 
 <Transaction
-	on:click={() => modalStore.openBtcTransaction(transaction)}
-	amount={nonNullish(value) ? BigNumber.from(value) : undefined}
+	on:click={() => modalStore.openBtcTransaction({ transaction, token })}
+	{amount}
 	{type}
 	timestamp={Number(timestamp)}
 	{status}
 	{token}
+	{iconType}
 >
 	{label}
 </Transaction>

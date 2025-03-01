@@ -17,28 +17,71 @@ dotenv.populate(
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
+const MATRIX_OS = process.env.MATRIX_OS ?? '';
+const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
+
+const appleProjects = [
+	{
+		name: 'Safari',
+		use: devices['Desktop Safari']
+	},
+	{
+		name: 'iPhone SE',
+		use: {
+			...devices['iPhone SE'],
+			screen: { width: 375, height: 667 },
+			viewport: { width: 375, height: 667 }
+		}
+	}
+];
+
+const nonAppleProjects = [
+	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome']
+	},
+	{
+		name: 'Firefox',
+		use: devices['Desktop Firefox']
+	},
+	{
+		name: 'Pixel 7',
+		use: {
+			...devices['Pixel 7'],
+			screen: { width: 412, height: 915 },
+			viewport: { width: 412, height: 915 }
+		}
+	}
+];
+
+const TIMEOUT = 5 * 60 * 1000;
+
 export default defineConfig({
-	timeout: 60 * 1000,
-	workers: 2,
+	retries: 3,
+	timeout: TIMEOUT,
+	workers: DEV ? 5 : 2,
+	expect: {
+		toHaveScreenshot: {
+			// disable any animations caught by playwright for better screenshots and less flaky tests.
+			animations: 'disabled',
+			// hide caret for cleaner snapshots.
+			caret: 'hide'
+		}
+	},
 	webServer: {
 		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
 		reuseExistingServer: true,
 		port: DEV ? 5173 : 4173,
-		timeout: 120 * 1000
+		timeout: TIMEOUT
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',
-		actionTimeout: 60 * 1000,
-		navigationTimeout: 60 * 1000,
+		actionTimeout: TIMEOUT,
+		navigationTimeout: TIMEOUT,
 		...(DEV && { headless: false })
 	},
-	projects: [
-		{
-			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
-		}
-	]
+	projects: isMac ? appleProjects : nonAppleProjects
 });

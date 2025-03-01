@@ -9,7 +9,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { formatSecondsToDate } from '$lib/utils/format.utils.js';
+	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
 	export let amount: BigNumber | undefined;
@@ -18,6 +18,7 @@
 	export let timestamp: number | undefined;
 	export let styleClass: string | undefined = undefined;
 	export let token: Token;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let icon: ComponentType;
 	$: icon = mapTransactionIcon({ type, status });
@@ -28,27 +29,28 @@
 
 <button class={`contents ${styleClass ?? ''}`} on:click>
 	<Card>
-		<span class="inline-block first-letter:capitalize"><slot /></span>
+		<span class="inline-block"><slot /></span>
 
 		<div slot="icon">
-			{#if nonNullish(token)}
+			{#if iconType === 'token'}
 				<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
 			{:else}
-				<RoundedIcon {icon} iconStyleClass={iconWithOpacity ? 'opacity-10' : ''} />
+				<RoundedIcon {icon} opacity={iconWithOpacity} />
 			{/if}
 		</div>
 
 		<svelte:fragment slot="amount">
 			{#if nonNullish(amount)}
-				<Amount {amount} decimals={token.decimals} />
+				<Amount {amount} decimals={token.decimals} symbol={token.symbol} formatPositiveAmount />
 			{/if}
 		</svelte:fragment>
 
 		<svelte:fragment slot="description">
-			{#if nonNullish(timestamp)}
-				{formatSecondsToDate(timestamp)}
-			{/if}
-
+			<span data-tid="receive-tokens-modal-transaction-timestamp">
+				{#if nonNullish(timestamp)}
+					{formatSecondsToDate(timestamp)}
+				{/if}
+			</span>
 			<TransactionStatusComponent {status} />
 		</svelte:fragment>
 	</Card>

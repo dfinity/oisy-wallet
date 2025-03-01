@@ -46,6 +46,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
+	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -59,7 +60,7 @@
 	export let currentStep: WizardStep | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
 
@@ -69,8 +70,11 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendToken, sendTokenSymbol } =
+	const { sendTokenDecimals, sendToken, sendTokenSymbol, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let simplifiedForm = false;
+	$: simplifiedForm = sendPurpose === 'convert-cketh-to-eth';
 
 	/**
 	 * Send
@@ -197,7 +201,15 @@
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan {source}>
+			<IcSendForm
+				on:icNext
+				bind:destination
+				bind:amount
+				bind:networkId
+				on:icQRCodeScan
+				{source}
+				{simplifiedForm}
+			>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
 						<ButtonBack on:click={back} />

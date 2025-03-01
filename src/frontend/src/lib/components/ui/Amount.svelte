@@ -5,6 +5,8 @@
 
 	export let amount: BigNumber;
 	export let decimals: number;
+	export let symbol: string;
+	export let formatPositiveAmount = false;
 
 	let detailedValue: string;
 	$: detailedValue = formatToken({
@@ -17,8 +19,14 @@
 	$: displayValue = formatToken({
 		value: amount,
 		unitName: decimals,
-		displayDecimals: EIGHT_DECIMALS
+		displayDecimals: EIGHT_DECIMALS,
+		showPlusSign: formatPositiveAmount
 	});
 </script>
 
-<data value={detailedValue}>{displayValue}</data>
+<span class:text-success-primary={formatPositiveAmount && amount.gt(0)}>
+	<data value={detailedValue}>
+		{displayValue}
+	</data>
+	{symbol}
+</span>

@@ -1,8 +1,4 @@
 //! Code for interacting with the chain fusion signer.
-use crate::{
-    read_config,
-    state::{CYCLES_LEDGER, SIGNER},
-};
 use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ic_cdk::api::{
@@ -13,13 +9,18 @@ use ic_cdk::api::{
     },
 };
 use ic_cycles_ledger_client::{
-    Account, ApproveArgs, ApproveError, DepositArgs, DepositResult, Service as CyclesLedgerService,
+    Account, ApproveArgs, ApproveError, CyclesLedgerService, DepositArgs, DepositResult,
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
 use shared::types::signer::topup::{
     TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
     TopUpCyclesLedgerResult,
+};
+
+use crate::{
+    read_config,
+    state::{CYCLES_LEDGER, SIGNER},
 };
 
 #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -36,8 +37,10 @@ const LEDGER_FEE: u64 = 1_000_000_000u64;
 /// Typical signer fee in cycles.  Unstable and subject to change.
 /// Note:
 /// - The endpoint prices can be seen here: <https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/lib.rs>
-/// - At the time of writing, the endpoint prices in the chain fusion signer repo are placeholders.  Initial measurements indicate that a typical real fee will be about 80T.
-/// - PAPI is likely to offer an endpoint returning a pricelist in future, so we can periodically check the price and adjust this value.
+/// - At the time of writing, the endpoint prices in the chain fusion signer repo are placeholders.
+///   Initial measurements indicate that a typical real fee will be about 80T.
+/// - PAPI is likely to offer an endpoint returning a pricelist in future, so we can periodically
+///   check the price and adjust this value.
 const SIGNER_FEE: u64 = 80_000_000_000;
 /// A reasonable number of signing operations per user per login.
 ///
@@ -46,7 +49,8 @@ const SIGNER_FEE: u64 = 80_000_000_000;
 /// - Getting Bitcoin address (1x per login)
 /// - Signing operations (10x per login)
 ///
-/// Margin of error: 3x (given  that the signer fee is subject to change in the next few days and weeks)
+/// Margin of error: 3x (given  that the signer fee is subject to change in the next few days and
+/// weeks)
 const SIGNING_OPS_PER_LOGIN: u64 = 36;
 const fn per_user_cycles_allowance() -> u64 {
     // Creating the allowance costs 1 ledger fee.

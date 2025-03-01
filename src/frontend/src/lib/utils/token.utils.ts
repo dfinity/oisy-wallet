@@ -1,8 +1,8 @@
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
 	ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS
-} from '$env/networks.icrc.env';
-import { ERC20_SUGGESTED_TOKENS } from '$env/tokens.erc20.env';
+} from '$env/networks/networks.icrc.env';
+import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
@@ -40,7 +40,7 @@ export const getMaxTransactionAmount = ({
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = balance.sub(tokenStandard !== 'erc20' ? fee : 0n);
+	const value = balance.sub(tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
 
 	return Number(
 		value.isNegative()
@@ -123,7 +123,7 @@ export const calculateTokenUsdBalance = ({
 
 	return nonNullish(exchangeRate)
 		? usdValue({
-				token,
+				decimals: token.decimals,
 				balance: $balances?.[token.id]?.data,
 				exchangeRate
 			})
@@ -137,15 +137,15 @@ export const calculateTokenUsdBalance = ({
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The token UI.
  */
-export const mapTokenUi = ({
+export const mapTokenUi = <T extends Token>({
 	token,
 	$balances,
 	$exchanges
 }: {
-	token: Token;
+	token: T;
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): TokenUi => ({
+}): TokenUi<T> => ({
 	...token,
 	// There is a difference between undefined and null for the balance.
 	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.

@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { NetworkEnvironment } from '$lib/types/network';

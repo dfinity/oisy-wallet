@@ -1,22 +1,27 @@
 [workspace]
 members = [
     "src/backend",
-    "src/cycles_ledger_client",
+    "src/cycles_ledger/client",
+    "src/cycles_ledger/pic",
+    "src/cycles_ledger/types",
     "src/shared"
 ]
 resolver = "2"
 
 [workspace.dependencies]
+bs58 = "0.5.1"
 ic-cdk = "0.16.0"
 ic-cdk-macros = "0.16.0"
 ic-cdk-timers = "0.9.0"
-ic-cycles-ledger-client = { path = "src/cycles_ledger_client" }
+ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
+ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
+ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
 ic-ledger-types = "0.13.0"
-ic-stable-structures = "0.6.5"
+ic-stable-structures = "0.6.7"
 ic-metrics-encoder = "1.1.1"
 ic-canister-sig-creation = "1.1.0"
-ic-verifiable-credentials = { git = "https://github.com/dfinity/verifiable-credentials-sdk", rev = "a116a2e53a13e4a1f6f7e8429960a7d0d6142e70" }
-candid = "0.10.10"
+ic-verifiable-credentials = "1.0.1"
+candid = "0.10.13"
 ethers-core = "= 2.0.11"
 futures = "0.3"
 serde = "1"
@@ -29,4 +34,4 @@ pocket-ic = "5.0.0"
 pretty_assertions = "1.4.1"
 strum = "0.26.3"
 strum_macros = "0.26.4"
-bitcoin = "0.32.4"
+bitcoin = "0.32.5"

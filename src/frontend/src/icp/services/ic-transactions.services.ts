@@ -87,15 +87,23 @@ export const loadNextTransactions = ({
 
 export const onLoadTransactionsError = ({
 	tokenId,
-	error: err
+	error: err,
+	silent = false
 }: {
 	tokenId: TokenId;
 	error: unknown;
+	silent?: boolean;
 }) => {
 	icTransactionsStore.reset(tokenId);
 
 	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
 	balancesStore.reset(tokenId);
+
+	if (silent) {
+		// We print the error to console just for debugging purposes
+		console.warn(`${get(i18n).transactions.error.loading_transactions}:`, err);
+		return;
+	}
 
 	toastsError({
 		msg: { text: get(i18n).transactions.error.loading_transactions },

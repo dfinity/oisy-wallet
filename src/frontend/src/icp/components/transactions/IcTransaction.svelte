@@ -11,6 +11,7 @@
 
 	export let transaction: IcTransactionUi;
 	export let token: Token;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let type: IcTransactionType;
 	let transactionTypeLabel: string | undefined;
@@ -32,8 +33,8 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	let amount: bigint | undefined;
-	$: amount = !incoming && nonNullish(value) ? value * -1n : value;
+	let amount: BigNumber | undefined;
+	$: amount = nonNullish(value) ? BigNumber.from(incoming ? value : value * -1n) : value;
 
 	let timestamp: number | undefined;
 	$: timestamp = nonNullish(timestampNanoseconds)
@@ -42,13 +43,14 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openIcTransaction(transaction)}
+	on:click={() => modalStore.openIcTransaction({ transaction, token })}
 	styleClass="block w-full border-0"
-	amount={BigNumber.from(amount)}
+	{amount}
 	{type}
 	{timestamp}
 	{status}
 	{token}
+	{iconType}
 >
-	<IcTransactionLabel label={transactionTypeLabel} fallback={type} />
+	<IcTransactionLabel label={transactionTypeLabel} fallback={type} {token} />
 </Transaction>

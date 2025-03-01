@@ -11,7 +11,7 @@ export const initBtcStatusesWorker: IcCkWorker = async ({
 	minterCanisterId,
 	token: { id: tokenId }
 }: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
-	const BtcStatusesWorker = await import('$icp/workers/btc-statuses.worker?worker');
+	const BtcStatusesWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new BtcStatusesWorker.default();
 
 	worker.onmessage = ({

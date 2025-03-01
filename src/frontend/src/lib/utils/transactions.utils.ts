@@ -1,13 +1,10 @@
-import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 import type { BtcTransactionUi } from '$btc/types/btc';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
-import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
-import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
-import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
@@ -16,13 +13,15 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
-import type { AllTransactionsUi, AnyTransactionUi } from '$lib/types/transaction';
+import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
 	isNetworkIdICP,
-	isNetworkIdSepolia
+	isNetworkIdSepolia,
+	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -34,6 +33,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * @param $ckEthMinterInfo - The CK Ethereum minter info store data.
  * @param $ethAddress - The ETH address of the user.
  * @param $icTransactions - The ICP transactions store data.
+ * @param $solTransactions - The SOL transactions store data.
  * @param $btcStatuses - The BTC statuses store data.
  * @returns The unified list of transactions with their respective token and components.
  */
@@ -44,6 +44,7 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo,
 	$ethAddress,
 	$icTransactions,
+	$solTransactions,
 	$btcStatuses
 }: {
 	tokens: Token[];
@@ -52,8 +53,9 @@ export const mapAllTransactionsUi = ({
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 	$icTransactions: CertifiedStoreData<TransactionsData<IcTransactionUi>>;
+	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-}): AllTransactionsUi => {
+}): AllTransactionUiWithCmp[] => {
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
 		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
 		networkId: ETHEREUM_NETWORK_ID
@@ -64,7 +66,7 @@ export const mapAllTransactionsUi = ({
 		networkId: SEPOLIA_NETWORK_ID
 	});
 
-	return tokens.reduce<AllTransactionsUi>((acc, token) => {
+	return tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
 		const {
 			id: tokenId,
 			network: { id: networkId }
@@ -78,9 +80,9 @@ export const mapAllTransactionsUi = ({
 			return [
 				...acc,
 				...($btcTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
-					...transaction,
+					transaction,
 					token,
-					component: BtcTransaction
+					component: 'bitcoin' as const
 				}))
 			];
 		}
@@ -92,7 +94,7 @@ export const mapAllTransactionsUi = ({
 			return [
 				...acc,
 				...($ethTransactions[tokenId] ?? []).map((transaction) => ({
-					...mapEthTransactionUi({
+					transaction: mapEthTransactionUi({
 						transaction,
 						ckMinterInfoAddresses: isSepoliaNetwork
 							? ckEthMinterInfoAddressesSepolia
@@ -100,7 +102,7 @@ export const mapAllTransactionsUi = ({
 						$ethAddress: $ethAddress
 					}),
 					token,
-					component: EthTransaction
+					component: 'ethereum' as const
 				}))
 			];
 		}
@@ -115,13 +117,28 @@ export const mapAllTransactionsUi = ({
 			return [
 				...acc,
 				...($icTransactions[tokenId] ?? []).map((transaction) => ({
-					...extendIcTransaction({
+					transaction: extendIcTransaction({
 						transaction,
 						token,
 						btcStatuses: $btcStatuses?.[tokenId] ?? undefined
 					}).data,
 					token,
-					component: IcTransaction
+					component: 'ic' as const
+				}))
+			];
+		}
+
+		if (isNetworkIdSolana(networkId)) {
+			if (isNullish($solTransactions)) {
+				return acc;
+			}
+
+			return [
+				...acc,
+				...($solTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					transaction,
+					token,
+					component: 'solana' as const
 				}))
 			];
 		}
@@ -144,5 +161,5 @@ export const sortTransactions = ({
 		);
 	}
 
-	return nonNullish(timestampA) ? 1 : -1;
+	return nonNullish(timestampA) ? -1 : 1;
 };

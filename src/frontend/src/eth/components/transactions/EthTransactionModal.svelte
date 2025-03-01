@@ -4,17 +4,15 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
-	import type { EthTransactionType } from '$eth/types/eth-transaction';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Transaction } from '$lib/types/transaction';
+	import type { OptionToken } from '$lib/types/token';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -22,7 +20,8 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let transaction: Transaction;
+	export let transaction: EthTransactionUi;
+	export let token: OptionToken;
 
 	let from: string;
 	let to: string | undefined;
@@ -31,10 +30,7 @@
 	let hash: string | undefined;
 	let blockNumber: number | undefined;
 
-	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
-
-	let type: EthTransactionType;
-	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
+	$: ({ from, value, timestamp, hash, blockNumber, to, type } = transaction);
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined;
@@ -122,18 +118,20 @@
 			</Value>
 		{/if}
 
-		<Value ref="amount">
-			<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-			<output>
-				{formatToken({
-					value,
-					unitName: $tokenWithFallback.decimals,
-					displayDecimals: $tokenWithFallback.decimals
-				})}
-				{$tokenWithFallback.symbol}
-			</output>
-		</Value>
+		{#if nonNullish(token)}
+			<Value ref="amount">
+				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
+				<output>
+					{formatToken({
+						value,
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					})}
+					{token.symbol}
+				</output>
+			</Value>
+		{/if}
 
-		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
+		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>

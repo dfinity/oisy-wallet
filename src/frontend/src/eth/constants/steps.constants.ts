@@ -1,5 +1,5 @@
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
-import type { ProgressStep } from '@dfinity/gix-components';
+import type { ProgressSteps } from '$lib/types/progress-steps';
 
 export const sendSteps = ({
 	i18n,
@@ -7,36 +7,36 @@ export const sendSteps = ({
 }: {
 	i18n: I18n;
 	sendWithApproval: boolean;
-}): [ProgressStep, ...ProgressStep[]] => [
+}): ProgressSteps => [
 	{
 		step: ProgressStepsSend.INITIALIZATION,
 		text: i18n.send.text.initializing_transaction,
 		state: 'in_progress'
-	} as ProgressStep,
+	},
 	...(sendWithApproval
-		? [
+		? ([
 				{
 					step: ProgressStepsSend.SIGN_APPROVE,
 					text: i18n.send.text.signing_approval,
 					state: 'next'
-				} as ProgressStep,
+				},
 				{
 					step: ProgressStepsSend.APPROVE,
 					text: i18n.send.text.approving,
 					state: 'next'
-				} as ProgressStep
-			]
+				}
+			] as ProgressSteps)
 		: []),
 	{
 		step: ProgressStepsSend.SIGN_TRANSFER,
 		text: i18n.send.text.signing_transaction,
 		state: 'next'
-	} as ProgressStep,
+	},
 	{
 		step: ProgressStepsSend.TRANSFER,
 		text: i18n.send.text.sending,
 		state: 'next'
-	} as ProgressStep
+	}
 ];
 
 export const walletConnectSendSteps = ({
@@ -45,7 +45,7 @@ export const walletConnectSendSteps = ({
 }: {
 	i18n: I18n;
 	sendWithApproval: boolean;
-}): [ProgressStep, ...ProgressStep[]] => [
+}): ProgressSteps => [
 	...sendSteps({
 		i18n,
 		...rest
@@ -57,20 +57,20 @@ export const walletConnectSendSteps = ({
 	}
 ];
 
-export const walletConnectSignSteps = (i18n: I18n): [ProgressStep, ...ProgressStep[]] => [
+export const walletConnectSignSteps = (i18n: I18n): ProgressSteps => [
 	{
 		step: ProgressStepsSign.INITIALIZATION,
 		text: i18n.send.text.initializing,
 		state: 'in_progress'
-	} as ProgressStep,
+	},
 	{
 		step: ProgressStepsSign.SIGN,
 		text: i18n.send.text.signing_message,
 		state: 'next'
-	} as ProgressStep,
+	},
 	{
-		step: ProgressStepsSign.APPROVE,
-		text: i18n.send.text.approving,
+		step: ProgressStepsSign.APPROVE_WALLET_CONNECT,
+		text: i18n.send.text.approving_wallet_connect,
 		state: 'next'
-	} as ProgressStep
+	}
 ];

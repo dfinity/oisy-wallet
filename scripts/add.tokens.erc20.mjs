@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import path from 'path';
 import { ENV } from './build.utils.mjs';
+import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 dotenv.config({ path: `.env.${ENV}` });
 
@@ -23,7 +24,7 @@ if (isNullish(ETHERSCAN_API_KEY)) {
 	process.exit(1);
 }
 
-const DATA_DIR = 'src/frontend/src/env';
+const DATA_DIR = 'src/frontend/src/env/tokens';
 const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
 const ERC20_DATA_DIR = `${DATA_DIR}/tokens-erc20`;
@@ -111,7 +112,7 @@ const fetchTokenDetails = async ({ contractAddress, isTestnet }) => {
 const loadFileContentOrEmpty = (filePath) => {
 	try {
 		return readFileSync(filePath, 'utf8');
-	} catch (err) {
+	} catch (_err) {
 		console.log(`File ${filePath} does not exist, it will be created.`);
 		return '';
 	}
@@ -313,7 +314,7 @@ const flattenEnvironmentData = (data) =>
 	);
 
 const readSupportedTokens = () => {
-	const jsonPath = resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
+	const jsonPath = resolve(CK_ERC20_JSON_FILE);
 	return JSON.parse(readFileSync(jsonPath, 'utf-8'));
 };
 

@@ -1,3 +1,5 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import IconConvert from '$lib/components/icons/IconConvert.svelte';
 import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
 import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
@@ -5,9 +7,16 @@ import IconReceive from '$lib/components/icons/IconReceive.svelte';
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import { MILLISECONDS_IN_SECOND, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { TransactionStatusSchema, TransactionTypeSchema } from '$lib/schema/transaction.schema';
-import type { AnyTransactionUi } from '$lib/types/transaction';
-import { groupTransactionsByDate, mapTransactionIcon } from '$lib/utils/transaction.utils';
-import { createTransactionsUi } from '$tests/mocks/transactions.mock';
+import type { ModalData } from '$lib/stores/modal.store';
+import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
+import {
+	groupTransactionsByDate,
+	mapTransactionIcon,
+	mapTransactionModalData
+} from '$lib/utils/transaction.utils';
+import en from '$tests/mocks/i18n.mock';
+import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import { createTransactionsUiWithCmp } from '$tests/mocks/transactions.mock';
 
 describe('transaction.utils', () => {
 	describe('mapIcon', () => {
@@ -63,12 +72,15 @@ describe('transaction.utils', () => {
 	});
 
 	describe('groupTransactionsByDate', () => {
-		const baseTransactions: AnyTransactionUi[] = createTransactionsUi(5);
+		const baseTransactions = createTransactionsUiWithCmp(5);
 
-		const mockTransactions = baseTransactions.map((transaction, index) => ({
-			...transaction,
-			timestamp: index + 1
-		})) as AnyTransactionUi[];
+		const mockTransactions = baseTransactions.map(({ transaction, ...rest }, index) => ({
+			transaction: {
+				...transaction,
+				timestamp: index + 1
+			},
+			...rest
+		})) as AnyTransactionUiWithCmp[];
 
 		const nowInMilliseconds =
 			Math.floor(Date.now() / MILLISECONDS_IN_SECOND) * MILLISECONDS_IN_SECOND;
@@ -97,12 +109,27 @@ describe('transaction.utils', () => {
 
 		it('should group transactions by formatted date when they are not unique', () => {
 			const transactions = [
-				{ ...mockTransactions[0], timestamp: 1 },
-				{ ...mockTransactions[1], timestamp: 1 },
-				{ ...mockTransactions[2], timestamp: 1 },
-				{ ...mockTransactions[3], timestamp: 2 },
-				{ ...mockTransactions[4], timestamp: 2 }
-			] as AnyTransactionUi[];
+				{
+					transaction: { ...mockTransactions[0].transaction, timestamp: 1 },
+					component: mockTransactions[0].component
+				},
+				{
+					transaction: { ...mockTransactions[1].transaction, timestamp: 1 },
+					component: mockTransactions[1].component
+				},
+				{
+					transaction: { ...mockTransactions[2].transaction, timestamp: 1 },
+					component: mockTransactions[2].component
+				},
+				{
+					transaction: { ...mockTransactions[3].transaction, timestamp: 2 },
+					component: mockTransactions[3].component
+				},
+				{
+					transaction: { ...mockTransactions[4].transaction, timestamp: 2 },
+					component: mockTransactions[4].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': transactions.slice(0, 3),
@@ -111,11 +138,18 @@ describe('transaction.utils', () => {
 		});
 
 		it('should handle transactions without timestamps', () => {
-			const transactions = [mockTransactions[0], { ...mockTransactions[1], timestamp: undefined }];
+			const undefinedKey = en.transaction.label.no_date_available;
+			const transactions = [
+				mockTransactions[0],
+				{
+					transaction: { ...mockTransactions[1], timestamp: undefined },
+					component: mockTransactions[1].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': [transactions[0]],
-				undefined: [transactions[1]]
+				[undefinedKey]: [transactions[1]]
 			});
 		});
 
@@ -126,8 +160,11 @@ describe('transaction.utils', () => {
 		it('should handle timestamps provided in nanoseconds', () => {
 			const transactions = [
 				mockTransactions[0],
-				{ ...mockTransactions[1], timestamp: nowInNanoSeconds }
-			] as AnyTransactionUi[];
+				{
+					transaction: { ...mockTransactions[1].transaction, timestamp: nowInNanoSeconds },
+					component: mockTransactions[1].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				[1]: [transactions[0]],
@@ -138,13 +175,78 @@ describe('transaction.utils', () => {
 		it('should handle timestamps provided in milliseconds', () => {
 			const transactions = [
 				mockTransactions[0],
-				{ ...mockTransactions[1], timestamp: nowInMilliseconds }
-			] as AnyTransactionUi[];
+				{
+					transaction: { ...mockTransactions[1].transaction, timestamp: nowInMilliseconds },
+					component: mockTransactions[1].component
+				}
+			] as AnyTransactionUiWithCmp[];
 
 			expect(groupTransactionsByDate(transactions)).toEqual({
 				'1': [transactions[0]],
 				[nowInSeconds.toString()]: [transactions[1]]
 			});
+		});
+	});
+
+	describe('mapTransactionModalData', () => {
+		const type = 'ic-transaction';
+
+		const mockToken = ICP_TOKEN;
+		const mockIcTransactionUi = createMockIcTransactionsUi(1)[0];
+
+		const mockModalStore = {
+			type,
+			data: { transaction: mockIcTransactionUi, token: mockToken }
+		} as ModalData<unknown>;
+
+		it('should return transaction and token if modal is open and store data is valid', () => {
+			const $modalOpen = true;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore: mockModalStore
+			});
+
+			expect(result.transaction).toEqual(mockIcTransactionUi);
+			expect(result.token).toEqual(mockToken);
+		});
+
+		it('should return undefined transaction and token if modal is closed', () => {
+			const $modalOpen = false;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore: mockModalStore
+			});
+
+			expect(result.transaction).toBeUndefined();
+			expect(result.token).toBeUndefined();
+		});
+
+		it('should return undefined transaction and token if store data is null', () => {
+			const $modalOpen = true;
+			const $modalStore = { type, data: null } as ModalData<unknown>;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore
+			});
+
+			expect(result.transaction).toBeUndefined();
+			expect(result.token).toBeUndefined();
+		});
+
+		it('should return undefined transaction and token if store data is missing', () => {
+			const $modalOpen = true;
+			const $modalStore = {} as ModalData<unknown>;
+
+			const result = mapTransactionModalData<IcTransactionUi>({
+				$modalOpen,
+				$modalStore: $modalStore
+			});
+
+			expect(result.transaction).toBeUndefined();
+			expect(result.token).toBeUndefined();
 		});
 	});
 });

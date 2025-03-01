@@ -1,16 +1,14 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let labelRef: string;
 	export let address: OptionString;
@@ -30,23 +28,18 @@
 		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
 
 		{#if text}
-			<p class="mb-1.5 break-normal py-2 text-misty-rose">
+			<p class="mb-1.5 break-normal py-2 text-tertiary">
 				<slot name="text" />
 			</p>
 		{/if}
 
 		<div
-			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle px-3 py-2"
+			class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
 			class:mt-3={!text}
 			data-tid={testId}
 		>
 			<div class="h-8 w-8">
-				<Logo
-					src={network.iconBW}
-					alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
-					color="white"
-					size="sm"
-				/>
+				<NetworkLogo {network} blackAndWhite color="white" size="sm" />
 			</div>
 
 			{#if nonNullish(address)}

@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	export let assertHide: () => { valid: boolean };
@@ -83,7 +84,7 @@
 		}
 	];
 
-	const HIDE_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
+	const HIDE_TOKEN_STEPS: ProgressSteps = [
 		{
 			step: ProgressStepsHideToken.INITIALIZATION,
 			text: $i18n.tokens.text.initializing,
@@ -123,7 +124,11 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Hiding'}
-		<InProgressWizard progressStep={hideProgressStep} steps={HIDE_TOKEN_STEPS} />
+		<InProgressWizard
+			progressStep={hideProgressStep}
+			steps={HIDE_TOKEN_STEPS}
+			warningType="manage"
+		/>
 	{:else}
 		<HideTokenReview on:icCancel={close} on:icHide={hide} />
 	{/if}

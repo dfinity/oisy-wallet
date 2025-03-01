@@ -1,14 +1,8 @@
-import type { IcCkToken } from '$icp/types/ic-token';
-import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
-import type { TokenUi } from '$lib/types/token';
+import type { TokenId, TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
-import {
-	isRequiredTokenWithLinkedData,
-	sumBalances,
-	sumTokenBalances,
-	sumUsdBalances
-} from '$lib/utils/token.utils';
+import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
+import { isToken } from '$lib/validation/token.validation';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -25,31 +19,6 @@ export const isTokenUiGroup = (
 	'tokens' in tokenUiOrGroupUi;
 
 /**
- * Factory function to create a TokenUiGroup based on the provided tokens and network details.
- * This function creates a group header and adds both the native token and the twin token to the group's tokens array.
- *
- * @param nativeToken - The native token used for the group, typically the original token or the one from the selected network.
- * @param twinToken - The twin token to be grouped with the native token, usually representing the same asset on a different network.
- *
- * @returns A TokenUiGroup object that includes a header with network and symbol information and contains both the native and twin tokens.
- */
-const createTokenGroup = ({
-	nativeToken,
-	twinToken
-}: {
-	nativeToken: TokenUi;
-	twinToken: TokenUi;
-}): TokenUiGroup => ({
-	// Setting the same ID of the native token to ensure the Group Card component is treated as the same component of the Native Token Card.
-	// This allows Svelte transitions/animations to handle the two cards as the same component, giving a smoother user experience.
-	id: nativeToken.id,
-	nativeToken,
-	tokens: [nativeToken, twinToken],
-	balance: sumTokenBalances([nativeToken, twinToken]),
-	usdBalance: sumUsdBalances([nativeToken.usdBalance, twinToken.usdBalance])
-});
-
-/**
  * Function to create a list of TokenUiOrGroupUi by grouping tokens with matching twinTokenSymbol.
  * The group is placed in the position where the first token of the group was found.
  * Tokens with no twin remain as individual tokens in their original position.
@@ -62,36 +31,46 @@ const createTokenGroup = ({
  *          The group replaces the first token of the group in the list.
  */
 export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
-	const groupedTokenTwins = new Set<string>();
-	const mappedTokensWithGroups: TokenUiOrGroupUi[] = tokens.map((token) => {
-		if (!isRequiredTokenWithLinkedData(token)) {
-			return token;
-		}
+	const tokenGroups = groupTokens(tokens);
 
-		const twinToken = tokens.find((t) => t.symbol === token.twinTokenSymbol && isIcCkToken(t)) as
-			| IcCkToken
-			| undefined;
-
-		if (twinToken && twinToken.decimals === token.decimals) {
-			groupedTokenTwins.add(twinToken.symbol);
-			groupedTokenTwins.add(token.symbol);
-			return createTokenGroup({
-				nativeToken: token,
-				twinToken: twinToken
-			});
-		}
-
-		return token;
-	});
-
-	return mappedTokensWithGroups
-		.filter((t) => isTokenUiGroup(t) || !groupedTokenTwins.has(t.symbol))
+	return tokenGroups
+		.map((group) => (group.tokens.length === 1 ? group.tokens[0] : group))
 		.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
 				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO)
 		);
 };
+
+const hasBalance = ({
+	token,
+	showZeroBalances
+}: {
+	token: TokenUiOrGroupUi;
+	showZeroBalances: boolean;
+}) => Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
+
+/**
+ * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
+ * one token with a balance if showZeroBalance is false.
+ *
+ * @param groupedTokens - The list of TokenUiOrGroupUi to filter. Groups without balance are filtered out.
+ * @param showZeroBalances - A boolean that indicates if zero balances should be shown.
+ *
+ * @returns A new list where all groups that do not have at least one token with a balance are removed if showZeroBalances is false.
+ */
+export const filterTokenGroups = ({
+	groupedTokens,
+	showZeroBalances
+}: {
+	groupedTokens: TokenUiOrGroupUi[];
+	showZeroBalances: boolean;
+}) =>
+	groupedTokens.filter((t: TokenUiOrGroupUi) =>
+		isTokenUiGroup(t)
+			? t.tokens.some((tok: TokenUi) => hasBalance({ token: tok, showZeroBalances }))
+			: hasBalance({ token: t, showZeroBalances })
+	);
 
 const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
 	id: token.id,
@@ -164,3 +143,55 @@ export const groupMainToken = ({ token, tokenGroup }: GroupTokenParams): TokenUi
  */
 export const groupSecondaryToken = ({ token, tokenGroup }: GroupTokenParams): TokenUiGroup =>
 	nonNullish(tokenGroup) ? updateTokenGroup({ token, tokenGroup }) : mapNewTokenGroup(token);
+
+/**
+ * Function to create a list of TokenUiGroup by grouping a provided list of tokens.
+ *
+ * The function loops through the tokens list and groups them according to a prop key that links a token to its "main token".
+ * For example, it could be `twinToken` as per ck token standard. But the logic can be extended to other props, if necessary.
+ *
+ * The tokens with no "main token" will still be included in a group, but it will be a single-element group, where the "main token" is the token itself.
+ * That, in general, makes sense for tokens that are not "secondary tokens" of a "main token".
+ *
+ * The returned list respects the sorting order of the initial tokens list, meaning that the group is created at each position of the first encountered token of the group.
+ * So, independently of being a "main token" or a "secondary token", the group will replace the first token of the group in the list.
+ * That is useful if a "secondary token" is before the "main token" in the list; for example, if the list is sorted by balance.
+ *
+ * NOTE: The function does not sort the groups by any criteria. It only groups the tokens. So, even if a group ends up having a total balance that would put it in a higher position in the list, it will not be moved.
+ *
+ * @param {TokenUi[]} tokens - The list of TokenUi objects to group. Each token may or may not have a prop key to identify a "main token".
+ * @returns {TokenUiGroup[]} A list where tokens are grouped into a TokenUiGroup, even if they are by themselves.
+ */
+export const groupTokens = (tokens: TokenUi[]): TokenUiGroup[] => {
+	const tokenGroupsMap = tokens.reduce<{
+		[id: TokenId]: TokenUiGroup | undefined;
+	}>(
+		(acc, token) => ({
+			...acc,
+			...(isToken(token) &&
+			'twinToken' in token &&
+			nonNullish(token.twinToken) &&
+			isToken(token.twinToken) &&
+			// TODO: separate the check for decimals from the rest, since it seems important to the logic.
+			token.decimals === token.twinToken.decimals
+				? // If the token has a twinToken, and both have the same decimals, group them together.
+					{
+						[token.twinToken.id]: groupSecondaryToken({
+							token,
+							tokenGroup: acc[token.twinToken.id]
+						})
+					}
+				: {
+						[token.id]: groupMainToken({
+							token,
+							tokenGroup: acc[token.id]
+						})
+					})
+		}),
+		{}
+	);
+
+	return Object.getOwnPropertySymbols(tokenGroupsMap).map(
+		(id) => tokenGroupsMap[id as TokenId] as TokenUiGroup
+	);
+};

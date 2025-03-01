@@ -2,7 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let addressToken: Token | undefined;
 

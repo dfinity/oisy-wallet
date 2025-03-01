@@ -1,24 +1,119 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { airdropCampaigns, FEATURED_AIRDROP_CAROUSEL_SLIDE_ID } from '$env/airdrop-campaigns.env';
+	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileLoaded, userSettings } from '$lib/derived/user-profile.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
-		dAppDescriptions,
-		type CarouselSlideOisyDappDescription
+		type CarouselSlideOisyDappDescription,
+		type OisyDappDescription
 	} from '$lib/types/dapp-description';
+	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
+	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	export let styleClass: string | undefined = undefined;
 
-	const dappsCarouselSlides = dAppDescriptions.filter(({ carousel }) =>
-		nonNullish(carousel)
-	) as CarouselSlideOisyDappDescription[];
+	// It may happen that the user's settings are refreshed before having been updated.
+	// But for that small instant of time, we could still show the dApp.
+	// To avoid this glitch we store the dApp id in a temporary array, and we add it to the hidden dApps ids.
+	let temporaryHiddenDappsIds: OisyDappDescription['id'][] = [];
+
+	let hiddenDappsIds: OisyDappDescription['id'][];
+	$: hiddenDappsIds = [
+		...($userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? []),
+		...temporaryHiddenDappsIds
+	];
+
+	let featuredAirdrop: AirdropDescription | undefined;
+	$: featuredAirdrop = airdropCampaigns.find(({ id }) => id === FEATURED_AIRDROP_CAROUSEL_SLIDE_ID);
+
+	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
+	$: featureAirdropSlide = nonNullish(featuredAirdrop)
+		? ({
+				id: featuredAirdrop.id,
+				carousel: {
+					text: replaceOisyPlaceholders($i18n.airdrops.text.carousel_slide_title),
+					callToAction: $i18n.airdrops.text.carousel_slide_cta
+				},
+				logo: featuredAirdrop.logo,
+				name: featuredAirdrop.title
+			} as CarouselSlideOisyDappDescription)
+		: undefined;
+
+	/*
+	 TODO: rename and adjust DappsCarousel for different data sources (not only dApps descriptions).
+	 1. The component now displays data from difference sources - featured airdrop and dApps
+	 2. We need to update all the related namings to something general.
+	 3. Create a single slide data type that can be used for airdrop, dApps, and all further cases.
+	 4. Adjust DappsCarouselSlide accordingly.
+	 */
+	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
+	$: dappsCarouselSlides = filterCarouselDapps({
+		dAppDescriptions: [
+			...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
+			...dAppDescriptions
+		],
+		hiddenDappsIds
+	});
+
+	let carousel: Carousel;
+
+	const closeSlide = async ({
+		detail: dappId
+	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
+
+		temporaryHiddenDappsIds = [...temporaryHiddenDappsIds, dappId];
+		hiddenDappsIds = [...hiddenDappsIds, dappId];
+
+		dappsCarouselSlides = filterCarouselDapps({ dAppDescriptions, hiddenDappsIds });
+
+		if (idx !== -1) {
+			carousel.removeSlide(idx);
+		}
+
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		if (isNullish($userProfileStore)) {
+			return;
+		}
+
+		await addUserHiddenDappId({
+			dappId,
+			identity: $authIdentity,
+			currentUserVersion: fromNullable($userProfileStore.profile.version)
+		});
+
+		emit({ message: 'oisyRefreshUserProfile' });
+	};
 </script>
 
-{#if nonNullish(dappsCarouselSlides)}
+{#if $userProfileLoaded && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
 	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
-	<Carousel controlsWidthStyleClass="w-[calc(100%-5rem)]" styleClass={`w-full ${styleClass ?? ''}`}>
-		{#each dappsCarouselSlides as dappsCarouselSlide}
-			<DappsCarouselSlide {dappsCarouselSlide} />
+	<Carousel
+		bind:this={carousel}
+		controlsWidthStyleClass="w-[calc(100%-5rem)]"
+		styleClass={`w-full ${styleClass ?? ''}`}
+	>
+		{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
+			<DappsCarouselSlide
+				{dappsCarouselSlide}
+				airdrop={nonNullish(featuredAirdrop) && featuredAirdrop.id === dappsCarouselSlide.id
+					? featuredAirdrop
+					: undefined}
+				on:icCloseCarouselSlide={closeSlide}
+			/>
 		{/each}
 	</Carousel>
 {/if}

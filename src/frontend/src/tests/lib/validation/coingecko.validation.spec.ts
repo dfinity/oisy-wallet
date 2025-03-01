@@ -1,5 +1,4 @@
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
-import { describe, expect, it } from 'vitest';
 
 describe('CoingeckoCoinsIdSchema', () => {
 	it('should pass validation for "ethereum"', () => {

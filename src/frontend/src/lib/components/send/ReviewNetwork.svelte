@@ -12,7 +12,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
-	export let sourceNetwork: Network;
+	export let sourceNetwork: Network | undefined;
 	export let destinationNetworkId: NetworkId | undefined = undefined;
 
 	let isNetworkBitcoin: boolean;
@@ -25,13 +25,15 @@
 	$: showDestinationNetwork = isNetworkBitcoin || isNetworkEthereum;
 </script>
 
-<Value ref="network" element="div">
-	<svelte:fragment slot="label"
-		>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
-				.network}{/if}</svelte:fragment
-	>
-	<TextWithLogo name={sourceNetwork.name} icon={sourceNetwork.icon} />
-</Value>
+{#if nonNullish(sourceNetwork)}
+	<Value ref="network" element="div">
+		<svelte:fragment slot="label"
+			>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
+					.network}{/if}</svelte:fragment
+		>
+		<TextWithLogo name={sourceNetwork.name} icon={sourceNetwork.icon} />
+	</Value>
+{/if}
 
 {#if nonNullish(destinationNetworkId) && showDestinationNetwork}
 	<Value ref="destination-network" element="div">

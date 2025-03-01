@@ -2,7 +2,7 @@
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
+	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks/networks.env';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isDestinationContractAddress } from '$eth/utils/send.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -73,12 +73,12 @@
 		})();
 </script>
 
-<label for="network" class="px-4.5 font-bold">{$i18n.send.text.network}:</label>
+<label for="network" class="font-bold">{$i18n.send.text.network}:</label>
 
 <div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>
 		<option disabled selected value={undefined} class="hidden"
-			><span class="description">{$i18n.send.placeholder.select_network}</span></option
+			>{$i18n.send.placeholder.select_network}</option
 		>
 		<DropdownItem value={ETHEREUM_NETWORK.name}>{ETHEREUM_NETWORK.name}</DropdownItem>
 

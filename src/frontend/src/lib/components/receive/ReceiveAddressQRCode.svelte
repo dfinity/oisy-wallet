@@ -20,7 +20,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<ContentWithToolbar minHeight="50vh">
+<ContentWithToolbar styleClass="min-h-50vh">
 	<ReceiveAddressQRCodeContent
 		{address}
 		{addressLabel}
@@ -32,7 +32,7 @@
 		on:click
 	/>
 
-	<Button colorStyle="secondary" fullWidth on:click={() => dispatch('icBack')} slot="toolbar">
+	<Button colorStyle="secondary-light" fullWidth on:click={() => dispatch('icBack')} slot="toolbar">
 		{$i18n.core.text.back}
 	</Button>
 </ContentWithToolbar>

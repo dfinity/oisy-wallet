@@ -13,6 +13,7 @@
 
 	export let transaction: EthTransactionUi;
 	export let token: Token;
+	export let iconType: 'token' | 'transaction' = 'transaction';
 
 	let value: BigNumber;
 	let timestamp: number | undefined;
@@ -25,7 +26,7 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	$: ({ value, timestamp, displayTimestamp, uiType: type } = transaction);
+	$: ({ value, timestamp, displayTimestamp, type } = transaction);
 
 	let ckTokenSymbol: string;
 	$: ckTokenSymbol = isSupportedEthToken(token)
@@ -67,12 +68,13 @@
 </script>
 
 <Transaction
-	on:click={() => modalStore.openEthTransaction(transaction)}
+	on:click={() => modalStore.openEthTransaction({ transaction, token })}
 	{amount}
 	{type}
 	timestamp={transactionDate}
 	{status}
 	{token}
+	{iconType}
 >
 	{label}
 </Transaction>

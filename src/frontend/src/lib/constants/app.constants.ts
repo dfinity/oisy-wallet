@@ -51,18 +51,34 @@ export const BACKEND_CANISTER_ID = LOCAL
 
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
+export const REWARDS_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_REWARDS_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_REWARDS_CANISTER_ID
+		: import.meta.env.VITE_IC_REWARDS_CANISTER_ID;
+
 export const SIGNER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_SIGNER_CANISTER_ID
 	: STAGING
 		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
 		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
 
+export const KONG_BACKEND_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_KONG_BACKEND_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_KONG_BACKEND_CANISTER_ID
+		: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
+
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
-export const AUTH_DERIVATION_ORIGIN = import.meta.env.VITE_AUTH_DERIVATION_ORIGIN;
+export const AUTH_DERIVATION_ORIGIN = BETA
+	? 'https://oisy.com'
+	: STAGING
+		? 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io'
+		: undefined;
 
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;
@@ -75,14 +91,13 @@ export const AUTH_TIMER_INTERVAL = 1000;
 // From FI team:
 // On mainnet, the index runs its indexing function every second. The time to see a new transaction in the index is <=1 second plus the time required by the indexing function
 // (however)
-// ICP Index has not been upgraded yet so right know for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second and we want to change the ICP one too eventually. We just didn't get to work on it yet
+// ICP Index has not been upgraded yet so right now for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
 export const INDEX_RELOAD_DELAY = 2000;
 
 // Date and time
 export const SECONDS_IN_MINUTE = 60;
 export const MINUTES_IN_HOUR = 60;
 export const HOURS_IN_DAY = 24;
-export const DAYS_IN_NON_LEAP_YEAR = 365;
 
 export const SECONDS_IN_HOUR = SECONDS_IN_MINUTE * MINUTES_IN_HOUR;
 export const SECONDS_IN_DAY = SECONDS_IN_HOUR * HOURS_IN_DAY;
@@ -103,3 +118,9 @@ export const ZERO = BigNumber.from(0n);
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+
+// VIP
+export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+
+// User Snapshot
+export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000; // 5 minutes in milliseconds

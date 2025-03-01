@@ -1,4 +1,6 @@
 <script lang="ts">
+	// TODO: this component is deprecated and will be replaced with EthFeeDisplay in the new send/convert flow UI
+
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
@@ -44,9 +46,9 @@
 	});
 </script>
 
-<label for="balance" class="px-4.5 font-bold"><Html text={$i18n.fee.text.max_fee_eth} /></label>
+<label for="max-fee-eth" class="font-bold"><Html text={$i18n.fee.text.max_fee_eth} /></label>
 
-<div id="balance" class="px-4.5 mb-4 min-h-6 break-all font-normal">
+<div id="max-fee-eth" class="mb-4 min-h-6 break-all font-normal">
 	{#if nonNullish(fee) && nonNullish($feeSymbolStore) && nonNullish($feeTokenIdStore) && nonNullish($feeDecimalsStore)}
 		<FeeAmountDisplay
 			{fee}

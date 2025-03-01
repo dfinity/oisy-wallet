@@ -6,6 +6,7 @@ import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { toastsStore } from '@dfinity/gix-components';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { Principal } from '@dfinity/principal';
@@ -35,12 +36,7 @@ describe('request-pouh-credential.services', () => {
 
 		const identity = Ed25519KeyIdentity.generate();
 
-		const initialUserProfile: UserProfile = {
-			version: [],
-			created_timestamp: 1234n,
-			updated_timestamp: 1234n,
-			credentials: []
-		};
+		const initialUserProfile: UserProfile = { ...mockUserProfile };
 
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -55,9 +51,7 @@ describe('request-pouh-credential.services', () => {
 		it('should request credential validate it and store it', async () => {
 			addUserCredentialMock.mockResolvedValueOnce({ Ok: null });
 			const userProfileWithCredential: UserProfile = {
-				version: [],
-				created_timestamp: 1234n,
-				updated_timestamp: 1234n,
+				...mockUserProfile,
 				credentials: [
 					{
 						issuer: 'pouh',

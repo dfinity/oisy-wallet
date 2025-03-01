@@ -5,8 +5,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 export const mockIcrcCustomToken: IcrcCustomToken = {
 	enabled: false,
 	...mockValidIcToken,
-	alternativeName: 'test',
-	indexCanisterVersion: 'up-to-date'
+	alternativeName: 'test'
 };
 
 export const mockIcrcCustomTokens: IcrcCustomToken[] = [

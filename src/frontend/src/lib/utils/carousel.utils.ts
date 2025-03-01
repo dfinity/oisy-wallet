@@ -38,7 +38,7 @@ export const extendCarouselSliderFrame = ({
 	slides: Node[];
 	slideWidth: number;
 } & CommonParams) => {
-	if (isNullish(sliderFrame)) {
+	if (isNullish(sliderFrame) || slides.length === 0) {
 		return;
 	}
 

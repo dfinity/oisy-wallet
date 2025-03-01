@@ -5,12 +5,14 @@
 	import { slide } from 'svelte/transition';
 	import MaxButton from '$lib/components/common/MaxButton.svelte';
 	import InputCurrency from '$lib/components/ui/InputCurrency.svelte';
+	import { AMOUNT_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let tokenDecimals: number | undefined = undefined;
 	export let placeholder: string = $i18n.core.text.amount;
 	export let customValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
@@ -55,18 +57,18 @@
 	export const triggerValidate = debounceValidate;
 </script>
 
-<label for="amount" class="px-4.5 font-bold">{$i18n.core.text.amount}</label>
+<label for="amount" class="font-bold">{$i18n.core.text.amount}</label>
 <InputCurrency
 	name="amount"
 	bind:value={amount}
 	decimals={tokenDecimals}
 	{placeholder}
-	testId="amount-input"
+	testId={AMOUNT_INPUT}
 	on:nnsInput={onInput}
 >
 	<MaxButton slot="inner-end" on:click={onMax} disabled={isNullish(calculateMax)} />
 </InputCurrency>
 
 {#if nonNullish(error)}
-	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">{error.message}</p>
+	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">{error.message}</p>
 {/if}

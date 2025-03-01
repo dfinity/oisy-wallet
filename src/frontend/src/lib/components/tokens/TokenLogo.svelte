@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { ComponentType } from 'svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
@@ -7,7 +8,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let data: CardData;
-	export let color: 'dust' | 'off-white' | 'white' = 'dust';
+	export let color: 'off-white' | 'white' = 'off-white';
 	export let badge:
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
@@ -18,11 +19,11 @@
 	export let testId: string | undefined = undefined;
 	export let badgeTestId: string | undefined = undefined;
 
-	const {
-		icon,
-		name,
-		network: { name: networkName, icon: networkIcon, iconBW: networkIconBW }
-	} = data;
+	let icon: CardData['icon'];
+	let name: CardData['name'];
+	let network: CardData['network'];
+
+	$: ({ icon, name, network } = data);
 </script>
 
 <div class="relative">
@@ -36,17 +37,17 @@
 	/>
 	{#if badge?.type === 'tokenCount' && badge.count > 0}
 		<span
-			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-white text-sm font-semibold text-[var(--color-secondary)]"
-			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: data.name })}
+			class="absolute -right-2.5 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+			aria-label={replacePlaceholders($i18n.tokens.alt.token_group_number, { $token: name })}
 			data-tid={`token-count-${badgeTestId}`}
 		>
 			{badge.count}
 		</span>
 	{:else if badge?.type === 'network'}
 		<div class="absolute -bottom-1 -right-1">
-			<Logo
-				src={badge.blackAndWhite ? networkIconBW : networkIcon}
-				alt={replacePlaceholders($i18n.core.alt.logo, { $name: networkName })}
+			<NetworkLogo
+				{network}
+				blackAndWhite={badge.blackAndWhite}
 				{color}
 				testId={`network-${badgeTestId}`}
 			/>
@@ -54,7 +55,7 @@
 	{:else if badge?.type === 'icon'}
 		<!-- TODO: use new mapping color when merged-->
 		<div
-			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-white"
+			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
 			aria-label={badge.ariaLabel}
 			data-tid={`icon-${badgeTestId}`}
 		>

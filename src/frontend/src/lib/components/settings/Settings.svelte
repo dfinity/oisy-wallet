@@ -5,13 +5,14 @@
 	import { fade } from 'svelte/transition';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
+	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
-	import { authSignedIn, authIdentity } from '$lib/derived/auth.derived';
+	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
-	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { busy } from '$lib/stores/busy.store';
@@ -41,27 +42,18 @@
 			}
 		}
 	};
-
-	$: {
-		if ($authSignedIn && POUH_ENABLED) {
-			loadUserProfile({ identity });
-		}
-	}
 </script>
 
 <KeyValuePairInfo>
-	<svelte:fragment slot="key"
-		><span class="font-bold">{$i18n.settings.text.principal}:</span></svelte:fragment
-	>
-	<svelte:fragment slot="value"
-		><output class="break-all"
-			>{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}</output
-		><Copy
-			inline
-			value={principal?.toText() ?? ''}
-			text={$i18n.settings.text.principal_copied}
-		/></svelte:fragment
-	>
+	<svelte:fragment slot="key">
+		<span class="font-bold">{$i18n.settings.text.principal}:</span>
+	</svelte:fragment>
+	<svelte:fragment slot="value">
+		<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
+			{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
+		</output>
+		<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
+	</svelte:fragment>
 	<svelte:fragment slot="info">
 		{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
 	</svelte:fragment>
@@ -140,5 +132,10 @@
 		</div>
 	</div>
 {/if}
+
+<div class="mt-10">
+	<h2 class="mb-4 pb-1 text-base">{$i18n.settings.text.appearance}:</h2>
+	<ThemeSelector />
+</div>
 
 <SettingsVersion />

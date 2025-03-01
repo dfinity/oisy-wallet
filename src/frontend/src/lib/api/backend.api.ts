@@ -10,6 +10,7 @@ import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
+	AddUserHiddenDappIdParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
@@ -155,4 +156,13 @@ const backendCanister = async ({
 	}
 
 	return canister;
+};
+
+export const addUserHiddenDappId = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<AddUserHiddenDappIdParams>): Promise<void> => {
+	const { addUserHiddenDappId } = await backendCanister({ identity });
+
+	return addUserHiddenDappId(params);
 };

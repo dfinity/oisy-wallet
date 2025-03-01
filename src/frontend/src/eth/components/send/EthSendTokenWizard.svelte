@@ -4,8 +4,8 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import SendForm from '$eth/components/send/SendForm.svelte';
-	import SendReview from '$eth/components/send/SendReview.svelte';
+	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
+	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -42,6 +42,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -63,7 +64,7 @@
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let sendProgressStep: string;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.
@@ -236,6 +237,8 @@
 
 <FeeContext
 	bind:this={feeContext}
+	sendToken={$sendToken}
+	sendTokenId={$sendTokenId}
 	{amount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
@@ -244,7 +247,7 @@
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SendReview
+		<EthSendReview
 			on:icBack
 			on:icSend={send}
 			{destination}
@@ -259,7 +262,7 @@
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SendForm
+		<EthSendForm
 			on:icNext
 			on:icClose={close}
 			on:icQRCodeScan
@@ -277,7 +280,7 @@
 					<ButtonCancel on:click={close} />
 				{/if}
 			</svelte:fragment>
-		</SendForm>
+		</EthSendForm>
 	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 		<SendQRCodeScan
 			expectedToken={$sendToken}

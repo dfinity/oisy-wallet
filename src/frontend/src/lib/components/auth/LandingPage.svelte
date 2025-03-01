@@ -1,9 +1,9 @@
 <script lang="ts">
-	import preview from '$lib/assets/preview.webp';
+	import { themeStore } from '@dfinity/gix-components';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { i18n } from '$lib/stores/i18n.store.js';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let ariaLabel: string;
 	$: ariaLabel = replaceOisyPlaceholders($i18n.auth.alt.preview);
@@ -21,7 +21,9 @@
 		class="ml-auto min-w-[1127px] pt-12 md:m-0 md:flex md:h-full md:content-center md:items-center"
 	>
 		<div class="w-full md:h-md:mt-auto">
-			<Img src={preview} alt={ariaLabel} />
+			{#await import(`$lib/assets/main_image-${$themeStore ?? 'light'}.webp`) then { default: src }}
+				<Img {src} alt={ariaLabel} />
+			{/await}
 		</div>
 	</div>
 </div>

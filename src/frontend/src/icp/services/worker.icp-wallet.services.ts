@@ -1,4 +1,4 @@
-import { ICP_TOKEN_ID } from '$env/tokens.env';
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { syncWallet } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
@@ -13,7 +13,7 @@ import type {
 } from '$lib/types/post-message';
 
 export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
-	const WalletWorker = await import('$icp/workers/icp-wallet.worker?worker');
+	const WalletWorker = await import('$lib/workers/workers?worker');
 	const worker: Worker = new WalletWorker.default();
 
 	worker.onmessage = ({

@@ -16,7 +16,7 @@
 </script>
 
 {#if displayInfo}
-	<MessageBox>
+	<MessageBox testId="send-info-message-box">
 		<span>
 			{#if sendPurpose === 'convert-eth-to-cketh'}
 				{$i18n.convert.text.cketh_conversions_may_take}

@@ -7,9 +7,6 @@ outputs: {}
 runs:
   using: 'composite'
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Update system packages
       run: sudo apt-get update
       shell: bash

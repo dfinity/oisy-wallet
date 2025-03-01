@@ -4,15 +4,17 @@ import type {
 	RejectionCode_1,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
+import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { mock } from 'vitest-mock-extended';
 
@@ -21,15 +23,6 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	return {
 		...actual,
 		LOCAL: false
-	};
-});
-
-vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
 	};
 });
 
@@ -579,6 +572,91 @@ describe('signer.canister', () => {
 			const res = sendBtc(sendBtcParams);
 
 			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('getSchnorrPublicKey', () => {
+		it('returns correct Schnorr public key', async () => {
+			const publicKey = [1, 2, 3];
+			const response = { public_key: publicKey, chain_code: [4, 5, 6] };
+			service.schnorr_public_key.mockResolvedValue({ Ok: [response] });
+
+			const { getSchnorrPublicKey } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
+
+			expect(res).toEqual(publicKey);
+			expect(service.schnorr_public_key).toHaveBeenCalledWith(
+				{
+					key_id: SOLANA_KEY_ID,
+					canister_id: [],
+					derivation_path: mapDerivationPath(['test'])
+				},
+				[SIGNER_PAYMENT_TYPE]
+			);
+		});
+
+		it('should throw an error if schnorr_public_key throws', async () => {
+			service.schnorr_public_key.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { getSchnorrPublicKey } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('signWithSchnorr', () => {
+		const message = [1, 2, 3];
+		const signature = [4, 5, 6];
+
+		it('signs with Schnorr', async () => {
+			service.schnorr_sign.mockResolvedValue({ Ok: [{ signature }] });
+
+			const { signWithSchnorr } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await signWithSchnorr({
+				message,
+				derivationPath: ['test'],
+				keyId: SOLANA_KEY_ID
+			});
+
+			expect(res).toEqual(signature);
+			expect(service.schnorr_sign).toHaveBeenCalledWith(
+				{
+					key_id: SOLANA_KEY_ID,
+					derivation_path: mapDerivationPath(['test']),
+					message
+				},
+				[SIGNER_PAYMENT_TYPE]
+			);
+		});
+
+		it('should throw an error if schnorr_sign throws', async () => {
+			service.schnorr_sign.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { signWithSchnorr } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signWithSchnorr({
+				message,
+				derivationPath: ['test'],
+				keyId: SOLANA_KEY_ID
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 });

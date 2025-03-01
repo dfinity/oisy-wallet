@@ -1,6 +1,6 @@
 # .github/release-drafter.yml
 
-name-template: 'Release v{{version}}'
+name-template: 'v{{version}}'
 tag-template: 'v{{version}}'
 categories:
   - title: '🚀 Features'
@@ -33,4 +33,4 @@ change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add
 template: |
   ## Changes
 
-  $CHANGES  
+  $CHANGES

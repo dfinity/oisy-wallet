@@ -1,117 +1,352 @@
-import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
+import * as appNavigation from '$app/navigation';
+import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
 import {
+	AppPath,
+	NETWORK_PARAM,
+	ROUTE_ID_GROUP_APP,
+	TOKEN_PARAM,
+	URI_PARAM
+} from '$lib/constants/routes.constants';
+import {
+	back,
+	gotoReplaceRoot,
 	isRouteActivity,
+	isRouteAirdrops,
 	isRouteDappExplorer,
 	isRouteSettings,
 	isRouteTokens,
 	isRouteTransactions,
+	loadRouteParams,
+	networkParam,
+	networkUrl,
+	removeSearchParam,
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';
-import type { Page } from '@sveltejs/kit';
-import { describe, expect } from 'vitest';
+import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
-describe('resetRouteParams', () => {
-	it('should return an object with all values set to null', () => {
-		const result = resetRouteParams();
+describe('nav.utils', () => {
+	const mockGoTo = vi.fn();
 
-		Object.keys(result).forEach((key) => {
-			expect(result[key as keyof RouteParams]).toBeNull();
-		});
-	});
-});
+	beforeAll(() => {
+		vi.resetAllMocks();
 
-describe('Route Check Functions', () => {
-	const mockPage = (id: string): Page => ({
-		params: {},
-		route: { id },
-		status: 200,
-		error: null,
-		data: {},
-		url: URL.prototype,
-		state: {},
-		form: null
+		vi.spyOn(appNavigation, 'goto').mockImplementation(mockGoTo);
 	});
 
-	describe('isRouteTransactions', () => {
-		it('should return true when route id matches Transactions path', () => {
-			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(
-				true
-			);
+	describe('networkParam', () => {
+		it('should return an empty string when networkId is undefined', () => {
+			expect(networkParam(undefined)).toBe('');
 		});
 
-		it('should return false when route id does not match Transactions path', () => {
-			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
-
-			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
-
-			expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
-
-			expect(isRouteTransactions(mockPage(`/anotherGroup/${AppPath.Transactions}`))).toBe(false);
+		it('should return the formatted network parameter when networkId is provided', () => {
+			expect(networkParam(ICP_NETWORK_ID)).toBe(`${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
 		});
 	});
 
-	describe('isRouteSettings', () => {
-		it('should return true when route id matches Settings path', () => {
-			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(true);
+	describe('networkUrl', () => {
+		const mockPath = AppPath.Activity;
+		const mockNetworkId = ETHEREUM_NETWORK_ID;
+		const mockQueryParam = `${NETWORK_PARAM}=${mockNetworkId.description}`;
+		const mockFromRoute: NavigationTarget = {
+			url: new URL(`https://example.com/?${NETWORK_PARAM}=test-network`)
+		} as unknown as NavigationTarget;
+
+		it('should return the path without query params when networkId and fromRoute are undefined', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: undefined,
+					usePreviousRoute: false,
+					fromRoute: null
+				})
+			).toBe(mockPath);
 		});
 
-		it('should return false when route id does not match Settings path', () => {
-			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+		it('should return the path with query params when networkId is defined and usePreviousRoute is false', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					usePreviousRoute: false,
+					fromRoute: null
+				})
+			).toBe(`${mockPath}?${mockQueryParam}`);
+		});
 
-			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
+		it('should return the path without query params when usePreviousRoute is true but fromRoute is null', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					usePreviousRoute: true,
+					fromRoute: null
+				})
+			).toBe(mockPath);
+		});
 
-			expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+		it('should return the path with query params from fromRoute when usePreviousRoute is true and fromRoute is non-null', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: undefined,
+					usePreviousRoute: true,
+					fromRoute: mockFromRoute
+				})
+			).toBe(`${mockPath}?${NETWORK_PARAM}=test-network`);
+		});
 
-			expect(isRouteSettings(mockPage(`/anotherGroup/${AppPath.Settings}`))).toBe(false);
+		it('should prioritize fromRoute query params when usePreviousRoute is true and both networkId and fromRoute are provided', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					usePreviousRoute: true,
+					fromRoute: mockFromRoute
+				})
+			).toBe(`${mockPath}?${NETWORK_PARAM}=test-network`);
+		});
+
+		it('should return the path without query params from fromRoute when usePreviousRoute is true and ther is no network selected', () => {
+			expect(
+				networkUrl({
+					path: mockPath,
+					networkId: mockNetworkId,
+					usePreviousRoute: true,
+					fromRoute: { url: new URL(`https://example.com/`) } as unknown as NavigationTarget
+				})
+			).toBe(mockPath);
 		});
 	});
 
-	describe('isRouteDappExplorer', () => {
-		it('should return true when route id matches Explore path', () => {
-			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Explore}`))).toBe(true);
+	describe('back', () => {
+		it('should call history.back when pop is true', async () => {
+			const historyBackMock = vi.spyOn(history, 'back');
+			await back({ pop: true });
+			expect(historyBackMock).toHaveBeenCalled();
 		});
 
-		it('should return false when route id does not match Explore path', () => {
-			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
-
-			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
-
-			expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
-
-			expect(isRouteDappExplorer(mockPage(`/anotherGroup/${AppPath.Explore}`))).toBe(false);
+		it('should navigate to "/" when pop is false', async () => {
+			await back({ pop: false });
+			expect(mockGoTo).toHaveBeenCalledWith('/');
 		});
 	});
 
-	describe('isRouteActivity', () => {
-		it('should return true when route id matches Activity path', () => {
-			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Activity}`))).toBe(true);
-		});
-
-		it('should return false when route id does not match Activity path', () => {
-			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
-
-			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
-
-			expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
-
-			expect(isRouteActivity(mockPage(`/anotherGroup/${AppPath.Activity}`))).toBe(false);
+	describe('gotoReplaceRoot', () => {
+		it('should navigate to "/" with replaceState', async () => {
+			await gotoReplaceRoot();
+			expect(mockGoTo).toHaveBeenCalledWith('/', { replaceState: true });
 		});
 	});
 
-	describe('isRouteTokens', () => {
-		it('should return true when route id matches ROUTE_ID_GROUP_APP exactly', () => {
-			expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBe(true);
+	describe('removeSearchParam', () => {
+		it('should remove search param from URL', () => {
+			const pushStateMock = vi.spyOn(appNavigation, 'pushState').mockImplementation(vi.fn());
+			const urlString = 'https://example.com/';
+			const url = new URL(urlString);
+			const searchParams = new URLSearchParams({
+				code: '123'
+			});
+			url.search = searchParams.toString();
+
+			expect(url.toString()).toBe(`${urlString}?code=123`);
+
+			removeSearchParam({ url, searchParam: 'code' });
+
+			expect(pushStateMock).toHaveBeenCalledWith(url, {});
+			expect(url.toString()).toBe(urlString);
+		});
+	});
+
+	describe('loadRouteParams', () => {
+		it('should return undefined values if not in a browser', () => {
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn((_) => null)
+					}
+				}
+			} as unknown as LoadEvent);
+			expect(result).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null
+			});
 		});
 
-		it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {
-			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+		it('should parse route parameters correctly', () => {
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn((key) => (key === TOKEN_PARAM ? 'testToken' : null))
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: 'testToken',
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null
+			});
 
-			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn((key) => (key === NETWORK_PARAM ? 'testNetwork' : null))
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: 'testNetwork',
+				[URI_PARAM]: null
+			});
 
-			expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn((key) => (key === URI_PARAM ? 'testURI' : null))
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: 'testURI'
+			});
+		});
+	});
 
-			expect(isRouteTokens(mockPage('/anotherGroup'))).toBe(false);
+	describe('resetRouteParams', () => {
+		it('should return an object with all values set to null', () => {
+			const result = resetRouteParams();
+
+			Object.keys(result).forEach((key) => {
+				expect(result[key as keyof RouteParams]).toBeNull();
+			});
+		});
+	});
+
+	describe('Route Check Functions', () => {
+		const mockPage = (id: string): Page => ({
+			params: {},
+			route: { id },
+			status: 200,
+			error: null,
+			data: {},
+			url: URL.prototype,
+			state: {},
+			form: null
+		});
+
+		describe('isRouteTransactions', () => {
+			it('should return true when route id matches Transactions path', () => {
+				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(
+					true
+				);
+			});
+
+			it('should return false when route id does not match Transactions path', () => {
+				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(
+					false
+				);
+
+				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+				expect(isRouteTransactions(mockPage(`/anotherGroup/${AppPath.Transactions}`))).toBe(false);
+			});
+		});
+
+		describe('isRouteSettings', () => {
+			it('should return true when route id matches Settings path', () => {
+				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(true);
+			});
+
+			it('should return false when route id does not match Settings path', () => {
+				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(
+					false
+				);
+
+				expect(isRouteSettings(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+				expect(isRouteSettings(mockPage(`/anotherGroup/${AppPath.Settings}`))).toBe(false);
+			});
+		});
+
+		describe('isRouteDappExplorer', () => {
+			it('should return true when route id matches Explore path', () => {
+				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Explore}`))).toBe(true);
+			});
+
+			it('should return false when route id does not match Explore path', () => {
+				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(
+					false
+				);
+
+				expect(isRouteDappExplorer(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+				expect(isRouteDappExplorer(mockPage(`/anotherGroup/${AppPath.Explore}`))).toBe(false);
+			});
+		});
+
+		describe('isRouteActivity', () => {
+			it('should return true when route id matches Activity path', () => {
+				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Activity}`))).toBe(true);
+			});
+
+			it('should return false when route id does not match Activity path', () => {
+				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+				expect(isRouteActivity(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+				expect(isRouteActivity(mockPage(`/anotherGroup/${AppPath.Activity}`))).toBe(false);
+			});
+		});
+
+		describe('isRouteTokens', () => {
+			it('should return true when route id matches ROUTE_ID_GROUP_APP exactly', () => {
+				expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBe(true);
+			});
+
+			it('should return true when route id matches Wallet Connect path', () => {
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`))).toBe(true);
+			});
+
+			it('should return false when route id does not match ROUTE_ID_GROUP_APP exactly', () => {
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`))).toBe(false);
+
+				expect(isRouteTokens(mockPage('/anotherGroup'))).toBe(false);
+			});
+		});
+
+		describe('isRouteAirdrops', () => {
+			it('should return true when route id matches Airdrops path', () => {
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Airdrops}`))).toBe(true);
+			});
+
+			it('should return false when route id does not match Airdrops path', () => {
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+
+				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+
+				expect(isRouteAirdrops(mockPage(`/anotherGroup/${AppPath.Airdrops}`))).toBe(false);
+			});
 		});
 	});
 });

@@ -11,10 +11,11 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
+	import type { OptionToken } from '$lib/types/token';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
+	export let token: OptionToken;
 
 	let id: bigint | string;
 	let from: string | undefined;
@@ -82,7 +83,9 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
 
 				{#if nonNullish(fromLabel)}
-					<p class="mb-0.5 first-letter:capitalize"><IcTransactionLabel label={fromLabel} /></p>
+					<p class="mb-0.5 first-letter:capitalize">
+						<IcTransactionLabel label={fromLabel} {token} />
+					</p>
 				{/if}
 
 				{#if nonNullish(from)}
@@ -110,7 +113,9 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.to}</svelte:fragment>
 
 				{#if nonNullish(toLabel)}
-					<p class="mb-0.5 first-letter:capitalize"><IcTransactionLabel label={toLabel} /></p>
+					<p class="mb-0.5 first-letter:capitalize">
+						<IcTransactionLabel label={toLabel} {token} />
+					</p>
 				{/if}
 
 				{#if nonNullish(to)}
@@ -136,14 +141,14 @@
 		{#if nonNullish(value)}
 			<Value ref="amount">
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-				{#if nonNullish($token)}
+				{#if nonNullish(token)}
 					<output>
 						{formatToken({
 							value: BigNumber.from(value),
-							unitName: $token.decimals,
-							displayDecimals: $token.decimals
+							unitName: token.decimals,
+							displayDecimals: token.decimals
 						})}
-						{$token.symbol}
+						{token.symbol}
 					</output>
 				{:else}
 					&ZeroWidthSpace;
@@ -151,6 +156,6 @@
 			</Value>
 		{/if}
 
-		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
+		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>

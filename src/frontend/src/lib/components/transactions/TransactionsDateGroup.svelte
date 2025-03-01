@@ -1,21 +1,33 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
+	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
+	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import type { AllTransactionsUi } from '$lib/types/transaction';
+	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction';
+	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 
 	export let date: string;
-	export let transactions: AllTransactionsUi;
+	export let transactions: AllTransactionUiWithCmpNonEmptyList;
 </script>
 
 {#if transactions.length > 0}
 	<div class="mb-5 flex flex-col gap-4">
 		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{date}</span>
 
-		{#each transactions as transaction, index (`${transaction.id}-${index}`)}
-			{@const { component, token } = transaction}
+		{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${index}`)}
+			{@const { component, token, transaction } = transactionUi}
 
 			<div in:slide={SLIDE_DURATION}>
-				<svelte:component this={component} {transaction} {token} />
+				{#if component === 'bitcoin'}
+					<BtcTransaction {transaction} {token} iconType="token" />
+				{:else if component === 'ethereum'}
+					<EthTransaction {transaction} {token} iconType="token" />
+				{:else if component === 'solana'}
+					<SolTransaction {transaction} {token} iconType="token" />
+				{:else}
+					<IcTransaction {transaction} {token} iconType="token" />
+				{/if}
 			</div>
 		{/each}
 	</div>

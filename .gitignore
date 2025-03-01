@@ -17,6 +17,9 @@ bitcoin*.gz
 # rust and downloaded wasm|did files
 target/
 
+# files used by docker buildx
+in/
+
 # files created by docker buildx
 out/
 
@@ -50,6 +53,7 @@ backend-v*.wasm.gz
 /playwright/.cache/
 pocket-ic
 
-e2e/*-snapshots/*-darwin.png
-
 coverage/
+
+# Frontend reproducibility script output folder
+tmp

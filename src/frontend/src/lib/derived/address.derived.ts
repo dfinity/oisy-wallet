@@ -2,13 +2,19 @@ import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
-	ethAddressStore
+	ethAddressStore,
+	solAddressDevnetStore,
+	solAddressLocalnetStore,
+	solAddressMainnetStore,
+	solAddressTestnetStore
 } from '$lib/stores/address.store';
 import type {
 	BtcAddress,
 	EthAddress,
 	OptionBtcAddress,
-	OptionEthAddress
+	OptionEthAddress,
+	OptionSolAddress,
+	SolAddress
 } from '$lib/types/address';
 import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
@@ -47,4 +53,24 @@ export const ethAddressCertified: Readable<boolean> = derived(
 export const ethAddressNotCertified: Readable<boolean> = derived(
 	[ethAddressCertified],
 	([$ethAddressCertified]) => !$ethAddressCertified
+);
+
+export const solAddressMainnet: Readable<OptionSolAddress> = derived(
+	[solAddressMainnetStore],
+	([$solAddressMainnetStore]) => mapAddress<SolAddress>($solAddressMainnetStore)
+);
+
+export const solAddressTestnet: Readable<OptionSolAddress> = derived(
+	[solAddressTestnetStore],
+	([$solAddressTestnetStore]) => mapAddress<SolAddress>($solAddressTestnetStore)
+);
+
+export const solAddressDevnet: Readable<OptionSolAddress> = derived(
+	[solAddressDevnetStore],
+	([$solAddressDevnetStore]) => mapAddress<SolAddress>($solAddressDevnetStore)
+);
+
+export const solAddressLocal: Readable<OptionSolAddress> = derived(
+	[solAddressLocalnetStore],
+	([$solAddressLocalnetStore]) => mapAddress<SolAddress>($solAddressLocalnetStore)
 );

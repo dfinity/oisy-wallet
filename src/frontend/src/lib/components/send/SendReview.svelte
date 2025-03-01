@@ -9,20 +9,29 @@
 	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { OptionAmount } from '$lib/types/send';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: OptionAmount = undefined;
 	export let source: string;
 	export let disabled: boolean | undefined = false;
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
 	{#if nonNullish($sendToken)}
-		<SendData {amount} {destination} token={$sendToken} balance={$sendBalance} {source}>
+		<SendData
+			{amount}
+			{destination}
+			token={$sendToken}
+			balance={$sendBalance}
+			exchangeRate={$sendTokenExchangeRate}
+			{source}
+		>
 			<slot name="fee" slot="fee" />
 
 			<slot name="network" slot="network" />

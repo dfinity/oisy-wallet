@@ -1,9 +1,13 @@
+use std::fmt::Debug;
+
 use candid::{CandidType, Deserialize, Principal};
 use ic_cdk_timers::TimerId;
-use std::fmt::Debug;
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
+
+#[cfg(test)]
+mod tests;
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
@@ -28,8 +32,13 @@ pub struct InitArg {
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
-    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
+    /// `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id
+    /// alias.
+    pub derivation_origin: Option<String>,
 }
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
@@ -65,15 +74,21 @@ pub enum Arg {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Config {
     pub ecdsa_key_name: String,
-    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
+    // A list of allowed callers to restrict access to endpoints that do not particularly check or
+    // use the caller()
     pub allowed_callers: Vec<Principal>,
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
     /// Enables or disables APIs
     pub api: Option<Guards>,
-    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in `btc_select_user_utxos_fee`
+    /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
+    /// `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
+    /// Derivation origins when logging in the dapp with Internet Identity.
+    /// Used to validate the id alias credential which includes the derivation origin of the id
+    /// alias.
+    pub derivation_origin: Option<String>,
 }
 
 pub mod transaction {
@@ -109,9 +124,10 @@ pub trait TokenVersion: Debug {
 
 /// ERC20 specific user defined tokens
 pub mod token {
-    use crate::types::Version;
     use candid::{CandidType, Deserialize};
     use serde::Serialize;
+
+    use crate::types::Version;
 
     pub type ChainId = u64;
 
@@ -132,35 +148,69 @@ pub mod token {
     }
 }
 
+/// The default maximum length of a token symbol.
+pub const MAX_SYMBOL_LENGTH: usize = 20;
+
 /// Extendable custom user defined tokens
 pub mod custom_token {
-    use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
+
+    use crate::types::Version;
 
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
 
+    /// An ICRC-1 compliant token on the Internet Computer.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
         pub index_id: Option<IndexId>,
     }
 
+    /// A Solana token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub enum Token {
-        Icrc(IcrcToken),
+    #[serde(remote = "Self")]
+    pub struct SplToken {
+        pub token_address: SplTokenId,
+        pub symbol: Option<String>,
+        pub decimals: Option<u8>,
     }
 
+    /// A network-specific unique Solana token identifier.
+    #[derive(CandidType, Clone, Eq, PartialEq, Deserialize, Debug)]
+    #[serde(remote = "Self")]
+    pub struct SplTokenId(pub String);
+
+    /// A variant describing any token
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[repr(u8)]
+    pub enum Token {
+        Icrc(IcrcToken) = 0,
+        SplMainnet(SplToken) = 1,
+        SplDevnet(SplToken) = 2,
+    }
+
+    /// User preferences for any token
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[serde(remote = "Self")]
     pub struct CustomToken {
         pub token: Token,
         pub enabled: bool,
         pub version: Option<Version>,
     }
 
+    /// A cross-chain token identifier.
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    #[serde(remote = "Self")]
+    #[repr(u8)]
     pub enum CustomTokenId {
-        Icrc(LedgerId),
+        /// An ICRC-1 compliant token on the Internet Computer mainnet.
+        Icrc(LedgerId) = 0,
+        /// A Solana token on the Solana mainnet.
+        SolMainnet(SplTokenId) = 1,
+        /// A Solana token on the Solana devnet.
+        SolDevnet(SplTokenId) = 2,
     }
 }
 
@@ -229,8 +279,9 @@ pub mod signer {
     use super::{CandidType, Debug, Deserialize};
     /// Types related to topping up the cycles ledger account for use with the signer.
     pub mod topup {
-        use super::{CandidType, Debug, Deserialize};
         use candid::Nat;
+
+        use super::{CandidType, Debug, Deserialize};
         /// A request to top up the cycles ledger.
         #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
         pub struct TopUpCyclesLedgerRequest {
@@ -256,22 +307,27 @@ pub mod signer {
                 }
                 Ok(())
             }
-            /// The requested threshold for topping up the cycles ledger, if provided, else the default.
+
+            /// The requested threshold for topping up the cycles ledger, if provided, else the
+            /// default.
             #[must_use]
             pub fn threshold(&self) -> Nat {
                 self.threshold
                     .clone()
                     .unwrap_or(Nat::from(DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD))
             }
-            /// The requested percentage of the backend's own canisters to send to the cycles ledger, if provided, else the default.
+
+            /// The requested percentage of the backend's own canisters to send to the cycles
+            /// ledger, if provided, else the default.
             #[must_use]
             pub fn percentage(&self) -> u8 {
                 self.percentage
                     .unwrap_or(DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE)
             }
         }
-        /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below this, it should be topped up.
-        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 10_000_000_000_000; // 10T
+        /// The default cycles ledger top up threshold.  If the cycles ledger balance falls below
+        /// this, it should be topped up.
+        pub const DEFAULT_CYCLES_LEDGER_TOP_UP_THRESHOLD: u128 = 50_000_000_000_000; // 50T
         /// The proportion of the backend canister's own cycles to send to the cycles ledger.
         pub const DEFAULT_CYCLES_LEDGER_TOP_UP_PERCENTAGE: u8 = 50;
         /// The minimum sensible percentage to send to the cycles ledger.
@@ -306,13 +362,70 @@ pub mod signer {
     }
 }
 
+pub mod dapp {
+    use candid::{CandidType, Deserialize};
+
+    use crate::types::Version;
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappCarouselSettings {
+        pub hidden_dapp_ids: Vec<String>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct DappSettings {
+        pub dapp_carousel: DappCarouselSettings,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AddDappSettingsError {
+        DappIdTooLong,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AddHiddenDappIdRequest {
+        pub dapp_id: String,
+        pub current_user_version: Option<Version>,
+    }
+
+    impl AddHiddenDappIdRequest {
+        /// The maximum supported dApp ID length.
+        pub const MAX_LEN: usize = 32;
+
+        /// Checks whether the request is syntactically valid
+        ///
+        /// # Errors
+        /// - If the dApp ID is too long.
+        pub fn check(&self) -> Result<(), AddDappSettingsError> {
+            (self.dapp_id.len() < Self::MAX_LEN)
+                .then_some(())
+                .ok_or(AddDappSettingsError::DappIdTooLong)
+        }
+    }
+}
+
+pub mod settings {
+    use candid::{CandidType, Deserialize};
+
+    use crate::types::dapp::DappSettings;
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct Settings {
+        pub dapp: DappSettings,
+    }
+}
+
 /// Types specifics to the user profile.
 pub mod user_profile {
-    use super::{CredentialType, Timestamp};
-    use crate::types::Version;
+    use std::collections::BTreeMap;
+
     use candid::{CandidType, Deserialize, Principal};
     use ic_verifiable_credentials::issuer_api::CredentialSpec;
-    use std::collections::BTreeMap;
+
+    use super::{CredentialType, Timestamp};
+    use crate::types::{settings::Settings, Version};
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {
@@ -324,6 +437,7 @@ pub mod user_profile {
     // Used in the endpoint
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
+        pub settings: Option<Settings>,
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,
@@ -332,6 +446,7 @@ pub mod user_profile {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
+        pub settings: Option<Settings>,
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: Timestamp,
         pub updated_timestamp: Timestamp,

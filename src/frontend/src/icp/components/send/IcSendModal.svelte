@@ -9,6 +9,7 @@
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { SendContextPurpose } from '$lib/stores/send.store';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -52,6 +53,9 @@
 		...otherSteps
 	];
 
+	let sendPurpose: SendContextPurpose;
+	$: sendPurpose = isNetworkIdEthereum(networkId) ? 'convert-cketh-to-eth' : 'send';
+
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
@@ -83,7 +87,7 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<SendTokenContext token={$token}>
+	<SendTokenContext token={$token} {sendPurpose}>
 		<IcSendTokenWizard
 			{source}
 			{currentStep}

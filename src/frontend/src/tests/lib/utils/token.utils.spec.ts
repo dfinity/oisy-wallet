@@ -1,11 +1,15 @@
-import * as NetworksModule from '$env/networks.icrc.env';
-import { IC_CKBTC_LEDGER_CANISTER_ID, IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
-import { LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
-import { USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
-import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
-import { ckErc20Production } from '$env/tokens.ckerc20.env';
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import * as NetworksModule from '$env/networks/networks.icrc.env';
+import {
+	IC_CKBTC_LEDGER_CANISTER_ID,
+	IC_CKETH_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
+import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
@@ -23,7 +27,7 @@ import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import { BigNumber } from 'alchemy-sdk';
-import { describe, type MockedFunction } from 'vitest';
+import type { MockedFunction } from 'vitest';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -98,6 +102,16 @@ describe('getMaxTransactionAmount', () => {
 			fee: BigNumber.from(fee),
 			tokenDecimals: tokenDecimals,
 			tokenStandard: 'erc20'
+		});
+		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+	});
+
+	it('should return the untouched amount if the token is SPL', () => {
+		const result = getMaxTransactionAmount({
+			balance: BigNumber.from(balance),
+			fee: BigNumber.from(fee),
+			tokenDecimals: tokenDecimals,
+			tokenStandard: 'spl'
 		});
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});

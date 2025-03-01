@@ -3,6 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import QRButton from '$lib/components/common/QRButton.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
+	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -21,11 +22,12 @@
 	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
-<label for="destination" class="px-4.5 font-bold">{$i18n.send.text.destination}:</label>
+<label for="destination" class="font-bold">{$i18n.send.text.destination}:</label>
 <InputTextWithAction
 	name="destination"
 	bind:value={destination}
 	placeholder={inputPlaceholder}
+	testId={DESTINATION_INPUT}
 	on:nnsInput
 >
 	<svelte:fragment slot="inner-end">
@@ -36,7 +38,7 @@
 </InputTextWithAction>
 
 {#if invalidDestination}
-	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">
+	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">
 		{$i18n.send.assertion.invalid_destination_address}
 	</p>
 {/if}

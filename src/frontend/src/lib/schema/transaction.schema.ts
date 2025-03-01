@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 const commonTypes = ['send', 'receive'] as const;
 
@@ -13,6 +13,8 @@ export const btcTransactionTypes = z.enum(commonTypes);
 export const ethTransactionTypes = z.enum([...commonTypes, ...ethSpecificTypes]);
 
 export const icpTransactionTypes = z.enum([...commonTypes, ...icpSpecificTypes]);
+
+export const solTransactionTypes = z.enum(commonTypes);
 
 export const TransactionTypeSchema = z.enum(allTypes);
 

@@ -2,6 +2,7 @@ name: E2E Tests
 
 on:
   pull_request:
+  merge_group:
   workflow_dispatch:
 
 concurrency:
@@ -9,7 +10,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   check-e2e-changes:
     runs-on: ubuntu-24.04
     outputs:
@@ -34,8 +34,8 @@ jobs:
         continue-on-error: false
 
   oisy-backend-wasm:
-    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
     runs-on: ubuntu-24.04
+    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
     needs: check-e2e-changes
     steps:
       - name: Checkout
@@ -43,14 +43,34 @@ jobs:
 
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
+        with:
+          network: local
 
   e2e:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    env:
+      MATRIX_OS: ${{ matrix.os }}
     if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
-    runs-on: ubuntu-24.04
     needs: oisy-backend-wasm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download WASM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend.wasm.gz
+          path: out/
+
+      - name: Prepare macOS
+        if: runner.os == 'macOS'
+        uses: ./.github/actions/prepare-macos
+
+      - name: Set Environment Variables
+        run: echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_E2E }}" >> $GITHUB_ENV
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
@@ -61,17 +81,29 @@ jobs:
       - name: Test
         run: npm run e2e:ci
 
-      - uses: actions/upload-artifact@v4
-        if: failure()
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.os }}
           path: playwright-report/
-          retention-days: 30
+          retention-days: 3
+
+      - name: Upload Playwright Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}
+          path: test-results/
+          retention-days: 3
 
   may-merge-e2e:
     if: always()
     needs: ['check-e2e-changes', 'e2e']
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-14]
     steps:
       - name: Cleared for merging
         run: |

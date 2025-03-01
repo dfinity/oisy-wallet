@@ -39,8 +39,8 @@ echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
 > To perform staging development, you'll need a `.env.staging` file.
 
 ```bash
-ENV=staging dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
-ENV=staging ./scripts/deploy.backend.sh
+dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
+dfx deploy backend --network staging
 ```
 
 ### Beta
@@ -49,16 +49,31 @@ ENV=staging ./scripts/deploy.backend.sh
 > Note that beta frontend points to production (IC) backend.
 
 ```bash
-ENV=beta dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
+dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
 ```
 
 ### IC
 
-> To perform production development, you'll need a `.env.production` file.
+Ensure that you have [`dfx-orbit`](https://github.com/dfinity/orbit/tree/main/tools/dfx-orbit) installed and are using the correct station:
+
+```
+dfx-orbit station show
+```
+
+> To perform production development, you'll need a `.env.production` file for the frontend. Then:
 
 ```bash
-ENV=ic dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
-ENV=ic ./scripts/deploy.backend.sh
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
+
+dfx-oisy request deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
+```
+
+For the backend:
+
+```bash
+scripts/docker-build
+
+dfx-orbit request canister install backend --mode upgrade --wasm out/backend.wasm.gz --arg-file out/backend.args.did
 ```
 
 ## Internationalization
@@ -89,6 +104,7 @@ A list of useful faucets and ERC20 tokens on Sepolia:
   - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
+- SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
 
 ## Testing
 
@@ -158,7 +174,7 @@ VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
 There are some important notes related to the BTC development:
 
 1. Wallet workers:
-   - Locally, only the Regex network wallet worker is launched
+   - Locally, only the Regtest network wallet worker is launched
    - On all other ens (staging, beta, prod), we launch Testnet and Mainnet workers
 2. Transactions:
    - To test them locally, you need to hardcode a mainnet BTC address with some txs inside. In the future, we plan to create mocks and use them during the local development.
