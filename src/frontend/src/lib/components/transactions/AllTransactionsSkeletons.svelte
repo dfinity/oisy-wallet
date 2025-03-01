@@ -1,45 +1,32 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import {
-		enabledBtcTokens,
 		enabledErc20Tokens,
 		enabledIcTokens
 	} from '$lib/derived/tokens.derived';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import { transactionsStoreIsLoading } from '$lib/utils/transactions.utils';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 
 	export let testIdPrefix: string | undefined = undefined;
 
-	let btcLoading: boolean;
-	$: btcLoading =
-		isNullish($btcTransactionsStore) ||
-		Object.getOwnPropertySymbols($btcTransactionsStore).length !== $enabledBtcTokens.length;
+	let foo =   [...$enabledIcTokens]
+	console.log(foo)
 
-	let ethLoading: boolean;
-	$: ethLoading =
-		isNullish($ethTransactionsStore) ||
-		Object.getOwnPropertySymbols($ethTransactionsStore).length !==
-			$enabledEthereumTokens.length + $enabledErc20Tokens.length;
-
-	let icLoading: boolean;
-	$: icLoading =
-		isNullish($icTransactionsStore) ||
-		Object.getOwnPropertySymbols($icTransactionsStore).length !== $enabledIcTokens.length;
-
-	let solLoading: boolean;
-	$: solLoading =
-		isNullish($solTransactionsStore) ||
-		Object.getOwnPropertySymbols($solTransactionsStore).length !==
-			$enabledSolanaTokens.length + $enabledSplTokens.length;
-
-	let loading: boolean;
-	$: loading = btcLoading && ethLoading && icLoading && solLoading;
+	let loading: boolean = true
+	$: loading = [
+		{ transactionsStore: $btcTransactionsStore, tokens: $enabledBitcoinTokens },
+		{ transactionsStore: $ethTransactionsStore, tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens] },
+		{ transactionsStore: $icTransactionsStore, tokens: $enabledIcTokens },
+		{ transactionsStore: $solTransactionsStore, tokens: [...$enabledSolanaTokens, ...$enabledSplTokens] }
+	]
+		.every(({ transactionsStore, tokens }) => transactionsStoreIsLoading({ transactionsStore, tokens }));
 </script>
 
 <TransactionsSkeletons {loading} {testIdPrefix}>

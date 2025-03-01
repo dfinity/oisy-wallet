@@ -163,3 +163,14 @@ export const sortTransactions = ({
 
 	return nonNullish(timestampA) ? -1 : 1;
 };
+
+// TODO: set correct type when we harmonize the transaction stores
+export const transactionsStoreIsLoading = <T>({
+	transactionsStore,
+	tokens
+}: {
+	transactionsStore: T;
+	tokens: Token[];
+}): boolean =>
+	isNullish(transactionsStore) ||
+	Object.getOwnPropertySymbols(transactionsStore).length !== tokens.length;
