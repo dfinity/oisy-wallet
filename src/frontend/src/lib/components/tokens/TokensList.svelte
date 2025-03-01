@@ -42,7 +42,7 @@
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="mb-3 flex flex-col gap-3">
-			{#each tokens ?? [] as tokenOrGroup (isTokenUiGroup(tokenOrGroup)  ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			{#each tokens ?? [] as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
 					class="overflow-hidden rounded-xl"
 					transition:fade
