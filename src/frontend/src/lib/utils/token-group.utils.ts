@@ -13,10 +13,11 @@ import { nonNullish } from '@dfinity/utils';
  */
 export const isTokenUiGroup = (
 	tokenUiOrGroupUi: TokenUiOrGroupUi
-): tokenUiOrGroupUi is TokenUiGroup =>
+): tokenUiOrGroupUi is { group: TokenUiGroup } =>
 	typeof tokenUiOrGroupUi === 'object' &&
-	'nativeToken' in tokenUiOrGroupUi &&
-	'tokens' in tokenUiOrGroupUi;
+	'group' in tokenUiOrGroupUi &&
+	'nativeToken' in tokenUiOrGroupUi.group &&
+	'tokens' in tokenUiOrGroupUi.group;
 
 /**
  * Function to create a list of TokenUiOrGroupUi by grouping tokens with matching twinTokenSymbol.
@@ -34,21 +35,20 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 	const tokenGroups = groupTokens(tokens);
 
 	return tokenGroups
-		.map((group) => (group.tokens.length === 1 ? group.tokens[0] : group))
-		.sort(
-			(a, b) =>
+		.map((group) => (group.tokens.length === 1 ? { token: group.tokens[0] } : { group }))
+		.sort((aa, bb) => {
+			const a = isTokenUiGroup(aa) ? aa.group : aa.token;
+			const b = isTokenUiGroup(bb) ? bb.group : bb.token;
+
+			return (
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
 				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO)
-		);
+			);
+		});
 };
 
-const hasBalance = ({
-	token,
-	showZeroBalances
-}: {
-	token: TokenUiOrGroupUi;
-	showZeroBalances: boolean;
-}) => Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
+const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
+	Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
 
 /**
  * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
@@ -66,10 +66,10 @@ export const filterTokenGroups = ({
 	groupedTokens: TokenUiOrGroupUi[];
 	showZeroBalances: boolean;
 }) =>
-	groupedTokens.filter((t: TokenUiOrGroupUi) =>
-		isTokenUiGroup(t)
-			? t.tokens.some((tok: TokenUi) => hasBalance({ token: tok, showZeroBalances }))
-			: hasBalance({ token: t, showZeroBalances })
+	groupedTokens.filter((tokenOrGroup: TokenUiOrGroupUi) =>
+		isTokenUiGroup(tokenOrGroup)
+			? tokenOrGroup.group.tokens.some((token: TokenUi) => hasBalance({ token, showZeroBalances }))
+			: hasBalance({ token: tokenOrGroup.token, showZeroBalances })
 	);
 
 const mapNewTokenGroup = (token: TokenUi): TokenUiGroup => ({
