@@ -17,9 +17,6 @@
 
 	export let testIdPrefix: string | undefined = undefined;
 
-	let foo =   [...$enabledIcTokens]
-	console.log(foo)
-
 	let loading: boolean = true
 	$: loading =$erc20UserTokensNotInitialized && [
 		{ transactionsStore: $btcTransactionsStore, tokens: $enabledBitcoinTokens },
