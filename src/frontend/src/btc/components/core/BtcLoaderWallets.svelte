@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import type { IcCkToken } from '$icp/types/ic-token';
@@ -10,7 +11,7 @@
 		btcAddressRegtest,
 		btcAddressTestnet
 	} from '$lib/derived/address.derived';
-	import {  tokens } from '$lib/derived/tokens.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import type { InitWalletWorkerFn } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
 	import {
@@ -19,7 +20,6 @@
 		isNetworkIdBTCTestnet
 	} from '$lib/utils/network.utils';
 	import { findTwinToken } from '$lib/utils/token.utils';
-	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 
 	let ckBtcToken: IcCkToken | undefined;
 	$: ckBtcToken = findTwinToken({
