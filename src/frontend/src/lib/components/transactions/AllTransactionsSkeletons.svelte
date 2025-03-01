@@ -39,7 +39,7 @@
 			$enabledSolanaTokens.length + $enabledSplTokens.length;
 
 	let loading: boolean;
-	$: loading = btcLoading || ethLoading || icLoading || solLoading;
+	$: loading = btcLoading && ethLoading && icLoading && solLoading;
 </script>
 
 <TransactionsSkeletons {loading} {testIdPrefix}>
