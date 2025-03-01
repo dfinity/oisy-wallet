@@ -394,7 +394,7 @@ describe('transactions.utils', () => {
 
 	describe('isTransactionsStoreInitialized', () => {
 		const mockParams = {
-			transactionsStore: {
+			transactionsStoreData: {
 				[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
 					data,
 					certified: true
@@ -409,7 +409,7 @@ describe('transactions.utils', () => {
 
 		it('should return false when transactions store is nullish', () => {
 			expect(
-				isTransactionsStoreInitialized({ ...mockParams, transactionsStore: undefined })
+				isTransactionsStoreInitialized({ ...mockParams, transactionsStoreData: undefined })
 			).toBeFalsy();
 		});
 
@@ -429,7 +429,7 @@ describe('transactions.utils', () => {
 
 	describe('isTransactionsStoreNotInitialized', () => {
 		const mockParams = {
-			transactionsStore: {
+			transactionsStoreData: {
 				[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
 					data,
 					certified: true
@@ -444,7 +444,7 @@ describe('transactions.utils', () => {
 
 		it('should return true when transactions store is nullish', () => {
 			expect(
-				isTransactionsStoreNotInitialized({ ...mockParams, transactionsStore: undefined })
+				isTransactionsStoreNotInitialized({ ...mockParams, transactionsStoreData: undefined })
 			).toBeTruthy();
 		});
 

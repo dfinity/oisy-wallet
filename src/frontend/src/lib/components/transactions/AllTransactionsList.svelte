@@ -43,6 +43,8 @@
 		$solTransactions: $solTransactionsStore
 	});
 
+	$: console.log($icTransactionsStore);
+
 	let sortedTransactions: AllTransactionUiWithCmp[];
 	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
 		sortTransactions({ transactionA: a, transactionB: b })

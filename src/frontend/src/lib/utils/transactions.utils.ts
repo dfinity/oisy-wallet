@@ -165,23 +165,23 @@ export const sortTransactions = ({
 };
 
 export const isTransactionsStoreInitialized = ({
-	transactionsStore,
+	transactionsStoreData,
 	tokens
 }: {
 	// TODO: set unified type when we harmonize the transaction stores
-	transactionsStore:
+	transactionsStoreData:
 		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
 		| EthTransactionsData;
 	tokens: Token[];
-}): boolean => tokens.every(({ id }) => transactionsStore?.[id] !== undefined);
+}): boolean => tokens.every(({ id }) => transactionsStoreData?.[id] !== undefined);
 
 export const isTransactionsStoreNotInitialized = ({
-	transactionsStore,
+	transactionsStoreData,
 	tokens
 }: {
 	// TODO: set unified type when we harmonize the transaction stores
-	transactionsStore:
+	transactionsStoreData:
 		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
 		| EthTransactionsData;
 	tokens: Token[];
-}): boolean => !isTransactionsStoreInitialized({ transactionsStore, tokens });
+}): boolean => !isTransactionsStoreInitialized({ transactionsStoreData, tokens });
