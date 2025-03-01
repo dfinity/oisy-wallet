@@ -1,7 +1,8 @@
+import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { btcTransactionsStore, type BtcTransactionsData } from '$btc/stores/btc-transactions.store';
 import { sortBtcTransactions } from '$btc/utils/btc-transactions.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const sortedBtcTransactions: Readable<NonNullable<BtcTransactionsData>> = derived(
@@ -20,4 +21,11 @@ export const btcTransactionsInitialized: Readable<boolean> = derived(
 export const btcTransactionsNotInitialized: Readable<boolean> = derived(
 	[btcTransactionsInitialized],
 	([$btcTransactionsInitialized]) => !$btcTransactionsInitialized
+);
+
+export const btcTransactionsLoading: Readable<boolean> = derived(
+	[btcTransactionsStore, enabledBitcoinTokens],
+	([$btcTransactionsStore, $enabledBitcoinTokens]) =>
+		isNullish($btcTransactionsStore) ||
+		Object.getOwnPropertySymbols($btcTransactionsStore).length !== $enabledBitcoinTokens.length
 );
