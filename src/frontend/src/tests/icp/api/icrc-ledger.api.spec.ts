@@ -1,8 +1,6 @@
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { balance } from '$icp/api/icrc-ledger.api';
-import * as agent from '$lib/actors/agents.ic';
+import { balance, transactionFee } from '$icp/api/icrc-ledger.api';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import type { HttpAgent } from '@dfinity/agent';
 import { IcrcLedgerCanister, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { mock } from 'vitest-mock-extended';
 
@@ -13,7 +11,6 @@ describe('icrc-ledger.api', () => {
 		vi.clearAllMocks();
 
 		vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
-		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 	});
 
 	describe('balance', () => {
@@ -66,6 +63,55 @@ describe('icrc-ledger.api', () => {
 				balance({
 					certified: true,
 					owner: mockPrincipal,
+					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+					identity: undefined
+				})
+			).rejects.toThrow();
+		});
+	});
+
+	describe('transactionFee', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const fee = 1_000n;
+
+		beforeEach(() => {
+			ledgerCanisterMock.transactionFee.mockResolvedValue(fee);
+		});
+
+		it('successfully calls transactionFee endpoint', async () => {
+			const result = await transactionFee(params);
+
+			expect(result).toEqual(fee);
+			expect(ledgerCanisterMock.transactionFee).toBeCalledTimes(1);
+
+			expect(ledgerCanisterMock.transactionFee).toBeCalledWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls transactionFee endpoint as query', async () => {
+			const result = await transactionFee({
+				...params,
+				certified: false
+			});
+
+			expect(result).toEqual(fee);
+			expect(ledgerCanisterMock.transactionFee).toBeCalledTimes(1);
+
+			expect(ledgerCanisterMock.transactionFee).toBeCalledWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(
+				transactionFee({
+					certified: true,
 					ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 					identity: undefined
 				})

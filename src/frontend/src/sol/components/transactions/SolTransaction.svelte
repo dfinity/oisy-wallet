@@ -30,7 +30,11 @@
 	$: transactionStatus = pending ? 'pending' : 'confirmed';
 
 	let amount: BigNumber | undefined;
-	$: amount = nonNullish(value) ? BigNumber.from(value) : value;
+	$: amount = nonNullish(value)
+		? type === 'send'
+			? BigNumber.from(value * -1n)
+			: BigNumber.from(value)
+		: value;
 </script>
 
 <Transaction

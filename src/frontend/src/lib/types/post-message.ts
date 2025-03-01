@@ -16,7 +16,6 @@ import {
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
-	PostMessageRequestSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
@@ -25,8 +24,6 @@ import {
 
 import type { ZodType } from 'zod';
 import * as z from 'zod';
-
-export type PostMessageRequest = z.infer<typeof PostMessageRequestSchema>;
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
 export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;

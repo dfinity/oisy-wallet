@@ -7,24 +7,20 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Option } from '$lib/types/utils';
-import {
-	getSolTransactions,
-	getSplTransactions,
-	loadSolLamportsBalance,
-	loadSplTokenBalance
-} from '$sol/api/solana.api';
+import { loadSolLamportsBalance, loadSplTokenBalance } from '$sol/api/solana.api';
+import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolBalance } from '$sol/types/sol-balance';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
-import { mapSolTransactionUi } from '$sol/utils/sol-transactions.utils';
-import { mapSplTransactionUi } from '$sol/utils/spl-transactions.utils';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
-	tokenAddress?: SolAddress;
+	tokenAddress?: SplTokenAddress;
+	tokenOwnerAddress?: SolAddress;
 }
 
 interface SolWalletStore {
@@ -66,37 +62,32 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	private loadBalance = async ({
 		address,
-		solanaNetwork,
-		tokenAddress
+		solanaNetwork: network,
+		tokenAddress,
+		tokenOwnerAddress
 	}: LoadSolWalletParams): Promise<CertifiedData<SolBalance | null>> => ({
-		data: nonNullish(tokenAddress)
-			? await loadSplTokenBalance({ address, network: solanaNetwork, tokenAddress })
-			: await loadSolLamportsBalance({ address, network: solanaNetwork }),
+		data:
+			nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
+				? await loadSplTokenBalance({
+						address,
+						network,
+						tokenAddress
+					})
+				: await loadSolLamportsBalance({ address, network }),
 		certified: false
 	});
 
-	// TODO add unit tests for spl txns
 	private loadTransactions = async ({
-		address,
-		solanaNetwork,
-		tokenAddress
+		solanaNetwork: network,
+		...rest
 	}: LoadSolWalletParams): Promise<SolCertifiedTransaction[]> => {
-		const transactions = nonNullish(tokenAddress)
-			? await getSplTransactions({
-					network: solanaNetwork,
-					address,
-					tokenAddress
-				})
-			: await getSolTransactions({ network: solanaNetwork, address });
+		const transactions = await getSolTransactions({
+			network,
+			...rest
+		});
 
 		const transactionsUi = transactions.map((transaction) => ({
-			data: nonNullish(tokenAddress)
-				? mapSplTransactionUi({
-						transaction,
-						tokenAddress,
-						address
-					})
-				: mapSolTransactionUi({ transaction, address }),
+			data: transaction,
 			certified: false
 		}));
 
@@ -109,20 +100,17 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		try {
 			const {
 				address: { data: address },
-				solanaNetwork,
-				tokenAddress
+				...rest
 			} = data;
 
 			const [balance, transactions] = await Promise.all([
 				this.loadBalance({
 					address,
-					solanaNetwork,
-					tokenAddress
+					...rest
 				}),
 				this.loadTransactions({
 					address,
-					solanaNetwork,
-					tokenAddress
+					...rest
 				})
 			]);
 

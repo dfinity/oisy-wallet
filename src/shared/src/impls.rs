@@ -1,25 +1,36 @@
-use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
-use crate::types::dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings};
-use crate::types::settings::Settings;
-use crate::types::token::UserToken;
-use crate::types::user_profile::{
-    AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
-};
-use crate::types::{
-    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
-    Timestamp, TokenVersion, Version,
-};
-use candid::Principal;
+use std::{collections::BTreeMap, fmt};
+
+use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
-use std::collections::BTreeMap;
-use std::fmt;
+use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
+
+use crate::{
+    types::{
+        custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        settings::Settings,
+        token::UserToken,
+        user_profile::{
+            AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
+        },
+        ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
+        Timestamp, TokenVersion, Version,
+    },
+    validate::{validate_on_deserialize, Validate},
+};
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
             Token::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
+            Token::SplMainnet(SplToken { token_address, .. }) => {
+                CustomTokenId::SolMainnet(token_address.clone())
+            }
+            Token::SplDevnet(SplToken { token_address, .. }) => {
+                CustomTokenId::SolDevnet(token_address.clone())
+            }
         }
     }
 }
@@ -31,7 +42,7 @@ impl TokenVersion for UserToken {
 
     fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
@@ -82,7 +93,7 @@ impl TokenVersion for CustomToken {
 
     fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
@@ -108,7 +119,7 @@ impl TokenVersion for StoredUserProfile {
 
     fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
@@ -256,6 +267,7 @@ impl ApiEnabled {
     pub fn readable(&self) -> bool {
         matches!(self, Self::Enabled | Self::ReadOnly)
     }
+
     #[must_use]
     pub fn writable(&self) -> bool {
         matches!(self, Self::Enabled)
@@ -275,15 +287,15 @@ impl MigrationProgress {
     /// The next phase in the migration process.
     ///
     /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
-    /// The code for that phase will have to keep track of those steps by means of the data in the variant.
+    /// The code for that phase will have to keep track of those steps by means of the data in the
+    /// variant.
     ///
     /// Prior art:
-    /// - There is an `enum_iterator` crate, however it deals only with simple enums
-    ///   without variant fields.  In this implementation, `next()` always uses the default value for
-    ///   the new field, which is always None.  `next()` does NOT step through the values of the
-    ///   variant field.
-    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not on the
-    ///   enum itself, so stepping from one variant to the next is not straightforward.
+    /// - There is an `enum_iterator` crate, however it deals only with simple enums without variant
+    ///   fields.  In this implementation, `next()` always uses the default value for the new field,
+    ///   which is always None.  `next()` does NOT step through the values of the variant field.
+    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not
+    ///   on the enum itself, so stepping from one variant to the next is not straightforward.
     ///
     /// Note: The next state after Completed is Completed, so the the iterator will run
     /// indefinitely.  In our case returning an option and ending with None would be fine but needs
@@ -316,7 +328,8 @@ impl MigrationProgress {
     }
 }
 
-// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at Completed.
+// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at
+// Completed.
 #[test]
 fn next_matches_strum_iter() {
     let mut iter = MigrationProgress::iter();
@@ -331,3 +344,109 @@ fn next_matches_strum_iter() {
         "Once completed, it should stay completed"
     );
 }
+
+impl SplTokenId {
+    pub const MAX_LENGTH: usize = 44;
+    pub const MIN_LENGTH: usize = 32;
+}
+
+impl Validate for SplTokenId {
+    /// Verifies that a Solana address is valid.
+    ///
+    /// # References
+    /// - <https://solana.com/docs/more/exchange#basic-verification>
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.0.len() < 32 {
+            return Err(candid::Error::msg(
+                "Minimum valid Solana address length is 32",
+            ));
+        }
+        if self.0.len() > 44 {
+            return Err(candid::Error::msg(
+                "Maximum valid Solana address length is 44",
+            ));
+        }
+        let parsed_maybe = bs58::decode(&self.0).into_vec();
+        if let Ok(bytes) = parsed_maybe {
+            if bytes.len() != 32 {
+                return Err(candid::Error::msg(
+                    "Invalid Solana address: not 32 bytes when decoded",
+                ));
+            }
+        } else {
+            return Err(candid::Error::msg("Invalid Solana address: not base58"));
+        }
+        Ok(())
+    }
+}
+
+impl Validate for CustomTokenId {
+    fn validate(&self) -> Result<(), candid::Error> {
+        match self {
+            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle we could */
+            // check the exact type of principal.
+            CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
+                token_address.validate()
+            }
+        }
+    }
+}
+
+impl Validate for CustomToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        self.token.validate()
+    }
+}
+
+impl Validate for Token {
+    fn validate(&self) -> Result<(), candid::Error> {
+        match self {
+            Token::Icrc(token) => token.validate(),
+            Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
+        }
+    }
+}
+
+impl Validate for SplToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        use crate::types::MAX_SYMBOL_LENGTH;
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg("Symbol too long"));
+            }
+        }
+        self.token_address.validate()
+    }
+}
+
+impl Validate for IcrcToken {
+    /// Verifies that an ICRC token is valid.
+    ///
+    /// - Checks that the ledger principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    /// - If an index principal is present, checks that it is also the type of principal used for a
+    ///   canister.
+    fn validate(&self) -> Result<(), candid::Error> {
+        let IcrcToken {
+            ledger_id,
+            index_id,
+        } = self;
+        // The ledger_id should be appropriate for a canister.
+        if ledger_id.as_slice().last() != Some(&1) {
+            return Err(candid::Error::msg("Ledger ID is not a canister"));
+        }
+        // Likewise for the index ID, if present:
+        if let Some(index_id) = index_id {
+            if index_id.as_slice().last() != Some(&1) {
+                return Err(candid::Error::msg("Index ID is not a canister"));
+            }
+        }
+        Ok(())
+    }
+}
+
+validate_on_deserialize!(CustomToken);
+validate_on_deserialize!(CustomTokenId);
+validate_on_deserialize!(IcrcToken);
+validate_on_deserialize!(SplToken);
+validate_on_deserialize!(SplTokenId);

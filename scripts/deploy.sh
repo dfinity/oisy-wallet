@@ -8,8 +8,8 @@ dfx deploy backend
 mkdir -p ./target/ic
 
 ./scripts/download.icp.sh
-./scripts/deploy.icp_ledger.sh
-./scripts/deploy.icp_index.sh
+dfx deploy icp_ledger
+dfx deploy icp_index
 
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh

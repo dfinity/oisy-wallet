@@ -17,6 +17,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
@@ -25,6 +26,7 @@
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { filterTokens, pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
@@ -143,11 +145,12 @@
 		bind:filter
 		noMatch={noTokensMatch}
 		placeholder={$i18n.tokens.placeholder.search_token}
+		autofocus={isDesktop()}
 	/>
 </div>
 
 {#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pb-2 pt-1 text-misty-rose">
+	<p class="mb-4 pb-2 pt-1 text-tertiary">
 		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
 			$network: $selectedNetwork.name
 		})}
@@ -167,8 +170,8 @@
 		>
 	</button>
 {:else}
-	<div class="tokens flex flex-col overflow-y-hidden sm:max-h-[26rem]">
-		<div class="tokens-scroll my-3 overflow-y-auto overscroll-contain">
+	<div class="flex flex-col overflow-y-hidden py-3 sm:max-h-[26rem]">
+		<div class="my-3 overflow-y-auto overscroll-contain">
 			{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 				<Card>
 					<TokenName data={token} />
@@ -202,30 +205,8 @@
 
 	<ButtonGroup>
 		<ButtonCancel on:click={() => dispatch('icClose')} />
-		<Button disabled={saveDisabled} on:click={save}>
+		<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
 		</Button>
 	</ButtonGroup>
 {/if}
-
-<style lang="scss">
-	.tokens {
-		padding: var(--padding-1_5x) 0;
-	}
-
-	.tokens-scroll {
-		&::-webkit-scrollbar-thumb {
-			background-color: rgba(var(--color-black-rgb), 0.2);
-		}
-
-		&::-webkit-scrollbar-track {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-
-		&::-webkit-scrollbar-thumb {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-	}
-</style>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/errors';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
@@ -86,6 +87,7 @@
 
 	let feeStore = initFeeStore();
 	let prioritizationFeeStore = initFeeStore();
+	let ataFeeStore = initFeeStore();
 
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(solanaNativeToken.symbol);
@@ -98,6 +100,7 @@
 		initFeeContext({
 			feeStore,
 			prioritizationFeeStore,
+			ataFeeStore,
 			feeSymbolStore,
 			feeDecimalsStore
 		})
@@ -181,8 +184,12 @@
 				}
 			});
 
+			const errorMsg = isSolanaError(err, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED)
+				? $i18n.send.error.solana_transaction_expired
+				: $i18n.send.error.unexpected;
+
 			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
+				msg: { text: errorMsg },
 				err
 			});
 
@@ -191,7 +198,7 @@
 	};
 </script>
 
-<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING}>
+<SolFeeContext observe={currentStep?.name !== WizardStepsSend.SENDING} {destination}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<SolSendReview
 			on:icBack

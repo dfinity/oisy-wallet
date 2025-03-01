@@ -4,11 +4,9 @@ import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
-import * as agent from '$lib/actors/agents.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { HttpAgent } from '@dfinity/agent';
 import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
 import { IcrcIndexNgCanister, type IcrcIndexNgTransactionWithId } from '@dfinity/ledger-icrc';
 import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
@@ -91,8 +89,6 @@ describe('ic-wallet-transactions.worker', () => {
 		vi.useFakeTimers();
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
-
-		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 	});
 
 	afterEach(() => {

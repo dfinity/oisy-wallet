@@ -16,6 +16,7 @@
           "prettier-plugin-organize-imports",
           "prettier-plugin-tailwindcss"
         ],
+        "tailwindStylesheet": "./src/frontend/src/lib/styles/global.scss",
         "parser": "svelte",
         "htmlWhitespaceSensitivity": "strict"
       }

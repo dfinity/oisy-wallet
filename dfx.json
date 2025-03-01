@@ -165,9 +165,11 @@
 		},
 		"icp_ledger": {
 			"type": "custom",
+			"build": "scripts/build.icp_ledger.sh",
 			"candid": "target/ic/icp_ledger.did",
 			"wasm": "target/ic/icp_ledger.wasm",
 			"specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+			"init_arg_file": "target/ic/icp_ledger.args.did",
 			"remote": {
 				"id": {
 					"test_be_1": "ryjl3-tyaaa-aaaaa-aaaba-cai",
@@ -182,9 +184,12 @@
 			}
 		},
 		"icp_index": {
+			"dependencies": ["icp_ledger"],
 			"type": "custom",
+			"build": "scripts/build.icp_index.sh",
 			"candid": "target/ic/icp_index.did",
 			"wasm": "target/ic/icp_index.wasm",
+			"init_arg_file": "target/ic/icp_index.args.did",
 			"specified_id": "qhbym-qaaaa-aaaaa-aaafq-cai",
 			"remote": {
 				"id": {
@@ -330,8 +335,8 @@
 		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.0.0/rewards.wasm.gz",
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.1.0-airdrop4/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.1.0-airdrop4/rewards.wasm.gz",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",

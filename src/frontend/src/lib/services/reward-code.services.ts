@@ -1,16 +1,16 @@
-import type { VipReward } from '$declarations/rewards/rewards.did';
+import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
@@ -42,18 +42,61 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 		return await queryVipUser({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
-		// TODO Remove this temporary fix as soon as we do run the rewards canister locally
-		if (LOCAL) {
-			console.error(vip.reward.error.loading_user_data, err);
-		} else {
-			toastsError({
-				msg: { text: vip.reward.error.loading_user_data },
-				err
-			});
-		}
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
 
 		return { success: false, err };
 	}
+};
+
+const queryAirdrops = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<AirdropsResponse> => {
+	const { usage_awards, last_snapshot_timestamp } = await getUserInfoApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	const awards: RewardInfo[] | undefined = fromNullable(usage_awards);
+
+	return {
+		airdrops: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? BigInt(0)
+	};
+};
+
+const mapRewardsInfo = ({ name, ...rest }: RewardInfo): AirdropInfo => ({
+	...rest,
+	name: fromNullable(name)
+});
+
+/**
+ * Gets the airdrops the user received.
+ *
+ * This function performs **always** a query (not certified) to get the airdrops of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to load the user data.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<AirdropsResponse>} - Resolves with the received airdrops and the last timestamp of the user.
+ *
+ * @throws {Error} Displays an error toast and returns an empty list of airdrops if the query fails.
+ */
+export const getAirdrops = async (params: { identity: Identity }): Promise<AirdropsResponse> => {
+	try {
+		return await queryAirdrops({ ...params, certified: false });
+	} catch (err: unknown) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
+	}
+
+	return { airdrops: [], lastTimestamp: BigInt(0) };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {

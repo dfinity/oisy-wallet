@@ -17,7 +17,8 @@
 			"approve": "Approve",
 			"view": "View",
 			"copy": "Copy",
-			"clear_filter": "Clear filter"
+			"clear_filter": "Clear filter",
+			"not_available": "n/a"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -37,11 +38,13 @@
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
+			"airdrops": "Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
 			"changelog": "Changelog",
-			"support_email": "Support",
+			"documentation": "Documentation",
+			"support": "Support",
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes"
 		},
@@ -50,21 +53,26 @@
 			"settings": "Open your settings",
 			"dapp_explorer": "Open dapp explorer",
 			"activity": "Open the activity view",
+			"airdrops": "Open the Rewards view",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"support_email": "Reach out to the team",
+			"documentation": "Open the $oisy_name documentation",
+			"support": "Open the Support section of the $oisy_name documentation",
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link"
+		},
+		"short": {
+			"documentation": "Docs"
 		}
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "Your Digital Assets",
-			"title_part_2": "Safe. Seamless. Sovereign.",
+			"title_part_1": "$oisy_name",
+			"title_part_2": "100% Decentralized",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
-			"asset_types": "Bitcoin, Ethereum, ICP and more",
+			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
 			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
 		},
@@ -111,6 +119,32 @@
 			"website": "Image of $dAppName"
 		}
 	},
+	"airdrops": {
+		"text": {
+			"title": "Rewards",
+			"active_campaigns": "Active Opportunities",
+			"upcoming_campaigns": "Upcoming Opportunities",
+			"active_date": "Due on",
+			"participate_title": "How to participate",
+			"share": "Share on X",
+			"learn_more": "Learn more",
+			"requirements_title": "Requirements",
+			"modal_button_text": "Got it",
+			"activity_button_text": "Check on Recent Activity",
+			"activity_button_text_short": "Check activity",
+			"no_balance_title": "Earn $oisy_short Sprinkles",
+			"no_balance_description": "Check back later to see your rewards",
+			"open_wallet": "Take me to the wallet",
+			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
+			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
+			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
+			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
+			"carousel_slide_cta": "Learn more"
+		},
+		"alt": {
+			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
+		}
+	},
 	"footer": {
 		"text": {
 			"incubated_with": "Incubated with",
@@ -119,8 +153,7 @@
 			"copyright": "© 2025"
 		},
 		"alt": {
-			"dfinity": "Go to DFINITY Foundation website",
-			"status": "Find more details about the current status of $oisy_short's development."
+			"dfinity": "Go to DFINITY Foundation website"
 		}
 	},
 	"wallet": {
@@ -142,9 +175,10 @@
 	},
 	"init": {
 		"text": {
-			"initializing_wallet": "Initializing your wallet",
+			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys"
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum and Solana",
+			"done": "Enjoy $oisy_short"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
@@ -215,11 +249,18 @@
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
-			"pouh_credential_verified": "Verified ✅"
+			"pouh_credential_verified": "Verified ✅",
+			"appearance": "Appearance",
+			"appearance_light": "Light",
+			"appearance_dark": "Dark",
+			"appearance_system": "System"
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
-			"github_release": "$oisy_short release notes on GitHub"
+			"github_release": "$oisy_short release notes on GitHub",
+			"appearance_light": "Enables light mode",
+			"appearance_dark": "Enables dark mode",
+			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
@@ -229,7 +270,8 @@
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion (all networks)"
+		"chain_fusion": "Chain Fusion (all networks)",
+		"network": "Network"
 	},
 	"receive": {
 		"text": {
@@ -383,7 +425,8 @@
 			"no_solana_network_id": "Current network ($networkId) is not a Solana network.",
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
-			"unable_to_retrieve_amount": "n/a (unable to retrieve)"
+			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
+			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again."
 		}
 	},
 	"convert": {
@@ -410,9 +453,6 @@
 			"swap_to_token": "Convert $sourceToken → $destinationToken",
 			"review": "Review transaction",
 			"max_balance": "Max",
-			"review_tokens_info_title": "You're converting",
-			"amount_to_convert": "Amount to convert",
-			"amount_to_receive": "Amount to receive",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
 			"conversion_may_take": "Conversion may take up to 1 hour",
@@ -436,18 +476,16 @@
 			"swap": "Swap",
 			"select_destination_token": "Select token to receive",
 			"select_source_token": "Select token to pay",
-			"select_source_token_title": "You pay",
-			"select_destination_token_title": "You receive",
 			"switch_tokens_button": "Switch tokens",
 			"review": "Review transaction",
 			"review_button": "Review swap",
-			"select_token": "Select token",
 			"max_slippage": "Max slippage",
 			"max_balance": "Max",
 			"not_available": "n/a",
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
-			"token_fee": "Token fee",
+			"network_fee": "Network fee",
+			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
 			"max_slippage_info": "Enter value between 0% and 50%",
@@ -455,15 +493,17 @@
 			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
 			"swap_button": "Swap now",
 			"swap_is_not_offered": "This swap is currently not offered.",
-			"exchange_is_not_available": "USD value is currently not available.",
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
-			"refreshing_ui": "Refreshing UI"
+			"refreshing_ui": "Refreshing UI",
+			"swap_provider": "Swap provider"
 		},
 		"error": {
+			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
-			"unexpected_missing_data": "Something went wrong while initiating a swap transaction."
+			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again."
 		}
 	},
 	"buy": {
@@ -488,7 +528,11 @@
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
 			"show_token": "Show token",
-			"hide_token": "Hide token"
+			"hide_token": "Hide token",
+			"select_token": "Select token",
+			"exchange_is_not_available": "USD value is currently not available.",
+			"source_token_title": "You pay",
+			"destination_token_title": "You receive"
 		},
 		"details": {
 			"title": "Token details",
@@ -531,6 +575,7 @@
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
+				"missing_token_address": "The token address is missing. Did you provide a value?",
 				"no_network": "No network is selected. This is unexpected."
 			},
 			"warning": {
@@ -575,6 +620,7 @@
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address",
+			"enter_token_address": "Enter an SPL token address",
 			"search_token": "Search for the token"
 		},
 		"warning": {
@@ -582,12 +628,13 @@
 		},
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
+			"invalid_token_address": "Token address is invalid.",
 			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
-			"no_metadata": "No metadata were fetched for the contract address.",
+			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the ERC20 contract metadata.",
+			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
@@ -774,7 +821,7 @@
 				"title": "Why $oisy_short",
 				"hold_crypto": {
 					"title": "Unified Management of All Your Digital Assets",
-					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
+					"description": "$oisy_short allows you to manage all your digital assets — including Bitcoin, Solana, Ethereum, ICP, and more — in a single, unified wallet. No more juggling multiple wallets for different cryptocurrencies — enjoy a seamless and efficient experience across various platforms."
 				},
 				"network_custody": {
 					"title": "No more private key anxiety with Network Custody",
@@ -867,7 +914,7 @@
 				"loading": "Loading consent message..."
 			},
 			"warning": {
-				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by OISY."
+				"token_without_consent_message": "This token does not provide confirmation messages, so the information below was extracted by $oisy_short."
 			},
 			"error": {
 				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
@@ -929,8 +976,8 @@
 			"btc_transactions": "BTC transaction information is obtained from central third parties and should be independently verified."
 		},
 		"warning": {
-			"no_index_canister": "Transaction for $token_list can not be displayed. No Index canister.",
-			"unavailable_index_canister": "Transaction for $token_list can not be displayed. Index canister is currently not available."
+			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
+			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
 		}
 	}
 }
