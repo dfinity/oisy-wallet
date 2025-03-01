@@ -10,9 +10,9 @@
 		enabledErc20Tokens,
 		enabledIcTokens
 	} from '$lib/derived/tokens.derived';
-	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
 	export let testIdPrefix: string | undefined = undefined;
 
@@ -33,7 +33,10 @@
 		Object.getOwnPropertySymbols($icTransactionsStore).length !== $enabledIcTokens.length;
 
 	let solLoading: boolean;
-	$: solLoading = isNullish($solTransactionsStore) || Object.getOwnPropertySymbols($solTransactionsStore).length !== $enabledSolanaTokens.length + $enabledSplTokens.length;
+	$: solLoading =
+		isNullish($solTransactionsStore) ||
+		Object.getOwnPropertySymbols($solTransactionsStore).length !==
+			$enabledSolanaTokens.length + $enabledSplTokens.length;
 
 	let loading: boolean;
 	$: loading = btcLoading || ethLoading || icLoading || solLoading;
