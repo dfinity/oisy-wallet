@@ -422,7 +422,7 @@ describe('transactions.utils', () => {
 		});
 
 		it('should return false when transactions store index matches enabled tokens', () => {
-			expect(transactionsStoreIsLoading({ ...mockParams })).toBeFalsy();
+			expect(transactionsStoreIsLoading(mockParams)).toBeFalsy();
 		});
 	});
 });

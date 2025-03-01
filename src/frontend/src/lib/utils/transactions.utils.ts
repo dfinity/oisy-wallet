@@ -164,12 +164,14 @@ export const sortTransactions = ({
 	return nonNullish(timestampA) ? -1 : 1;
 };
 
-// TODO: set correct type when we harmonize the transaction stores
-export const transactionsStoreIsLoading = <T>({
+export const transactionsStoreIsLoading = ({
 	transactionsStore,
 	tokens
 }: {
-	transactionsStore: T;
+	// TODO: set unified type when we harmonize the transaction stores
+	transactionsStore:
+		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
+		| EthTransactionsData;
 	tokens: Token[];
 }): boolean =>
 	isNullish(transactionsStore) ||
