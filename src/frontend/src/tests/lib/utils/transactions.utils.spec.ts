@@ -28,9 +28,10 @@ import type {
 	Transaction
 } from '$lib/types/transaction';
 import {
+	isTransactionsStoreInitialized,
+	isTransactionsStoreNotInitialized,
 	mapAllTransactionsUi,
-	sortTransactions,
-	transactionsStoreIsLoading
+	sortTransactions
 } from '$lib/utils/transactions.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
@@ -391,7 +392,42 @@ describe('transactions.utils', () => {
 		});
 	});
 
-	describe('transactionsStoreIsLoading', () => {
+	describe('isTransactionsStoreInitialized', () => {
+		const mockParams = {
+			transactionsStore: {
+				[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
+					data,
+					certified: true
+				})),
+				[BTC_TESTNET_TOKEN_ID]: createMockBtcTransactionsUi(7).map((data) => ({
+					data,
+					certified: true
+				}))
+			},
+			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
+		};
+
+		it('should return false when transactions store is nullish', () => {
+			expect(
+				isTransactionsStoreInitialized({ ...mockParams, transactionsStore: undefined })
+			).toBeFalsy();
+		});
+
+		it('should return false when transactions store index does not match enabled tokens', () => {
+			expect(
+				isTransactionsStoreInitialized({
+					...mockParams,
+					tokens: [...mockParams.tokens, BTC_REGTEST_TOKEN]
+				})
+			).toBeFalsy();
+		});
+
+		it('should return true when transactions store index matches enabled tokens', () => {
+			expect(isTransactionsStoreInitialized(mockParams)).toBeTruthy();
+		});
+	});
+
+	describe('isTransactionsStoreNotInitialized', () => {
 		const mockParams = {
 			transactionsStore: {
 				[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
@@ -408,13 +444,13 @@ describe('transactions.utils', () => {
 
 		it('should return true when transactions store is nullish', () => {
 			expect(
-				transactionsStoreIsLoading({ ...mockParams, transactionsStore: undefined })
+				isTransactionsStoreNotInitialized({ ...mockParams, transactionsStore: undefined })
 			).toBeTruthy();
 		});
 
 		it('should return true when transactions store index does not match enabled tokens', () => {
 			expect(
-				transactionsStoreIsLoading({
+				isTransactionsStoreNotInitialized({
 					...mockParams,
 					tokens: [...mockParams.tokens, BTC_REGTEST_TOKEN]
 				})
@@ -422,7 +458,7 @@ describe('transactions.utils', () => {
 		});
 
 		it('should return false when transactions store index matches enabled tokens', () => {
-			expect(transactionsStoreIsLoading(mockParams)).toBeFalsy();
+			expect(isTransactionsStoreNotInitialized(mockParams)).toBeFalsy();
 		});
 	});
 });

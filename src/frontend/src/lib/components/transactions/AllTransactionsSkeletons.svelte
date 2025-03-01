@@ -11,8 +11,9 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import { transactionsStoreIsLoading } from '$lib/utils/transactions.utils';
+	import { isTransactionsStoreNotInitialized } from '$lib/utils/transactions.utils';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 
 	export let testIdPrefix: string | undefined = undefined;
 
@@ -20,13 +21,13 @@
 	console.log(foo)
 
 	let loading: boolean = true
-	$: loading = [
+	$: loading =$erc20UserTokensNotInitialized && [
 		{ transactionsStore: $btcTransactionsStore, tokens: $enabledBitcoinTokens },
 		{ transactionsStore: $ethTransactionsStore, tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens] },
 		{ transactionsStore: $icTransactionsStore, tokens: $enabledIcTokens },
 		{ transactionsStore: $solTransactionsStore, tokens: [...$enabledSolanaTokens, ...$enabledSplTokens] }
 	]
-		.every(({ transactionsStore, tokens }) => transactionsStoreIsLoading({ transactionsStore, tokens }));
+		.every(({ transactionsStore, tokens }) => isTransactionsStoreNotInitialized({ transactionsStore, tokens }));
 </script>
 
 <TransactionsSkeletons {loading} {testIdPrefix}>

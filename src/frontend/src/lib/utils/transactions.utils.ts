@@ -164,7 +164,7 @@ export const sortTransactions = ({
 	return nonNullish(timestampA) ? -1 : 1;
 };
 
-export const transactionsStoreIsLoading = ({
+export const isTransactionsStoreInitialized = ({
 	transactionsStore,
 	tokens
 }: {
@@ -173,6 +173,15 @@ export const transactionsStoreIsLoading = ({
 		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
 		| EthTransactionsData;
 	tokens: Token[];
-}): boolean =>
-	isNullish(transactionsStore) ||
-	Object.getOwnPropertySymbols(transactionsStore).length !== tokens.length;
+}): boolean => tokens.every(({ id }) => transactionsStore?.[id] !== undefined);
+
+export const isTransactionsStoreNotInitialized = ({
+	transactionsStore,
+	tokens
+}: {
+	// TODO: set unified type when we harmonize the transaction stores
+	transactionsStore:
+		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
+		| EthTransactionsData;
+	tokens: Token[];
+}): boolean => !isTransactionsStoreInitialized({ transactionsStore, tokens });
