@@ -16,6 +16,7 @@ import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -151,21 +152,31 @@ const createSplTokenTransactionMessage = async ({
 		tokenOwnerAddress
 	});
 
-	const destinationTokenAccountAddress = await loadTokenAccount({
-		address: destination,
-		network,
-		tokenAddress
-	});
+	const destinationIsAtaAddress = await isAtaAddress({ address: destination, network });
 
-	const calculatedDestinationTokenAccountAddress: SolAddress =
-		await calculateAssociatedTokenAddress({
-			owner: destination,
-			tokenAddress,
-			tokenOwnerAddress
-		});
+	const destinationTokenAccountAddress = destinationIsAtaAddress
+		? destination
+		: await loadTokenAccount({
+				address: destination,
+				network,
+				tokenAddress
+			});
+
+	const calculatedDestinationTokenAccountAddress: SolAddress = destinationIsAtaAddress
+		? destination
+		: await calculateAssociatedTokenAddress({
+				owner: destination,
+				tokenAddress,
+				tokenOwnerAddress
+			});
+
+	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
 	// To be sure there was no mistake nor injection, we verify that the destination token account is the same as the calculated one.
-	if (destinationTokenAccountAddress !== calculatedDestinationTokenAccountAddress) {
+	if (
+		!mustCreateDestinationTokenAccount &&
+		destinationTokenAccountAddress !== calculatedDestinationTokenAccountAddress
+	) {
 		throw new Error(
 			`Destination ATA address is different from the calculated one. Destination: ${destinationTokenAccountAddress}, Calculated: ${calculatedDestinationTokenAccountAddress}`
 		);
@@ -177,15 +188,15 @@ const createSplTokenTransactionMessage = async ({
 		tokenAddress
 	});
 
-	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
-
 	const transferInstruction = getTransferInstruction(
 		{
 			source: solAddress(sourceTokenAccountAddress),
 			destination: solAddress(
-				mustCreateDestinationTokenAccount
-					? calculatedDestinationTokenAccountAddress
-					: destinationTokenAccountAddress
+				destinationIsAtaAddress
+					? destination
+					: mustCreateDestinationTokenAccount
+						? calculatedDestinationTokenAccountAddress
+						: destinationTokenAccountAddress
 			),
 			authority: signer,
 			amount: amount.toBigInt()
