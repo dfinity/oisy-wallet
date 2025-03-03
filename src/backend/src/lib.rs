@@ -34,9 +34,11 @@ use shared::{
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError,
-            ListUsersRequest, ListUsersResponse, OisyUser, UserProfile,
+            ListUserCreationTimestampsResponse, ListUsersRequest, ListUsersResponse, OisyUser,
+            UserProfile,
         },
         Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+        Timestamp,
     },
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
@@ -50,6 +52,7 @@ use user_profile_model::UserProfileModel;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, may_read_user_data, may_write_user_data},
+    oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
     user_profile::add_hidden_dapp_id,
 };
@@ -619,6 +622,21 @@ pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 
     ListUsersResponse {
         users,
+        matches_max_length,
+    }
+}
+
+#[query(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+#[must_use]
+pub fn list_user_creation_timestamps(
+    request: ListUsersRequest,
+) -> ListUserCreationTimestampsResponse {
+    let (creation_timestamps, matches_max_length): (Vec<Timestamp>, u64) =
+        read_state(|s| oisy_user_creation_timestamps(&request, &s.user_profile));
+
+    ListUserCreationTimestampsResponse {
+        creation_timestamps,
         matches_max_length,
     }
 }

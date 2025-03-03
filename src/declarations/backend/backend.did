@@ -118,6 +118,10 @@ type InitArg = record {
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
 };
+type ListUserCreationTimestampsResponse = record {
+  creation_timestamps : vec nat64;
+  matches_max_length : nat64;
+};
 type ListUsersRequest = record {
   updated_after_timestamp : opt nat64;
   matches_max_length : opt nat64;
@@ -271,6 +275,9 @@ service : (Arg) -> {
   get_user_profile : () -> (Result_6) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
+  list_user_creation_timestamps : (ListUsersRequest) -> (
+      ListUserCreationTimestampsResponse,
+    ) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
   migrate_user_data_to : (principal) -> (Result_7);
