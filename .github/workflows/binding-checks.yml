@@ -69,7 +69,7 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Install rust
-        uses: .github/actions/install-rust
+        uses: ./.github/actions/install-rust
 
       - name: Install dfx
         if: steps.changes.outputs.src == 'true'
