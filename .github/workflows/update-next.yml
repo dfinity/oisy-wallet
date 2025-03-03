@@ -12,6 +12,7 @@ on:
           - gix-components
           - ic-js
           - oisy-wallet-signer
+          - eslint-config-oisy-wallet
           - agent
           - agent & ic-js
       next:
@@ -44,6 +45,7 @@ jobs:
             "gix-components") echo "PKG_NAME=gix-cmp" >> "$GITHUB_ENV" ;;
             "ic-js") echo "PKG_NAME=ic-js" >> "$GITHUB_ENV" ;;
             "oisy-wallet-signer") echo "PKG_NAME=signer" >> "$GITHUB_ENV" ;;
+            "eslint-config-oisy-wallet") echo "PKG_NAME=oisy-eslint" >> "$GITHUB_ENV" ;;
             "agent") echo "PKG_NAME=agent" >> "$GITHUB_ENV" ;;
             "agent & ic-js") echo "PKG_NAME=agent:ic-js" >> "$GITHUB_ENV" ;;
             *) echo "Invalid package selection" && exit 1 ;;
