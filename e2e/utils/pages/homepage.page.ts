@@ -366,11 +366,11 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot({ 
-		freezeCarousel = false, 
-		centeredElementTestId,
-		screenshotTarget,
-	}: TakeScreenshotParams = { freezeCarousel: false }): Promise<void> {
+	async takeScreenshot(
+		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
+			freezeCarousel: false
+		}
+	): Promise<void> {
 		if (freezeCarousel) {
 			await this.setCarouselFirstSlide();
 			await this.waitForLoadState();
@@ -391,9 +391,9 @@ abstract class Homepage {
 				});
 			} else {
 				await expect(this.#page).toHaveScreenshot({
-				// creates a snapshot as a fullPage and not just certain parts.
+					// creates a snapshot as a fullPage and not just certain parts.
 					fullPage: true,
-				// playwright can retry flaky tests in the amount of time set below.
+					// playwright can retry flaky tests in the amount of time set below.
 					timeout: 5 * 60 * 1000
 				});
 			}
