@@ -1,6 +1,6 @@
+import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
-import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 
 type TestnetsPageParams = HomepageLoggedInParams;
 
