@@ -1,18 +1,25 @@
-import { config } from 'dotenv';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ENV, replaceEnv } from './build.utils.mjs';
+import { replaceEnv } from './build.utils.mjs';
 
 const domain_for_dfx_network = (dfx_network) => {
-  return dfx_network === 'ic'? 'https://oisy.com'
-       : dfx_network === 'test_fe_1'? 'https://fe1.oisy.com'
-       : dfx_network === 'test_fe_2'? 'https://fe2.oisy.com'
-       : dfx_network === 'test_fe_3'? 'https://fe3.oisy.com'
-       : dfx_network === 'test_fe_4'? 'https://fe4.oisy.com'
-       : dfx_network === 'staging'? 'https://staging.oisy.com'
-       : dfx_network === 'beta'? 'https://beta.oisy.com'
-       : dfx_network === 'audit'? 'https://audit.oisy.com'
-       : `https://${dfx_network}.oisy.com`;
+	return dfx_network === 'ic'
+		? 'https://oisy.com'
+		: dfx_network === 'test_fe_1'
+			? 'https://fe1.oisy.com'
+			: dfx_network === 'test_fe_2'
+				? 'https://fe2.oisy.com'
+				: dfx_network === 'test_fe_3'
+					? 'https://fe3.oisy.com'
+					: dfx_network === 'test_fe_4'
+						? 'https://fe4.oisy.com'
+						: dfx_network === 'staging'
+							? 'https://staging.oisy.com'
+							: dfx_network === 'beta'
+								? 'https://beta.oisy.com'
+								: dfx_network === 'audit'
+									? 'https://audit.oisy.com'
+									: `https://${dfx_network}.oisy.com`;
 };
 
 const generateDomain = (targetFile) => {
