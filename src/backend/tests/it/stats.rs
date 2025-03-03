@@ -6,7 +6,7 @@ use crate::{
     user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
     utils::{
         mock::USER_1,
-        pocketic::{controller, BackendBuilder, PicCanisterTrait},
+        pocketic::{controller, limited_user, BackendBuilder, PicCanisterTrait},
     },
 };
 
@@ -42,11 +42,17 @@ fn stats_returns_correct_number_of_users() {
 }
 
 #[test]
-fn stats_endpoint_is_accessible_to_allowed_callers_only() {
+fn stats_endpoint_is_accessible_to_limited_or_allowed_callers_only() {
     let pic_setup = BackendBuilder::default().deploy();
     assert!(
         pic_setup.query::<Stats>(controller(), "stats", ()).is_ok(),
         "Controller should be able to call stats"
+    );
+    assert!(
+        pic_setup
+            .query::<Stats>(limited_user(), "stats", ())
+            .is_ok(),
+        "Limited user should be able to call stats"
     );
     assert!(
         pic_setup

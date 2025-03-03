@@ -75,6 +75,7 @@ type Config = record {
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_raw : opt blob;
+  limited_callers : vec principal;
 };
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };
@@ -117,6 +118,7 @@ type InitArg = record {
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
+  limited_callers : vec principal;
 };
 type ListUsersRequest = record {
   updated_after_timestamp : opt nat64;
