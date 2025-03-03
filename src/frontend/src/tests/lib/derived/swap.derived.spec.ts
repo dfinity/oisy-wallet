@@ -4,7 +4,6 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
-import { describe } from 'vitest';
 
 describe('swap.derived', () => {
 	describe('swappableTokens', () => {

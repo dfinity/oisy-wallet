@@ -7,12 +7,16 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { loadTokenAccount } from '$sol/api/solana.api';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
-import { createAtaInstruction } from '$sol/services/spl-accounts.services';
+import {
+	calculateAssociatedTokenAddress,
+	createAtaInstruction
+} from '$sol/services/spl-accounts.services';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -141,41 +145,58 @@ const createSplTokenTransactionMessage = async ({
 
 	const source = signer.address;
 
-	const sourceTokenAccountAddress = await loadTokenAccount({
-		address: source,
-		network,
-		tokenAddress
+	// To be sure which token account is used, we calculate the associated token account address
+	const sourceTokenAccountAddress: SolAddress = await calculateAssociatedTokenAddress({
+		owner: source,
+		tokenAddress,
+		tokenOwnerAddress
 	});
 
-	// This should not happen since we are sending from an existing account.
-	// But we need it to return a non-nullish value.
-	assertNonNullish(
-		sourceTokenAccountAddress,
-		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
-	);
+	const destinationIsAtaAddress = await isAtaAddress({ address: destination, network });
 
-	const destinationTokenAccountAddress = await loadTokenAccount({
-		address: destination,
-		network,
-		tokenAddress
-	});
+	const destinationTokenAccountAddress = destinationIsAtaAddress
+		? destination
+		: await loadTokenAccount({
+				address: destination,
+				network,
+				tokenAddress
+			});
+
+	const calculatedDestinationTokenAccountAddress: SolAddress = destinationIsAtaAddress
+		? destination
+		: await calculateAssociatedTokenAddress({
+				owner: destination,
+				tokenAddress,
+				tokenOwnerAddress
+			});
 
 	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
-	const { ataInstruction, ataAddress: calculatedDestinationTokenAccountAddress } =
-		await createAtaInstruction({
-			signer,
-			destination,
-			tokenAddress
-		});
+	// To be sure there was no mistake nor injection, we verify that the destination token account is the same as the calculated one.
+	if (
+		!mustCreateDestinationTokenAccount &&
+		destinationTokenAccountAddress !== calculatedDestinationTokenAccountAddress
+	) {
+		throw new Error(
+			`Destination ATA address is different from the calculated one. Destination: ${destinationTokenAccountAddress}, Calculated: ${calculatedDestinationTokenAccountAddress}`
+		);
+	}
+
+	const ataInstruction = await createAtaInstruction({
+		signer,
+		destination,
+		tokenAddress
+	});
 
 	const transferInstruction = getTransferInstruction(
 		{
 			source: solAddress(sourceTokenAccountAddress),
 			destination: solAddress(
-				mustCreateDestinationTokenAccount
-					? calculatedDestinationTokenAccountAddress
-					: destinationTokenAccountAddress
+				destinationIsAtaAddress
+					? destination
+					: mustCreateDestinationTokenAccount
+						? calculatedDestinationTokenAccountAddress
+						: destinationTokenAccountAddress
 			),
 			authority: signer,
 			amount: amount.toBigInt()

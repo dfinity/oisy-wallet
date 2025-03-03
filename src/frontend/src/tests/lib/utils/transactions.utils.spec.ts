@@ -82,14 +82,14 @@ describe('transactions.utils', () => {
 			}))
 		];
 
-		const uiType = 'receive' as EthTransactionType;
+		const type = 'receive' as EthTransactionType;
 
 		const expectedEthMainnetTransactions: AllTransactionUiWithCmp[] = [
 			...mockEthMainnetTransactions.map((transaction) => ({
 				transaction: {
 					...transaction,
 					id: transaction.hash,
-					uiType
+					type
 				},
 				token: ETHEREUM_TOKEN,
 				component: 'ethereum' as const
@@ -101,7 +101,7 @@ describe('transactions.utils', () => {
 				transaction: {
 					...transaction,
 					id: transaction.hash,
-					uiType
+					type
 				},
 				token: SEPOLIA_TOKEN,
 				component: 'ethereum' as const
@@ -113,7 +113,7 @@ describe('transactions.utils', () => {
 				transaction: {
 					...transaction,
 					id: transaction.hash,
-					uiType
+					type
 				},
 				token: PEPE_TOKEN,
 				component: 'ethereum' as const

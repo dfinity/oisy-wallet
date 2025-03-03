@@ -25,6 +25,16 @@ export const ManageTokensCases: ManageTokensConfig[] = [
 		type: 'SepoliaERC20',
 		tokenSymbol: 'USDC',
 		networkSymbol: 'SepoliaETH'
+	},
+	{
+		type: 'SPL',
+		tokenSymbol: 'EURC',
+		networkSymbol: 'SOL'
+	},
+	{
+		type: 'DevnetSPL',
+		tokenSymbol: 'DevnetUSDC',
+		networkSymbol: 'SOL (Devnet)'
 	}
 ];
 
@@ -52,9 +62,8 @@ export class ManageTokensPage extends HomepageLoggedIn {
 			})
 		).toBeVisible();
 		await this.waitForLoadState();
-		await this.setCarouselFirstSlide();
-		await this.waitForLoadState();
 		await this.takeScreenshot({
+			freezeCarousel: true,
 			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
 		});
 		await this.toggleTokenInList({
