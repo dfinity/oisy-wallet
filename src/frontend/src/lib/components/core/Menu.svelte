@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
@@ -19,7 +19,6 @@
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -27,7 +26,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
-	import { networkId } from '$lib/derived/network.derived';
 	import { isVipUser } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -35,10 +33,7 @@
 		isRouteActivity,
 		isRouteAirdrops,
 		isRouteDappExplorer,
-		isRouteSettings,
-		isRouteTokens,
-		isRouteTransactions,
-		networkUrl
+		isRouteSettings
 	} from '$lib/utils/nav.utils';
 
 	let visible = false;
