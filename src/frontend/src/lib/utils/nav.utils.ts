@@ -63,14 +63,28 @@ export const networkUrl = ({
 	networkId: Option<NetworkId>;
 	usePreviousRoute: boolean;
 	fromRoute: NavigationTarget | null;
-}) =>
-	usePreviousRoute
-		? notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))
-			? `${path}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`
-			: path
-		: nonNullish(networkId)
-			? `${path}?${networkParam(networkId)}`
-			: path;
+}) => {
+	// Due to different mobile behavior when routing, we need to make sure theres a trailing slash
+	let ret = path.endsWith('/') ? path : path + '/';
+
+	if (usePreviousRoute) {
+		// if usePreviousRoute (if transactions route)
+		// the main nav link should point back to assets if network param is in URL
+		// else we return the path as it is
+		if (notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))) {
+			ret += `?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`;
+		}
+		// if not usePreviousRoute (not transaction route) but a network id is provided, we pass the
+		// networkId in the URL again to stay in context. This is needed for the Assets routes/subroutes
+		// else we return the path as it is again
+	} else {
+		if (nonNullish(networkId)) {
+			ret += `?${networkParam(networkId)}`;
+		}
+	}
+
+	return ret;
+};
 
 export const back = async ({ pop }: { pop: boolean }) => {
 	if (pop) {
