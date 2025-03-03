@@ -168,8 +168,6 @@ const createSplTokenTransactionMessage = async ({
 				tokenAddress
 			});
 
-	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
-
 	const calculatedDestinationTokenAccountAddress: SolAddress = destinationIsAtaAddress
 		? destination
 		: await calculateAssociatedTokenAddress({
@@ -178,11 +176,20 @@ const createSplTokenTransactionMessage = async ({
 				tokenOwnerAddress
 			});
 
+	// To be sure there was no mistake nor injection, we verify that the destination token account is the same as the calculated one.
+	if (destinationTokenAccountAddress !== calculatedDestinationTokenAccountAddress) {
+		throw new Error(
+			`Destination ATA address is different from the calculated one. Destination: ${destinationTokenAccountAddress}, Calculated: ${calculatedDestinationTokenAccountAddress}`
+		);
+	}
+
 	const ataInstruction = await createAtaInstruction({
 		signer,
 		destination,
 		tokenAddress
 	});
+
+	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
 	const transferInstruction = getTransferInstruction(
 		{
