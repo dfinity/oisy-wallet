@@ -18,7 +18,7 @@ import {
 	getComputeUnitEstimateForTransactionMessageFactory,
 	sendAndConfirmTransactionFactory
 } from '@solana/web3.js';
-import { expect, type MockInstance } from 'vitest';
+import { type MockInstance } from 'vitest';
 
 vi.mock('@solana/functional', () => ({
 	pipe: vi.fn()

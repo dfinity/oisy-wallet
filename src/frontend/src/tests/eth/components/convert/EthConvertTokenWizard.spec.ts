@@ -26,7 +26,7 @@ import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { get, readable, writable } from 'svelte/store';
-import { expect, type MockInstance } from 'vitest';
+import { type MockInstance } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
