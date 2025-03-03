@@ -5,6 +5,7 @@ import { PEPE_TOKEN, PEPE_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.pepe.
 import {
 	BTC_MAINNET_TOKEN,
 	BTC_MAINNET_TOKEN_ID,
+	BTC_REGTEST_TOKEN,
 	BTC_TESTNET_TOKEN,
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens/tokens.btc.env';
@@ -26,7 +27,12 @@ import type {
 	AnyTransactionUi,
 	Transaction
 } from '$lib/types/transaction';
-import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
+import {
+	isTransactionsStoreInitialized,
+	isTransactionsStoreNotInitialized,
+	mapAllTransactionsUi,
+	sortTransactions
+} from '$lib/utils/transactions.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
@@ -383,6 +389,76 @@ describe('transactions.utils', () => {
 				sortTransactions({ transactionA: a, transactionB: b })
 			);
 			expect(result).toEqual([transaction2, transaction1, transactionWithNullTimestamp]);
+		});
+	});
+
+	describe('isTransactionsStoreInitialized', () => {
+		const mockParams = {
+			transactionsStoreData: {
+				[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
+					data,
+					certified: true
+				})),
+				[BTC_TESTNET_TOKEN_ID]: createMockBtcTransactionsUi(7).map((data) => ({
+					data,
+					certified: true
+				}))
+			},
+			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
+		};
+
+		it('should return false when transactions store is nullish', () => {
+			expect(
+				isTransactionsStoreInitialized({ ...mockParams, transactionsStoreData: undefined })
+			).toBeFalsy();
+		});
+
+		it('should return false when transactions store index does not match enabled tokens', () => {
+			expect(
+				isTransactionsStoreInitialized({
+					...mockParams,
+					tokens: [...mockParams.tokens, BTC_REGTEST_TOKEN]
+				})
+			).toBeFalsy();
+		});
+
+		it('should return true when transactions store index matches enabled tokens', () => {
+			expect(isTransactionsStoreInitialized(mockParams)).toBeTruthy();
+		});
+	});
+
+	describe('isTransactionsStoreNotInitialized', () => {
+		const mockParams = {
+			transactionsStoreData: {
+				[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
+					data,
+					certified: true
+				})),
+				[BTC_TESTNET_TOKEN_ID]: createMockBtcTransactionsUi(7).map((data) => ({
+					data,
+					certified: true
+				}))
+			},
+			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
+		};
+
+		it('should return true when transactions store is nullish', () => {
+			expect(
+				isTransactionsStoreNotInitialized({ ...mockParams, transactionsStoreData: undefined })
+			).toBeTruthy();
+		});
+
+		it('should return true when transactions store index does not match enabled tokens', () => {
+			expect(
+				isTransactionsStoreNotInitialized({
+					...mockParams,
+					tokens: [...mockParams.tokens, BTC_REGTEST_TOKEN]
+				})
+			).toBeTruthy();
+		});
+
+		it('should return false when transactions store index matches enabled tokens', () => {
+			expect(isTransactionsStoreNotInitialized(mockParams)).toBeFalsy();
 		});
 	});
 });
