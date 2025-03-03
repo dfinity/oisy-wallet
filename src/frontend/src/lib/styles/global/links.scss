@@ -88,6 +88,9 @@ div.mobile-nav {
 		@apply pt-2.25;
 		@apply text-sm;
 
+		// iOS bottom bar offset so the nav doesnt get overrun by OS bottom bar
+		padding-bottom: calc(.5rem + env(safe-area-inset-bottom));
+
 		svg {
 			width: 24px;
 			height: 24px;
