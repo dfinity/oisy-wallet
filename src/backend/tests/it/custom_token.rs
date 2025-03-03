@@ -1,12 +1,15 @@
-use crate::utils::assertion::{assert_custom_tokens_eq, assert_tokens_data_eq};
-use crate::utils::mock::CALLER;
-use crate::utils::pocketic::{setup, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::custom_token::{
-    CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token,
+use shared::types::{
+    custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+    TokenVersion,
 };
-use shared::types::TokenVersion;
+
+use crate::utils::{
+    assertion::{assert_custom_tokens_eq, assert_tokens_data_eq},
+    mock::CALLER,
+    pocketic::{setup, PicCanisterTrait},
+};
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {

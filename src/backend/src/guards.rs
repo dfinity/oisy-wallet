@@ -1,7 +1,7 @@
-use crate::read_config;
 use candid::Principal;
-use ic_cdk::api::is_controller;
-use ic_cdk::caller;
+use ic_cdk::{api::is_controller, caller};
+
+use crate::read_config;
 
 pub fn caller_is_not_anonymous() -> Result<(), String> {
     if caller() == Principal::anonymous() {

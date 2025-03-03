@@ -68,8 +68,8 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "Your Digital Assets",
-			"title_part_2": "Safe. Seamless. Sovereign.",
+			"title_part_1": "$oisy_name",
+			"title_part_2": "100% Decentralized",
 			"logout": "Logout",
 			"authenticate": "Open or Create",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
