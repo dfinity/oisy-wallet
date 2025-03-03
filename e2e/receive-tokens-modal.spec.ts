@@ -44,7 +44,6 @@ testWithII('should display receive-tokens modal', async () => {
 			RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION
 		])
 	});
-	await homepageLoggedIn.takeScreenshot();
 });
 
 testWithII('should display correct QR codes for receiving ICP tokens', async () => {

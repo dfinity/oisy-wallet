@@ -25,5 +25,4 @@ test('should display about-why-oisy modal', async ({ page, isMobile }) => {
 		modalOpenButtonTestId: ABOUT_WHY_OISY_BUTTON,
 		modalTestId: ABOUT_WHY_OISY_MODAL
 	});
-	await homepageLoggedOut.takeScreenshot();
 });
