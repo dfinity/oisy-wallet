@@ -289,7 +289,7 @@ abstract class Homepage {
 			);
 		}
 
-		await expect(modal).toHaveScreenshot();
+		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
