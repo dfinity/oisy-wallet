@@ -73,16 +73,6 @@
 		);
 	};
 
-	const goToTokens = async () => await navigateTo(AppPath.Tokens);
-
-	const gotoSettings = async () => await navigateTo(AppPath.Settings);
-
-	const goToDappExplorer = async () => await navigateTo(AppPath.Explore);
-
-	const goToActivity = async () => await navigateTo(AppPath.Activity);
-
-	const goToAirdrops = async () => await navigateTo(AppPath.Airdrops);
-
 	let assetsRoute = false;
 	$: assetsRoute = isRouteTokens($page);
 
