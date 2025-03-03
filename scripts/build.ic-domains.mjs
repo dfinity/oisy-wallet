@@ -13,9 +13,8 @@ const DFX_NETWORK_DOMAINS = {
 	audit: 'https://audit.oisy.com'
 };
 
-const domain_for_dfx_network = (dfx_network) => {
-	return DFX_NETWORK_DOMAINS[dfx_network] || `https://${dfx_network}.oisy.com`;
-};
+const domain_for_dfx_network = (dfx_network) =>
+	DFX_NETWORK_DOMAINS[dfx_network] || `https://${dfx_network}.oisy.com`;
 
 const generateDomain = (targetFile) => {
 	let content = readFileSync(targetFile, 'utf8');
