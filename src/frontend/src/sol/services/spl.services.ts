@@ -247,7 +247,6 @@ export const loadUserTokens = async ({
 			},
 			Promise.resolve([])
 		);
-
 		return [...existingTokens, ...userTokens];
 	};
 

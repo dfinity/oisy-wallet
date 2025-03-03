@@ -29,12 +29,15 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNetworkIdEthereum, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdEthereum,
+		isNetworkIdICP,
+		isNetworkIdSolana,
+		isNetworkIdSOLDevnet
+	} from '$lib/utils/network.utils';
 	import SolAddTokenReview from '$sol/components/tokens/SolAddTokenReview.svelte';
 	import { saveSplUserTokens } from '$sol/services/manage-tokens.services';
-	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
 	const steps: WizardSteps = [
 		{
@@ -80,7 +83,16 @@
 		await Promise.allSettled([
 			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
 			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
-			...(spl.length > 0 ? [saveSpl(spl)] : [])
+			...(spl.length > 0
+				? [
+						saveSpl(
+							spl.map((t) => ({
+								...t,
+								networkKey: isNetworkIdSOLDevnet(t.network.id) ? 'SplDevnet' : 'SplMainnet'
+							}))
+						)
+					]
+				: [])
 		]);
 	};
 
@@ -146,7 +158,7 @@
 			{
 				address: splTokenAddress,
 				...splMetadata,
-				network: network as SolanaNetwork,
+				networkKey: isNetworkIdSOLDevnet(network?.id) ? 'SplDevnet' : 'SplMainnet',
 				enabled: true
 			}
 		]);
@@ -174,7 +186,7 @@
 			identity: $authIdentity
 		});
 
-	const saveSpl = (tokens: SaveSplUserToken[]): Promise<void> =>
+	const saveSpl = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
 		saveSplUserTokens({
 			tokens,
 			progress,
