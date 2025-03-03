@@ -53,7 +53,7 @@ pub fn oisy_user_creation_timestamps(
     let creation_timestamps: Vec<Timestamp> = user_profile_map
         .range((start_bound, Bound::Unbounded))
         .take(limit_users_size)
-        .map(|((_, principal), profile)| profile.created_timestamp)
+        .map(|((_, _principal), profile)| profile.created_timestamp)
         .collect();
 
     (creation_timestamps, limit_users_size as u64)
