@@ -46,7 +46,7 @@ const tokenUrl = ({
 	token: Token;
 	path: AppPath.Transactions | undefined;
 }): string =>
-	`${path ?? ''}/?${TOKEN_PARAM}=${encodeURIComponent(
+	`${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
