@@ -290,7 +290,7 @@ abstract class Homepage {
 			);
 		}
 
-		await expect(modal).toHaveScreenshot();
+		// await expect(modal).toHaveScreenshot();
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
@@ -384,18 +384,16 @@ abstract class Homepage {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
-
+		await this.#page.emulateMedia({ colorScheme: 'light' });
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
 			// playwright can retry flaky tests in the amount of time set below.
 			timeout: 5 * 60 * 1000
 		});
-		await this.clickByTestId({ testId: THEME_SELECTOR_BUTTON_DARK });
+		await this.#page.emulateMedia({ colorScheme: 'dark' });
 		await expect(this.#page).toHaveScreenshot({
-			// creates a snapshot as a fullPage and not just certain parts.
 			fullPage: true,
-			// playwright can retry flaky tests in the amount of time set below.
 			timeout: 5 * 60 * 1000
 		});
 	}

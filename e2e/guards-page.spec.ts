@@ -25,6 +25,8 @@ testWithII(
 
 		await homepageLoggedIn.waitForContentReady();
 
-		await expect(page).toHaveScreenshot({ fullPage: true });
+		await homepageLoggedIn.takeScreenshot();
+
+		//await expect(page).toHaveScreenshot({ fullPage: true });
 	}
 );
