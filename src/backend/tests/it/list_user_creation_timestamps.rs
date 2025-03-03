@@ -2,14 +2,19 @@ use std::time::{Duration, UNIX_EPOCH};
 
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
-use shared::types::Timestamp;
-use shared::types::user_profile::{AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUserCreationTimestampsResponse, OisyUser, UserProfile};
+use shared::types::{
+    user_profile::{
+        AddUserCredentialError, AddUserCredentialRequest, ListUserCreationTimestampsResponse,
+        ListUsersRequest, OisyUser, UserProfile,
+    },
+    Timestamp,
+};
 
 use crate::utils::{
+    assertion::assert_user_creation_timestamps_eq,
     mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
     pocketic::{setup, PicCanisterTrait},
 };
-use crate::utils::assertion::assert_user_creation_timestamps_eq;
 
 #[test]
 fn test_list_user_creation_timestamps_cannot_be_called_if_not_allowed() {
@@ -21,7 +26,8 @@ fn test_list_user_creation_timestamps_cannot_be_called_if_not_allowed() {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let list_user_creation_timestamps_response = pic_setup.query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
+    let list_user_creation_timestamps_response = pic_setup
+        .query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
 
     assert!(list_user_creation_timestamps_response.is_err(),);
 }
@@ -31,7 +37,10 @@ fn test_list_user_creation_timestamps_returns_timestamps() {
     let pic_setup = setup();
 
     let expected_users: Vec<OisyUser> = pic_setup.create_users(1..=5);
-    let expected_timestamps: Vec<Timestamp> = expected_users.iter().map(|user| user.updated_timestamp).collect();
+    let expected_timestamps: Vec<Timestamp> = expected_users
+        .iter()
+        .map(|user| user.updated_timestamp)
+        .collect();
 
     let caller = Principal::from_text(CALLER).unwrap();
 
@@ -39,9 +48,12 @@ fn test_list_user_creation_timestamps_returns_timestamps() {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let list_user_creation_timestamps_response = pic_setup.query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
+    let list_user_creation_timestamps_response = pic_setup
+        .query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
 
-    let results_timestamps = list_user_creation_timestamps_response.expect("Call failed").creation_timestamps;
+    let results_timestamps = list_user_creation_timestamps_response
+        .expect("Call failed")
+        .creation_timestamps;
 
     assert_user_creation_timestamps_eq(results_timestamps, expected_timestamps);
 }
@@ -107,9 +119,12 @@ fn test_list_user_creation_timestamps_returns_filtered_timestamps_by_updated() {
         matches_max_length: None,
         updated_after_timestamp: Some(timestamp_nanos_1 as u64),
     };
-    let list_user_creation_timestamps_response = pic_setup.query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
+    let list_user_creation_timestamps_response = pic_setup
+        .query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
 
-    let results_timestamps = list_user_creation_timestamps_response.expect("Call failed").creation_timestamps;
+    let results_timestamps = list_user_creation_timestamps_response
+        .expect("Call failed")
+        .creation_timestamps;
 
     let vc_holder_expected_user = OisyUser {
         principal: vc_holder,
@@ -118,7 +133,10 @@ fn test_list_user_creation_timestamps_returns_filtered_timestamps_by_updated() {
     };
     expected_users.push(vc_holder_expected_user);
 
-    let expected_timestamps: Vec<Timestamp> = expected_users.iter().map(|user| user.updated_timestamp).collect();
+    let expected_timestamps: Vec<Timestamp> = expected_users
+        .iter()
+        .map(|user| user.updated_timestamp)
+        .collect();
 
     assert_user_creation_timestamps_eq(results_timestamps, expected_timestamps);
 }
@@ -152,10 +170,16 @@ fn test_list_user_creation_timestamps_returns_requested_users_count() {
         updated_after_timestamp: Some(timestamp_nanos as u64),
     };
     let expected_users = &users_after_expected_timestamp[0..requested_count];
-    let expected_timestamps: Vec<Timestamp> = expected_users.iter().map(|user| user.updated_timestamp).collect();
-    let list_user_creation_timestamps_response = pic_setup.query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
+    let expected_timestamps: Vec<Timestamp> = expected_users
+        .iter()
+        .map(|user| user.updated_timestamp)
+        .collect();
+    let list_user_creation_timestamps_response = pic_setup
+        .query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
 
-    let results_timestamps = list_user_creation_timestamps_response.expect("Call failed").creation_timestamps;
+    let results_timestamps = list_user_creation_timestamps_response
+        .expect("Call failed")
+        .creation_timestamps;
 
     assert_user_creation_timestamps_eq(results_timestamps, expected_timestamps);
 }
@@ -174,11 +198,17 @@ fn test_list_user_creation_timestamps_returns_less_than_requested_users_count() 
         matches_max_length: Some(requested_count as u64),
         updated_after_timestamp: None,
     };
-    let list_user_creation_timestamps_response = pic_setup.query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
+    let list_user_creation_timestamps_response = pic_setup
+        .query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
 
-    let results_timestamps = list_user_creation_timestamps_response.expect("Call failed").creation_timestamps;
+    let results_timestamps = list_user_creation_timestamps_response
+        .expect("Call failed")
+        .creation_timestamps;
     let expected_users = &created_users[0..requested_count];
-    let expected_timestamps: Vec<Timestamp> = expected_users.iter().map(|user| user.updated_timestamp).collect();
+    let expected_timestamps: Vec<Timestamp> = expected_users
+        .iter()
+        .map(|user| user.updated_timestamp)
+        .collect();
 
     assert_user_creation_timestamps_eq(results_timestamps, expected_timestamps);
 }
@@ -231,9 +261,12 @@ fn test_list_user_creation_timestamps_returns_pouh_credential() {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let list_user_creation_timestamps_response = pic_setup.query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
+    let list_user_creation_timestamps_response = pic_setup
+        .query::<ListUserCreationTimestampsResponse>(caller, "list_user_creation_timestamps", arg);
 
-    let results_timestamps = list_user_creation_timestamps_response.expect("Call failed").creation_timestamps;
+    let results_timestamps = list_user_creation_timestamps_response
+        .expect("Call failed")
+        .creation_timestamps;
 
     let expected_vc_holder_user = OisyUser {
         principal: vc_holder,
@@ -242,7 +275,10 @@ fn test_list_user_creation_timestamps_returns_pouh_credential() {
     };
     expected_users.push(expected_vc_holder_user);
 
-    let expected_timestamps: Vec<Timestamp> = expected_users.iter().map(|user| user.updated_timestamp).collect();
+    let expected_timestamps: Vec<Timestamp> = expected_users
+        .iter()
+        .map(|user| user.updated_timestamp)
+        .collect();
 
-    assert_user_creation_timestamps_eq(results_timestamps,expected_timestamps);
+    assert_user_creation_timestamps_eq(results_timestamps, expected_timestamps);
 }

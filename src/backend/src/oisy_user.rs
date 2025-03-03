@@ -40,7 +40,6 @@ pub fn oisy_users(
     (users, limit_users_size as u64)
 }
 
-
 pub fn oisy_user_creation_timestamps(
     request: &ListUsersRequest,
     user_profile_map: &UserProfileMap,
