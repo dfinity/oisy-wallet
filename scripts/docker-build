@@ -13,6 +13,7 @@ else
   exit 1
 fi
 
+DFX_PORT="${DFX_PORT:-4943}"
 DFX_TARGET=backend
 OUTDIR=out
 PROGRESS="--progress=auto"
@@ -46,11 +47,13 @@ rm -fr "${OUTDIR}"
 
 scripts/docker-build.pre
 
+set -x
 if DOCKER_BUILDKIT=1 docker build \
   --target "$DFX_TARGET" \
+  --build-arg "DFX_NETWORK=${DFX_NETWORK:-ic}" \
   "$PROGRESS" \
-  -t "$image_name" \
-  -o "$OUTDIR" . \
+  --tag "$image_name" \
+  --output "$OUTDIR" . \
   "${@+${@}}"; then
   echo "SUCCESS: Docker build has succeeded."
   cat out/report.txt
