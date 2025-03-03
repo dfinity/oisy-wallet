@@ -9,7 +9,7 @@
 	export let dAppDescription: FeaturedOisyDappDescription;
 </script>
 
-<article class="rounded-2xl relative flex items-end overflow-hidden">
+<article class="relative flex items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
 		<div class="max-h-64 bg-brand-subtle-30">
 			<ImgBanner
@@ -18,8 +18,8 @@
 			/>
 		</div>
 	{/if}
-	<div class="start-0 px-4 py-4 backdrop-blur-xs absolute w-full flex-1 bg-black/30">
-		<div class="gap-x-2 flex items-center">
+	<div class="backdrop-blur-xs absolute start-0 w-full flex-1 bg-black/30 px-4 py-4">
+		<div class="flex items-center gap-x-2">
 			<div class="h-12 w-12 rounded-full">
 				<Img
 					src={dAppDescription.logo}
@@ -27,11 +27,11 @@
 				/>
 			</div>
 			<div class="flex-1">
-				<h6 class="text-sm font-bold text-info-blue">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-sm font-bold text-brand-primary-alt">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-primary-inverted">{dAppDescription.name}</h4>
 			</div>
 
-			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="secondary" on:click>
+			<Button paddingSmall styleClass="grow-0 text-sm" colorStyle="primary" on:click>
 				{$i18n.core.text.view}
 			</Button>
 		</div>

@@ -3,11 +3,11 @@
 	export let testId: string | undefined = undefined;
 
 	const variantClassNames = {
-		default: 'border border-tertiary bg-dust/30',
-		info: 'bg-brand-subtle-10 text-brand-primary',
-		error: 'bg-error-subtle-10 text-error-primary',
-		warning: 'bg-warning-subtle-10 text-warning-primary',
-		success: 'bg-success-subtle-10 text-success-primary',
+		default: 'bg-secondary text-primary border border-secondary',
+		info: 'bg-brand-subtle-20 text-brand-primary',
+		error: 'bg-error-subtle-20 text-error-primary',
+		warning: 'bg-warning-subtle-20 text-warning-primary',
+		success: 'bg-success-subtle-20 text-success-primary',
 		outline: 'border border-tertiary bg-off-white'
 	};
 
@@ -16,11 +16,11 @@
 
 <span
 	data-tid={testId}
-	class="gap-1 rounded px-2 py-0.5 text-xs font-semibold inline-flex h-fit w-full items-center {variantClassNames[
+	class="inline-flex h-fit w-full items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold {variantClassNames[
 		variant
 	]} {styleClass ?? ''}"
 >
-	<span class="min-w-0 inline-block truncate">
+	<span class="inline-block min-w-0 truncate">
 		<slot />
 	</span>
 </span>

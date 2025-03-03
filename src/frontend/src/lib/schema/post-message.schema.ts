@@ -27,9 +27,6 @@ export const PostMessageRequestSchema = z.enum([
 	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
-	'startUserSnapshotTimer',
-	'triggerUserSnapshotTimer',
-	'stopUserSnapshotTimer',
 	'stopIcpWalletTimer',
 	'startIcpWalletTimer',
 	'triggerIcpWalletTimer',
@@ -97,7 +94,8 @@ export const PostMessageDataRequestSolSchema = z.object({
 	// TODO: generate zod schema for CertifiedData
 	address: z.custom<CertifiedData<SolAddress>>(),
 	solanaNetwork: z.custom<SolanaNetworkType>(),
-	tokenAddress: z.custom<SolAddress>().optional()
+	tokenAddress: z.custom<SplTokenAddress>().optional(),
+	tokenOwnerAddress: z.custom<SolAddress>().optional()
 });
 
 export const PostMessageResponseStatusSchema = z.enum([
@@ -106,8 +104,7 @@ export const PostMessageResponseStatusSchema = z.enum([
 	'syncSolWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
-	'syncCkBTCUpdateBalanceStatus',
-	'syncUserSnapshotStatus'
+	'syncCkBTCUpdateBalanceStatus'
 ]);
 
 export const PostMessageResponseSchema = z.enum([
@@ -115,7 +112,6 @@ export const PostMessageResponseSchema = z.enum([
 	'delegationRemainingTime',
 	'syncExchange',
 	'syncExchangeError',
-	'syncUserSnapshotError',
 	'syncIcpWallet',
 	'syncIcrcWallet',
 	'syncBtcWallet',

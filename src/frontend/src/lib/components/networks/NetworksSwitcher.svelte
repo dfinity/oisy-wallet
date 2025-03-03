@@ -34,7 +34,7 @@
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
 	<div slot="items">
-		<ul class="gap-4 font-normal flex list-none flex-col">
+		<ul class="flex list-none flex-col font-normal">
 			<li>
 				<NetworkButton
 					id={undefined}
@@ -52,10 +52,10 @@
 			{/each}
 		</ul>
 
-		<span class="mt-8 mb-5 font-bold flex">{$i18n.networks.test_networks}</span>
+		<span class="mb-5 mt-8 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
 
 		{#if $testnetsEnabled}
-			<ul class="mb-2 gap-4 font-normal flex list-none flex-col" transition:slide={SLIDE_EASING}>
+			<ul class="mb-2 flex list-none flex-col font-normal" transition:slide={SLIDE_EASING}>
 				{#each $networksTestnets as network}
 					<li>
 						<Network {network} on:icSelected={dropdown.close} />
@@ -64,13 +64,13 @@
 			</ul>
 		{/if}
 
-		<hr class="my-4 w-10/12 opacity-10" style="border: 0.05rem solid" />
+		<hr class="mx-3 w-11/12 opacity-10" style="border: 0.05rem solid" />
 
-		<ul class="gap-4 font-normal flex list-none flex-col">
+		<ul class="flex list-none flex-col gap-4 font-normal">
 			<li class="flex items-center justify-between">
-				<div class="gap-2 flex items-center">
+				<div class="dropdown-item disabled flex items-center gap-2">
 					<IconMorePlain />
-					<span class="text-grey">{$i18n.networks.more}</span>
+					<span>{$i18n.networks.more}</span>
 				</div>
 			</li>
 		</ul>
