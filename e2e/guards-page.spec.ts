@@ -1,5 +1,4 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
-import { expect } from '@playwright/test';
 import { TRANSACTIONS_URL } from './utils/constants/e2e.constants';
 import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { TransactionsPage } from './utils/pages/transactions.page';
@@ -25,6 +24,6 @@ testWithII(
 
 		await homepageLoggedIn.waitForContentReady();
 
-		await expect(page).toHaveScreenshot({ fullPage: true });
+		await homepageLoggedIn.takeScreenshot();
 	}
 );
