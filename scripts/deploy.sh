@@ -18,7 +18,7 @@ dfx deploy icp_index
 ./scripts/deploy.cketh.sh
 ./scripts/deploy.ckerc20.sh
 
-./scripts/deploy.kong_backend.sh
+dfx deploy kong_backend
 
 dfx deploy internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
 dfx deploy pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
