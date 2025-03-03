@@ -144,26 +144,18 @@ const createSplTokenTransactionMessage = async ({
 
 	const source = signer.address;
 
-	const sourceTokenAccountAddress = await loadTokenAccount({
-		address: source,
-		network,
-		tokenAddress
+	// To be sure which token account is used, we calculate the associated token account address
+	const sourceTokenAccountAddress: SolAddress = await calculateAssociatedTokenAddress({
+		owner: source,
+		tokenAddress,
+		tokenOwnerAddress
 	});
-
-	// This should not happen since we are sending from an existing account.
-	// But we need it to return a non-nullish value.
-	assertNonNullish(
-		sourceTokenAccountAddress,
-		`Token account not found for wallet ${source} and token ${tokenAddress} on ${network} network`
-	);
 
 	const destinationTokenAccountAddress = await loadTokenAccount({
 		address: destination,
 		network,
 		tokenAddress
 	});
-
-	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
 	const calculatedDestinationTokenAccountAddress: SolAddress =
 		await calculateAssociatedTokenAddress({
@@ -172,11 +164,20 @@ const createSplTokenTransactionMessage = async ({
 			tokenOwnerAddress
 		});
 
+	// To be sure there was no mistake nor injection, we verify that the destination token account is the same as the calculated one.
+	if (destinationTokenAccountAddress !== calculatedDestinationTokenAccountAddress) {
+		throw new Error(
+			`Destination ATA address is different from the calculated one. Destination: ${destinationTokenAccountAddress}, Calculated: ${calculatedDestinationTokenAccountAddress}`
+		);
+	}
+
 	const ataInstruction = await createAtaInstruction({
 		signer,
 		destination,
 		tokenAddress
 	});
+
+	const mustCreateDestinationTokenAccount = isNullish(destinationTokenAccountAddress);
 
 	const transferInstruction = getTransferInstruction(
 		{
