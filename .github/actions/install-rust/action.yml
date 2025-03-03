@@ -1,0 +1,15 @@
+name: Install Rust
+
+description: Install Rust
+
+runs:
+  using: composite
+  steps:
+    - name: Install rust in rust-toolchain.toml
+      run: rustup show
+    - name: Show the installed rust
+      run: cargo --version
+    - name: install nightly compiler
+      run: rustup toolchain install nightly
+    - name: install nightly rustfmt
+      run: rustup component add rustfmt --toolchain nightly
