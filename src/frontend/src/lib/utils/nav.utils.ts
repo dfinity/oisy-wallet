@@ -46,7 +46,7 @@ const tokenUrl = ({
 	token: Token;
 	path: AppPath.Transactions | undefined;
 }): string =>
-	`${path ?? ''}/?${TOKEN_PARAM}=${encodeURIComponent(
+	`${path ?? ''}?${TOKEN_PARAM}=${encodeURIComponent(
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
@@ -63,27 +63,14 @@ export const networkUrl = ({
 	networkId: Option<NetworkId>;
 	usePreviousRoute: boolean;
 	fromRoute: NavigationTarget | null;
-}) => {
-	// Due to different mobile behavior when routing, we need to make sure theres a trailing slash
-	const pathTrailingSlash = path.endsWith('/') ? path : `${path}/`;
-
-	if (usePreviousRoute) {
-		// if usePreviousRoute (if transactions route)
-		// the main nav link should point back to assets if network param is in URL
-		// else we return the path as it is
-		if (notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))) {
-			return `${pathTrailingSlash}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`;
-		}
-		return pathTrailingSlash;
-	}
-	// if not usePreviousRoute (not transaction route) but a network id is provided, we pass the
-	// networkId in the URL again to stay in context. This is needed for the Assets routes/subroutes
-	// else we return the path as it is again
-	if (nonNullish(networkId)) {
-		return `${pathTrailingSlash}?${networkParam(networkId)}`;
-	}
-	return pathTrailingSlash;
-};
+}) =>
+	usePreviousRoute
+		? notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))
+			? `${path}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`
+			: path
+		: nonNullish(networkId)
+			? `${path}?${networkParam(networkId)}`
+			: path;
 
 export const back = async ({ pop }: { pop: boolean }) => {
 	if (pop) {

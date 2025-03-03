@@ -77,10 +77,13 @@ button.nav-item[disabled]:not(.loading) {
 
 div.mobile-nav {
 	a.nav-item:not([disabled]):not(.disabled):not(.loading),
-	button.nav-item:not([disabled]):not(.disabled):not(.loading) {
+	button.nav-item:not([disabled]):not(.disabled):not(.loading),
+	a.nav-item:hover:not([disabled]):not(.disabled):not(.loading),
+	button.nav-item:hover:not([disabled]):not(.disabled):not(.loading), {
 		@apply flex;
 		@apply flex-col;
 		@apply text-center;
+		@apply text-primary;
 		@apply bg-transparent;
 		@apply items-center;
 		@apply gap-0;
@@ -94,6 +97,10 @@ div.mobile-nav {
 		svg {
 			width: 24px;
 			height: 24px;
+		}
+
+		&.selected {
+			@apply text-brand-primary-alt;
 		}
 	}
 }
