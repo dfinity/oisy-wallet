@@ -61,20 +61,7 @@
 		fromRoute = from;
 	});
 
-	let isTransactionsRoute = false;
-	$: isTransactionsRoute = isRouteTransactions($page);
-
 	const hidePopover = () => (visible = false);
-
-	const navigateTo = async (path: AppPath) => {
-		hidePopover();
-		await goto(
-			networkUrl({ path, networkId: $networkId, usePreviousRoute: isTransactionsRoute, fromRoute })
-		);
-	};
-
-	let assetsRoute = false;
-	$: assetsRoute = isRouteTokens($page);
 
 	let settingsRoute = false;
 	$: settingsRoute = isRouteSettings($page);
