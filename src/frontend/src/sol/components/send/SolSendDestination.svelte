@@ -24,7 +24,7 @@
 	let network: SolanaNetworkType | undefined;
 	$: network = mapNetworkIdToNetwork($sendTokenNetworkId);
 
-	let isAtaDestination: boolean = true
+	let isAtaDestination = true;
 
 	const updateIsAtaDestination = async () => {
 		assertNonNullish(network, 'No Solana network provided to start Solana wallet worker.');
