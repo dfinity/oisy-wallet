@@ -92,7 +92,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.1.0",
+		"@dfinity/eslint-config-oisy-wallet": "^0.1.1",
 		"@dfinity/ic-management": "^6.0.5",
 		"@dfinity/identity-secp256k1": "^2.3.0",
 		"@dfinity/internet-identity-playwright": "^0.0.4",
