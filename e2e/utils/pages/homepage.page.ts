@@ -57,6 +57,7 @@ interface WaitForModalParams {
 interface TakeScreenshotParams {
 	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
+	screenshotTarget?: Locator;
 }
 
 type TestModalSnapshotParams = {
@@ -288,8 +289,8 @@ abstract class Homepage {
 				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
 			);
 		}
-
-		await expect(modal).toHaveScreenshot();
+		await this.takeScreenshot({ screenshotTarget: modal });
+		// await expect(modal).toHaveScreenshot();
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
@@ -366,7 +367,7 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{ freezeCarousel = false, centeredElementTestId }: TakeScreenshotParams = {
+		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
@@ -378,15 +379,26 @@ abstract class Homepage {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
-
 		await this.#page.mouse.move(0, 0);
 
-		await expect(this.#page).toHaveScreenshot({
-			// creates a snapshot as a fullPage and not just certain parts.
-			fullPage: true,
-			// playwright can retry flaky tests in the amount of time set below.
-			timeout: 5 * 60 * 1000
-		});
+		const colorSchemes = ['light', 'dark'] as const;
+		for (const scheme of colorSchemes) {
+			await this.#page.emulateMedia({ colorScheme: scheme });
+
+			if (screenshotTarget) {
+				await expect(screenshotTarget).toHaveScreenshot({
+					timeout: 5 * 60 * 1000
+				});
+			} else {
+				await expect(this.#page).toHaveScreenshot({
+					// creates a snapshot as a fullPage and not just certain parts.
+					fullPage: true,
+					// playwright can retry flaky tests in the amount of time set below.
+					timeout: 5 * 60 * 1000
+				});
+			}
+		}
+		await this.#page.emulateMedia({ colorScheme: null });
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
