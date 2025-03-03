@@ -389,9 +389,9 @@ abstract class Homepage {
 				fullPage: true,
 				// playwright can retry flaky tests in the amount of time set below.
 				timeout: 5 * 60 * 1000
-				});
+			});
 			await this.#page.emulateMedia({ colorScheme: null });
-			}
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
