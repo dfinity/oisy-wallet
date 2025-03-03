@@ -1,4 +1,4 @@
-import { TOKEN_CARD } from '$lib/constants/test-ids.constants';
+import { CAROUSEL_CONTAINER, TOKEN_CARD } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 export type TransactionsPageParams = {
@@ -20,6 +20,10 @@ export class TransactionsPage extends HomepageLoggedIn {
 	override async extendWaitForReady(): Promise<void> {
 		const testId = `${TOKEN_CARD}-${this.#tokenSymbol}-${this.#networkId}`;
 		await this.clickByTestId({ testId });
+		await this.waitForByTestId({
+			testId: CAROUSEL_CONTAINER,
+			options: { state: 'detached' }
+		});
 		await this.waitForLoadState();
 	}
 }

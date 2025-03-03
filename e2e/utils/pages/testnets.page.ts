@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
+import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 
 type TestnetsPageParams = HomepageLoggedInParams;
 
@@ -55,6 +56,10 @@ export class TestnetsPage extends HomepageLoggedIn {
 				networkSymbol
 			})
 		).toBeVisible();
+		await this.waitForByTestId({
+			testId: CAROUSEL_CONTAINER,
+			options: { state: 'detached' }
+		});
 		await this.waitForLoadState();
 	}
 }
