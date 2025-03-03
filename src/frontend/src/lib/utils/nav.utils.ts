@@ -66,25 +66,24 @@ export const networkUrl = ({
 }) => {
 	// Due to different mobile behavior when routing, we need to make sure theres a trailing slash
 	const pathTrailingSlash = path.endsWith('/') ? path : path + '/';
-	let ret;
 
 	if (usePreviousRoute) {
 		// if usePreviousRoute (if transactions route)
 		// the main nav link should point back to assets if network param is in URL
 		// else we return the path as it is
 		if (notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))) {
-			ret = `${pathTrailingSlash}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`;
+			return `${pathTrailingSlash}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`;
 		} else {
-			ret = pathTrailingSlash;
+			return pathTrailingSlash;
 		}
 		// if not usePreviousRoute (not transaction route) but a network id is provided, we pass the
 		// networkId in the URL again to stay in context. This is needed for the Assets routes/subroutes
 		// else we return the path as it is again
 	} else {
 		if (nonNullish(networkId)) {
-			ret = `${pathTrailingSlash}?${networkParam(networkId)}`;
+			return `${pathTrailingSlash}?${networkParam(networkId)}`;
 		} else {
-			ret = pathTrailingSlash;
+			return pathTrailingSlash;
 		}
 	}
 
