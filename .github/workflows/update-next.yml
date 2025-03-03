@@ -1,5 +1,5 @@
 # A GitHub Actions workflow that can be used to trigger updates of npm packages.
-name: Update npm package dependencies
+name: Update npm Package Dependencies
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ on:
         default: true
 
 jobs:
-  update-next-dependencies:
+  update-dependencies:
     runs-on: ubuntu-latest
     steps:
       - name: Create GitHub App Token
