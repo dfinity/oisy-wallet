@@ -1,6 +1,6 @@
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
-import type { SolAddress } from '$lib/types/address';
+import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -154,7 +154,7 @@ const createSplTokenTransactionMessage = async ({
 
 	const destinationIsAtaAddress = await isAtaAddress({ address: destination, network });
 
-	const destinationTokenAccountAddress = destinationIsAtaAddress
+	const destinationTokenAccountAddress: OptionSolAddress = destinationIsAtaAddress
 		? destination
 		: await loadTokenAccount({
 				address: destination,
