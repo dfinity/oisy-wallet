@@ -36,11 +36,11 @@
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
 	data-tid={testId}
 	class:as-button={asButton}
-	class:text-brand-primary={!asButton && !asMenuItem}
+	class:text-brand-primary-alt={!asButton && !asMenuItem}
 	class:hover:text-inherit={color === 'blue' && !asButton && !asMenuItem}
 	class:active:text-inherit={color === 'blue' && !asButton && !asMenuItem}
-	class:hover:text-brand-primary={color === 'inherit' && !asButton && !asMenuItem}
-	class:active:text-brand-primary={color === 'inherit' && !asButton && !asMenuItem}
+	class:hover:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
+	class:active:text-brand-primary-alt={color === 'inherit' && !asButton && !asMenuItem}
 	class:w-full={fullWidth}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
