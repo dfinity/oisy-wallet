@@ -20,6 +20,9 @@ RUN npm --version
 
 FROM deps AS build_frontend
 
+COPY package.json package-lock.json .
+RUN npm ci
+
 COPY . .
 
 ARG network="staging"
