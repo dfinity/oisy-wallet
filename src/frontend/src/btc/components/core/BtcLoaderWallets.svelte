@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import type { IcCkToken } from '$icp/types/ic-token';
@@ -10,7 +11,7 @@
 		btcAddressRegtest,
 		btcAddressTestnet
 	} from '$lib/derived/address.derived';
-	import { enabledBtcTokens, tokens } from '$lib/derived/tokens.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import type { InitWalletWorkerFn } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
 	import {
@@ -28,7 +29,7 @@
 
 	let walletWorkerTokens: Token[];
 	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
-	$: walletWorkerTokens = $enabledBtcTokens.filter(({ network: { id: networkId } }) =>
+	$: walletWorkerTokens = $enabledBitcoinTokens.filter(({ network: { id: networkId } }) =>
 		LOCAL
 			? isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)
 			: !isNetworkIdBTCRegtest(networkId) &&

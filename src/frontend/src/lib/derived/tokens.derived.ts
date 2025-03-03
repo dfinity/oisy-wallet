@@ -72,15 +72,6 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 		$enabledTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
 );
 
-// TODO: add tests when https://github.com/dfinity/oisy-wallet/pull/2450 is merged
-/**
- * The following store is used as reference for the list of WalletWorkers that are started/stopped in the main token page.
- */
-export const enabledBtcTokens: Readable<Token[]> = derived(
-	[enabledBitcoinTokens],
-	filterEnabledTokens
-);
-
 /**
  * The following store is used as reference for the list of WalletWorkers that are started/stopped in the main token page.
  */
