@@ -43,7 +43,12 @@
 		$solTransactions: $solTransactionsStore
 	});
 
-	$: console.log($icTransactionsStore);
+	$: console.log(
+		$btcTransactionsStore,
+		$ethTransactionsStore,
+		$icTransactionsStore,
+		$solTransactionsStore
+	);
 
 	let sortedTransactions: AllTransactionUiWithCmp[];
 	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>

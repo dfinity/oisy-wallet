@@ -1,21 +1,40 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+	import type { BtcTransactionUi } from '$btc/types/btc';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import {
+		type EthTransactionsData,
+		ethTransactionsStore
+	} from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
-	import { isTransactionsStoreNotInitialized } from '$lib/utils/transactions.utils';
+	import type { CertifiedStoreData } from '$lib/stores/certified.store';
+	import type { TransactionsData } from '$lib/stores/transactions.store';
+	import type { Token } from '$lib/types/token';
+	import {
+		isTransactionsStoreEmpty,
+		isTransactionsStoreNotEmpty,
+		isTransactionsStoreNotInitialized
+	} from '$lib/utils/transactions.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	export let testIdPrefix: string | undefined = undefined;
 
-	let loading = true;
-	$: loading = [
+	let transactionsStores: {
+		// TODO: set unified type when we harmonize the transaction stores
+		transactionsStoreData:
+			| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
+			| EthTransactionsData;
+		tokens: Token[];
+	}[];
+	$: transactionsStores = [
 		{ transactionsStoreData: $btcTransactionsStore, tokens: $enabledBitcoinTokens },
 		{
 			transactionsStoreData: $ethTransactionsStore,
@@ -26,18 +45,16 @@
 			transactionsStoreData: $solTransactionsStore,
 			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
 		}
-	].reduce<boolean>(
-		(acc, { transactionsStoreData, tokens }) =>
-			// The order of the below conditions is important.
-			// If ANY of the transactions store data is not initialized, then loading is true.
-			// That is because we do not hide the skeleton if there is a single store that is still not initialized.
-			// It could be showing an empty list of transactions when, in fact, there are still transactions to be fetched.
-			// If ALL tokens are not initialized, then loading is true.
-			// That is because we want all the tokens to be present or fetched once, before hiding the skeleton and maybe showing a possible empty list of transactions.
-			(acc || isNullish(transactionsStoreData)) &&
-			isTransactionsStoreNotInitialized({ transactionsStoreData, tokens }),
-		true
-	);
+	];
+
+	let loading = true;
+	$: loading =
+		(transactionsStores.some(({ transactionsStoreData }) => isNullish(transactionsStoreData)) ||
+		transactionsStores.every(({ transactionsStoreData, tokens }) =>
+			isTransactionsStoreNotInitialized({ transactionsStoreData, tokens })
+		)) && transactionsStores.every(({ transactionsStoreData, tokens }) =>
+			isTransactionsStoreEmpty({ transactionsStoreData, tokens })
+		) ;
 </script>
 
 <TransactionsSkeletons {loading} {testIdPrefix}>
