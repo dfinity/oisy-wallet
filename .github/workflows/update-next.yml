@@ -1,0 +1,75 @@
+# A GitHub Actions workflow that can be used to trigger updates of npm packages.
+name: Update npm Package Dependencies
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        required: true
+        type: choice
+        description: 'Select the package(s) to update.'
+        options:
+          - gix-components
+          - ic-js
+          - oisy-wallet-signer
+          - eslint-config-oisy-wallet
+          - agent
+          - agent & ic-js
+      next:
+        required: false
+        type: boolean
+        description: 'Update all dependencies to the next version'
+        default: true
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Set package variable
+        id: package_name
+        run: |
+          case "${{ inputs.package }}" in
+            "gix-components") echo "PKG_NAME=gix-cmp" >> "$GITHUB_ENV" ;;
+            "ic-js") echo "PKG_NAME=ic-js" >> "$GITHUB_ENV" ;;
+            "oisy-wallet-signer") echo "PKG_NAME=signer" >> "$GITHUB_ENV" ;;
+            "eslint-config-oisy-wallet") echo "PKG_NAME=oisy-eslint" >> "$GITHUB_ENV" ;;
+            "agent") echo "PKG_NAME=agent" >> "$GITHUB_ENV" ;;
+            "agent & ic-js") echo "PKG_NAME=agent:ic-js" >> "$GITHUB_ENV" ;;
+            *) echo "Invalid package selection" && exit 1 ;;
+          esac
+
+      - name: Update package
+        run: npm run update:${{ env.PKG_NAME }}${{ inputs.next && ':next' || '' }}
+
+      - name: Create Pull Request
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: bot-bump-${{ inputs.package }}${{ inputs.next && '-next' || '' }}
+          title: "build(frontend): Bump ${{ inputs.package }}${{ inputs.next && ' to next' || '' }}"
+          body: |
+            # Motivation
+
+            We want to pull in the latest changes for the `${{ inputs.package }}` package.
+
+            # Changes
+
+            * Ran `npm run update:${{ env.PKG_NAME }}${{ inputs.next && ':next' || '' }}`
+
+            # Tests
+
+            * CI should pass
+            * The pulled in changes should have been tested before being committed to their repositories.
