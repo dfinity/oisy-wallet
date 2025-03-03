@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
@@ -39,8 +37,6 @@
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
-	let fromRoute: NavigationTarget | null;
-
 	let isVip = false;
 	onMount(async () => {
 		if (nonNullish($authIdentity)) {
@@ -50,10 +46,6 @@
 				})
 			).success;
 		}
-	});
-
-	afterNavigate(({ from }) => {
-		fromRoute = from;
 	});
 
 	const hidePopover = () => (visible = false);
