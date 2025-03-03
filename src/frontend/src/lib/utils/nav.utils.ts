@@ -73,18 +73,16 @@ export const networkUrl = ({
 		// else we return the path as it is
 		if (notEmptyString(fromRoute?.url.searchParams.get(NETWORK_PARAM))) {
 			return `${pathTrailingSlash}?${NETWORK_PARAM}=${fromRoute?.url.searchParams.get(NETWORK_PARAM)}`;
-		} else {
-			return pathTrailingSlash;
 		}
+		return pathTrailingSlash;
 		// if not usePreviousRoute (not transaction route) but a network id is provided, we pass the
 		// networkId in the URL again to stay in context. This is needed for the Assets routes/subroutes
 		// else we return the path as it is again
 	} else {
 		if (nonNullish(networkId)) {
 			return `${pathTrailingSlash}?${networkParam(networkId)}`;
-		} else {
-			return pathTrailingSlash;
 		}
+		return pathTrailingSlash;
 	}
 };
 
