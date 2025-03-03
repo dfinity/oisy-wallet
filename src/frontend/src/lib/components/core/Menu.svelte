@@ -5,17 +5,11 @@
 	import { onMount } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { AIRDROPS_ENABLED } from '$env/airdrops.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import SignOut from '$lib/components/core/SignOut.svelte';
-	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
-	import IconWallet from '$lib/components/icons/IconWallet.svelte';
-	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
-	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
-	import IconlyUfo from '$lib/components/icons/iconly/IconlyUfo.svelte';
 	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -29,11 +23,7 @@
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
-		NAVIGATION_ITEM_ACTIVITY,
-		NAVIGATION_ITEM_EXPLORER,
-		NAVIGATION_ITEM_SETTINGS,
-		NAVIGATION_MENU_VIP_BUTTON,
-		NAVIGATION_ITEM_AIRDROPS
+		NAVIGATION_MENU_VIP_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalVipQrCode } from '$lib/derived/modal.derived';
