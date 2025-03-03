@@ -78,12 +78,11 @@ export const networkUrl = ({
 		// if not usePreviousRoute (not transaction route) but a network id is provided, we pass the
 		// networkId in the URL again to stay in context. This is needed for the Assets routes/subroutes
 		// else we return the path as it is again
-	} else {
-		if (nonNullish(networkId)) {
-			return `${pathTrailingSlash}?${networkParam(networkId)}`;
-		}
-		return pathTrailingSlash;
 	}
+	if (nonNullish(networkId)) {
+		return `${pathTrailingSlash}?${networkParam(networkId)}`;
+	}
+	return pathTrailingSlash;
 };
 
 export const back = async ({ pop }: { pop: boolean }) => {
