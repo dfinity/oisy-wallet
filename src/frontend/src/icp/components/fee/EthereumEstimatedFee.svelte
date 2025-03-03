@@ -12,6 +12,7 @@
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import type { Option } from '$lib/types/utils';
@@ -23,6 +24,9 @@
 
 	let maxTransactionFee: Option<bigint> = undefined;
 	$: maxTransactionFee = $store?.maxTransactionFee;
+
+	let ethFeeExchangeRate: number | undefined;
+	$: ethFeeExchangeRate = $exchanges?.[feeToken.id]?.usd;
 </script>
 
 {#if nonNullish($store)}
@@ -37,6 +41,7 @@
 						feeSymbol={feeToken.symbol}
 						feeTokenId={feeToken.id}
 						feeDecimals={feeToken.decimals}
+						feeExchangeRate={ethFeeExchangeRate}
 					/>
 				{:else}
 					&ZeroWidthSpace;
