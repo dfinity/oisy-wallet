@@ -4,7 +4,6 @@ import {
 	getNewVipReward as getNewVipRewardApi,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { LOCAL } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
@@ -43,15 +42,10 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 		return await queryVipUser({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
-		// TODO Remove this temporary fix as soon as we do run the rewards canister locally
-		if (LOCAL) {
-			console.error(vip.reward.error.loading_user_data, err);
-		} else {
-			toastsError({
-				msg: { text: vip.reward.error.loading_user_data },
-				err
-			});
-		}
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
 
 		return { success: false, err };
 	}
