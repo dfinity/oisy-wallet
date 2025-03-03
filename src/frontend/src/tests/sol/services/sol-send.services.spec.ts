@@ -237,7 +237,7 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledOnce();
+			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledTimes(2);
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 
 			expect(pipe).toHaveBeenCalledTimes(4);
