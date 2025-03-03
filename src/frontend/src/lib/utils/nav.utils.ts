@@ -65,7 +65,7 @@ export const networkUrl = ({
 	fromRoute: NavigationTarget | null;
 }) => {
 	// Due to different mobile behavior when routing, we need to make sure theres a trailing slash
-	const pathTrailingSlash = path.endsWith('/') ? path : path + '/';
+	const pathTrailingSlash = path.endsWith('/') ? path : `${path}/`;
 
 	if (usePreviousRoute) {
 		// if usePreviousRoute (if transactions route)
