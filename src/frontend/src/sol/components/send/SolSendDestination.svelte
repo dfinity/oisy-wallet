@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { assertNonNullish, notEmptyString } from '@dfinity/utils';
+	import { assertNonNullish, debounce, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
@@ -24,7 +24,7 @@
 	let network: SolanaNetworkType | undefined;
 	$: network = mapNetworkIdToNetwork($sendTokenNetworkId);
 
-	let isAtaDestination: boolean;
+	let isAtaDestination: boolean = true
 
 	const updateIsAtaDestination = async () => {
 		assertNonNullish(network, 'No Solana network provided to start Solana wallet worker.');
@@ -32,7 +32,9 @@
 		isAtaDestination = await isAtaAddress({ address: destination, network });
 	};
 
-	$: destination, updateIsAtaDestination();
+	const debounceUpdateIsAtaDestination = debounce(updateIsAtaDestination);
+
+	$: destination, debounceUpdateIsAtaDestination();
 </script>
 
 <SendInputDestination
