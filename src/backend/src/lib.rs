@@ -39,6 +39,8 @@ use shared::{
         Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
     },
 };
+use shared::types::Timestamp;
+use shared::types::user_profile::{ ListUserCreationTimestampsResponse};
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
@@ -53,6 +55,7 @@ use crate::{
     token::{add_to_user_token, remove_from_user_token},
     user_profile::add_hidden_dapp_id,
 };
+use crate::oisy_user::oisy_user_creation_timestamps;
 
 mod assertions;
 mod bitcoin_api;
@@ -619,6 +622,19 @@ pub fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 
     ListUsersResponse {
         users,
+        matches_max_length,
+    }
+}
+
+#[query(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+#[must_use]
+pub fn list_user_creation_timestamps(request: ListUsersRequest) -> ListUserCreationTimestampsResponse {
+    let (creation_timestamps, matches_max_length): (Vec<Timestamp>, u64) =
+        read_state(|s| oisy_user_creation_timestamps(&request, &s.user_profile));
+
+    ListUserCreationTimestampsResponse {
+        creation_timestamps,
         matches_max_length,
     }
 }
