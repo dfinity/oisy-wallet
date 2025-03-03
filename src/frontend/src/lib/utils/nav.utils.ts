@@ -86,8 +86,6 @@ export const networkUrl = ({
 			return pathTrailingSlash;
 		}
 	}
-
-	return ret;
 };
 
 export const back = async ({ pop }: { pop: boolean }) => {
