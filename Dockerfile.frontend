@@ -20,6 +20,9 @@ RUN npm --version
 
 FROM deps AS build_frontend
 
+COPY package.json package-lock.json .
+RUN npm ci
+
 COPY . .
 
 ARG network="staging"
@@ -29,7 +32,6 @@ ENV DFX_NETWORK=$network
 RUN echo $ENV
 RUN echo $DFX_NETWORK
 
-RUN npm ci
 RUN npm run build
 
 
