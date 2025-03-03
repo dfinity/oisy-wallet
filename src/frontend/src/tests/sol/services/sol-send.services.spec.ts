@@ -164,5 +164,29 @@ describe('sol-send.services', () => {
 				})
 			);
 		});
+
+		it('should throw an error if no token accounts are found', async () => {
+			vi.mocked(solanaHttpRpc).mockReturnValue({
+				getTokenAccountsByOwner: vi.fn(() => ({
+					send: vi.fn(() => Promise.resolve({ value: [] }))
+				}))
+			} as unknown as Rpc<SolanaRpcApi>);
+
+			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrowError(
+				`Token account not found for wallet ${mockSource} and token ${DEVNET_USDC_TOKEN.address} on devnet network`
+			);
+		});
+
+		it('should throw an error if the destination ATA address is different from the calculated one', async () => {
+			vi.mocked(solanaHttpRpc).mockReturnValue({
+				getTokenAccountsByOwner: vi.fn(() => ({
+					send: vi.fn(() => Promise.resolve({ value: [{ pubkey: 'different-address' }] }))
+				}))
+			} as unknown as Rpc<SolanaRpcApi>);
+
+			await expect(sendSol({ ...mockParams, token: DEVNET_USDC_TOKEN })).rejects.toThrowError(
+				`Destination ATA address is different from the calculated one. Destination: different-address, Calculated: ${mockSplAddress}`
+			);
+		});
 	});
 });
