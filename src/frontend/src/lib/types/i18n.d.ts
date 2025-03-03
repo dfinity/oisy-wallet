@@ -354,6 +354,7 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
+		ata_will_be_calculated: string;
 	};
 	assertion: {
 		invalid_destination_address: string;

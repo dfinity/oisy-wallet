@@ -382,7 +382,8 @@
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
-			"no_available_utxos": "You won't have available utxos to perform this transaction."
+			"no_available_utxos": "You won't have available utxos to perform this transaction.",
+			"ata_will_be_calculated": "You provided a non-ATA address. The ATA address will be calculated automatically based on your input."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
