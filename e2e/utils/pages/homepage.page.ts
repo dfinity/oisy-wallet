@@ -381,12 +381,17 @@ abstract class Homepage {
 
 		await this.#page.mouse.move(0, 0);
 
-		await expect(this.#page).toHaveScreenshot({
-			// creates a snapshot as a fullPage and not just certain parts.
-			fullPage: true,
-			// playwright can retry flaky tests in the amount of time set below.
-			timeout: 5 * 60 * 1000
-		});
+		const colorSchemes = ['light', 'dark'] as const;
+		for (const scheme of colorSchemes) {
+			await this.#page.emulateMedia({ colorScheme: scheme });
+			await expect(this.#page).toHaveScreenshot({
+				// creates a snapshot as a fullPage and not just certain parts.
+				fullPage: true,
+				// playwright can retry flaky tests in the amount of time set below.
+				timeout: 5 * 60 * 1000
+			});
+			await this.#page.emulateMedia({ colorScheme: null });
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
