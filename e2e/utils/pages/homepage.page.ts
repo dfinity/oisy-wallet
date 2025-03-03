@@ -336,9 +336,6 @@ abstract class Homepage {
 		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
-		await this.getLocatorByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN }).evaluate((el) =>
-			el.blur()
-		);
 	}
 
 	async toggleTokenInList({
@@ -356,8 +353,6 @@ abstract class Homepage {
 		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
-		// We want to remove the focus from the button to avoid the focus box to be visible in the screenshot
-		await this.#page.keyboard.press('Escape');
 	}
 
 	getTokenCardLocator({
@@ -383,6 +378,8 @@ abstract class Homepage {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
+
+		await this.#page.mouse.move(0, 0);
 
 		await expect(this.#page).toHaveScreenshot({
 			// creates a snapshot as a fullPage and not just certain parts.

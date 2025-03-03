@@ -7,7 +7,6 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import { vi } from 'vitest';
 
 describe('VipQrCodeModal', () => {
 	const qrCodeSelector = `div[data-tid="qr-code"]`;
