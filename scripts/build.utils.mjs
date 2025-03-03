@@ -11,7 +11,7 @@ export const ENV =
 		? 'production'
 		: (REQUESTED_ENV ?? '').startsWith('test_fe_')
 			? 'staging'
-			: ['staging', 'beta'].includes(REQUESTED_ENV)
+			: ['staging', 'beta', 'audit'].includes(REQUESTED_ENV)
 				? REQUESTED_ENV
 				: 'development';
 
