@@ -39,7 +39,7 @@
 		<button
 			class:hover:cursor-default={disabled}
 			{disabled}
-			on:click={handleUnitSwitch}
+			on:click|preventDefault={handleUnitSwitch}
 			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 		>
 			<IconArrowUpDown size="14" />
