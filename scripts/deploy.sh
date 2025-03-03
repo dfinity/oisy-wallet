@@ -3,7 +3,7 @@ set -euxo pipefail
 
 dfx canister create --all
 dfx deploy backend
-./scripts/deploy.signer.sh
+dfx deploy signer
 
 mkdir -p ./target/ic
 
