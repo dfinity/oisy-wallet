@@ -89,9 +89,22 @@ jobs:
       - name: Test
         run: npm run test
 
+  config:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Install dfx
+        uses: dfinity/setup-dfx@main
+      - name: Check ic-domains
+        run: scripts/build.ic-domains.test
+
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test']
+    needs: ['format', 'lint', 'check', 'test', 'config']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging

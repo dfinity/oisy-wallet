@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -50,13 +50,15 @@
 		"erc20:check": "vite-node scripts/check.tokens.erc20.ts",
 		"update:agent": "npm rm @dfinity/{agent,auth-client,candid,principal,identity-secp256k1} && npm i @dfinity/{agent,auth-client,candid,principal} && npm i @dfinity/identity-secp256k1 -D",
 		"update:ic-js": "npm rm @dfinity/{ckbtc,cketh,ic-management,ledger-icp,ledger-icrc,utils,zod-schemas} && npm i @dfinity/{ckbtc,cketh,ledger-icp,ledger-icrc,utils,zod-schemas} && npm i @dfinity/ic-management -D",
-		"update:ic-js:next": "npm rm @dfinity/{ckbtc,cketh,ic-management,ledger-icp,ledger-icrc,utils,zod-schemas} && npm i @dfinity/{ckbtc,cketh,ledger-icp,ledger-icrc,utils,zod-schemas,}@next && npm i @dfinity/ic-management@next -D",
+		"update:ic-js:next": "npm rm @dfinity/{ckbtc,cketh,ic-management,ledger-icp,ledger-icrc,utils,zod-schemas} && npm i @dfinity/{ckbtc,cketh,ledger-icp,ledger-icrc,utils,zod-schemas}@next && npm i @dfinity/ic-management@next -D",
 		"update:signer": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer",
 		"update:signer:next": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer@next",
 		"update:agent:ic-js": "npm run update:ic-js && npm run update:agent",
 		"update:agent:ic-js:next": "npm run update:ic-js:next && npm run update:agent",
 		"update:gix-cmp": "npm rm @dfinity/gix-components && npm i @dfinity/gix-components",
-		"update:gix-cmp:next": "npm rm @dfinity/gix-components && npm i @dfinity/gix-components@next"
+		"update:gix-cmp:next": "npm rm @dfinity/gix-components && npm i @dfinity/gix-components@next",
+		"update:oisy-eslint": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet -D",
+		"update:oisy-eslint:next": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet@next -D"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^2.3.0",
@@ -64,10 +66,10 @@
 		"@dfinity/candid": "^2.3.0",
 		"@dfinity/ckbtc": "^3.1.8",
 		"@dfinity/cketh": "^3.4.5",
-		"@dfinity/gix-components": "^5.1.0-next-2025-02-26",
+		"@dfinity/gix-components": "^5.1.0-next-2025-03-03",
 		"@dfinity/ledger-icp": "^2.6.9",
 		"@dfinity/ledger-icrc": "^2.7.4",
-		"@dfinity/oisy-wallet-signer": "^0.1.6-next-2025-02-17",
+		"@dfinity/oisy-wallet-signer": "^0.1.7",
 		"@dfinity/principal": "^2.3.0",
 		"@dfinity/utils": "^2.10.1",
 		"@dfinity/verifiable-credentials": "^0.0.4",
@@ -90,7 +92,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.1.0",
+		"@dfinity/eslint-config-oisy-wallet": "^0.1.1",
 		"@dfinity/ic-management": "^6.0.5",
 		"@dfinity/identity-secp256k1": "^2.3.0",
 		"@dfinity/internet-identity-playwright": "^0.0.4",
@@ -102,7 +104,7 @@
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@tailwindcss/postcss": "^4.0.7",
 		"@testing-library/jest-dom": "^6.6.3",
-		"@testing-library/svelte": "^5.2.6",
+		"@testing-library/svelte": "^5.2.7",
 		"@types/dom-view-transitions": "^1.0.5",
 		"@types/node": "^22.13.4",
 		"@vitest/coverage-v8": "^2.1.9",
@@ -117,14 +119,14 @@
 		"prettier-plugin-organize-imports": "^4.1.0",
 		"prettier-plugin-svelte": "^3.3.3",
 		"prettier-plugin-tailwindcss": "^0.6.11",
-		"sass": "^1.83.4",
+		"sass": "^1.85.1",
 		"svelte": "^4.2.19",
 		"svelte-check": "^4.1.4",
 		"tailwindcss": "^4.0.7",
 		"tslib": "^2.8.1",
 		"typescript": "^5.4.5",
 		"vite": "^5.4.14",
-		"vite-node": "^3.0.5",
+		"vite-node": "^3.0.7",
 		"vitest": "^2.1.9",
 		"vitest-mock-extended": "^2.0.2"
 	},

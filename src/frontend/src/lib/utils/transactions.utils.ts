@@ -1,5 +1,4 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
@@ -56,15 +55,13 @@ export const mapAllTransactionsUi = ({
 	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 }): AllTransactionUiWithCmp[] => {
-	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
-		minterInfo: $ckEthMinterInfo?.[ETHEREUM_TOKEN_ID],
-		networkId: ETHEREUM_NETWORK_ID
-	});
+	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses(
+		$ckEthMinterInfo?.[ETHEREUM_TOKEN_ID]
+	);
 
-	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
-		minterInfo: $ckEthMinterInfo?.[SEPOLIA_TOKEN_ID],
-		networkId: SEPOLIA_NETWORK_ID
-	});
+	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses(
+		$ckEthMinterInfo?.[SEPOLIA_TOKEN_ID]
+	);
 
 	return tokens.reduce<AllTransactionUiWithCmp[]>((acc, token) => {
 		const {
