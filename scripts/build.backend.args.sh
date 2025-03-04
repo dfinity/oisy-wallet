@@ -38,7 +38,7 @@ case "$DFX_NETWORK" in
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
-  # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
+  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://id.decideai.xyz/"
   DERIVATION_ORIGIN="https://oisy.com"
@@ -49,11 +49,14 @@ case "$DFX_NETWORK" in
   # to match what candid expects ({}), replace the commas between array entries to match
   # what candid expects (semicolon) and annotate the numbers with their type (otherwise dfx assumes 'nat'
   # instead of 'nat8').
-  rootkey_did=$(dfx ping "${DFX_NETWORK:-local}" |
-    jq -r '.root_key | reduce .[] as $item ("{ "; "\(.) \($item):nat8;") + " }"')
+  test -e "in/ping.json" || {
+    mkdir -p "in"
+    dfx ping "$DFX_NETWORK" >"in/ping.json"
+  }
+  rootkey_did="$(jq -r '.root_key | reduce .[] as $item ("{ "; "\(.) \($item):nat8;") + " }"' "in/ping.json")"
   echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
   ic_root_key_der="opt vec $rootkey_did"
-  # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
+  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # We use the dummy issuer canister for local development
   POUH_ISSUER_VC_URL="https://dummy-issuer.vc/"
   DERIVATION_ORIGIN="http://${CANISTER_ID_BACKEND}.localhost:4943"

@@ -105,9 +105,11 @@ RUN scripts/build.backend.wasm.sh
 # Variables that don't affect the rust build:
 COPY dfx.json dfx.json
 COPY canister_ids.json canister_ids.json
-COPY ./in/tags in/tags
-COPY ./in/commit in/commit
-ENV DFX_NETWORK=ic
+COPY ./in/* in/
+ARG DFX_NETWORK=ic
+RUN echo "DFX_NETWORK=$DFX_NETWORK"
+COPY .dfx .dfx
+RUN dfx canister id backend
 COPY scripts/commit-metadata scripts/
 RUN touch src/*/src/lib.rs src/*/*/src/lib.rs
 RUN dfx build backend --network "$DFX_NETWORK"
