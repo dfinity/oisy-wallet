@@ -1,8 +1,10 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import {
+	checkIfAccountExists,
 	estimatePriorityFee,
 	fetchSignatures,
+	getAccountOwner,
 	getSolCreateAccountFee,
 	getTokenDecimals,
 	getTokenOwner,
@@ -54,7 +56,7 @@ describe('solana.api', () => {
 			prioritizationFee: mockPriorityFee - 2n
 		}
 	];
-	const mockAccountInfo = {
+	const mockTokenAccountInfo = {
 		value: {
 			owner: TOKEN_PROGRAM_ADDRESS,
 			data: {
@@ -66,11 +68,26 @@ describe('solana.api', () => {
 			}
 		}
 	};
+	const mockAtaInfo = {
+		value: {
+			data: {
+				parsed: {
+					info: {
+						owner: mockSolAddress
+					}
+				}
+			}
+		}
+	};
+	const mockOwnerInfo = { value: { lamports: mockBalance } };
+	let mockAccountInfo = {};
 
 	const mockError = new Error('RPC Error');
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		mockAccountInfo = {};
 
 		mockGetBalance = vi
 			.fn()
@@ -197,7 +214,7 @@ describe('solana.api', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toBeNull();
+			expect(balance).toBeUndefined();
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -470,6 +487,10 @@ describe('solana.api', () => {
 	});
 
 	describe('getTokenDecimals', () => {
+		beforeEach(() => {
+			mockAccountInfo = mockTokenAccountInfo;
+		});
+
 		it('should get token decimals successfully', async () => {
 			const decimals = await getTokenDecimals({
 				address: mockSplAddress,
@@ -530,6 +551,10 @@ describe('solana.api', () => {
 	});
 
 	describe('getTokenOwner', () => {
+		beforeEach(() => {
+			mockAccountInfo = mockTokenAccountInfo;
+		});
+
 		it('should get token owner successfully', async () => {
 			const owner = await getTokenOwner({
 				address: mockSplAddress,
@@ -562,6 +587,107 @@ describe('solana.api', () => {
 			});
 
 			expect(owner).toBeUndefined();
+		});
+	});
+
+	describe('getAccountOwner', () => {
+		beforeEach(() => {
+			mockAccountInfo = mockAtaInfo;
+		});
+
+		it('should get token owner successfully', async () => {
+			const owner = await getAccountOwner({
+				address: mockAtaAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(owner).toEqual(mockSolAddress);
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			await expect(
+				getAccountOwner({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				})
+			).rejects.toThrow(mockError);
+		});
+
+		it('should return undefined when owner is not found', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({
+				send: () => Promise.resolve({})
+			});
+
+			const owner = await getAccountOwner({
+				address: mockSplAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(owner).toBeUndefined();
+		});
+	});
+
+	describe('checkIfAccountExists', () => {
+		it('should return true if the ATA address has info data', async () => {
+			mockAccountInfo = mockAtaInfo;
+
+			const result = await checkIfAccountExists({
+				address: mockAtaAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should return true if it is a non-ATA address', async () => {
+			mockAccountInfo = mockOwnerInfo;
+
+			const result = await checkIfAccountExists({
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(result).toBeTruthy();
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should return false if the ATA address has no info data', async () => {
+			mockAccountInfo = {};
+
+			const result = await checkIfAccountExists({
+				address: mockAtaAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should return false if the ATA address if the info data are nullish', async () => {
+			mockAccountInfo = { value: null };
+
+			const result = await checkIfAccountExists({
+				address: mockAtaAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(result).toBeFalsy();
+			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+		});
+
+		it('should throw error when RPC call fails', async () => {
+			mockGetAccountInfo.mockReturnValueOnce({ send: () => Promise.reject(mockError) });
+
+			await expect(
+				checkIfAccountExists({
+					address: mockSplAddress,
+					network: SolanaNetworks.mainnet
+				})
+			).rejects.toThrow(mockError);
 		});
 	});
 });

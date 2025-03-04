@@ -226,7 +226,7 @@ export const getAccountOwner = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<SplTokenAddress | undefined> => {
+}): Promise<SolAddress | undefined> => {
 	const { getAccountInfo } = solanaHttpRpc(network);
 	const account = solAddress(address);
 
