@@ -206,9 +206,19 @@ const toSplSnapshot = ({
 	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses(
 		get(ckEthMinterInfoStore)?.[ETHEREUM_TOKEN_ID]
 	);
+	// If there are no minter info addresses, we cannot map the transactions. We return undefined to skip this token.
+	// Since we are sending snapshots at several intervals and refreshes, it is not necessary to raise an error.
+	if (isNullish(ckEthMinterInfoAddressesMainnet)) {
+		return;
+	}
 	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses(
 		get(ckEthMinterInfoStore)?.[SEPOLIA_TOKEN_ID]
 	);
+	// If there are no minter info addresses, we cannot map the transactions. We return undefined to skip this token.
+	// Since we are sending snapshots at several intervals and refreshes, it is not necessary to raise an error.
+	if (isNullish(ckEthMinterInfoAddressesSepolia)) {
+		return;
+	}
 	const lastTransactions =
 		isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)
 			? (get(ethTransactionsStore)?.[id] ?? []).map((transaction) =>

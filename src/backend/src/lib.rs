@@ -51,7 +51,7 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
-    guards::{caller_is_allowed, may_read_user_data, may_write_user_data},
+    guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
     user_profile::add_hidden_dapp_id,
@@ -216,14 +216,14 @@ pub fn post_upgrade(arg: Option<Arg>) {
 #[query(guard = "caller_is_allowed")]
 #[must_use]
 pub fn config() -> Config {
-    read_config(std::clone::Clone::clone)
+    read_config(Clone::clone)
 }
 
 /// Adds cycles to the cycles ledger, if it is below a certain threshold.
 ///
 /// # Errors
 /// Error conditions are enumerated by: `TopUpCyclesLedgerError`
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_controller")]
 pub async fn top_up_cycles_ledger(
     request: Option<TopUpCyclesLedgerRequest>,
 ) -> TopUpCyclesLedgerResult {
@@ -656,7 +656,7 @@ pub fn migration() -> Option<MigrationReport> {
 
 /// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to
 /// enable an API in read-only mode.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_controller")]
 pub fn set_guards(guards: Guards) {
     mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
 }
@@ -675,7 +675,7 @@ pub fn stats() -> Stats {
 ///
 /// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur
 /// only if a migration failed and had to be restarted.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_controller")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn bulk_up(data: Vec<u8>) {
     migrate::bulk_up(&data);
@@ -685,7 +685,7 @@ pub fn bulk_up(data: Vec<u8>) {
 ///
 /// # Errors
 /// - There is a current migration in progress to a different canister.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_controller")]
 pub fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
@@ -713,7 +713,7 @@ pub fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 ///
 /// # Errors
 /// - There is no migration in progress.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_controller")]
 pub fn migration_stop_timer() -> Result<(), String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
@@ -728,7 +728,7 @@ pub fn migration_stop_timer() -> Result<(), String> {
 /// Steps the migration.
 ///
 /// On error, the migration is marked as failed and the timer is cleared.
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_controller")]
 pub async fn step_migration() {
     let result = migrate::step_migration().await;
     eprintln!("Stepped migration: {:?}", result);
