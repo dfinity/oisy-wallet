@@ -34,7 +34,7 @@
 {#if nonNullish(origin)}
 	<p class="mb-6 break-normal text-center">
 		{$i18n.signer.origin.text.request_from}
-		{#if nonNullish(host)}<span class="font-bold text-brand-primary"
+		{#if nonNullish(host)}<span class="font-bold text-brand-primary-alt"
 				><ExternalLink
 					ariaLabel={$i18n.signer.origin.alt.link_to_dapp}
 					href={origin}
