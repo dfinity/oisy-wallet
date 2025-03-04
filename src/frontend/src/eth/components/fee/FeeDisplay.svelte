@@ -10,8 +10,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
 
-	const { maxGasFee, feeSymbolStore, feeTokenIdStore, feeDecimalsStore }: FeeContext =
-		getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const {
+		maxGasFee,
+		feeSymbolStore,
+		feeTokenIdStore,
+		feeDecimalsStore,
+		feeExchangeRateStore
+	}: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let fee: Option<BigNumber> = undefined;
 
@@ -55,6 +60,7 @@
 			feeSymbol={$feeSymbolStore}
 			feeTokenId={$feeTokenIdStore}
 			feeDecimals={$feeDecimalsStore}
+			feeExchangeRate={$feeExchangeRateStore}
 		/>
 	{/if}
 </div>
