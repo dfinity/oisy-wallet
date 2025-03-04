@@ -79,7 +79,7 @@ const getBalance = ({
 	});
 };
 
-const getBalanceAndTransactions = async (
+const getTransactionsWithLedgerBalance = async (
 	params: SchedulerJobParams<PostMessageDataRequestIcrcStrict>
 ): Promise<IcrcIndexNgGetTransactions> => {
 	const balance = await getBalance(params);
@@ -99,7 +99,7 @@ const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
 	PostMessageDataRequestIcrcStrict
 > =>
 	new IcWalletTransactionsScheduler(
-		getBalanceAndTransactions,
+		getTransactionsWithLedgerBalance,
 		mapTransactionIcrcToSelf,
 		mapTransaction,
 		MSG_SYNC_ICRC_WALLET
