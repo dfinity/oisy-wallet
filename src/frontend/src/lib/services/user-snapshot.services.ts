@@ -9,7 +9,6 @@ import type {
 	Transaction_Spl
 } from '$declarations/rewards/rewards.did';
 import { USER_SNAPSHOT_ENABLED } from '$env/airdrop-campaigns.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -204,14 +203,12 @@ const toSplSnapshot = ({
 	}
 
 	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
-	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses({
-		minterInfo: get(ckEthMinterInfoStore)?.[ETHEREUM_TOKEN_ID],
-		networkId: ETHEREUM_NETWORK_ID
-	});
-	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
-		minterInfo: get(ckEthMinterInfoStore)?.[SEPOLIA_TOKEN_ID],
-		networkId: SEPOLIA_NETWORK_ID
-	});
+	const ckEthMinterInfoAddressesMainnet = toCkMinterInfoAddresses(
+		get(ckEthMinterInfoStore)?.[ETHEREUM_TOKEN_ID]
+	);
+	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses(
+		get(ckEthMinterInfoStore)?.[SEPOLIA_TOKEN_ID]
+	);
 	const lastTransactions =
 		isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)
 			? (get(ethTransactionsStore)?.[id] ?? []).map((transaction) =>
