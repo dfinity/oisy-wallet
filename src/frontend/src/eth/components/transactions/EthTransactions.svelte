@@ -25,8 +25,7 @@
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
-	$: ckMinterInfoAddresses = toCkMinterInfoAddresses( $ckEthMinterInfoStore?.[$ethereumTokenId],
-	);
+	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
 
 	let sortedTransactionsUi: EthTransactionUi[];
 	$: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>
