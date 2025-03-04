@@ -4,4 +4,6 @@ export type ButtonColorStyle =
 	| 'secondary-light'
 	| 'tertiary'
 	| 'tertiary-main-card'
-	| 'tertiary-alt';
+	| 'tertiary-alt'
+	| 'error'
+	| 'success';
