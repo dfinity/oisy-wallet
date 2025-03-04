@@ -1,6 +1,6 @@
 import { join } from 'node:path';
+import OISY_DOMAINS from './domains.json' with { type: 'json' };
 import { findFiles } from './utils.mjs';
-import OISY_DOMAINS from "./domains.json" with { type: "json" };
 
 export const findHtmlFiles = (dir = join(process.cwd(), 'build')) =>
 	findFiles({ dir, extensions: ['.html'] });
