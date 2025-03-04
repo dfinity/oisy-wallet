@@ -7,7 +7,7 @@
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
 	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
-	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -25,10 +25,7 @@
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
-	$: ckMinterInfoAddresses = toCkMinterInfoAddresses({
-		minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
-		networkId: $ethereumToken.network.id
-	});
+	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
 
 	let sortedTransactionsUi: EthTransactionUi[];
 	$: sortedTransactionsUi = $sortedEthTransactions.map((transaction) =>

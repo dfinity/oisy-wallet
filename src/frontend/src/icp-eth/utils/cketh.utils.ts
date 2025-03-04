@@ -7,7 +7,7 @@ export const toCkEthHelperContractAddress = ({
 	minterInfo
 }: {
 	minterInfo: OptionCertifiedMinterInfo;
-	networkId: NetworkId;
+	networkId?: NetworkId;
 }): OptionEthAddress => fromNullishNullable(minterInfo?.data.eth_helper_contract_address);
 
 export const toCkErc20HelperContractAddress = (
@@ -17,16 +17,12 @@ export const toCkErc20HelperContractAddress = (
 const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
 	fromNullishNullable(minterInfo?.data.minter_address);
 
-export const toCkMinterInfoAddresses = ({
-	minterInfo,
-	networkId
-}: {
-	minterInfo: OptionCertifiedMinterInfo;
-	networkId: NetworkId;
-}): OptionEthAddress[] =>
+export const toCkMinterInfoAddresses = (
+	minterInfo: OptionCertifiedMinterInfo
+): OptionEthAddress[] =>
 	nonNullish(minterInfo)
 		? [
-				toCkEthHelperContractAddress({ minterInfo, networkId }),
+				toCkEthHelperContractAddress({ minterInfo }),
 				toCkErc20HelperContractAddress(minterInfo),
 				toCkMinterAddress(minterInfo)
 			].map((address) => address?.toLowerCase())
