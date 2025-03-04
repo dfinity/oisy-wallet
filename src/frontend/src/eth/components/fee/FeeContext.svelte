@@ -64,10 +64,9 @@
 					...(await getFeeData()),
 					gas: getEthFeeData({
 						...params,
-						helperContractAddress: toCkEthHelperContractAddress({
-							minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
-							networkId: sourceNetwork.id
-						})
+						helperContractAddress: toCkEthHelperContractAddress(
+							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+						)
 					})
 				});
 				return;
