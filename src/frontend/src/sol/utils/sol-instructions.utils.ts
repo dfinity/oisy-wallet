@@ -225,26 +225,8 @@ const mapTokenParsedInstruction = async ({
 			account: SolAddress;
 		};
 
-		const { getAccountInfo } = solanaHttpRpc(network);
-
-		const { value: result } = await getAccountInfo(address(from), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (nonNullish(result) && 'parsed' in result.data) {
-			const {
-				data: {
-					parsed: { info }
-				}
-			} = result;
-
-			const { mint: tokenAddress } = info as {
-				mint: SplTokenAddress;
-			};
-
-			// TODO: find a way to get the amount redeemed in the close account instruction
-			return { value: 0n, from, to, tokenAddress };
-		}
+		// TODO: find a way to get the amount redeemed in the close account instruction
+		return { value: 0n, from, to };
 	}
 };
 
