@@ -18,7 +18,6 @@
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { NetworkId } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 
 	export let nativeTokenId: TokenId;
