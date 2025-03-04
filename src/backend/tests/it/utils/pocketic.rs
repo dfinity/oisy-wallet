@@ -400,7 +400,7 @@ impl PicBackend {
             self.pic.advance_time(Duration::new(10, 0));
             let caller = Principal::self_authenticating(i.to_string());
             let response = self.update::<UserProfile>(caller, "create_user_profile", ());
-            let expected_user_profile = response.expect("Failed to create user profile");
+            let expected_user_profile = response.clone().expect("Failed to create user profile");
             expected_user_profiles.push(expected_user_profile);
             assert!(response.is_ok());
         }

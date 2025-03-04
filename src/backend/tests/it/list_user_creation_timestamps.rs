@@ -107,12 +107,6 @@ fn test_list_user_creation_timestamps_returns_filtered_timestamps_by_updated() {
         "add_user_credential",
         add_user_cred_arg.clone(),
     );
-    let timestamp_nanos_2 = pic_setup
-        .pic()
-        .get_time()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_nanos();
 
     let caller = Principal::from_text(CALLER).unwrap();
 
