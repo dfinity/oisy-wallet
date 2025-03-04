@@ -13,14 +13,13 @@
 	export let exchangeRate: number | undefined;
 
 	let usdAmount: number | undefined;
-	$: usdAmount =
-		nonNullish(decimals) && nonNullish(amount) && nonNullish(exchangeRate)
-			? usdValue({
-					decimals,
-					balance: amount,
-					exchangeRate
-				})
-			: undefined;
+	$: usdAmount = nonNullish(exchangeRate)
+		? usdValue({
+				decimals,
+				balance: amount,
+				exchangeRate
+			})
+		: undefined;
 </script>
 
 <div transition:fade class="flex gap-4">
