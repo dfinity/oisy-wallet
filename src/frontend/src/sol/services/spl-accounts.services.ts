@@ -71,7 +71,7 @@ export const loadSplTokenBalance = async ({
 	const accountExists = await checkIfAccountExists({ address: ataAddress, network });
 
 	if (!accountExists) {
-		return BigInt(0);
+		return 0n;
 	}
 
 	const balance = await loadTokenBalance({
