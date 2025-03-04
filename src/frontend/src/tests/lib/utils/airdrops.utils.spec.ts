@@ -1,5 +1,6 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
+import { ZERO } from '$lib/constants/app.constants';
 import type { AirdropInfo } from '$lib/types/airdrop';
 import {
 	INITIAL_AIRDROP_RESULT,
@@ -199,7 +200,7 @@ describe('airdrops utils', () => {
 
 			const result = getAirdropsBalance(mockedAirdrops);
 
-			expect(result).toEqual(BigNumber.from(0));
+			expect(result).toEqual(ZERO);
 		});
 	});
 });
