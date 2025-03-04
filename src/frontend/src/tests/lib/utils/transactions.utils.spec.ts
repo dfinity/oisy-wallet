@@ -28,6 +28,7 @@ import type {
 	Transaction
 } from '$lib/types/transaction';
 import {
+	isTransactionsStoreEmpty,
 	isTransactionsStoreInitialized,
 	isTransactionsStoreNotInitialized,
 	mapAllTransactionsUi,
@@ -459,6 +460,48 @@ describe('transactions.utils', () => {
 
 		it('should return false when transactions store index matches enabled tokens', () => {
 			expect(isTransactionsStoreNotInitialized(mockParams)).toBeFalsy();
+		});
+	});
+
+	describe('isTransactionsStoreEmpty', () => {
+		const mockParams = {
+			transactionsStoreData: {
+				[BTC_MAINNET_TOKEN_ID]: [],
+				[BTC_TESTNET_TOKEN_ID]: []
+			},
+			tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN]
+		};
+
+		it('should return true when transactions store have no data', () => {
+			expect(isTransactionsStoreEmpty({ ...mockParams, transactionsStoreData: {} })).toBeTruthy();
+		});
+
+		it('should return true when transactions store have no transactions for all the tokens', () => {
+			expect(isTransactionsStoreEmpty(mockParams)).toBeTruthy();
+		});
+
+		it('should return true when transactions store is a mix of missing data and empty transactions', () => {
+			expect(
+				isTransactionsStoreEmpty({
+					...mockParams,
+					tokens: [BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN, BTC_REGTEST_TOKEN]
+				})
+			).toBeTruthy();
+		});
+
+		it('should return false when there is at least one token with transactions', () => {
+			expect(
+				isTransactionsStoreEmpty({
+					...mockParams,
+					transactionsStoreData: {
+						[BTC_MAINNET_TOKEN_ID]: createMockBtcTransactionsUi(5).map((data) => ({
+							data,
+							certified: true
+						})),
+						[BTC_TESTNET_TOKEN_ID]: []
+					}
+				})
+			).toBeFalsy();
 		});
 	});
 });
