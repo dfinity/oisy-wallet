@@ -21,10 +21,7 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
-<ConvertETH
-	nativeTokenId={$ethereumTokenId}
-	ariaLabel={$i18n.convert.text.convert_to_cketh}
->
+<ConvertETH nativeTokenId={$ethereumTokenId} ariaLabel={$i18n.convert.text.convert_to_cketh}>
 	<IconCkConvert size="28" slot="icon" />
 	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
 </ConvertETH>
