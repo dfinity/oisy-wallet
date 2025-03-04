@@ -14,13 +14,13 @@
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import Button from '$lib/components/ui/Button.svelte';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
