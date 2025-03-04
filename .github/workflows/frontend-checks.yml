@@ -75,6 +75,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Prepare
         uses: ./.github/actions/prepare
+      - name: Install dfx
+        uses: dfinity/setup-dfx@main
       - name: Check
         run: npm run check
 
