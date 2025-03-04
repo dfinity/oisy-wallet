@@ -4,11 +4,11 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
+	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 	import { areTransactionsStoresLoading } from '$lib/utils/transactions.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 
 	export let testIdPrefix: string | undefined = undefined;
 
