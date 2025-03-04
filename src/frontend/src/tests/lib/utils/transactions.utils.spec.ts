@@ -651,7 +651,8 @@ describe('transactions.utils', () => {
 				{
 					transactionsStoreData: {
 						[ETHEREUM_TOKEN_ID]: [],
-						[SEPOLIA_TOKEN_ID]: []
+						[SEPOLIA_TOKEN_ID]: [],
+						[PEPE_TOKEN_ID]: []
 					},
 					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
 				},
@@ -722,6 +723,33 @@ describe('transactions.utils', () => {
 			]);
 
 			expect(result).toBeFalsy();
+		});
+
+		it('should return true if some transactions stores are partially initialized but all of them are empty', () => {
+			const result = areTransactionsStoresLoading([
+				{
+					transactionsStoreData: {
+						[ETHEREUM_TOKEN_ID]: [],
+						[SEPOLIA_TOKEN_ID]: []
+					},
+					tokens: [ETHEREUM_TOKEN, SEPOLIA_TOKEN, PEPE_TOKEN]
+				},
+				{
+					transactionsStoreData: {
+						[SOLANA_TOKEN_ID]: [],
+						[BONK_TOKEN_ID]: []
+					},
+					tokens: [SOLANA_TOKEN, BONK_TOKEN]
+				},
+				{
+					transactionsStoreData: {
+						[ICP_TOKEN_ID]: []
+					},
+					tokens: [ICP_TOKEN]
+				}
+			]);
+
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false if all transactions stores are empty but initialized and non-nullish', () => {
@@ -839,8 +867,8 @@ describe('transactions.utils', () => {
 			).toBeFalsy();
 		});
 
-		it('should return true for an empty input array', () => {
-			expect(areTransactionsStoresLoading([])).toBeTruthy();
+		it('should return false for an empty input array', () => {
+			expect(areTransactionsStoresLoading([])).toBeFalsy();
 		});
 	});
 });

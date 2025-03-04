@@ -86,10 +86,10 @@
 		}));
 </script>
 
-<AllTransactionsSkeletons>
+<AllTransactionsSkeletons testIdPrefix="all-transactions-skeleton-card">
 	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-		{#each Object.entries(groupedTransactions) as [date, transactions] (date)}
-			<TransactionsDateGroup {date} {transactions} />
+		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
+			<TransactionsDateGroup {date} {transactions} testId={`all-transactions-date-group-${index}`} />
 		{/each}
 	{/if}
 

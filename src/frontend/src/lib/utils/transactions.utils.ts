@@ -182,19 +182,19 @@ export const isTransactionsStoreEmpty = ({
 export const areTransactionsStoresLoading = (
 	transactionsStores: TransactionsStoreCheckParams[]
 ): boolean => {
-	const { someNullish, allNotInitialized, allEmpty } = transactionsStores.reduce<{
+	const { someNullish, someNotInitialized, allEmpty } = transactionsStores.reduce<{
 		someNullish: boolean;
-		allNotInitialized: boolean;
+		someNotInitialized: boolean;
 		allEmpty: boolean;
 	}>(
-		({ someNullish, allNotInitialized, allEmpty }, { transactionsStoreData, tokens }) => ({
+		({ someNullish, someNotInitialized, allEmpty }, { transactionsStoreData, tokens }) => ({
 			someNullish: someNullish || isNullish(transactionsStoreData),
-			allNotInitialized:
-				allNotInitialized && isTransactionsStoreNotInitialized({ transactionsStoreData, tokens }),
+			someNotInitialized:
+				someNotInitialized || isTransactionsStoreNotInitialized({ transactionsStoreData, tokens }),
 			allEmpty: allEmpty && isTransactionsStoreEmpty({ transactionsStoreData, tokens })
 		}),
-		{ someNullish: false, allNotInitialized: true, allEmpty: true }
+		{ someNullish: false, someNotInitialized: false, allEmpty: true }
 	);
 
-	return (someNullish || allNotInitialized) && allEmpty;
+	return (someNullish || someNotInitialized) && allEmpty;
 };

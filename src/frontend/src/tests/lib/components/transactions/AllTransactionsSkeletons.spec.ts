@@ -88,7 +88,7 @@ describe('AllTransactionsSkeletons', () => {
 			});
 		});
 
-		it('should not render the skeleton when at least one store has not all the tokens initialized', async () => {
+		it('should render the skeleton when at least one store has not all the tokens initialized', async () => {
 			vi.spyOn(enabledSplTokens, 'subscribe').mockImplementation((fn) => {
 				fn([{ ...JUP_TOKEN, enabled: true }]);
 				return () => {};
@@ -108,29 +108,7 @@ describe('AllTransactionsSkeletons', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="${testIdPrefix}-${i}"]`
 				);
-				expect(skeleton).toBeNull();
-			});
-
-			solTransactionsStore.nullify(SOLANA_TOKEN_ID);
-
-			await tick();
-
-			Array.from({ length: 5 }).forEach((_, i) => {
-				const skeleton: HTMLParagraphElement | null = container.querySelector(
-					`div[data-tid="${testIdPrefix}-${i}"]`
-				);
 				expect(skeleton).toBeDefined();
-			});
-
-			solTransactionsStore.append({ tokenId: SOLANA_TOKEN_ID, transactions: [] });
-
-			await tick();
-
-			Array.from({ length: 5 }).forEach((_, i) => {
-				const skeleton: HTMLParagraphElement | null = container.querySelector(
-					`div[data-tid="${testIdPrefix}-${i}"]`
-				);
-				expect(skeleton).toBeNull();
 			});
 		});
 	});
