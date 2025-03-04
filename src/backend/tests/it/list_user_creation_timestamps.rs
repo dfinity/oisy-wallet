@@ -2,6 +2,7 @@ use std::time::{Duration, UNIX_EPOCH};
 
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
+use pretty_assertions::assert_eq;
 use shared::types::{
     user_profile::{
         AddUserCredentialError, AddUserCredentialRequest, ListUserCreationTimestampsResponse,
@@ -9,7 +10,6 @@ use shared::types::{
     },
     Timestamp,
 };
-use pretty_assertions::{assert_eq};
 
 use crate::utils::{
     mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
@@ -84,8 +84,9 @@ fn test_list_user_creation_timestamps_returns_filtered_timestamps_by_updated() {
 
     // Add 10 more users
     let users_count_after_timestamp = 10;
-    let mut expected_user_profiles: Vec<UserProfile> = pic_setup
-        .create_user_profiles(users_count_initial + 1..=users_count_initial + users_count_after_timestamp);
+    let mut expected_user_profiles: Vec<UserProfile> = pic_setup.create_user_profiles(
+        users_count_initial + 1..=users_count_initial + users_count_after_timestamp,
+    );
 
     // Advance time before updating one of the users
     pic_setup.pic().advance_time(Duration::new(10, 0));
@@ -157,8 +158,9 @@ fn test_list_user_creation_timestamps_returns_requested_users_count() {
 
     // Add 15 more users
     let users_count_after_timestamp = 15;
-    let users_after_expected_timestamp = pic_setup
-        .create_user_profiles(users_count_initial + 1..=users_count_initial + users_count_after_timestamp);
+    let users_after_expected_timestamp = pic_setup.create_user_profiles(
+        users_count_initial + 1..=users_count_initial + users_count_after_timestamp,
+    );
 
     let requested_count: usize = 10;
     let arg = ListUsersRequest {
@@ -208,4 +210,3 @@ fn test_list_user_creation_timestamps_returns_less_than_requested_users_count() 
 
     assert_eq!(results_timestamps, expected_timestamps);
 }
-
