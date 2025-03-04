@@ -26,9 +26,12 @@ dfx_network_domains() {
     echo OK: ic-domains
     rm "$ACTUAL_DOMAINS"
   else
-    echo "ERROR: Incorrect candid:args metadata"
+    echo "ERROR: Incorrect .well-known/ic-domains"
     echo "Expected: $EXPECTED_DOMAINS"
     echo "Found:    $ACTUAL_DOMAINS"
+    echo "==== START DIFF"
+    diff "$EXPECTED_DOMAINS" "$ACTUAL_DOMAINS" || true
+    echo "==== END DIFF"
     exit 1
   fi
 )
