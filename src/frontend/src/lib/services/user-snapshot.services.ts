@@ -208,10 +208,16 @@ const toSplSnapshot = ({
 		minterInfo: get(ckEthMinterInfoStore)?.[ETHEREUM_TOKEN_ID],
 		networkId: ETHEREUM_NETWORK_ID
 	});
+	if (isNullish(ckEthMinterInfoAddressesMainnet)) {
+		return;
+	}
 	const ckEthMinterInfoAddressesSepolia = toCkMinterInfoAddresses({
 		minterInfo: get(ckEthMinterInfoStore)?.[SEPOLIA_TOKEN_ID],
 		networkId: SEPOLIA_NETWORK_ID
 	});
+	if (isNullish(ckEthMinterInfoAddressesSepolia)) {
+		return;
+	}
 	const lastTransactions =
 		isNetworkIdEthereum(networkId) || isNetworkIdSepolia(networkId)
 			? (get(ethTransactionsStore)?.[id] ?? []).map((transaction) =>
