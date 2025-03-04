@@ -15,7 +15,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
 import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
@@ -302,11 +302,11 @@ describe('user-snapshot.services', () => {
 		it('should not include tokens with zero balance', async () => {
 			balancesStore.set({
 				tokenId: mockValidIcToken.id,
-				data: { data: BigNumber.from(0), certified }
+				data: { data: ZERO, certified }
 			});
 			balancesStore.set({
 				tokenId: ETHEREUM_TOKEN.id,
-				data: { data: BigNumber.from(0), certified }
+				data: { data: ZERO, certified }
 			});
 
 			await registerUserSnapshot();
