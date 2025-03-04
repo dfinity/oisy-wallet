@@ -283,7 +283,7 @@ describe('network utils', () => {
 			expect(filterTokensForSelectedNetwork([[], SEPOLIA_NETWORK, true])).toEqual([]);
 		});
 
-		it('should return an empty array when there are not tokens for the selected network', () => {
+		it('should return an empty array when there are no tokens for the selected network', () => {
 			expect(filterTokensForSelectedNetwork([tokens, ETHEREUM_NETWORK, false])).toEqual([]);
 
 			expect(filterTokensForSelectedNetwork([tokens, SOLANA_DEVNET_NETWORK, false])).toEqual([]);
