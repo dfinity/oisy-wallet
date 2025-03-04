@@ -24,24 +24,22 @@
 </script>
 
 <div transition:fade class="flex gap-4">
-	{#if nonNullish(amount) && nonNullish(decimals) && nonNullish(symbol)}
-		{formatToken({
-			value: amount,
-			unitName: decimals,
-			displayDecimals: EIGHT_DECIMALS
-		})}
-		{symbol}
+	{formatToken({
+		value: amount,
+		unitName: decimals,
+		displayDecimals: EIGHT_DECIMALS
+	})}
+	{symbol}
 
-		{#if nonNullish(usdAmount)}
-			<div class="text-tertiary">
-				{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
-					{`( < ${formatUSD({
-						value: EXCHANGE_USD_AMOUNT_THRESHOLD
-					})} )`}
-				{:else}
-					{`( ${formatUSD({ value: usdAmount })} )`}
-				{/if}
-			</div>
-		{/if}
+	{#if nonNullish(usdAmount)}
+		<div class="text-tertiary">
+			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
+				{`( < ${formatUSD({
+					value: EXCHANGE_USD_AMOUNT_THRESHOLD
+				})} )`}
+			{:else}
+				{`( ${formatUSD({ value: usdAmount })} )`}
+			{/if}
+		</div>
 	{/if}
 </div>
