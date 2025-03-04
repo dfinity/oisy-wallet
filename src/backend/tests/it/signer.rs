@@ -12,14 +12,14 @@ use crate::utils::{
 };
 
 #[test]
-fn test_topup_cannot_be_called_if_not_allowed() {
+fn test_topup_cannot_be_called_if_not_controller() {
     let pic_setup = setup();
     // A random unauthorized user.
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
     let response = pic_setup.update::<TopUpCyclesLedgerResult>(caller, "top_up_cycles_ledger", ());
 
-    assert_eq!(response, Err("Caller is not allowed.".to_string()));
+    assert_eq!(response, Err("Caller is not a controller.".to_string()));
 }
 
 #[test]
