@@ -17,24 +17,28 @@ import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
 
+const normalizePath = (s: string | null) =>
+	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
+
 export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
-	id === `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`;
+	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`;
 
 export const isRouteSettings = ({ route: { id } }: Page): boolean =>
-	id === `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
+	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
 
 export const isRouteDappExplorer = ({ route: { id } }: Page): boolean =>
-	id === `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
+	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Explore}`;
 
 export const isRouteActivity = ({ route: { id } }: Page): boolean =>
-	id === `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
+	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Activity}`;
 
 // The page of the link for WalletConnect is the same as the page where we show the Tokens list
 export const isRouteTokens = ({ route: { id } }: Page): boolean =>
-	id === ROUTE_ID_GROUP_APP || id === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
+	id === ROUTE_ID_GROUP_APP ||
+	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 
 export const isRouteAirdrops = ({ route: { id } }: Page): boolean =>
-	id === `${ROUTE_ID_GROUP_APP}${AppPath.Airdrops}`;
+	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Airdrops}`;
 
 const tokenUrl = ({
 	token: {

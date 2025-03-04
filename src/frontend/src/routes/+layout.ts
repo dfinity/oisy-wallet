@@ -1,6 +1,6 @@
 export const prerender = true;
 export const ssr = false;
-export const trailingSlash = 'never';
+export const trailingSlash = 'always';
 
 // ⚠️ For production build the polyfill needs to be injected with Rollup (see vite.config.ts) because the page might be loaded before the _layout.js which will contains this polyfill.
 // The / in buffer/ is mandatory here.
