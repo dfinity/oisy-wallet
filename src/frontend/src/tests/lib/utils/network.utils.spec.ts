@@ -269,6 +269,8 @@ describe('network utils', () => {
 			env: 'testnet'
 		};
 
+		const extendedTokens: Token[] = [...tokens, mockIcrcTestnetToken];
+
 		it('should return an empty array when no tokens are provided', () => {
 			expect(filterTokensForSelectedNetwork([[], undefined, false])).toEqual([]);
 
@@ -336,38 +338,54 @@ describe('network utils', () => {
 		});
 
 		it('should return ICRC pseudo-testnet tokens when filtering for ICP network or if Chain Fusion is true', () => {
-			expect(
-				filterTokensForSelectedNetwork([[...tokens, mockIcrcTestnetToken], ICP_NETWORK, false])
-			).toEqual([ICP_TOKEN, mockIcrcTestnetToken]);
+			expect(filterTokensForSelectedNetwork([extendedTokens, ICP_NETWORK, false])).toEqual([
+				ICP_TOKEN,
+				mockIcrcTestnetToken
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, ICP_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, BTC_MAINNET_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, SEPOLIA_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				SEPOLIA_TOKEN,
+				SEPOLIA_PEPE_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
 
 			expect(
-				filterTokensForSelectedNetwork([[...tokens, mockIcrcTestnetToken], ICP_NETWORK, true])
+				filterTokensForSelectedNetwork([extendedTokens, SOLANA_MAINNET_NETWORK, true])
 			).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, mockIcrcTestnetToken]);
 
-			expect(
-				filterTokensForSelectedNetwork([[...tokens, mockIcrcTestnetToken], undefined, true])
-			).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, mockIcrcTestnetToken]);
+			expect(filterTokensForSelectedNetwork([extendedTokens, undefined, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
 		});
 
 		it('should not return ICRC pseudo-testnet tokens when filtering for non-ICP network', () => {
-			expect(
-				filterTokensForSelectedNetwork([
-					[...tokens, mockIcrcTestnetToken],
-					BTC_MAINNET_NETWORK,
-					false
-				])
-			).toEqual([BTC_MAINNET_TOKEN]);
+			expect(filterTokensForSelectedNetwork([extendedTokens, BTC_MAINNET_NETWORK, false])).toEqual([
+				BTC_MAINNET_TOKEN
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, SEPOLIA_NETWORK, false])).toEqual([
+				SEPOLIA_TOKEN,
+				SEPOLIA_PEPE_TOKEN
+			]);
 
 			expect(
-				filterTokensForSelectedNetwork([[...tokens, mockIcrcTestnetToken], SEPOLIA_NETWORK, false])
-			).toEqual([SEPOLIA_TOKEN, SEPOLIA_PEPE_TOKEN]);
-
-			expect(
-				filterTokensForSelectedNetwork([
-					[...tokens, mockIcrcTestnetToken],
-					SOLANA_MAINNET_NETWORK,
-					false
-				])
+				filterTokensForSelectedNetwork([extendedTokens, SOLANA_MAINNET_NETWORK, false])
 			).toEqual([]);
 		});
 	});
