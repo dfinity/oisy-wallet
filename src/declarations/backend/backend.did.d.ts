@@ -130,6 +130,10 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
 }
+export interface ListUserCreationTimestampsResponse {
+	creation_timestamps: BigUint64Array | bigint[];
+	matches_max_length: bigint;
+}
 export interface ListUsersRequest {
 	updated_after_timestamp: [] | [bigint];
 	matches_max_length: [] | [bigint];
@@ -293,6 +297,10 @@ export interface _SERVICE {
 	get_user_profile: ActorMethod<[], Result_6>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	list_user_creation_timestamps: ActorMethod<
+		[ListUsersRequest],
+		ListUserCreationTimestampsResponse
+	>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
 	migrate_user_data_to: ActorMethod<[Principal], Result_7>;
