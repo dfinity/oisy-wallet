@@ -49,10 +49,10 @@
 </script>
 
 <button
-	class="font-semibold text-brand-primary transition-all"
+	class="font-semibold text-brand-primary-alt transition-all"
 	on:click|preventDefault={setMax}
 	class:text-error-primary={isZeroBalance || error}
-	class:text-brand-primary={!isZeroBalance && !error}
+	class:text-brand-primary-alt={!isZeroBalance && !error}
 	data-tid={MAX_BUTTON}
 >
 	{$i18n.core.text.max}:
