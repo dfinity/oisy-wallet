@@ -17,6 +17,9 @@ import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 const normalizePath = (s: string | null) =>
 	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
 
+export const transactionsUrl = ({ token }: { token: Token }): string =>
+	tokenUrl({ path: AppPath.Transactions, token });
+
 export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Transactions}`;
 
