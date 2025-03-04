@@ -19,7 +19,9 @@ rust_version=$(sed -n 's/^channel[[:space:]]*=[[:space:]]"\(.*\)"/\1/p' rust-too
 echo "using rust version '$rust_version'"
 
 # here we set the toolchain to 'none' and rustup will pick up on ./rust-toolchain.toml
-run curl --fail https://sh.rustup.rs -sSf | run sh -s -- -y --default-toolchain "none" --no-modify-path
+run curl --fail https://raw.githubusercontent.com/rust-lang/rustup/refs/tags/1.28.0/rustup-init.sh -sSf | run sh -s -- -y --no-modify-path
+rustup toolchain install
+rustup show
 
 # make sure the packages are actually installed (rustup waits for the first invoke to lazyload)
 cargo --version
