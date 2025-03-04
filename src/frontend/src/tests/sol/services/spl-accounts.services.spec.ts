@@ -73,6 +73,14 @@ describe('spl-account.services', () => {
 			expect(spyLoadTokenBalance).not.toHaveBeenCalled();
 		});
 
+		it('should return zero when amount is nullish', async () => {
+			spyLoadTokenBalance.mockResolvedValueOnce(undefined);
+
+			const balance = await loadSplTokenBalance(mockParams);
+
+			expect(balance).toEqual(0n);
+		});
+
 		it('should calculate the ATA address when the input address is not an ATA', async () => {
 			spyIsAtaAddress.mockResolvedValueOnce(false);
 

@@ -74,8 +74,10 @@ export const loadSplTokenBalance = async ({
 		return BigInt(0);
 	}
 
-	return await loadTokenBalance({
+	const balance = await loadTokenBalance({
 		ataAddress,
 		network
 	});
+
+	return balance ?? 0n;
 };

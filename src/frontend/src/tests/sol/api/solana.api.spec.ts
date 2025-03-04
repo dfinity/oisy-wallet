@@ -174,7 +174,7 @@ describe('solana.api', () => {
 			expect(balance).toEqual(0n);
 		});
 
-		it('should handle nullish balance', async () => {
+		it('should handle undefined balance', async () => {
 			mockGetTokenAccountBalance.mockReturnValueOnce({
 				send: () => Promise.resolve({ value: { amount: undefined } })
 			});
@@ -184,7 +184,20 @@ describe('solana.api', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(0n);
+			expect(balance).toBeUndefined();
+		});
+
+		it('should handle null balance', async () => {
+			mockGetTokenAccountBalance.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: { amount: null } })
+			});
+
+			const balance = await loadTokenBalance({
+				ataAddress: mockAtaAddress,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(balance).toBeNull();
 		});
 
 		it('should throw error when RPC call fails', async () => {

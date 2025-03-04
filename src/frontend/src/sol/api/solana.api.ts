@@ -33,7 +33,7 @@ export const loadTokenBalance = async ({
 }: {
 	ataAddress: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<bigint> => {
+}): Promise<bigint | undefined> => {
 	const { getTokenAccountBalance } = solanaHttpRpc(network);
 	const wallet = solAddress(ataAddress);
 
@@ -41,7 +41,9 @@ export const loadTokenBalance = async ({
 		value: { amount }
 	} = await getTokenAccountBalance(wallet).send();
 
-	return BigInt(amount ?? 0n);
+	if (nonNullish(amount)) {
+		return BigInt(amount);
+	}
 };
 
 /**
