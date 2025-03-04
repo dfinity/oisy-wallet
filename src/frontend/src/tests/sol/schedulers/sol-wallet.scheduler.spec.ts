@@ -5,6 +5,7 @@ import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
+import * as accountServices from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
@@ -85,7 +86,7 @@ describe('sol-wallet.scheduler', () => {
 			.spyOn(solanaApi, 'loadSolLamportsBalance')
 			.mockResolvedValue(mockSolBalance);
 		spyLoadSplBalance = vi
-			.spyOn(solanaApi, 'loadSplTokenBalance')
+			.spyOn(accountServices, 'loadSplTokenBalance')
 			.mockResolvedValue(mockSplBalance);
 		spyLoadTransactions = vi
 			.spyOn(solSignaturesServices, 'getSolTransactions')
@@ -242,7 +243,8 @@ describe('sol-wallet.scheduler', () => {
 			expect(spyLoadBalance).toHaveBeenCalledWith({
 				address: mockSolAddress,
 				network: startData?.solanaNetwork,
-				tokenAddress: startData?.tokenAddress
+				tokenAddress: startData?.tokenAddress,
+				tokenOwnerAddress: startData?.tokenOwnerAddress
 			});
 		});
 
