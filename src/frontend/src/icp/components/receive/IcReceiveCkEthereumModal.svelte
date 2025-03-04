@@ -9,7 +9,6 @@
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import {
-		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -34,10 +33,7 @@
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					networkId: $ckEthereumNativeToken.network.id
-				}) ?? '');
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

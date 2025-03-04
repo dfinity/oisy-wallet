@@ -22,7 +22,6 @@
 	export let destinationEditable = true;
 	export let amount: OptionAmount = undefined;
 	export let nativeEthereumToken: Token;
-	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
 
 	let insufficientFunds: boolean;
@@ -50,7 +49,7 @@
 				on:icQRCodeScan
 			/>
 
-			<SendNetworkICP {destination} {sourceNetwork} bind:network />
+			<SendNetworkICP {destination} bind:network />
 		{/if}
 
 		<NetworkInfo network={sourceNetwork} />
