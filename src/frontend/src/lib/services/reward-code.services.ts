@@ -64,7 +64,7 @@ const queryAirdrops = async (params: {
 
 	return {
 		airdrops: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
-		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? BigInt(0)
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? 0n
 	};
 };
 
@@ -96,7 +96,7 @@ export const getAirdrops = async (params: { identity: Identity }): Promise<Airdr
 		});
 	}
 
-	return { airdrops: [], lastTimestamp: BigInt(0) };
+	return { airdrops: [], lastTimestamp: 0n };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
