@@ -24,7 +24,7 @@
 </script>
 
 {#if nonNullish(amount) && nonNullish(decimals) && nonNullish(symbol)}
-	<div transition:fade class="flex gap-4">
+	<div transition:fade|global class="flex gap-4">
 		{formatToken({
 			value: amount,
 			unitName: decimals,
