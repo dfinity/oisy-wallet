@@ -12,7 +12,7 @@
 <button
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
 	on:click
-	class="relative h-60 flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
+	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
 >
 	<span class="absolute -top-5 left-4">
 		<Logo
@@ -30,7 +30,7 @@
 				{oneLiner}
 			</p>
 		</section>
-		<section class="absolute bottom-4 left-4 right-4 max-h-6 min-h-6 overflow-hidden md:max-h-14">
+		<section class="relative mt-3">
 			<DappTags {dAppName} {tags} />
 		</section>
 	</article>
