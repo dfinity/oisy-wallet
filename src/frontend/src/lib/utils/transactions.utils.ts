@@ -13,6 +13,7 @@ import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { AllTransactionUiWithCmp, AnyTransactionUi } from '$lib/types/transaction';
+import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdEthereum,
@@ -164,46 +165,36 @@ export const sortTransactions = ({
 export const isTransactionsStoreInitialized = ({
 	transactionsStoreData,
 	tokens
-}: {
-	// TODO: set unified type when we harmonize the transaction stores
-	transactionsStoreData:
-		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
-		| EthTransactionsData;
-	tokens: Token[];
-}): boolean => tokens.every(({ id }) => transactionsStoreData?.[id] !== undefined);
+}: TransactionsStoreCheckParams): boolean =>
+	tokens.every(({ id }) => transactionsStoreData?.[id] !== undefined);
 
-export const isTransactionsStoreNotInitialized = ({
-	transactionsStoreData,
-	tokens
-}: {
-	// TODO: set unified type when we harmonize the transaction stores
-	transactionsStoreData:
-		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
-		| EthTransactionsData;
-	tokens: Token[];
-}): boolean => !isTransactionsStoreInitialized({ transactionsStoreData, tokens });
+export const isTransactionsStoreNotInitialized = (params: TransactionsStoreCheckParams): boolean =>
+	!isTransactionsStoreInitialized(params);
 
 export const isTransactionsStoreEmpty = ({
 	transactionsStoreData,
 	tokens
-}: {
-	// TODO: set unified type when we harmonize the transaction stores
-	transactionsStoreData:
-		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
-		| EthTransactionsData;
-	tokens: Token[];
-}): boolean =>
+}: TransactionsStoreCheckParams): boolean =>
 	tokens.every(
-		({ id }) => nonNullish(transactionsStoreData?.[id]) && transactionsStoreData?.[id]?.length === 0
+		({ id }) => isNullish(transactionsStoreData?.[id]) || transactionsStoreData?.[id]?.length === 0
 	);
 
-export const isTransactionsStoreNotEmpty = ({
-	transactionsStoreData,
-	tokens
-}: {
-	// TODO: set unified type when we harmonize the transaction stores
-	transactionsStoreData:
-		| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
-		| EthTransactionsData;
-	tokens: Token[];
-}): boolean => !isTransactionsStoreEmpty({ transactionsStoreData, tokens });
+export const areTransactionsStoresLoading = (
+	transactionsStores: TransactionsStoreCheckParams[]
+): boolean => {
+	const { someNullish, allNotInitialized, allEmpty } = transactionsStores.reduce<{
+		someNullish: boolean;
+		allNotInitialized: boolean;
+		allEmpty: boolean;
+	}>(
+		({ someNullish, allNotInitialized, allEmpty }, { transactionsStoreData, tokens }) => ({
+			someNullish: someNullish || isNullish(transactionsStoreData),
+			allNotInitialized:
+				allNotInitialized && isTransactionsStoreNotInitialized({ transactionsStoreData, tokens }),
+			allEmpty: allEmpty && isTransactionsStoreEmpty({ transactionsStoreData, tokens })
+		}),
+		{ someNullish: false, allNotInitialized: true, allEmpty: true }
+	);
+
+	return (someNullish || allNotInitialized) && allEmpty;
+};

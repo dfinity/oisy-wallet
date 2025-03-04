@@ -1,39 +1,20 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-	import type { BtcTransactionUi } from '$btc/types/btc';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import {
-		type EthTransactionsData,
-		ethTransactionsStore
-	} from '$eth/stores/eth-transactions.store';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
-	import type { CertifiedStoreData } from '$lib/stores/certified.store';
-	import type { TransactionsData } from '$lib/stores/transactions.store';
-	import type { Token } from '$lib/types/token';
-	import {
-		isTransactionsStoreEmpty,
-		isTransactionsStoreNotEmpty,
-		isTransactionsStoreNotInitialized
-	} from '$lib/utils/transactions.utils';
+	import { areTransactionsStoresLoading } from '$lib/utils/transactions.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 
 	export let testIdPrefix: string | undefined = undefined;
 
-	let transactionsStores: {
-		// TODO: set unified type when we harmonize the transaction stores
-		transactionsStoreData:
-			| CertifiedStoreData<TransactionsData<IcTransactionUi | BtcTransactionUi | SolTransactionUi>>
-			| EthTransactionsData;
-		tokens: Token[];
-	}[];
+	let transactionsStores: TransactionsStoreCheckParams[];
 	$: transactionsStores = [
 		{ transactionsStoreData: $btcTransactionsStore, tokens: $enabledBitcoinTokens },
 		{
@@ -48,13 +29,7 @@
 	];
 
 	let loading = true;
-	$: loading =
-		(transactionsStores.some(({ transactionsStoreData }) => isNullish(transactionsStoreData)) ||
-		transactionsStores.every(({ transactionsStoreData, tokens }) =>
-			isTransactionsStoreNotInitialized({ transactionsStoreData, tokens })
-		)) && transactionsStores.every(({ transactionsStoreData, tokens }) =>
-			isTransactionsStoreEmpty({ transactionsStoreData, tokens })
-		) ;
+	$: loading = areTransactionsStoresLoading(transactionsStores);
 </script>
 
 <TransactionsSkeletons {loading} {testIdPrefix}>
