@@ -20,6 +20,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
@@ -122,10 +123,12 @@
 		{/if}
 
 		<ButtonGroup>
-			<button type="button" class="error flex-1" on:click={onReject}
-				>{$i18n.core.text.reject}</button
-			>
-			<button type="submit" class="success flex-1">{$i18n.core.text.approve}</button>
+			<Button colorStyle="error" on:click={onReject}>
+				{$i18n.core.text.reject}
+			</Button>
+			<Button colorStyle="success" type="submit">
+				{$i18n.core.text.approve}
+			</Button>
 		</ButtonGroup>
 	</form>
 {/if}

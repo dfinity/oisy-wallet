@@ -15,6 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	const {
 		consentMessagePrompt: { payload, reset: resetPrompt },
@@ -136,10 +137,12 @@
 		</div>
 
 		<ButtonGroup>
-			<button type="button" class="error flex-1" on:click={onReject}
-				>{$i18n.core.text.reject}</button
-			>
-			<button type="submit" class="success flex-1">{$i18n.core.text.approve}</button>
+			<Button colorStyle="error" on:click={onReject}>
+				{$i18n.core.text.reject}
+			</Button>
+			<Button colorStyle="success" type="submit">
+				{$i18n.core.text.approve}
+			</Button>
 		</ButtonGroup>
 	</form>
 {/if}
