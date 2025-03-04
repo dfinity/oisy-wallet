@@ -7,8 +7,7 @@
 	import {
 		ckEthereumTwinTokenStandard,
 		ckEthereumTwinToken,
-		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
+		ckEthereumNativeTokenId
 	} from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {

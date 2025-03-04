@@ -6,7 +6,6 @@
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
-		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
