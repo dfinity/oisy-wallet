@@ -1,4 +1,4 @@
-use shared::types::{custom_token::CustomToken, user_profile::OisyUser, Timestamp};
+use shared::types::{custom_token::CustomToken, user_profile::OisyUser};
 
 pub fn assert_tokens_data_eq<T: PartialEq + std::fmt::Debug>(
     results_tokens: &[T],
@@ -46,25 +46,6 @@ pub fn assert_user_profiles_eq(results_users: Vec<OisyUser>, expected_users: Vec
             user, expected,
             "Result users differs from expected user: {:?} vs {:?}",
             user, expected
-        );
-    }
-}
-
-pub fn assert_user_creation_timestamps_eq(
-    results_timestamps: Vec<Timestamp>,
-    expected_timestamps: Vec<Timestamp>,
-) {
-    assert_eq!(
-        results_timestamps.len(),
-        expected_timestamps.len(),
-        "The number of timestamps differ."
-    );
-
-    for (timestamp, expected) in results_timestamps.iter().zip(expected_timestamps.iter()) {
-        assert_eq!(
-            timestamp, expected,
-            "Result timestamp differs from expected timestamp: {:?} vs {:?}",
-            timestamp, expected
         );
     }
 }
