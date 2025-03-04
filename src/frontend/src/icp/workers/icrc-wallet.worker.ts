@@ -79,6 +79,18 @@ const getBalance = ({
 	});
 };
 
+const getBalanceAndTransactions = async (
+	params: SchedulerJobParams<PostMessageDataRequestIcrcStrict>
+): Promise<IcrcIndexNgGetTransactions> => {
+	const balance = await getBalance(params);
+
+	// Ignoring the balance from the transactions' response.
+	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
+	const transactions = await getTransactions(params);
+
+	return { ...transactions, balance };
+};
+
 const MSG_SYNC_ICRC_WALLET = 'syncIcrcWallet';
 
 const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
@@ -87,7 +99,7 @@ const initIcrcWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
 	PostMessageDataRequestIcrcStrict
 > =>
 	new IcWalletTransactionsScheduler(
-		getTransactions,
+		getBalanceAndTransactions,
 		mapTransactionIcrcToSelf,
 		mapTransaction,
 		MSG_SYNC_ICRC_WALLET
