@@ -114,11 +114,9 @@ jobs:
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
             if [[ "$NETWORK" == "staging" ]]; then
               echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
-              echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" >> $GITHUB_ENV
             else
               SUBDOMAIN="fe${NETWORK#test_fe_}" # E.g. test_fe_1 -> fe1
               echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" | sed "s/staging/$SUBDOMAIN/g" >> $GITHUB_ENV
-              echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" | sed "s/staging/$SUBDOMAIN/g" >> $GITHUB_ENV
             fi
             {
               echo 'DFX_DEPLOY_KEY<<EOF'
@@ -131,7 +129,6 @@ jobs:
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_QUICKNODE_API_KEY=${{ secrets.VITE_QUICKNODE_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}" >> $GITHUB_ENV
-            echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_BETA }}" >> $GITHUB_ENV
             echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}" >> $GITHUB_ENV
             echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}" >> $GITHUB_ENV

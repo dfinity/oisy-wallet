@@ -28,5 +28,5 @@ export const {
 	}
 });
 
-export const OISY_URL = import.meta.env.VITE_OISY_URL;
+export const OISY_URL = import.meta.env.OISY_IC_DOMAIN;
 export const OISY_ICON = `${OISY_URL}/favicons/icon-512x512.png`;
