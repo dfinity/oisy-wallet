@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { slide, fade } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -30,14 +30,12 @@
 	$: balance, fee, debounceCheckFeeFunds();
 </script>
 
-<div transition:fade>
-	<ExchangeAmountDisplay
-		amount={fee}
-		decimals={feeDecimals}
-		symbol={feeSymbol}
-		exchangeRate={feeExchangeRate}
-	/>
-</div>
+<ExchangeAmountDisplay
+	amount={fee}
+	decimals={feeDecimals}
+	symbol={feeSymbol}
+	exchangeRate={feeExchangeRate}
+/>
 
 {#if insufficientFeeFunds && nonNullish(balance)}
 	<p in:slide={SLIDE_DURATION} class="text-error-primary">
