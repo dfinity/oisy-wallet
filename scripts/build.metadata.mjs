@@ -16,7 +16,7 @@ const parseMetadata = (targetFile) => {
 
 	const METADATA = {
 		...getMetadata(),
-		OISY_IC_DOMAIN,
+		OISY_IC_DOMAIN
 	};
 
 	Object.entries(METADATA).forEach(
@@ -27,7 +27,7 @@ const parseMetadata = (targetFile) => {
 	content = replaceEnv({
 		content,
 		pattern: `https://oisy.com`,
-		value: OISY_IC_DOMAIN,
+		value: OISY_IC_DOMAIN
 	});
 
 	writeFileSync(targetFile, content);
@@ -39,7 +39,7 @@ const parseUrl = (filePath) => {
 	content = replaceEnv({
 		content,
 		pattern: `https://oisy.com`,
-		value: OISY_IC_DOMAIN,
+		value: OISY_IC_DOMAIN
 	});
 
 	writeFileSync(filePath, content);
