@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -28,12 +29,11 @@
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils.js';
-	import { nonNullish } from '@dfinity/utils';
 
 	export let testIdPrefix: string | undefined = undefined;
 
-	const addTestIdPrefix = (testId: string) :string=> nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
-
+	const addTestIdPrefix = (testId: string): string =>
+		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
