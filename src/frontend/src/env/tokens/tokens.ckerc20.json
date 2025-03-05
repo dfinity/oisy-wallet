@@ -7,23 +7,12 @@
 		},
 		"ckUNI": {
 			"ledgerCanisterId": "ilzky-ayaaa-aaaar-qahha-cai",
-			"indexCanisterId": "imymm-naaaa-aaaar-qahhq-cai",
 			"erc20ContractAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"
 		},
 		"ckWBTC": {
 			"ledgerCanisterId": "bptq2-faaaa-aaaar-qagxq-cai",
 			"indexCanisterId": "dso6s-wiaaa-aaaar-qagya-cai",
 			"erc20ContractAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
-		},
-		"ckLINK": {
-			"ledgerCanisterId": "g4tto-rqaaa-aaaar-qageq-cai",
-			"indexCanisterId": "gvqys-hyaaa-aaaar-qagfa-cai",
-			"erc20ContractAddress": "0x514910771AF9Ca656af840dff83E8264EcF986CA"
-		},
-		"ckXAUT": {
-			"ledgerCanisterId": "nza5v-qaaaa-aaaar-qahzq-cai",
-			"indexCanisterId": "nmhmy-riaaa-aaaar-qah2a-cai",
-			"erc20ContractAddress": "0x68749665FF8D2d112Fa859AA293F07A622782F38"
 		},
 		"ckPEPE": {
 			"ledgerCanisterId": "etik7-oiaaa-aaaar-qagia-cai",
@@ -52,8 +41,6 @@
 		},
 		"ckOCT": {
 			"ledgerCanisterId": "ebo5g-cyaaa-aaaar-qagla-cai",
-			"indexCanisterId": "egp3s-paaaa-aaaar-qaglq-cai",
-			"erc20ContractAddress": "0xF5cFBC74057C610c8EF151A439252680AC68c6DC"
 		}
 	},
 	"staging": {
@@ -61,11 +48,6 @@
 			"ledgerCanisterId": "yfumr-cyaaa-aaaar-qaela-cai",
 			"indexCanisterId": "ycvkf-paaaa-aaaar-qaelq-cai",
 			"erc20ContractAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
-		},
-		"ckSepoliaPEPE": {
-			"ledgerCanisterId": "hw4ru-taaaa-aaaar-qagdq-cai",
-			"indexCanisterId": "g3sv2-4iaaa-aaaar-qagea-cai",
-			"erc20ContractAddress": "0x560eF9F39E4B08f9693987cad307f6FBfd97B2F6"
 		},
 		"ckSepoliaLINK": {
 			"ledgerCanisterId": "r52mc-qaaaa-aaaar-qafzq-cai",
