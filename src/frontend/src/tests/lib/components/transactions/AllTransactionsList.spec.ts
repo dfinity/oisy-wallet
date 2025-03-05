@@ -42,7 +42,7 @@ describe('AllTransactionsList', () => {
 	});
 
 	describe('when the transactions list is empty', () => {
-		beforeAll(() => {
+		beforeEach(() => {
 			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
 			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 			icTransactionsStore.reset(ICP_TOKEN_ID);
@@ -75,7 +75,12 @@ describe('AllTransactionsList', () => {
 		const todayTimestamp = new Date().getTime();
 		const yesterdayTimestamp = todayTimestamp - 24 * 60 * 60 * 1000;
 
-		beforeAll(() => {
+		beforeEach(() => {
+			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+			icTransactionsStore.reset(ICP_TOKEN_ID);
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,
 				transactions: createMockBtcTransactionsUi(btcTransactionsNumber).map((transaction) => ({

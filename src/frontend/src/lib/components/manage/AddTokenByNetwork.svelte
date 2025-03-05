@@ -40,10 +40,7 @@
 	let isSolanaNetwork = false;
 	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
 
-	let ledgerCanisterId = tokenData?.ledgerCanisterId ?? '';
-	let indexCanisterId = tokenData?.indexCanisterId ?? '';
-	let erc20ContractAddress = tokenData?.erc20ContractAddress ?? '';
-	let splTokenAddress = tokenData?.splTokenAddress ?? '';
+	let { ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData;
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
