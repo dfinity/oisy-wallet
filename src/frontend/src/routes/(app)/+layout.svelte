@@ -77,7 +77,7 @@
 		</SplitPane>
 
 		<MobileNavigationMenu>
-			<NavigationMenuMainItems />
+			<NavigationMenuMainItems testIdPrefix="mobile" />
 		</MobileNavigationMenu>
 
 		<Modals />
