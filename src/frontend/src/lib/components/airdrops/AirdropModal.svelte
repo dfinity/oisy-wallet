@@ -9,8 +9,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 
 	export let airdrop: AirdropDescription;
+
+	$: console.log($userProfileStore?.profile);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

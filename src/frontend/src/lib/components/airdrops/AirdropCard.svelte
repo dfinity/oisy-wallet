@@ -3,6 +3,8 @@
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
+	import AirdropsEndsInBadge from '$lib/components/airdrops/AirdropsEndsInBadge.svelte';
 
 	export let airdrop: AirdropDescription;
 	export let testId: string | undefined = undefined;
@@ -22,9 +24,15 @@
 			testId={nonNullish(testId) ? `${testId}-logo` : undefined}
 		/>
 	</span>
+	<span class="absolute right-4 top-3">
+		<AirdropsEndsInBadge {airdrop} />
+	</span>
 	<article class="h-full">
 		<section>
-			<p class="m-0 text-start text-lg font-semibold">{airdrop.cardTitle}</p>
+			<p class="m-0 text-start text-lg font-semibold"
+				>{airdrop.cardTitle}<AirdropsRequirements {airdrop} badgeOnly /></p
+			>
+
 			<p class="m-0 mt-2 text-start text-xs text-tertiary">
 				{airdrop.oneLiner}
 			</p>
