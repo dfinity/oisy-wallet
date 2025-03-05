@@ -14,6 +14,9 @@ import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
+const normalizePath = (s: string | null) =>
+	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
+
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
 
