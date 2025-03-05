@@ -19,12 +19,15 @@
 		STAGING_CKBTC_LEDGER_CANISTER_ID,
 		CKBTC_LEDGER_CANISTER_TESTNET_IDS,
 		LOCAL_CKBTC_LEDGER_CANISTER_ID,
-		CKERC20_LEDGER_CANISTER_TESTNET_IDS
+		CKERC20_LEDGER_CANISTER_TESTNET_IDS,
+		CKERC20_LEDGER_CANISTER_IDS
 	} from '$env/networks/networks.icrc.env';
 	import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { nonNullish } from '@dfinity/utils';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 
 	export let airdrop: AirdropDescription;
 
@@ -35,37 +38,42 @@
 	let icpReward: BigNumber;
 	$: icpReward = BigNumber.from(0);
 
+	let loading: boolean;
+	$: loading = true;
+
 	const loadRewardsUserInfo = async () => {
 		const data = await getUserInfo({ identity: $authIdentity });
 
 		console.log(data);
 
-		data.usage_awards[0]?.forEach((aw, i) => {
-			const canisterId = aw.ledger.toText();
-			console.log('canisterId ' + i, canisterId);
-			if (
-				CKBTC_LEDGER_CANISTER_IDS.includes(canisterId) ||
-				STAGING_CKBTC_LEDGER_CANISTER_ID === canisterId ||
-				CKBTC_LEDGER_CANISTER_TESTNET_IDS.includes(canisterId) ||
-				LOCAL_CKBTC_LEDGER_CANISTER_ID === canisterId
-			) {
-				ckBtcReward = BigNumber.from(ckBtcReward).add(aw.amount);
-			} else if (ICP_LEDGER_CANISTER_ID.includes(canisterId)) {
-				icpReward = BigNumber.from(ckBtcReward).add(aw.amount);
-			} else if (
-				LOCAL_CKUSDC_LEDGER_CANISTER_ID === canisterId ||
-				CKERC20_LEDGER_CANISTER_TESTNET_IDS.includes(canisterId)
-			) {
-				ckUsdcReward = BigNumber.from(ckBtcReward).add(aw.amount);
-			} else {
-				console.warn('Ledger canister mapping not found for: ' + canisterId);
+		for (let i = 0; i < (data.usage_awards[0] || []).length; i++) {
+			const aw = data.usage_awards[0]?.[i];
+			if (nonNullish(aw)) {
+				const canisterId = aw.ledger.toText();
+				console.log('canisterId ' + i, canisterId);
+				if (
+					CKBTC_LEDGER_CANISTER_IDS.includes(canisterId) ||
+					STAGING_CKBTC_LEDGER_CANISTER_ID === canisterId ||
+					CKBTC_LEDGER_CANISTER_TESTNET_IDS.includes(canisterId) ||
+					LOCAL_CKBTC_LEDGER_CANISTER_ID === canisterId
+				) {
+					ckBtcReward = BigNumber.from(ckBtcReward).add(aw.amount);
+				} else if (ICP_LEDGER_CANISTER_ID.includes(canisterId)) {
+					icpReward = BigNumber.from(ckBtcReward).add(aw.amount);
+				} else if (
+					LOCAL_CKUSDC_LEDGER_CANISTER_ID === canisterId ||
+					CKERC20_LEDGER_CANISTER_TESTNET_IDS.includes(canisterId) ||
+					CKERC20_LEDGER_CANISTER_IDS.includes(canisterId)
+				) {
+					ckUsdcReward = BigNumber.from(ckBtcReward).add(aw.amount);
+				} else {
+					console.warn('Ledger canister mapping not found for: ' + canisterId);
+				}
 			}
-		});
-	};
+		}
 
-	$: console.log('ckBtcReward', ckBtcReward);
-	$: console.log('ckUsdcReward', ckUsdcReward);
-	$: console.log('icpReward', icpReward);
+		loading = false;
+	};
 
 	onMount(loadRewardsUserInfo);
 </script>
@@ -77,29 +85,58 @@
 		<AirdropBanner />
 
 		<div class="flex w-full gap-2">
-			<div class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted">
-				{formatToken({
-					value: ckBtcReward,
-					unitName: 8,
-					displayDecimals: EIGHT_DECIMALS,
-					showPlusSign: true
-				})} ckBTC
+			<div
+				class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted"
+				class:transition={loading}
+				class:duration-500={loading}
+				class:ease-in-out={loading}
+				class:animate-pulse={loading}
+			>
+				{#if loading}
+					<SkeletonText />
+				{:else}
+					{formatToken({
+						value: ckBtcReward,
+						unitName: 8,
+						displayDecimals: EIGHT_DECIMALS,
+						showPlusSign: true
+					})} ckBTC
+				{/if}
 			</div>
-			<div class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted">
-				{formatToken({
-					value: ckUsdcReward,
-					unitName: 8,
-					displayDecimals: EIGHT_DECIMALS,
-					showPlusSign: true
-				})} ckUSDC
+			<div
+				class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted"
+				class:transition={loading}
+				class:duration-500={loading}
+				class:ease-in-out={loading}
+				class:animate-pulse={loading}
+			>
+				{#if loading}
+					<SkeletonText />
+				{:else}
+					{formatToken({
+						value: ckUsdcReward,
+						unitName: 6,
+						displayDecimals: EIGHT_DECIMALS,
+						showPlusSign: true
+					})} ckUSDC
+				{/if}
 			</div>
-			<div class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted">
-				{formatToken({
-					value: icpReward,
-					unitName: 8,
-					displayDecimals: EIGHT_DECIMALS,
-					showPlusSign: true
-				})} ICP
+			<div
+				class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted"
+				class:transition={loading}
+				class:duration-500={loading}
+				class:ease-in-out={loading}
+				class:animate-pulse={loading}
+				>{#if loading}
+					<SkeletonText />
+				{:else}
+					{formatToken({
+						value: icpReward,
+						unitName: 8,
+						displayDecimals: EIGHT_DECIMALS,
+						showPlusSign: true
+					})} ICP
+				{/if}
 			</div>
 		</div>
 
