@@ -5,7 +5,7 @@ import type { IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc/dist/types/
 import { Principal } from '@dfinity/principal';
 import { createAgent, isNullish } from '@dfinity/utils';
 
-const agent: HttpAgent = await createAgent({
+export const agent: HttpAgent = await createAgent({
 	identity: new AnonymousIdentity(),
 	host: 'https://icp-api.io'
 });

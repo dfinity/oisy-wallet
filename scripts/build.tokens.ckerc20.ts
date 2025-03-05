@@ -8,17 +8,16 @@ import type {
 } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { AnonymousIdentity, HttpAgent } from '@dfinity/agent';
 import {
 	CkETHOrchestratorCanister,
 	type ManagedCanisters,
 	type OrchestratorInfo
 } from '@dfinity/cketh';
 import { Principal } from '@dfinity/principal';
-import { createAgent, fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadMetadata } from './buil.tokens.utils';
+import { agent, loadMetadata } from './buil.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -29,11 +28,6 @@ interface TokensAndIcons {
 		icon: string;
 	}[];
 }
-
-const agent: HttpAgent = await createAgent({
-	identity: new AnonymousIdentity(),
-	host: 'https://icp-api.io'
-});
 
 // Tokens for which the ERC20 and ckERC20 logos are different—i.e., tokens that are presented with their original ERC20 logos but have a custom logo for ckERC20.
 const SKIP_CANISTER_IDS_LOGOS: LedgerCanisterIdText[] = [
