@@ -38,7 +38,7 @@ describe('AllTransactionsSkeletons', () => {
 		});
 	});
 
-	describe('when at least one store is not empty', () => {
+	describe('when at least one transactions store is not empty', () => {
 		beforeEach(() => {
 			btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
 			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
