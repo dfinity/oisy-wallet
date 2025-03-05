@@ -16,7 +16,7 @@ concurrency:
 jobs:
   oisy-backend-wasm:
     runs-on: ubuntu-24.04
-    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    if: ${{ github.event_name != 'pull_request'}}
     permissions:
       contents: write
       packages: write
@@ -45,7 +45,7 @@ jobs:
         os: [ubuntu-24.04, macos-14]
     env:
       MATRIX_OS: ${{ matrix.os }}
-    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
+    if: ${{ github.event_name != 'pull_request' }}
     outputs:
       ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}

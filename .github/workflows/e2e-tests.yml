@@ -35,7 +35,7 @@ jobs:
 
   oisy-backend-wasm:
     runs-on: ubuntu-24.04
-    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
+    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     needs: check-e2e-changes
     steps:
       - name: Checkout
@@ -62,7 +62,7 @@ jobs:
         os: [ubuntu-24.04, macos-14]
     env:
       MATRIX_OS: ${{ matrix.os }}
-    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
+    if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
     outputs:
       ubuntu_status: ${{ steps.set_snapshot_output.outputs.ubuntu_status }}
       macos_status: ${{ steps.set_snapshot_output.outputs.macos_status }}
