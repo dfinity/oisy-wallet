@@ -183,7 +183,7 @@ const findCkErc20 = async () => {
 			.map(
 				([name, token]) =>
 					nonNullish(token?.ledgerCanisterId) &&
-					saveTokenLogo({ canisterId: token.ledgerCanisterId, name })
+					saveTokenLogo({ canisterId: Principal.from(token.ledgerCanisterId), name })
 			)
 	);
 };
