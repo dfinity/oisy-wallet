@@ -25,7 +25,7 @@
 			"erc20ContractAddress": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
 		},
 		"ckSHIB": {
-			"ledgerCanisterId": "fxffn-xiaaa-aaaar-qagoa-cai",
+			"ledgerCanisterId": "fxffn-xiaaa-aaaar-qagoa-cai"
 		},
 		"ckUSDC": {
 			"ledgerCanisterId": "xevnm-gaaaa-aaaar-qafnq-cai",
