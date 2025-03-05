@@ -162,7 +162,7 @@ jobs:
   finalize_snapshots_update:
     name: Finalize Snapshots Update
     runs-on: ubuntu-24.04
-    needs: [ e2e ]
+    needs: [e2e]
 
     steps:
       - name: Create GitHub App Token
