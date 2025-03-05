@@ -17,7 +17,7 @@ import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { agent, loadMetadata } from './buil.tokens.utils';
+import { agent, loadMetadata } from './build.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
