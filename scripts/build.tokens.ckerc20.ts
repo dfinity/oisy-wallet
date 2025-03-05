@@ -187,7 +187,7 @@ const findCkErc20 = async () => {
 	writeFileSync(CK_ERC20_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
 
 	await Promise.allSettled(
-		[...stagingIcons, ...productionIcons]
+		[...productionIcons, ...stagingIcons]
 			.filter(({ ledgerCanisterId }) => !SKIP_CANISTER_IDS_LOGOS.includes(ledgerCanisterId))
 			.map(({ name, icon }) => saveTokenLogo({ name, logoData: icon }))
 	);
