@@ -9,10 +9,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import {
-		saveErc20UserTokens,
-		saveIcrcCustomTokens
-	} from '$icp-eth/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
@@ -35,6 +31,8 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
+	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
+	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 
 	const steps: WizardSteps = [
 		{
