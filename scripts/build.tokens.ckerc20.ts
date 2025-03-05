@@ -3,7 +3,7 @@
 import type {
 	EnvCkErc20TokenData,
 	EnvCkErc20TokensRaw,
-	EnvCkErc20TokensWithIcon,
+	EnvCkErc20TokensWithMetadata,
 	EnvTokensCkErc20
 } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
@@ -22,7 +22,7 @@ import { loadMetadata } from './buil.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
-	tokens: EnvCkErc20TokensWithIcon;
+	tokens: EnvCkErc20TokensWithMetadata;
 	icons: {
 		ledgerCanisterId: LedgerCanisterIdText;
 		name: EnvTokenSymbol;

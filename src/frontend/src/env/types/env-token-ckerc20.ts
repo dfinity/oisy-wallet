@@ -2,7 +2,7 @@ import {
 	EnvCkErc20TokenDataSchema,
 	EnvCkErc20TokensRawSchema,
 	EnvCkErc20TokensSchema,
-	EnvCkErc20TokensWithIconSchema,
+	EnvCkErc20TokensWithMetadataSchema,
 	EnvTokensCkErc20Schema
 } from '$env/schema/env-token-ckerc20.schema';
 import * as z from 'zod';
@@ -15,4 +15,4 @@ export type EnvCkErc20Tokens = z.infer<typeof EnvCkErc20TokensSchema>;
 
 export type EnvTokensCkErc20 = z.infer<typeof EnvTokensCkErc20Schema>;
 
-export type EnvCkErc20TokensWithIcon = z.infer<typeof EnvCkErc20TokensWithIconSchema>;
+export type EnvCkErc20TokensWithMetadata = z.infer<typeof EnvCkErc20TokensWithMetadataSchema>;

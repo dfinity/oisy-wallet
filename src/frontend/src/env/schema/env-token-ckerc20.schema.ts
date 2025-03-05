@@ -31,7 +31,7 @@ export const EnvTokensCkErc20Schema = z.object({
 	staging: EnvCkErc20TokensSchema
 });
 
-export const EnvCkErc20TokensWithIconSchema = z.record(
+export const EnvCkErc20TokensWithMetadataSchema = z.record(
 	EnvTokenSymbolSchema,
 	EnvCkErc20WithMetadataSchema
 );
