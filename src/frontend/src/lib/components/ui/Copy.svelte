@@ -17,7 +17,7 @@
 	data-tid={testId}
 	class:py-2={!inline}
 	class:inline-block={inline}
-	class:text-brand-primary={color === 'blue'}
+	class:text-brand-primary-alt={color === 'blue'}
 	class:hover:text-inherit={color === 'blue'}
 	class:active:text-inherit={color === 'blue'}
 	style={`${inline ? 'vertical-align: sub;' : ''}`}
