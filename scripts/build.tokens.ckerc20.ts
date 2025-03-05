@@ -2,8 +2,8 @@
 
 import type {
 	EnvCkErc20TokenData,
-	EnvCkErc20Tokens,
 	EnvCkErc20TokensRaw,
+	EnvCkErc20TokensWithIcon,
 	EnvTokensCkErc20
 } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
@@ -14,12 +14,21 @@ import {
 	type ManagedCanisters,
 	type OrchestratorInfo
 } from '@dfinity/cketh';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { createAgent, fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { loadMetadata } from './buil.tokens.utils';
 import { CK_ERC20_JSON_FILE } from './constants.mjs';
+
+interface TokensAndIcons {
+	tokens: EnvCkErc20TokensWithIcon;
+	icons: {
+		ledgerCanisterId: LedgerCanisterIdText;
+		name: EnvTokenSymbol;
+		icon: string;
+	}[];
+}
 
 const agent: HttpAgent = await createAgent({
 	identity: new AnonymousIdentity(),
@@ -53,7 +62,7 @@ const orchestratorInfo = async ({
 	return await getOrchestratorInfo({ certified: true });
 };
 
-const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<EnvCkErc20Tokens> => {
+const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<TokensAndIcons> => {
 	const { managed_canisters } = await orchestratorInfo({ orchestratorId });
 
 	// eslint-disable-next-line local-rules/prefer-object-params -- This is a destructuring assignment
@@ -107,12 +116,38 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<EnvCkEr
 		);
 	}
 
-	return Object.entries(tokens).reduce(
-		(acc, [key, value]) => ({
-			...acc,
-			[key]: value[0]
-		}),
-		{}
+	return await Object.entries(tokens).reduce<Promise<TokensAndIcons>>(
+		async (acc, [key, value]) => {
+			const { tokens: accTokens, icons: accIcons } = await acc;
+
+			const valueWithMetadata = await loadMetadata(value[0]);
+
+			if (isNullish(valueWithMetadata)) {
+				return { tokens: accTokens, icons: accIcons };
+			}
+
+			const { ledgerCanisterId, name, icon, ...rest } = valueWithMetadata;
+
+			return {
+				tokens: {
+					...accTokens,
+					[key]: { ledgerCanisterId, name, ...rest }
+				},
+				icons: [
+					...accIcons,
+					...(nonNullish(icon)
+						? [
+								{
+									ledgerCanisterId,
+									name: key,
+									icon
+								}
+							]
+						: [])
+				]
+			};
+		},
+		Promise.resolve({ tokens: {}, icons: [] })
 	);
 };
 
@@ -121,36 +156,13 @@ const ORCHESTRATOR_PRODUCTION_ID: Principal = Principal.fromText('vxkom-oyaaa-aa
 
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
-const saveTokenLogo = async ({
-	canisterId,
-	name
-}: {
-	canisterId: Principal;
-	name: EnvTokenSymbol;
-}) => {
+const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: string }) => {
 	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
 	const file = join(LOGO_FOLDER, `${logoName}.svg`);
 
 	if (existsSync(file)) {
 		return;
 	}
-
-	const { metadata } = IcrcLedgerCanister.create({
-		agent,
-		canisterId
-	});
-
-	const data = await metadata({ certified: true });
-
-	const logoItem = data.find((item) => item[0] === 'icrc1:logo');
-
-	if (isNullish(logoItem) || !('Text' in logoItem[1])) {
-		const error = new Error(`No 'icrc1:logo' data found for ${name}`);
-		console.warn(error.stack);
-		return;
-	}
-
-	const logoData = logoItem[1].Text;
 
 	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
 
@@ -160,7 +172,10 @@ const saveTokenLogo = async ({
 };
 
 const findCkErc20 = async () => {
-	const [staging, production]: EnvCkErc20Tokens[] = await Promise.all(
+	const [
+		{ tokens: staging, icons: stagingIcons },
+		{ tokens: production, icons: productionIcons }
+	]: TokensAndIcons[] = await Promise.all(
 		[ORCHESTRATOR_STAGING_ID, ORCHESTRATOR_PRODUCTION_ID].map(buildOrchestratorInfo)
 	);
 
@@ -172,19 +187,9 @@ const findCkErc20 = async () => {
 	writeFileSync(CK_ERC20_JSON_FILE, JSON.stringify(tokens, jsonReplacer, 8));
 
 	await Promise.allSettled(
-		Object.entries({
-			...tokens.production,
-			...tokens.staging
-		})
-			.filter(
-				([, token]) =>
-					nonNullish(token) && !SKIP_CANISTER_IDS_LOGOS.includes(token.ledgerCanisterId)
-			)
-			.map(
-				([name, token]) =>
-					nonNullish(token?.ledgerCanisterId) &&
-					saveTokenLogo({ canisterId: Principal.from(token.ledgerCanisterId), name })
-			)
+		[...stagingIcons, ...productionIcons]
+			.filter(({ ledgerCanisterId }) => !SKIP_CANISTER_IDS_LOGOS.includes(ledgerCanisterId))
+			.map(({ name, icon }) => saveTokenLogo({ name, logoData: icon }))
 	);
 };
 
