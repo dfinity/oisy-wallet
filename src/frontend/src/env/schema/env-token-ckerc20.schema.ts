@@ -8,9 +8,14 @@ const EnvErc20ContractAddressSchema = z.custom<string>(
 	'Invalid ERC20 Contract Address'
 );
 
-const EnvCkErc20TokenDataSchema = EnvIcTokenSchema.extend({
+export const EnvCkErc20TokenDataSchema = EnvIcTokenSchema.extend({
 	erc20ContractAddress: EnvErc20ContractAddressSchema
 });
+
+export const EnvCkErc20TokensRawSchema = z.record(
+	EnvTokenSymbolSchema,
+	z.array(EnvCkErc20TokenDataSchema)
+);
 
 export const EnvCkErc20TokensSchema = z.record(
 	EnvTokenSymbolSchema,

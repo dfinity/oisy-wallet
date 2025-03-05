@@ -132,7 +132,7 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 ## Integrate ckERC20 Tokens
 
-While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.mjs] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
+While the weekly GitHub Action that runs the job [./scripts/build.tokens.ckerc20.ts] helps discover new ckERC20 tokens deployed on the IC mainnet for testnet purposes or through proposals for effective production usage, some manual steps are still required to integrate them within OISY.
 
 The steps are as follows:
 
