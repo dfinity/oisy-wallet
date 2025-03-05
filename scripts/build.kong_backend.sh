@@ -16,6 +16,9 @@ print_help() {
   exit 0
 }
 
+KONG_BUILDENV="$DFX_NETWORK"
+export KONG_BUILDENV
+
 KONG_REPO_URL="https://raw.githubusercontent.com/KongSwap/kong/refs/heads/main/canisters"
 CANDID_URL="${KONG_REPO_URL}/kong_backend.did"
 WASM_URL="${KONG_REPO_URL}/kong_backend.wasm.gz"

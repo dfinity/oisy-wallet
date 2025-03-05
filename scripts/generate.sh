@@ -48,7 +48,7 @@ function install_did_files() {
 # .. downloads candid for the signer
 DFX_NETWORK=ic ./scripts/build.signer.sh
 # .. downloads candid for the kong_backend
-./scripts/build.kong_backend.sh
+DFX_NETWORK=ic ./scripts/build.kong_backend.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
