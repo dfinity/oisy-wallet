@@ -116,8 +116,8 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<EnvCkEr
 	);
 };
 
-const ORCHESTRATOR_STAGING_ID = Principal.fromText('2s5qh-7aaaa-aaaar-qadya-cai');
-const ORCHESTRATOR_PRODUCTION_ID = Principal.fromText('vxkom-oyaaa-aaaar-qafda-cai');
+const ORCHESTRATOR_STAGING_ID: Principal = Principal.fromText('2s5qh-7aaaa-aaaar-qadya-cai');
+const ORCHESTRATOR_PRODUCTION_ID: Principal = Principal.fromText('vxkom-oyaaa-aaaar-qafda-cai');
 
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
@@ -177,7 +177,7 @@ const findCkErc20 = async () => {
 			...tokens.staging
 		})
 			.filter(
-				([_, token]) =>
+				([, token]) =>
 					nonNullish(token) && !SKIP_CANISTER_IDS_LOGOS.includes(token.ledgerCanisterId)
 			)
 			.map(
