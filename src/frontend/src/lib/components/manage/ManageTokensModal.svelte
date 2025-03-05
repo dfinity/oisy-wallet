@@ -4,10 +4,12 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
+	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
@@ -31,8 +33,6 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
-	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
-	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 
 	const steps: WizardSteps = [
 		{
