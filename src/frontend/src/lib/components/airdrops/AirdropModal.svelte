@@ -9,11 +9,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
+	import { getUserInfo } from '$lib/api/reward.api';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { onMount } from 'svelte';
 
 	export let airdrop: AirdropDescription;
 
-	$: console.log($userProfileStore?.profile);
+	const loadRewardsUserInfo = async () => {
+		const data = await getUserInfo({ identity: $authIdentity });
+		console.log('Rewards user info', data);
+	};
+
+	onMount(loadRewardsUserInfo);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
