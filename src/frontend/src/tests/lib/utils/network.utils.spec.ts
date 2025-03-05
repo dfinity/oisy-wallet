@@ -1,5 +1,6 @@
 import * as networkEnv from '$env/networks/networks.env';
 import {
+	BTC_MAINNET_NETWORK,
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID,
@@ -7,18 +8,28 @@ import {
 	ETHEREUM_NETWORK_ID,
 	ICP_NETWORK,
 	ICP_NETWORK_ID,
+	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.env';
+import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
+	SOLANA_DEVNET_NETWORK,
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
+	SOLANA_MAINNET_NETWORK,
 	SOLANA_MAINNET_NETWORK_ID,
 	SOLANA_NETWORKS,
 	SOLANA_NETWORKS_IDS,
 	SOLANA_TESTNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
+import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { NetworkId } from '$lib/types/network';
+import type { Token } from '$lib/types/token';
 import {
+	filterTokensForSelectedNetwork,
 	isNetworkICP,
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCRegtest,
@@ -35,6 +46,7 @@ import {
 	isNetworkSolana,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 
 describe('network utils', () => {
 	describe('isNetworkICP', () => {
@@ -164,20 +176,6 @@ describe('network utils', () => {
 		});
 	});
 
-	describe('mapNetworkIdToBitcoinNetwork', () => {
-		it('should map network id to bitcoin network', () => {
-			expect(mapNetworkIdToBitcoinNetwork(BTC_MAINNET_NETWORK_ID)).toBe('mainnet');
-			expect(mapNetworkIdToBitcoinNetwork(BTC_TESTNET_NETWORK_ID)).toBe('testnet');
-			expect(mapNetworkIdToBitcoinNetwork(BTC_REGTEST_NETWORK_ID)).toBe('regtest');
-		});
-
-		it('should return `undefined` with non bitcoin network', () => {
-			expect(mapNetworkIdToBitcoinNetwork(ETHEREUM_NETWORK_ID)).toBeUndefined();
-			expect(mapNetworkIdToBitcoinNetwork(SEPOLIA_NETWORK_ID)).toBeUndefined();
-			expect(mapNetworkIdToBitcoinNetwork(ICP_NETWORK_ID)).toBeUndefined();
-		});
-	});
-
 	describe('isNetworkIdSolana', () => {
 		it.each(SOLANA_NETWORKS_IDS)('should return true for Solana network ID %s', (id) => {
 			expect(isNetworkIdSolana(id)).toBe(true);
@@ -239,6 +237,156 @@ describe('network utils', () => {
 			expect(isNetworkIdSOLLocal(SOLANA_MAINNET_NETWORK_ID)).toBe(false);
 			expect(isNetworkIdSOLLocal(SOLANA_TESTNET_NETWORK_ID)).toBe(false);
 			expect(isNetworkIdSOLLocal(SOLANA_DEVNET_NETWORK_ID)).toBe(false);
+		});
+	});
+
+	describe('mapNetworkIdToBitcoinNetwork', () => {
+		it('should map network id to bitcoin network', () => {
+			expect(mapNetworkIdToBitcoinNetwork(BTC_MAINNET_NETWORK_ID)).toBe('mainnet');
+			expect(mapNetworkIdToBitcoinNetwork(BTC_TESTNET_NETWORK_ID)).toBe('testnet');
+			expect(mapNetworkIdToBitcoinNetwork(BTC_REGTEST_NETWORK_ID)).toBe('regtest');
+		});
+
+		it('should return `undefined` with non bitcoin network', () => {
+			expect(mapNetworkIdToBitcoinNetwork(ETHEREUM_NETWORK_ID)).toBeUndefined();
+			expect(mapNetworkIdToBitcoinNetwork(SEPOLIA_NETWORK_ID)).toBeUndefined();
+			expect(mapNetworkIdToBitcoinNetwork(ICP_NETWORK_ID)).toBeUndefined();
+		});
+	});
+
+	describe('filterTokensForSelectedNetwork', () => {
+		const tokens: Token[] = [
+			ICP_TOKEN,
+			SEPOLIA_TOKEN,
+			SEPOLIA_PEPE_TOKEN,
+			BTC_REGTEST_TOKEN,
+			BTC_MAINNET_TOKEN
+		];
+
+		const mockIcrcTestnetToken = {
+			...mockIcrcCustomToken,
+			ledgerCanisterId: CKBTC_LEDGER_CANISTER_TESTNET_IDS,
+			env: 'testnet'
+		};
+
+		const extendedTokens: Token[] = [...tokens, mockIcrcTestnetToken];
+
+		it('should return an empty array when no tokens are provided', () => {
+			expect(filterTokensForSelectedNetwork([[], undefined, false])).toEqual([]);
+
+			expect(filterTokensForSelectedNetwork([[], BTC_MAINNET_NETWORK, false])).toEqual([]);
+
+			expect(filterTokensForSelectedNetwork([[], SEPOLIA_NETWORK, false])).toEqual([]);
+
+			expect(filterTokensForSelectedNetwork([[], undefined, true])).toEqual([]);
+
+			expect(filterTokensForSelectedNetwork([[], BTC_MAINNET_NETWORK, true])).toEqual([]);
+
+			expect(filterTokensForSelectedNetwork([[], SEPOLIA_NETWORK, true])).toEqual([]);
+		});
+
+		it('should return an empty array when there are no tokens for the selected network', () => {
+			expect(filterTokensForSelectedNetwork([tokens, ETHEREUM_NETWORK, false])).toEqual([]);
+
+			expect(filterTokensForSelectedNetwork([tokens, SOLANA_DEVNET_NETWORK, false])).toEqual([]);
+		});
+
+		it('should filter tokens on a mainnet network', () => {
+			expect(filterTokensForSelectedNetwork([tokens, BTC_MAINNET_NETWORK, false])).toEqual([
+				BTC_MAINNET_TOKEN
+			]);
+		});
+
+		it('should filter tokens on a testnet network', () => {
+			expect(filterTokensForSelectedNetwork([tokens, SEPOLIA_NETWORK, false])).toEqual([
+				SEPOLIA_TOKEN,
+				SEPOLIA_PEPE_TOKEN
+			]);
+		});
+
+		it('should filter mainnet tokens when no network is provided and Chain Fusion is true', () => {
+			expect(filterTokensForSelectedNetwork([tokens, undefined, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN
+			]);
+		});
+
+		it('should ignore provided mainnet network when Chain Fusion is true', () => {
+			expect(filterTokensForSelectedNetwork([tokens, BTC_MAINNET_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN
+			]);
+
+			expect(filterTokensForSelectedNetwork([tokens, SOLANA_MAINNET_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN
+			]);
+		});
+
+		it('should not ignore provided testnet network when Chain Fusion is true', () => {
+			expect(filterTokensForSelectedNetwork([tokens, SEPOLIA_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				SEPOLIA_TOKEN,
+				SEPOLIA_PEPE_TOKEN,
+				BTC_MAINNET_TOKEN
+			]);
+
+			expect(filterTokensForSelectedNetwork([tokens, SOLANA_DEVNET_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN
+			]);
+		});
+
+		it('should return ICRC pseudo-testnet tokens when filtering for ICP network or if Chain Fusion is true', () => {
+			expect(filterTokensForSelectedNetwork([extendedTokens, ICP_NETWORK, false])).toEqual([
+				ICP_TOKEN,
+				mockIcrcTestnetToken
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, ICP_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, BTC_MAINNET_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, SEPOLIA_NETWORK, true])).toEqual([
+				ICP_TOKEN,
+				SEPOLIA_TOKEN,
+				SEPOLIA_PEPE_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
+
+			expect(
+				filterTokensForSelectedNetwork([extendedTokens, SOLANA_MAINNET_NETWORK, true])
+			).toEqual([ICP_TOKEN, BTC_MAINNET_TOKEN, mockIcrcTestnetToken]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, undefined, true])).toEqual([
+				ICP_TOKEN,
+				BTC_MAINNET_TOKEN,
+				mockIcrcTestnetToken
+			]);
+		});
+
+		it('should not return ICRC pseudo-testnet tokens when filtering for non-ICP network', () => {
+			expect(filterTokensForSelectedNetwork([extendedTokens, BTC_MAINNET_NETWORK, false])).toEqual([
+				BTC_MAINNET_TOKEN
+			]);
+
+			expect(filterTokensForSelectedNetwork([extendedTokens, SEPOLIA_NETWORK, false])).toEqual([
+				SEPOLIA_TOKEN,
+				SEPOLIA_PEPE_TOKEN
+			]);
+
+			expect(
+				filterTokensForSelectedNetwork([extendedTokens, SOLANA_MAINNET_NETWORK, false])
+			).toEqual([]);
 		});
 	});
 });
