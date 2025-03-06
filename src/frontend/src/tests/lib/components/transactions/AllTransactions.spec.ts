@@ -1,8 +1,15 @@
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -77,6 +84,11 @@ describe('Activity', () => {
 	});
 
 	it('renders the transactions list', () => {
+		btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+		ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+		icTransactionsStore.reset(ICP_TOKEN_ID);
+		solTransactionsStore.reset(SOLANA_TOKEN_ID);
+
 		const { getByText } = render(AllTransactions);
 
 		expect(getByText(en.transactions.text.transaction_history)).toBeInTheDocument();
