@@ -112,9 +112,9 @@ const mapTokenParsedInstruction = async ({
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
 		const {
-			destination,
+			destination: to,
 			amount: value,
-			source
+			source: from
 		} = info as {
 			destination: SolAddress;
 			amount: string;
@@ -123,38 +123,19 @@ const mapTokenParsedInstruction = async ({
 
 		const { getAccountInfo } = solanaHttpRpc(network);
 
-		const { value: sourceResult } = await getAccountInfo(address(source), {
+		const { value: sourceResult } = await getAccountInfo(address(from), {
 			encoding: 'jsonParsed'
 		}).send();
 
-		const { value: destinationResult } = await getAccountInfo(address(destination), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (
-			nonNullish(sourceResult) &&
-			'parsed' in sourceResult.data &&
-			nonNullish(destinationResult) &&
-			'parsed' in destinationResult.data
-		) {
+		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
 			const {
 				data: {
 					parsed: { info: sourceAccoutInfo }
 				}
 			} = sourceResult;
 
-			const { mint: tokenAddress, owner: from } = sourceAccoutInfo as {
+			const { mint: tokenAddress } = sourceAccoutInfo as {
 				mint: SplTokenAddress;
-				owner: SolAddress;
-			};
-
-			const {
-				data: {
-					parsed: { info: destinationAccoutInfo }
-				}
-			} = destinationResult;
-
-			const { owner: to } = destinationAccoutInfo as {
 				owner: SolAddress;
 			};
 
@@ -165,9 +146,9 @@ const mapTokenParsedInstruction = async ({
 	if (type === 'transferChecked') {
 		// We need to cast the type since it is not implied
 		const {
-			destination,
+			destination: to,
 			tokenAmount: { amount: value },
-			source,
+			source: from,
 			mint: tokenAddress
 		} = info as {
 			destination: SolAddress;
@@ -178,44 +159,7 @@ const mapTokenParsedInstruction = async ({
 			mint: SplTokenAddress;
 		};
 
-		const { getAccountInfo } = solanaHttpRpc(network);
-
-		const { value: sourceResult } = await getAccountInfo(address(source), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		const { value: destinationResult } = await getAccountInfo(address(destination), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (
-			nonNullish(sourceResult) &&
-			'parsed' in sourceResult.data &&
-			nonNullish(destinationResult) &&
-			'parsed' in destinationResult.data
-		) {
-			const {
-				data: {
-					parsed: { info: sourceAccoutInfo }
-				}
-			} = sourceResult;
-
-			const { owner: from } = sourceAccoutInfo as {
-				owner: SolAddress;
-			};
-
-			const {
-				data: {
-					parsed: { info: destinationAccoutInfo }
-				}
-			} = destinationResult;
-
-			const { owner: to } = destinationAccoutInfo as {
-				owner: SolAddress;
-			};
-
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
+		return { value: BigInt(value), from, to, tokenAddress };
 	}
 
 	if (type === 'closeAccount') {
@@ -242,9 +186,9 @@ const mapToken2022ParsedInstruction = async ({
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
 		const {
-			destination,
+			destination: to,
 			amount: value,
-			source
+			source: from
 		} = info as {
 			destination: SolAddress;
 			amount: string;
@@ -253,38 +197,19 @@ const mapToken2022ParsedInstruction = async ({
 
 		const { getAccountInfo } = solanaHttpRpc(network);
 
-		const { value: sourceResult } = await getAccountInfo(address(source), {
+		const { value: sourceResult } = await getAccountInfo(address(from), {
 			encoding: 'jsonParsed'
 		}).send();
 
-		const { value: destinationResult } = await getAccountInfo(address(destination), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (
-			nonNullish(sourceResult) &&
-			'parsed' in sourceResult.data &&
-			nonNullish(destinationResult) &&
-			'parsed' in destinationResult.data
-		) {
+		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
 			const {
 				data: {
 					parsed: { info: sourceAccoutInfo }
 				}
 			} = sourceResult;
 
-			const { mint: tokenAddress, owner: from } = sourceAccoutInfo as {
+			const { mint: tokenAddress } = sourceAccoutInfo as {
 				mint: SplTokenAddress;
-				owner: SolAddress;
-			};
-
-			const {
-				data: {
-					parsed: { info: destinationAccoutInfo }
-				}
-			} = destinationResult;
-
-			const { owner: to } = destinationAccoutInfo as {
 				owner: SolAddress;
 			};
 
@@ -295,9 +220,9 @@ const mapToken2022ParsedInstruction = async ({
 	if (type === 'transferChecked') {
 		// We need to cast the type since it is not implied
 		const {
-			destination,
+			destination: to,
 			tokenAmount: { amount: value },
-			source,
+			source: from,
 			mint: tokenAddress
 		} = info as {
 			destination: SolAddress;
@@ -308,44 +233,7 @@ const mapToken2022ParsedInstruction = async ({
 			mint: SplTokenAddress;
 		};
 
-		const { getAccountInfo } = solanaHttpRpc(network);
-
-		const { value: sourceResult } = await getAccountInfo(address(source), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		const { value: destinationResult } = await getAccountInfo(address(destination), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (
-			nonNullish(sourceResult) &&
-			'parsed' in sourceResult.data &&
-			nonNullish(destinationResult) &&
-			'parsed' in destinationResult.data
-		) {
-			const {
-				data: {
-					parsed: { info: sourceAccoutInfo }
-				}
-			} = sourceResult;
-
-			const { owner: from } = sourceAccoutInfo as {
-				owner: SolAddress;
-			};
-
-			const {
-				data: {
-					parsed: { info: destinationAccoutInfo }
-				}
-			} = destinationResult;
-
-			const { owner: to } = destinationAccoutInfo as {
-				owner: SolAddress;
-			};
-
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
+		return { value: BigInt(value), from, to, tokenAddress };
 	}
 };
 
