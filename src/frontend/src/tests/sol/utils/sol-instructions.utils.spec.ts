@@ -216,8 +216,7 @@ describe('sol-instructions.utils', () => {
 				expect(result).toEqual({
 					value: 0n,
 					from: mockSolAddress,
-					to: mockSolAddress2,
-					tokenAddress: mockTokenAddress
+					to: mockSolAddress2
 				});
 			});
 
