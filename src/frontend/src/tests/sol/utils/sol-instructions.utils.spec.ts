@@ -208,12 +208,36 @@ describe('sol-instructions.utils', () => {
 					}
 				};
 
-				const result = await mapSolParsedInstruction({
-					instruction: mockCloseAccountInstruction,
-					network
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 0n,
+					from: mockSolAddress,
+					to: mockSolAddress2
 				});
 
-				expect(result).toEqual({
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress]: 100n }
+					})
+				).resolves.toEqual({
+					value: 100n,
+					from: mockSolAddress,
+					to: mockSolAddress2
+				});
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress2]: 100n }
+					})
+				).resolves.toEqual({
 					value: 0n,
 					from: mockSolAddress,
 					to: mockSolAddress2
