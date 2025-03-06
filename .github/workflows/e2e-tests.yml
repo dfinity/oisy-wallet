@@ -163,6 +163,8 @@ jobs:
     name: Finalize Snapshots Update
     runs-on: ubuntu-24.04
     needs: [e2e]
+    outputs:
+      e2e-snapshots-changed: ${{ steps.e2e-check-snapshots.outputs.e2e-snapshots-changed }}
 
     steps:
       - name: Create GitHub App Token
@@ -204,11 +206,14 @@ jobs:
           path: e2e
 
       - name: Check for Final Changes
+        id: e2e-check-snapshots
         run: |
           if [ -n "$(git status --porcelain e2e)" ]; then
             echo "FINAL_CHANGES=true" >> $GITHUB_ENV
+            echo "e2e-snapshots-changed=true" >> $GITHUB_OUTPUT
           else
             echo "FINAL_CHANGES=false" >> $GITHUB_ENV
+            echo "e2e-snapshots-changed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Commit and push updates
@@ -247,7 +252,7 @@ jobs:
 
   may-merge-e2e:
     if: always()
-    needs: ['check-e2e-changes', 'e2e']
+    needs: ['check-e2e-changes', 'e2e', 'finalize_snapshots_update']
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -257,7 +262,7 @@ jobs:
         run: |
           if [ "${{ needs.check-e2e-changes.outputs.e2e-or-config-changed }}" == "false" ]; then
             echo "No E2E or config changes detected. PR is cleared for merging."
-          elif [ "${{ needs.e2e.result }}" == "success" ]; then
+          elif [ "${{ needs.finalize_snapshots_update.outputs.e2e-snapshots-changed }}" == "false" ]; then
             echo "This PR is cleared for merging"
           else
             echo "This PR is not cleared for merging"
