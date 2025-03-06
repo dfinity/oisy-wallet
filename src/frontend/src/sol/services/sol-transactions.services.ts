@@ -71,70 +71,76 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			: [undefined];
 
+	const parsedTransactions: SolTransactionUi[] = await allInstructions.reduce<
+		Promise<SolTransactionUi[]>
+	>(async (acc, instruction, idx) => {
+		const innerInstructionsRaw =
+			putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
+
+		const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map((innerInstruction) => ({
+			...innerInstruction,
+			programAddress: innerInstruction.programId
+		}));
+
+		const mappedTransaction = await mapSolParsedInstruction({
+			instruction: {
+				...instruction,
+				programAddress: instruction.programId
+			},
+			innerInstructions,
+			network
+		});
+
+		if (isNullish(mappedTransaction)) {
+			return acc;
+		}
+
+		const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
+
+		// Ignoring the instruction if the transaction is not related to the address or its associated token account.
+		if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
+			return acc;
+		}
+
+		// If the token address is not the one we are looking for, we can skip this instruction.
+		// In case of Solana native tokens, the token address is undefined.
+		if (mappedTokenAddress !== tokenAddress) {
+			return acc;
+		}
+
+		const newTransaction: SolTransactionUi = {
+			id: `${signature.signature}-${instruction.programId}`,
+			signature: signature.signature,
+			timestamp: blockTime ?? 0n,
+			value,
+			type: address === from ? 'send' : 'receive',
+			from,
+			to,
+			status
+		};
+
+		return [
+			...(await acc),
+			newTransaction,
+			...(from === to
+				? [
+						{
+							...newTransaction,
+							id: `${newTransaction.id}-self`,
+							type: newTransaction.type === 'send' ? 'receive' : 'send'
+						} as SolTransactionUi
+					]
+				: [])
+		];
+	}, Promise.resolve([]));
+
 	// The instructions are received in the order they were executed, meaning the first instruction
 	// in the list was executed first, and the last instruction was executed last.
 	// However, since they all share the same timestamp, we want to display them in reverse
 	// order—from the last executed instruction to the first. This ensures that when shown,
 	// the most recently executed instruction appears first, maintaining a more intuitive,
 	// backward-looking view of execution history.
-	return await allInstructions.reverse().reduce(
-		async (acc, instruction, idx) => {
-			const innerInstructionsRaw =
-				putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
-
-			const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map(
-				(innerInstruction) => ({
-					...innerInstruction,
-					programAddress: innerInstruction.programId
-				})
-			);
-
-			const mappedTransaction = await mapSolParsedInstruction({
-				instruction: {
-					...instruction,
-					programAddress: instruction.programId
-				},
-				innerInstructions,
-				network
-			});
-
-			if (nonNullish(mappedTransaction) && mappedTransaction.tokenAddress === tokenAddress) {
-				const { value, from, to } = mappedTransaction;
-
-				if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-					return acc;
-				}
-
-				const newTransaction: SolTransactionUi = {
-					id: `${signature.signature}-${instruction.programId}`,
-					signature: signature.signature,
-					timestamp: blockTime ?? 0n,
-					value,
-					type: address === from ? 'send' : 'receive',
-					from,
-					to,
-					status
-				};
-
-				return [
-					...(await acc),
-					...(from === to
-						? [
-								{
-									...newTransaction,
-									id: `${newTransaction.id}-self`,
-									type: newTransaction.type === 'send' ? 'receive' : 'send'
-								} as SolTransactionUi
-							]
-						: []),
-					newTransaction
-				];
-			}
-
-			return acc;
-		},
-		Promise.resolve([] as SolTransactionUi[])
-	);
+	return parsedTransactions.reverse();
 };
 
 export const loadNextSolTransactions = async ({
