@@ -71,7 +71,7 @@ export const assertErc20Amount = ({
 	fee
 }: CommonParamsWithBalanceForFee): ConvertAmountErrorType => {
 	const assertBalanceError = assertBalance({ userAmount, balance });
-	if (assertBalanceError) {
+	if (nonNullish(assertBalanceError)) {
 		return assertBalanceError;
 	}
 
@@ -85,22 +85,10 @@ export const assertCkBtcAmount = ({
 	balance,
 	minterInfo,
 	fee
-}: CommonParamsWithMinter) => {
-	const assertBalanceError = assertBalance({ userAmount, balance });
-	if (assertBalanceError) {
-		return assertBalanceError;
-	}
-
-	const assertMinterInfoError = assertMinterInfo({ minterInfo, userAmount });
-	if (assertMinterInfoError) {
-		return assertMinterInfoError;
-	}
-
-	const assertUserAmountWithFeeError = assertUserAmountWithFee({ userAmount, balance, fee });
-	if (assertUserAmountWithFeeError) {
-		return assertUserAmountWithFeeError;
-	}
-};
+}: CommonParamsWithMinter) =>
+	assertBalance({ userAmount, balance }) ??
+	assertMinterInfo({ minterInfo, userAmount }) ??
+	assertUserAmountWithFee({ userAmount, balance, fee });
 
 export const assertCkEthAmount = ({
 	userAmount,
@@ -109,12 +97,12 @@ export const assertCkEthAmount = ({
 	fee
 }: CommonParamsWithMinter): ConvertAmountErrorType => {
 	const assertBalanceError = assertBalance({ userAmount, balance });
-	if (assertBalanceError) {
+	if (nonNullish(assertBalanceError)) {
 		return assertBalanceError;
 	}
 
 	const assertMinterInfoError = assertMinterInfo({ minterInfo, userAmount });
-	if (assertMinterInfoError) {
+	if (nonNullish(assertMinterInfoError)) {
 		return assertMinterInfoError;
 	}
 
@@ -122,10 +110,7 @@ export const assertCkEthAmount = ({
 		return 'amount-less-than-ledger-fee';
 	}
 
-	const assertUserAmountWithFeeError = assertUserAmountWithFee({ userAmount, balance, fee });
-	if (assertUserAmountWithFeeError) {
-		return assertUserAmountWithFeeError;
-	}
+	return assertUserAmountWithFee({ userAmount, balance, fee });
 };
 
 export const assertCkErc20Amount = ({
@@ -136,7 +121,7 @@ export const assertCkErc20Amount = ({
 	ethereumEstimateFee
 }: CommonParamsWithBalanceForFee & { ethereumEstimateFee?: bigint }): ConvertAmountErrorType => {
 	const assertBalanceError = assertBalance({ userAmount, balance });
-	if (assertBalanceError) {
+	if (nonNullish(assertBalanceError)) {
 		return assertBalanceError;
 	}
 
@@ -148,24 +133,8 @@ export const assertCkErc20Amount = ({
 		return 'insufficient-funds-for-fee';
 	}
 
-	const assertUserAmountWithFeeError = assertUserAmountWithFee({ userAmount, balance, fee });
-	if (assertUserAmountWithFeeError) {
-		return assertUserAmountWithFeeError;
-	}
+	return assertUserAmountWithFee({ userAmount, balance, fee });
 };
 
-export const assertAmount = ({
-	userAmount,
-	balance,
-	fee
-}: CommonParams): ConvertAmountErrorType => {
-	const assertBalanceError = assertBalance({ userAmount, balance });
-	if (assertBalanceError) {
-		return assertBalanceError;
-	}
-
-	const assertUserAmountWithFeeError = assertUserAmountWithFee({ userAmount, balance, fee });
-	if (assertUserAmountWithFeeError) {
-		return assertUserAmountWithFeeError;
-	}
-};
+export const assertAmount = ({ userAmount, balance, fee }: CommonParams): ConvertAmountErrorType =>
+	assertBalance({ userAmount, balance }) ?? assertUserAmountWithFee({ userAmount, balance, fee });
