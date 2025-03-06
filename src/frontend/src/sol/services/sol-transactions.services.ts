@@ -114,8 +114,13 @@ export const fetchSolTransactionsForSignature = async ({
 
 			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
 
+			// The cumulative balances are updated for every instruction, so we can keep track of the
+			// SOL balance of the address and its associated token account at any given time.
+			// It is useful when mapping for example a `closeAccount` instruction, where the redeemed value
+			// is not provided in the data and must be calculated as the latest total SOL balance of the Associated Token Account.
 			const cumulativeBalances = {
 				...accCumulativeBalances,
+				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
 				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
 					[from]: (accCumulativeBalances[from] ?? 0n) - value,
 					[to]: (accCumulativeBalances[to] ?? 0n) + value
