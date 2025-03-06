@@ -58,13 +58,12 @@ export const fetchSolTransactionsForSignature = async ({
 	// Inside the instructions there could be some that we are unable to decode, but that may have
 	// simpler (and decoded) inner instructions. We should try to map those as well.
 	// They are inserted in the instructions array in the order they refer to the main instruction.
-	const allInstructions = putativeInnerInstructions.reduce(
-		(acc, { index, instructions }, offset) => {
+	const allInstructions = [...putativeInnerInstructions]
+		.sort((a, b) => a.index - b.index)
+		.reduce((acc, { index, instructions }, offset) => {
 			const insertIndex = index + 1 + offset;
 			return [...acc.slice(0, insertIndex), ...instructions, ...acc.slice(insertIndex)];
-		},
-		instructions
-	);
+		}, instructions);
 
 	const [ataAddress] =
 		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
