@@ -132,11 +132,11 @@ const mapTokenParsedInstruction = async ({
 		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
 			const {
 				data: {
-					parsed: { info }
+					parsed: { info: sourceInfo }
 				}
 			} = sourceResult;
 
-			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+			const { mint: tokenAddress } = sourceInfo as { mint: SplTokenAddress };
 
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
@@ -148,11 +148,11 @@ const mapTokenParsedInstruction = async ({
 		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
 			const {
 				data: {
-					parsed: { info }
+					parsed: { info: destinationInfo }
 				}
 			} = destinationResult;
 
-			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+			const { mint: tokenAddress } = destinationInfo as { mint: SplTokenAddress };
 
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
@@ -222,11 +222,11 @@ const mapToken2022ParsedInstruction = async ({
 		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
 			const {
 				data: {
-					parsed: { info }
+					parsed: { info: sourceInfo }
 				}
 			} = sourceResult;
 
-			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+			const { mint: tokenAddress } = sourceInfo as { mint: SplTokenAddress };
 
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
@@ -238,11 +238,11 @@ const mapToken2022ParsedInstruction = async ({
 		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
 			const {
 				data: {
-					parsed: { info }
+					parsed: { info: destinationInfo }
 				}
 			} = destinationResult;
 
-			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+			const { mint: tokenAddress } = destinationInfo as { mint: SplTokenAddress };
 
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
