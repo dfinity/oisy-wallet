@@ -103,11 +103,13 @@ const mapSystemParsedInstruction = ({
 const mapTokenParsedInstruction = async ({
 	type,
 	info,
-	network
+	network,
+	cumulativeBalances
 }: {
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
+	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
 }): Promise<SolMappedTransaction | undefined> => {
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
@@ -169,8 +171,11 @@ const mapTokenParsedInstruction = async ({
 			account: SolAddress;
 		};
 
-		// TODO: find a way to get the amount redeemed in the close account instruction
-		return { value: 0n, from, to };
+		// In case of `closeAccount` transaction we take the accumulated balance of SOL (or WSOL) of the Associated Token Account (this is the `from` address).
+		// We do this because the entire amount of SOL (or WSOL) is redeemed by the owner of the ATA.
+		const value = cumulativeBalances?.[from] ?? 0n;
+
+		return { value, from, to };
 	}
 };
 
@@ -275,11 +280,13 @@ const mapAssociatedTokenAccountInstruction = ({
 export const mapSolParsedInstruction = async ({
 	instruction,
 	network,
-	innerInstructions
+	innerInstructions,
+	cumulativeBalances
 }: {
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
 	innerInstructions?: SolRpcInstruction[];
+	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
 }): Promise<SolMappedTransaction | undefined> => {
 	if (!('parsed' in instruction)) {
 		return;
@@ -299,7 +306,7 @@ export const mapSolParsedInstruction = async ({
 	}
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
-		return await mapTokenParsedInstruction({ type, info, network });
+		return await mapTokenParsedInstruction({ type, info, network, cumulativeBalances });
 	}
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
