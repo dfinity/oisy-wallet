@@ -20,7 +20,7 @@
 		"build:copy-workers": "node ./scripts/build.copy-workers.mjs",
 		"build:post-process": "npm run build:style && npm run build:metadata && npm run build:ic-domains && npm run build:ii-alternative-origins && npm run build:csp && npm run build:copy-workers && npm run build:compress",
 		"build:tokens-sns": "vite-node scripts/build.tokens.sns.ts && npm run format",
-		"build:tokens-ckerc20": "node scripts/build.tokens.ckerc20.mjs && npm run format",
+		"build:tokens-ckerc20": "vite-node scripts/build.tokens.ckerc20.ts && npm run format",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
 		"prepare": "svelte-kit sync",
