@@ -8,7 +8,10 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+	import {
+		areTransactionsStoresLoading,
+		mapAllTransactionsUi
+	} from '$lib/utils/transactions.utils';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -23,8 +26,17 @@
 		combinedDerivedSortedNetworkTokensUi,
 		enabledNetworkTokens
 	} from '$lib/derived/network-tokens.derived';
-	import { MILLISECONDS_IN_DAY } from '$lib/constants/app.constants';
+	import { LOCAL, MILLISECONDS_IN_DAY } from '$lib/constants/app.constants';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
+	import { isNullish } from '@dfinity/utils';
+	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
+	import { bigint } from 'zod';
+	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 
 	export let airdrop: AirdropDescription;
 
@@ -33,7 +45,7 @@
 	let totalUsd: number;
 	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 
-	let transactions: any[];
+	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledNetworkTokens,
 		$btcTransactions: $btcTransactionsStore,
@@ -49,17 +61,37 @@
 	$: transactionsLength = transactions.filter((trx) =>
 		trx.transaction.timestamp
 			? new Date().getTime() - MILLISECONDS_IN_DAY * 7 <
-				formatNanosecondsToTimestamp(trx.transaction.timestamp)
+				formatNanosecondsToTimestamp(BigInt(trx.transaction.timestamp))
 			: false
 	).length;
-
-	let isEligible: boolean = false;
-	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
 
 	// hardcoded values, first element is true since you need to have logged in at least once to even
 	// see this UI, second criteria is have at least two trxs, third is hold at least 20$
 	let requirementsFulfilled: boolean[];
 	$: requirementsFulfilled = [true, transactionsLength >= 2, totalUsd >= 1];
+
+	let isEligible: boolean = false;
+	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
+
+	let transactionsStores: TransactionsStoreCheckParams[];
+	$: transactionsStores = [
+		// We explicitly do not include the Bitcoin transactions store locally, as it may cause lags in the UI.
+		// It could take longer time to be initialized and in case of no transactions (for example, a new user), it would be stuck to show the skeletons.
+		...(LOCAL
+			? []
+			: [{ transactionsStoreData: $btcTransactionsStore, tokens: $enabledBitcoinTokens }]),
+		{
+			transactionsStoreData: $ethTransactionsStore,
+			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens]
+		},
+		{ transactionsStoreData: $icTransactionsStore, tokens: $enabledIcTokens },
+		{
+			transactionsStoreData: $solTransactionsStore,
+			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
+		}
+	];
+	let isRequirementsLoading = true;
+	$: isRequirementsLoading = areTransactionsStoresLoading(transactionsStores);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -85,7 +117,12 @@
 
 		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="mt-2" />
 
-		<AirdropsRequirements {airdrop} {isEligible} {requirementsFulfilled} />
+		<AirdropsRequirements
+			loading={isRequirementsLoading}
+			{airdrop}
+			{isEligible}
+			{requirementsFulfilled}
+		/>
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
 			{$i18n.airdrops.text.modal_button_text}
