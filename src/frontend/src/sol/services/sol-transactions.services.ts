@@ -113,6 +113,7 @@ export const fetchSolTransactionsForSignature = async ({
 
 					return [
 						...(await acc),
+						newTransaction,
 						...(from === to
 							? [
 									{
@@ -121,8 +122,7 @@ export const fetchSolTransactionsForSignature = async ({
 										type: newTransaction.type === 'send' ? 'receive' : 'send'
 									} as SolTransactionUi
 								]
-							: []),
-						newTransaction
+							: [])
 					];
 				}
 
