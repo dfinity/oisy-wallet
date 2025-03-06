@@ -93,40 +93,44 @@ export const fetchSolTransactionsForSignature = async ({
 					network
 				});
 
-				if (nonNullish(mappedTransaction) && mappedTransaction.tokenAddress === tokenAddress) {
-					const { value, from, to } = mappedTransaction;
-
-					if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-						return acc;
-					}
-
-					const newTransaction: SolTransactionUi = {
-						id: `${signature.signature}-${instruction.programId}`,
-						signature: signature.signature,
-						timestamp: blockTime ?? 0n,
-						value,
-						type: address === from ? 'send' : 'receive',
-						from,
-						to,
-						status
-					};
-
-					return [
-						...(await acc),
-						newTransaction,
-						...(from === to
-							? [
-									{
-										...newTransaction,
-										id: `${newTransaction.id}-self`,
-										type: newTransaction.type === 'send' ? 'receive' : 'send'
-									} as SolTransactionUi
-								]
-							: [])
-					];
+				if (isNullish(mappedTransaction)) {
+					return acc;
 				}
 
-				return acc;
+				if (mappedTransaction.tokenAddress !== tokenAddress) {
+					return acc;
+				}
+
+				const { value, from, to } = mappedTransaction;
+
+				if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
+					return acc;
+				}
+
+				const newTransaction: SolTransactionUi = {
+					id: `${signature.signature}-${instruction.programId}`,
+					signature: signature.signature,
+					timestamp: blockTime ?? 0n,
+					value,
+					type: address === from ? 'send' : 'receive',
+					from,
+					to,
+					status
+				};
+
+				return [
+					...(await acc),
+					newTransaction,
+					...(from === to
+						? [
+								{
+									...newTransaction,
+									id: `${newTransaction.id}-self`,
+									type: newTransaction.type === 'send' ? 'receive' : 'send'
+								} as SolTransactionUi
+							]
+						: [])
+				];
 			}, Promise.resolve([]))
 		)
 			// The instructions are received in the order they were executed, meaning the first instruction
