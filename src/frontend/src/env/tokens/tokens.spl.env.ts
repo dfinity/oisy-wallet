@@ -7,6 +7,7 @@ import { RAY_TOKEN } from '$env/tokens/tokens-spl/tokens.ray.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { DEVNET_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
@@ -18,7 +19,8 @@ const SPL_TOKENS_MAINNET: RequiredSplToken[] = [
 	RAY_TOKEN,
 	TRUMP_TOKEN,
 	USDC_TOKEN,
-	USDT_TOKEN
+	USDT_TOKEN,
+	WSOL_TOKEN
 ];
 
 const SPL_TOKENS_DEVNET: RequiredSplToken[] = [DEVNET_USDC_TOKEN, DEVNET_EURC_TOKEN];
