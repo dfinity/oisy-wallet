@@ -9,10 +9,11 @@
 
 	export let date: string;
 	export let transactions: AllTransactionUiWithCmpNonEmptyList;
+	export let testId: string | undefined = undefined;
 </script>
 
 {#if transactions.length > 0}
-	<div class="mb-5 flex flex-col gap-4">
+	<div class="mb-5 flex flex-col gap-4" data-tid={testId}>
 		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{date}</span>
 
 		{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${index}`)}
