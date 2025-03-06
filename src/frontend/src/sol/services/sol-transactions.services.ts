@@ -97,6 +97,7 @@ export const fetchSolTransactionsForSignature = async ({
 
 		const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
 
+		// Ignoring the instruction if the transaction is not related to the address or its associated token account.
 		if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
 			return acc;
 		}
