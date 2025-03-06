@@ -129,20 +129,26 @@ const mapTokenParsedInstruction = async ({
 			encoding: 'jsonParsed'
 		}).send();
 
-		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
-			const {
-				data: {
-					parsed: { info: sourceAccoutInfo }
-				}
-			} = sourceResult;
+		const { value: destinationResult } = await getAccountInfo(address(to), {
+			encoding: 'jsonParsed'
+		}).send();
 
-			const { mint: tokenAddress } = sourceAccoutInfo as {
-				mint: SplTokenAddress;
-				owner: SolAddress;
-			};
+		const { mint: tokenAddress } = (
+			nonNullish(sourceResult)
+				? 'parsed' in sourceResult.data
+					? sourceResult.data.parsed.info
+					: {}
+				: nonNullish(destinationResult)
+					? 'parsed' in destinationResult.data
+						? destinationResult.data.parsed.info
+						: {}
+					: {}
+		) as {
+			mint: SplTokenAddress;
+			owner: SolAddress;
+		};
 
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
+		return { value: BigInt(value), from, to, tokenAddress };
 	}
 
 	if (type === 'transferChecked') {
@@ -206,20 +212,26 @@ const mapToken2022ParsedInstruction = async ({
 			encoding: 'jsonParsed'
 		}).send();
 
-		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
-			const {
-				data: {
-					parsed: { info: sourceAccoutInfo }
-				}
-			} = sourceResult;
+		const { value: destinationResult } = await getAccountInfo(address(to), {
+			encoding: 'jsonParsed'
+		}).send();
 
-			const { mint: tokenAddress } = sourceAccoutInfo as {
-				mint: SplTokenAddress;
-				owner: SolAddress;
-			};
+		const { mint: tokenAddress } = (
+			nonNullish(sourceResult)
+				? 'parsed' in sourceResult.data
+					? sourceResult.data.parsed.info
+					: {}
+				: nonNullish(destinationResult)
+					? 'parsed' in destinationResult.data
+						? destinationResult.data.parsed.info
+						: {}
+					: {}
+		) as {
+			mint: SplTokenAddress;
+			owner: SolAddress;
+		};
 
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
+		return { value: BigInt(value), from, to, tokenAddress };
 	}
 
 	if (type === 'transferChecked') {
