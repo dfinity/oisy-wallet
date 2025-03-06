@@ -30,6 +30,7 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -86,7 +87,7 @@
 		}));
 </script>
 
-<AllTransactionsSkeletons testIdPrefix="all-transactions-skeleton-card">
+<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
 		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
 			<TransactionsDateGroup
