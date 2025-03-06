@@ -8,74 +8,58 @@
 	import Share from '$lib/components/ui/Share.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { mapAllTransactionsUi } from '$lib/utils/transactions.utils';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
-	import { getUserInfo } from '$lib/api/reward.api';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { onMount } from 'svelte';
-	import type { RewardInfo } from '$declarations/rewards/rewards.did';
+	import AirdropEarnings from '$lib/components/airdrops/AirdropEarnings.svelte';
+	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import {
-		LOCAL_CKUSDC_LEDGER_CANISTER_ID,
-		CKBTC_LEDGER_CANISTER_IDS,
-		STAGING_CKBTC_LEDGER_CANISTER_ID,
-		CKBTC_LEDGER_CANISTER_TESTNET_IDS,
-		LOCAL_CKBTC_LEDGER_CANISTER_ID,
-		CKERC20_LEDGER_CANISTER_TESTNET_IDS,
-		CKERC20_LEDGER_CANISTER_IDS
-	} from '$env/networks/networks.icrc.env';
-	import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { formatToken } from '$lib/utils/format.utils';
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { nonNullish } from '@dfinity/utils';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+		combinedDerivedSortedNetworkTokensUi,
+		enabledNetworkTokens
+	} from '$lib/derived/network-tokens.derived';
+	import { MILLISECONDS_IN_DAY } from '$lib/constants/app.constants';
+	import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 
 	export let airdrop: AirdropDescription;
 
-	let ckBtcReward: BigNumber;
-	$: ckBtcReward = BigNumber.from(0);
-	let ckUsdcReward: BigNumber;
-	$: ckUsdcReward = BigNumber.from(0);
-	let icpReward: BigNumber;
-	$: icpReward = BigNumber.from(0);
+	// for the moment we evaluate if requirements are fulfilled in frontend
+	// this might need to change when we have multiple campaigns etc
+	let totalUsd: number;
+	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 
-	let loading: boolean;
-	$: loading = true;
+	let transactions: any[];
+	$: transactions = mapAllTransactionsUi({
+		tokens: $enabledNetworkTokens,
+		$btcTransactions: $btcTransactionsStore,
+		$ethTransactions: $ethTransactionsStore,
+		$ckEthMinterInfo: $ckEthMinterInfoStore,
+		$ethAddress: $ethAddress,
+		$icTransactions: $icTransactionsStore,
+		$btcStatuses: $btcStatusesStore,
+		$solTransactions: $solTransactionsStore
+	});
 
-	const loadRewardsUserInfo = async () => {
-		const data = await getUserInfo({ identity: $authIdentity });
+	let transactionsLength: number;
+	$: transactionsLength = transactions.filter((trx) =>
+		trx.transaction.timestamp
+			? new Date().getTime() - MILLISECONDS_IN_DAY * 7 <
+				formatNanosecondsToTimestamp(trx.transaction.timestamp)
+			: false
+	).length;
 
-		console.log(data);
+	let isEligible: boolean = false;
+	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
 
-		for (let i = 0; i < (data.usage_awards[0] || []).length; i++) {
-			const aw = data.usage_awards[0]?.[i];
-			if (nonNullish(aw)) {
-				const canisterId = aw.ledger.toText();
-				console.log('canisterId ' + i, canisterId);
-				if (
-					CKBTC_LEDGER_CANISTER_IDS.includes(canisterId) ||
-					STAGING_CKBTC_LEDGER_CANISTER_ID === canisterId ||
-					CKBTC_LEDGER_CANISTER_TESTNET_IDS.includes(canisterId) ||
-					LOCAL_CKBTC_LEDGER_CANISTER_ID === canisterId
-				) {
-					ckBtcReward = BigNumber.from(ckBtcReward).add(aw.amount);
-				} else if (ICP_LEDGER_CANISTER_ID.includes(canisterId)) {
-					icpReward = BigNumber.from(ckBtcReward).add(aw.amount);
-				} else if (
-					LOCAL_CKUSDC_LEDGER_CANISTER_ID === canisterId ||
-					CKERC20_LEDGER_CANISTER_TESTNET_IDS.includes(canisterId) ||
-					CKERC20_LEDGER_CANISTER_IDS.includes(canisterId)
-				) {
-					ckUsdcReward = BigNumber.from(ckBtcReward).add(aw.amount);
-				} else {
-					console.warn('Ledger canister mapping not found for: ' + canisterId);
-				}
-			}
-		}
-
-		loading = false;
-	};
-
-	onMount(loadRewardsUserInfo);
+	// hardcoded values, first element is true since you need to have logged in at least once to even
+	// see this UI, second criteria is have at least two trxs, third is hold at least 20$
+	let requirementsFulfilled: boolean[];
+	$: requirementsFulfilled = [true, transactionsLength >= 2, totalUsd >= 1];
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -84,61 +68,7 @@
 	<ContentWithToolbar>
 		<AirdropBanner />
 
-		<div class="flex w-full gap-2">
-			<div
-				class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted"
-				class:transition={loading}
-				class:duration-500={loading}
-				class:ease-in-out={loading}
-				class:animate-pulse={loading}
-			>
-				{#if loading}
-					<SkeletonText />
-				{:else}
-					{formatToken({
-						value: ckBtcReward,
-						unitName: 8,
-						displayDecimals: EIGHT_DECIMALS,
-						showPlusSign: true
-					})} ckBTC
-				{/if}
-			</div>
-			<div
-				class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted"
-				class:transition={loading}
-				class:duration-500={loading}
-				class:ease-in-out={loading}
-				class:animate-pulse={loading}
-			>
-				{#if loading}
-					<SkeletonText />
-				{:else}
-					{formatToken({
-						value: ckUsdcReward,
-						unitName: 6,
-						displayDecimals: EIGHT_DECIMALS,
-						showPlusSign: true
-					})} ckUSDC
-				{/if}
-			</div>
-			<div
-				class="w-1/3 rounded-xl bg-success-primary p-5 font-bold text-primary-inverted"
-				class:transition={loading}
-				class:duration-500={loading}
-				class:ease-in-out={loading}
-				class:animate-pulse={loading}
-				>{#if loading}
-					<SkeletonText />
-				{:else}
-					{formatToken({
-						value: icpReward,
-						unitName: 8,
-						displayDecimals: EIGHT_DECIMALS,
-						showPlusSign: true
-					})} ICP
-				{/if}
-			</div>
-		</div>
+		<AirdropEarnings {isEligible} />
 
 		<span class="text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
 		<p class="mb-0 mt-2">{airdrop.description}</p>
@@ -155,7 +85,7 @@
 
 		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="mt-2" />
 
-		<AirdropsRequirements {airdrop} />
+		<AirdropsRequirements {airdrop} {isEligible} {requirementsFulfilled} />
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
 			{$i18n.airdrops.text.modal_button_text}
