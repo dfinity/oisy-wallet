@@ -95,10 +95,6 @@ describe('sol-transactions.services', () => {
 		let spyMapSolParsedInstruction: MockInstance;
 
 		beforeEach(() => {
-			vi.clearAllMocks();
-			vi.resetAllMocks();
-			vi.resetAllMocks();
-
 			spyFetchTransactionDetailForSignature = vi.spyOn(
 				solanaApi,
 				'fetchTransactionDetailForSignature'
