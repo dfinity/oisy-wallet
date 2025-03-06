@@ -188,9 +188,8 @@ jobs:
 
       - name: Set snapshot status from previous jobs
         run: |
-          echo "ubuntu_status=${{ needs.update_snapshots.outputs.ubuntu_status }}" >> $GITHUB_ENV
-          echo "macos_status=${{ needs.update_snapshots.outputs.macos_status }}" >> $GITHUB_ENV
-
+          echo "ubuntu_status=${{ needs.e2e.outputs.ubuntu_status }}" >> $GITHUB_ENV
+          echo "macos_status=${{ needs.e2e.outputs.macos_status }}" >> $GITHUB_ENV
       - name: Download Ubuntu Snapshots
         if: env.ubuntu_status == 'true'
         uses: actions/download-artifact@v4
