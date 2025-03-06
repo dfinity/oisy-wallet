@@ -1,3 +1,4 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
@@ -14,7 +15,11 @@ import {
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
-import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import type {
+	SolMappedTransaction,
+	SolSignature,
+	SolTransactionUi
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -74,68 +79,90 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			: [undefined];
 
-	const parsedTransactions: SolTransactionUi[] = await allInstructions.reduce<
-		Promise<SolTransactionUi[]>
-	>(async (acc, instruction, idx) => {
-		const innerInstructionsRaw =
-			putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
+	const { parsedTransactions } = await allInstructions.reduce<
+		Promise<{
+			parsedTransactions: SolTransactionUi[];
+			cumulativeBalances: Record<SolAddress, SolMappedTransaction['value']>;
+		}>
+	>(
+		async (acc, instruction, idx) => {
+			const innerInstructionsRaw =
+				putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
 
-		const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map((innerInstruction) => ({
-			...innerInstruction,
-			programAddress: innerInstruction.programId
-		}));
+			const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map(
+				(innerInstruction) => ({
+					...innerInstruction,
+					programAddress: innerInstruction.programId
+				})
+			);
 
-		const mappedTransaction = await mapSolParsedInstruction({
-			instruction: {
-				...instruction,
-				programAddress: instruction.programId
-			},
-			innerInstructions,
-			network
-		});
+			const { parsedTransactions, cumulativeBalances: accCumulativeBalances } = await acc;
 
-		if (isNullish(mappedTransaction)) {
-			return acc;
-		}
+			const mappedTransaction = await mapSolParsedInstruction({
+				instruction: {
+					...instruction,
+					programAddress: instruction.programId
+				},
+				innerInstructions,
+				network,
+				cumulativeBalances: accCumulativeBalances
+			});
 
-		const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
+			if (isNullish(mappedTransaction)) {
+				return acc;
+			}
 
-		// Ignoring the instruction if the transaction is not related to the address or its associated token account.
-		if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-			return acc;
-		}
+			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
 
-		// If the token address is not the one we are looking for, we can skip this instruction.
-		// In case of Solana native tokens, the token address is undefined.
-		if (mappedTokenAddress !== tokenAddress) {
-			return acc;
-		}
+			const cumulativeBalances = {
+				...accCumulativeBalances,
+				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
+					[from]: (accCumulativeBalances[from] ?? 0n) - value,
+					[to]: (accCumulativeBalances[to] ?? 0n) + value
+				})
+			};
 
-		const newTransaction: SolTransactionUi = {
-			id: `${signature.signature}-${instruction.programId}`,
-			signature: signature.signature,
-			timestamp: blockTime ?? 0n,
-			value,
-			type: address === from ? 'send' : 'receive',
-			from,
-			to,
-			status
-		};
+			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
+			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
+				return { parsedTransactions, cumulativeBalances };
+			}
 
-		return [
-			...(await acc),
-			newTransaction,
-			...(from === to
-				? [
-						{
-							...newTransaction,
-							id: `${newTransaction.id}-self`,
-							type: newTransaction.type === 'send' ? 'receive' : 'send'
-						} as SolTransactionUi
-					]
-				: [])
-		];
-	}, Promise.resolve([]));
+			// If the token address is not the one we are looking for, we can skip this instruction.
+			// In case of Solana native tokens, the token address is undefined.
+			if (mappedTokenAddress !== tokenAddress) {
+				return { parsedTransactions, cumulativeBalances };
+			}
+
+			const newTransaction: SolTransactionUi = {
+				id: `${signature.signature}-${instruction.programId}`,
+				signature: signature.signature,
+				timestamp: blockTime ?? 0n,
+				value,
+				type: address === from || ataAddress === from ? 'send' : 'receive',
+				from,
+				to,
+				status
+			};
+
+			return {
+				parsedTransactions: [
+					...parsedTransactions,
+					newTransaction,
+					...(from === to
+						? [
+								{
+									...newTransaction,
+									id: `${newTransaction.id}-self`,
+									type: newTransaction.type === 'send' ? 'receive' : 'send'
+								} as SolTransactionUi
+							]
+						: [])
+				],
+				cumulativeBalances
+			};
+		},
+		Promise.resolve({ parsedTransactions: [], cumulativeBalances: {} })
+	);
 
 	// The instructions are received in the order they were executed, meaning the first instruction
 	// in the list was executed first, and the last instruction was executed last.
