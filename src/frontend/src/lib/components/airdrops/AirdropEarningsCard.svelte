@@ -1,0 +1,52 @@
+<script lang="ts">
+	import { formatToken, formatUSD } from '$lib/utils/format.utils.js';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import type { IcToken } from '$icp/types/ic-token';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import Img from '$lib/components/ui/Img.svelte';
+	import ConfettiImg from '$lib/assets/confetti.png';
+	import { nonNullish } from '@dfinity/utils';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	export let amount: BigNumber;
+	export let usdAmount: number;
+	export let token: IcToken | undefined;
+	export let loading: boolean = true;
+</script>
+
+{#if nonNullish(token)}
+	<div
+		class="relative w-1/3 rounded-xl bg-success-primary p-2 text-center text-sm text-primary-inverted md:text-base"
+		class:transition={loading}
+		class:duration-500={loading}
+		class:ease-in-out={loading}
+		class:animate-pulse={loading}
+	>
+		<span class="absolute bottom-0 left-0 right-0 top-0 z-0"><Img src={ConfettiImg} /></span>
+		<div class="relative grid flex-col justify-items-center">
+			<div class="flex justify-center pb-2">
+				<TokenLogo data={token} />
+			</div>
+			<span class="w-full text-sm font-bold">
+				{#if loading}
+					<div class="relative mb-3"><SkeletonText /></div>
+				{:else}
+					{formatToken({
+						value: amount,
+						unitName: token.decimals,
+						displayDecimals: EIGHT_DECIMALS,
+						showPlusSign: true
+					})}
+					{token.symbol}
+				{/if}
+			</span>
+			<span class="w-full">
+				{#if loading}
+					<SkeletonText />
+				{:else}
+					{formatUSD({ value: usdAmount })}
+				{/if}
+			</span>
+		</div>
+	</div>
+{/if}
