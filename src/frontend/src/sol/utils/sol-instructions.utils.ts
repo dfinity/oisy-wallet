@@ -103,13 +103,11 @@ const mapSystemParsedInstruction = ({
 const mapTokenParsedInstruction = async ({
 	type,
 	info,
-	network,
-	cumulativeBalances
+	network
 }: {
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
-	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
 }): Promise<SolMappedTransaction | undefined> => {
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
