@@ -129,26 +129,33 @@ const mapTokenParsedInstruction = async ({
 			encoding: 'jsonParsed'
 		}).send();
 
+		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
+			const {
+				data: {
+					parsed: { info }
+				}
+			} = sourceResult;
+
+			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
+
 		const { value: destinationResult } = await getAccountInfo(address(to), {
 			encoding: 'jsonParsed'
 		}).send();
 
-		const { mint: tokenAddress } = (
-			nonNullish(sourceResult)
-				? 'parsed' in sourceResult.data
-					? sourceResult.data.parsed.info
-					: {}
-				: nonNullish(destinationResult)
-					? 'parsed' in destinationResult.data
-						? destinationResult.data.parsed.info
-						: {}
-					: {}
-		) as {
-			mint: SplTokenAddress;
-			owner: SolAddress;
-		};
+		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
+			const {
+				data: {
+					parsed: { info }
+				}
+			} = destinationResult;
 
-		return { value: BigInt(value), from, to, tokenAddress };
+			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
 	}
 
 	if (type === 'transferChecked') {
@@ -212,26 +219,33 @@ const mapToken2022ParsedInstruction = async ({
 			encoding: 'jsonParsed'
 		}).send();
 
+		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
+			const {
+				data: {
+					parsed: { info }
+				}
+			} = sourceResult;
+
+			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
+
 		const { value: destinationResult } = await getAccountInfo(address(to), {
 			encoding: 'jsonParsed'
 		}).send();
 
-		const { mint: tokenAddress } = (
-			nonNullish(sourceResult)
-				? 'parsed' in sourceResult.data
-					? sourceResult.data.parsed.info
-					: {}
-				: nonNullish(destinationResult)
-					? 'parsed' in destinationResult.data
-						? destinationResult.data.parsed.info
-						: {}
-					: {}
-		) as {
-			mint: SplTokenAddress;
-			owner: SolAddress;
-		};
+		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
+			const {
+				data: {
+					parsed: { info }
+				}
+			} = destinationResult;
 
-		return { value: BigInt(value), from, to, tokenAddress };
+			const { mint: tokenAddress } = info as { mint: SplTokenAddress };
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
 	}
 
 	if (type === 'transferChecked') {
