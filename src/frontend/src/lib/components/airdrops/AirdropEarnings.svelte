@@ -18,6 +18,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { fade } from 'svelte/transition';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let isEligible: boolean = false;
 
@@ -103,7 +105,9 @@
 			class:duration-500={loading}
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
-			>You've received 3 sprinkles, totaling {formatUSD({ value: totalRewardUsd })}! 🎉
+			>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
+				$amount: formatUSD({ value: totalRewardUsd })
+			})}
 		</div>
 
 		<div class="flex w-full gap-2">
@@ -142,4 +146,6 @@
 			</button>
 		</div>
 	</div>
+
+	<Hr spacing="md" />
 {/if}

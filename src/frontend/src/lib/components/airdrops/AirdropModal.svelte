@@ -29,14 +29,13 @@
 	import { LOCAL, MILLISECONDS_IN_DAY } from '$lib/constants/app.constants';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
-	import { isNullish } from '@dfinity/utils';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
-	import { bigint } from 'zod';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
 
 	export let airdrop: AirdropDescription;
 
@@ -102,20 +101,23 @@
 
 		<AirdropEarnings {isEligible} />
 
-		<span class="text-lg font-semibold">{$i18n.airdrops.text.participate_title}</span>
-		<p class="mb-0 mt-2">{airdrop.description}</p>
+		<div class="flex w-full justify-between text-lg font-semibold"
+			><span class="inline-flex">{$i18n.airdrops.text.participate_title}</span>
+			<span class="inline-flex"><AirdropDateBadge date={airdrop.endDate} /></span></div
+		>
+		<p class="my-3">{airdrop.description}</p>
 
 		<ExternalLink
 			href={airdrop.learnMoreHref}
 			ariaLabel={$i18n.airdrops.text.learn_more}
 			iconVisible={false}
 			asButton
-			styleClass={`rounded-xl px-3 py-2 secondary-light`}
+			styleClass={`rounded-xl px-3 py-2 secondary-light mb-3`}
 		>
 			{$i18n.airdrops.text.learn_more}
 		</ExternalLink>
 
-		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="mt-2" />
+		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="my-2" />
 
 		<AirdropsRequirements
 			loading={isRequirementsLoading}
