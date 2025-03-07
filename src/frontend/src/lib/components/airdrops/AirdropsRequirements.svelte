@@ -20,8 +20,6 @@
 				><Badge variant="success">{$i18n.airdrops.text.youre_eligible}</Badge></span
 			>{/if}
 	{:else}
-		<Hr spacing="md" />
-
 		<span class="text-md font-semibold"
 			>{$i18n.airdrops.text.requirements_title}
 		</span>{#if isEligible}<span class="inline-flex pl-3"
