@@ -3,7 +3,10 @@
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 </script>
 
-<div data-tid="navigation-menu-left" class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8">
+<div
+	data-tid="navigation-menu-left"
+	class="flex h-full w-full flex-col justify-between py-3 pl-4 md:pl-8"
+>
 	<div class="flex flex-col gap-3">
 		<NavigationMenuMainItems />
 	</div>

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { BadgeVariant } from '$lib/types/style';
+
 	export let styleClass: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
 
@@ -11,7 +13,7 @@
 		outline: 'border border-tertiary bg-off-white'
 	};
 
-	export let variant: keyof typeof variantClassNames = 'default';
+	export let variant: BadgeVariant = 'default';
 </script>
 
 <span

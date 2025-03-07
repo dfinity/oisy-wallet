@@ -2,7 +2,6 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
 import { readCanisterIds } from './env.utils';
-import { ViewportAdjuster } from './e2e/utils/helpers/viewport-utils';
 
 dotenv.config({
 	path: join(process.cwd(), '.env.e2e')
@@ -28,7 +27,7 @@ const appleProjects = [
 			...devices['Desktop Safari'],
 			screen: { width: 1280, height: 720 },
 			viewport: { width: 1280, height: 720 }
-		},
+		}
 	},
 	{
 		name: 'iPhone SE',
@@ -47,7 +46,7 @@ const nonAppleProjects = [
 			...devices['Desktop Chrome'],
 			screen: { width: 1280, height: 720 },
 			viewport: { width: 1280, height: 720 }
-		},
+		}
 	},
 	{
 		name: 'Firefox 720p',
@@ -55,7 +54,7 @@ const nonAppleProjects = [
 			...devices['Desktop Firefox'],
 			screen: { width: 1280, height: 720 },
 			viewport: { width: 1280, height: 720 }
-		},
+		}
 	},
 	{
 		name: 'Pixel 7',

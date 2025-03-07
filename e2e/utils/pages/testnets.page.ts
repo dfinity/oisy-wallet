@@ -56,7 +56,9 @@ export class TestnetsPage extends HomepageLoggedIn {
 				networkSymbol
 			})
 		).toBeVisible();
-		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({ state: 'hidden' });
+		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
+			state: 'hidden'
+		});
 		await this.waitForLoadState();
 	}
 }
