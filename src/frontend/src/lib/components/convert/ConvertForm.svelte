@@ -12,9 +12,14 @@
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
 	export let minFee: bigint | undefined = undefined;
+	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let disabled: boolean;
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
+	export let amountLessThanLedgerFee: boolean | undefined = undefined;
+	export let minimumAmountNotReached: boolean | undefined = undefined;
+	export let unknownMinimumAmount: boolean | undefined = undefined;
+	export let minterInfoNotCertified: boolean | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -27,9 +32,14 @@
 		bind:receiveAmount
 		bind:insufficientFunds
 		bind:insufficientFundsForFee
+		bind:amountLessThanLedgerFee
+		bind:minimumAmountNotReached
+		bind:unknownMinimumAmount
+		bind:minterInfoNotCertified
 		bind:exchangeValueUnit
 		{totalFee}
 		{minFee}
+		{ethereumEstimateFee}
 	/>
 
 	<div class="mt-6">
