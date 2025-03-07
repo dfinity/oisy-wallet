@@ -117,6 +117,7 @@ describe('sol-transactions.services', () => {
 				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 			});
 
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
 			expect(spyFindAssociatedTokenPda).toHaveBeenCalledWith({
 				owner: mockSolAddress,
 				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
