@@ -139,7 +139,8 @@
 			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
-			"carousel_slide_cta": "Learn more"
+			"carousel_slide_cta": "Learn more",
+			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
