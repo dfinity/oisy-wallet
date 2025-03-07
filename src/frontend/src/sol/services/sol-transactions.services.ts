@@ -1,3 +1,4 @@
+import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
 import {
 	SOLANA_DEVNET_TOKEN_ID,
 	SOLANA_LOCAL_TOKEN_ID,
@@ -14,7 +15,11 @@ import {
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
-import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import type {
+	SolMappedTransaction,
+	SolSignature,
+	SolTransactionUi
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -77,6 +82,7 @@ export const fetchSolTransactionsForSignature = async ({
 	const { parsedTransactions } = await allInstructions.reduce<
 		Promise<{
 			parsedTransactions: SolTransactionUi[];
+			cumulativeBalances: Record<SolAddress, SolMappedTransaction['value']>;
 		}>
 	>(
 		async (acc, instruction, idx) => {
@@ -90,7 +96,7 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			);
 
-			const { parsedTransactions } = await acc;
+			const { parsedTransactions, cumulativeBalances: accCumulativeBalances } = await acc;
 
 			const mappedTransaction = await mapSolParsedInstruction({
 				instruction: {
@@ -98,7 +104,8 @@ export const fetchSolTransactionsForSignature = async ({
 					programAddress: instruction.programId
 				},
 				innerInstructions,
-				network
+				network,
+				cumulativeBalances: accCumulativeBalances
 			});
 
 			if (isNullish(mappedTransaction)) {
@@ -107,15 +114,28 @@ export const fetchSolTransactionsForSignature = async ({
 
 			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
 
+			// The cumulative balances are updated for every instruction, so we can keep track of the
+			// SOL balance of the address and its associated token account at any given time.
+			// It is useful when mapping for example a `closeAccount` instruction, where the redeemed value
+			// is not provided in the data and must be calculated as the latest total SOL balance of the Associated Token Account.
+			const cumulativeBalances = {
+				...accCumulativeBalances,
+				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
+				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
+					[from]: (accCumulativeBalances[from] ?? 0n) - value,
+					[to]: (accCumulativeBalances[to] ?? 0n) + value
+				})
+			};
+
 			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
 			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-				return acc;
+				return { parsedTransactions, cumulativeBalances };
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
 			// In case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
-				return acc;
+				return { parsedTransactions, cumulativeBalances };
 			}
 
 			const newTransaction: SolTransactionUi = {
@@ -123,7 +143,7 @@ export const fetchSolTransactionsForSignature = async ({
 				signature: signature.signature,
 				timestamp: blockTime ?? 0n,
 				value,
-				type: address === from ? 'send' : 'receive',
+				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
 				to,
 				status
@@ -142,10 +162,11 @@ export const fetchSolTransactionsForSignature = async ({
 								} as SolTransactionUi
 							]
 						: [])
-				]
+				],
+				cumulativeBalances
 			};
 		},
-		Promise.resolve({ parsedTransactions: [] })
+		Promise.resolve({ parsedTransactions: [], cumulativeBalances: {} })
 	);
 
 	// The instructions are received in the order they were executed, meaning the first instruction

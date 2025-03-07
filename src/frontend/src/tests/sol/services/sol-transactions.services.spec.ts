@@ -45,6 +45,7 @@ describe('sol-transactions.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.resetAllMocks();
+		vi.resetAllMocks();
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
@@ -63,8 +64,10 @@ describe('sol-transactions.services', () => {
 
 		const mockTransactionDetail: SolRpcTransactionRaw = mockSolRpcSendTransaction;
 
+		const mockValue = 123n;
+
 		const mockMappedTransaction: SolMappedTransaction = {
-			value: 123n,
+			value: mockValue,
 			from: mockSolAddress,
 			to: mockSolAddress2
 		};
@@ -125,10 +128,30 @@ describe('sol-transactions.services', () => {
 		it('should process instructions and return transactions', async () => {
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(expectedResults);
 
-			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
+			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(3);
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: { ...mockInstructions[0], programAddress: mockInstructions[0].programId },
 				innerInstructions: [],
-				network
+				network,
+				cumulativeBalances: {}
+			});
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(2, {
+				instruction: { ...mockInstructions[1], programAddress: mockInstructions[1].programId },
+				innerInstructions: [],
+				network,
+				cumulativeBalances: {
+					[mockSolAddress]: -mockValue,
+					[mockSolAddress2]: mockValue
+				}
+			});
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(3, {
+				instruction: { ...mockInstructions[2], programAddress: mockInstructions[2].programId },
+				innerInstructions: [],
+				network,
+				cumulativeBalances: {
+					[mockSolAddress]: -mockValue * 2n,
+					[mockSolAddress2]: mockValue * 2n
+				}
 			});
 		});
 
@@ -161,7 +184,8 @@ describe('sol-transactions.services', () => {
 				expectedInnerInstructions[1]
 			]);
 
-			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
+			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(6);
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: {
 					...mockInstructions[0],
 					programAddress: mockInstructions[0].programId
@@ -170,7 +194,74 @@ describe('sol-transactions.services', () => {
 					...innerInstruction,
 					programAddress: innerInstruction.programId
 				})),
-				network
+				network,
+				cumulativeBalances: {}
+			});
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(2, {
+				instruction: innerInstructions[0].instructions.map((innerInstruction) => ({
+					...innerInstruction,
+					programAddress: innerInstruction.programId
+				}))[0],
+				innerInstructions: innerInstructions[1].instructions.map((innerInstruction) => ({
+					...innerInstruction,
+					programAddress: innerInstruction.programId
+				})),
+				network,
+				cumulativeBalances: {
+					[mockSolAddress]: -mockValue,
+					[mockSolAddress2]: mockValue
+				}
+			});
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(3, {
+				instruction: {
+					...mockInstructions[1],
+					programAddress: mockInstructions[1].programId
+				},
+				innerInstructions: innerInstructions[2].instructions.map((innerInstruction) => ({
+					...innerInstruction,
+					programAddress: innerInstruction.programId
+				})),
+				network,
+				cumulativeBalances: {
+					[mockSolAddress]: -mockValue * 2n,
+					[mockSolAddress2]: mockValue * 2n
+				}
+			});
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(4, {
+				instruction: innerInstructions[1].instructions.map((innerInstruction) => ({
+					...innerInstruction,
+					programAddress: innerInstruction.programId
+				}))[0],
+				innerInstructions: [],
+				network,
+				cumulativeBalances: {
+					[mockSolAddress]: -mockValue * 3n,
+					[mockSolAddress2]: mockValue * 3n
+				}
+			});
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(5, {
+				instruction: {
+					...mockInstructions[2],
+					programAddress: mockInstructions[2].programId
+				},
+				innerInstructions: [],
+				network,
+				cumulativeBalances: {
+					[mockSolAddress]: -mockValue * 4n,
+					[mockSolAddress2]: mockValue * 4n
+				}
+			});
+			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(6, {
+				instruction: innerInstructions[2].instructions.map((innerInstruction) => ({
+					...innerInstruction,
+					programAddress: innerInstruction.programId
+				}))[0],
+				innerInstructions: [],
+				network,
+				cumulativeBalances: {
+					[mockSolAddress]: -mockValue * 5n,
+					[mockSolAddress2]: mockValue * 5n
+				}
 			});
 		});
 
