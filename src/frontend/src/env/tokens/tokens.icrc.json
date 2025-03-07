@@ -18,5 +18,9 @@
 	"GLDT": {
 		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai"
+	},
+	"nICP": {
+		"indexCanisterId": "btxkl-saaaa-aaaar-qagvq-cai",
+		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai"
 	}
 }
