@@ -20,6 +20,11 @@
 	import { formatUSD } from '$lib/utils/format.utils.js';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
+	import { findTwinToken } from '$lib/utils/token.utils';
+	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import { tokens } from '$lib/derived/tokens.derived';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 
 	export let isEligible = false;
 
@@ -34,23 +39,23 @@
 	};
 
 	let ckBtcToken: IcToken | undefined;
-	$: ckBtcToken = $icrcTokens.find((t) => t.symbol.match(new RegExp(`(ck)(.*)?(BTC)+`, 'gi')));
+	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
 	let ckBtcReward: BigNumber;
-	$: ckBtcReward = BigNumber.from(0);
+	$: ckBtcReward = ZERO;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = getUsdAmount({ amount: ckBtcReward, token: ckBtcToken });
 
 	let ckUsdcToken: IcToken | undefined;
-	$: ckUsdcToken = $icrcTokens.find((t) => t.symbol.match(new RegExp(`(ck)(.*)?(USDC)+`, 'gi')));
+	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
 	let ckUsdcReward: BigNumber;
-	$: ckUsdcReward = BigNumber.from(0);
+	$: ckUsdcReward = ZERO;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = getUsdAmount({ amount: ckUsdcReward, token: ckUsdcToken });
 
 	let icpToken: IcToken | undefined;
 	$: icpToken = ICP_TOKEN;
 	let icpReward: BigNumber;
-	$: icpReward = BigNumber.from(0);
+	$: icpReward = ZERO;
 	let icpRewardUsd: number;
 	$: icpRewardUsd = getUsdAmount({ amount: icpReward, token: icpToken });
 
@@ -74,9 +79,9 @@
 		}
 		const data = await getUserInfo({ identity: $authIdentity });
 
-		let _ckBtcReward: BigNumber = BigNumber.from(0);
-		let _ckUsdcReward: BigNumber = BigNumber.from(0);
-		let _icpReward: BigNumber = BigNumber.from(0);
+		let _ckBtcReward: BigNumber = ZERO;
+		let _ckUsdcReward: BigNumber = ZERO;
+		let _icpReward: BigNumber = ZERO;
 
 		for (let i = 0; i < (data.usage_awards[0] ?? []).length; i++) {
 			const aw = data.usage_awards[0]?.[i];
@@ -101,6 +106,17 @@
 	};
 
 	$: loadUserRewardsInfo({ ckBtcToken, ckUsdcToken, icpToken });
+
+	const gotoActivity = async () => {
+		await goto(
+			networkUrl({
+				path: AppPath.Activity,
+				networkId: $networkId,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
+	};
 </script>
 
 {#if isEligible}
@@ -133,19 +149,7 @@
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
-			<button
-				on:click={async () => {
-					await goto(
-						networkUrl({
-							path: AppPath.Activity,
-							networkId: $networkId,
-							usePreviousRoute: false,
-							fromRoute: null
-						})
-					);
-				}}
-				class=" font-semibold text-brand-primary-alt"
-			>
+			<button on:click={gotoActivity} class=" font-semibold text-brand-primary-alt">
 				{isMobile()
 					? $i18n.airdrops.text.activity_button_text_short
 					: $i18n.airdrops.text.activity_button_text}
