@@ -26,7 +26,6 @@
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
 
-
 	export let isEligible = false;
 
 	let ckBtcToken: IcToken | undefined;
@@ -73,7 +72,9 @@
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
 	}) => {
-		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {return;}
+		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {
+			return;
+		}
 
 		const result = await getUserRewardsTokenAmounts({
 			ckBtcToken,
