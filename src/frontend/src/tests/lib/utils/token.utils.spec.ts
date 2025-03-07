@@ -180,7 +180,7 @@ describe('calculateTokenUsdAmount', () => {
 	it('should correctly calculate USD amount for the token and amount', () => {
 		const result = calculateTokenUsdAmount({
 			token: ICP_TOKEN,
-			amount: BigNumber.from(3),
+			amount: bn3,
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual(bn3.toNumber());
