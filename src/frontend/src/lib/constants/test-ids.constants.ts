@@ -109,4 +109,5 @@ export const AIRDROPS_STATE_MODAL_IMAGE_BANNER = 'airdrop-state-modal-image-bann
 export const AIRDROPS_STATE_MODAL_SHARE_BUTTON = 'airdrop-state-modal-share-button';
 export const AIRDROPS_BANNER = 'airdrops-banner';
 
+export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'activity-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';

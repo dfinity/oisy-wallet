@@ -1,5 +1,6 @@
 import {
 	ACTIVITY_TRANSACTION_SKELETON_PREFIX,
+	ACTIVITY_TRANSACTIONS_PLACEHOLDER,
 	NAVIGATION_ITEM_ACTIVITY
 } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
@@ -25,5 +26,10 @@ export class ActivityPage extends HomepageLoggedIn {
 					})
 			)
 		);
+
+		await this.waitForByTestId({
+			testId: ACTIVITY_TRANSACTIONS_PLACEHOLDER,
+			options: { state: 'visible', timeout: 60000 }
+		});
 	}
 }
