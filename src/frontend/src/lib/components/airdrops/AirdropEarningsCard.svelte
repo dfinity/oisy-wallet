@@ -8,6 +8,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils.js';
+
 	export let amount: BigNumber;
 	export let usdAmount: number;
 	export let token: IcToken | undefined;
