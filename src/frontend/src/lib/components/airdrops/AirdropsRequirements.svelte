@@ -1,13 +1,14 @@
 <script lang="ts">
-	import type { AirdropDescription } from '$env/types/env-airdrop';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { IconCheckCircleFill } from '@dfinity/gix-components';
+	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	export let loading: boolean = true;
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+
+	export let loading = true;
 	export let airdrop: AirdropDescription;
-	export let badgeOnly: boolean = false;
-	export let isEligible: boolean = false;
+	export let badgeOnly = false;
+	export let isEligible = false;
 	export let requirementsFulfilled: boolean[];
 
 	const isRequirementFulfilled = (index: number) => requirementsFulfilled[index] ?? false;
