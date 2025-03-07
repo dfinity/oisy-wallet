@@ -30,7 +30,6 @@ export class ViewportAdjuster {
         const isOverlapping = footerTop < divBottom && footerBottom > divTop;
 
         if (isOverlapping) {
-          console.log("Elements are overlapping. Changing to 1080p.");
           await this.#page.setViewportSize({ width: 1920, height: 1080 });
         }
       }
