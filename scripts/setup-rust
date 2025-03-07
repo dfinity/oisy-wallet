@@ -18,8 +18,10 @@ function run() {
 rust_version=$(sed -n 's/^channel[[:space:]]*=[[:space:]]"\(.*\)"/\1/p' rust-toolchain.toml)
 echo "using rust version '$rust_version'"
 
+RUSTUP_VERSION="$(jq -re .rustup.version dev-tools.json)"
+
 # here we set the toolchain to 'none' and rustup will pick up on ./rust-toolchain.toml
-run curl --fail https://raw.githubusercontent.com/rust-lang/rustup/refs/tags/1.28.0/rustup-init.sh -sSf | run sh -s -- -y --no-modify-path
+run curl --fail "https://raw.githubusercontent.com/rust-lang/rustup/refs/tags/${RUSTUP_VERSION}/rustup-init.sh" -sSf | run sh -s -- -y --no-modify-path
 rustup toolchain install
 rustup show
 
