@@ -67,7 +67,7 @@ describe('transactions.store', () => {
 				})();
 			}));
 
-		it('should duplicate transactions with same id', () =>
+		it('should not duplicate transactions with same id', () =>
 			new Promise<void>((done) => {
 				const store = initTransactionsStore<IcTransactionUi>();
 
@@ -78,6 +78,49 @@ describe('transactions.store', () => {
 				store.append({ tokenId, transactions: newTx });
 
 				store.append({ tokenId, transactions: [tx] });
+
+				store.subscribe((state) => {
+					expect(state?.[tokenId]).toHaveLength(2);
+					expect(
+						(state?.[tokenId] ?? []).filter(({ data: { id } }) => id === tx.data.id)
+					).toHaveLength(1);
+
+					done();
+				})();
+			}));
+	});
+
+	describe('appendDuplicating', () => {
+		it('should add transactions at the end of the list', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				const tx1 = [createCertifiedIcTransactionUiMock('tx1')];
+				store.appendDuplicating({ tokenId, transactions: tx1 });
+
+				const tx2 = [createCertifiedIcTransactionUiMock('tx2')];
+				store.appendDuplicating({ tokenId, transactions: tx2 });
+
+				store.subscribe((state) => {
+					expect(state?.[tokenId]).toHaveLength(2);
+					expect(state?.[tokenId]?.[0].data.id).toBe('tx1');
+					expect(state?.[tokenId]?.[1].data.id).toBe('tx2');
+
+					done();
+				})();
+			}));
+
+		it('should duplicate transactions with same id', () =>
+			new Promise<void>((done) => {
+				const store = initTransactionsStore<IcTransactionUi>();
+
+				const tx = createCertifiedIcTransactionUiMock('tx1');
+				store.appendDuplicating({ tokenId, transactions: [tx] });
+
+				const newTx = [createCertifiedIcTransactionUiMock('tx2')];
+				store.appendDuplicating({ tokenId, transactions: newTx });
+
+				store.appendDuplicating({ tokenId, transactions: [tx] });
 
 				store.subscribe((state) => {
 					expect(state?.[tokenId]).toHaveLength(3);

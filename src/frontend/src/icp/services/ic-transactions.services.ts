@@ -65,7 +65,7 @@ export const loadNextTransactions = ({
 				return;
 			}
 
-			icTransactionsStore.append({
+			icTransactionsStore.appendDuplicating({
 				tokenId: token.id,
 				transactions: transactions.map((transaction) => ({
 					data: mapIcTransaction({

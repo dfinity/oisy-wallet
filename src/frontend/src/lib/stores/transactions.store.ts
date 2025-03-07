@@ -1,6 +1,6 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
+import { type CertifiedStore, initCertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -15,6 +15,10 @@ export type TransactionsData<T> = CertifiedTransaction<T>[] | NullableCertifiedT
 export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>> {
 	prepend: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
 	append: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
+	appendDuplicating: (params: {
+		tokenId: TokenId;
+		transactions: CertifiedTransaction<T>[];
+	}) => void;
 	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
 	nullify: (tokenId: TokenId) => void;
 }
@@ -42,6 +46,23 @@ export const initTransactionsStore = <
 				]
 			})),
 		append: ({
+			tokenId,
+			transactions
+		}: {
+			tokenId: TokenId;
+			transactions: CertifiedTransaction<T>[];
+		}) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: [
+					...((state ?? {})[tokenId] ?? []),
+					...transactions.filter(
+						({ data: { id } }) =>
+							!((state ?? {})[tokenId] ?? []).some(({ data: { id: txId } }) => txId === id)
+					)
+				]
+			})),
+		appendDuplicating: ({
 			tokenId,
 			transactions
 		}: {
