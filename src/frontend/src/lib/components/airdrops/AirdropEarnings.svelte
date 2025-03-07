@@ -14,18 +14,18 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
-	import { exchanges } from '$lib/derived/exchange.derived';
-	import { authIdentity } from '$lib/derived/auth.derived';
 
-	import type { Token } from '$lib/types/token';
 
 	export let isEligible = false;
 
@@ -73,7 +73,7 @@
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
 	}) => {
-		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) return;
+		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {return;}
 
 		const result = await getUserRewardsTokenAmounts({
 			ckBtcToken,
