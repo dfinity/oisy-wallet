@@ -12,9 +12,11 @@ export const ENV =
 		? 'production'
 		: (REQUESTED_ENV ?? '').startsWith('test_fe_')
 			? 'staging'
-			: ['staging', 'beta'].includes(REQUESTED_ENV)
-				? REQUESTED_ENV
-				: 'development';
+			: REQUESTED_ENV === 'audit'
+				? 'staging'
+				: ['staging', 'beta'].includes(REQUESTED_ENV)
+					? REQUESTED_ENV
+					: 'development';
 
 const domain_for_dfx_network = (dfx_network) =>
 	OISY_DOMAINS.frontend[dfx_network] || `https://${dfx_network}.oisy.com`;
