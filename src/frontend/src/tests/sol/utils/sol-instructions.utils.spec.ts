@@ -141,10 +141,10 @@ describe('sol-instructions.utils', () => {
 
 			beforeEach(() => {
 				const mockRpc = {
-					getAccountInfo: vi.fn((address) => ({
+					getAccountInfo: vi.fn(() => ({
 						send: vi.fn(() => ({
 							value: {
-								data: { parsed: { info: { mint: mockTokenAddress, owner: `${address}-owner` } } }
+								data: { parsed: { info: { mint: mockTokenAddress } } }
 							}
 						}))
 					}))
@@ -161,8 +161,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});
@@ -190,8 +190,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});
@@ -208,12 +208,36 @@ describe('sol-instructions.utils', () => {
 					}
 				};
 
-				const result = await mapSolParsedInstruction({
-					instruction: mockCloseAccountInstruction,
-					network
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 0n,
+					from: mockSolAddress,
+					to: mockSolAddress2
 				});
 
-				expect(result).toEqual({
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress]: 100n }
+					})
+				).resolves.toEqual({
+					value: 100n,
+					from: mockSolAddress,
+					to: mockSolAddress2
+				});
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress2]: 100n }
+					})
+				).resolves.toEqual({
 					value: 0n,
 					from: mockSolAddress,
 					to: mockSolAddress2
@@ -248,10 +272,10 @@ describe('sol-instructions.utils', () => {
 
 			beforeEach(() => {
 				const mockRpc = {
-					getAccountInfo: vi.fn((address) => ({
+					getAccountInfo: vi.fn(() => ({
 						send: vi.fn(() => ({
 							value: {
-								data: { parsed: { info: { mint: mockTokenAddress, owner: `${address}-owner` } } }
+								data: { parsed: { info: { mint: mockTokenAddress } } }
 							}
 						}))
 					}))
@@ -268,8 +292,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});
@@ -297,8 +321,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});

@@ -139,20 +139,26 @@ describe('sol-transactions.services', () => {
 				{ index: 2, instructions: [mockInstructions[2]] }
 			];
 
+			const expectedInnerInstructions = innerInstructions
+				.flatMap(({ instructions }) => instructions)
+				.map((instruction) => ({
+					...expected,
+					id: `${expected.id}-${instruction.programId}`
+				}))
+				.reverse();
+
 			spyFetchTransactionDetailForSignature.mockResolvedValue({
 				...mockTransactionDetail,
 				meta: { innerInstructions }
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
-				...innerInstructions
-					.flatMap(({ instructions }) => instructions)
-					.map((instruction) => ({
-						...expected,
-						id: `${expected.id}-${instruction.programId}`
-					}))
-					.reverse(),
-				...expectedResults
+				expectedResults[0],
+				expectedInnerInstructions[0],
+				expectedResults[1],
+				expectedInnerInstructions[1],
+				expectedResults[2],
+				expectedInnerInstructions[1]
 			]);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
