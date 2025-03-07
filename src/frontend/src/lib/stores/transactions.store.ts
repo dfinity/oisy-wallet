@@ -1,6 +1,6 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { type CertifiedStore, initCertifiedStore } from '$lib/stores/certified.store';
+import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
