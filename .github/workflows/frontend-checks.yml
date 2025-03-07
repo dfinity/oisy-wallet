@@ -104,7 +104,7 @@ jobs:
 
   may-merge:
     if: always()
-    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
+    needs: ['format', 'lint', 'check', 'test', 'config']
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
