@@ -1,0 +1,18 @@
+name: Start Solana
+
+description: Start a local Solana testnet
+
+runs:
+  using: composite
+  steps:
+    - name: Install solana cli
+      shell: bash
+      run: |
+        ./scripts/setup.sh solana
+        echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+    - name: Verifies that Solana is installed
+      shell: bash
+      run: solana --version
+    - name: Start Solana
+      shell: bash
+      run: ./scripts/start-solana

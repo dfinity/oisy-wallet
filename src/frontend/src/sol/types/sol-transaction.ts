@@ -6,7 +6,14 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import type { Address } from '@solana/addresses';
 import type { Signature } from '@solana/keys';
 import type { GetSignaturesForAddressApi } from '@solana/rpc';
-import type { Commitment } from '@solana/rpc-types';
+import type {
+	Base58EncodedBytes,
+	Commitment,
+	Lamports,
+	Reward,
+	TokenBalance,
+	TransactionError
+} from '@solana/rpc-types';
 import type {
 	FullySignedTransaction,
 	TransactionWithBlockhashLifetime
@@ -51,6 +58,28 @@ export type SolRpcTransaction = SolRpcTransactionRaw & {
 	id: string;
 	signature: Signature;
 	confirmationStatus: Commitment | null;
+	meta: {
+		computeUnitsConsumed?: bigint;
+		err: TransactionError | null;
+		fee: Lamports;
+		logMessages: readonly string[] | null;
+		postBalances: readonly Lamports[];
+		postTokenBalances?: readonly TokenBalance[];
+		preBalances: readonly Lamports[];
+		preTokenBalances?: readonly TokenBalance[];
+		rewards: readonly Reward[] | null;
+	} | null;
+	transaction: {
+		message: {
+			accountKeys: readonly Address[];
+			instructions: readonly {
+				accounts: readonly number[];
+				data: Base58EncodedBytes;
+				programIdIndex: number;
+				stackHeight?: number;
+			}[];
+		};
+	};
 };
 
 export type SolSignature = ReturnType<

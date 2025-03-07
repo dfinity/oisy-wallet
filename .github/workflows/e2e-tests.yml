@@ -78,6 +78,9 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
+      - name: Start Solana
+        uses: ./.github/actions/start-solana
+
       - name: Test
         run: npm run e2e:ci
 
