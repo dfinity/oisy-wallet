@@ -198,7 +198,7 @@ describe('calculateTokenUsdAmount', () => {
 	it('should return undefined if token is not available', () => {
 		const result = calculateTokenUsdAmount({
 			token: undefined,
-			amount: BigNumber.from(3),
+			amount: bn3,
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual(undefined);
