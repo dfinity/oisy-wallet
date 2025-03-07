@@ -8,11 +8,23 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils.js';
+	import type { AmountString } from '$lib/types/amount';
 
 	export let amount: BigNumber;
 	export let usdAmount: number;
 	export let token: IcToken | undefined;
 	export let loading = true;
+
+	let displayAmount: AmountString;
+	$: displayAmount = formatToken({
+		value: amount,
+		unitName: token?.decimals,
+		displayDecimals: EIGHT_DECIMALS,
+		showPlusSign: true
+	});
+
+	let displayUsdAmount: string;
+	$: displayUsdAmount = formatUSD({ value: usdAmount });
 </script>
 
 {#if nonNullish(token)}
@@ -32,20 +44,14 @@
 				{#if loading}
 					<div class="relative mb-3"><SkeletonText /></div>
 				{:else}
-					{formatToken({
-						value: amount,
-						unitName: token.decimals,
-						displayDecimals: EIGHT_DECIMALS,
-						showPlusSign: true
-					})}
-					{token.symbol}
+					{`${displayAmount}${token.symbol}`}
 				{/if}
 			</span>
 			<span class="w-full">
 				{#if loading}
 					<SkeletonText />
 				{:else}
-					{formatUSD({ value: usdAmount })}
+					{displayUsdAmount}
 				{/if}
 			</span>
 		</div>
