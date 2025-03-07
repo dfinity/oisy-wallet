@@ -6,4 +6,4 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<DateBadge {date} {testId} prefix={$i18n.airdrops.text.active_date}></DateBadge>
+<DateBadge variant="warning" {date} {testId} prefix={$i18n.airdrops.text.active_date}></DateBadge>
