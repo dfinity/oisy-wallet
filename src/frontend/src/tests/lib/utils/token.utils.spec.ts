@@ -189,7 +189,7 @@ describe('calculateTokenUsdAmount', () => {
 	it('should return undefined if exchange rate is not available', () => {
 		const result = calculateTokenUsdAmount({
 			token: ICP_TOKEN,
-			amount: BigNumber.from(3),
+			amount: bn3,
 			$exchanges: {}
 		});
 		expect(result).toEqual(undefined);
