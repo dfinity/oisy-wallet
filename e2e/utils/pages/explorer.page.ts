@@ -1,5 +1,6 @@
 import { NAVIGATION_ITEM_EXPLORER } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
+import { AppPath } from '$lib/constants/routes.constants';
 
 export type ExplorerPageParams = HomepageLoggedInParams;
 
@@ -9,7 +10,7 @@ export class ExplorerPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_EXPLORER);
+		await this.navigateTo({testId:NAVIGATION_ITEM_EXPLORER, expectedPath: AppPath.Explore});
 		await this.waitForLoadState();
 	}
 }

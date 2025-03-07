@@ -30,6 +30,7 @@ import {
 	getReceiveTokensModalAddressLabelSelector,
 	getReceiveTokensModalQrCodeButtonSelector
 } from '../selectors.utils';
+import  { AppPath } from '$lib/constants/routes.constants';
 
 interface HomepageParams {
 	page: Page;
@@ -306,7 +307,7 @@ abstract class Homepage {
 		await this.#page.waitForLoadState('networkidle');
 	}
 
-	async navigateTo(testId: string): Promise<void> {
+	async navigateTo({testId,expectedPath}:{ testId: string, expectedPath:AppPath }): Promise<void> {
 		if (await this.isVisibleByTestId(testId)) {
 			await this.clickByTestId({ testId });
 		} else {
@@ -315,10 +316,13 @@ abstract class Homepage {
 			const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU);
 			await navigationMenu.getByTestId(testId).click();
 		}
+
+		const urlRegex = new RegExp(`/${expectedPath}(\\?.*|#.*|$)`);
+		await this.#page.waitForURL(urlRegex);
 	}
 
 	async activateTestnetSettings(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.navigateTo({ testId:NAVIGATION_ITEM_SETTINGS , expectedPath:AppPath.Settings });
 		await this.clickByTestId({ testId: TESTNET_TOGGLE });
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
