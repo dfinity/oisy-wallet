@@ -1,5 +1,5 @@
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
@@ -133,13 +133,13 @@ describe('sol-wallet.scheduler', () => {
 			);
 			expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(postMessageMock).toHaveBeenCalledTimes(5);
 			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
 			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(postMessageMock).toHaveBeenCalledTimes(7);
 			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusInProgress);
@@ -170,12 +170,12 @@ describe('sol-wallet.scheduler', () => {
 			expect(spyLoadBalance).toHaveBeenCalledTimes(1);
 			expect(spyLoadTransactions).toHaveBeenCalledTimes(1);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(2);
 			expect(spyLoadTransactions).toHaveBeenCalledTimes(2);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyLoadBalance).toHaveBeenCalledTimes(3);
 			expect(spyLoadTransactions).toHaveBeenCalledTimes(3);
@@ -215,7 +215,7 @@ describe('sol-wallet.scheduler', () => {
 			spyLoadSolBalance.mockResolvedValue(mockSolBalance);
 			spyLoadSplBalance.mockResolvedValue(mockSplBalance);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+			await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
 			// Only status messages should be sent
 			expect(postMessageMock).toHaveBeenCalledTimes(2);
