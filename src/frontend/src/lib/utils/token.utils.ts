@@ -119,14 +119,13 @@ export const calculateTokenUsdBalance = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }): number | undefined => {
-	const amount = $balances?.[token.id]?.data;
-
-	return calculateTokenUsdAmount({ amount, $exchanges, token });
+	return calculateTokenUsdAmount({ amount: $balances?.[token.id]?.data, $exchanges, token });
 };
 
 /**
  * Calculates USD amount for the provided token and token amount.
  *
+ * @param amount - Amount in token for which USD balance will be calculated.
  * @param token - Token for which USD balance will be calculated.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The USD balance or Number(0) in case the number cannot be calculated.
@@ -140,7 +139,7 @@ export const calculateTokenUsdAmount = ({
 	amount?: BigNumber;
 	token?: Token;
 	$exchanges: ExchangesData;
-}) => {
+}): number | undefined => {
 	if (isNullish(amount) || isNullish(token)) {
 		return undefined;
 	}
