@@ -9,6 +9,7 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import { getUserRewardsTokenAmounts } from '$lib/api/reward.api';
 	import AirdropEarningsCard from '$lib/components/airdrops/AirdropEarningsCard.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -21,7 +22,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
-	import Button from '$lib/components/ui/Button.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 
