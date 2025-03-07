@@ -118,9 +118,8 @@ export const calculateTokenUsdBalance = ({
 	token: Token;
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): number | undefined => {
-	return calculateTokenUsdAmount({ amount: $balances?.[token.id]?.data, $exchanges, token });
-};
+}): number | undefined =>
+	calculateTokenUsdAmount({ amount: $balances?.[token.id]?.data, $exchanges, token });
 
 /**
  * Calculates USD amount for the provided token and token amount.
