@@ -14,8 +14,6 @@ import {
 } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
-import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type {
 	SolMappedTransaction,
 	SolSignature,
