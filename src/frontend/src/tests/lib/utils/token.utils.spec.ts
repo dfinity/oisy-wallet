@@ -14,6 +14,7 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import type { TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	calculateTokenUsdAmount,
 	calculateTokenUsdBalance,
 	findTwinToken,
 	getMaxTransactionAmount,
@@ -159,6 +160,45 @@ describe('calculateTokenUsdBalance', () => {
 		const result = calculateTokenUsdBalance({
 			token: ETHEREUM_TOKEN,
 			$balances: undefined,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual(0);
+	});
+});
+
+describe('calculateTokenUsdAmount', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should correctly calculate USD amount for the token and amount', () => {
+		const result = calculateTokenUsdAmount({
+			token: ICP_TOKEN,
+			amount: bn3,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual(bn3.toNumber());
+	});
+
+	it('should return undefined if exchange rate is not available', () => {
+		const result = calculateTokenUsdAmount({
+			token: ICP_TOKEN,
+			amount: bn3,
+			$exchanges: {}
+		});
+		expect(result).toEqual(undefined);
+	});
+
+	it('should return 0 if amount is not available', () => {
+		const result = calculateTokenUsdAmount({
+			token: ICP_TOKEN,
+			amount: undefined,
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual(0);
