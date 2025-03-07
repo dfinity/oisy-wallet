@@ -1,30 +1,30 @@
 <script lang="ts">
-	import AirdropEarningsCard from '$lib/components/airdrops/AirdropEarningsCard.svelte';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import type { IcToken } from '$icp/types/ic-token';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { getUserInfo } from '$lib/api/reward.api';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { usdValue } from '$lib/utils/exchange.utils';
-	import { exchanges } from '$lib/derived/exchange.derived';
-	import { formatUSD } from '$lib/utils/format.utils.js';
-	import { goto } from '$app/navigation';
-	import { networkUrl } from '$lib/utils/nav.utils';
-	import { AppPath } from '$lib/constants/routes.constants';
-	import { networkId } from '$lib/derived/network.derived';
-	import { isMobile } from '$lib/utils/device.utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { goto } from '$app/navigation';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import type { IcToken } from '$icp/types/ic-token';
+	import { getUserInfo } from '$lib/api/reward.api';
+	import AirdropEarningsCard from '$lib/components/airdrops/AirdropEarningsCard.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { isMobile } from '$lib/utils/device.utils';
+	import { usdValue } from '$lib/utils/exchange.utils';
+	import { formatUSD } from '$lib/utils/format.utils.js';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { networkUrl } from '$lib/utils/nav.utils';
 
-	export let isEligible: boolean = false;
+	export let isEligible = false;
 
 	const getUsdAmount = (amount: BigNumber, token?: IcToken) => {
-		if (isNullish(amount) || isNullish(token)) return 0;
+		if (isNullish(amount) || isNullish(token)) {return 0;}
 		const exchangeRate = $exchanges?.[token.id]?.usd;
 		return nonNullish(exchangeRate)
 			? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })
@@ -63,15 +63,14 @@
 		ckUsdcToken: IcToken | undefined,
 		icpToken: IcToken | undefined
 	) => {
-		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) return;
+		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {return;}
 		const data = await getUserInfo({ identity: $authIdentity });
-		console.log('loadUserRewardsInfo', data);
 
 		let _ckBtcReward: BigNumber = BigNumber.from(0);
 		let _ckUsdcReward: BigNumber = BigNumber.from(0);
 		let _icpReward: BigNumber = BigNumber.from(0);
 
-		for (let i = 0; i < (data.usage_awards[0] || []).length; i++) {
+		for (let i = 0; i < (data.usage_awards[0] ?? []).length; i++) {
 			const aw = data.usage_awards[0]?.[i];
 			if (nonNullish(aw)) {
 				const canisterId = aw.ledger.toText();
@@ -82,7 +81,7 @@
 				} else if (ckUsdcToken.ledgerCanisterId === canisterId) {
 					_ckUsdcReward = BigNumber.from(_ckUsdcReward).add(aw.amount);
 				} else {
-					console.warn('Ledger canister mapping not found for: ' + canisterId);
+					console.warn(`Ledger canister mapping not found for: ${  canisterId}`);
 				}
 			}
 		}

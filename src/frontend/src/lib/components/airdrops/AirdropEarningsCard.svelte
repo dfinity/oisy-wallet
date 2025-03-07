@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { formatToken, formatUSD } from '$lib/utils/format.utils.js';
+	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { IcToken } from '$icp/types/ic-token';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import Img from '$lib/components/ui/Img.svelte';
 	import ConfettiImg from '$lib/assets/confetti.png';
-	import { nonNullish } from '@dfinity/utils';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { formatToken, formatUSD } from '$lib/utils/format.utils.js';
 	export let amount: BigNumber;
 	export let usdAmount: number;
 	export let token: IcToken | undefined;
-	export let loading: boolean = true;
+	export let loading = true;
 </script>
 
 {#if nonNullish(token)}
