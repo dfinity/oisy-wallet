@@ -1,6 +1,6 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
+import { type CertifiedStore, initCertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -28,6 +28,27 @@ export const initTransactionsStore = <
 >(): TransactionsStore<T> => {
 	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
 
+	const append = ({
+		tokenId,
+		transactions,
+		allowDuplicates
+	}: {
+		tokenId: TokenId;
+		transactions: CertifiedTransaction<T>[];
+		allowDuplicates: boolean;
+	}) =>
+		update((state) => ({
+			...(nonNullish(state) && state),
+			[tokenId]: [
+				...((state ?? {})[tokenId] ?? []),
+				...transactions.filter(
+					({ data: { id } }) =>
+						allowDuplicates ||
+						!((state ?? {})[tokenId] ?? []).some(({ data: { id: txId } }) => txId === id)
+				)
+			]
+		}));
+
 	return {
 		prepend: ({
 			tokenId,
@@ -45,34 +66,10 @@ export const initTransactionsStore = <
 					)
 				]
 			})),
-		append: ({
-			tokenId,
-			transactions
-		}: {
-			tokenId: TokenId;
-			transactions: CertifiedTransaction<T>[];
-		}) =>
-			update((state) => ({
-				...(nonNullish(state) && state),
-				[tokenId]: [
-					...((state ?? {})[tokenId] ?? []),
-					...transactions.filter(
-						({ data: { id } }) =>
-							!((state ?? {})[tokenId] ?? []).some(({ data: { id: txId } }) => txId === id)
-					)
-				]
-			})),
-		appendDuplicating: ({
-			tokenId,
-			transactions
-		}: {
-			tokenId: TokenId;
-			transactions: CertifiedTransaction<T>[];
-		}) =>
-			update((state) => ({
-				...(nonNullish(state) && state),
-				[tokenId]: [...((state ?? {})[tokenId] ?? []), ...transactions]
-			})),
+		append: ({ tokenId, transactions }) =>
+			append({ tokenId, transactions, allowDuplicates: false }),
+		appendDuplicating: ({ tokenId, transactions }) =>
+			append({ tokenId, transactions, allowDuplicates: true }),
 		cleanUp: ({ tokenId, transactionIds }: { tokenId: TokenId; transactionIds: string[] }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
