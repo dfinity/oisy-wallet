@@ -23,8 +23,10 @@
 
 	export let isEligible = false;
 
-	const getUsdAmount = (amount: BigNumber, token?: IcToken) => {
-		if (isNullish(amount) || isNullish(token)) {return 0;}
+	const getUsdAmount = ({ amount, token }: { amount: BigNumber; token?: IcToken }) => {
+		if (isNullish(amount) || isNullish(token)) {
+			return 0;
+		}
 		const exchangeRate = $exchanges?.[token.id]?.usd;
 		return nonNullish(exchangeRate)
 			? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })
@@ -36,21 +38,21 @@
 	let ckBtcReward: BigNumber;
 	$: ckBtcReward = BigNumber.from(0);
 	let ckBtcRewardUsd: number;
-	$: ckBtcRewardUsd = getUsdAmount(ckBtcReward, ckBtcToken);
+	$: ckBtcRewardUsd = getUsdAmount({ amount: ckBtcReward, token: ckBtcToken });
 
 	let ckUsdcToken: IcToken | undefined;
 	$: ckUsdcToken = $icrcTokens.find((t) => t.symbol.match(new RegExp(`(ck)(.*)?(USDC)+`, 'gi')));
 	let ckUsdcReward: BigNumber;
 	$: ckUsdcReward = BigNumber.from(0);
 	let ckUsdcRewardUsd: number;
-	$: ckUsdcRewardUsd = getUsdAmount(ckUsdcReward, ckUsdcToken);
+	$: ckUsdcRewardUsd = getUsdAmount({ amount: ckUsdcReward, token: ckUsdcToken });
 
 	let icpToken: IcToken | undefined;
 	$: icpToken = ICP_TOKEN;
 	let icpReward: BigNumber;
 	$: icpReward = BigNumber.from(0);
 	let icpRewardUsd: number;
-	$: icpRewardUsd = getUsdAmount(icpReward, icpToken);
+	$: icpRewardUsd = getUsdAmount({ amount: icpReward, token: icpToken });
 
 	let totalRewardUsd: number;
 	$: totalRewardUsd = ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd;
@@ -63,7 +65,9 @@
 		ckUsdcToken: IcToken | undefined,
 		icpToken: IcToken | undefined
 	) => {
-		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {return;}
+		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {
+			return;
+		}
 		const data = await getUserInfo({ identity: $authIdentity });
 
 		let _ckBtcReward: BigNumber = BigNumber.from(0);
@@ -81,7 +85,7 @@
 				} else if (ckUsdcToken.ledgerCanisterId === canisterId) {
 					_ckUsdcReward = BigNumber.from(_ckUsdcReward).add(aw.amount);
 				} else {
-					console.warn(`Ledger canister mapping not found for: ${  canisterId}`);
+					console.warn(`Ledger canister mapping not found for: ${canisterId}`);
 				}
 			}
 		}
