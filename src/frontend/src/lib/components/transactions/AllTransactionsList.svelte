@@ -11,6 +11,7 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -85,16 +86,21 @@
 		}));
 </script>
 
-<!--TODO: include skeleton for loading transactions and remove nullish checks-->
-{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-	{#each Object.entries(groupedTransactions) as [date, transactions] (date)}
-		<TransactionsDateGroup {date} {transactions} />
-	{/each}
-{/if}
+<AllTransactionsSkeletons testIdPrefix="all-transactions-skeleton-card">
+	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
+		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
+			<TransactionsDateGroup
+				{date}
+				{transactions}
+				testId={`all-transactions-date-group-${index}`}
+			/>
+		{/each}
+	{/if}
 
-{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
-	<TransactionsPlaceholder />
-{/if}
+	{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
+		<TransactionsPlaceholder />
+	{/if}
+</AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal transaction={selectedBtcTransaction} token={selectedBtcToken} />
