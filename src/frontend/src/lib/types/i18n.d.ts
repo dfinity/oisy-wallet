@@ -120,6 +120,7 @@ interface I18nAirdrops {
 		participate_title: string;
 		share: string;
 		learn_more: string;
+		check_earnings: string;
 		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
