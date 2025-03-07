@@ -1,5 +1,4 @@
 import { AppPath } from '$lib/constants/routes.constants';
-import { NAVIGATION_ITEM_ACTIVITY } from '$lib/constants/test-ids.constants';
 import {
 	ACTIVITY_TRANSACTION_SKELETON_PREFIX,
 	ACTIVITY_TRANSACTIONS_PLACEHOLDER,
