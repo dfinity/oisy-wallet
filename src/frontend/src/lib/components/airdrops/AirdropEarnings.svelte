@@ -127,7 +127,7 @@
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
-				$noOfSprinkles: 3,
+				$noOfSprinkles: '3',
 				$amount: formatUSD({ value: totalRewardUsd })
 			})}
 		</div>
