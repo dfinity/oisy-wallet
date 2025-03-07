@@ -300,6 +300,8 @@ abstract class Homepage {
 
 		await this.promotionCarousel.navigateToSlide(1);
 		await this.promotionCarousel.freezeCarousel();
+
+		await this.waitForLoadState();
 	}
 
 	async waitForLoadState() {

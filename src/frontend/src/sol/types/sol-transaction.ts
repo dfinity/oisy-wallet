@@ -67,7 +67,7 @@ export interface MappedSolTransaction {
 }
 
 export interface SolMappedTransaction {
-	value: bigint | undefined;
+	value: bigint;
 	from: SolAddress;
 	to: SolAddress;
 	tokenAddress?: SplTokenAddress;
