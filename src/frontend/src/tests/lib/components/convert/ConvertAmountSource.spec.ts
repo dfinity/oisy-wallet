@@ -50,7 +50,14 @@ describe('ConvertAmountSource', () => {
 		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
 	});
 
-	it('should display values correctly without error if insufficientFundsForFee is true', async () => {
+	it.each([
+		{ type: 'insufficientFunds' },
+		{ type: 'insufficientFundsForFee' },
+		{ type: 'amountLessThanLedgerFee' },
+		{ type: 'minimumAmountNotReached' },
+		{ type: 'unknownMinimumAmount' },
+		{ type: 'minterInfoNotCertified' }
+	])('should display values correctly with $type error', async ({ type }) => {
 		const { getByTestId, rerender } = render(ConvertAmountSource, {
 			props,
 			context: mockContext()
@@ -58,22 +65,7 @@ describe('ConvertAmountSource', () => {
 
 		await rerender({
 			...props,
-			insufficientFundsForFee: true
-		});
-
-		expect(getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE)).toHaveTextContent('$0.20');
-		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
-	});
-
-	it('should display values correctly with error', async () => {
-		const { getByTestId, rerender } = render(ConvertAmountSource, {
-			props,
-			context: mockContext()
-		});
-
-		await rerender({
-			...props,
-			insufficientFunds: true
+			[type]: true
 		});
 
 		expect(getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE)).toHaveTextContent('$0.20');

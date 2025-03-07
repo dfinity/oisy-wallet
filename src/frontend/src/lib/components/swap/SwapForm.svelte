@@ -30,8 +30,8 @@
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -110,11 +110,12 @@
 
 	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
 		nonNullish($sourceToken)
-			? validateConvertAmount({
+			? validateUserAmount({
 					userAmount,
 					token: $sourceToken,
 					balance: $sourceTokenBalance,
-					fee: totalFee
+					fee: totalFee,
+					isSwapFlow: true
 				})
 			: undefined;
 </script>
