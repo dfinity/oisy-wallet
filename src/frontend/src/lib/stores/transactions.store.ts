@@ -15,6 +15,10 @@ export type TransactionsData<T> = CertifiedTransaction<T>[] | NullableCertifiedT
 export interface TransactionsStore<T> extends CertifiedStore<TransactionsData<T>> {
 	prepend: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
 	append: (params: { tokenId: TokenId; transactions: CertifiedTransaction<T>[] }) => void;
+	appendDuplicating: (params: {
+		tokenId: TokenId;
+		transactions: CertifiedTransaction<T>[];
+	}) => void;
 	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
 	nullify: (tokenId: TokenId) => void;
 }
@@ -23,6 +27,27 @@ export const initTransactionsStore = <
 	T extends IcTransactionUi | BtcTransactionUi | SolTransactionUi
 >(): TransactionsStore<T> => {
 	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
+
+	const append = ({
+		tokenId,
+		transactions,
+		allowDuplicates
+	}: {
+		tokenId: TokenId;
+		transactions: CertifiedTransaction<T>[];
+		allowDuplicates: boolean;
+	}) =>
+		update((state) => ({
+			...(nonNullish(state) && state),
+			[tokenId]: [
+				...((state ?? {})[tokenId] ?? []),
+				...transactions.filter(
+					({ data: { id } }) =>
+						allowDuplicates ||
+						!((state ?? {})[tokenId] ?? []).some(({ data: { id: txId } }) => txId === id)
+				)
+			]
+		}));
 
 	return {
 		prepend: ({
@@ -41,17 +66,10 @@ export const initTransactionsStore = <
 					)
 				]
 			})),
-		append: ({
-			tokenId,
-			transactions
-		}: {
-			tokenId: TokenId;
-			transactions: CertifiedTransaction<T>[];
-		}) =>
-			update((state) => ({
-				...(nonNullish(state) && state),
-				[tokenId]: [...((state ?? {})[tokenId] ?? []), ...transactions]
-			})),
+		append: ({ tokenId, transactions }) =>
+			append({ tokenId, transactions, allowDuplicates: false }),
+		appendDuplicating: ({ tokenId, transactions }) =>
+			append({ tokenId, transactions, allowDuplicates: true }),
 		cleanUp: ({ tokenId, transactionIds }: { tokenId: TokenId; transactionIds: string[] }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
