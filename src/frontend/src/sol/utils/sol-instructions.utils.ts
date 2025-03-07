@@ -84,6 +84,21 @@ const mapSystemParsedInstruction = ({
 	type: string;
 	info: object;
 }): SolMappedTransaction | undefined => {
+	if (type === 'createAccount') {
+		// We need to cast the type since it is not implied
+		const {
+			source: from,
+			newAccount: to,
+			lamports: value
+		} = info as {
+			source: SolAddress;
+			newAccount: SolAddress;
+			lamports: bigint;
+		};
+
+		return { value, from, to };
+	}
+
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
 		const {

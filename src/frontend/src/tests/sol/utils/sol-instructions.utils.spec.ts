@@ -87,22 +87,48 @@ describe('sol-instructions.utils', () => {
 		});
 
 		describe('with a System parsed instruction', () => {
-			const mockSystemInstruction: SolRpcInstruction = {
-				...mockInstruction,
-				programAddress: address(SYSTEM_PROGRAM_ADDRESS),
-				parsed: {
-					type: 'transfer',
-					info: {
-						destination: 'toAddress',
-						lamports: 100n,
-						source: 'fromAddress'
+			it('should map a valid `createAccount` instruction', async () => {
+				const mockCreateAccountInstruction: SolRpcInstruction = {
+					...mockInstruction,
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+					parsed: {
+						type: 'createAccount',
+						info: {
+							newAccount: 'toAddress',
+							lamports: 100n,
+							source: 'fromAddress'
+						}
 					}
-				}
-			};
+				};
+
+				const result = await mapSolParsedInstruction({
+					instruction: mockCreateAccountInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 100n,
+					from: 'fromAddress',
+					to: 'toAddress'
+				});
+			});
 
 			it('should map a valid `transfer` instruction', async () => {
+				const mockTransferInstruction: SolRpcInstruction = {
+					...mockInstruction,
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+					parsed: {
+						type: 'transfer',
+						info: {
+							destination: 'toAddress',
+							lamports: 100n,
+							source: 'fromAddress'
+						}
+					}
+				};
+
 				const result = await mapSolParsedInstruction({
-					instruction: mockSystemInstruction,
+					instruction: mockTransferInstruction,
 					network
 				});
 
@@ -115,7 +141,11 @@ describe('sol-instructions.utils', () => {
 
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
-					instruction: { ...mockSystemInstruction, parsed: { type: 'other-type', info: {} } },
+					instruction: {
+						...mockInstruction,
+						programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+						parsed: { type: 'other-type', info: {} }
+					},
 					network
 				});
 
