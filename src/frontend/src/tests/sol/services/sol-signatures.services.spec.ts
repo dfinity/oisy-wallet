@@ -61,7 +61,7 @@ describe('sol-transactions.services', () => {
 			const transactions = await loadTransactions();
 
 			const solBalance: bigint = transactions.reduce<bigint>(
-				(acc, { value, from }) => acc + (value ?? 0n) * (from === address ? -1n : 1n),
+				(acc, { value, type }) => acc + (value ?? 0n) * (type === 'send' ? -1n : 1n),
 				0n
 			);
 
@@ -73,6 +73,7 @@ describe('sol-transactions.services', () => {
 			console.log(solBalance, fetchedSolBalance, transactions.length);
 		}, 60000);
 
+		// describe('with mocked dependencies', () => {
 		let spyFetchSignatures: MockInstance;
 		let spyFetchTransactionsForSignature: MockInstance;
 		let spyFindAssociatedTokenPda: MockInstance;
@@ -188,5 +189,6 @@ describe('sol-transactions.services', () => {
 				})
 			).rejects.toThrow(mockError);
 		});
+		// });
 	});
 });
