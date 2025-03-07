@@ -1,4 +1,3 @@
-import { AppPath } from '$lib/constants/routes.constants';
 import {
 	ACTIVITY_TRANSACTION_SKELETON_PREFIX,
 	NAVIGATION_ITEM_ACTIVITY
@@ -13,7 +12,7 @@ export class ActivityPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo({ testId: NAVIGATION_ITEM_ACTIVITY, expectedPath: AppPath.Activity });
+		await this.navigateTo(NAVIGATION_ITEM_ACTIVITY);
 		await this.waitForLoadState();
 
 		await Promise.all(
