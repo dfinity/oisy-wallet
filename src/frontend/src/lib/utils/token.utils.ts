@@ -4,7 +4,7 @@ import {
 } from '$env/networks/networks.icrc.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
-import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -119,15 +119,9 @@ export const calculateTokenUsdBalance = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }): number | undefined => {
-	const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
+	const amount = $balances?.[token.id]?.data;
 
-	return nonNullish(exchangeRate)
-		? usdValue({
-				decimals: token.decimals,
-				balance: $balances?.[token.id]?.data,
-				exchangeRate
-			})
-		: undefined;
+	return calculateTokenUsdAmount({ amount, $exchanges, token });
 };
 
 /**
@@ -143,17 +137,17 @@ export const calculateTokenUsdAmount = ({
 	token,
 	$exchanges
 }: {
-	amount: BigNumber;
-	token?: IcToken;
+	amount?: BigNumber;
+	token?: Token;
 	$exchanges: ExchangesData;
 }) => {
 	if (isNullish(amount) || isNullish(token)) {
-		return 0;
+		return undefined;
 	}
 	const exchangeRate = $exchanges?.[token.id]?.usd;
 	return nonNullish(exchangeRate)
 		? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })
-		: 0;
+		: undefined;
 };
 
 /** Maps a Token object to a TokenUi object, meaning it adds the balance and the USD balance to the token.
