@@ -14,7 +14,6 @@ import {
 } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
-import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type {
 	SolMappedTransaction,
 	SolSignature,
@@ -86,16 +85,6 @@ export const fetchSolTransactionsForSignature = async ({
 		}>
 	>(
 		async (acc, instruction, idx) => {
-			const innerInstructionsRaw =
-				putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
-
-			const innerInstructions: SolRpcInstruction[] = innerInstructionsRaw.map(
-				(innerInstruction) => ({
-					...innerInstruction,
-					programAddress: innerInstruction.programId
-				})
-			);
-
 			const { parsedTransactions, cumulativeBalances: accCumulativeBalances } = await acc;
 
 			const mappedTransaction = await mapSolParsedInstruction({
@@ -103,7 +92,6 @@ export const fetchSolTransactionsForSignature = async ({
 					...instruction,
 					programAddress: instruction.programId
 				},
-				innerInstructions,
 				network,
 				cumulativeBalances: accCumulativeBalances
 			});
@@ -139,7 +127,7 @@ export const fetchSolTransactionsForSignature = async ({
 			}
 
 			const newTransaction: SolTransactionUi = {
-				id: `${signature.signature}-${instruction.programId}`,
+				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
 				timestamp: blockTime ?? 0n,
 				value,
