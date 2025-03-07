@@ -13,6 +13,9 @@ export const EnvIcrcTokenIconSchema = z.object({
 	icon: z.string().optional()
 });
 
+export const EnvIcrcTokenMetadataWithIconSchema =
+	EnvIcrcTokenMetadataSchema.merge(EnvIcrcTokenIconSchema);
+
 export const EnvIcTokenSchema = z.object({
 	ledgerCanisterId: z.string(),
 	indexCanisterId: z.string()
