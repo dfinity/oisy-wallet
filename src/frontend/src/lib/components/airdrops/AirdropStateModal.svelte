@@ -8,7 +8,6 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {
 		AIRDROPS_STATE_MODAL_IMAGE_BANNER,
@@ -17,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	export let jackpot = false;
 
@@ -27,9 +27,9 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
-		<ImgBanner
+		<Img
 			src={jackpot ? airdropJackpotReceived : airdropReceived}
-			styleClass="aspect-auto"
+			styleClass="w-full"
 			testId={AIRDROPS_STATE_MODAL_IMAGE_BANNER}
 		/>
 

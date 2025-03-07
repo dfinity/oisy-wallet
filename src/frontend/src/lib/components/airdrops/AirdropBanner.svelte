@@ -4,7 +4,6 @@
 	import { onMount } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import airdropBanner from '$lib/assets/airdrop-modal-banner.svg';
-	import AirdropBannerOverlay from '$lib/components/airdrops/AirdropBannerOverlay.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { AIRDROPS_MODAL_IMAGE_BANNER } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -45,6 +44,4 @@
 	<div class="max-h-60">
 		<ImgBanner src={airdropBanner} testId={AIRDROPS_MODAL_IMAGE_BANNER} styleClass="object-cover" />
 	</div>
-
-	<AirdropBannerOverlay {token} {balance} {usdBalance} />
 </div>

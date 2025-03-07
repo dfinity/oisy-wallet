@@ -18,7 +18,8 @@
 			"view": "View",
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
-			"not_available": "n/a"
+			"not_available": "n/a",
+			"new": "New"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -125,9 +126,10 @@
 			"active_campaigns": "Active Opportunities",
 			"upcoming_campaigns": "Upcoming Opportunities",
 			"active_date": "Due on",
-			"participate_title": "How to participate",
+			"participate_title": "Participate and earn Sprinkles",
 			"share": "Share on X",
 			"learn_more": "Learn more",
+			"check_earnings": "Check your Earnings",
 			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
@@ -139,7 +141,9 @@
 			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
-			"carousel_slide_cta": "Learn more"
+			"carousel_slide_cta": "Learn more",
+			"sprinkles_earned": "You've earned 3 sprinkles, totaling $amount! \uD83C\uDF89",
+			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
