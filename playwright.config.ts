@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
 import { readCanisterIds } from './env.utils';
+import { ViewportAdjuster } from './e2e/utils/helpers/viewport-utils';
 
 dotenv.config({
 	path: join(process.cwd(), '.env.e2e')
@@ -22,8 +23,12 @@ const isMac = MATRIX_OS.includes('macos') ?? process.platform === 'darwin';
 
 const appleProjects = [
 	{
-		name: 'Safari',
-		use: devices['Desktop Safari']
+		name: 'Safari 720p',
+		use: {
+			...devices['Desktop Safari'],
+			screen: { width: 1280, height: 720 },
+			viewport: { width: 1280, height: 720 }
+		},
 	},
 	{
 		name: 'iPhone SE',
@@ -37,12 +42,20 @@ const appleProjects = [
 
 const nonAppleProjects = [
 	{
-		name: 'Google Chrome',
-		use: devices['Desktop Chrome']
+		name: 'Google Chrome 720p',
+		use: {
+			...devices['Desktop Chrome'],
+			screen: { width: 1280, height: 720 },
+			viewport: { width: 1280, height: 720 }
+		},
 	},
 	{
-		name: 'Firefox',
-		use: devices['Desktop Firefox']
+		name: 'Firefox 720p',
+		use: {
+			...devices['Desktop Firefox'],
+			screen: { width: 1280, height: 720 },
+			viewport: { width: 1280, height: 720 }
+		},
 	},
 	{
 		name: 'Pixel 7',

@@ -1,4 +1,4 @@
-import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
+import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 import { expect } from '@playwright/test';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
@@ -56,10 +56,7 @@ export class TestnetsPage extends HomepageLoggedIn {
 				networkSymbol
 			})
 		).toBeVisible();
-		await this.waitForByTestId({
-			testId: CAROUSEL_CONTAINER,
-			options: { state: 'detached' }
-		});
+		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({ state: 'hidden' });
 		await this.waitForLoadState();
 	}
 }
