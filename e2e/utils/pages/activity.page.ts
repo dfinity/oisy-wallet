@@ -1,9 +1,9 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	ACTIVITY_TRANSACTION_SKELETON_PREFIX,
 	NAVIGATION_ITEM_ACTIVITY
 } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
-import { AppPath } from '$lib/constants/routes.constants';
 
 export type ActivityPageParams = HomepageLoggedInParams;
 
