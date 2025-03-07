@@ -84,6 +84,21 @@ const mapSystemParsedInstruction = ({
 	type: string;
 	info: object;
 }): SolMappedTransaction | undefined => {
+	if (type === 'createAccount') {
+		// We need to cast the type since it is not implied
+		const {
+			source: from,
+			newAccount: to,
+			lamports: value
+		} = info as {
+			source: SolAddress;
+			newAccount: SolAddress;
+			lamports: bigint;
+		};
+
+		return { value, from, to };
+	}
+
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
 		const {
@@ -132,14 +147,27 @@ const mapTokenParsedInstruction = async ({
 		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
 			const {
 				data: {
-					parsed: { info: sourceAccoutInfo }
+					parsed: { info: sourceInfo }
 				}
 			} = sourceResult;
 
-			const { mint: tokenAddress } = sourceAccoutInfo as {
-				mint: SplTokenAddress;
-				owner: SolAddress;
-			};
+			const { mint: tokenAddress } = sourceInfo as { mint: SplTokenAddress };
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
+
+		const { value: destinationResult } = await getAccountInfo(address(to), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
+			const {
+				data: {
+					parsed: { info: destinationInfo }
+				}
+			} = destinationResult;
+
+			const { mint: tokenAddress } = destinationInfo as { mint: SplTokenAddress };
 
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
@@ -209,14 +237,27 @@ const mapToken2022ParsedInstruction = async ({
 		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
 			const {
 				data: {
-					parsed: { info: sourceAccoutInfo }
+					parsed: { info: sourceInfo }
 				}
 			} = sourceResult;
 
-			const { mint: tokenAddress } = sourceAccoutInfo as {
-				mint: SplTokenAddress;
-				owner: SolAddress;
-			};
+			const { mint: tokenAddress } = sourceInfo as { mint: SplTokenAddress };
+
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
+
+		const { value: destinationResult } = await getAccountInfo(address(to), {
+			encoding: 'jsonParsed'
+		}).send();
+
+		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
+			const {
+				data: {
+					parsed: { info: destinationInfo }
+				}
+			} = destinationResult;
+
+			const { mint: tokenAddress } = destinationInfo as { mint: SplTokenAddress };
 
 			return { value: BigInt(value), from, to, tokenAddress };
 		}
