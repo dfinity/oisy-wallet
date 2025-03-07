@@ -177,7 +177,7 @@ describe('calculateTokenUsdAmount', () => {
 		);
 	});
 
-	it('should correctly calculate USD balance for the token', () => {
+	it('should correctly calculate USD amount for the token and amount', () => {
 		const result = calculateTokenUsdAmount({
 			token: ICP_TOKEN,
 			amount: BigNumber.from(3),
