@@ -7,7 +7,7 @@
 	export let prefix: string | undefined = undefined;
 	export let suffix: string | undefined = undefined;
 	export let testId: string | undefined = undefined;
-	export let variant: BadgeVariant;
+	export let variant: BadgeVariant = 'default';
 
 	let formattedDate: string;
 	$: formattedDate = `${formatToShortDateString(date)} ${date.getDate()}`;
