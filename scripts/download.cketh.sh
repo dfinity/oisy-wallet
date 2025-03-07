@@ -4,9 +4,7 @@
 
 DIR=target/ic
 
-if [ ! -d "$DIR" ]; then
-  mkdir "$DIR"
-fi
+mkdir -p "$DIR"
 
 IC_COMMIT="03dd6ee6de80c2202f66948692c69c61eb6af54d"
 

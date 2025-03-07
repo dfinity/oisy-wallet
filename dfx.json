@@ -306,7 +306,9 @@
 		"cketh_ledger": {
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
+			"build": "scripts/build.cketh_ledger.sh",
 			"wasm": "target/ic/cketh_ledger.wasm",
+			"init_arg_file": "target/ic/cketh_ledger.args.did",
 			"specified_id": "apia6-jaaaa-aaaar-qabma-cai",
 			"remote": {
 				"id": {
