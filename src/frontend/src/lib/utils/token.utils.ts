@@ -135,7 +135,7 @@ export const calculateTokenUsdAmount = ({
 	token,
 	$exchanges
 }: {
-	amount: Option<BigNumber>;
+	amount: BigNumber | undefined;
 	token: Token;
 	$exchanges: ExchangesData;
 }): number | undefined => {
