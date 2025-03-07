@@ -20,8 +20,8 @@
 	import { formatUSD } from '$lib/utils/format.utils.js';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
-	import { findTwinToken } from '$lib/utils/token.utils';
-	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+	import { calculateTokenUsdBalance, findTwinToken } from '$lib/utils/token.utils';
+	import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
@@ -39,14 +39,15 @@
 	};
 
 	let ckBtcToken: IcToken | undefined;
-	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
+	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $icrcTokens });
+	$: console.log('ckBTC', ckBtcToken);
 	let ckBtcReward: BigNumber;
 	$: ckBtcReward = ZERO;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = getUsdAmount({ amount: ckBtcReward, token: ckBtcToken });
 
 	let ckUsdcToken: IcToken | undefined;
-	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
+	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $icrcTokens });
 	let ckUsdcReward: BigNumber;
 	$: ckUsdcReward = ZERO;
 	let ckUsdcRewardUsd: number;
@@ -128,6 +129,7 @@
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
+				$noOfSprinkles: 3,
 				$amount: formatUSD({ value: totalRewardUsd })
 			})}
 		</div>
