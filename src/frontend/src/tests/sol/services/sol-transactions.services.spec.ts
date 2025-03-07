@@ -139,26 +139,32 @@ describe('sol-transactions.services', () => {
 				{ index: 2, instructions: [mockInstructions[2]] }
 			];
 
+			const expectedInnerInstructions = innerInstructions
+				.flatMap(({ instructions }) => instructions)
+				.map((instruction) => ({
+					...expected,
+					id: `${expected.id}-${instruction.programId}`
+				}))
+				.reverse();
+
 			spyFetchTransactionDetailForSignature.mockResolvedValue({
 				...mockTransactionDetail,
 				meta: { innerInstructions }
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
-				...innerInstructions
-					.flatMap(({ instructions }) => instructions)
-					.map((instruction) => ({
-						...expected,
-						id: `${expected.id}-${instruction.programId}`
-					}))
-					.reverse(),
-				...expectedResults
+				expectedResults[0],
+				expectedInnerInstructions[0],
+				expectedResults[1],
+				expectedInnerInstructions[1],
+				expectedResults[2],
+				expectedInnerInstructions[1]
 			]);
 
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledWith({
 				instruction: {
-					...mockInstructions[mockInstructions.length - 1],
-					programAddress: mockInstructions[mockInstructions.length - 1].programId
+					...mockInstructions[0],
+					programAddress: mockInstructions[0].programId
 				},
 				innerInstructions: innerInstructions[0].instructions.map((innerInstruction) => ({
 					...innerInstruction,
@@ -179,7 +185,7 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should return only transactions that have mapped transactions non-nullish', async () => {
-			const expected = expectedResults.slice(1);
+			const expected = expectedResults.slice(0, -1);
 
 			spyMapSolParsedInstruction.mockResolvedValueOnce(null);
 
@@ -214,15 +220,15 @@ describe('sol-transactions.services', () => {
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
+				...expectedResults.slice(0, -1),
 				{
 					...expected,
-					id: `${expected.id}-${mockInstructions[mockInstructions.length - 1].programId}-self`,
+					id: `${expected.id}-${mockInstructions[0].programId}-self`,
 					type: 'receive',
 					from: mockSolAddress,
 					to: mockSolAddress
 				},
-				{ ...expectedResults[0], from: mockSolAddress, to: mockSolAddress },
-				...expectedResults.slice(1)
+				{ ...expectedResults[expectedResults.length - 1], from: mockSolAddress, to: mockSolAddress }
 			]);
 		});
 
@@ -234,7 +240,7 @@ describe('sol-transactions.services', () => {
 			});
 
 			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(
-				expectedResults.slice(1)
+				expectedResults.slice(0, -1)
 			);
 		});
 	});

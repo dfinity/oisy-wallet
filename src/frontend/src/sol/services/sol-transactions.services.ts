@@ -57,10 +57,13 @@ export const fetchSolTransactionsForSignature = async ({
 
 	// Inside the instructions there could be some that we are unable to decode, but that may have
 	// simpler (and decoded) inner instructions. We should try to map those as well.
-	const allInstructions = [
-		...instructions,
-		...putativeInnerInstructions.flatMap(({ instructions }) => instructions)
-	];
+	// They are inserted in the instructions array in the order they refer to the main instruction.
+	const allInstructions = [...putativeInnerInstructions]
+		.sort((a, b) => a.index - b.index)
+		.reduce((acc, { index, instructions }, offset) => {
+			const insertIndex = index + 1 + offset;
+			return [...acc.slice(0, insertIndex), ...instructions, ...acc.slice(insertIndex)];
+		}, instructions);
 
 	const [ataAddress] =
 		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
@@ -71,13 +74,11 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			: [undefined];
 
-	// The instructions are received in the order they were executed, meaning the first instruction
-	// in the list was executed first, and the last instruction was executed last.
-	// However, since they all share the same timestamp, we want to display them in reverse
-	// order—from the last executed instruction to the first. This ensures that when shown,
-	// the most recently executed instruction appears first, maintaining a more intuitive,
-	// backward-looking view of execution history.
-	return await allInstructions.reverse().reduce(
+	const { parsedTransactions } = await allInstructions.reduce<
+		Promise<{
+			parsedTransactions: SolTransactionUi[];
+		}>
+	>(
 		async (acc, instruction, idx) => {
 			const innerInstructionsRaw =
 				putativeInnerInstructions.find(({ index }) => index === idx)?.instructions ?? [];
@@ -89,6 +90,8 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			);
 
+			const { parsedTransactions } = await acc;
+
 			const mappedTransaction = await mapSolParsedInstruction({
 				instruction: {
 					...instruction,
@@ -98,26 +101,38 @@ export const fetchSolTransactionsForSignature = async ({
 				network
 			});
 
-			if (nonNullish(mappedTransaction) && mappedTransaction.tokenAddress === tokenAddress) {
-				const { value, from, to } = mappedTransaction;
+			if (isNullish(mappedTransaction)) {
+				return acc;
+			}
 
-				if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-					return acc;
-				}
+			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
 
-				const newTransaction: SolTransactionUi = {
-					id: `${signature.signature}-${instruction.programId}`,
-					signature: signature.signature,
-					timestamp: blockTime ?? 0n,
-					value,
-					type: address === from ? 'send' : 'receive',
-					from,
-					to,
-					status
-				};
+			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
+			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
+				return acc;
+			}
 
-				return [
-					...(await acc),
+			// If the token address is not the one we are looking for, we can skip this instruction.
+			// In case of Solana native tokens, the token address is undefined.
+			if (mappedTokenAddress !== tokenAddress) {
+				return acc;
+			}
+
+			const newTransaction: SolTransactionUi = {
+				id: `${signature.signature}-${instruction.programId}`,
+				signature: signature.signature,
+				timestamp: blockTime ?? 0n,
+				value,
+				type: address === from ? 'send' : 'receive',
+				from,
+				to,
+				status
+			};
+
+			return {
+				parsedTransactions: [
+					...parsedTransactions,
+					newTransaction,
 					...(from === to
 						? [
 								{
@@ -126,15 +141,20 @@ export const fetchSolTransactionsForSignature = async ({
 									type: newTransaction.type === 'send' ? 'receive' : 'send'
 								} as SolTransactionUi
 							]
-						: []),
-					newTransaction
-				];
-			}
-
-			return acc;
+						: [])
+				]
+			};
 		},
-		Promise.resolve([] as SolTransactionUi[])
+		Promise.resolve({ parsedTransactions: [] })
 	);
+
+	// The instructions are received in the order they were executed, meaning the first instruction
+	// in the list was executed first, and the last instruction was executed last.
+	// However, since they all share the same timestamp, we want to display them in reverse
+	// order—from the last executed instruction to the first. This ensures that when shown,
+	// the most recently executed instruction appears first, maintaining a more intuitive,
+	// backward-looking view of execution history.
+	return parsedTransactions.reverse();
 };
 
 export const loadNextSolTransactions = async ({
