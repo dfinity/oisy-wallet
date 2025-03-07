@@ -284,49 +284,23 @@ const mapToken2022ParsedInstruction = async ({
 };
 
 const mapAssociatedTokenAccountInstruction = ({
-	type,
-	innerInstructions
+	type
 }: {
 	type: string;
-	innerInstructions?: SolRpcInstruction[];
 }): SolMappedTransaction | undefined => {
 	if (type === 'create' || type === 'createIdempotent') {
-		if (isNullish(innerInstructions) || innerInstructions.length < 0) {
-			return;
-		}
-
-		const valueInnerInstruction = innerInstructions.find(
-			(instruction) => 'parsed' in instruction && instruction.parsed.type === 'createAccount'
-		);
-
-		if (isNullish(valueInnerInstruction) || !('parsed' in valueInnerInstruction)) {
-			return;
-		}
-
-		// We need to cast the type since it is not implied
-		const {
-			source: from,
-			newAccount: to,
-			lamports: value
-		} = valueInnerInstruction.parsed.info as {
-			source: SolAddress;
-			newAccount: SolAddress;
-			lamports: bigint;
-		};
-
-		return { value, from, to };
+		// We don't need to map the instruction since it is not relevant for the user
+		return;
 	}
 };
 
 export const mapSolParsedInstruction = async ({
 	instruction,
 	network,
-	innerInstructions,
 	cumulativeBalances
 }: {
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
-	innerInstructions?: SolRpcInstruction[];
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
 }): Promise<SolMappedTransaction | undefined> => {
 	if (!('parsed' in instruction)) {
@@ -355,7 +329,7 @@ export const mapSolParsedInstruction = async ({
 	}
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
-		return mapAssociatedTokenAccountInstruction({ type, innerInstructions });
+		return mapAssociatedTokenAccountInstruction({ type });
 	}
 
 	// It is useful to receive feedback when we are not able to map an instruction
