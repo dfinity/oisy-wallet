@@ -85,10 +85,10 @@ describe('sol-transactions.services', () => {
 			status: mockTransactionDetail.confirmationStatus
 		};
 
-		const expectedResults = [
-			{ ...expected, id: `${expected.id}-${mockInstructions[0].programId}` },
-			{ ...expected, id: `${expected.id}-${mockInstructions[1].programId}` },
-			{ ...expected, id: `${expected.id}-${mockInstructions[2].programId}` }
+		const expectedResults: SolTransactionUi[] = [
+			{ ...expected, id: `${expected.id}-0-${mockInstructions[0].programId}` },
+			{ ...expected, id: `${expected.id}-1-${mockInstructions[1].programId}` },
+			{ ...expected, id: `${expected.id}-2-${mockInstructions[2].programId}` }
 		].reverse();
 
 		let spyFetchTransactionDetailForSignature: MockInstance;
@@ -131,13 +131,11 @@ describe('sol-transactions.services', () => {
 			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(3);
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: { ...mockInstructions[0], programAddress: mockInstructions[0].programId },
-				innerInstructions: [],
 				network,
 				cumulativeBalances: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(2, {
 				instruction: { ...mockInstructions[1], programAddress: mockInstructions[1].programId },
-				innerInstructions: [],
 				network,
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue,
@@ -146,7 +144,6 @@ describe('sol-transactions.services', () => {
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(3, {
 				instruction: { ...mockInstructions[2], programAddress: mockInstructions[2].programId },
-				innerInstructions: [],
 				network,
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 2n,
@@ -155,14 +152,14 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
-		it('should use inner instructions if presents and/or required', async () => {
+		it('should use inner instructions if presents', async () => {
 			const innerInstructions = [
 				{ index: 0, instructions: [mockInstructions[0]] },
 				{ index: 1, instructions: [mockInstructions[1]] },
 				{ index: 2, instructions: [mockInstructions[2]] }
 			];
 
-			const expectedInnerInstructions = innerInstructions
+			const expectedInnerInstructions: SolTransactionUi[] = innerInstructions
 				.flatMap(({ instructions }) => instructions)
 				.map((instruction) => ({
 					...expected,
@@ -175,25 +172,32 @@ describe('sol-transactions.services', () => {
 				meta: { innerInstructions }
 			});
 
-			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual([
-				expectedResults[0],
-				expectedInnerInstructions[0],
-				expectedResults[1],
-				expectedInnerInstructions[1],
-				expectedResults[2],
-				expectedInnerInstructions[1]
-			]);
+			await expect(fetchSolTransactionsForSignature(mockParams)).resolves.toEqual(
+				[
+					expectedResults[0],
+					expectedInnerInstructions[0],
+					expectedResults[1],
+					expectedInnerInstructions[1],
+					expectedResults[2],
+					expectedInnerInstructions[1]
+				].map((transaction, idx) => {
+					const splitId = transaction.id.split('-');
 
-			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(6);
+					return {
+						...transaction,
+						id: `${splitId[0]}-${5 - idx}-${splitId[splitId.length - 1]}`
+					};
+				})
+			);
+
+			expect(spyMapSolParsedInstruction).toHaveBeenCalledTimes(
+				expectedResults.length + expectedInnerInstructions.length
+			);
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: {
 					...mockInstructions[0],
 					programAddress: mockInstructions[0].programId
 				},
-				innerInstructions: innerInstructions[0].instructions.map((innerInstruction) => ({
-					...innerInstruction,
-					programAddress: innerInstruction.programId
-				})),
 				network,
 				cumulativeBalances: {}
 			});
@@ -202,10 +206,6 @@ describe('sol-transactions.services', () => {
 					...innerInstruction,
 					programAddress: innerInstruction.programId
 				}))[0],
-				innerInstructions: innerInstructions[1].instructions.map((innerInstruction) => ({
-					...innerInstruction,
-					programAddress: innerInstruction.programId
-				})),
 				network,
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue,
@@ -217,10 +217,6 @@ describe('sol-transactions.services', () => {
 					...mockInstructions[1],
 					programAddress: mockInstructions[1].programId
 				},
-				innerInstructions: innerInstructions[2].instructions.map((innerInstruction) => ({
-					...innerInstruction,
-					programAddress: innerInstruction.programId
-				})),
 				network,
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 2n,
@@ -232,7 +228,6 @@ describe('sol-transactions.services', () => {
 					...innerInstruction,
 					programAddress: innerInstruction.programId
 				}))[0],
-				innerInstructions: [],
 				network,
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 3n,
@@ -244,7 +239,6 @@ describe('sol-transactions.services', () => {
 					...mockInstructions[2],
 					programAddress: mockInstructions[2].programId
 				},
-				innerInstructions: [],
 				network,
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 4n,
@@ -256,7 +250,6 @@ describe('sol-transactions.services', () => {
 					...innerInstruction,
 					programAddress: innerInstruction.programId
 				}))[0],
-				innerInstructions: [],
 				network,
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 5n,
@@ -314,7 +307,7 @@ describe('sol-transactions.services', () => {
 				...expectedResults.slice(0, -1),
 				{
 					...expected,
-					id: `${expected.id}-${mockInstructions[0].programId}-self`,
+					id: `${expected.id}-0-${mockInstructions[0].programId}-self`,
 					type: 'receive',
 					from: mockSolAddress,
 					to: mockSolAddress
