@@ -3,7 +3,7 @@
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import airdropBanner from '$lib/assets/airdrops-banner.svg';
 	import AirdropsGroups from '$lib/components/airdrops/AirdropsGroup.svelte';
-	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import {
 		AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER,
 		AIRDROPS_BANNER,
@@ -22,9 +22,9 @@
 	$: upcomingCampaigns = airdropCampaigns.filter(({ startDate }) => isUpcomingCampaign(startDate));
 </script>
 
-<div class="relative mb-6 flex items-end overflow-hidden rounded-2xl md:mb-10">
-	<div class="max-h-64">
-		<ImgBanner src={airdropBanner} testId={AIRDROPS_BANNER} />
+<div class="relative mb-6 flex items-end md:mb-10">
+	<div class="max-h-66 overflow-hidden rounded-2xl">
+		<Img src={airdropBanner} testId={AIRDROPS_BANNER} />
 	</div>
 </div>
 
