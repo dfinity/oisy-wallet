@@ -9,6 +9,8 @@
 	export let badgeOnly: boolean = false;
 	export let isEligible: boolean = false;
 	export let requirementsFulfilled: boolean[];
+
+	const isRequirementFulfilled = (index: number) => requirementsFulfilled[index] ?? false;
 </script>
 
 {#if airdrop.requirements.length > 0}
@@ -27,29 +29,24 @@
 		<ul class="list-none">
 			{#each airdrop.requirements as requirement, i}
 				<li class="flex gap-2 pt-1">
-					{#if requirementsFulfilled[i]}
-						<span class="flex w-full flex-row">
-							<span class="-mt-0.5 mr-2 text-success-primary"
-								><IconCheckCircleFill size={32} /></span
-							>
-							<span>
-								{requirement}
-							</span>
-						</span>
-					{:else}
+					<span
+						class="flex w-full flex-row"
+						class:transition={!isRequirementFulfilled(i) && loading}
+						class:duration-500={!isRequirementFulfilled(i) && loading}
+						class:ease-in-out={!isRequirementFulfilled(i) && loading}
+						class:animate-pulse={!isRequirementFulfilled(i) && loading}
+					>
 						<span
-							class="flex w-full flex-row"
-							class:transition={loading}
-							class:duration-500={loading}
-							class:ease-in-out={loading}
-							class:animate-pulse={loading}
+							class="-mt-0.5 mr-2"
+							class:text-success-primary={isRequirementFulfilled(i)}
+							class:text-disabled={!isRequirementFulfilled(i)}
 						>
-							<span class="-mt-0.5 mr-2 text-disabled"><IconCheckCircleFill size={32} /></span>
-							<span>
-								{requirement}
-							</span>
+							<IconCheckCircleFill size={32} />
 						</span>
-					{/if}
+						<span>
+							{requirement}
+						</span>
+					</span>
 				</li>
 			{/each}
 		</ul>
