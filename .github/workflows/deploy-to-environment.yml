@@ -23,6 +23,7 @@ on:
           - test_fe_3
           - test_fe_4
           - test_be_1
+          - audit
       canister:
         required: true
         type: choice
