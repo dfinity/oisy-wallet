@@ -1,4 +1,3 @@
-import { AppPath } from '$lib/constants/routes.constants';
 import {
 	NAVIGATION_ITEM_SETTINGS,
 	SETTINGS_ADDRESS_LABEL
