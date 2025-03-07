@@ -4,7 +4,7 @@ import {
 } from '$env/networks/networks.icrc.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
-import type { IcCkToken } from '$icp/types/ic-token';
+import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -128,6 +128,32 @@ export const calculateTokenUsdBalance = ({
 				exchangeRate
 			})
 		: undefined;
+};
+
+/**
+ * Calculates USD amount for the provided token and token amount.
+ *
+ * @param token - Token for which USD balance will be calculated.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns The USD balance or Number(0) in case the number cannot be calculated.
+ *
+ */
+export const calculateTokenUsdAmount = ({
+	amount,
+	token,
+	$exchanges
+}: {
+	amount: BigNumber;
+	token?: IcToken;
+	$exchanges: ExchangesData;
+}) => {
+	if (isNullish(amount) || isNullish(token)) {
+		return 0;
+	}
+	const exchangeRate = $exchanges?.[token.id]?.usd;
+	return nonNullish(exchangeRate)
+		? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })
+		: 0;
 };
 
 /** Maps a Token object to a TokenUi object, meaning it adds the balance and the USD balance to the token.
