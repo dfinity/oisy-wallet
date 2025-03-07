@@ -4,6 +4,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+
 	export let loading = true;
 	export let airdrop: AirdropDescription;
 	export let badgeOnly = false;
