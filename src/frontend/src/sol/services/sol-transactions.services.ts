@@ -8,8 +8,8 @@ import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
-	type SolCertifiedTransaction,
-	solTransactionsStore
+	solTransactionsStore,
+	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
