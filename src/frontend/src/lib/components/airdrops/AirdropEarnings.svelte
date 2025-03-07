@@ -60,11 +60,15 @@
 	let loading: boolean;
 	$: loading = true;
 
-	const loadUserRewardsInfo = async (
-		ckBtcToken: IcToken | undefined,
-		ckUsdcToken: IcToken | undefined,
-		icpToken: IcToken | undefined
-	) => {
+	const loadUserRewardsInfo = async ({
+		ckBtcToken,
+		ckUsdcToken,
+		icpToken
+	}: {
+		ckBtcToken: IcToken | undefined;
+		ckUsdcToken: IcToken | undefined;
+		icpToken: IcToken | undefined;
+	}) => {
 		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {
 			return;
 		}
@@ -96,7 +100,7 @@
 		loading = false;
 	};
 
-	$: loadUserRewardsInfo(ckBtcToken, ckUsdcToken, icpToken);
+	$: loadUserRewardsInfo({ ckBtcToken, ckUsdcToken, icpToken });
 </script>
 
 {#if isEligible}
