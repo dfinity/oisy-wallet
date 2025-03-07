@@ -6,7 +6,6 @@
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { getUserInfo } from '$lib/api/reward.api';
 	import AirdropEarningsCard from '$lib/components/airdrops/AirdropEarningsCard.svelte';
@@ -21,7 +20,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import { formatUSD } from '$lib/utils/format.utils.js';
+	import { formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { findTwinToken } from '$lib/utils/token.utils';
