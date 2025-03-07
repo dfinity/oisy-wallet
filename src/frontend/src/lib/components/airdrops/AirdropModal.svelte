@@ -36,6 +36,7 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 
 	export let airdrop: AirdropDescription;
 
@@ -100,6 +101,9 @@
 		<AirdropBanner />
 
 		<AirdropEarnings {isEligible} />
+		{#if isEligible}
+			<Hr spacing="md" />
+		{/if}
 
 		<div class="flex w-full justify-between text-lg font-semibold"
 			><span class="inline-flex">{$i18n.airdrops.text.participate_title}</span>
@@ -119,6 +123,9 @@
 
 		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="my-2" />
 
+		{#if airdrop.requirements.length > 0}
+			<Hr spacing="md" />
+		{/if}
 		<AirdropsRequirements
 			loading={isRequirementsLoading}
 			{airdrop}
