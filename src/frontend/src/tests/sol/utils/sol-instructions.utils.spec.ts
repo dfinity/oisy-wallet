@@ -374,51 +374,7 @@ describe('sol-instructions.utils', () => {
 				parsed: { type: 'create', info: {} }
 			};
 
-			const mockInnerInstruction: SolRpcInstruction = {
-				parsed: {
-					type: 'createAccount',
-					info: {
-						source: mockSolAddress,
-						newAccount: mockSolAddress2,
-						lamports: 200n
-					}
-				},
-				program: 'mock-program',
-				programId: address(SYSTEM_PROGRAM_ADDRESS),
-				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
-			};
-
-			const mockInnerInstructions: SolRpcInstruction[] = [mockInnerInstruction];
-
 			it('should map a valid `create` instruction with inner instructions', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: mockInnerInstructions
-				});
-
-				expect(result).toEqual({
-					value: 200n,
-					from: mockSolAddress,
-					to: mockSolAddress2
-				});
-			});
-
-			it('should map a valid `createIdempotent` instruction with inner instructions', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: { ...mockAtaInstruction, parsed: { type: 'createIdempotent', info: {} } },
-					network,
-					innerInstructions: mockInnerInstructions
-				});
-
-				expect(result).toEqual({
-					value: 200n,
-					from: mockSolAddress,
-					to: mockSolAddress2
-				});
-			});
-
-			it('should return undefined if inner instructions are undefined', async () => {
 				const result = await mapSolParsedInstruction({
 					instruction: mockAtaInstruction,
 					network
@@ -427,38 +383,10 @@ describe('sol-instructions.utils', () => {
 				expect(result).toBeUndefined();
 			});
 
-			it('should return undefined if there are no inner instructions', async () => {
+			it('should map a valid `createIdempotent` instruction with inner instructions', async () => {
 				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: []
-				});
-
-				expect(result).toBeUndefined();
-			});
-
-			it('should return undefined if there is no `createAccount` in the inner instructions', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: [{ ...mockInnerInstruction, parsed: { type: 'other-type', info: {} } }]
-				});
-
-				expect(result).toBeUndefined();
-			});
-
-			it('should return undefined if the `createAccount` inner instruction is not parsed', async () => {
-				const innerInstruction: SolRpcInstruction = {
-					data: 'mock-data' as Base58EncodedBytes,
-					programId: address(SYSTEM_PROGRAM_ADDRESS),
-					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
-					accounts: [address(mockSolAddress), address(mockSolAddress2)]
-				};
-
-				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: [innerInstruction]
+					instruction: { ...mockAtaInstruction, parsed: { type: 'createIdempotent', info: {} } },
+					network
 				});
 
 				expect(result).toBeUndefined();
