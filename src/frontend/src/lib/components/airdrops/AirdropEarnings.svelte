@@ -24,7 +24,9 @@
 	export let isEligible = false;
 
 	const getUsdAmount = (amount: BigNumber, token?: IcToken) => {
-		if (isNullish(amount) || isNullish(token)) {return 0;}
+		if (isNullish(amount) || isNullish(token)) {
+			return 0;
+		}
 		const exchangeRate = $exchanges?.[token.id]?.usd;
 		return nonNullish(exchangeRate)
 			? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })
@@ -63,7 +65,9 @@
 		ckUsdcToken: IcToken | undefined,
 		icpToken: IcToken | undefined
 	) => {
-		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {return;}
+		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {
+			return;
+		}
 		const data = await getUserInfo({ identity: $authIdentity });
 
 		let _ckBtcReward: BigNumber = BigNumber.from(0);
@@ -81,7 +85,7 @@
 				} else if (ckUsdcToken.ledgerCanisterId === canisterId) {
 					_ckUsdcReward = BigNumber.from(_ckUsdcReward).add(aw.amount);
 				} else {
-					console.warn(`Ledger canister mapping not found for: ${  canisterId}`);
+					console.warn(`Ledger canister mapping not found for: ${canisterId}`);
 				}
 			}
 		}
