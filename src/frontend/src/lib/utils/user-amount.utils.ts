@@ -18,9 +18,9 @@ import {
 	assertErc20Amount
 } from '$lib/utils/assert-amount.utils';
 import { formatToken } from '$lib/utils/format.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { Utils } from 'alchemy-sdk';
 
 export const validateUserAmount = ({
 	userAmount,
@@ -43,55 +43,61 @@ export const validateUserAmount = ({
 }): ConvertAmountErrorType => {
 	// We should align balance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 	const parsedSendBalance = nonNullish(balance)
-		? Utils.parseUnits(
-				formatToken({
+		? parseToken({
+				value: formatToken({
 					value: balance,
 					unitName: token.decimals,
 					displayDecimals: token.decimals
 				}),
-				token.decimals
-			)
+				unitName: token.decimals
+			})
 		: ZERO;
 
 	// if the function called in the swap flow, we only need to check the basic assertAmount condition
 	// if convert or send - we identify token type and check some network-specific conditions
-	if (!isSwapFlow) {
-		if (isTokenErc20(token)) {
-			return assertErc20Amount({
-				userAmount,
-				balance: parsedSendBalance,
-				balanceForFee: balanceForFee ?? ZERO,
-				fee
-			});
-		}
+	if (isSwapFlow) {
+		return assertAmount({
+			userAmount,
+			balance: parsedSendBalance,
+			fee
+		});
+	}
 
-		if (isTokenCkBtcLedger(token)) {
-			return assertCkBtcAmount({
-				userAmount,
-				balance: parsedSendBalance,
-				minterInfo,
-				fee
-			});
-		}
+	if (isTokenErc20(token)) {
+		return assertErc20Amount({
+			userAmount,
+			balance: parsedSendBalance,
+			balanceForFee: balanceForFee ?? ZERO,
+			fee
+		});
+	}
 
-		if (isTokenCkEthLedger(token)) {
-			return assertCkEthAmount({
-				userAmount,
-				balance: parsedSendBalance,
-				minterInfo,
-				fee
-			});
-		}
+	if (isTokenCkBtcLedger(token)) {
+		return assertCkBtcAmount({
+			userAmount,
+			balance: parsedSendBalance,
+			minterInfo,
+			fee
+		});
+	}
 
-		if (isTokenCkErc20Ledger(token)) {
-			return assertCkErc20Amount({
-				userAmount,
-				balance: parsedSendBalance,
-				balanceForFee: balanceForFee ?? ZERO,
-				ethereumEstimateFee,
-				fee
-			});
-		}
+	if (isTokenCkEthLedger(token)) {
+		return assertCkEthAmount({
+			userAmount,
+			balance: parsedSendBalance,
+			minterInfo,
+			fee
+		});
+	}
+
+	if (isTokenCkErc20Ledger(token)) {
+		return assertCkErc20Amount({
+			userAmount,
+			balance: parsedSendBalance,
+			balanceForFee: balanceForFee ?? ZERO,
+			ethereumEstimateFee,
+			fee
+		});
 	}
 
 	return assertAmount({
