@@ -137,12 +137,9 @@ export const calculateTokenUsdAmount = ({
 	$exchanges
 }: {
 	amount?: BigNumber;
-	token?: Token;
+	token: Token;
 	$exchanges: ExchangesData;
 }): number | undefined => {
-	if (isNullish(amount) || isNullish(token)) {
-		return undefined;
-	}
 	const exchangeRate = $exchanges?.[token.id]?.usd;
 	return nonNullish(exchangeRate)
 		? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })

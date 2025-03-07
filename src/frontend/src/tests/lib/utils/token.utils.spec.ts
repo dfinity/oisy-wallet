@@ -147,22 +147,22 @@ describe('calculateTokenUsdBalance', () => {
 		expect(result).toEqual(undefined);
 	});
 
-	it('should return undefined if balances store is not available', () => {
+	it('should return 0 if balances store is not available', () => {
 		const result = calculateTokenUsdBalance({
 			token: ETHEREUM_TOKEN,
 			$balances: {},
 			$exchanges: mockExchanges
 		});
-		expect(result).toEqual(undefined);
+		expect(result).toEqual(0);
 	});
 
-	it('should return undefined if balances store is undefined', () => {
+	it('should return 0 if balances store is undefined', () => {
 		const result = calculateTokenUsdBalance({
 			token: ETHEREUM_TOKEN,
 			$balances: undefined,
 			$exchanges: mockExchanges
 		});
-		expect(result).toEqual(undefined);
+		expect(result).toEqual(0);
 	});
 });
 
@@ -195,13 +195,13 @@ describe('calculateTokenUsdAmount', () => {
 		expect(result).toEqual(undefined);
 	});
 
-	it('should return undefined if token is not available', () => {
+	it('should return 0 if amount is not available', () => {
 		const result = calculateTokenUsdAmount({
-			token: undefined,
-			amount: bn3,
+			token: ICP_TOKEN,
+			amount: undefined,
 			$exchanges: mockExchanges
 		});
-		expect(result).toEqual(undefined);
+		expect(result).toEqual(0);
 	});
 });
 
