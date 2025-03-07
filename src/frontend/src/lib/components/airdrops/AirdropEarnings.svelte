@@ -24,6 +24,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { findTwinToken } from '$lib/utils/token.utils';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	export let isEligible = false;
 
@@ -149,11 +150,15 @@
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
-			<button on:click={gotoActivity} class=" font-semibold text-brand-primary-alt">
+			<Button
+				paddingSmall
+				on:click={gotoActivity}
+				styleClass="font-semibold bg-transparent text-brand-primary-alt"
+			>
 				{isMobile()
 					? $i18n.airdrops.text.activity_button_text_short
 					: $i18n.airdrops.text.activity_button_text}
-			</button>
+			</Button>
 		</div>
 	</div>
 
