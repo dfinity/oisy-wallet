@@ -38,7 +38,6 @@
 				? $solAddressLocalnetStore
 				: $solAddressMainnetStore;
 
-
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
 	let ataAddress: SolAddress | undefined;
@@ -47,15 +46,14 @@
 		[ataAddress] =
 			nonNullish(addressData) && isTokenSpl(token)
 				? await findAssociatedTokenPda({
-					owner: solAddress(addressData.data),
-					tokenProgram: solAddress(token.owner),
-					mint: solAddress(token.address)
-				})
+						owner: solAddress(addressData.data),
+						tokenProgram: solAddress(token.owner),
+						mint: solAddress(token.address)
+					})
 				: [undefined];
 	};
 
 	$: token, updateAtaAddress();
-
 
 	let address: SolAddress | undefined;
 	$: address = nonNullish(ataAddress) ? ataAddress : addressData?.data;
