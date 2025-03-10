@@ -2,11 +2,11 @@
 	import { IconCheckCircleFill, Spinner } from '@dfinity/gix-components';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		AIRDROPS_REQUIREMENTS_STATUS,
 		AIRDROPS_REQUIREMENTS_STATUS_SPINNER
-	} from "$lib/constants/test-ids.constants";
+	} from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let loading = true;
 	export let airdrop: AirdropDescription;

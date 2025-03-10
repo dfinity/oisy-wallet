@@ -1,11 +1,14 @@
 import type { AirdropDescription } from '$env/types/env-airdrop';
 import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
+import {
+	AIRDROPS_REQUIREMENTS_STATUS,
+	AIRDROPS_REQUIREMENTS_STATUS_SPINNER
+} from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import {AIRDROPS_REQUIREMENTS_STATUS, AIRDROPS_REQUIREMENTS_STATUS_SPINNER} from "$lib/constants/test-ids.constants";
 
 describe('AirdropsRequirements', () => {
 	const mockAirdropCampaign: AirdropDescription | undefined = mockAirdropCampaigns.find(
