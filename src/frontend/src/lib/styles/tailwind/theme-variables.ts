@@ -5,6 +5,7 @@ export const themeVariables = {
 		primary: 'var(--color-background-primary)',
 		'primary-alt': 'var(--color-background-primary-alt)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
+		'primary-inverted-alt': 'var(--color-background-primary-inverted-alt)',
 		secondary: 'var(--color-background-secondary)',
 		'secondary-alt': 'var(--color-background-secondary-alt)',
 		'secondary-inverted': 'var(--color-background-secondary-inverted)',
