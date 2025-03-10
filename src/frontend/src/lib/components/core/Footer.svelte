@@ -16,6 +16,7 @@
 </script>
 
 <footer
+	data-tid="navigation-footer"
 	class="z-1 pointer-events-none mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-12 sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between sm:px-8 lg:fixed lg:inset-x-0 lg:bottom-0"
 	class:sm:sticky={$authNotSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}

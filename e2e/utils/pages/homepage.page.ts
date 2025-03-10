@@ -30,6 +30,7 @@ import {
 	getReceiveTokensModalAddressLabelSelector,
 	getReceiveTokensModalQrCodeButtonSelector
 } from '../selectors.utils';
+import { ViewportAdjuster } from '../helpers/viewport-utils';
 
 interface HomepageParams {
 	page: Page;
@@ -373,6 +374,8 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		const viewportAdjuster = new ViewportAdjuster(this.#page);
+		await viewportAdjuster.checkAndAdjustViewport();
 		if (freezeCarousel) {
 			await this.setCarouselFirstSlide();
 			await this.waitForLoadState();
