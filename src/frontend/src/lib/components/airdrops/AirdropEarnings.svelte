@@ -70,7 +70,12 @@
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
 	}) => {
-		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {
+		if (
+			isNullish(ckBtcToken) ||
+			isNullish(ckUsdcToken) ||
+			isNullish(icpToken) ||
+			isNullish($authIdentity)
+		) {
 			return;
 		}
 
