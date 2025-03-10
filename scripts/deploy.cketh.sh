@@ -3,11 +3,9 @@
 DFX_NETWORK=local
 
 echo "Step 1: create canisters..."
-dfx canister create cketh_ledger --specified-id apia6-jaaaa-aaaar-qabma-cai --network "$DFX_NETWORK"
-dfx canister create cketh_minter --specified-id jzenf-aiaaa-aaaar-qaa7q-cai --network "$DFX_NETWORK"
+dfx canister create cketh_ledger --network "$DFX_NETWORK"
+dfx canister create cketh_minter --network "$DFX_NETWORK"
 
-MINTERID="$(dfx canister id cketh_minter --network "$DFX_NETWORK")"
-echo "$MINTERID"
 LEDGERID="$(dfx canister id cketh_ledger --network "$DFX_NETWORK")"
 echo "$LEDGERID"
 
