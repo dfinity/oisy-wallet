@@ -21,12 +21,12 @@
 			})
 		: undefined;
 
-	let displayAmount: string
+	let displayAmount: string;
 	$: displayAmount = `${formatToken({
 		value: amount,
 		unitName: decimals,
 		displayDecimals: EIGHT_DECIMALS
-	})} ${symbol}`
+	})} ${symbol}`;
 </script>
 
 <div transition:fade class="flex gap-4">
