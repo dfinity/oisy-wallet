@@ -11,7 +11,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { jsonReplacer, nonNullish } from '@dfinity/utils';
-import { lamports } from '@solana/rpc-types';
+import { lamports } from '@solana/web3.js';
 import { type MockInstance } from 'vitest';
 
 describe('sol-wallet.scheduler', () => {
