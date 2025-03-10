@@ -36,25 +36,22 @@ import { type MockInstance } from 'vitest';
 vi.mock(import('@solana/web3.js'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
+		appendTransactionMessageInstructions: vi.fn(),
+		assertIsTransactionPartialSigner: vi.fn(),
+		assertIsTransactionSigner: vi.fn(),
+		assertTransactionIsFullySigned: vi.fn(),
+		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
+		getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
+		getSignatureFromTransaction: vi.fn(),
+		prependTransactionMessageInstruction: vi.fn(),
+		sendAndConfirmTransactionFactory: vi.fn(),
+		setTransactionMessageFeePayer: vi.fn((message) => message),
+		setTransactionMessageFeePayerSigner: vi.fn((message) => message),
+		setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
+		signTransactionMessageWithSigners: vi.fn(),
 		pipe: actual.pipe
 	};
 });
-
-vi.mock('@solana/web3.js', () => ({
-	appendTransactionMessageInstructions: vi.fn(),
-	assertIsTransactionPartialSigner: vi.fn(),
-	assertIsTransactionSigner: vi.fn(),
-	assertTransactionIsFullySigned: vi.fn(),
-	createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
-	getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
-	getSignatureFromTransaction: vi.fn(),
-	prependTransactionMessageInstruction: vi.fn(),
-	sendAndConfirmTransactionFactory: vi.fn(),
-	setTransactionMessageFeePayer: vi.fn((message) => message),
-	setTransactionMessageFeePayerSigner: vi.fn((message) => message),
-	setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
-	signTransactionMessageWithSigners: vi.fn()
-}));
 
 vi.mock('@solana-program/system', () => ({
 	getTransferSolInstruction: vi.fn().mockReturnValue('mock-transfer-sol-instruction')
