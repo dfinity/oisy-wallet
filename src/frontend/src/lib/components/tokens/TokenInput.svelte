@@ -32,6 +32,7 @@
 	export let amountSetToMax = false;
 	export let loading = false;
 	export let isSelectable = true;
+	export let autofocus = false;
 	export let customValidate: (userAmount: BigNumber) => ConvertAmountErrorType = () => undefined;
 	export let customErrorValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
 
@@ -88,6 +89,7 @@
 						{placeholder}
 						{disabled}
 						{loading}
+						{autofocus}
 						decimals={token.decimals}
 						error={nonNullish(errorType)}
 						on:focus={onFocus}
@@ -103,6 +105,7 @@
 						{placeholder}
 						{disabled}
 						{loading}
+						{autofocus}
 						error={nonNullish(errorType)}
 						on:focus={onFocus}
 						on:blur={onBlur}

@@ -108,6 +108,7 @@ export const AIRDROPS_MODAL_IMAGE_BANNER = 'airdrop-modal-image-banner';
 export const AIRDROPS_STATE_MODAL_IMAGE_BANNER = 'airdrop-state-modal-image-banner';
 export const AIRDROPS_STATE_MODAL_SHARE_BUTTON = 'airdrop-state-modal-share-button';
 export const AIRDROPS_BANNER = 'airdrops-banner';
+export const AIRDROPS_REQUIREMENTS_STATUS = 'airdrop-requirement-status';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
