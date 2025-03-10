@@ -281,7 +281,7 @@ describe('reward-code', () => {
 				ckBtcToken: mockCkBtcToken,
 				ckUsdcToken: mockCkUsdcToken,
 				icpToken: mockIcpToken,
-				$authIdentity: mockIdentity
+				identity: mockIdentity
 			});
 			expect(result.ckBtcReward.toString()).toEqual('3000');
 			expect(result.ckUsdcReward.toString()).toEqual('4000');
@@ -293,7 +293,7 @@ describe('reward-code', () => {
 				ckBtcToken: mockCkBtcToken,
 				ckUsdcToken: mockCkUsdcToken,
 				icpToken: mockIcpToken,
-				$authIdentity: mockIdentity
+				identity: mockIdentity
 			});
 			expect(result.ckBtcReward.toString()).toEqual('1000');
 			expect(result.ckUsdcReward.toString()).toEqual('0');
@@ -305,7 +305,7 @@ describe('reward-code', () => {
 				ckBtcToken: mockCkBtcToken,
 				ckUsdcToken: mockCkUsdcToken,
 				icpToken: mockIcpToken,
-				$authIdentity: mockIdentity
+				identity: mockIdentity
 			});
 			expect(result.ckBtcReward.toString()).toEqual('0');
 			expect(result.ckUsdcReward.toString()).toEqual('0');

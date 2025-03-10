@@ -78,16 +78,12 @@
 			return;
 		}
 
-		const result = await getUserRewardsTokenAmounts({
+		({ ckBtcReward, ckUsdcReward, icpReward } = await getUserRewardsTokenAmounts({
 			ckBtcToken,
 			ckUsdcToken,
 			icpToken,
-			$authIdentity
-		});
-
-		ckBtcReward = result.ckBtcReward;
-		ckUsdcReward = result.ckUsdcReward;
-		icpReward = result.icpReward;
+			identity: $authIdentity
+		}));
 		loading = false;
 	};
 
