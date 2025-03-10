@@ -209,7 +209,7 @@ export const getRewardRequirementsFulfilled = ({
 	transactions: AnyTransactionUiWithCmp[];
 	totalUsdBalance: number;
 }): boolean[] => {
-	const req1: boolean = true; // logged in once in last 7 days
+	const req1 = true; // logged in once in last 7 days
 	const req2: boolean =
 		transactions.filter((trx) =>
 			trx.transaction.timestamp

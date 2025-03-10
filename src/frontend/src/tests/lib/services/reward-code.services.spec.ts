@@ -214,7 +214,7 @@ describe('reward-code', () => {
 			component: 'bitcoin'
 		});
 
-		it('should be fulfilled for 1 of 3 criterias', async () => {
+		it('should be fulfilled for 1 of 3 criterias', () => {
 			const [req1, req2, req3] = getRewardRequirementsFulfilled({
 				transactions: [],
 				totalUsdBalance: 9
@@ -225,7 +225,7 @@ describe('reward-code', () => {
 			expect(req3).toBeFalsy();
 		});
 
-		it('should be fulfilled for 2 of 3 criterias', async () => {
+		it('should be fulfilled for 2 of 3 criterias', () => {
 			const [req1, req2, req3] = getRewardRequirementsFulfilled({
 				transactions: [
 					buildMockTransaction(
@@ -243,7 +243,7 @@ describe('reward-code', () => {
 			expect(req3).toBeFalsy();
 		});
 
-		it('should be fulfilled for 2 of 3 criterias because transactions older than 7 days', async () => {
+		it('should be fulfilled for 2 of 3 criterias because transactions older than 7 days', () => {
 			const [req1, req2, req3] = getRewardRequirementsFulfilled({
 				transactions: [
 					buildMockTransaction(
@@ -261,7 +261,7 @@ describe('reward-code', () => {
 			expect(req3).toBeTruthy();
 		});
 
-		it('should be fulfilled for 3 of 3 criterias', async () => {
+		it('should be fulfilled for 3 of 3 criterias', () => {
 			const [req1, req2, req3] = getRewardRequirementsFulfilled({
 				transactions: [
 					buildMockTransaction(
