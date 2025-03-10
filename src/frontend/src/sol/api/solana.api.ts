@@ -27,44 +27,23 @@ export const loadSolLamportsBalance = async ({
 	return balance;
 };
 
-/**
- * Fetches the SPL token balance for a wallet.
- */
-export const loadSplTokenBalance = async ({
-	address,
-	network,
-	tokenAddress
+export const loadTokenBalance = async ({
+	ataAddress,
+	network
 }: {
-	address: SolAddress;
+	ataAddress: SolAddress;
 	network: SolanaNetworkType;
-	tokenAddress: SplTokenAddress;
-}): Promise<bigint> => {
-	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
-	const wallet = solAddress(address);
-
-	const response = await getTokenAccountsByOwner(
-		wallet,
-		{
-			mint: solAddress(tokenAddress)
-		},
-		{ encoding: 'jsonParsed' }
-	).send();
-
-	if (response.value.length === 0) {
-		return BigInt(0);
-	}
+}): Promise<bigint | undefined> => {
+	const { getTokenAccountBalance } = solanaHttpRpc(network);
+	const wallet = solAddress(ataAddress);
 
 	const {
-		account: {
-			data: {
-				parsed: {
-					info: { tokenAmount }
-				}
-			}
-		}
-	} = response.value[0];
+		value: { amount }
+	} = await getTokenAccountBalance(wallet).send();
 
-	return BigInt(tokenAmount.amount);
+	if (nonNullish(amount)) {
+		return BigInt(amount);
+	}
 };
 
 /**
@@ -239,4 +218,45 @@ export const getTokenOwner = async ({
 	const { value } = await getAccountInfo(token, { encoding: 'jsonParsed' }).send();
 
 	return value?.owner?.toString();
+};
+
+export const getAccountOwner = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<SolAddress | undefined> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const account = solAddress(address);
+
+	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+
+	if (isNullish(value?.data) || !('parsed' in value.data)) {
+		return undefined;
+	}
+
+	if (isNullish(value.data.parsed?.info)) {
+		return undefined;
+	}
+
+	// We need to cast the type since it is not implied
+	const { owner } = value.data.parsed.info as { owner: SolAddress };
+
+	return owner;
+};
+
+export const checkIfAccountExists = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<boolean> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const account = solAddress(address);
+
+	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+
+	return nonNullish(value);
 };

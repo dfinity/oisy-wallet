@@ -87,22 +87,48 @@ describe('sol-instructions.utils', () => {
 		});
 
 		describe('with a System parsed instruction', () => {
-			const mockSystemInstruction: SolRpcInstruction = {
-				...mockInstruction,
-				programAddress: address(SYSTEM_PROGRAM_ADDRESS),
-				parsed: {
-					type: 'transfer',
-					info: {
-						destination: 'toAddress',
-						lamports: 100n,
-						source: 'fromAddress'
+			it('should map a valid `createAccount` instruction', async () => {
+				const mockCreateAccountInstruction: SolRpcInstruction = {
+					...mockInstruction,
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+					parsed: {
+						type: 'createAccount',
+						info: {
+							newAccount: 'toAddress',
+							lamports: 100n,
+							source: 'fromAddress'
+						}
 					}
-				}
-			};
+				};
+
+				const result = await mapSolParsedInstruction({
+					instruction: mockCreateAccountInstruction,
+					network
+				});
+
+				expect(result).toEqual({
+					value: 100n,
+					from: 'fromAddress',
+					to: 'toAddress'
+				});
+			});
 
 			it('should map a valid `transfer` instruction', async () => {
+				const mockTransferInstruction: SolRpcInstruction = {
+					...mockInstruction,
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+					parsed: {
+						type: 'transfer',
+						info: {
+							destination: 'toAddress',
+							lamports: 100n,
+							source: 'fromAddress'
+						}
+					}
+				};
+
 				const result = await mapSolParsedInstruction({
-					instruction: mockSystemInstruction,
+					instruction: mockTransferInstruction,
 					network
 				});
 
@@ -115,7 +141,11 @@ describe('sol-instructions.utils', () => {
 
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
-					instruction: { ...mockSystemInstruction, parsed: { type: 'other-type', info: {} } },
+					instruction: {
+						...mockInstruction,
+						programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+						parsed: { type: 'other-type', info: {} }
+					},
 					network
 				});
 
@@ -141,10 +171,10 @@ describe('sol-instructions.utils', () => {
 
 			beforeEach(() => {
 				const mockRpc = {
-					getAccountInfo: vi.fn((address) => ({
+					getAccountInfo: vi.fn(() => ({
 						send: vi.fn(() => ({
 							value: {
-								data: { parsed: { info: { mint: mockTokenAddress, owner: `${address}-owner` } } }
+								data: { parsed: { info: { mint: mockTokenAddress } } }
 							}
 						}))
 					}))
@@ -161,8 +191,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});
@@ -190,8 +220,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});
@@ -208,16 +238,39 @@ describe('sol-instructions.utils', () => {
 					}
 				};
 
-				const result = await mapSolParsedInstruction({
-					instruction: mockCloseAccountInstruction,
-					network
-				});
-
-				expect(result).toEqual({
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network
+					})
+				).resolves.toEqual({
 					value: 0n,
 					from: mockSolAddress,
-					to: mockSolAddress2,
-					tokenAddress: mockTokenAddress
+					to: mockSolAddress2
+				});
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress]: 100n }
+					})
+				).resolves.toEqual({
+					value: 100n,
+					from: mockSolAddress,
+					to: mockSolAddress2
+				});
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockCloseAccountInstruction,
+						network,
+						cumulativeBalances: { [mockSolAddress2]: 100n }
+					})
+				).resolves.toEqual({
+					value: 0n,
+					from: mockSolAddress,
+					to: mockSolAddress2
 				});
 			});
 
@@ -249,10 +302,10 @@ describe('sol-instructions.utils', () => {
 
 			beforeEach(() => {
 				const mockRpc = {
-					getAccountInfo: vi.fn((address) => ({
+					getAccountInfo: vi.fn(() => ({
 						send: vi.fn(() => ({
 							value: {
-								data: { parsed: { info: { mint: mockTokenAddress, owner: `${address}-owner` } } }
+								data: { parsed: { info: { mint: mockTokenAddress } } }
 							}
 						}))
 					}))
@@ -269,8 +322,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});
@@ -298,8 +351,8 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toEqual({
 					value: 50n,
-					from: `${mockSolAddress}-owner`,
-					to: `${mockSolAddress2}-owner`,
+					from: mockSolAddress,
+					to: mockSolAddress2,
 					tokenAddress: mockTokenAddress
 				});
 			});
@@ -321,51 +374,7 @@ describe('sol-instructions.utils', () => {
 				parsed: { type: 'create', info: {} }
 			};
 
-			const mockInnerInstruction: SolRpcInstruction = {
-				parsed: {
-					type: 'createAccount',
-					info: {
-						source: mockSolAddress,
-						newAccount: mockSolAddress2,
-						lamports: 200n
-					}
-				},
-				program: 'mock-program',
-				programId: address(SYSTEM_PROGRAM_ADDRESS),
-				programAddress: address(SYSTEM_PROGRAM_ADDRESS)
-			};
-
-			const mockInnerInstructions: SolRpcInstruction[] = [mockInnerInstruction];
-
 			it('should map a valid `create` instruction with inner instructions', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: mockInnerInstructions
-				});
-
-				expect(result).toEqual({
-					value: 200n,
-					from: mockSolAddress,
-					to: mockSolAddress2
-				});
-			});
-
-			it('should map a valid `createIdempotent` instruction with inner instructions', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: { ...mockAtaInstruction, parsed: { type: 'createIdempotent', info: {} } },
-					network,
-					innerInstructions: mockInnerInstructions
-				});
-
-				expect(result).toEqual({
-					value: 200n,
-					from: mockSolAddress,
-					to: mockSolAddress2
-				});
-			});
-
-			it('should return undefined if inner instructions are undefined', async () => {
 				const result = await mapSolParsedInstruction({
 					instruction: mockAtaInstruction,
 					network
@@ -374,38 +383,10 @@ describe('sol-instructions.utils', () => {
 				expect(result).toBeUndefined();
 			});
 
-			it('should return undefined if there are no inner instructions', async () => {
+			it('should map a valid `createIdempotent` instruction with inner instructions', async () => {
 				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: []
-				});
-
-				expect(result).toBeUndefined();
-			});
-
-			it('should return undefined if there is no `createAccount` in the inner instructions', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: [{ ...mockInnerInstruction, parsed: { type: 'other-type', info: {} } }]
-				});
-
-				expect(result).toBeUndefined();
-			});
-
-			it('should return undefined if the `createAccount` inner instruction is not parsed', async () => {
-				const innerInstruction: SolRpcInstruction = {
-					data: 'mock-data' as Base58EncodedBytes,
-					programId: address(SYSTEM_PROGRAM_ADDRESS),
-					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
-					accounts: [address(mockSolAddress), address(mockSolAddress2)]
-				};
-
-				const result = await mapSolParsedInstruction({
-					instruction: mockAtaInstruction,
-					network,
-					innerInstructions: [innerInstruction]
+					instruction: { ...mockAtaInstruction, parsed: { type: 'createIdempotent', info: {} } },
+					network
 				});
 
 				expect(result).toBeUndefined();
