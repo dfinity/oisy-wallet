@@ -300,6 +300,8 @@ abstract class Homepage {
 
 		await this.promotionCarousel.navigateToSlide(1);
 		await this.promotionCarousel.freezeCarousel();
+
+		await this.waitForLoadState();
 	}
 
 	async waitForLoadState() {
@@ -309,6 +311,8 @@ abstract class Homepage {
 	async navigateTo(testId: string): Promise<void> {
 		if (await this.isVisibleByTestId(testId)) {
 			await this.clickByTestId({ testId });
+		} else if (await this.isVisibleByTestId(`mobile-${testId}`)) {
+			await this.clickByTestId({ testId: `mobile-${testId}` });
 		} else {
 			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
 			await navigationMenuButton.click();

@@ -29,7 +29,7 @@ describe('TransactionsDateGroup', () => {
 	).map((transaction) => ({
 		transaction: {
 			...transaction,
-			id: transaction.hash,
+			id: transaction.hash ?? '',
 			type: 'send'
 		},
 		timestamp: todayTimestamp,
