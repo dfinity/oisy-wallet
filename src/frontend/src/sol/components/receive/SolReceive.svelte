@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { address as solAddress } from '@solana/web3.js';
 	import { findAssociatedTokenPda } from '@solana-program/token';
-	import { onDestroy } from 'svelte';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalSolReceive } from '$lib/derived/modal.derived';
@@ -46,10 +45,10 @@
 		[ataAddress] =
 			nonNullish(addressData) && isTokenSpl(token)
 				? await findAssociatedTokenPda({
-						owner: solAddress(addressData.data),
-						tokenProgram: solAddress(token.owner),
-						mint: solAddress(token.address)
-					})
+					owner: solAddress(addressData.data),
+					tokenProgram: solAddress(token.owner),
+					mint: solAddress(token.address)
+				})
 				: [undefined];
 	};
 
