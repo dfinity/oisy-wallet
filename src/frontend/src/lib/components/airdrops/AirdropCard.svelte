@@ -39,7 +39,7 @@
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">
 			<div class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
-				>{$i18n.airdrops.text.check_earnings}
+				>{$i18n.airdrops.text.check_status}
 			</div></section
 		>
 	</article>
