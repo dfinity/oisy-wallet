@@ -134,6 +134,7 @@
 	exchangeRate={$sendTokenExchangeRate}
 	bind:error={amountError}
 	customErrorValidate={customValidate}
+	autofocus={nonNullish($sendToken)}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
