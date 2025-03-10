@@ -40,8 +40,6 @@
 
 	export let airdrop: AirdropDescription;
 
-	// for the moment we evaluate if requirements are fulfilled in frontend
-	// this might need to change when we have multiple campaigns etc
 	let totalUsdBalance: number;
 	$: totalUsdBalance = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 
