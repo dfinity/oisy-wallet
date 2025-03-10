@@ -9,12 +9,10 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import AirdropEarningsCard from '$lib/components/airdrops/AirdropEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
