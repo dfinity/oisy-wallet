@@ -33,7 +33,7 @@
 	$: ckBtcReward = ZERO;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
-		? (calculateTokenUsdAmount({ amount: ckBtcReward, token: ckBtcToken, $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({ amount: ckBtcReward, token: ckBtcToken, $exchanges: $exchanges }) ?? 0)
 		: 0;
 
 	let ckUsdcToken: IcToken | undefined;
@@ -42,7 +42,7 @@
 	$: ckUsdcReward = ZERO;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
-		? (calculateTokenUsdAmount({ amount: ckUsdcReward, token: ckUsdcToken, $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({ amount: ckUsdcReward, token: ckUsdcToken, $exchanges: $exchanges }) ?? 0)
 		: 0;
 
 	let icpToken: IcToken | undefined;
@@ -51,7 +51,7 @@
 	$: icpReward = ZERO;
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
-		? (calculateTokenUsdAmount({ amount: icpReward, token: icpToken, $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({ amount: icpReward, token: icpToken, $exchanges: $exchanges }) ?? 0)
 		: 0;
 
 	let totalRewardUsd: number;
