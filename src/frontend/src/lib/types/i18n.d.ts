@@ -121,6 +121,7 @@ interface I18nAirdrops {
 		participate_title: string;
 		share: string;
 		learn_more: string;
+		check_status: string;
 		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
@@ -364,8 +365,10 @@ interface I18nSend {
 		insufficient_funds: string;
 		unknown_minimum_ckbtc_amount: string;
 		unknown_minimum_cketh_amount: string;
+		unknown_minimum_amount: string;
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
+		minimum_amount: string;
 		minimum_ledger_fees: string;
 		minimum_cketh_balance: string;
 		unknown_cketh: string;
