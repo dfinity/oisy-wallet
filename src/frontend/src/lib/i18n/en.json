@@ -18,7 +18,8 @@
 			"view": "View",
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
-			"not_available": "n/a"
+			"not_available": "n/a",
+			"new": "New"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
