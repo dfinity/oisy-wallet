@@ -205,12 +205,12 @@ export const getUserRewardsTokenAmounts = async ({
 	ckBtcToken,
 	ckUsdcToken,
 	icpToken,
-	$authIdentity
+	identity
 }: {
 	ckBtcToken: IcToken;
 	ckUsdcToken: IcToken;
 	icpToken: IcToken;
-	$authIdentity: OptionIdentity;
+	identity: Identity;
 }): Promise<{
 	ckBtcReward: BigNumber;
 	ckUsdcReward: BigNumber;
@@ -222,11 +222,7 @@ export const getUserRewardsTokenAmounts = async ({
 		icpReward: ZERO
 	};
 
-	if (isNullish($authIdentity)) {
-		return initialRewards;
-	}
-
-	const { usage_awards } = await getUserInfo({ identity: $authIdentity });
+	const { usage_awards } = await getUserInfo({ identity });
 	const usageAwards = fromNullable(usage_awards);
 
 	if (isNullish(usageAwards)) {
