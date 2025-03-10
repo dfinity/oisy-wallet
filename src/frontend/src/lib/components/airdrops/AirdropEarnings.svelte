@@ -62,10 +62,10 @@
 	$: loading = true;
 
 	const loadRewards = async ({
-		ckBtcToken,
-		ckUsdcToken,
-		icpToken
-	}: {
+															 ckBtcToken,
+															 ckUsdcToken,
+															 icpToken
+														 }: {
 		ckBtcToken: IcToken | undefined;
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
@@ -110,10 +110,10 @@
 			class:duration-500={loading}
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
-			>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
-				$noOfSprinkles: '3',
-				$amount: formatUSD({ value: totalRewardUsd })
-			})}
+		>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
+			$noOfSprinkles: '3',
+			$amount: formatUSD({ value: totalRewardUsd })
+		})}
 		</div>
 
 		<div class="flex w-full gap-2">
@@ -144,6 +144,4 @@
 			</Button>
 		</div>
 	</div>
-
-	<Hr spacing="md" />
 {/if}
