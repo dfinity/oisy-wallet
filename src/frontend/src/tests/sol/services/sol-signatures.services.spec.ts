@@ -1,5 +1,7 @@
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { last } from '$lib/utils/array.utils';
 import * as solanaApi from '$sol/api/solana.api';
+import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
@@ -31,6 +33,47 @@ describe('sol-transactions.services', () => {
 	});
 
 	describe('getSolTransactions', () => {
+		it('should match the total balance of an account', async () => {
+			// We use a real address here to test the function. Ideally, the address is a very active one.
+			const address = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
+
+			const loadTransactions = async (
+				lastSignature?: string | undefined
+			): Promise<SolTransactionUi[]> => {
+				const transactions = await getSolTransactions({
+					address,
+					network: SolanaNetworks.mainnet,
+					before: lastSignature,
+					limit: 100
+				});
+
+				if (transactions.length === 0) {
+					return transactions;
+				}
+
+				const nextTransactions: SolTransactionUi[] = await loadTransactions(
+					last(transactions)?.signature
+				);
+
+				return [...transactions, ...nextTransactions];
+			};
+
+			const transactions = await loadTransactions();
+
+			const solBalance: bigint = transactions.reduce<bigint>(
+				(acc, { value, type }) => acc + (value ?? 0n) * (type === 'send' ? -1n : 1n),
+				0n
+			);
+
+			const fetchedSolBalance = await loadSolLamportsBalance({
+				address,
+				network: SolanaNetworks.mainnet
+			});
+
+			console.log(solBalance, fetchedSolBalance, transactions.length);
+		}, 60000);
+
+		// describe('with mocked dependencies', () => {
 		let spyFetchSignatures: MockInstance;
 		let spyFetchTransactionsForSignature: MockInstance;
 		let spyFindAssociatedTokenPda: MockInstance;
@@ -146,5 +189,6 @@ describe('sol-transactions.services', () => {
 				})
 			).rejects.toThrow(mockError);
 		});
+		// });
 	});
 });
