@@ -87,8 +87,9 @@
 
 	<ContentWithToolbar>
 		<AirdropBanner />
+
+		<AirdropEarnings {isEligible} />
 		{#if isEligible}
-			<AirdropEarnings {isEligible} />
 			<Hr spacing="md" />
 		{/if}
 
