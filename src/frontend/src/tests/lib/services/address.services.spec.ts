@@ -35,6 +35,9 @@ describe('address.services', () => {
 		vi.resetAllMocks();
 		vi.clearAllMocks();
 
+		// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+
 		authStore.setForTesting(mockIdentity);
 	});
 

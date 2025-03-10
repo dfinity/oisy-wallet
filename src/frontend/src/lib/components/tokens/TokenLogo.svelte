@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,7 +12,7 @@
 	export let badge:
 		| { type: 'network'; blackAndWhite?: boolean }
 		| { type: 'tokenCount'; count: number }
-		| { type: 'icon'; icon: ComponentType; ariaLabel: string }
+		| { type: 'icon'; icon: Component; ariaLabel: string }
 		| undefined = undefined;
 	export let logoSize: LogoSize = 'lg';
 	export let ring = false;

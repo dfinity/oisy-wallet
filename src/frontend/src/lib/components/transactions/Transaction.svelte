@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { ComponentType } from 'svelte';
+	import type { Component } from 'svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -20,7 +20,7 @@
 	export let token: Token;
 	export let iconType: 'token' | 'transaction' = 'transaction';
 
-	let icon: ComponentType;
+	let icon: Component;
 	$: icon = mapTransactionIcon({ type, status });
 
 	let iconWithOpacity: boolean;
