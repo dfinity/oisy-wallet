@@ -1,10 +1,10 @@
 import type { BtcTransactionType } from '$btc/types/btc-transaction';
-import type { TransactionStatus, TransactionUiCommon } from '$lib/types/transaction';
+import type { TransactionId, TransactionStatus, TransactionUiCommon } from '$lib/types/transaction';
 
 export type BtcTransactionStatus = TransactionStatus;
 
 export interface BtcTransactionUi extends TransactionUiCommon {
-	id: string;
+	id: TransactionId;
 	type: BtcTransactionType;
 	status: BtcTransactionStatus;
 	value?: bigint;
