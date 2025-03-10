@@ -9,7 +9,6 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import AirdropEarningsCard from '$lib/components/airdrops/AirdropEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -34,7 +33,11 @@
 	$: ckBtcReward = ZERO;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
-		? (calculateTokenUsdAmount({ amount: ckBtcReward, token: ckBtcToken, $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({
+				amount: ckBtcReward,
+				token: ckBtcToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let ckUsdcToken: IcToken | undefined;
@@ -43,7 +46,11 @@
 	$: ckUsdcReward = ZERO;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
-		? (calculateTokenUsdAmount({ amount: ckUsdcReward, token: ckUsdcToken, $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({
+				amount: ckUsdcReward,
+				token: ckUsdcToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let icpToken: IcToken | undefined;
@@ -52,7 +59,7 @@
 	$: icpReward = ZERO;
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
-		? (calculateTokenUsdAmount({ amount: icpReward, token: icpToken, $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({ amount: icpReward, token: icpToken, $exchanges: $exchanges }) ?? 0)
 		: 0;
 
 	let totalRewardUsd: number;
@@ -144,6 +151,4 @@
 			</Button>
 		</div>
 	</div>
-
-	<Hr spacing="md" />
 {/if}
