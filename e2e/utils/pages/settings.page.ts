@@ -17,7 +17,9 @@ export class SettingsPage extends HomepageLoggedIn {
 
 		await this.mockSelector({ selector: `[data-tid="${SETTINGS_ADDRESS_LABEL}"]` });
 
-		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({ state: 'hidden' });
+		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
+			state: 'hidden'
+		});
 
 		await this.waitForLoadState();
 	}

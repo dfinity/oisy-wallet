@@ -20,7 +20,9 @@ export class TransactionsPage extends HomepageLoggedIn {
 	override async extendWaitForReady(): Promise<void> {
 		const testId = `${TOKEN_CARD}-${this.#tokenSymbol}-${this.#networkId}`;
 		await this.clickByTestId({ testId });
-		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({ state: 'hidden' });
+		await this.getLocatorByTestId({ testId: CAROUSEL_SLIDE_NAVIGATION }).waitFor({
+			state: 'hidden'
+		});
 		await this.waitForLoadState();
 	}
 }
