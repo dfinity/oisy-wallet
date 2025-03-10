@@ -27,7 +27,8 @@
 		value: amount,
 		unitName: decimals,
 		displayDecimals: EIGHT_DECIMALS
-	})} {symbol}
+	})}
+	{symbol}
 
 	{#if nonNullish(usdAmount)}
 		<div class="text-tertiary">
