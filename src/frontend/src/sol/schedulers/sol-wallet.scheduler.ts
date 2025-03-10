@@ -1,4 +1,4 @@
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { SolAddress } from '$lib/types/address';
 import type {
@@ -48,7 +48,7 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 
 	async start(data: PostMessageDataRequestSol | undefined) {
 		await this.timer.start<PostMessageDataRequestSol>({
-			interval: WALLET_TIMER_INTERVAL_MILLIS,
+			interval: SOL_WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
 			data
 		});

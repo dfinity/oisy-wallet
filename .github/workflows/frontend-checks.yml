@@ -109,7 +109,7 @@ jobs:
     steps:
       - name: Cleared for merging
         run: |
-          if [ "${{ needs.format.result }}" == "success" ] && [ "${{ needs.lint.result }}" == "success" ] && [ "${{ needs.check.result }}" == "success" ] && [ "${{ needs.test.result }}" == "success" ]; then
+          if [ "${{ needs.format.result }}" == "success" ] && [ "${{ needs.lint.result }}" == "success" ] && [ "${{ needs.check.result }}" == "success" ] && [ "${{ needs.test.result }}" == "success" ] && [ "${{ needs.config.result }}" == "success" ]; then
             echo "This PR is cleared for merging"
           else
             echo "This PR is not cleared for merging"
