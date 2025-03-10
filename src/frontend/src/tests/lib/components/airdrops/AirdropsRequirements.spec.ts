@@ -1,8 +1,6 @@
 import type { AirdropDescription } from '$env/types/env-airdrop';
 import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
-import {
-	AIRDROPS_REQUIREMENTS_STATUS
-} from '$lib/constants/test-ids.constants';
+import { AIRDROPS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
