@@ -26,6 +26,14 @@ const appleProjects = [
 		use: devices['Desktop Safari']
 	},
 	{
+		name: 'Google Chrome',
+		use: {
+			...devices['Desktop Chrome'],
+			screen: { width: 1280, height: 720 },
+			viewport: { width: 1280, height: 720 }
+		}
+	},
+	{
 		name: 'iPhone SE',
 		use: {
 			...devices['iPhone SE'],
