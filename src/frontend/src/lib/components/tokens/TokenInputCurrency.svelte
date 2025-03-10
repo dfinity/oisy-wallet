@@ -11,6 +11,7 @@
 	export let loading = false;
 	export let testId: string | undefined = undefined;
 	export let styleClass = '';
+	export let autofocus = false;
 </script>
 
 <div
@@ -26,6 +27,7 @@
 		{placeholder}
 		{disabled}
 		{decimals}
+		{autofocus}
 		on:focus
 		on:blur
 		on:nnsInput
