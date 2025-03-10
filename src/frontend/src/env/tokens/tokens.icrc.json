@@ -26,5 +26,9 @@
 	"vUSD": {
 		"indexCanisterId": "wdqhz-qyaaa-aaaam-aeccq-cai",
 		"ledgerCanisterId": "aiw2p-tyaaa-aaaam-aebyq-cai"
+	},
+	"RUGGY": {
+		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai",
+		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai"
 	}
 }
