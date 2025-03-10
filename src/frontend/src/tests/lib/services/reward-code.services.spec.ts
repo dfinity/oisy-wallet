@@ -204,37 +204,77 @@ describe('reward-code', () => {
 		});
 	});
 
+	const mockCkBtcToken = {
+		...ICP_TOKEN,
+		symbol: 'ckBTC',
+		ledgerCanisterId: 'ckbtcLedgerCanisterId'
+	};
+	const mockCkUsdcToken = {
+		...ICP_TOKEN,
+		symbol: 'ckUSDC',
+		ledgerCanisterId: 'ckusdcLedgerCanisterId'
+	};
+	const mockIcpToken = { ...ICP_TOKEN, ledgerCanisterId: 'icpLedgerCanisterId' };
+
+	const getMockReward = ({
+		ledgerCanisterId,
+		amount
+	}: {
+		ledgerCanisterId: any;
+		amount: any;
+	}): RewardInfo =>
+		({
+			ledger: { toText: () => ledgerCanisterId },
+			amount: amount
+		}) as unknown as RewardInfo;
+
+	const baseMockUserData = {
+		usage_awards: [],
+		airdrops: [],
+		last_snapshot_timestamp: undefined,
+		is_vip: false,
+		sprinkles: []
+	} as unknown as UserData;
+
 	describe('getUserRewardsTokenAmounts', () => {
-		const mockCkBtcToken = {
-			...ICP_TOKEN,
-			symbol: 'ckBTC',
-			ledgerCanisterId: 'ckbtcLedgerCanisterId'
-		};
-		const mockCkUsdcToken = {
-			...ICP_TOKEN,
-			symbol: 'ckUSDC',
-			ledgerCanisterId: 'ckusdcLedgerCanisterId'
-		};
-		const mockIcpToken = { ...ICP_TOKEN, ledgerCanisterId: 'icpLedgerCanisterId' };
-
-		const mockUserData = {
-			usage_awards: [
-				[
-					{ ledger: { toText: () => mockCkBtcToken.ledgerCanisterId }, amount: 1000n },
-					{ ledger: { toText: () => mockCkBtcToken.ledgerCanisterId }, amount: 1000n },
-					{ ledger: { toText: () => mockCkBtcToken.ledgerCanisterId }, amount: 1000n },
-					{ ledger: { toText: () => mockCkUsdcToken.ledgerCanisterId }, amount: 2000n },
-					{ ledger: { toText: () => mockCkUsdcToken.ledgerCanisterId }, amount: 2000n },
-					{ ledger: { toText: () => mockIcpToken.ledgerCanisterId }, amount: 3000n }
+		vi.spyOn(rewardApi, 'getUserInfo')
+			.mockResolvedValueOnce({
+				...baseMockUserData,
+				usage_awards: [
+					[
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 2000n }),
+						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 2000n }),
+						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: 3000n })
+					]
 				]
-			],
-			airdrops: [],
-			last_snapshot_timestamp: undefined,
-			is_vip: false,
-			sprinkles: []
-		} as unknown as UserData;
-
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(mockUserData);
+			})
+			.mockResolvedValueOnce({
+				...baseMockUserData,
+				usage_awards: [
+					[
+						getMockReward({ ledgerCanisterId: null, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: 'invalid', amount: 1000n }),
+						getMockReward({ ledgerCanisterId: undefined, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 1000n })
+					]
+				]
+			})
+			.mockResolvedValueOnce({
+				...baseMockUserData,
+				usage_awards: [
+					[
+						getMockReward({ ledgerCanisterId: null, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: 'invalid', amount: 1000n }),
+						getMockReward({ ledgerCanisterId: undefined, amount: 1000n }),
+						getMockReward({ ledgerCanisterId: mockCkBtcToken.ledgerCanisterId, amount: 0n }),
+						getMockReward({ ledgerCanisterId: mockCkUsdcToken.ledgerCanisterId, amount: 0n }),
+						getMockReward({ ledgerCanisterId: mockIcpToken.ledgerCanisterId, amount: 0n })
+					]
+				]
+			});
 
 		it('should calculate correct sums for all rewards', async () => {
 			const result = await getUserRewardsTokenAmounts({
@@ -246,6 +286,30 @@ describe('reward-code', () => {
 			expect(result.ckBtcReward.toString()).toEqual('3000');
 			expect(result.ckUsdcReward.toString()).toEqual('4000');
 			expect(result.icpReward.toString()).toEqual('3000');
+		});
+
+		it('should ignore invalid canister ids', async () => {
+			const result = await getUserRewardsTokenAmounts({
+				ckBtcToken: mockCkBtcToken,
+				ckUsdcToken: mockCkUsdcToken,
+				icpToken: mockIcpToken,
+				$authIdentity: mockIdentity
+			});
+			expect(result.ckBtcReward.toString()).toEqual('1000');
+			expect(result.ckUsdcReward.toString()).toEqual('0');
+			expect(result.icpReward.toString()).toEqual('0');
+		});
+
+		it('should ignore invalid canister ids but still return values', async () => {
+			const result = await getUserRewardsTokenAmounts({
+				ckBtcToken: mockCkBtcToken,
+				ckUsdcToken: mockCkUsdcToken,
+				icpToken: mockIcpToken,
+				$authIdentity: mockIdentity
+			});
+			expect(result.ckBtcReward.toString()).toEqual('0');
+			expect(result.ckUsdcReward.toString()).toEqual('0');
+			expect(result.icpReward.toString()).toEqual('0');
 		});
 	});
 });
