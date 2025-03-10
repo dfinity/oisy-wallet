@@ -8,17 +8,23 @@ import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
-import { IcrcIndexNgCanister, type IcrcIndexNgTransactionWithId } from '@dfinity/ledger-icrc';
+import {
+	IcrcIndexNgCanister,
+	IcrcLedgerCanister,
+	type IcrcIndexNgTransactionWithId
+} from '@dfinity/ledger-icrc';
 import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('ic-wallet-transactions.worker', () => {
+	let spyGetBalance: MockInstance;
 	let spyGetTransactions: MockInstance;
 
 	let originalPostmessage: unknown;
 
 	const mockBalance = 100n;
+	const mockBalanceFromTransactions = 123n;
 	const mockOldestTxId = 4n;
 
 	const mockPostMessageStatusInProgress = {
@@ -131,6 +137,9 @@ describe('ic-wallet-transactions.worker', () => {
 
 			// query + update = 2
 			expect(spyGetTransactions).toHaveBeenCalledTimes(2);
+			if (msg === 'syncIcrcWallet') {
+				expect(spyGetBalance).toHaveBeenCalledTimes(2);
+			}
 		});
 
 		it('should stop the scheduler', () => {
@@ -143,14 +152,23 @@ describe('ic-wallet-transactions.worker', () => {
 
 			// query + update = 2
 			expect(spyGetTransactions).toHaveBeenCalledTimes(2);
+			if (msg === 'syncIcrcWallet') {
+				expect(spyGetBalance).toHaveBeenCalledTimes(2);
+			}
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyGetTransactions).toHaveBeenCalledTimes(4);
+			if (msg === 'syncIcrcWallet') {
+				expect(spyGetBalance).toHaveBeenCalledTimes(4);
+			}
 
 			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 			expect(spyGetTransactions).toHaveBeenCalledTimes(6);
+			if (msg === 'syncIcrcWallet') {
+				expect(spyGetBalance).toHaveBeenCalledTimes(6);
+			}
 		});
 
 		it('should not trigger postMessage with transactions again if no changes', async () => {
@@ -403,6 +421,7 @@ describe('ic-wallet-transactions.worker', () => {
 	});
 
 	describe('icrc-wallet.worker', () => {
+		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
 		const indexCanisterMock = mock<IcrcIndexNgCanister>();
 
 		const mockTransaction: IcrcIndexNgTransactionWithId = {
@@ -445,13 +464,16 @@ describe('ic-wallet-transactions.worker', () => {
 		};
 
 		beforeEach(() => {
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 			vi.spyOn(IcrcIndexNgCanister, 'create').mockImplementation(() => indexCanisterMock);
+
+			spyGetBalance = ledgerCanisterMock.balance.mockResolvedValue(mockBalance);
 		});
 
 		describe('with transactions', () => {
 			beforeEach(() => {
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-					balance: mockBalance,
+					balance: mockBalanceFromTransactions,
 					transactions: [mockTransaction],
 					oldest_tx_id: [mockOldestTxId]
 				});
@@ -468,7 +490,7 @@ describe('ic-wallet-transactions.worker', () => {
 		describe('without transactions', () => {
 			beforeEach(() => {
 				spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
-					balance: mockBalance,
+					balance: mockBalanceFromTransactions,
 					transactions: [],
 					oldest_tx_id: [mockOldestTxId]
 				});
@@ -485,7 +507,7 @@ describe('ic-wallet-transactions.worker', () => {
 			const initCleanupMock = (mockRogueId: bigint) => {
 				indexCanisterMock.getTransactions.mockImplementation(({ certified }) =>
 					Promise.resolve({
-						balance: mockBalance,
+						balance: mockBalanceFromTransactions,
 						transactions: !certified
 							? [
 									mockTransaction,
