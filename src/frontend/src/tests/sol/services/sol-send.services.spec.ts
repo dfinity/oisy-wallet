@@ -36,6 +36,7 @@ import { type MockInstance } from 'vitest';
 vi.mock(import('@solana/web3.js'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
+		...actual,
 		appendTransactionMessageInstructions: vi.fn(),
 		assertIsTransactionPartialSigner: vi.fn(),
 		assertIsTransactionSigner: vi.fn(),
@@ -48,8 +49,7 @@ vi.mock(import('@solana/web3.js'), async (importOriginal) => {
 		setTransactionMessageFeePayer: vi.fn((message) => message),
 		setTransactionMessageFeePayerSigner: vi.fn((message) => message),
 		setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
-		signTransactionMessageWithSigners: vi.fn(),
-		pipe: actual.pipe
+		signTransactionMessageWithSigners: vi.fn()
 	};
 });
 
