@@ -5,16 +5,20 @@ import type {
 	UserData
 } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
+import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import {
 	claimVipReward,
 	getAirdrops,
 	getNewReward,
+	getRewardRequirementsFulfilled,
 	isVipUser
 } from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { AirdropInfo } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
+import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
+import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
@@ -194,6 +198,78 @@ describe('reward-code', () => {
 			});
 
 			expect(result).toEqual({ airdrops: [expectedAirdrop], lastTimestamp });
+		});
+	});
+
+	describe('getRewardRequirementsFulfilled', () => {
+		const buildMockTransaction: (timestamp: bigint) => AnyTransactionUiWithCmp = (timestamp) => ({
+			transaction: { ...mockBtcTransactionUi, timestamp },
+			component: 'bitcoin'
+		});
+
+		it('should be fulfilled for 1 of 3 criterias', async () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [],
+				totalUsdBalance: 9
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeFalsy();
+			expect(req3).toBeFalsy();
+		});
+
+		it('should be fulfilled for 2 of 3 criterias', async () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 2) * NANO_SECONDS_IN_MILLISECOND // trx 2 days ago
+					),
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 3) * NANO_SECONDS_IN_MILLISECOND // trx 3 days ago
+					)
+				],
+				totalUsdBalance: 9
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeTruthy();
+			expect(req3).toBeFalsy();
+		});
+
+		it('should be fulfilled for 2 of 3 criterias because transactions older than 7 days', async () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 8) * NANO_SECONDS_IN_MILLISECOND // trx 8 days ago
+					),
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 8) * NANO_SECONDS_IN_MILLISECOND // trx 8 days ago
+					)
+				],
+				totalUsdBalance: 12
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeFalsy();
+			expect(req3).toBeTruthy();
+		});
+
+		it('should be fulfilled for 3 of 3 criterias', async () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 2) * NANO_SECONDS_IN_MILLISECOND // trx 2 days ago
+					),
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 3) * NANO_SECONDS_IN_MILLISECOND // trx 3 days ago
+					)
+				],
+				totalUsdBalance: 12
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeTruthy();
+			expect(req3).toBeTruthy();
 		});
 	});
 });

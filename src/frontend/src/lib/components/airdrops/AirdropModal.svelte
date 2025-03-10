@@ -37,13 +37,14 @@
 	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
 	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { getRewardRequirementsFulfilled } from '$lib/services/reward-code.services';
 
 	export let airdrop: AirdropDescription;
 
 	// for the moment we evaluate if requirements are fulfilled in frontend
 	// this might need to change when we have multiple campaigns etc
-	let totalUsd: number;
-	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
+	let totalUsdBalance: number;
+	$: totalUsdBalance = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
@@ -57,18 +58,10 @@
 		$solTransactions: $solTransactionsStore
 	});
 
-	let transactionsLength: number;
-	$: transactionsLength = transactions.filter((trx) =>
-		trx.transaction.timestamp
-			? new Date().getTime() - MILLISECONDS_IN_DAY * 7 <
-				formatNanosecondsToTimestamp(BigInt(trx.transaction.timestamp))
-			: false
-	).length;
-
 	// hardcoded values, first element is true since you need to have logged in at least once to even
 	// see this UI, second criteria is have at least two trxs, third is hold at least 20$
 	let requirementsFulfilled: boolean[];
-	$: requirementsFulfilled = [true, transactionsLength >= 2, totalUsd >= 1];
+	$: requirementsFulfilled = getRewardRequirementsFulfilled({ transactions, totalUsdBalance });
 
 	let isEligible: boolean = false;
 	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
