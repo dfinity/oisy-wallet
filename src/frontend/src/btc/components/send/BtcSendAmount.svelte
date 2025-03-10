@@ -10,10 +10,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
+
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -35,6 +40,7 @@
 <TokenInput
 	token={$sendToken}
 	bind:amount
+	displayUnit={inputUnit}
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
 	bind:error={amountError}
@@ -49,7 +55,7 @@
 					{amount}
 					exchangeRate={$sendTokenExchangeRate}
 					token={$sendToken}
-					disabled
+					bind:displayUnit={exchangeValueUnit}
 				/>
 			</div>
 		{/if}
