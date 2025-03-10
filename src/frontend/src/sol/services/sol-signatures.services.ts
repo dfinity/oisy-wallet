@@ -77,15 +77,13 @@ export const getSolSignatures = async ({
  * Fetches transactions without an error for a given wallet address.
  */
 export const getSolTransactions = async ({
-	address: foo,
+	address,
 	network,
 	tokenAddress,
 	tokenOwnerAddress,
 	before,
 	limit = Number(WALLET_PAGINATION)
 }: GetSolTransactionsParams): Promise<SolTransactionUi[]> => {
-	const address = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
-
 	if (nonNullish(tokenAddress)) {
 		assertIsAddress(tokenAddress);
 	}
