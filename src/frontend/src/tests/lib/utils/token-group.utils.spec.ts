@@ -20,6 +20,7 @@ import {
 import { parseTokenId } from '$lib/validation/token.validation';
 import { bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { BigNumber } from 'alchemy-sdk';
 
 const tokens = [
@@ -119,16 +120,15 @@ describe('token-group.utils', () => {
 
 			expect(groupedTokens).toHaveLength(3);
 
-			const btcGroup = groupedTokens[0];
+			const [btcGroup, _, icpToken] = groupedTokens;
 
-			expect(btcGroup).toHaveProperty('tokens');
-			expect((btcGroup as TokenUiGroup).tokens).toHaveLength(2);
-			expect((btcGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('BTC');
-			expect((btcGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('ckBTC');
+			expect(btcGroup).toHaveProperty('group');
+			assert('group' in btcGroup);
+			expect(btcGroup.group.tokens).toHaveLength(2);
+			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
+			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
 
-			const icpToken = groupedTokens[2];
-
-			expect(icpToken).toHaveProperty('symbol', 'ICP');
+			expect(icpToken).toHaveProperty('token.symbol', 'ICP');
 		});
 
 		it('should handle tokens without twinTokenSymbol', () => {
@@ -136,23 +136,29 @@ describe('token-group.utils', () => {
 			const groupedTokens = groupTokensByTwin(tokensWithoutTwins);
 
 			expect(groupedTokens).toHaveLength(1);
-			expect(groupedTokens[0]).toHaveProperty('symbol', 'ICP');
+
+			const [firstGroup] = groupedTokens;
+
+			expect(firstGroup).toHaveProperty('token.symbol', 'ICP');
 		});
 
 		it('should place the group in the position of the first token', () => {
 			const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
-			const firstGroup = groupedTokens[0];
+			const [firstGroup] = groupedTokens;
 
-			expect(firstGroup).toHaveProperty('tokens');
-			expect((firstGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('BTC');
-			expect((firstGroup as TokenUiGroup).tokens.map((t) => t.symbol)).toContain('ckBTC');
+			expect(firstGroup).toHaveProperty('group');
+			assert('group' in firstGroup);
+			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
+			expect(firstGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
 		});
 
 		it('should not duplicate tokens in the result', () => {
 			const groupedTokens = groupTokensByTwin(tokens as TokenUi[]);
 
 			const tokenSymbols = groupedTokens.flatMap((groupOrToken) =>
-				'tokens' in groupOrToken ? groupOrToken.tokens.map((t) => t.symbol) : [groupOrToken.symbol]
+				'group' in groupOrToken
+					? groupOrToken.group.tokens.map((t) => t.symbol)
+					: [groupOrToken.token.symbol]
 			);
 			const uniqueSymbols = new Set(tokenSymbols);
 
@@ -164,14 +170,14 @@ describe('token-group.utils', () => {
 
 			expect(groupedTokens).toHaveLength(5);
 
-			const fooToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'FOO');
-			const ckFooToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'ckFOO');
+			const fooToken = groupedTokens.find((t) => 'token' in t && t.token.symbol === 'FOO');
+			const ckFooToken = groupedTokens.find((t) => 'token' in t && t.token.symbol === 'ckFOO');
 
 			expect(fooToken).toBeDefined();
 			expect(ckFooToken).toBeDefined();
 
-			expect(fooToken).not.toHaveProperty('tokens');
-			expect(ckFooToken).not.toHaveProperty('tokens');
+			expect(fooToken).not.toHaveProperty('group.tokens');
+			expect(ckFooToken).not.toHaveProperty('group.tokens');
 		});
 
 		it('should correctly group tokens even when the ckToken is declared before the native token', () => {
@@ -181,25 +187,29 @@ describe('token-group.utils', () => {
 
 			const btcGroup = groupedTokens.find(
 				(groupOrToken) =>
-					'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'BTC')
-			) as TokenUiGroup;
+					'group' in groupOrToken && groupOrToken.group.tokens.some((t) => t.symbol === 'BTC')
+			);
 
 			expect(btcGroup).toBeDefined();
-			expect(btcGroup.tokens).toHaveLength(2);
-			expect(btcGroup.tokens.map((t) => t.symbol)).toContain('BTC');
-			expect(btcGroup.tokens.map((t) => t.symbol)).toContain('ckBTC');
+			assertNonNullish(btcGroup);
+			assert('group' in btcGroup);
+			expect(btcGroup.group.tokens).toHaveLength(2);
+			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('BTC');
+			expect(btcGroup.group.tokens.map((t) => t.symbol)).toContain('ckBTC');
 
 			const ethGroup = groupedTokens.find(
 				(groupOrToken) =>
-					'tokens' in groupOrToken && groupOrToken.tokens.some((t) => t.symbol === 'ETH')
-			) as TokenUiGroup;
+					'group' in groupOrToken && groupOrToken.group.tokens.some((t) => t.symbol === 'ETH')
+			);
 
 			expect(ethGroup).toBeDefined();
-			expect(ethGroup.tokens).toHaveLength(2);
-			expect(ethGroup.tokens.map((t) => t.symbol)).toContain('ETH');
-			expect(ethGroup.tokens.map((t) => t.symbol)).toContain('ckETH');
+			assertNonNullish(ethGroup);
+			assert('group' in ethGroup);
+			expect(ethGroup.group.tokens).toHaveLength(2);
+			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ETH');
+			expect(ethGroup.group.tokens.map((t) => t.symbol)).toContain('ckETH');
 
-			const icpToken = groupedTokens.find((t) => 'symbol' in t && t.symbol === 'ICP');
+			const icpToken = groupedTokens.find((t) => 'token' in t && t.token.symbol === 'ICP');
 
 			expect(icpToken).toBeDefined();
 		});
@@ -217,11 +227,17 @@ describe('token-group.utils', () => {
 
 			expect(groupedTokens).toHaveLength(3);
 
-			expect(groupedTokens[0]).toHaveProperty('nativeToken', reorderedTokens[1]);
-			expect(groupedTokens[1]).toHaveProperty('nativeToken', reorderedTokens[0]);
+			expect(groupedTokens[0]).toHaveProperty('group.nativeToken', reorderedTokens[1]);
+			expect(groupedTokens[1]).toHaveProperty('group.nativeToken', reorderedTokens[0]);
 
-			expect(groupedTokens[0]).toHaveProperty('tokens', [reorderedTokens[1], reorderedTokens[2]]);
-			expect(groupedTokens[1]).toHaveProperty('tokens', [reorderedTokens[0], reorderedTokens[4]]);
+			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
+				reorderedTokens[1],
+				reorderedTokens[2]
+			]);
+			expect(groupedTokens[1]).toHaveProperty('group.tokens', [
+				reorderedTokens[0],
+				reorderedTokens[4]
+			]);
 		});
 
 		it('should re-sort groups if their total balance made them out of order', () => {
@@ -236,11 +252,17 @@ describe('token-group.utils', () => {
 
 			expect(groupedTokens).toHaveLength(2);
 
-			expect(groupedTokens[0]).toHaveProperty('nativeToken', reorderedTokens[1]);
-			expect(groupedTokens[1]).toHaveProperty('nativeToken', reorderedTokens[0]);
+			expect(groupedTokens[0]).toHaveProperty('group.nativeToken', reorderedTokens[1]);
+			expect(groupedTokens[1]).toHaveProperty('group.nativeToken', reorderedTokens[0]);
 
-			expect(groupedTokens[0]).toHaveProperty('tokens', [reorderedTokens[1], reorderedTokens[2]]);
-			expect(groupedTokens[1]).toHaveProperty('tokens', [reorderedTokens[0], reorderedTokens[3]]);
+			expect(groupedTokens[0]).toHaveProperty('group.tokens', [
+				reorderedTokens[1],
+				reorderedTokens[2]
+			]);
+			expect(groupedTokens[1]).toHaveProperty('group.tokens', [
+				reorderedTokens[0],
+				reorderedTokens[3]
+			]);
 		});
 	});
 
@@ -271,7 +293,7 @@ describe('token-group.utils', () => {
 
 			expect(filteredTokenGroups).toHaveLength(1);
 
-			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [
+			expect(filteredTokenGroups[0]).toHaveProperty('group.tokens', [
 				customReorderedTokens[3],
 				customReorderedTokens[4]
 			]);
@@ -289,7 +311,7 @@ describe('token-group.utils', () => {
 
 			expect(filteredTokenGroups).toHaveLength(1);
 
-			expect(filteredTokenGroups[0]).toHaveProperty('tokens', [
+			expect(filteredTokenGroups[0]).toHaveProperty('group.tokens', [
 				customReorderedTokens[3],
 				customReorderedTokens[4]
 			]);

@@ -132,6 +132,8 @@ interface I18nAirdrops {
 		state_modal_content_text: string;
 		carousel_slide_title: string;
 		carousel_slide_cta: string;
+		sprinkles_earned: string;
+		youre_eligible: string;
 	};
 	alt: { upcoming_campaigns: string };
 }
@@ -354,6 +356,7 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
+		ata_will_be_calculated: string;
 	};
 	assertion: {
 		invalid_destination_address: string;

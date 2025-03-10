@@ -1,5 +1,7 @@
 import type { SolAddress } from '$lib/types/address';
-import { isNullish } from '@dfinity/utils';
+import { getAccountOwner } from '$sol/api/solana.api';
+import type { SolanaNetworkType } from '$sol/types/network';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { assertIsAddress } from '@solana/addresses';
 
 export const isSolAddress = (address: SolAddress | undefined): boolean => {
@@ -17,3 +19,15 @@ export const isSolAddress = (address: SolAddress | undefined): boolean => {
 
 export const invalidSolAddress = (address: SolAddress | undefined): boolean =>
 	!isSolAddress(address);
+
+export const isAtaAddress = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<boolean> => {
+	const accountOwner = await getAccountOwner({ address, network });
+
+	return nonNullish(accountOwner);
+};

@@ -11,7 +11,7 @@
 	class:whitespace-nowrap={!asMenuItem}
 	class:text-center={!asMenuItem}
 	class:font-bold={!asMenuItem}
-	class:text-brand-primary={!asMenuItem}
+	class:text-brand-primary-alt={!asMenuItem}
 	on:click
 	data-tid={testId}
 >

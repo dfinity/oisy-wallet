@@ -12,26 +12,25 @@
 	export let symbol: string;
 	export let exchangeRate: number | undefined;
 
-	let usdAmount: number;
-	$: usdAmount =
-		nonNullish(decimals) && nonNullish(amount) && nonNullish(exchangeRate)
-			? usdValue({
-					decimals,
-					balance: amount,
-					exchangeRate
-				})
-			: 0;
+	let usdAmount: number | undefined;
+	$: usdAmount = nonNullish(exchangeRate)
+		? usdValue({
+				decimals,
+				balance: amount,
+				exchangeRate
+			})
+		: undefined;
 </script>
 
-{#if nonNullish(amount) && nonNullish(decimals) && nonNullish(symbol)}
-	<div transition:fade class="flex gap-4">
-		{formatToken({
-			value: amount,
-			unitName: decimals,
-			displayDecimals: EIGHT_DECIMALS
-		})}
-		{symbol}
+<div transition:fade class="flex gap-4">
+	{formatToken({
+		value: amount,
+		unitName: decimals,
+		displayDecimals: EIGHT_DECIMALS
+	})}
+	{symbol}
 
+	{#if nonNullish(usdAmount)}
 		<div class="text-tertiary">
 			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
 				{`( < ${formatUSD({
@@ -41,5 +40,5 @@
 				{`( ${formatUSD({ value: usdAmount })} )`}
 			{/if}
 		</div>
-	</div>
-{/if}
+	{/if}
+</div>

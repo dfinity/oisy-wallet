@@ -8,7 +8,6 @@ import type { OptionAmount } from '$lib/types/send';
 import type { DisplayUnit } from '$lib/types/swap';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
 
 describe('TokenInputAmountExchange', () => {
 	const defaultProps = {

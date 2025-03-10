@@ -2,7 +2,6 @@ import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyTo
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import type { OptionAmount } from '$lib/types/send';
 import { fireEvent, render } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
 
 describe('TokenInputCurrencyToken', () => {
 	const defaultProps = {

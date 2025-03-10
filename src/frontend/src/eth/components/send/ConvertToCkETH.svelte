@@ -2,7 +2,6 @@
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
 	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
@@ -22,11 +21,7 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
-<ConvertETH
-	nativeTokenId={$ethereumTokenId}
-	nativeNetworkId={$selectedEthereumNetwork.id}
-	ariaLabel={$i18n.convert.text.convert_to_cketh}
->
+<ConvertETH nativeTokenId={$ethereumTokenId} ariaLabel={$i18n.convert.text.convert_to_cketh}>
 	<IconCkConvert size="28" slot="icon" />
 	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
 </ConvertETH>

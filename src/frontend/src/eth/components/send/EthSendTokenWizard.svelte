@@ -34,6 +34,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -97,6 +98,9 @@
 	let feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(nativeEthereumToken.decimals);
 
+	let feeExchangeRateStore = writable<number | undefined>(undefined);
+	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+
 	let feeContext: FeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
@@ -107,6 +111,7 @@
 			feeSymbolStore,
 			feeTokenIdStore,
 			feeDecimalsStore,
+			feeExchangeRateStore,
 			evaluateFee
 		})
 	);

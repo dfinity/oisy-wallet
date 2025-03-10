@@ -67,7 +67,7 @@
 		<button
 			on:click={open}
 			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, { $dAppName: dAppName })}
-			class="text-sm font-semibold text-brand-primary"
+			class="text-sm font-semibold text-brand-primary-alt"
 		>
 			{callToAction} →
 		</button>

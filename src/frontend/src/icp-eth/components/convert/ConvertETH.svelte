@@ -18,13 +18,10 @@
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { NetworkId } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
-	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
-	export let nativeNetworkId: NetworkId;
 
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
@@ -32,12 +29,7 @@
 		$ethAddressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(nativeTokenId) ||
-		isNullish(
-			toCkEthHelperContractAddress({
-				minterInfo: $ckEthMinterInfoStore?.[nativeTokenId],
-				networkId: nativeNetworkId
-			})
-		) ||
+		isNullish(toCkEthHelperContractAddress($ckEthMinterInfoStore?.[nativeTokenId])) ||
 		($networkICP && isNullish($ckEthMinterInfoStore?.[nativeTokenId]));
 
 	const openConvert = async () => {
