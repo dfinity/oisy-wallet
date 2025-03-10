@@ -19,7 +19,6 @@
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';

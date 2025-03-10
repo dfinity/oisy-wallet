@@ -222,12 +222,16 @@ export const getUserRewardsTokenAmounts = async ({
 		icpReward: ZERO
 	};
 
-	if (isNullish($authIdentity)) return initialRewards;
+	if (isNullish($authIdentity)) {
+		return initialRewards;
+	}
 
 	const { usage_awards } = await getUserInfo({ identity: $authIdentity });
 	const usageAwards = fromNullable(usage_awards);
 
-	if (isNullish(usageAwards)) return initialRewards;
+	if (isNullish(usageAwards)) {
+		return initialRewards;
+	}
 
 	return usageAwards.reduce((acc, { ledger, amount }) => {
 		const canisterId = ledger.toText();
