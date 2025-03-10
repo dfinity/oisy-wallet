@@ -1,8 +1,7 @@
 import type { AirdropDescription } from '$env/types/env-airdrop';
 import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
 import {
-	AIRDROPS_REQUIREMENTS_STATUS,
-	AIRDROPS_REQUIREMENTS_STATUS_SPINNER
+	AIRDROPS_REQUIREMENTS_STATUS
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
@@ -47,8 +46,6 @@ describe('AirdropsRequirements', () => {
 	describe('RequirementsFulfilled', () => {
 		const requirementStatusSelector = (index: number) =>
 			`span[data-tid="${AIRDROPS_REQUIREMENTS_STATUS}-${index}"]`;
-		const requirementStatusSpinnerSelector = (index: number) =>
-			`span[data-tid="${AIRDROPS_REQUIREMENTS_STATUS_SPINNER}-${index}"]`;
 
 		it('should render all requirements as fulfilled', () => {
 			const { container } = render(AirdropsRequirements, {
@@ -88,7 +85,7 @@ describe('AirdropsRequirements', () => {
 			});
 		});
 
-		it('should render spinners if wrong amount of requirement states are available', () => {
+		it('should render all requirements as not fulfilled if incorrect amount of states are provided', () => {
 			const { container } = render(AirdropsRequirements, {
 				props: {
 					loading: false,
@@ -99,14 +96,15 @@ describe('AirdropsRequirements', () => {
 			});
 
 			mockAirdropCampaign.requirements.forEach((requirement, index) => {
-				const requirementStatusSpinner: HTMLSpanElement | null = container.querySelector(
-					requirementStatusSpinnerSelector(index)
+				const requirementStatus: HTMLSpanElement | null = container.querySelector(
+					requirementStatusSelector(index)
 				);
-				expect(requirementStatusSpinner).toBeInTheDocument();
+				expect(requirementStatus).toBeInTheDocument();
+				expect(requirementStatus?.className).toContain('text-disabled');
 			});
 		});
 
-		it('should render spinners if no requirement states are available', () => {
+		it('should render all requirements as not fulfilled if no states are provided', () => {
 			const { container } = render(AirdropsRequirements, {
 				props: {
 					loading: false,
@@ -117,10 +115,11 @@ describe('AirdropsRequirements', () => {
 			});
 
 			mockAirdropCampaign.requirements.forEach((requirement, index) => {
-				const requirementStatusSpinner: HTMLSpanElement | null = container.querySelector(
-					requirementStatusSpinnerSelector(index)
+				const requirementStatus: HTMLSpanElement | null = container.querySelector(
+					requirementStatusSelector(index)
 				);
-				expect(requirementStatusSpinner).toBeInTheDocument();
+				expect(requirementStatus).toBeInTheDocument();
+				expect(requirementStatus?.className).toContain('text-disabled');
 			});
 		});
 	});

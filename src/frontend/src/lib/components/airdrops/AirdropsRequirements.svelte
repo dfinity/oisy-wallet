@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { IconCheckCircleFill, Spinner } from '@dfinity/gix-components';
+	import { IconCheckCircleFill } from '@dfinity/gix-components';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import {
-		AIRDROPS_REQUIREMENTS_STATUS,
-		AIRDROPS_REQUIREMENTS_STATUS_SPINNER
+		AIRDROPS_REQUIREMENTS_STATUS
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -13,7 +12,7 @@
 	export let isEligible = false;
 	export let requirementsFulfilled: boolean[];
 
-	const isRequirementFulfilled = (index: number) => requirementsFulfilled[index] ?? false;
+	const isRequirementFulfilled = (index: number) => (airdrop.requirements.length === requirementsFulfilled.length && requirementsFulfilled[index]) ?? false;
 </script>
 
 {#if airdrop.requirements.length > 0}
@@ -32,20 +31,14 @@
 					class:ease-in-out={!isRequirementFulfilled(i) && loading}
 					class:animate-pulse={!isRequirementFulfilled(i) && loading}
 				>
-					{#if airdrop.requirements.length === requirementsFulfilled.length}
-						<span
-							data-tid={`${AIRDROPS_REQUIREMENTS_STATUS}-${i}`}
-							class="-mt-0.5 mr-2"
-							class:text-success-primary={isRequirementFulfilled(i)}
-							class:text-disabled={!isRequirementFulfilled(i)}
-						>
-							<IconCheckCircleFill size={32} />
-						</span>
-					{:else}
-						<span data-tid={`${AIRDROPS_REQUIREMENTS_STATUS_SPINNER}-${i}`} class="-mt-0.5 mr-2">
-							<Spinner inline size="small" />
-						</span>
-					{/if}
+					<span
+						data-tid={`${AIRDROPS_REQUIREMENTS_STATUS}-${i}`}
+						class="-mt-0.5 mr-2"
+						class:text-success-primary={isRequirementFulfilled(i)}
+						class:text-disabled={!isRequirementFulfilled(i)}
+					>
+						<IconCheckCircleFill size={32} />
+					</span>
 					<span>
 						{requirement}
 					</span>
