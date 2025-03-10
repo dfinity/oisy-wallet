@@ -59,7 +59,7 @@ export const mapIcpTransaction = ({
 	const { operation, timestamp, transferToSelf } = transaction;
 
 	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status' | 'txExplorerUrl'> = {
-		id,
+		id: id.toString(),
 		timestamp: fromNullable(timestamp)?.timestamp_nanos,
 		status: 'executed',
 		txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${id}`
