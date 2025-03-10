@@ -39,10 +39,8 @@
 			</p>
 		</section>
 		<section class="bottom-4 left-4 mt-3 flex">
-			<div>
-				<Button colorStyle="primary" styleClass="py-2" paddingSmall
-					>{$i18n.airdrops.text.check_earnings}</Button
-				>
+			<div class="rounded-xl bg-brand-primary px-4 py-3 font-bold text-primary-inverted"
+				>{$i18n.airdrops.text.check_earnings}
 			</div></section
 		>
 	</article>
