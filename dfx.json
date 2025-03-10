@@ -287,8 +287,10 @@
 		},
 		"cketh_minter": {
 			"type": "custom",
+			"build": "scripts/build.cketh_minter.sh",
 			"candid": "target/ic/cketh_minter.did",
 			"wasm": "target/ic/cketh_minter.wasm",
+			"init_arg_file": "target/ic/cketh_minter.args.did",
 			"specified_id": "jzenf-aiaaa-aaaar-qaa7q-cai",
 			"remote": {
 				"id": {
