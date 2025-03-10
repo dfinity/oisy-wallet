@@ -7,3 +7,8 @@ export const EnvAdditionalIcrcTokensSchema = z.record(
 	EnvTokenSymbolSchema,
 	z.union([z.undefined(), EnvIcTokenSchema])
 );
+
+export const EnvAdditionalIcrcTokensWithMetadataSchema = z.record(
+	EnvTokenSymbolSchema,
+	EnvIcTokenSchema
+);
