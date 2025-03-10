@@ -24,6 +24,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
+	import { nullishSignOut } from '$lib/services/auth.services';
 
 	export let isEligible = false;
 
@@ -69,12 +70,12 @@
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
 	}) => {
-		if (
-			isNullish(ckBtcToken) ||
-			isNullish(ckUsdcToken) ||
-			isNullish(icpToken) ||
-			isNullish($authIdentity)
-		) {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		if (isNullish(ckBtcToken) || isNullish(ckUsdcToken) || isNullish(icpToken)) {
 			return;
 		}
 
