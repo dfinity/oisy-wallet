@@ -214,7 +214,7 @@ export const getRewardRequirementsFulfilled = ({
 					formatNanosecondsToTimestamp(BigInt(trx.transaction.timestamp))
 				: false
 		).length >= 2; // at least 2 transactions in last 7 days
-	const req3: boolean = totalUsdBalance >= 10; // at least 10$ balance
+	const req3: boolean = totalUsdBalance >= 20; // at least 20$ balance
 
 	return [req1, req2, req3];
 };

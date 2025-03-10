@@ -58,8 +58,6 @@
 		$solTransactions: $solTransactionsStore
 	});
 
-	// hardcoded values, first element is true since you need to have logged in at least once to even
-	// see this UI, second criteria is have at least two trxs, third is hold at least 20$
 	let requirementsFulfilled: boolean[];
 	$: requirementsFulfilled = getRewardRequirementsFulfilled({ transactions, totalUsdBalance });
 
