@@ -16,16 +16,16 @@ testWithII('should display BTC transactions page', async ({ page, iiPage }) => {
 
 testWithII('should display ETH transactions page', async ({ page, iiPage }) => {
 	const transactionsPage = new TransactionsPage({
- 		page,
- 		iiPage,
- 		tokenSymbol: 'ETH',
- 		networkId: 'ETH'
- 	});
+		page,
+		iiPage,
+		tokenSymbol: 'ETH',
+		networkId: 'ETH'
+	});
 
- 	await transactionsPage.waitForReady();
+	await transactionsPage.waitForReady();
 
- 	await transactionsPage.takeScreenshot();
- });
+	await transactionsPage.takeScreenshot();
+});
 
 testWithII('should display ICP transactions page', async ({ page, iiPage }) => {
 	const transactionsPage = new TransactionsPage({
