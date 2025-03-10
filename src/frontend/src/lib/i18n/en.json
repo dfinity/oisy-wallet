@@ -140,6 +140,7 @@
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
 			"carousel_slide_cta": "Learn more",
+			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
