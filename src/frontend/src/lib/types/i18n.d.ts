@@ -132,6 +132,7 @@ interface I18nAirdrops {
 		state_modal_content_text: string;
 		carousel_slide_title: string;
 		carousel_slide_cta: string;
+		sprinkles_earned: string;
 		youre_eligible: string;
 	};
 	alt: { upcoming_campaigns: string };

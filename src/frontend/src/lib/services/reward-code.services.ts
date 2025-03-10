@@ -1,16 +1,20 @@
 import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
+import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
+	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
@@ -194,4 +198,45 @@ export const claimVipReward = async (params: {
 		});
 		return { success: false, err };
 	}
+};
+
+export const getUserRewardsTokenAmounts = async ({
+	ckBtcToken,
+	ckUsdcToken,
+	icpToken,
+	identity
+}: {
+	ckBtcToken: IcToken;
+	ckUsdcToken: IcToken;
+	icpToken: IcToken;
+	identity: Identity;
+}): Promise<{
+	ckBtcReward: BigNumber;
+	ckUsdcReward: BigNumber;
+	icpReward: BigNumber;
+}> => {
+	const initialRewards = {
+		ckBtcReward: ZERO,
+		ckUsdcReward: ZERO,
+		icpReward: ZERO
+	};
+
+	const { usage_awards } = await getUserInfo({ identity });
+	const usageAwards = fromNullable(usage_awards);
+
+	if (isNullish(usageAwards)) {
+		return initialRewards;
+	}
+
+	return usageAwards.reduce((acc, { ledger, amount }) => {
+		const canisterId = ledger.toText();
+
+		return ckBtcToken.ledgerCanisterId === canisterId
+			? { ...acc, ckBtcReward: acc.ckBtcReward.add(amount) }
+			: icpToken.ledgerCanisterId === canisterId
+				? { ...acc, icpReward: acc.icpReward.add(amount) }
+				: ckUsdcToken.ledgerCanisterId === canisterId
+					? { ...acc, ckUsdcReward: acc.ckUsdcReward.add(amount) }
+					: acc;
+	}, initialRewards);
 };
