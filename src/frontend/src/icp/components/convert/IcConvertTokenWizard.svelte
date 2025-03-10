@@ -59,6 +59,7 @@
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
+	// TODO: add "Destination field" step and update receiveAmount calculation to support ckBTC -> BTC
 	let destination: OptionBtcAddress | OptionEthAddress;
 	$: destination = isTokenCkBtcLedger($sourceToken) ? $btcAddressMainnet : $ethAddress;
 
