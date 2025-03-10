@@ -7,10 +7,14 @@ import {
 import * as solanaWeb3Pkg from '@solana/web3.js';
 import type { MockInstance } from 'vitest';
 
-vi.mock('@solana/web3.js', () => ({
-	getSignatureFromTransaction: vi.fn(),
-	signTransactionMessageWithSigners: vi.fn()
-}));
+vi.mock(import('@solana/web3.js'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getSignatureFromTransaction: vi.fn(),
+		signTransactionMessageWithSigners: vi.fn()
+	};
+});
 
 describe('sol-sign.services', () => {
 	describe('signTransaction', () => {
