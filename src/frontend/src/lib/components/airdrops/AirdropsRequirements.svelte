@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {IconCheckCircleFill, Spinner} from '@dfinity/gix-components';
+	import { IconCheckCircleFill, Spinner } from '@dfinity/gix-components';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -38,10 +38,7 @@
 							<IconCheckCircleFill size={32} />
 						</span>
 					{:else}
-						<span
-							data-tid={`airdrop-requirement-status-spinner-${i}`}
-							class="-mt-0.5 mr-2"
-						>
+						<span data-tid={`airdrop-requirement-status-spinner-${i}`} class="-mt-0.5 mr-2">
 							<Spinner inline size="small" />
 						</span>
 					{/if}
