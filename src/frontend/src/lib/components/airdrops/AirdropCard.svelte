@@ -2,7 +2,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
