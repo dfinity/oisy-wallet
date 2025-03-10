@@ -24,6 +24,7 @@
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	export let isEligible = false;
 
