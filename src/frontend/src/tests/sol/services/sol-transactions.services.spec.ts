@@ -132,7 +132,8 @@ describe('sol-transactions.services', () => {
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(1, {
 				instruction: { ...mockInstructions[0], programAddress: mockInstructions[0].programId },
 				network,
-				cumulativeBalances: {}
+				cumulativeBalances: {},
+				addressToToken: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(2, {
 				instruction: { ...mockInstructions[1], programAddress: mockInstructions[1].programId },
@@ -140,7 +141,8 @@ describe('sol-transactions.services', () => {
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue,
 					[mockSolAddress2]: mockValue
-				}
+				},
+				addressToToken: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(3, {
 				instruction: { ...mockInstructions[2], programAddress: mockInstructions[2].programId },
@@ -148,7 +150,8 @@ describe('sol-transactions.services', () => {
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 2n,
 					[mockSolAddress2]: mockValue * 2n
-				}
+				},
+				addressToToken: {}
 			});
 		});
 
@@ -199,7 +202,8 @@ describe('sol-transactions.services', () => {
 					programAddress: mockInstructions[0].programId
 				},
 				network,
-				cumulativeBalances: {}
+				cumulativeBalances: {},
+				addressToToken: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(2, {
 				instruction: innerInstructions[0].instructions.map((innerInstruction) => ({
@@ -210,7 +214,8 @@ describe('sol-transactions.services', () => {
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue,
 					[mockSolAddress2]: mockValue
-				}
+				},
+				addressToToken: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(3, {
 				instruction: {
@@ -221,7 +226,8 @@ describe('sol-transactions.services', () => {
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 2n,
 					[mockSolAddress2]: mockValue * 2n
-				}
+				},
+				addressToToken: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(4, {
 				instruction: innerInstructions[1].instructions.map((innerInstruction) => ({
@@ -232,7 +238,8 @@ describe('sol-transactions.services', () => {
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 3n,
 					[mockSolAddress2]: mockValue * 3n
-				}
+				},
+				addressToToken: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(5, {
 				instruction: {
@@ -243,7 +250,8 @@ describe('sol-transactions.services', () => {
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 4n,
 					[mockSolAddress2]: mockValue * 4n
-				}
+				},
+				addressToToken: {}
 			});
 			expect(spyMapSolParsedInstruction).toHaveBeenNthCalledWith(6, {
 				instruction: innerInstructions[2].instructions.map((innerInstruction) => ({
@@ -254,7 +262,8 @@ describe('sol-transactions.services', () => {
 				cumulativeBalances: {
 					[mockSolAddress]: -mockValue * 5n,
 					[mockSolAddress2]: mockValue * 5n
-				}
+				},
+				addressToToken: {}
 			});
 		});
 
