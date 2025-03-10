@@ -14,7 +14,7 @@ import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/typ
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
@@ -216,29 +216,28 @@ export const getUserRewardsTokenAmounts = async ({
 	ckUsdcReward: BigNumber;
 	icpReward: BigNumber;
 }> => {
-	const data = await getUserInfo({ identity: $authIdentity });
 	const initialRewards = {
 		ckBtcReward: ZERO,
 		ckUsdcReward: ZERO,
 		icpReward: ZERO
 	};
 
-	const rewards = data.usage_awards[0]?.reduce((acc, aw) => {
-		if (nonNullish(aw)) {
-			const canisterId = aw.ledger.toText();
+	if (isNullish($authIdentity)) return initialRewards;
 
-			if (ckBtcToken.ledgerCanisterId === canisterId) {
-				acc.ckBtcReward = BigNumber.from(acc.ckBtcReward).add(aw.amount);
-			} else if (icpToken.ledgerCanisterId === canisterId) {
-				acc.icpReward = BigNumber.from(acc.icpReward).add(aw.amount);
-			} else if (ckUsdcToken.ledgerCanisterId === canisterId) {
-				acc.ckUsdcReward = BigNumber.from(acc.ckUsdcReward).add(aw.amount);
-			} else {
-				console.warn(`Ledger canister mapping not found for: ${canisterId}`);
-			}
-		}
-		return acc;
+	const { usage_awards } = await getUserInfo({ identity: $authIdentity });
+	const usageAwards = fromNullable(usage_awards);
+
+	if (isNullish(usageAwards)) return initialRewards;
+
+	return usageAwards.reduce((acc, { ledger, amount }) => {
+		const canisterId = ledger.toText();
+
+		return ckBtcToken.ledgerCanisterId === canisterId
+			? { ...acc, ckBtcReward: acc.ckBtcReward.add(amount) }
+			: icpToken.ledgerCanisterId === canisterId
+				? { ...acc, icpReward: acc.icpReward.add(amount) }
+				: ckUsdcToken.ledgerCanisterId === canisterId
+					? { ...acc, ckUsdcReward: acc.ckUsdcReward.add(amount) }
+					: acc;
 	}, initialRewards);
-
-	return rewards ?? initialRewards;
 };
