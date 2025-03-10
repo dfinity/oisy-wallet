@@ -22,6 +22,7 @@ interface I18nCore {
 		copy: string;
 		clear_filter: string;
 		not_available: string;
+		new: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -132,6 +133,8 @@ interface I18nAirdrops {
 		state_modal_content_text: string;
 		carousel_slide_title: string;
 		carousel_slide_cta: string;
+		sprinkles_earned: string;
+		youre_eligible: string;
 	};
 	alt: { upcoming_campaigns: string };
 }
