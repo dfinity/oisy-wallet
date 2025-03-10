@@ -20,43 +20,38 @@ import {
 import { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import * as solanaFunctional from '@solana/functional';
-import { pipe } from '@solana/functional';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
-import { appendTransactionMessageInstructions } from '@solana/transaction-messages';
+import * as solanaWeb3 from '@solana/web3.js';
 import {
+	appendTransactionMessageInstructions,
 	getComputeUnitEstimateForTransactionMessageFactory,
-	sendAndConfirmTransactionFactory
+	pipe,
+	sendAndConfirmTransactionFactory,
+	type Rpc,
+	type RpcSubscriptions,
+	type SolanaRpcApi,
+	type SolanaRpcSubscriptionsApi
 } from '@solana/web3.js';
 import { type MockInstance } from 'vitest';
 
-vi.mock(import('@solana/functional'), async (importOriginal) => {
+vi.mock(import('@solana/web3.js'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
-		pipe: actual.pipe
+		...actual,
+		appendTransactionMessageInstructions: vi.fn(),
+		assertIsTransactionPartialSigner: vi.fn(),
+		assertIsTransactionSigner: vi.fn(),
+		assertTransactionIsFullySigned: vi.fn(),
+		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
+		getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
+		getSignatureFromTransaction: vi.fn(),
+		prependTransactionMessageInstruction: vi.fn(),
+		sendAndConfirmTransactionFactory: vi.fn(),
+		setTransactionMessageFeePayer: vi.fn((message) => message),
+		setTransactionMessageFeePayerSigner: vi.fn((message) => message),
+		setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
+		signTransactionMessageWithSigners: vi.fn()
 	};
 });
-
-vi.mock('@solana/signers', () => ({
-	assertIsTransactionSigner: vi.fn(),
-	assertIsTransactionPartialSigner: vi.fn(),
-	signTransactionMessageWithSigners: vi.fn(),
-	setTransactionMessageFeePayerSigner: vi.fn((message) => message)
-}));
-
-vi.mock('@solana/transactions', () => ({
-	assertTransactionIsFullySigned: vi.fn(),
-	getSignatureFromTransaction: vi.fn()
-}));
-
-vi.mock('@solana/transaction-messages', () => ({
-	createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
-	setTransactionMessageFeePayer: vi.fn((message) => message),
-	setTransactionMessageLifetimeUsingBlockhash: vi.fn((message) => message),
-	prependTransactionMessageInstruction: vi.fn(),
-	appendTransactionMessageInstructions: vi.fn()
-}));
 
 vi.mock('@solana-program/system', () => ({
 	getTransferSolInstruction: vi.fn().mockReturnValue('mock-transfer-sol-instruction')
@@ -64,11 +59,6 @@ vi.mock('@solana-program/system', () => ({
 
 vi.mock('@solana-program/token', () => ({
 	getTransferInstruction: vi.fn().mockReturnValue('mock-transfer-instruction')
-}));
-
-vi.mock('@solana/web3.js', () => ({
-	getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
-	sendAndConfirmTransactionFactory: vi.fn()
 }));
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -137,7 +127,7 @@ describe('sol-send.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(solanaFunctional, 'pipe');
+			vi.spyOn(solanaWeb3, 'pipe');
 
 			vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			vi.mocked(solanaWebSocketRpc).mockReturnValue(mockRpcSubscriptions);

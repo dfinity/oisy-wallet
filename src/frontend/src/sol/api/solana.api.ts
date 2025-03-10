@@ -6,9 +6,12 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSignature } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address, address as solAddress, type Address } from '@solana/addresses';
-import { type Signature } from '@solana/keys';
-import type { Lamports } from '@solana/rpc-types';
+import {
+	address as solAddress,
+	type Address,
+	type Lamports,
+	type Signature
+} from '@solana/web3.js';
 import type { Writeable } from 'zod';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
@@ -171,7 +174,7 @@ export const estimatePriorityFee = async ({
 }): Promise<bigint> => {
 	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
 	const fees = await getRecentPrioritizationFees(
-		nonNullish(addresses) ? addresses.map(address) : undefined
+		nonNullish(addresses) ? addresses.map(solAddress) : undefined
 	).send();
 
 	return fees.reduce<bigint>(

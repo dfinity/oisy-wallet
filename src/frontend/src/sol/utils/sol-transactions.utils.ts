@@ -2,15 +2,17 @@ import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
 import { nonNullish } from '@dfinity/utils';
-import { getBase64Encoder } from '@solana/codecs';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
 import {
+	decompileTransactionMessageFetchingLookupTables,
+	getBase64Encoder,
 	getCompiledTransactionMessageDecoder,
+	getTransactionDecoder,
 	type CompilableTransactionMessage,
+	type Rpc,
+	type SolanaRpcApi,
+	type Transaction,
 	type TransactionMessage
-} from '@solana/transaction-messages';
-import { getTransactionDecoder, type Transaction } from '@solana/transactions';
-import { decompileTransactionMessageFetchingLookupTables } from '@solana/web3.js';
+} from '@solana/web3.js';
 
 export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);

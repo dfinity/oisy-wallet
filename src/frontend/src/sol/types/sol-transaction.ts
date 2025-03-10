@@ -3,14 +3,14 @@ import type { SolAddress } from '$lib/types/address';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { Address } from '@solana/addresses';
-import type { Signature } from '@solana/keys';
-import type { GetSignaturesForAddressApi } from '@solana/rpc';
-import type { Commitment } from '@solana/rpc-types';
 import type {
+	Address,
+	Commitment,
 	FullySignedTransaction,
+	GetSignaturesForAddressApi,
+	Signature,
 	TransactionWithBlockhashLifetime
-} from '@solana/transactions';
+} from '@solana/web3.js';
 
 export type SolTransactionType = Extract<
 	TransactionType,

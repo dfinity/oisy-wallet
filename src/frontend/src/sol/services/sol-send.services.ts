@@ -24,30 +24,29 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import { address as solAddress } from '@solana/addresses';
-import { pipe } from '@solana/functional';
-import type { Signature } from '@solana/keys';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { RpcSubscriptions, SolanaRpcSubscriptionsApi } from '@solana/rpc-subscriptions';
-import { lamports, type Commitment } from '@solana/rpc-types';
-import {
-	setTransactionMessageFeePayerSigner,
-	type TransactionPartialSigner,
-	type TransactionSigner
-} from '@solana/signers';
 import {
 	appendTransactionMessageInstructions,
+	assertTransactionIsFullySigned,
 	createTransactionMessage,
-	prependTransactionMessageInstruction,
-	setTransactionMessageLifetimeUsingBlockhash,
-	type ITransactionMessageWithFeePayer,
-	type TransactionMessage,
-	type TransactionVersion
-} from '@solana/transaction-messages';
-import { assertTransactionIsFullySigned } from '@solana/transactions';
-import {
 	getComputeUnitEstimateForTransactionMessageFactory,
-	sendAndConfirmTransactionFactory
+	lamports,
+	pipe,
+	prependTransactionMessageInstruction,
+	sendAndConfirmTransactionFactory,
+	setTransactionMessageFeePayerSigner,
+	setTransactionMessageLifetimeUsingBlockhash,
+	address as solAddress,
+	type Commitment,
+	type ITransactionMessageWithFeePayer,
+	type Rpc,
+	type RpcSubscriptions,
+	type Signature,
+	type SolanaRpcApi,
+	type SolanaRpcSubscriptionsApi,
+	type TransactionMessage,
+	type TransactionPartialSigner,
+	type TransactionSigner,
+	type TransactionVersion
 } from '@solana/web3.js';
 import { get } from 'svelte/store';
 

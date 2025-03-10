@@ -74,8 +74,11 @@ import {
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction
 } from '@solana-program/token';
-import { address } from '@solana/addresses';
-import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/instructions';
+import {
+	address,
+	assertIsInstructionWithAccounts,
+	assertIsInstructionWithData
+} from '@solana/web3.js';
 
 const mapSystemParsedInstruction = ({
 	type,

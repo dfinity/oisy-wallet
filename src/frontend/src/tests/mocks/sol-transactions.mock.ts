@@ -11,16 +11,16 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { address } from '@solana/addresses';
-import { signature } from '@solana/keys';
 import {
+	address,
 	blockhash,
 	lamports,
+	signature,
 	type Base58EncodedBytes,
 	type Blockhash,
+	type TransactionMessageBytes,
 	type UnixTimestamp
-} from '@solana/rpc-types';
-import type { TransactionMessageBytes } from '@solana/transactions';
+} from '@solana/web3.js';
 
 const mockSignature =
 	'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM';
