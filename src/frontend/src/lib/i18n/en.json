@@ -18,7 +18,8 @@
 			"view": "View",
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
-			"not_available": "n/a"
+			"not_available": "n/a",
+			"new": "New"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -125,7 +126,7 @@
 			"active_campaigns": "Active Opportunities",
 			"upcoming_campaigns": "Upcoming Opportunities",
 			"active_date": "Due on",
-			"participate_title": "How to participate",
+			"participate_title": "Participate and earn Sprinkles",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"requirements_title": "Requirements",
