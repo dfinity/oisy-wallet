@@ -45,10 +45,10 @@
 		[ataAddress] =
 			nonNullish(addressData) && isTokenSpl(token)
 				? await findAssociatedTokenPda({
-					owner: solAddress(addressData.data),
-					tokenProgram: solAddress(token.owner),
-					mint: solAddress(token.address)
-				})
+						owner: solAddress(addressData.data),
+						tokenProgram: solAddress(token.owner),
+						mint: solAddress(token.address)
+					})
 				: [undefined];
 	};
 
