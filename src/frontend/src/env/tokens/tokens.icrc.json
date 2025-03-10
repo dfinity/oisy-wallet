@@ -22,5 +22,9 @@
 	"nICP": {
 		"indexCanisterId": "btxkl-saaaa-aaaar-qagvq-cai",
 		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai"
+	},
+	"vUSD": {
+		"indexCanisterId": "wdqhz-qyaaa-aaaam-aeccq-cai",
+		"ledgerCanisterId": "aiw2p-tyaaa-aaaam-aebyq-cai"
 	}
 }
