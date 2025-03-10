@@ -314,10 +314,7 @@ abstract class Homepage {
 		} else if (await this.isVisibleByTestId(`mobile-${testId}`)) {
 			await this.clickByTestId({ testId: `mobile-${testId}` });
 		} else {
-			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
-			await navigationMenuButton.click();
-			const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU);
-			await navigationMenu.getByTestId(testId).click();
+			throw new Error('Cannot reach navigation menu!');
 		}
 	}
 
