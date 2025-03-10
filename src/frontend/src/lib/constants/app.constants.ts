@@ -55,7 +55,9 @@ export const REWARDS_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_REWARDS_CANISTER_ID
 	: STAGING
 		? import.meta.env.VITE_STAGING_REWARDS_CANISTER_ID
-		: import.meta.env.VITE_IC_REWARDS_CANISTER_ID;
+		: BETA
+			? import.meta.env.VITE_STAGING_REWARDS_CANISTER_ID
+			: import.meta.env.VITE_IC_REWARDS_CANISTER_ID;
 
 export const SIGNER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_SIGNER_CANISTER_ID
