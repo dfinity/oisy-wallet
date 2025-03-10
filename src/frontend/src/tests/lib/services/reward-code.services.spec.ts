@@ -208,6 +208,78 @@ describe('reward-code', () => {
 		});
 	});
 
+	describe('getRewardRequirementsFulfilled', () => {
+		const buildMockTransaction: (timestamp: bigint) => AnyTransactionUiWithCmp = (timestamp) => ({
+			transaction: { ...mockBtcTransactionUi, timestamp },
+			component: 'bitcoin'
+		});
+
+		it('should be fulfilled for 1 of 3 criterias', () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [],
+				totalUsdBalance: 9
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeFalsy();
+			expect(req3).toBeFalsy();
+		});
+
+		it('should be fulfilled for 2 of 3 criterias', () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 2) * NANO_SECONDS_IN_MILLISECOND // trx 2 days ago
+					),
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 3) * NANO_SECONDS_IN_MILLISECOND // trx 3 days ago
+					)
+				],
+				totalUsdBalance: 9
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeTruthy();
+			expect(req3).toBeFalsy();
+		});
+
+		it('should be fulfilled for 2 of 3 criterias because transactions older than 7 days', () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 7) * NANO_SECONDS_IN_MILLISECOND // trx 7 days ago
+					),
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 7) * NANO_SECONDS_IN_MILLISECOND // trx 7 days ago
+					)
+				],
+				totalUsdBalance: 22
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeFalsy();
+			expect(req3).toBeTruthy();
+		});
+
+		it('should be fulfilled for 3 of 3 criterias', () => {
+			const [req1, req2, req3] = getRewardRequirementsFulfilled({
+				transactions: [
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 2) * NANO_SECONDS_IN_MILLISECOND // trx 2 days ago
+					),
+					buildMockTransaction(
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 3) * NANO_SECONDS_IN_MILLISECOND // trx 3 days ago
+					)
+				],
+				totalUsdBalance: 22
+			});
+
+			expect(req1).toBeTruthy();
+			expect(req2).toBeTruthy();
+			expect(req3).toBeTruthy();
+		});
+	});
+
 	const mockCkBtcToken = {
 		...ICP_TOKEN,
 		symbol: 'ckBTC',
