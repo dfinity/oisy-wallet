@@ -5,7 +5,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import type { Transaction } from '@solana/transactions';
+import type { Transaction } from '@solana/web3.js';
 import type { MockInstance } from 'vitest';
 
 describe('sol-sign.utils', () => {
