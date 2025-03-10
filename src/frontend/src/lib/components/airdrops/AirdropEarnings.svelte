@@ -14,6 +14,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { networkId } from '$lib/derived/network.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward-code.services';
