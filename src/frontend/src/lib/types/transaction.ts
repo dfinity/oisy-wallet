@@ -1,9 +1,10 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import type {
-	TransactionStatusSchema,
-	TransactionTypeSchema
+import {
+	TransactionIdSchema,
+	type TransactionStatusSchema,
+	type TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -12,6 +13,8 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import type { FeeData } from '@ethersproject/providers';
 import type { Transaction as EthTransaction } from '@ethersproject/transactions';
 import * as z from 'zod';
+
+export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type Transaction = Omit<EthTransaction, 'data'> &
 	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
