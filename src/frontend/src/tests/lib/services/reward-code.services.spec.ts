@@ -253,7 +253,7 @@ describe('reward-code', () => {
 						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 8) * NANO_SECONDS_IN_MILLISECOND // trx 8 days ago
 					)
 				],
-				totalUsdBalance: 12
+				totalUsdBalance: 22
 			});
 
 			expect(req1).toBeTruthy();
@@ -276,10 +276,10 @@ describe('reward-code', () => {
 
 			expect(req1).toBeTruthy();
 			expect(req2).toBeTruthy();
-			expect(req3).toBeTruthy();  
+			expect(req3).toBeTruthy();
 		});
-  }); 
-      
+	});
+
 	const mockCkBtcToken = {
 		...ICP_TOKEN,
 		symbol: 'ckBTC',

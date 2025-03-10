@@ -6,8 +6,7 @@ import {
 	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY } from '$lib/constants/app.constants';
-import { ZERO } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
@@ -221,7 +220,8 @@ export const getRewardRequirementsFulfilled = ({
 	const req3: boolean = totalUsdBalance >= 20; // at least 20$ balance
 
 	return [req1, req2, req3];
-  
+};
+
 export const getUserRewardsTokenAmounts = async ({
 	ckBtcToken,
 	ckUsdcToken,
