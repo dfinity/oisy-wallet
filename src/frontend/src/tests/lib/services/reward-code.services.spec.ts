@@ -221,7 +221,7 @@ describe('reward-code', () => {
 		amount
 	}: {
 		ledgerCanisterId: unknown;
-		amount: BigInt;
+		amount: bigint;
 	}): RewardInfo =>
 		({
 			ledger: { toText: () => ledgerCanisterId },
