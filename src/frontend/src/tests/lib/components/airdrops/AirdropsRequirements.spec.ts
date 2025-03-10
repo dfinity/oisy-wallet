@@ -5,6 +5,7 @@ import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import {AIRDROPS_REQUIREMENTS_STATUS, AIRDROPS_REQUIREMENTS_STATUS_SPINNER} from "$lib/constants/test-ids.constants";
 
 describe('AirdropsRequirements', () => {
 	const mockAirdropCampaign: AirdropDescription | undefined = mockAirdropCampaigns.find(
@@ -42,9 +43,9 @@ describe('AirdropsRequirements', () => {
 
 	describe('RequirementsFulfilled', () => {
 		const requirementStatusSelector = (index: number) =>
-			`span[data-tid="airdrop-requirement-status-${index}"]`;
+			`span[data-tid="${AIRDROPS_REQUIREMENTS_STATUS}-${index}"]`;
 		const requirementStatusSpinnerSelector = (index: number) =>
-			`span[data-tid="airdrop-requirement-status-spinner-${index}"]`;
+			`span[data-tid="${AIRDROPS_REQUIREMENTS_STATUS_SPINNER}-${index}"]`;
 
 		it('should render all requirements as fulfilled', () => {
 			const { container } = render(AirdropsRequirements, {

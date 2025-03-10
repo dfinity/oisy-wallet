@@ -3,6 +3,10 @@
 	import type { AirdropDescription } from '$env/types/env-airdrop';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		AIRDROPS_REQUIREMENTS_STATUS,
+		AIRDROPS_REQUIREMENTS_STATUS_SPINNER
+	} from "$lib/constants/test-ids.constants";
 
 	export let loading = true;
 	export let airdrop: AirdropDescription;
@@ -30,7 +34,7 @@
 				>
 					{#if airdrop.requirements.length === requirementsFulfilled.length}
 						<span
-							data-tid={`airdrop-requirement-status-${i}`}
+							data-tid={`${AIRDROPS_REQUIREMENTS_STATUS}-${i}`}
 							class="-mt-0.5 mr-2"
 							class:text-success-primary={isRequirementFulfilled(i)}
 							class:text-disabled={!isRequirementFulfilled(i)}
@@ -38,7 +42,7 @@
 							<IconCheckCircleFill size={32} />
 						</span>
 					{:else}
-						<span data-tid={`airdrop-requirement-status-spinner-${i}`} class="-mt-0.5 mr-2">
+						<span data-tid={`${AIRDROPS_REQUIREMENTS_STATUS_SPINNER}-${i}`} class="-mt-0.5 mr-2">
 							<Spinner inline size="small" />
 						</span>
 					{/if}
