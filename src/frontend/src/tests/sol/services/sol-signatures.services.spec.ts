@@ -14,7 +14,7 @@ import {
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
-import { address } from '@solana/web3.js';
+import { address } from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({

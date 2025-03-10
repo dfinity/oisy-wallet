@@ -23,7 +23,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { address as solAddress } from '@solana/web3.js';
+import { address as solAddress } from '@solana/kit';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
 	signalEnd: () => void;

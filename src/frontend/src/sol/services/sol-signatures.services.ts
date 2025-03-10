@@ -5,7 +5,7 @@ import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import { nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { assertIsAddress, signature, address as solAddress } from '@solana/web3.js';
+import { assertIsAddress, signature, address as solAddress } from '@solana/kit';
 
 /**
  * Fetches transactions without an error for a given wallet address.
