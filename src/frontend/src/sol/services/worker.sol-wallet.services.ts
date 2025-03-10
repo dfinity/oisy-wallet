@@ -89,9 +89,9 @@ export const initSolWalletWorker = async ({ token }: { token: Token }): Promise<
 	const data: PostMessageDataRequestSol = {
 		address,
 		solanaNetwork: network,
+		beforeSignature,
 		tokenAddress,
-		tokenOwnerAddress,
-		beforeSignature
+		tokenOwnerAddress
 	};
 
 	return {
