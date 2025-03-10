@@ -95,6 +95,10 @@
 	>
 		<IconGift />
 		{$i18n.navigation.text.airdrops}
+		<div
+			class="h-5.5 mt-0.25 text-xs/4.5 ml-1 rounded-md bg-error-primary px-2 py-0.5 font-bold text-white"
+			>{$i18n.core.text.new}</div
+		>
 	</NavigationItem>
 {/if}
 
