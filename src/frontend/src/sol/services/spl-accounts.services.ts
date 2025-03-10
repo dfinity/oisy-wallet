@@ -8,8 +8,7 @@ import {
 	findAssociatedTokenPda,
 	getCreateAssociatedTokenInstructionAsync
 } from '@solana-program/token';
-import { address as solAddress } from '@solana/addresses';
-import type { TransactionSigner } from '@solana/signers';
+import { address as solAddress, type TransactionSigner } from '@solana/web3.js';
 
 export const calculateAssociatedTokenAddress = async ({
 	owner,
