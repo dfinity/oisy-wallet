@@ -217,38 +217,28 @@ export const getUserRewardsTokenAmounts = async ({
 	icpReward: BigNumber;
 }> => {
 	const data = await getUserInfo({ identity: $authIdentity });
-	/*
-		const data = {
-			usage_awards: [
-				[{ ledger: { toText: () => ckBtcToken.ledgerCanisterId }, amount: 1000n }],
-				[{ ledger: { toText: () => ckUsdcToken.ledgerCanisterId }, amount: 1000n }],
-				[{ ledger: { toText: () => icpToken.ledgerCanisterId }, amount: 1000n }]
-			]
-		};
-*/
-	let _ckBtcReward: BigNumber = ZERO;
-	let _ckUsdcReward: BigNumber = ZERO;
-	let _icpReward: BigNumber = ZERO;
+	const initialRewards = {
+		ckBtcReward: ZERO,
+		ckUsdcReward: ZERO,
+		icpReward: ZERO
+	};
 
-	for (let i = 0; i < (data.usage_awards[0] ?? []).length; i++) {
-		const aw = data.usage_awards[0]?.[i];
+	const rewards = data.usage_awards[0]?.reduce((acc, aw) => {
 		if (nonNullish(aw)) {
 			const canisterId = aw.ledger.toText();
+
 			if (ckBtcToken.ledgerCanisterId === canisterId) {
-				_ckBtcReward = BigNumber.from(_ckBtcReward).add(aw.amount);
+				acc.ckBtcReward = BigNumber.from(acc.ckBtcReward).add(aw.amount);
 			} else if (icpToken.ledgerCanisterId === canisterId) {
-				_icpReward = BigNumber.from(_icpReward).add(aw.amount);
+				acc.icpReward = BigNumber.from(acc.icpReward).add(aw.amount);
 			} else if (ckUsdcToken.ledgerCanisterId === canisterId) {
-				_ckUsdcReward = BigNumber.from(_ckUsdcReward).add(aw.amount);
+				acc.ckUsdcReward = BigNumber.from(acc.ckUsdcReward).add(aw.amount);
 			} else {
 				console.warn(`Ledger canister mapping not found for: ${canisterId}`);
 			}
 		}
-	}
+		return acc;
+	}, initialRewards);
 
-	return {
-		ckBtcReward: _ckBtcReward,
-		ckUsdcReward: _ckUsdcReward,
-		icpReward: _icpReward
-	};
+	return rewards ?? initialRewards;
 };
