@@ -37,6 +37,9 @@ describe('manage-tokens.services', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
+			// we mock console.error just to avoid unnecessary logs while running the tests
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+
 			vi.spyOn(toastsStore, 'toastsError');
 		});
 
