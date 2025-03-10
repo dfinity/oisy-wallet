@@ -6,12 +6,14 @@ import {
 	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { ZERO } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
+import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
+import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -198,6 +200,28 @@ export const claimVipReward = async (params: {
 		});
 		return { success: false, err };
 	}
+};
+
+// Todo: for the moment we evaluate if requirements are fulfilled in frontend
+// this will change once we get this info from rewards canister
+export const getRewardRequirementsFulfilled = ({
+	transactions,
+	totalUsdBalance
+}: {
+	transactions: AnyTransactionUiWithCmp[];
+	totalUsdBalance: number;
+}): boolean[] => {
+	const req1 = true; // logged in once in last 7 days
+	const req2: boolean =
+		transactions.filter((trx) =>
+			trx.transaction.timestamp
+				? new Date().getTime() - MILLISECONDS_IN_DAY * 7 <
+					formatNanosecondsToTimestamp(BigInt(trx.transaction.timestamp))
+				: false
+		).length >= 2; // at least 2 transactions in last 7 days
+	const req3: boolean = totalUsdBalance >= 20; // at least 20$ balance
+
+	return [req1, req2, req3];
 };
 
 export const getUserRewardsTokenAmounts = async ({
