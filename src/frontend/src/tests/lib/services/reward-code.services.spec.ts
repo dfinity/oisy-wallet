@@ -4,11 +4,13 @@ import type {
 	RewardInfo,
 	UserData
 } from '$declarations/rewards/rewards.did';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
 import {
 	claimVipReward,
 	getAirdrops,
 	getNewReward,
+	getUserRewardsTokenAmounts,
 	isVipUser
 } from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -23,6 +25,7 @@ const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('reward-code', () => {
 	beforeEach(() => {
+		vi.clearAllMocks();
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 	});
 
@@ -36,7 +39,9 @@ describe('reward-code', () => {
 		};
 
 		it('should return true if user is vip', async () => {
-			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+			const getUserInfoSpy = vi
+				.spyOn(rewardApi, 'getUserInfo')
+				.mockResolvedValueOnce(mockedUserData);
 
 			const result = await isVipUser({ identity: mockIdentity });
 
@@ -50,7 +55,7 @@ describe('reward-code', () => {
 
 		it('should return false if user is not vip', async () => {
 			const userData: UserData = { ...mockedUserData, is_vip: [false] };
-			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(userData);
+			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(userData);
 
 			const result = await isVipUser({ identity: mockIdentity });
 
@@ -183,7 +188,9 @@ describe('reward-code', () => {
 		};
 
 		it('should return a list of airdrops and the last timestamp', async () => {
-			const getUserInfoSpy = vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+			const getUserInfoSpy = vi
+				.spyOn(rewardApi, 'getUserInfo')
+				.mockResolvedValueOnce(mockedUserData);
 
 			const result = await getAirdrops({ identity: mockIdentity });
 
@@ -194,6 +201,51 @@ describe('reward-code', () => {
 			});
 
 			expect(result).toEqual({ airdrops: [expectedAirdrop], lastTimestamp });
+		});
+	});
+
+	describe('getUserRewardsTokenAmounts', () => {
+		const mockCkBtcToken = {
+			...ICP_TOKEN,
+			symbol: 'ckBTC',
+			ledgerCanisterId: 'ckbtcLedgerCanisterId'
+		};
+		const mockCkUsdcToken = {
+			...ICP_TOKEN,
+			symbol: 'ckUSDC',
+			ledgerCanisterId: 'ckusdcLedgerCanisterId'
+		};
+		const mockIcpToken = { ...ICP_TOKEN, ledgerCanisterId: 'icpLedgerCanisterId' };
+
+		const mockUserData = {
+			usage_awards: [
+				[
+					{ ledger: { toText: () => mockCkBtcToken.ledgerCanisterId }, amount: 1000n },
+					{ ledger: { toText: () => mockCkBtcToken.ledgerCanisterId }, amount: 1000n },
+					{ ledger: { toText: () => mockCkBtcToken.ledgerCanisterId }, amount: 1000n },
+					{ ledger: { toText: () => mockCkUsdcToken.ledgerCanisterId }, amount: 2000n },
+					{ ledger: { toText: () => mockCkUsdcToken.ledgerCanisterId }, amount: 2000n },
+					{ ledger: { toText: () => mockIcpToken.ledgerCanisterId }, amount: 3000n }
+				]
+			],
+			airdrops: [],
+			last_snapshot_timestamp: undefined,
+			is_vip: false,
+			sprinkles: []
+		} as unknown as UserData;
+
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValueOnce(mockUserData);
+
+		it('should calculate correct sums for all rewards', async () => {
+			const result = await getUserRewardsTokenAmounts({
+				ckBtcToken: mockCkBtcToken,
+				ckUsdcToken: mockCkUsdcToken,
+				icpToken: mockIcpToken,
+				$authIdentity: mockIdentity
+			});
+			expect(result.ckBtcReward.toString()).toEqual('3000');
+			expect(result.ckUsdcReward.toString()).toEqual('4000');
+			expect(result.icpReward.toString()).toEqual('3000');
 		});
 	});
 });

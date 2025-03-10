@@ -1,16 +1,21 @@
 import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
+import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
+	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
@@ -194,4 +199,56 @@ export const claimVipReward = async (params: {
 		});
 		return { success: false, err };
 	}
+};
+
+export const getUserRewardsTokenAmounts = async ({
+	ckBtcToken,
+	ckUsdcToken,
+	icpToken,
+	$authIdentity
+}: {
+	ckBtcToken: IcToken;
+	ckUsdcToken: IcToken;
+	icpToken: IcToken;
+	$authIdentity: OptionIdentity;
+}): Promise<{
+	ckBtcReward: BigNumber;
+	ckUsdcReward: BigNumber;
+	icpReward: BigNumber;
+}> => {
+	const data = await getUserInfo({ identity: $authIdentity });
+	/*
+		const data = {
+			usage_awards: [
+				[{ ledger: { toText: () => ckBtcToken.ledgerCanisterId }, amount: 1000n }],
+				[{ ledger: { toText: () => ckUsdcToken.ledgerCanisterId }, amount: 1000n }],
+				[{ ledger: { toText: () => icpToken.ledgerCanisterId }, amount: 1000n }]
+			]
+		};
+*/
+	let _ckBtcReward: BigNumber = ZERO;
+	let _ckUsdcReward: BigNumber = ZERO;
+	let _icpReward: BigNumber = ZERO;
+
+	for (let i = 0; i < (data.usage_awards[0] ?? []).length; i++) {
+		const aw = data.usage_awards[0]?.[i];
+		if (nonNullish(aw)) {
+			const canisterId = aw.ledger.toText();
+			if (ckBtcToken.ledgerCanisterId === canisterId) {
+				_ckBtcReward = BigNumber.from(_ckBtcReward).add(aw.amount);
+			} else if (icpToken.ledgerCanisterId === canisterId) {
+				_icpReward = BigNumber.from(_icpReward).add(aw.amount);
+			} else if (ckUsdcToken.ledgerCanisterId === canisterId) {
+				_ckUsdcReward = BigNumber.from(_ckUsdcReward).add(aw.amount);
+			} else {
+				console.warn(`Ledger canister mapping not found for: ${canisterId}`);
+			}
+		}
+	}
+
+	return {
+		ckBtcReward: _ckBtcReward,
+		ckUsdcReward: _ckUsdcReward,
+		icpReward: _icpReward
+	};
 };
