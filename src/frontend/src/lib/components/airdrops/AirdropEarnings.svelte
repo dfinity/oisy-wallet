@@ -13,8 +13,8 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { networkId } from '$lib/derived/network.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward-code.services';
@@ -33,7 +33,11 @@
 	$: ckBtcReward = ZERO;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
-		? (calculateTokenUsdAmount({ amount: ckBtcReward, token: ckBtcToken, $exchanges: $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({
+				amount: ckBtcReward,
+				token: ckBtcToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let ckUsdcToken: IcToken | undefined;
@@ -42,7 +46,11 @@
 	$: ckUsdcReward = ZERO;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
-		? (calculateTokenUsdAmount({ amount: ckUsdcReward, token: ckUsdcToken, $exchanges: $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({
+				amount: ckUsdcReward,
+				token: ckUsdcToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let icpToken: IcToken | undefined;
@@ -61,10 +69,10 @@
 	$: loading = true;
 
 	const loadRewards = async ({
-															 ckBtcToken,
-															 ckUsdcToken,
-															 icpToken
-														 }: {
+		ckBtcToken,
+		ckUsdcToken,
+		icpToken
+	}: {
 		ckBtcToken: IcToken | undefined;
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
@@ -109,10 +117,10 @@
 			class:duration-500={loading}
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
-		>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
-			$noOfSprinkles: '3',
-			$amount: formatUSD({ value: totalRewardUsd })
-		})}
+			>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
+				$noOfSprinkles: '3',
+				$amount: formatUSD({ value: totalRewardUsd })
+			})}
 		</div>
 
 		<div class="flex w-full gap-2">
