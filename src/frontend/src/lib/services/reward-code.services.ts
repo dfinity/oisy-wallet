@@ -202,6 +202,8 @@ export const claimVipReward = async (params: {
 	}
 };
 
+// Todo: for the moment we evaluate if requirements are fulfilled in frontend
+// this will change once we get this info from rewards canister
 export const getRewardRequirementsFulfilled = ({
 	transactions,
 	totalUsdBalance

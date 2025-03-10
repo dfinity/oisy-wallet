@@ -115,13 +115,14 @@
 
 		{#if airdrop.requirements.length > 0}
 			<Hr spacing="md" />
+
+			<AirdropsRequirements
+				loading={isRequirementsLoading}
+				{airdrop}
+				{isEligible}
+				{requirementsFulfilled}
+			/>
 		{/if}
-		<AirdropsRequirements
-			loading={isRequirementsLoading}
-			{airdrop}
-			{isEligible}
-			{requirementsFulfilled}
-		/>
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
 			{$i18n.airdrops.text.modal_button_text}
