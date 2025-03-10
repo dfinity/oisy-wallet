@@ -57,6 +57,7 @@ interface WaitForModalParams {
 interface TakeScreenshotParams {
 	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
+	screenshotTarget?: Locator;
 }
 
 type TestModalSnapshotParams = {
@@ -289,7 +290,7 @@ abstract class Homepage {
 			);
 		}
 
-		await expect(modal).toHaveScreenshot();
+		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
@@ -299,6 +300,8 @@ abstract class Homepage {
 
 		await this.promotionCarousel.navigateToSlide(1);
 		await this.promotionCarousel.freezeCarousel();
+
+		await this.waitForLoadState();
 	}
 
 	async waitForLoadState() {
@@ -336,9 +339,6 @@ abstract class Homepage {
 		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
 		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
 		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
-		await this.getLocatorByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN }).evaluate((el) =>
-			el.blur()
-		);
 	}
 
 	async toggleTokenInList({
@@ -356,8 +356,6 @@ abstract class Homepage {
 		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
-		// We want to remove the focus from the button to avoid the focus box to be visible in the screenshot
-		await this.#page.keyboard.press('Escape');
 	}
 
 	getTokenCardLocator({
@@ -371,7 +369,7 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{ freezeCarousel = false, centeredElementTestId }: TakeScreenshotParams = {
+		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
 		}
 	): Promise<void> {
@@ -384,12 +382,26 @@ abstract class Homepage {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
-		await expect(this.#page).toHaveScreenshot({
-			// creates a snapshot as a fullPage and not just certain parts.
-			fullPage: true,
-			// playwright can retry flaky tests in the amount of time set below.
-			timeout: 5 * 60 * 1000
-		});
+		await this.#page.mouse.move(0, 0);
+
+		const colorSchemes = ['light', 'dark'] as const;
+		for (const scheme of colorSchemes) {
+			await this.#page.emulateMedia({ colorScheme: scheme });
+
+			if (screenshotTarget) {
+				await expect(screenshotTarget).toHaveScreenshot({
+					timeout: 5 * 60 * 1000
+				});
+			} else {
+				await expect(this.#page).toHaveScreenshot({
+					// creates a snapshot as a fullPage and not just certain parts.
+					fullPage: true,
+					// playwright can retry flaky tests in the amount of time set below.
+					timeout: 5 * 60 * 1000
+				});
+			}
+		}
+		await this.#page.emulateMedia({ colorScheme: null });
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
