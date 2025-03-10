@@ -1,43 +1,42 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+	import { btcStatusesStore } from '$icp/stores/btc.store';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import AirdropBanner from '$lib/components/airdrops/AirdropBanner.svelte';
+	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
+	import AirdropEarnings from '$lib/components/airdrops/AirdropEarnings.svelte';
+	import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		areTransactionsStoresLoading,
-		mapAllTransactionsUi
-	} from '$lib/utils/transactions.utils';
-	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { LOCAL } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import { btcStatusesStore } from '$icp/stores/btc.store';
-	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
-	import AirdropEarnings from '$lib/components/airdrops/AirdropEarnings.svelte';
-	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import {
 		combinedDerivedSortedNetworkTokensUi,
 		enabledNetworkTokens
 	} from '$lib/derived/network-tokens.derived';
-	import { LOCAL, MILLISECONDS_IN_DAY } from '$lib/constants/app.constants';
-	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-	import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
-	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
-	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledErc20Tokens, enabledIcTokens } from '$lib/derived/tokens.derived';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
-	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { getRewardRequirementsFulfilled } from '$lib/services/reward-code.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { AllTransactionUiWithCmp } from '$lib/types/transaction';
+	import type { TransactionsStoreCheckParams } from '$lib/types/transactions';
+	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import {
+		areTransactionsStoresLoading,
+		mapAllTransactionsUi
+	} from '$lib/utils/transactions.utils';
+	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
 	export let airdrop: AirdropDescription;
 
@@ -61,7 +60,7 @@
 	let requirementsFulfilled: boolean[];
 	$: requirementsFulfilled = getRewardRequirementsFulfilled({ transactions, totalUsdBalance });
 
-	let isEligible: boolean = false;
+	let isEligible = false;
 	$: isEligible = requirementsFulfilled.reduce((p, c) => p && c);
 
 	let transactionsStores: TransactionsStoreCheckParams[];
