@@ -1,5 +1,6 @@
+import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
+import EthListener from '$eth/components/core/EthListener.svelte';
 import type { Token } from '$lib/types/token';
-import type { ComponentType } from 'svelte';
 
 export interface WalletWorker {
 	start: () => void;
@@ -11,7 +12,7 @@ export type InitWalletWorkerFn = (params: { token: Token }) => Promise<WalletWor
 
 export interface TokenToListener {
 	token: Token;
-	listener: ComponentType;
+	listener: typeof BitcoinListener | typeof EthListener;
 }
 
 export interface WebSocketListener {
