@@ -11,9 +11,7 @@ import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { address } from '@solana/addresses';
-import type { Rpc, SolanaRpcApi } from '@solana/rpc';
-import type { Base58EncodedBytes } from '@solana/rpc-types';
+import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/web3.js';
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
 	solanaHttpRpc: vi.fn(),
