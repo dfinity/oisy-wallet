@@ -247,10 +247,10 @@ describe('reward-code', () => {
 			const [req1, req2, req3] = getRewardRequirementsFulfilled({
 				transactions: [
 					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 8) * NANO_SECONDS_IN_MILLISECOND // trx 8 days ago
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 7) * NANO_SECONDS_IN_MILLISECOND // trx 7 days ago
 					),
 					buildMockTransaction(
-						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 8) * NANO_SECONDS_IN_MILLISECOND // trx 8 days ago
+						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 7) * NANO_SECONDS_IN_MILLISECOND // trx 7 days ago
 					)
 				],
 				totalUsdBalance: 22
