@@ -4,6 +4,7 @@
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
 	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -13,13 +14,13 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
-	import ExchangeAmountDisplay from "$lib/components/exchange/ExchangeAmountDisplay.svelte";
 
 	export let utxosFee: UtxosFee | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -63,10 +64,10 @@
 		<span class="mt-2 block w-full max-w-[140px]"><SkeletonText /></span>
 	{:else}
 		<ExchangeAmountDisplay
-				amount={BigNumber.from(utxosFee.feeSatoshis)}
-				decimals={$sendTokenDecimals}
-				symbol={$sendTokenSymbol}
-				exchangeRate={$sendTokenExchangeRate}
+			amount={BigNumber.from(utxosFee.feeSatoshis)}
+			decimals={$sendTokenDecimals}
+			symbol={$sendTokenSymbol}
+			exchangeRate={$sendTokenExchangeRate}
 		/>
 	{/if}
 </Value>
