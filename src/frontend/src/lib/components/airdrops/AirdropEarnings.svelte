@@ -23,6 +23,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
+	import { exchanges } from '$lib/derived/exchange.derived';
 
 	export let isEligible = false;
 
