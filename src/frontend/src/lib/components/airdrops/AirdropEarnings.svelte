@@ -17,6 +17,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isMobile } from '$lib/utils/device.utils';
@@ -24,7 +25,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
-	import { nullishSignOut } from '$lib/services/auth.services';
 
 	export let isEligible = false;
 
