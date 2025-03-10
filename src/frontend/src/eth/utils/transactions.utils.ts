@@ -37,7 +37,7 @@ export const mapEthTransactionUi = ({
 
 	return {
 		...transaction,
-		id: transaction.hash,
+		id: transaction.hash ?? '',
 		type: ckMinterInfoAddresses.includes(from.toLowerCase())
 			? 'withdraw'
 			: ckMinterInfoAddresses.includes(to?.toLowerCase())

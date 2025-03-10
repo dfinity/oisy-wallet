@@ -1,5 +1,5 @@
 import { ethTransactionTypes } from '$lib/schema/transaction.schema';
-import type { Transaction, TransactionType } from '$lib/types/transaction';
+import type { Transaction, TransactionId, TransactionType } from '$lib/types/transaction';
 
 export type EthTransactionType = Extract<
 	TransactionType,
@@ -7,6 +7,6 @@ export type EthTransactionType = Extract<
 >;
 
 export interface EthTransactionUi extends Omit<Transaction, 'type'> {
-	id: string | undefined;
+	id: TransactionId;
 	type: EthTransactionType;
 }
