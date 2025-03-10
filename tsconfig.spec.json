@@ -36,6 +36,6 @@
 		"./tests/**/*.svelte",
 		"./vitest.config.ts",
 		"./vitest.setup.ts",
-		"./scripts/*.ts",
+		"./scripts/*.ts"
 	]
 }
