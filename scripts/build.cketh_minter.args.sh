@@ -6,7 +6,7 @@ ARG_FILE="$(jq -re .canisters.cketh_minter.init_arg_file dfx.json)"
 
 mkdir -p "$(dirname "$ARG_FILE")"
 
-cat <<EOF > "$ARG_FILE"
+cat <<EOF >"$ARG_FILE"
 (variant {
   InitArg = record {
        ethereum_network = variant {Sepolia};
