@@ -264,7 +264,7 @@ describe('reward-code', () => {
 						BigInt(new Date().getTime() - MILLISECONDS_IN_DAY * 3) * NANO_SECONDS_IN_MILLISECOND // trx 3 days ago
 					)
 				],
-				totalUsdBalance: 12
+				totalUsdBalance: 22
 			});
 
 			expect(req1).toBeTruthy();
