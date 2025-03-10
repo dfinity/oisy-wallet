@@ -4,16 +4,12 @@ import {
 	mockSolSignedTransaction,
 	mockSolTransactionMessage
 } from '$tests/mocks/sol-transactions.mock';
-import * as solanaSignersPkg from '@solana/signers';
-import * as solanaTransactionsPkg from '@solana/transactions';
+import * as solanaWeb3Pkg from '@solana/web3.js';
 import type { MockInstance } from 'vitest';
 
-vi.mock('@solana/signers', () => ({
+vi.mock('@solana/web3.js', () => ({
+	getSignatureFromTransaction: vi.fn(),
 	signTransactionMessageWithSigners: vi.fn()
-}));
-
-vi.mock('@solana/transactions', () => ({
-	getSignatureFromTransaction: vi.fn()
 }));
 
 describe('sol-sign.services', () => {
@@ -29,10 +25,10 @@ describe('sol-sign.services', () => {
 			vi.clearAllMocks();
 
 			spySignTransactionMessageWithSigners = vi
-				.spyOn(solanaSignersPkg, 'signTransactionMessageWithSigners')
+				.spyOn(solanaWeb3Pkg, 'signTransactionMessageWithSigners')
 				.mockResolvedValue(mockSignedTransaction);
 			spyGetSignatureFromTransaction = vi
-				.spyOn(solanaTransactionsPkg, 'getSignatureFromTransaction')
+				.spyOn(solanaWeb3Pkg, 'getSignatureFromTransaction')
 				.mockReturnValue(mockSignature);
 		});
 
