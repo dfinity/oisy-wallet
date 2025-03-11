@@ -12,6 +12,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/web3.js';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
 	solanaHttpRpc: vi.fn(),
@@ -152,6 +153,8 @@ describe('sol-instructions.utils', () => {
 		});
 
 		describe('with a Token parsed instruction', () => {
+			let mockGetAccountInfo: MockInstance;
+
 			const mockTokenAddress: SplTokenAddress = JUP_TOKEN.address;
 
 			const mockTokenInstruction: SolRpcInstruction = {
@@ -168,30 +171,93 @@ describe('sol-instructions.utils', () => {
 			};
 
 			beforeEach(() => {
-				const mockRpc = {
-					getAccountInfo: vi.fn(() => ({
-						send: vi.fn(() => ({
-							value: {
-								data: { parsed: { info: { mint: mockTokenAddress } } }
-							}
-						}))
+				mockGetAccountInfo = vi.fn(() => ({
+					send: vi.fn(() => ({
+						value: {
+							data: { parsed: { info: { mint: mockTokenAddress } } }
+						}
 					}))
-				} as unknown as Rpc<SolanaRpcApi>;
+				}));
+
+				const mockRpc = { getAccountInfo: mockGetAccountInfo } as unknown as Rpc<SolanaRpcApi>;
 
 				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			});
 
-			it('should map a valid `transfer` instruction', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: mockTokenInstruction,
-					network
+			describe('with `transfer` instruction', () => {
+				it('should map a valid `transfer` instruction', async () => {
+					const result = await mapSolParsedInstruction({
+						instruction: mockTokenInstruction,
+						network
+					});
+
+					expect(result).toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
+
+					expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
+						encoding: 'jsonParsed'
+					});
 				});
 
-				expect(result).toEqual({
-					value: 50n,
-					from: mockSolAddress,
-					to: mockSolAddress2,
-					tokenAddress: mockTokenAddress
+				it('should fetch token address from destination account info if not provided by source info', async () => {
+					mockGetAccountInfo.mockReturnValueOnce({
+						send: vi.fn(() => ({ value: { data: {} } }))
+					});
+
+					const result = await mapSolParsedInstruction({
+						instruction: mockTokenInstruction,
+						network
+					});
+
+					expect(result).toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
+
+					expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
+						encoding: 'jsonParsed'
+					});
+					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress2, {
+						encoding: 'jsonParsed'
+					});
+				});
+
+				it('should not call getAccountInfo for `transfer` instruction if token address is already mapped', async () => {
+					await expect(
+						mapSolParsedInstruction({
+							instruction: mockTokenInstruction,
+							network,
+							addressToToken: { [mockSolAddress]: mockTokenAddress }
+						})
+					).resolves.toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
+
+					expect(mockGetAccountInfo).not.toHaveBeenCalled();
+
+					await expect(
+						mapSolParsedInstruction({
+							instruction: mockTokenInstruction,
+							network,
+							addressToToken: { [mockSolAddress2]: mockTokenAddress }
+						})
+					).resolves.toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
 				});
 			});
 
@@ -283,6 +349,8 @@ describe('sol-instructions.utils', () => {
 		});
 
 		describe('with a Token-2022 parsed instruction', () => {
+			let mockGetAccountInfo: MockInstance;
+
 			const mockTokenAddress: SplTokenAddress = JUP_TOKEN.address;
 
 			const mockTokenInstruction: SolRpcInstruction = {
@@ -299,30 +367,93 @@ describe('sol-instructions.utils', () => {
 			};
 
 			beforeEach(() => {
-				const mockRpc = {
-					getAccountInfo: vi.fn(() => ({
-						send: vi.fn(() => ({
-							value: {
-								data: { parsed: { info: { mint: mockTokenAddress } } }
-							}
-						}))
+				mockGetAccountInfo = vi.fn(() => ({
+					send: vi.fn(() => ({
+						value: {
+							data: { parsed: { info: { mint: mockTokenAddress } } }
+						}
 					}))
-				} as unknown as Rpc<SolanaRpcApi>;
+				}));
+
+				const mockRpc = { getAccountInfo: mockGetAccountInfo } as unknown as Rpc<SolanaRpcApi>;
 
 				vi.mocked(solanaHttpRpc).mockReturnValue(mockRpc);
 			});
 
-			it('should map a valid `transfer` instruction', async () => {
-				const result = await mapSolParsedInstruction({
-					instruction: mockTokenInstruction,
-					network
+			describe('with `transfer` instruction', () => {
+				it('should map a valid `transfer` instruction', async () => {
+					const result = await mapSolParsedInstruction({
+						instruction: mockTokenInstruction,
+						network
+					});
+
+					expect(result).toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
+
+					expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
+						encoding: 'jsonParsed'
+					});
 				});
 
-				expect(result).toEqual({
-					value: 50n,
-					from: mockSolAddress,
-					to: mockSolAddress2,
-					tokenAddress: mockTokenAddress
+				it('should fetch token address from destination account info if not provided by source info', async () => {
+					mockGetAccountInfo.mockReturnValueOnce({
+						send: vi.fn(() => ({ value: { data: {} } }))
+					});
+
+					const result = await mapSolParsedInstruction({
+						instruction: mockTokenInstruction,
+						network
+					});
+
+					expect(result).toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
+
+					expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, {
+						encoding: 'jsonParsed'
+					});
+					expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress2, {
+						encoding: 'jsonParsed'
+					});
+				});
+
+				it('should not call getAccountInfo for `transfer` instruction if token address is already mapped', async () => {
+					await expect(
+						mapSolParsedInstruction({
+							instruction: mockTokenInstruction,
+							network,
+							addressToToken: { [mockSolAddress]: mockTokenAddress }
+						})
+					).resolves.toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
+
+					expect(mockGetAccountInfo).not.toHaveBeenCalled();
+
+					await expect(
+						mapSolParsedInstruction({
+							instruction: mockTokenInstruction,
+							network,
+							addressToToken: { [mockSolAddress2]: mockTokenAddress }
+						})
+					).resolves.toEqual({
+						value: 50n,
+						from: mockSolAddress,
+						to: mockSolAddress2,
+						tokenAddress: mockTokenAddress
+					});
 				});
 			});
 
