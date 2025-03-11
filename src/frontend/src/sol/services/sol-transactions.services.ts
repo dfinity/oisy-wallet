@@ -57,6 +57,7 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
+	const { fee } = meta ?? {};
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
 	// Inside the instructions there could be some that we are unable to decode, but that may have
@@ -134,7 +135,11 @@ export const fetchSolTransactionsForSignature = async ({
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
 				to,
-				status
+				status,
+				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
+				// Particularly, we are repeating the same fee for each instruction in the transaction.
+				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
+				fee
 			};
 
 			return {
