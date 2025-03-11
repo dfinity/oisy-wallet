@@ -10,25 +10,31 @@
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
+	import { formatTokenAmount, formatUSD } from '$lib/utils/format.utils';
 
 	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let sourceTokenTransferFee: number;
-	$: sourceTokenTransferFee =
+	let sourceTokenTransferFeeDisplay: string;
+	$: sourceTokenTransferFeeDisplay =
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])
-			? formatTokenBigintToNumber({
-					value: $icTokenFeeStore?.[$sourceToken.symbol],
+			? formatTokenAmount({
+					value: $icTokenFeeStore[$sourceToken.symbol],
 					displayDecimals: $sourceToken.decimals,
 					unitName: $sourceToken.decimals
 				})
-			: 0;
+			: '0';
+
+	let sourceTokenTransferFee: number;
+	$: sourceTokenTransferFee = Number(sourceTokenTransferFeeDisplay);
+
+	let sourceTokenApproveFeeDisplay: string;
+	$: sourceTokenApproveFeeDisplay = isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0';
 
 	let sourceTokenApproveFee: number;
-	$: sourceTokenApproveFee = isSourceTokenIcrc2 ? sourceTokenTransferFee : 0;
+	$: sourceTokenApproveFee = Number(sourceTokenApproveFeeDisplay);
 
 	let sourceTokenTotalFeeUSD: number;
 	$: sourceTokenTotalFeeUSD = nonNullish($sourceTokenExchangeRate)
@@ -63,14 +69,14 @@
 		<svelte:fragment slot="list-items">
 			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
 				<SwapFee
-					fee={sourceTokenApproveFee}
+					fee={sourceTokenApproveFeeDisplay}
 					symbol={$sourceToken.symbol}
 					label={$i18n.swap.text.approval_fee}
 				/>
 			{/if}
 
 			<SwapFee
-				fee={sourceTokenTransferFee}
+				fee={sourceTokenTransferFeeDisplay}
 				symbol={$sourceToken.symbol}
 				label={$i18n.swap.text.network_fee}
 			/>
