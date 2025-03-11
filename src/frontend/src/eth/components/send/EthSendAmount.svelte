@@ -13,12 +13,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
 	export let nativeEthereumToken: Token;
+
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	let insufficientFundsError: InsufficientFundsError | undefined = undefined;
 
@@ -79,11 +84,13 @@
 <TokenInput
 	token={$sendToken}
 	bind:amount
+	displayUnit={inputUnit}
 	bind:amountSetToMax
 	isSelectable={false}
 	exchangeRate={$sendTokenExchangeRate}
 	bind:error={insufficientFundsError}
 	customErrorValidate={customValidate}
+	autofocus={nonNullish($sendToken)}
 >
 	<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -94,7 +101,7 @@
 					{amount}
 					exchangeRate={$sendTokenExchangeRate}
 					token={$sendToken}
-					disabled
+					bind:displayUnit={exchangeValueUnit}
 				/>
 			</div>
 		{/if}

@@ -30,6 +30,10 @@ const appleProjects = [
 		}
 	},
 	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome']
+	},
+	{
 		name: 'iPhone SE',
 		use: {
 			...devices['iPhone SE'],
