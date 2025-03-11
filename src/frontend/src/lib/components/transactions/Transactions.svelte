@@ -14,6 +14,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken } from '$lib/types/token';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
+	import {toastsShow} from "$lib/stores/toasts.store";
+	import {replacePlaceholders} from "$lib/utils/i18n.utils";
 
 	let token: OptionToken;
 	$: token = $allTokens.find((token) => token.name === $routeToken);
@@ -22,6 +24,19 @@
 	$: if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
 		setTimeout(() => {
 			showTokenModal = true;
+		}, FALLBACK_TIMEOUT);
+	}
+
+	$: if(nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
+		setTimeout(async () => {
+			toastsShow({
+				text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
+					$token: $routeToken,
+					$network: $routeNetwork
+				}),
+				level: 'warn'
+			});
+			await goto('/')
 		}, FALLBACK_TIMEOUT);
 	}
 
