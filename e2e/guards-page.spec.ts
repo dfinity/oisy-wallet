@@ -24,6 +24,6 @@ testWithII(
 
 		await homepageLoggedIn.waitForContentReady();
 
-		await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+		await homepageLoggedIn.takeScreenshot();
 	}
 );
