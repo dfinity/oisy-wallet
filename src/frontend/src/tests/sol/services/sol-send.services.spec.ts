@@ -20,7 +20,7 @@ import {
 import { BigNumber } from '@ethersproject/bignumber';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferInstruction } from '@solana-program/token';
-import * as solanaWeb3 from '@solana/web3.js';
+import * as solanaWeb3 from '@solana/kit';
 import {
 	appendTransactionMessageInstructions,
 	getComputeUnitEstimateForTransactionMessageFactory,
@@ -30,10 +30,10 @@ import {
 	type RpcSubscriptions,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
-} from '@solana/web3.js';
+} from '@solana/kit';
 import { type MockInstance } from 'vitest';
 
-vi.mock(import('@solana/web3.js'), async (importOriginal) => {
+vi.mock(import('@solana/kit'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,

@@ -4,7 +4,7 @@ import {
 	getSignatureFromTransaction,
 	signTransactionMessageWithSigners,
 	type Signature
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 export const signTransaction = async (
 	transactionMessage: SolTransactionMessage
