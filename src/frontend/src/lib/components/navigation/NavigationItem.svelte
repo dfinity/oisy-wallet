@@ -8,7 +8,7 @@
 	export let ariaLabel: string;
 	export let testId: string | undefined = undefined;
 	export let tag: string | undefined = undefined;
-	export let tagVariant: TagVariant;
+	export let tagVariant: TagVariant | undefined = undefined;
 </script>
 
 <a {href} class="nav-item" class:selected aria-label={ariaLabel} data-tid={testId}>
