@@ -3,6 +3,7 @@ import {
 	LOADER_MODAL,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	MANAGE_TOKENS_MODAL,
 	MANAGE_TOKENS_MODAL_BUTTON,
 	MANAGE_TOKENS_MODAL_SAVE,
 	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
@@ -51,6 +52,12 @@ interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
 	state?: 'detached';
+}
+
+interface TakeScreenshotParams {
+	freezeCarousel?: boolean;
+	centeredElementTestId?: string;
+	screenshotTarget?: Locator;
 }
 
 type TestModalSnapshotParams = {
@@ -222,8 +229,8 @@ abstract class Homepage {
 		await this.#page.locator(selector).click();
 	}
 
-	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
-		return await this.#page.getByTestId(testId);
+	protected getLocatorByTestId({ testId }: TestIdOperationParams): Locator {
+		return this.#page.getByTestId(testId);
 	}
 
 	async waitForTimeout(timeout: number): Promise<void> {
@@ -283,7 +290,7 @@ abstract class Homepage {
 			);
 		}
 
-		await expect(modal).toHaveScreenshot();
+		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
@@ -293,6 +300,8 @@ abstract class Homepage {
 
 		await this.promotionCarousel.navigateToSlide(1);
 		await this.promotionCarousel.freezeCarousel();
+
+		await this.waitForLoadState();
 	}
 
 	async waitForLoadState() {
@@ -302,11 +311,10 @@ abstract class Homepage {
 	async navigateTo(testId: string): Promise<void> {
 		if (await this.isVisibleByTestId(testId)) {
 			await this.clickByTestId({ testId });
+		} else if (await this.isVisibleByTestId(`mobile-${testId}`)) {
+			await this.clickByTestId({ testId: `mobile-${testId}` });
 		} else {
-			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
-			await navigationMenuButton.click();
-			const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU);
-			await navigationMenu.getByTestId(testId).click();
+			throw new Error('Cannot reach navigation menu!');
 		}
 	}
 
@@ -316,6 +324,22 @@ abstract class Homepage {
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
+	private async scrollIntoViewCentered(testId: string): Promise<void> {
+		const selector = `[data-tid="${testId}"]`;
+		const locator = this.#page.locator(selector);
+		await locator.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
+	}
+
+	protected async waitForManageTokensModal(options?: WaitForLocatorOptions): Promise<void> {
+		await this.waitForByTestId({ testId: MANAGE_TOKENS_MODAL, options });
+	}
+
+	async toggleNetworkSelector({ networkSymbol }: { networkSymbol: string }): Promise<void> {
+		await this.scrollIntoViewCentered(NETWORKS_SWITCHER_DROPDOWN);
+		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
+		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+	}
+
 	async toggleTokenInList({
 		tokenSymbol,
 		networkSymbol
@@ -323,13 +347,14 @@ abstract class Homepage {
 		tokenSymbol: string;
 		networkSymbol: string;
 	}): Promise<void> {
-		await this.clickByTestId({ testId: NETWORKS_SWITCHER_DROPDOWN });
-		await this.clickByTestId({ testId: `${NETWORKS_SWITCHER_SELECTOR}-${networkSymbol}` });
+		await this.toggleNetworkSelector({ networkSymbol });
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_BUTTON });
+		await this.waitForManageTokensModal();
 		await this.clickByTestId({
 			testId: `${MANAGE_TOKENS_MODAL_TOKEN_TOGGLE}-${tokenSymbol}-${networkSymbol}`
 		});
 		await this.clickByTestId({ testId: MANAGE_TOKENS_MODAL_SAVE });
+		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
 	}
 
 	getTokenCardLocator({
@@ -342,13 +367,40 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot(): Promise<void> {
-		await expect(this.#page).toHaveScreenshot({
-			// creates a snapshot as a fullPage and not just certain parts.
-			fullPage: true,
-			// playwright can retry flaky tests in the amount of time set below.
-			timeout: 5 * 60 * 1000
-		});
+	async takeScreenshot(
+		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
+			freezeCarousel: false
+		}
+	): Promise<void> {
+		if (freezeCarousel) {
+			await this.setCarouselFirstSlide();
+			await this.waitForLoadState();
+		}
+
+		if (nonNullish(centeredElementTestId)) {
+			await this.scrollIntoViewCentered(centeredElementTestId);
+		}
+
+		await this.#page.mouse.move(0, 0);
+
+		const colorSchemes = ['light', 'dark'] as const;
+		for (const scheme of colorSchemes) {
+			await this.#page.emulateMedia({ colorScheme: scheme });
+
+			if (screenshotTarget) {
+				await expect(screenshotTarget).toHaveScreenshot({
+					timeout: 5 * 60 * 1000
+				});
+			} else {
+				await expect(this.#page).toHaveScreenshot({
+					// creates a snapshot as a fullPage and not just certain parts.
+					fullPage: true,
+					// playwright can retry flaky tests in the amount of time set below.
+					timeout: 5 * 60 * 1000
+				});
+			}
+		}
+		await this.#page.emulateMedia({ colorScheme: null });
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
@@ -422,7 +474,7 @@ export class HomepageLoggedIn extends Homepage {
 			})
 		});
 
-		const qrCodeOutputLocator = await this.getLocatorByTestId({
+		const qrCodeOutputLocator = this.getLocatorByTestId({
 			testId: RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT
 		});
 		await qrCodeOutputLocator.waitFor();

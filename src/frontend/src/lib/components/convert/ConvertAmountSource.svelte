@@ -2,6 +2,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
+	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
@@ -9,13 +10,19 @@
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	export let sendAmount: OptionAmount = undefined;
 	export let totalFee: bigint | undefined;
+	export let minFee: bigint | undefined = undefined;
+	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let insufficientFunds: boolean;
 	export let insufficientFundsForFee: boolean;
+	export let amountLessThanLedgerFee: boolean | undefined = undefined;
+	export let minimumAmountNotReached: boolean | undefined = undefined;
+	export let unknownMinimumAmount: boolean | undefined = undefined;
+	export let minterInfoNotCertified: boolean | undefined = undefined;
 	export let exchangeValueUnit: DisplayUnit = 'usd';
 	export let inputUnit: DisplayUnit = 'token';
 
@@ -23,16 +30,25 @@
 
 	$: insufficientFunds = nonNullish(errorType) && errorType === 'insufficient-funds';
 	$: insufficientFundsForFee = nonNullish(errorType) && errorType === 'insufficient-funds-for-fee';
+	$: amountLessThanLedgerFee = nonNullish(errorType) && errorType === 'amount-less-than-ledger-fee';
+	$: minimumAmountNotReached = nonNullish(errorType) && errorType === 'minimum-amount-not-reached';
+	$: unknownMinimumAmount = nonNullish(errorType) && errorType === 'unknown-minimum-amount';
+	$: minterInfoNotCertified = nonNullish(errorType) && errorType === 'minter-info-not-certified';
 
-	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate } =
+	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate, balanceForFee, minterInfo } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
-		validateConvertAmount({
+		validateUserAmount({
 			userAmount,
-			decimals: $sourceToken.decimals,
+			token: $sourceToken,
 			balance: $sourceTokenBalance,
-			totalFee
+			balanceForFee: $balanceForFee,
+			ethereumEstimateFee,
+			minterInfo: $minterInfo,
+			// If ETH, the balance should cover the user entered amount plus the min gas fee
+			// If other tokens - the balance plus total (max) fee
+			fee: isSupportedEthTokenId($sourceToken.id) ? minFee : totalFee
 		});
 
 	let isZeroBalance: boolean;
@@ -94,7 +110,7 @@
 		slot="balance"
 		class="font-semibold transition-all"
 		class:text-brand-primary={!isZeroBalance && isNullish(errorType) && nonNullish(maxAmount)}
-		class:text-error={isZeroBalance || nonNullish(errorType)}
+		class:text-error-primary={isZeroBalance || nonNullish(errorType)}
 		class:text-tertiary={isNullish(maxAmount)}
 		class:animate-pulse={isNullish(maxAmount)}
 		data-tid="convert-amount-source-balance"

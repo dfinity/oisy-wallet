@@ -25,7 +25,7 @@
 <ContentWithToolbar>
 	<TokensSkeletons {loading}>
 		{#if tokens.length > 0}
-			<div class="mb-6 gap-6 flex flex-col">
+			<div class="mb-6 flex flex-col gap-6">
 				{#each tokens as token (token.id)}
 					<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
 						<TokenCardContent data={token} />
@@ -33,7 +33,7 @@
 				{/each}
 			</div>
 		{:else}
-			<p class="text-black">
+			<p class="text-primary">
 				{$i18n.tokens.manage.text.all_tokens_zero_balance}
 			</p>
 		{/if}

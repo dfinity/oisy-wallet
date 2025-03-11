@@ -5,13 +5,10 @@ import {
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON
 } from '$lib/constants/test-ids.constants';
-import * as authStore from '$lib/derived/auth.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { Identity } from '@dfinity/agent';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
-import { readable } from 'svelte/store';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
@@ -20,9 +17,6 @@ describe('Menu', () => {
 	beforeEach(() => {
 		userProfileStore.reset();
 	});
-
-	const mockAuthStore = (value: Identity | null = mockIdentity) =>
-		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
 	it('renders the vip menu item', async () => {
 		const mockedUserData: UserData = {

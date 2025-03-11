@@ -1,8 +1,10 @@
 <script lang="ts">
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
+	import UserSnapshotWorker from '$lib/components/airdrops/UserSnapshotWorker.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
+	import AirdropGuard from '$lib/components/guard/AirdropGuard.svelte';
 	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
@@ -13,17 +15,21 @@
 <AddressGuard>
 	<Loader>
 		<RewardGuard>
-			<LoaderEthBalances>
-				<LoaderWallets>
-					<ExchangeWorker>
-						<LoaderMetamask>
-							<LoaderUserProfile>
-								<slot />
-							</LoaderUserProfile>
-						</LoaderMetamask>
-					</ExchangeWorker>
-				</LoaderWallets>
-			</LoaderEthBalances>
+			<AirdropGuard>
+				<LoaderEthBalances>
+					<LoaderWallets>
+						<ExchangeWorker>
+							<LoaderMetamask>
+								<LoaderUserProfile>
+									<UserSnapshotWorker>
+										<slot />
+									</UserSnapshotWorker>
+								</LoaderUserProfile>
+							</LoaderMetamask>
+						</ExchangeWorker>
+					</LoaderWallets>
+				</LoaderEthBalances>
+			</AirdropGuard>
 		</RewardGuard>
 	</Loader>
 </AddressGuard>

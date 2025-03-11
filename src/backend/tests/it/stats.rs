@@ -1,4 +1,7 @@
 //! `PocketIc` tests for the `stats()` API.
+use candid::Principal;
+use shared::types::{user_profile::OisyUser, Stats};
+
 use crate::{
     user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
     utils::{
@@ -6,9 +9,6 @@ use crate::{
         pocketic::{controller, BackendBuilder, PicCanisterTrait},
     },
 };
-use candid::Principal;
-use shared::types::user_profile::OisyUser;
-use shared::types::Stats;
 
 #[test]
 fn stats_returns_correct_number_of_users() {

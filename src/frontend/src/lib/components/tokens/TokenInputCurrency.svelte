@@ -11,11 +11,12 @@
 	export let loading = false;
 	export let testId: string | undefined = undefined;
 	export let styleClass = '';
+	export let autofocus = false;
 </script>
 
 <div
-	class={`token-input-currency font-bold flex h-full w-full items-center ${styleClass}`}
-	class:text-error={error}
+	class={`token-input-currency flex h-full w-full items-center font-bold ${styleClass}`}
+	class:text-error-primary={error}
 	class:animate-pulse={loading}
 >
 	<slot name="prefix"></slot>
@@ -26,6 +27,7 @@
 		{placeholder}
 		{disabled}
 		{decimals}
+		{autofocus}
 		on:focus
 		on:blur
 		on:nnsInput

@@ -30,7 +30,12 @@
 	};
 </script>
 
-<button data-tid={testId} class="flex w-full items-start justify-between" on:click={onClick}>
+<button
+	data-tid={testId}
+	class="dropdown-item flex w-full items-start justify-between"
+	class:selected={id === $networkId}
+	on:click={onClick}
+>
 	<TextWithLogo
 		{name}
 		{icon}

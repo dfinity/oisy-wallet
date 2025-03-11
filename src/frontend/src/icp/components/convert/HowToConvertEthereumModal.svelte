@@ -7,8 +7,7 @@
 	import {
 		ckEthereumTwinTokenStandard,
 		ckEthereumTwinToken,
-		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
+		ckEthereumNativeTokenId
 	} from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
@@ -29,10 +28,7 @@
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					networkId: $ckEthereumNativeToken.network.id
-				}) ?? '');
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

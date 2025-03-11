@@ -1,10 +1,13 @@
+use candid::Principal;
+use shared::types::{
+    dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+    user_profile::{GetUserProfileError, UserProfile},
+};
+
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicCanisterTrait},
 };
-use candid::Principal;
-use shared::types::dapp::{AddDappSettingsError, AddHiddenDappIdRequest};
-use shared::types::user_profile::{GetUserProfileError, UserProfile};
 
 #[test]
 fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {

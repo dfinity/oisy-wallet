@@ -6,7 +6,6 @@
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
-		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -121,10 +120,7 @@
 	$: toContractAddress =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					networkId: $ckEthereumNativeToken.network.id
-				}) ?? '');
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '');
 
 	$: (async () =>
 		await init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();

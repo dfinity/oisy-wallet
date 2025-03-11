@@ -24,7 +24,7 @@
 	});
 </script>
 
-<span class:text-success={formatPositiveAmount && amount.gt(0)}>
+<span class:text-success-primary={formatPositiveAmount && amount.gt(0)}>
 	<data value={detailedValue}>
 		{displayValue}
 	</data>

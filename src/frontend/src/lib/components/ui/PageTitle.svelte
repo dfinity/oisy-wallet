@@ -1,1 +1,1 @@
-<h1 class="mt-6 mb-5"><slot /></h1>
+<h1 class="mb-5 mt-6"><slot /></h1>

@@ -11,6 +11,8 @@ export const TRACK_COUNT_ETH_SEND_SUCCESS = 'eth_send_success_count';
 export const TRACK_COUNT_ETH_SEND_ERROR = 'eth_send_error_count';
 export const TRACK_COUNT_WC_ETH_SEND_SUCCESS = 'wc_eth_send_success_count';
 export const TRACK_COUNT_WC_ETH_SEND_ERROR = 'wc_eth_send_error_count';
+export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS = 'eth_to_cketh_convert_success_count';
+export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR = 'eth_to_cketh_convert_error_count';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success_count';

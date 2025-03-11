@@ -7,7 +7,7 @@
 	export let hideNetworkLogo = false;
 </script>
 
-<div class="gap-2 flex flex-row items-center justify-between">
+<div class="flex flex-row items-center justify-between gap-2">
 	{nonNullish(data.oisySymbol) ? data.oisySymbol.oisySymbol : data.symbol}
 
 	{#if nonNullish(data.network.iconBW) && !hideNetworkLogo}

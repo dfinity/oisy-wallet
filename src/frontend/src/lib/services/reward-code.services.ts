@@ -1,16 +1,22 @@
-import type { VipReward } from '$declarations/rewards/rewards.did';
+import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
+import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
+	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { LOCAL } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
+import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
+import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 const queryVipUser = async (params: {
@@ -42,18 +48,61 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 		return await queryVipUser({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
-		// TODO Remove this temporary fix as soon as we do run the rewards canister locally
-		if (LOCAL) {
-			console.error(vip.reward.error.loading_user_data, err);
-		} else {
-			toastsError({
-				msg: { text: vip.reward.error.loading_user_data },
-				err
-			});
-		}
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
 
 		return { success: false, err };
 	}
+};
+
+const queryAirdrops = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<AirdropsResponse> => {
+	const { usage_awards, last_snapshot_timestamp } = await getUserInfoApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+	const awards: RewardInfo[] | undefined = fromNullable(usage_awards);
+
+	return {
+		airdrops: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? 0n
+	};
+};
+
+const mapRewardsInfo = ({ name, ...rest }: RewardInfo): AirdropInfo => ({
+	...rest,
+	name: fromNullable(name)
+});
+
+/**
+ * Gets the airdrops the user received.
+ *
+ * This function performs **always** a query (not certified) to get the airdrops of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to load the user data.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<AirdropsResponse>} - Resolves with the received airdrops and the last timestamp of the user.
+ *
+ * @throws {Error} Displays an error toast and returns an empty list of airdrops if the query fails.
+ */
+export const getAirdrops = async (params: { identity: Identity }): Promise<AirdropsResponse> => {
+	try {
+		return await queryAirdrops({ ...params, certified: false });
+	} catch (err: unknown) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.loading_user_data },
+			err
+		});
+	}
+
+	return { airdrops: [], lastTimestamp: 0n };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
@@ -151,4 +200,77 @@ export const claimVipReward = async (params: {
 		});
 		return { success: false, err };
 	}
+};
+
+// Todo: for the moment we evaluate if requirements are fulfilled in frontend
+// this will change once we get this info from rewards canister
+export const getRewardRequirementsFulfilled = ({
+	transactions,
+	totalUsdBalance
+}: {
+	transactions: AnyTransactionUiWithCmp[];
+	totalUsdBalance: number;
+}): boolean[] => {
+	const req1 = true; // logged in once in last 7 days
+	const req2: boolean =
+		transactions.filter((trx) =>
+			trx.transaction.timestamp
+				? new Date().getTime() - MILLISECONDS_IN_DAY * 7 <
+					formatNanosecondsToTimestamp(BigInt(trx.transaction.timestamp))
+				: false
+		).length >= 2; // at least 2 transactions in last 7 days
+	const req3: boolean = totalUsdBalance >= 20; // at least 20$ balance
+
+	return [req1, req2, req3];
+};
+
+export const getUserRewardsTokenAmounts = async ({
+	ckBtcToken,
+	ckUsdcToken,
+	icpToken,
+	identity
+}: {
+	ckBtcToken: IcToken;
+	ckUsdcToken: IcToken;
+	icpToken: IcToken;
+	identity: Identity;
+}): Promise<{
+	ckBtcReward: BigNumber;
+	ckUsdcReward: BigNumber;
+	icpReward: BigNumber;
+	amountOfRewards: number;
+}> => {
+	const initialRewards = {
+		ckBtcReward: ZERO,
+		ckUsdcReward: ZERO,
+		icpReward: ZERO,
+		amountOfRewards: 0
+	};
+
+	const { usage_awards } = await getUserInfo({ identity });
+	const usageAwards = fromNullable(usage_awards);
+
+	if (isNullish(usageAwards)) {
+		return initialRewards;
+	}
+
+	return usageAwards.reduce((acc, { ledger, amount }) => {
+		const canisterId = ledger.toText();
+
+		return ckBtcToken.ledgerCanisterId === canisterId
+			? {
+					...acc,
+					ckBtcReward: acc.ckBtcReward.add(amount),
+					amountOfRewards: acc.amountOfRewards + 1
+				}
+			: icpToken.ledgerCanisterId === canisterId
+				? { ...acc, icpReward: acc.icpReward.add(amount), amountOfRewards: acc.amountOfRewards + 1 }
+				: ckUsdcToken.ledgerCanisterId === canisterId
+					? {
+							...acc,
+							ckUsdcReward: acc.ckUsdcReward.add(amount),
+							amountOfRewards: acc.amountOfRewards + 1
+						}
+					: acc;
+	}, initialRewards);
 };

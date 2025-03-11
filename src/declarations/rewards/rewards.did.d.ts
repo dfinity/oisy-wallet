@@ -12,6 +12,7 @@ export type AccountSnapshotFor =
 	| { SplMainnet: AccountSnapshot_Spl };
 export interface AccountSnapshot_Icrc {
 	decimals: number;
+	token_address: Principal;
 	network: {};
 	approx_usd_per_token: number;
 	last_transactions: Array<Transaction_Icrc>;
@@ -21,6 +22,7 @@ export interface AccountSnapshot_Icrc {
 }
 export interface AccountSnapshot_Spl {
 	decimals: number;
+	token_address: string;
 	network: {};
 	approx_usd_per_token: number;
 	last_transactions: Array<Transaction_Spl>;
@@ -40,6 +42,13 @@ export interface BatchSizes {
 	airdrop: number;
 	block_fetching: number;
 }
+export type CandidDuration =
+	| { Minutes: bigint }
+	| { Seconds: bigint }
+	| { Days: bigint }
+	| { Forever: null }
+	| { Hours: bigint }
+	| { Nanoseconds: bigint };
 export type ClaimVipRewardResponse =
 	| { AlreadyClaimed: null }
 	| { Success: null }
@@ -130,15 +139,15 @@ export interface Transaction_Spl {
 	amount: bigint;
 }
 export interface UsageAwardConfig {
+	cycle_duration: CandidDuration;
 	awards: Array<UsageAwardEvent>;
-	day_length_s: bigint;
 	eligibility_criteria: UsageCriteria;
 }
 export interface UsageAwardEvent {
 	name: string;
+	num_events_per_cycle: number;
 	awards: Array<TokenConfig>;
 	num_users_per_event: number;
-	num_events_per_day: number;
 }
 export interface UsageAwardState {
 	snapshots: Array<UserSnapshot>;
@@ -148,11 +157,13 @@ export interface UsageAwardStats {
 	eligible_user_count: bigint;
 	snapshot_count: bigint;
 	awarded_count: bigint;
+	award_events: bigint;
 	eligible_snapshots: bigint;
 }
 export interface UsageCriteria {
-	max_days_to_take: number;
-	num_days_logged_in: number;
+	measurement_duration: CandidDuration;
+	min_transactions: number;
+	min_logins: number;
 	min_valuation_usd: bigint;
 }
 export interface UserData {
@@ -188,9 +199,11 @@ export interface _SERVICE {
 	new_vip_reward: ActorMethod<[], NewVipRewardResponse>;
 	public_rewards_info: ActorMethod<[], PublicRewardsInfo>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
+	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
 	set_sprinkle_timestamp: ActorMethod<[SetSprinkleTimestampArg], undefined>;
 	status: ActorMethod<[], StatusResponse>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
+	usage_eligible: ActorMethod<[Principal], boolean>;
 	usage_stats: ActorMethod<[], UsageAwardStats>;
 	user_info: ActorMethod<[], UserData>;
 	user_stats: ActorMethod<[Principal], UsageAwardState>;

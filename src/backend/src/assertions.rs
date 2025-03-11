@@ -1,5 +1,4 @@
-use shared::types::token::UserToken;
-use shared::types::MAX_SYMBOL_LENGTH;
+use shared::types::{token::UserToken, MAX_SYMBOL_LENGTH};
 
 pub fn assert_token_symbol_length(token: &UserToken) -> Result<(), String> {
     if let Some(symbol) = token.symbol.as_ref() {

@@ -43,10 +43,6 @@ jobs:
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
           echo "Bumped to version: $new_version"
 
-      - name: Stage changes
-        run: |
-          git add package.json package-lock.json
-
       - name: Create Pull Request
         uses: ./.github/actions/create-pr
         with:

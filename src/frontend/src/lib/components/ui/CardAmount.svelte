@@ -1,1 +1,1 @@
-<span class="font-bold inline-flex flex-1 items-center justify-end text-right"><slot /></span>
+<span class="inline-flex flex-1 items-center justify-end text-right font-bold"><slot /></span>
