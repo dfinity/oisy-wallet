@@ -23,19 +23,21 @@
 </script>
 
 <label for="destination" class="font-bold">{$i18n.send.text.destination}:</label>
-<InputTextWithAction
-	name="destination"
-	bind:value={destination}
-	placeholder={inputPlaceholder}
-	testId={DESTINATION_INPUT}
-	on:nnsInput
->
-	<svelte:fragment slot="inner-end">
-		{#if nonNullish(onQRButtonClick)}
-			<QRButton on:click={onQRButtonClick} />
-		{/if}
-	</svelte:fragment>
-</InputTextWithAction>
+<div class="mb-4">
+	<InputTextWithAction
+		name="destination"
+		bind:value={destination}
+		placeholder={inputPlaceholder}
+		testId={DESTINATION_INPUT}
+		on:nnsInput
+	>
+		<svelte:fragment slot="inner-end">
+			{#if nonNullish(onQRButtonClick)}
+				<QRButton on:click={onQRButtonClick} />
+			{/if}
+		</svelte:fragment>
+	</InputTextWithAction>
+</div>
 
 {#if invalidDestination}
 	<p transition:slide={SLIDE_DURATION} class="pb-3 text-error-primary">
