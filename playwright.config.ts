@@ -26,6 +26,10 @@ const appleProjects = [
 		use: devices['Desktop Safari']
 	},
 	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome']
+	},
+	{
 		name: 'iPhone SE',
 		use: {
 			...devices['iPhone SE'],
