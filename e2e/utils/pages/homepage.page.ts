@@ -243,10 +243,6 @@ abstract class Homepage {
 
 	async waitForLoggedInIndicator(): Promise<void> {
 		await this.waitForByTestId({ testId: NAVIGATION_MENU_BUTTON });
-
-		await this.waitForLoaderModal();
-
-		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 	}
 
 	protected async elementExistsByTestId(testId: string): Promise<boolean> {
