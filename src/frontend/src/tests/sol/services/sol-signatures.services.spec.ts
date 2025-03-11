@@ -60,9 +60,21 @@ describe('sol-transactions.services', () => {
 
 			const transactions = await loadTransactions();
 
-			const solBalance: bigint = transactions.reduce<bigint>(
-				(acc, { value, type }) => acc + (value ?? 0n) * (type === 'send' ? -1n : 1n),
-				0n
+			const { solBalance, totalFee } = transactions.reduce<{
+				solBalance: bigint;
+				totalFee: bigint;
+				signatures: string[];
+			}>(
+				({ solBalance, totalFee, signatures }, { value, type, fee, signature }) => ({
+					solBalance: solBalance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
+					totalFee: signatures.includes(signature) ? totalFee : totalFee + (fee ?? 0n),
+					signatures: [...signatures, signature]
+				}),
+				{
+					solBalance: 0n,
+					totalFee: 0n,
+					signatures: []
+				}
 			);
 
 			const fetchedSolBalance = await loadSolLamportsBalance({
@@ -70,8 +82,8 @@ describe('sol-transactions.services', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-			console.log(solBalance, fetchedSolBalance, transactions.length);
-		}, 60000);
+			expect(solBalance - totalFee).toBe(fetchedSolBalance);
+		}, 600000);
 
 		// describe('with mocked dependencies', () => {
 		let spyFetchSignatures: MockInstance;
