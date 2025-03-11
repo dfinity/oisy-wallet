@@ -238,11 +238,13 @@ export const getUserRewardsTokenAmounts = async ({
 	ckBtcReward: BigNumber;
 	ckUsdcReward: BigNumber;
 	icpReward: BigNumber;
+	amountOfRewards: number;
 }> => {
 	const initialRewards = {
 		ckBtcReward: ZERO,
 		ckUsdcReward: ZERO,
-		icpReward: ZERO
+		icpReward: ZERO,
+		amountOfRewards: 0
 	};
 
 	const { usage_awards } = await getUserInfo({ identity });
@@ -252,15 +254,18 @@ export const getUserRewardsTokenAmounts = async ({
 		return initialRewards;
 	}
 
-	return usageAwards.reduce((acc, { ledger, amount }) => {
-		const canisterId = ledger.toText();
+	return {
+		...usageAwards.reduce((acc, { ledger, amount }) => {
+			const canisterId = ledger.toText();
 
-		return ckBtcToken.ledgerCanisterId === canisterId
-			? { ...acc, ckBtcReward: acc.ckBtcReward.add(amount) }
-			: icpToken.ledgerCanisterId === canisterId
-				? { ...acc, icpReward: acc.icpReward.add(amount) }
-				: ckUsdcToken.ledgerCanisterId === canisterId
-					? { ...acc, ckUsdcReward: acc.ckUsdcReward.add(amount) }
-					: acc;
-	}, initialRewards);
+			return ckBtcToken.ledgerCanisterId === canisterId
+				? { ...acc, ckBtcReward: acc.ckBtcReward.add(amount) }
+				: icpToken.ledgerCanisterId === canisterId
+					? { ...acc, icpReward: acc.icpReward.add(amount) }
+					: ckUsdcToken.ledgerCanisterId === canisterId
+						? { ...acc, ckUsdcReward: acc.ckUsdcReward.add(amount) }
+						: acc;
+		}, initialRewards),
+		amountOfRewards: usageAwards.length
+	};
 };
