@@ -83,10 +83,15 @@ export const fetchSolTransactionsForSignature = async ({
 		Promise<{
 			parsedTransactions: SolTransactionUi[];
 			cumulativeBalances: Record<SolAddress, SolMappedTransaction['value']>;
+			addressToToken: Record<SolAddress, SplTokenAddress>;
 		}>
 	>(
 		async (acc, instruction, idx) => {
-			const { parsedTransactions, cumulativeBalances: accCumulativeBalances } = await acc;
+			const {
+				parsedTransactions,
+				cumulativeBalances: accCumulativeBalances,
+				addressToToken: accAddressToToken
+			} = await acc;
 
 			const mappedTransaction = await mapSolParsedInstruction({
 				instruction: {
@@ -94,7 +99,8 @@ export const fetchSolTransactionsForSignature = async ({
 					programAddress: instruction.programId
 				},
 				network,
-				cumulativeBalances: accCumulativeBalances
+				cumulativeBalances: accCumulativeBalances,
+				addressToToken: accAddressToToken
 			});
 
 			if (isNullish(mappedTransaction)) {
@@ -102,6 +108,17 @@ export const fetchSolTransactionsForSignature = async ({
 			}
 
 			const { value, from, to, tokenAddress: mappedTokenAddress } = mappedTransaction;
+
+			// To avoid an excessive amount of call to the Solana RPC, we keep track of the token address
+			// associated with a certain address. This way, we can skip the call to request the account info
+			// for mapping a certain transaction to its specific token.
+			const addressToToken = {
+				...accAddressToToken,
+				...(nonNullish(mappedTokenAddress) && {
+					[from]: mappedTokenAddress,
+					[to]: mappedTokenAddress
+				})
+			};
 
 			// The cumulative balances are updated for every instruction, so we can keep track of the
 			// SOL balance of the address and its associated token account at any given time.
@@ -118,13 +135,13 @@ export const fetchSolTransactionsForSignature = async ({
 
 			// Ignoring the instruction if the transaction is not related to the address or its associated token account.
 			if (from !== address && to !== address && from !== ataAddress && to !== ataAddress) {
-				return { parsedTransactions, cumulativeBalances };
+				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
 			// In case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
-				return { parsedTransactions, cumulativeBalances };
+				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
 
 			const newTransaction: SolTransactionUi = {
@@ -156,10 +173,11 @@ export const fetchSolTransactionsForSignature = async ({
 							]
 						: [])
 				],
-				cumulativeBalances
+				cumulativeBalances,
+				addressToToken
 			};
 		},
-		Promise.resolve({ parsedTransactions: [], cumulativeBalances: {} })
+		Promise.resolve({ parsedTransactions: [], cumulativeBalances: {}, addressToToken: {} })
 	);
 
 	// The instructions are received in the order they were executed, meaning the first instruction
