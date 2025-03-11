@@ -11,8 +11,6 @@
 </script>
 
 <span aria-label={ariaLabel}>
-	{#if nonNullish(data.oisyName?.prefix)}
-		<Tag ariaHidden>{data.oisyName.prefix}</Tag>
-	{/if}
+	<Tag ariaHidden>ck</Tag>
 	<span aria-hidden="true">{data.oisyName?.oisyName ?? data.name}</span>
 </span>
