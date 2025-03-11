@@ -35,6 +35,8 @@
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
 
+	export let initialSearch: string | undefined = undefined;
+
 	const dispatch = createEventDispatcher();
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
@@ -68,7 +70,7 @@
 	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
-	let filter = '';
+	let filter = initialSearch ?? '';
 	$: filter, debounceUpdateFilter();
 
 	let filteredTokens: Token[] = [];
