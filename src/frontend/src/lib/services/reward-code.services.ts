@@ -254,18 +254,23 @@ export const getUserRewardsTokenAmounts = async ({
 		return initialRewards;
 	}
 
-	return {
-		...usageAwards.reduce((acc, { ledger, amount }) => {
-			const canisterId = ledger.toText();
+	return usageAwards.reduce((acc, { ledger, amount }) => {
+		const canisterId = ledger.toText();
 
-			return ckBtcToken.ledgerCanisterId === canisterId
-				? { ...acc, ckBtcReward: acc.ckBtcReward.add(amount) }
-				: icpToken.ledgerCanisterId === canisterId
-					? { ...acc, icpReward: acc.icpReward.add(amount) }
-					: ckUsdcToken.ledgerCanisterId === canisterId
-						? { ...acc, ckUsdcReward: acc.ckUsdcReward.add(amount) }
-						: acc;
-		}, initialRewards),
-		amountOfRewards: usageAwards.length
-	};
+		return ckBtcToken.ledgerCanisterId === canisterId
+			? {
+					...acc,
+					ckBtcReward: acc.ckBtcReward.add(amount),
+					amountOfRewards: acc.amountOfRewards + 1
+				}
+			: icpToken.ledgerCanisterId === canisterId
+				? { ...acc, icpReward: acc.icpReward.add(amount), amountOfRewards: acc.amountOfRewards + 1 }
+				: ckUsdcToken.ledgerCanisterId === canisterId
+					? {
+							...acc,
+							ckUsdcReward: acc.ckUsdcReward.add(amount),
+							amountOfRewards: acc.amountOfRewards + 1
+						}
+					: acc;
+	}, initialRewards);
 };

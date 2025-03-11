@@ -447,7 +447,7 @@ describe('reward-code', () => {
 			expect(result.ckBtcReward.toString()).toEqual('1000');
 			expect(result.ckUsdcReward.toString()).toEqual('0');
 			expect(result.icpReward.toString()).toEqual('0');
-			expect(result.amountOfRewards.toString()).toEqual('4');
+			expect(result.amountOfRewards.toString()).toEqual('1');
 		});
 
 		it('should ignore invalid canister ids but still return values', async () => {
@@ -460,7 +460,7 @@ describe('reward-code', () => {
 			expect(result.ckBtcReward.toString()).toEqual('0');
 			expect(result.ckUsdcReward.toString()).toEqual('0');
 			expect(result.icpReward.toString()).toEqual('0');
-			expect(result.amountOfRewards.toString()).toEqual('6');
+			expect(result.amountOfRewards.toString()).toEqual('3');
 		});
 	});
 });
