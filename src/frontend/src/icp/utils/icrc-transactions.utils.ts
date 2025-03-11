@@ -126,7 +126,7 @@ export const mapIcrcTransaction = ({
 			: undefined;
 
 	return {
-		id: id.toString(),
+		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
 		type,
 		...source,
 		to:
