@@ -35,10 +35,12 @@ import {
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import { getBase64Decoder } from '@solana/codecs';
-import { addSignersToTransactionMessage } from '@solana/signers';
-import { type Base64EncodedWireTransaction } from '@solana/transactions';
-import { getTransactionEncoder } from '@solana/web3.js';
+import {
+	addSignersToTransactionMessage,
+	getBase64Decoder,
+	getTransactionEncoder,
+	type Base64EncodedWireTransaction
+} from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {

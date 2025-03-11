@@ -127,40 +127,41 @@
 </script>
 
 <div class="mb-4">
-	<TokenInput
-		token={$sendToken}
-		bind:amount
-		displayUnit={inputUnit}
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
-		bind:error={amountError}
-		customErrorValidate={customValidate}
-	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+    <TokenInput
+        token={$sendToken}
+        bind:amount
+        displayUnit={inputUnit}
+        isSelectable={false}
+        exchangeRate={$sendTokenExchangeRate}
+        bind:error={amountError}
+        customErrorValidate={customValidate}
+        autofocus={nonNullish($sendToken)}
+    >
+        <span slot="title">{$i18n.core.text.amount}</span>
 
-		<svelte:fragment slot="amount-info">
-			{#if nonNullish($sendToken)}
-				<div class="text-tertiary">
-					<TokenInputAmountExchange
-						{amount}
-						exchangeRate={$sendTokenExchangeRate}
-						token={$sendToken}
-						bind:displayUnit={exchangeValueUnit}
-					/>
-				</div>
-			{/if}
-		</svelte:fragment>
+        <svelte:fragment slot="amount-info">
+            {#if nonNullish($sendToken)}
+                <div class="text-tertiary">
+                    <TokenInputAmountExchange
+                        {amount}
+                        exchangeRate={$sendTokenExchangeRate}
+                        token={$sendToken}
+                        bind:displayUnit={exchangeValueUnit}
+                    />
+                </div>
+            {/if}
+        </svelte:fragment>
 
-		<svelte:fragment slot="balance">
-			{#if nonNullish($sendToken)}
-				<MaxBalanceButton
-					bind:amount
-					error={nonNullish(amountError)}
-					balance={$sendBalance}
-					token={$sendToken}
-					fee={BigNumber.from(fee ?? 0)}
-				/>
-			{/if}
-		</svelte:fragment>
-	</TokenInput>
+        <svelte:fragment slot="balance">
+            {#if nonNullish($sendToken)}
+                <MaxBalanceButton
+                    bind:amount
+                    error={nonNullish(amountError)}
+                    balance={$sendBalance}
+                    token={$sendToken}
+                    fee={BigNumber.from(fee ?? 0)}
+                />
+            {/if}
+        </svelte:fragment>
+    </TokenInput>
 </div>
