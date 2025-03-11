@@ -380,9 +380,7 @@ abstract class Homepage {
 		});
 
 		const currentViewport = this.#page.viewportSize();
-		const width =
-			currentViewport?.width ??
-			(await this.#page.evaluate(() => window.innerWidth));
+		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
 
 		this.#page.setViewportSize({ height: maxPageHeight, width });
 	}
