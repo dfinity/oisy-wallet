@@ -17,16 +17,6 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let sourceTokenTransferFee: number;
-	$: sourceTokenTransferFee =
-		nonNullish($sourceToken) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])
-			? formatTokenBigintToNumber({
-					value: $icTokenFeeStore?.[$sourceToken.symbol],
-					displayDecimals: $sourceToken.decimals,
-					unitName: $sourceToken.decimals
-				})
-			: 0;
-
 	let sourceTokenTransferFeeDisplay: string;
 	$: sourceTokenTransferFeeDisplay =
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore?.[$sourceToken.symbol])
@@ -37,8 +27,8 @@
 				})
 			: '0';
 
-	let sourceTokenApproveFee: number;
-	$: sourceTokenApproveFee = isSourceTokenIcrc2 ? sourceTokenTransferFee : 0;
+	let sourceTokenTransferFee: number;
+	$: sourceTokenTransferFee = Number(sourceTokenTransferFeeDisplay);
 
 	let sourceTokenApproveFeeDisplay: string;
 	$: sourceTokenApproveFeeDisplay =
@@ -49,6 +39,9 @@
 					unitName: $sourceToken.decimals
 				})
 			: '0';
+
+	let sourceTokenApproveFee: number;
+	$: sourceTokenApproveFee = Number(sourceTokenApproveFeeDisplay);
 
 	let sourceTokenTotalFeeUSD: number;
 	$: sourceTokenTotalFeeUSD = nonNullish($sourceTokenExchangeRate)
