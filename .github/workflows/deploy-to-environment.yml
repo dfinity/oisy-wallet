@@ -82,6 +82,7 @@ jobs:
             if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
               echo "deploy_frontend=true" >> $GITHUB_ENV
               echo "deploy_backend=true" >> $GITHUB_ENV
+            fi
           else
             echo "Error: Unsupported event type."
             exit 1
