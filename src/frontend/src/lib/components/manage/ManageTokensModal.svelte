@@ -34,9 +34,6 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
-	export let initialSearch: string | undefined = undefined;
-	export let onClose: () => void = () => {};
-
 	const steps: WizardSteps = [
 		{
 			name: 'Manage',
@@ -189,7 +186,6 @@
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
-		onClose();
 	};
 
 	let ledgerCanisterId: string | undefined;
@@ -256,11 +252,8 @@
 			on:icClose={close}
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
-			{initialSearch}
 		>
-			<svelte:fragment slot="info-element">
-				<slot name="info-element" />
-			</svelte:fragment>
+			<slot name="info-element" slot="info-element" />
 		</ManageTokens>
 	{/if}
 </WizardModal>
