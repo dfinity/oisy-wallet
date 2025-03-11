@@ -653,7 +653,7 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
-			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:",
+			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>",
 			"convert_fee": "Conversion fee",
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",
