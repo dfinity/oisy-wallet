@@ -17,7 +17,7 @@
 		<div
 			class="text-xs/4.5 md:mt-0.75 absolute -mt-1.5 ml-10 scale-75 font-bold uppercase md:relative md:ml-1 md:scale-100"
 		>
-			<Tag variant={tagVariant} size="xs">{tag}</Tag>
+			<Tag variant={tagVariant} size="sm">{tag}</Tag>
 		</div>
 	{/if}
 </a>

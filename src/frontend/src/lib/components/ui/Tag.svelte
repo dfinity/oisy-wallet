@@ -14,23 +14,21 @@
 	};
 
 	export let variant: TagVariant = 'default';
-	export let size: 'xs' | 'sm' | 'md' = 'sm';
+	export let size: 'xs' | 'sm' | 'md' = 'xs';
 </script>
 
 <span
 	aria-hidden={ariaHidden}
-	class="rounded-md px-1.5 py-1 text-{size} {variantClassNames[variant]}"
-	class:px-1={size === 'xs'}
-	class:pt-0.75={size === 'xs'}
-	class:pb-0.5={size === 'xs'}
-	class:px-1.5={size === 'sm' || size === 'md'}
-	class:pt-0={size === 'sm' || size === 'md'}
-	class:pb-0={size === 'sm' || size === 'md'}
-	class:md:px-2={size === 'xs' || size === 'sm' || size === 'md'}
-	class:md:pt-0.75={size === 'xs'}
-	class:md:pb-1={size === 'xs'}
-	class:md:pt-0={size === 'sm' || size === 'md'}
-	class:md:pb-0={size === 'sm' || size === 'md'}
+	class="rounded-md {variantClassNames[variant]}"
+	class:text-xs={size === 'sm'}
+	class:text-sm={size === 'xs' || size === 'md'}
+	class:px-1.5={size === 'xs'}
+	class:px-1={size === 'sm' || size === 'md'}
+	class:md:px-2={size === 'sm' || size === 'md'}
+	class:py-0={size === 'xs'}
+	class:md:py-0={size === 'xs'}
+	class:py-0.5={size === 'sm' || size === 'md'}
+	class:md:py-1={size === 'sm' || size === 'md'}
 >
 	<slot />
 </span>
