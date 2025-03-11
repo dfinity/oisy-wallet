@@ -122,12 +122,14 @@ const mapTokenParsedInstruction = async ({
 	type,
 	info,
 	network,
-	cumulativeBalances
+	cumulativeBalances,
+	addressToToken
 }: {
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
+	addressToToken?: Record<SolAddress, SplTokenAddress>;
 }): Promise<SolMappedTransaction | undefined> => {
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
@@ -140,6 +142,12 @@ const mapTokenParsedInstruction = async ({
 			amount: string;
 			source: SolAddress;
 		};
+
+		const tokenAddress = addressToToken?.[from] ?? addressToToken?.[to];
+
+		if (nonNullish(tokenAddress)) {
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
 
 		const { getAccountInfo } = solanaHttpRpc(network);
 
@@ -213,11 +221,13 @@ const mapTokenParsedInstruction = async ({
 const mapToken2022ParsedInstruction = async ({
 	type,
 	info,
-	network
+	network,
+	addressToToken
 }: {
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
+	addressToToken?: Record<SolAddress, SplTokenAddress>;
 }): Promise<SolMappedTransaction | undefined> => {
 	if (type === 'transfer') {
 		// We need to cast the type since it is not implied
@@ -230,6 +240,12 @@ const mapToken2022ParsedInstruction = async ({
 			amount: string;
 			source: SolAddress;
 		};
+
+		const tokenAddress = addressToToken?.[from] ?? addressToToken?.[to];
+
+		if (nonNullish(tokenAddress)) {
+			return { value: BigInt(value), from, to, tokenAddress };
+		}
 
 		const { getAccountInfo } = solanaHttpRpc(network);
 
@@ -300,11 +316,13 @@ const mapAssociatedTokenAccountInstruction = ({
 export const mapSolParsedInstruction = async ({
 	instruction,
 	network,
-	cumulativeBalances
+	cumulativeBalances,
+	addressToToken
 }: {
 	instruction: SolRpcInstruction;
 	network: SolanaNetworkType;
 	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
+	addressToToken?: Record<SolAddress, SplTokenAddress>;
 }): Promise<SolMappedTransaction | undefined> => {
 	if (!('parsed' in instruction)) {
 		return;
@@ -324,11 +342,17 @@ export const mapSolParsedInstruction = async ({
 	}
 
 	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
-		return await mapTokenParsedInstruction({ type, info, network, cumulativeBalances });
+		return await mapTokenParsedInstruction({
+			type,
+			info,
+			network,
+			cumulativeBalances,
+			addressToToken
+		});
 	}
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
-		return mapToken2022ParsedInstruction({ type, info, network });
+		return mapToken2022ParsedInstruction({ type, info, network, addressToToken });
 	}
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
