@@ -65,6 +65,9 @@
 	let totalRewardUsd: number;
 	$: totalRewardUsd = ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd;
 
+	let amountOfRewards: number;
+	$: amountOfRewards = 0;
+
 	let loading: boolean;
 	$: loading = true;
 
@@ -86,7 +89,7 @@
 			return;
 		}
 
-		({ ckBtcReward, ckUsdcReward, icpReward } = await getUserRewardsTokenAmounts({
+		({ ckBtcReward, ckUsdcReward, icpReward, amountOfRewards } = await getUserRewardsTokenAmounts({
 			ckBtcToken,
 			ckUsdcToken,
 			icpToken,
@@ -118,7 +121,7 @@
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
 			>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
-				$noOfSprinkles: '3',
+				$noOfSprinkles: amountOfRewards.toString(),
 				$amount: formatUSD({ value: totalRewardUsd })
 			})}
 		</div>
