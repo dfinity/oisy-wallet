@@ -35,7 +35,6 @@
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
 	export let initialSearch: string | undefined = undefined;
-	export let onClose: () => void = () => {};
 
 	const steps: WizardSteps = [
 		{
@@ -189,7 +188,6 @@
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
-		onClose();
 	};
 
 	let ledgerCanisterId: string | undefined;
