@@ -14,11 +14,11 @@ export const mockAirdropCampaigns: AirdropDescription[] = [
 		],
 		logo: '/images/airdrops/oisy-airdrop-logo.svg',
 		campaignHref:
-			'https://x.com/intent/post?text=Sprinkles%20from%20%40OISY%20Wallet%20just%20went%20live%0A%0A50%20token%20reward%20opportunities%2C%20EVERY%20Day%0A%0ATry%20OISY.com%20and%20stack%20some%20rewards%20fam%20%F0%9F%9A%80',
+			'https://x.com/intent/post?text=Sprinkles%20from%20%40OISY%20Wallet%20just%20went%20live%0A%0A%24BTC%20drops%2C%20all%20day%2C%20every%20day%0A%0ATry%20OISY.com%20and%20get%20some%20free%20Bitcoin%21%20%F0%9F%9A%80',
 		jackpotHref:
-			'https://x.com/intent/post?text=Just%20received%20%2450%20in%20tokens%20from%20%40OISY%20Wallet%E2%80%99s%20%E2%80%98Sprinkles%E2%80%99%20initiative%20%F0%9F%AA%82%0A%0AAnd%20I%E2%80%99m%20eligible%20again%20tomorrow%20...%20and%20the%20day%20after%20that%20...%20and%20the%20day%20after%20that%20...%20and%2C%20you%20get%20the%20idea%0A%0ASign%20up%20at%20OISY.com%20%E2%80%94%2050%20drops%20a%20day%2C%20every%20day%20%F0%9F%A4%91',
+			'https://x.com/intent/post?text=Just%20received%20a%20big%20token%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0A%0AThey%20are%20sprinkling%20big%20drops%20of%20%24BTC%20every%20single%20day.%0A%0ASign%20up%20at%20OISY.com%20-%20and%20score%20some%20easy%20Bitcoin%20%F0%9F%A4%91',
 		airdropHref:
-			'https://x.com/intent/post?text=Just%20got%20my%20sprinkles%20from%20%40OISY%20Wallet.%0A%0AI%E2%80%99m%20eligible%20for%2050%20drops%20every%20day%2C%20and%20I%E2%80%99m%20ready%20for%20more%21%20%F0%9F%AA%82%0A%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%2C%20you%E2%80%99re%20NGMI',
+			'https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet.%0A%0AThey%E2%80%99re%20dropping%20%24BTC%20all%20day%2C%20every%20day.%0A%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%2C%20you%E2%80%99re%20missing%20out.',
 		learnMoreHref: 'https://docs.oisy.com/rewards/get-to-know-oisy/launch-initiative/initiative-1',
 		startDate: new Date('2025-02-05T14:28:02.288Z'),
 		endDate: new Date('2025-03-04T00:00:00.000Z')
