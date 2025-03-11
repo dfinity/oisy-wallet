@@ -102,6 +102,10 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 	// This avoids a potential file system race condition warning.
 	const fd = openSync(file, 'wx');
 
+	if (!logoData.includes(';') || !logoData.includes(',')) {
+		console.error(`Invalid logoData format for ${name}: ${logoData}`);
+		return;
+	}
 	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
 
 	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');
