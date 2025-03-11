@@ -367,21 +367,23 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async viewportAdjuster(): Promise<void> {
-		const maxPageHeight = await this.#page.evaluate(() => (Math.max(
+	private async viewportAdjuster(): Promise<void> {
+		const maxPageHeight = await this.#page.evaluate(() =>
+			Math.max(
 				document.body.scrollHeight,
 				document.documentElement.scrollHeight,
 				document.body.offsetHeight,
 				document.documentElement.offsetHeight,
 				document.body.clientHeight,
 				document.documentElement.clientHeight
-			);
-		});
+			)
+		);
 
 		const currentViewport = this.#page.viewportSize();
 		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
 
-		this.#page.setViewportSize({ height: maxPageHeight, width }))
+		await this.#page.setViewportSize({ height: maxPageHeight, width });
+	}
 
 	async takeScreenshot(
 		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
