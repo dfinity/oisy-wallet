@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {isNullish, nonNullish, notEmptyString} from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Transactions from '$lib/components/transactions/Transactions.svelte';
@@ -20,14 +20,14 @@
 		// Therefore, we cannot automatically select the network if it is not provided when the component mounts, and we cannot wait indefinitely.
 		// That's why, if no network is provided, we route to the root.
 		if (isNullish(routeNetwork) || !notEmptyString(routeNetwork)) {
-            if (nonNullish($routeToken)) {
-                toastsShow({
-                    text: replacePlaceholders($i18n.transactions.error.loading_token, {
-                        $token: $routeToken
-                    }),
-                    level: 'warn'
-                });
-            }
+			if (nonNullish($routeToken)) {
+				toastsShow({
+					text: replacePlaceholders($i18n.transactions.error.loading_token, {
+						$token: $routeToken
+					}),
+					level: 'warn'
+				});
+			}
 			await goto('/');
 		}
 
