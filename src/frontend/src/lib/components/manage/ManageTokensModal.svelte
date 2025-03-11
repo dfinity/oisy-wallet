@@ -253,10 +253,10 @@
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
 		<ManageTokens
-				on:icClose={close}
-				on:icAddToken={modal.next}
-				on:icSave={saveTokens}
-				{initialSearch}
+			on:icClose={close}
+			on:icAddToken={modal.next}
+			on:icSave={saveTokens}
+			{initialSearch}
 		>
 			<svelte:fragment slot="info-element">
 				<slot name="info-element" />
