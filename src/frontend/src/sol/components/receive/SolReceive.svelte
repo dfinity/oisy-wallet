@@ -36,7 +36,6 @@
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
-
 	// TODO: PRODSEC: provide the ATA address too in the receive modal for SPL tokens
 	let address: SolAddress | undefined;
 	$: address = addressData?.data;
