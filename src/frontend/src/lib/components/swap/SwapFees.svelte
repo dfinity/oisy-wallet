@@ -31,14 +31,7 @@
 	$: sourceTokenTransferFee = Number(sourceTokenTransferFeeDisplay);
 
 	let sourceTokenApproveFeeDisplay: string;
-	$: sourceTokenApproveFeeDisplay =
-		nonNullish($sourceToken) && nonNullish($sourceToken.fee)
-			? formatTokenAmount({
-					value: isSourceTokenIcrc2 ? $sourceToken.fee : 0n,
-					displayDecimals: $sourceToken.decimals,
-					unitName: $sourceToken.decimals
-				})
-			: '0';
+	$: sourceTokenApproveFeeDisplay = isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0';
 
 	let sourceTokenApproveFee: number;
 	$: sourceTokenApproveFee = Number(sourceTokenApproveFeeDisplay);
