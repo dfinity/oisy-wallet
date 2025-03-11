@@ -7,13 +7,10 @@
 	export let destination = '';
 	export let invalidDestination = false;
 
-
 	const dispatch = createEventDispatcher();
 
 	let isInvalidDestination: () => boolean;
 	$: isInvalidDestination = (): boolean => isInvalidDestinationSol(destination);
-
-
 </script>
 
 <SendInputDestination
