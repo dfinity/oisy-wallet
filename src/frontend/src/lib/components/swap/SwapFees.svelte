@@ -10,7 +10,7 @@
 	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import { formatTokenAmount, formatTokenBigintToNumber, formatUSD } from '$lib/utils/format.utils';
+	import { formatTokenAmount, formatUSD } from '$lib/utils/format.utils';
 
 	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
