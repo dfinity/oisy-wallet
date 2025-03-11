@@ -106,6 +106,7 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		console.error(`Invalid logoData format for ${name}: ${logoData}`);
 		return;
 	}
+	
 	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
 
 	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');
