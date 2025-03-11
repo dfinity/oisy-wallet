@@ -196,7 +196,7 @@ jobs:
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
-          if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" ]; then
+          if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" && "${{ github.event.event.workflow_run.conclusion }}" == "success" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
