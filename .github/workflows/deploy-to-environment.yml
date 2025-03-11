@@ -51,11 +51,14 @@ concurrency:
 
 jobs:
   deployment:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-24.04
 
     steps:
       - name: Determine Deployment Network
         run: |
+          echo "deploy_frontend=false" >> $GITHUB_ENV
+          echo "deploy_backend=false" >> $GITHUB_ENV
           if [ "${{ github.event_name }}" == "push" ]; then
             if [ "${{ github.ref_type }}" == "branch" ]; then
               echo "NETWORK=staging" >> $GITHUB_ENV
@@ -66,12 +69,19 @@ jobs:
               exit 1
             fi
             echo "CANISTER=frontend" >> $GITHUB_ENV
+            echo "deploy_frontend=true" >> $GITHUB_ENV
+            echo "deploy_backend=true" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "NETWORK=${{ github.event.inputs.network }}" >> $GITHUB_ENV
             echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
+            echo "deploy_frontend=${{ github.event.inputs.canister == 'frontend' }}" >> $GITHUB_ENV
+            echo "deploy_backend=${{ github.event.inputs.canister == 'backend' }}" >> $GITHUB_ENV
           elif [ "${{ github.event_name }}" == "workflow_run" ]; then
             echo "NETWORK=beta" >> $GITHUB_ENV
             echo "CANISTER=frontend" >> $GITHUB_ENV
+            if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+              echo "deploy_frontend=true" >> $GITHUB_ENV
+              echo "deploy_backend=true" >> $GITHUB_ENV
           else
             echo "Error: Unsupported event type."
             exit 1
@@ -84,10 +94,12 @@ jobs:
             exit 1
           fi
           if [[ "$NETWORK" = test_fe_* ]] && [[ "$CANISTER" != "frontend" ]] ; then
+            echo "deploy_backend=false" >> $GITHUB_ENV
             echo "Only a frontend may be deployed to test_fe_* networks"
             exit 1
           fi
           if [[ "$NETWORK" = test_be_* ]] && [[ "$CANISTER" != "backend" ]] ; then
+            echo "deploy_frontend=false" >> $GITHUB_ENV
             echo "Only a backend may be deployed to test_be_* networks"
             exit 1
           fi
@@ -187,7 +199,7 @@ jobs:
 
       - name: Deploy Frontend to Environment
         run: |
-          if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" && "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+          if [ "$deploy_frontend" == "true" ] ; then
             dfx deploy frontend --network $NETWORK
           fi
 
@@ -196,7 +208,7 @@ jobs:
           DFX_DEPLOY_FLAGS=() # Arguments to be added to the dfx deploy command.
           [[ "${{ github.event.inputs.force-backend }}" != "true" ]] || DFX_DEPLOY_FLAGS+=('--yes' '--upgrade-unchanged') # Corresponds to: dfx deploy --yes --upgrade-unchanged
 
-          if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" && "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+          if [ "$deploy_backend" == "true" ] ; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
                 echo "No changes in specified files/folders detected, skipping backend deployment."
