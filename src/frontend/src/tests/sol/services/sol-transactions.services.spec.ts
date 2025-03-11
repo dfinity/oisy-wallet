@@ -82,7 +82,8 @@ describe('sol-transactions.services', () => {
 			from: mockSolAddress,
 			to: mockSolAddress2,
 			type: 'send',
-			status: mockTransactionDetail.confirmationStatus
+			status: mockTransactionDetail.confirmationStatus,
+			fee: mockTransactionDetail.meta?.fee
 		};
 
 		const expectedResults: SolTransactionUi[] = [
@@ -180,7 +181,7 @@ describe('sol-transactions.services', () => {
 					expectedInnerInstructions[1],
 					expectedResults[2],
 					expectedInnerInstructions[1]
-				].map((transaction, idx) => {
+				].map(({ fee: _, ...transaction }, idx) => {
 					const splitId = transaction.id.split('-');
 
 					return {
