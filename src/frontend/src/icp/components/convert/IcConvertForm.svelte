@@ -4,12 +4,14 @@
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IcTokenFees from '$icp/components/fee/IcTokenFees.svelte';
+	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
-	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumNativeToken, ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
@@ -22,7 +24,7 @@
 	export let receiveAmount: number | undefined;
 	export let destination: OptionBtcAddress | OptionEthAddress = '';
 
-	const { sourceToken, sourceTokenExchangeRate, destinationToken } =
+	const { sourceToken, sourceTokenExchangeRate, destinationToken, balanceForFee } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	let insufficientFunds: boolean;
@@ -63,21 +65,32 @@
 	let ethereumEstimateFee: bigint | undefined;
 
 	let errorMessage: string | undefined;
-	$: errorMessage = unknownMinimumAmount
-		? replacePlaceholders($i18n.send.assertion.unknown_minimum_ckbtc_amount, {
-				$sourceTokenSymbol: $sourceToken.symbol,
-				$destinationTokenSymbol: $destinationToken.symbol
-			})
-		: amountLessThanLedgerFee
-			? replacePlaceholders($i18n.send.assertion.minimum_ledger_fees, {
-					$symbol: $sourceToken.symbol
+	$: errorMessage = insufficientFundsForFee
+		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
+				$symbol: isCkBtc
+					? $sourceToken.symbol
+					: ($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken).symbol,
+				$balance: formatToken({
+					value: $balanceForFee ?? ZERO,
+					unitName: $sourceToken.decimals,
+					displayDecimals: $sourceToken.decimals
 				})
-			: minimumAmountNotReached
-				? replacePlaceholders($i18n.send.assertion.minimum_amount, {
-						$symbol: $sourceToken.symbol,
-						$amount: formattedMinterMinimumAmount
+			})
+		: unknownMinimumAmount
+			? replacePlaceholders($i18n.send.assertion.unknown_minimum_ckbtc_amount, {
+					$sourceTokenSymbol: $sourceToken.symbol,
+					$destinationTokenSymbol: $destinationToken.symbol
+				})
+			: amountLessThanLedgerFee
+				? replacePlaceholders($i18n.send.assertion.minimum_ledger_fees, {
+						$symbol: $sourceToken.symbol
 					})
-				: undefined;
+				: minimumAmountNotReached
+					? replacePlaceholders($i18n.send.assertion.minimum_amount, {
+							$symbol: $sourceToken.symbol,
+							$amount: formattedMinterMinimumAmount
+						})
+					: undefined;
 
 	let infoMessage: string | undefined;
 	$: infoMessage = minterInfoNotCertified
