@@ -8,7 +8,7 @@ import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-messa
 import { mockSolCertifiedTransactions } from '$tests/mocks/sol-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { lamports } from '@solana/rpc-types';
+import { lamports } from '@solana/web3.js';
 import { get } from 'svelte/store';
 
 describe('sol-listener.services', () => {

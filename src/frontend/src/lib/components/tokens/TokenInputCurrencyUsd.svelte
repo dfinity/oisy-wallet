@@ -16,6 +16,7 @@
 	export let placeholder = '0';
 	export let error = false;
 	export let loading = false;
+	export let autofocus = false;
 
 	let displayValue: OptionAmount;
 
@@ -52,6 +53,7 @@
 	{disabled}
 	{error}
 	{loading}
+	{autofocus}
 	decimals={2}
 	on:focus
 	on:blur
