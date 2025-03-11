@@ -6,9 +6,12 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSignature } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address, address as solAddress, type Address } from '@solana/addresses';
-import { type Signature } from '@solana/keys';
-import type { Lamports } from '@solana/rpc-types';
+import {
+	address as solAddress,
+	type Address,
+	type Lamports,
+	type Signature
+} from '@solana/web3.js';
 import type { Writeable } from 'zod';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
@@ -27,44 +30,23 @@ export const loadSolLamportsBalance = async ({
 	return balance;
 };
 
-/**
- * Fetches the SPL token balance for a wallet.
- */
-export const loadSplTokenBalance = async ({
-	address,
-	network,
-	tokenAddress
+export const loadTokenBalance = async ({
+	ataAddress,
+	network
 }: {
-	address: SolAddress;
+	ataAddress: SolAddress;
 	network: SolanaNetworkType;
-	tokenAddress: SplTokenAddress;
-}): Promise<bigint> => {
-	const { getTokenAccountsByOwner } = solanaHttpRpc(network);
-	const wallet = solAddress(address);
-
-	const response = await getTokenAccountsByOwner(
-		wallet,
-		{
-			mint: solAddress(tokenAddress)
-		},
-		{ encoding: 'jsonParsed' }
-	).send();
-
-	if (response.value.length === 0) {
-		return BigInt(0);
-	}
+}): Promise<bigint | undefined> => {
+	const { getTokenAccountBalance } = solanaHttpRpc(network);
+	const wallet = solAddress(ataAddress);
 
 	const {
-		account: {
-			data: {
-				parsed: {
-					info: { tokenAmount }
-				}
-			}
-		}
-	} = response.value[0];
+		value: { amount }
+	} = await getTokenAccountBalance(wallet).send();
 
-	return BigInt(tokenAmount.amount);
+	if (nonNullish(amount)) {
+		return BigInt(amount);
+	}
 };
 
 /**
@@ -192,7 +174,7 @@ export const estimatePriorityFee = async ({
 }): Promise<bigint> => {
 	const { getRecentPrioritizationFees } = solanaHttpRpc(network);
 	const fees = await getRecentPrioritizationFees(
-		nonNullish(addresses) ? addresses.map(address) : undefined
+		nonNullish(addresses) ? addresses.map(solAddress) : undefined
 	).send();
 
 	return fees.reduce<bigint>(
@@ -247,7 +229,7 @@ export const getAccountOwner = async ({
 }: {
 	address: SolAddress;
 	network: SolanaNetworkType;
-}): Promise<SplTokenAddress | undefined> => {
+}): Promise<SolAddress | undefined> => {
 	const { getAccountInfo } = solanaHttpRpc(network);
 	const account = solAddress(address);
 
@@ -265,4 +247,19 @@ export const getAccountOwner = async ({
 	const { owner } = value.data.parsed.info as { owner: SolAddress };
 
 	return owner;
+};
+
+export const checkIfAccountExists = async ({
+	address,
+	network
+}: {
+	address: SolAddress;
+	network: SolanaNetworkType;
+}): Promise<boolean> => {
+	const { getAccountInfo } = solanaHttpRpc(network);
+	const account = solAddress(address);
+
+	const { value } = await getAccountInfo(account, { encoding: 'jsonParsed' }).send();
+
+	return nonNullish(value);
 };

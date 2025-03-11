@@ -17,7 +17,7 @@ testWithII(
 		await transactionsPage.waitForReady();
 
 		// We go to transactions without network
-		await page.goto(`${TRANSACTIONS_URL}/?token=Internet%20Computer`);
+		await page.goto(`${TRANSACTIONS_URL}?token=Internet%20Computer`);
 
 		// We should be redirected to the home screen.
 		const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });

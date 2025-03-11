@@ -29,7 +29,10 @@ function deploy_ckerc20 {
          minting_account = record { owner = principal \"$MINTERID\" };
          transfer_fee = 9_500;
          metadata = vec {};
-         initial_balances = vec { record { record { owner = principal \"$PRINCIPAL\"; }; 100_000_000_000_000_000_000; }; };
+         initial_balances = vec {
+	   record { record { owner = principal \"$PRINCIPAL\"; }; 100_000_000_000_000_000_000; };
+	   record { record { owner = principal \"x4w27-so7wg-cudsa-yy7fh-wcpy5-njul4-q54tv-euzzi-tdnzz-ill46-zqe\"; }; 500_000_000_000_000_000; };
+         };
          archive_options = record {
              num_blocks_to_archive = 10_000;
              trigger_threshold = 20_000;
@@ -48,9 +51,6 @@ function deploy_ckerc20 {
         ledger_id = principal \"$LEDGER_CANISTER_ID\";
        }
     })"
-
-  echo "Step D: transfer ckETH to principal..."
-  dfx canister call "$LEDGER_CANISTER" --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"x4w27-so7wg-cudsa-yy7fh-wcpy5-njul4-q54tv-euzzi-tdnzz-ill46-zqe\";}; amount=500_000_000_000_000_000; fee=null; memo=null; created_at_time=null;})"
 }
 
 deploy_ckerc20 ckusdc_ledger "yfumr-cyaaa-aaaar-qaela-cai" ckusdc_index "ycvkf-paaaa-aaaar-qaelq-cai" "ckSepoliaUSDC" "Chain key Sepolia USDC" 6

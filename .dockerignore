@@ -29,3 +29,4 @@ internet_identity.did
 codes.txt
 
 backend-v*.wasm.gz
+scripts/build.ic-domains.test.actual.*
