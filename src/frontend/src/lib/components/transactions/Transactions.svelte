@@ -12,10 +12,10 @@
 	import { networkBitcoin, networkICP, networkSolana } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
-	import {toastsShow} from "$lib/stores/toasts.store";
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
 
 	let token: OptionToken;
 	$: token = $allTokens.find((token) => token.name === $routeToken);
@@ -27,7 +27,7 @@
 		}, FALLBACK_TIMEOUT);
 	}
 
-	$: if(nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
+	$: if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
 		setTimeout(async () => {
 			toastsShow({
 				text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
@@ -36,7 +36,7 @@
 				}),
 				level: 'warn'
 			});
-			await goto('/')
+			await goto('/');
 		}, FALLBACK_TIMEOUT);
 	}
 
