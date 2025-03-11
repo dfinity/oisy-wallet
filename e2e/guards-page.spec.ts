@@ -4,7 +4,7 @@ import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { TransactionsPage } from './utils/pages/transactions.page';
 
 testWithII(
-	'should be redirected to home if not network is provided to access transactions',
+	'should be redirected to home if no network is provided to access transactions',
 	async ({ page, iiPage }) => {
 		// We load the transaction page for ICP. This way we know ICP is supported.
 		const transactionsPage = new TransactionsPage({

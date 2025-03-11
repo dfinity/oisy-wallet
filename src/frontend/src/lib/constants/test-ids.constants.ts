@@ -64,6 +64,7 @@ export const IN_PROGRESS_MODAL = 'in-progress-modal';
 export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
+export const CAROUSEL_SLIDE = 'carousel-slide';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
 
 export const TOKEN_MENU_IC = 'token-menu-ic';
