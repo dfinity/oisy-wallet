@@ -7,8 +7,8 @@ on:
     tags:
       - v*
   workflow_run:
-    workflows: ['Tag on Merge from Release Branch']
-    types: [completed]
+    workflows: [ 'Tag on Merge from Release Branch' ]
+    types: [ completed ]
   workflow_dispatch:
     inputs:
       network:
@@ -39,13 +39,14 @@ on:
 
 run-name: >-
   ${{ 
-    github.event_name == 'push' && 'Deploying Frontend / Backend to Staging'
+    github.event_name == 'push' && github.ref_type == "branch" && 'Deploying Frontend / Backend to Staging'
+    || github.event_name == 'push' && github.ref_type == "tag" && 'Deploying Frontend / Backend to Beta'
     || github.event_name == 'workflow_run' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
     || format('Deploying {0} to {1}', inputs.canister, inputs.network) }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.network }}-${{ github.event.inputs.canister }}
   cancel-in-progress: false
 
 jobs:
@@ -186,7 +187,7 @@ jobs:
 
       - name: Deploy Frontend to Environment
         run: |
-          if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" ]; then
+          if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_run" && "${{ github.event.event.workflow_run.conclusion }}" == "success" ]; then
             dfx deploy frontend --network $NETWORK
           fi
 
