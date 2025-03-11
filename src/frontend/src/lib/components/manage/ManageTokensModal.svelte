@@ -250,6 +250,11 @@
 	{:else if currentStep?.name === 'Import'}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
-		<ManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} {initialSearch} />
+		<ManageTokens
+			on:icClose={close}
+			on:icAddToken={modal.next}
+			on:icSave={saveTokens}
+			{initialSearch}
+		/>
 	{/if}
 </WizardModal>
