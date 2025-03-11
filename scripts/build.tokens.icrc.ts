@@ -6,7 +6,7 @@ import type { EnvAdditionalIcrcTokensWithMetadata } from '$env/types/env-icrc-ad
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
-import { existsSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, openSync, writeFileSync, writeSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadMetadata } from './build.tokens.utils';
 import { ADDITIONAL_ICRC_JSON_FILE } from './constants.mjs';
@@ -98,11 +98,16 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		return;
 	}
 
+	// Open the file for writing only if it does not already exist (wx flag).
+	// This avoids a potential file system race condition warning.
+	const fd = openSync(file, 'wx');
+
 	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
 
 	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');
 
-	writeFileSync(file, svgContent, 'utf-8');
+	writeSync(fd, svgContent, 0, 'utf-8');
+	closeSync(fd);
 };
 
 const findAdditionalIcrc = async () => {
