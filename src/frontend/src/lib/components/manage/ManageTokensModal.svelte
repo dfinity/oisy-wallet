@@ -258,9 +258,7 @@
 			on:icSave={saveTokens}
 			{initialSearch}
 		>
-			<svelte:fragment slot="info-element">
-				<slot name="info-element" />
-			</svelte:fragment>
+			<slot name="info-element" slot="info-element" />
 		</ManageTokens>
 	{/if}
 </WizardModal>
