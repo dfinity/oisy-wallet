@@ -18,7 +18,8 @@
 			"view": "View",
 			"copy": "Copy",
 			"clear_filter": "Clear filter",
-			"not_available": "n/a"
+			"not_available": "n/a",
+			"new": "New"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -125,9 +126,10 @@
 			"active_campaigns": "Active Opportunities",
 			"upcoming_campaigns": "Upcoming Opportunities",
 			"active_date": "Due on",
-			"participate_title": "How to participate",
+			"participate_title": "Participate and earn Sprinkles",
 			"share": "Share on X",
 			"learn_more": "Learn more",
+			"check_status": "Check Status & Eligibility",
 			"requirements_title": "Requirements",
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
@@ -139,7 +141,9 @@
 			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
 			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
 			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
-			"carousel_slide_cta": "Learn more"
+			"carousel_slide_cta": "Learn more",
+			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
+			"youre_eligible": "You're eligible!"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! Subscribe to $oisy_short on X and follow us to catch all the latest updates."
@@ -390,8 +394,10 @@
 			"insufficient_funds": "Insufficient funds.",
 			"unknown_minimum_ckbtc_amount": "The minimum amount of ckBTC required for converting to BTC is unknown.",
 			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
+			"unknown_minimum_amount": "The minimum amount of $sourceTokenSymbol required for converting to $destinationTokenSymbol is unknown.",
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
+			"minimum_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
 			"minimum_cketh_balance": "The $symbol balance falls below the estimated fee of $amount.",
 			"unknown_cketh": "The ckETH token cannot be retrieved.",
@@ -647,7 +653,7 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee",
-			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:",
+			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>",
 			"convert_fee": "Conversion fee",
 			"convert_inter_network_fee": "Inter-network fee",
 			"convert_btc_network_fee": "Bitcoin network fee",

@@ -126,7 +126,7 @@ export const mapIcrcTransaction = ({
 			: undefined;
 
 	return {
-		id,
+		id: id.toString(),
 		type,
 		...source,
 		to:

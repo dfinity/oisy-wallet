@@ -98,7 +98,7 @@ describe('transactions.utils', () => {
 			...mockEthMainnetTransactions.map((transaction) => ({
 				transaction: {
 					...transaction,
-					id: transaction.hash,
+					id: transaction.hash ?? '',
 					type
 				},
 				token: ETHEREUM_TOKEN,
@@ -110,7 +110,7 @@ describe('transactions.utils', () => {
 			...mockSepoliaTransactions.map((transaction) => ({
 				transaction: {
 					...transaction,
-					id: transaction.hash,
+					id: transaction.hash ?? '',
 					type
 				},
 				token: SEPOLIA_TOKEN,
@@ -122,7 +122,7 @@ describe('transactions.utils', () => {
 			...mockErc20Transactions.map((transaction) => ({
 				transaction: {
 					...transaction,
-					id: transaction.hash,
+					id: transaction.hash ?? '',
 					type
 				},
 				token: PEPE_TOKEN,

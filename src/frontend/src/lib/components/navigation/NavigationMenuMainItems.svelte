@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -29,6 +30,11 @@
 		networkUrl
 	} from '$lib/utils/nav.utils.js';
 
+	export let testIdPrefix: string | undefined = undefined;
+
+	const addTestIdPrefix = (testId: string): string =>
+		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
+
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
 	// cast it to `Page`.
@@ -54,7 +60,7 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.tokens}
 	selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
-	testId={NAVIGATION_ITEM_TOKENS}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	<IconWallet />
 	{$i18n.navigation.text.tokens}
@@ -69,7 +75,7 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.activity}
 	selected={isRouteActivity(pageData)}
-	testId={NAVIGATION_ITEM_ACTIVITY}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
 	<IconActivity />
 	{$i18n.navigation.text.activity}
@@ -85,10 +91,14 @@
 		})}
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		selected={isRouteAirdrops(pageData)}
-		testId={NAVIGATION_ITEM_AIRDROPS}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_AIRDROPS)}
 	>
 		<IconGift />
 		{$i18n.navigation.text.airdrops}
+		<div
+			class="md:h-5.5 md:mt-0.25 text-xs/4.5 absolute -mt-2 ml-10 h-5 scale-75 rounded-md bg-error-primary px-1 py-0.5 font-bold uppercase text-white md:relative md:ml-1 md:scale-100 md:px-2"
+			>{$i18n.core.text.new}</div
+		>
 	</NavigationItem>
 {/if}
 
@@ -101,7 +111,7 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	selected={isRouteDappExplorer(pageData)}
-	testId={NAVIGATION_ITEM_EXPLORER}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
 	<IconlyUfo />
 	{$i18n.navigation.text.dapp_explorer}
@@ -116,7 +126,7 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.settings}
 	selected={isRouteSettings(pageData)}
-	testId={NAVIGATION_ITEM_SETTINGS}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >
 	<IconlySettings />
 	{$i18n.navigation.text.settings}

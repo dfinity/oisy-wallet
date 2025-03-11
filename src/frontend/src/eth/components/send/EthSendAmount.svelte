@@ -13,12 +13,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let amount: OptionAmount = undefined;
 	export let insufficientFunds: boolean;
 	export let nativeEthereumToken: Token;
+
+	let exchangeValueUnit: DisplayUnit = 'usd';
+	let inputUnit: DisplayUnit;
+	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
 
 	let insufficientFundsError: InsufficientFundsError | undefined = undefined;
 
@@ -76,40 +81,44 @@
 	let amountSetToMax = false;
 </script>
 
-<TokenInput
-	token={$sendToken}
-	bind:amount
-	bind:amountSetToMax
-	isSelectable={false}
-	exchangeRate={$sendTokenExchangeRate}
-	bind:error={insufficientFundsError}
-	customErrorValidate={customValidate}
->
-	<span slot="title">{$i18n.core.text.amount}</span>
+<div class="mb-4">
+	<TokenInput
+		token={$sendToken}
+		bind:amount
+		displayUnit={inputUnit}
+		bind:amountSetToMax
+		isSelectable={false}
+		exchangeRate={$sendTokenExchangeRate}
+		bind:error={insufficientFundsError}
+		customErrorValidate={customValidate}
+		autofocus={nonNullish($sendToken)}
+	>
+		<span slot="title">{$i18n.core.text.amount}</span>
 
-	<svelte:fragment slot="amount-info">
-		{#if nonNullish($sendToken)}
-			<div class="text-tertiary">
-				<TokenInputAmountExchange
-					{amount}
-					exchangeRate={$sendTokenExchangeRate}
+		<svelte:fragment slot="amount-info">
+			{#if nonNullish($sendToken)}
+				<div class="text-tertiary">
+					<TokenInputAmountExchange
+						{amount}
+						exchangeRate={$sendTokenExchangeRate}
+						token={$sendToken}
+						bind:displayUnit={exchangeValueUnit}
+					/>
+				</div>
+			{/if}
+		</svelte:fragment>
+
+		<svelte:fragment slot="balance">
+			{#if nonNullish($sendToken)}
+				<MaxBalanceButton
+					bind:amount
+					bind:amountSetToMax
+					error={nonNullish(insufficientFundsError)}
+					balance={$sendBalance}
 					token={$sendToken}
-					disabled
+					fee={$maxGasFee}
 				/>
-			</div>
-		{/if}
-	</svelte:fragment>
-
-	<svelte:fragment slot="balance">
-		{#if nonNullish($sendToken)}
-			<MaxBalanceButton
-				bind:amount
-				bind:amountSetToMax
-				error={nonNullish(insufficientFundsError)}
-				balance={$sendBalance}
-				token={$sendToken}
-				fee={$maxGasFee}
-			/>
-		{/if}
-	</svelte:fragment>
-</TokenInput>
+			{/if}
+		</svelte:fragment>
+	</TokenInput>
+</div>
