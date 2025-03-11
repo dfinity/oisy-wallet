@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { address as solAddress } from '@solana/web3.js';
-	import { findAssociatedTokenPda } from '@solana-program/token';
+	import { isNullish } from '@dfinity/utils';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalSolReceive } from '$lib/derived/modal.derived';
@@ -23,7 +21,6 @@
 		isNetworkIdSOLLocal,
 		isNetworkIdSOLTestnet
 	} from '$lib/utils/network.utils';
-	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	export let token: Token;
 
@@ -39,23 +36,9 @@
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
-	let ataAddress: SolAddress | undefined;
-
-	const updateAtaAddress = async () => {
-		[ataAddress] =
-			nonNullish(addressData) && isTokenSpl(token)
-				? await findAssociatedTokenPda({
-						owner: solAddress(addressData.data),
-						tokenProgram: solAddress(token.owner),
-						mint: solAddress(token.address)
-					})
-				: [undefined];
-	};
-
-	$: token, updateAtaAddress();
-
+	// TODO: PRODSEC: provide the ATA address too in the receive modal for SPL tokens
 	let address: SolAddress | undefined;
-	$: address = nonNullish(ataAddress) ? ataAddress : addressData?.data;
+	$: address = addressData?.data;
 
 	const openReceive = async (modalId: symbol) => {
 		if (isDisabled()) {
