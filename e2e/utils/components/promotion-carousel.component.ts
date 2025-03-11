@@ -9,7 +9,7 @@ export class PromotionCarousel {
 	}
 
 	public async navigateToSlide(slideNumber: number): Promise<void> {
-		const navigation1Selector = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}-${slideNumber}"]:visible`;
+		const navigation1Selector = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}"]:visible`;
 		await this.#page.click(navigation1Selector);
 	}
 
