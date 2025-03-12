@@ -1,3 +1,4 @@
+import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { last } from '$lib/utils/array.utils';
 import * as solanaApi from '$sol/api/solana.api';
@@ -15,6 +16,7 @@ import {
 } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
+import { notEmptyString } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
 import { address } from '@solana/web3.js';
 import { type MockInstance } from 'vitest';
@@ -34,6 +36,12 @@ describe('sol-transactions.services', () => {
 
 	describe('getSolTransactions', () => {
 		it('should match the total balance of an account', async () => {
+			// If the Alchemy API is empty, the test will fail.
+			assert(
+				notEmptyString(ALCHEMY_API_KEY),
+				'ALCHEMY_API_KEY is empty, please provide a valid key in the env file as VITE_ALCHEMY_API_KEY'
+			);
+
 			// We use a real address here to test the function. Ideally, the address is a very active one.
 			const address = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
 
