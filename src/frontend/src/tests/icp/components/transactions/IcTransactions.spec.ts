@@ -1,6 +1,7 @@
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import { ACTIVITY_TRANSACTIONS_PLACEHOLDER } from '$lib/constants/test-ids.constants';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
@@ -23,7 +24,7 @@ describe('IcTransactions', () => {
 
 		const { getByTestId } = render(IcTransactions);
 
-		expect(getByTestId('no-transactions-placeholder')).not.toBeNull();
+		expect(getByTestId(ACTIVITY_TRANSACTIONS_PLACEHOLDER)).not.toBeNull();
 	});
 
 	it('should render no transactions placeholder', () => {

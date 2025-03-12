@@ -4,8 +4,8 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import SendForm from '$eth/components/send/SendForm.svelte';
-	import SendReview from '$eth/components/send/SendReview.svelte';
+	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
+	import EthSendReview from '$eth/components/send/EthSendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -34,6 +34,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -97,6 +98,9 @@
 	let feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set(nativeEthereumToken.decimals);
 
+	let feeExchangeRateStore = writable<number | undefined>(undefined);
+	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+
 	let feeContext: FeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
@@ -107,6 +111,7 @@
 			feeSymbolStore,
 			feeTokenIdStore,
 			feeDecimalsStore,
+			feeExchangeRateStore,
 			evaluateFee
 		})
 	);
@@ -237,6 +242,8 @@
 
 <FeeContext
 	bind:this={feeContext}
+	sendToken={$sendToken}
+	sendTokenId={$sendTokenId}
 	{amount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
@@ -245,7 +252,7 @@
 	{nativeEthereumToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SendReview
+		<EthSendReview
 			on:icBack
 			on:icSend={send}
 			{destination}
@@ -260,7 +267,7 @@
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SendForm
+		<EthSendForm
 			on:icNext
 			on:icClose={close}
 			on:icQRCodeScan
@@ -278,7 +285,7 @@
 					<ButtonCancel on:click={close} />
 				{/if}
 			</svelte:fragment>
-		</SendForm>
+		</EthSendForm>
 	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 		<SendQRCodeScan
 			expectedToken={$sendToken}

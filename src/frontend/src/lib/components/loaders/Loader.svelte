@@ -1,31 +1,39 @@
 <script lang="ts">
-	import { Modal, type ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { loadBtcAddressRegtest, loadBtcAddressTestnet } from '$btc/services/btc-address.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import banner from '$lib/assets/banner.svg';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
-	import { btcAddressTestnet } from '$lib/derived/address.derived';
+	import {
+		btcAddressRegtest,
+		btcAddressTestnet,
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import {
-		loadAddresses,
-		loadBtcAddressRegtest,
-		loadBtcAddressTestnet,
-		loadIdbAddresses
-	} from '$lib/services/address.services';
+	import { loadAddresses, loadIdbAddresses } from '$lib/services/addresses.services';
 	import { signOut } from '$lib/services/auth.services';
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import {
+		loadSolAddressDevnet,
+		loadSolAddressLocal,
+		loadSolAddressTestnet
+	} from '$sol/services/sol-address.services';
+	import { loadSplTokens } from '$sol/services/spl.services';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -40,6 +48,11 @@
 			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: ProgressStepsLoader.DONE,
+			text: replaceOisyPlaceholders($i18n.init.text.done),
+			state: 'completed'
 		} as ProgressStep
 	];
 
@@ -60,6 +73,9 @@
 			}),
 			loadIcrcTokens({
 				identity: $authIdentity
+			}),
+			loadSplTokens({
+				identity: $authIdentity
 			})
 		]);
 	};
@@ -77,11 +93,32 @@
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
+	const debounceLoadSolAddressTestnet = debounce(loadSolAddressTestnet);
+	const debounceLoadSolAddressDevnet = debounce(loadSolAddressDevnet);
+	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
+
 	$: {
-		if ($testnets && isNullish($btcAddressTestnet)) {
-			debounceLoadBtcAddressTestnet();
+		if ($testnets) {
+			if (isNullish($btcAddressTestnet)) {
+				debounceLoadBtcAddressTestnet();
+			}
+
+			if (isNullish($solAddressTestnet)) {
+				debounceLoadSolAddressTestnet();
+			}
+
+			if (isNullish($solAddressDevnet)) {
+				debounceLoadSolAddressDevnet();
+			}
+
 			if (LOCAL) {
-				debounceLoadBtcAddressRegtest();
+				if (isNullish($btcAddressRegtest)) {
+					debounceLoadBtcAddressRegtest();
+				}
+
+				if (isNullish($solAddressLocal)) {
+					debounceLoadSolAddressLocal();
+				}
 			}
 		}
 	}
@@ -116,7 +153,7 @@
 		);
 
 		if (!addressSuccess) {
-			await signOut();
+			await signOut({});
 			return;
 		}
 
@@ -126,11 +163,13 @@
 
 {#if $loading}
 	{#if progressModal}
-		<div in:fade={{ delay: 0, duration: 250 }}>
+		<div in:fade={{ delay: 0, duration: 250 }} class="login-modal">
 			<Modal testId={LOADER_MODAL}>
 				<div class="stretch">
-					<div class="relative mb-8 block md:h-40">
-						<ImgBanner src={banner} styleClass="h-full md:absolute aspect-auto" />
+					<div class="mb-8 block">
+						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+							<ImgBanner {src} styleClass="aspect-auto" />
+						{/await}
 					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
@@ -145,3 +184,11 @@
 		<slot />
 	</div>
 {/if}
+
+<style>
+	:root:has(.login-modal) {
+		--alert-max-width: 90vw;
+		--alert-max-height: initial;
+		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
+	}
+</style>

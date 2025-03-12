@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import BtcTransactionsHeader from '$btc/components/transactions/BtcTransactionsHeader.svelte';
@@ -13,7 +14,7 @@
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalBtcTransaction } from '$lib/derived/modal.derived';
+	import { modalBtcToken, modalBtcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OptionToken } from '$lib/types/token';
@@ -44,4 +45,6 @@
 
 {#if $modalBtcTransaction && nonNullish(selectedTransaction)}
 	<BtcTransactionModal transaction={selectedTransaction} token={selectedToken} />
+{:else if $modalBtcToken}
+	<BtcTokenModal />
 {/if}

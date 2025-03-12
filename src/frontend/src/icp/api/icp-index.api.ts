@@ -1,4 +1,4 @@
-import { ICP_INDEX_CANISTER_ID } from '$env/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';

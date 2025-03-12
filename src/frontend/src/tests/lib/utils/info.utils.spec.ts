@@ -7,7 +7,7 @@ describe('info.utils', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			localStorage.clear();
+			sessionStorage.clear();
 
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
@@ -15,16 +15,16 @@ describe('info.utils', () => {
 		it('should save a value in localStorage', () => {
 			saveHideInfo(key);
 
-			expect(localStorage.getItem(key)).toBe('true');
+			expect(sessionStorage.getItem(key)).toBe('true');
 		});
 
-		it('should not throw errors even if localStorage is unavailable', () => {
-			const originalLocalStorage = window.localStorage;
+		it('should not throw errors even if sessionStorage is unavailable', () => {
+			const originalSessionStorage = window.sessionStorage;
 
-			Object.defineProperty(window, 'localStorage', {
+			Object.defineProperty(window, 'sessionStorage', {
 				value: {
 					setItem: vi.fn(() => {
-						throw new Error('LocalStorage is full');
+						throw new Error('SessionStorage is full');
 					})
 				},
 				writable: true
@@ -32,8 +32,8 @@ describe('info.utils', () => {
 
 			expect(() => saveHideInfo(key)).not.toThrow();
 
-			Object.defineProperty(window, 'localStorage', {
-				value: originalLocalStorage,
+			Object.defineProperty(window, 'sessionStorage', {
+				value: originalSessionStorage,
 				writable: true
 			});
 		});
@@ -45,32 +45,32 @@ describe('info.utils', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
-			localStorage.clear();
+			sessionStorage.clear();
 
 			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 
 		it('should return true if the value for the key is "true"', () => {
-			localStorage.setItem(key, 'true');
+			sessionStorage.setItem(key, 'true');
 			expect(shouldHideInfo(key)).toBe(true);
 		});
 
 		it('should return false if the value for the key is "false"', () => {
-			localStorage.setItem(key, 'false');
+			sessionStorage.setItem(key, 'false');
 			expect(shouldHideInfo(key)).toBe(false);
 		});
 
-		it('should return false if the key does not exist in localStorage', () => {
+		it('should return false if the key does not exist in sessionStorage', () => {
 			expect(shouldHideInfo(key)).toBe(false);
 		});
 
-		it('should return false if localStorage is unavailable or throws an error', () => {
-			const originalLocalStorage = window.localStorage;
+		it('should return false if sessionStorage is unavailable or throws an error', () => {
+			const originalSessionStorage = window.sessionStorage;
 
-			Object.defineProperty(window, 'localStorage', {
+			Object.defineProperty(window, 'sessionStorage', {
 				value: {
 					getItem: vi.fn(() => {
-						throw new Error('LocalStorage is full');
+						throw new Error('SessionStorage is full');
 					})
 				},
 				writable: true
@@ -78,8 +78,8 @@ describe('info.utils', () => {
 
 			expect(shouldHideInfo(key)).toBe(false);
 
-			Object.defineProperty(window, 'localStorage', {
-				value: originalLocalStorage,
+			Object.defineProperty(window, 'sessionStorage', {
+				value: originalSessionStorage,
 				writable: true
 			});
 		});

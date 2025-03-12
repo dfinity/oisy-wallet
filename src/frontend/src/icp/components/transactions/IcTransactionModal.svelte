@@ -156,6 +156,6 @@
 			</Value>
 		{/if}
 
-		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
+		<ButtonCloseModal slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>

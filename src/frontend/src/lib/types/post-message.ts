@@ -6,6 +6,7 @@ import {
 	PostMessageDataRequestIcrcSchema,
 	PostMessageDataRequestIcrcStrictSchema,
 	PostMessageDataRequestSchema,
+	PostMessageDataRequestSolSchema,
 	PostMessageDataResponseAuthSchema,
 	PostMessageDataResponseBTCAddressSchema,
 	PostMessageDataResponseErrorSchema,
@@ -15,16 +16,14 @@ import {
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
 	PostMessageJsonDataResponseSchema,
-	PostMessageRequestSchema,
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 
-import { z, type ZodType } from 'zod';
-
-export type PostMessageRequest = z.infer<typeof PostMessageRequestSchema>;
+import type { ZodType } from 'zod';
+import * as z from 'zod';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
 export type PostMessageDataResponse = z.infer<typeof PostMessageDataResponseSchema>;
@@ -46,6 +45,8 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = z.infer<
 >;
 
 export type PostMessageDataRequestBtc = z.infer<typeof PostMessageDataRequestBtcSchema>;
+
+export type PostMessageDataRequestSol = z.infer<typeof PostMessageDataRequestSolSchema>;
 
 export type PostMessageResponseStatus = z.infer<typeof PostMessageResponseStatusSchema>;
 

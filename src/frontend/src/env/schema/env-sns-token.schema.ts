@@ -1,5 +1,5 @@
 import { EnvIcrcTokenMetadataSchema, EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const EnvSnsTokenSchema = EnvIcTokenSchema.extend({
 	rootCanisterId: z.string(),

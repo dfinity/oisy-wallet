@@ -2,9 +2,9 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import { initTransactionsListener } from '$eth/services/eth-listener.services';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import type { OptionEthAddress } from '$lib/types/address';
+	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;

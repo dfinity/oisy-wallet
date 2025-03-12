@@ -6,7 +6,7 @@ import type {
 
 const scheduler = new CkBTCUpdateBalanceScheduler();
 
-onmessage = async ({
+export const onCkBtcUpdateBalanceMessage = async ({
 	data: dataMsg
 }: MessageEvent<PostMessage<PostMessageDataRequestIcCkBTCUpdateBalance>>) => {
 	const { msg, data } = dataMsg;

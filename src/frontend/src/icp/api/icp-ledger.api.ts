@@ -1,4 +1,4 @@
-import { ICP_LEDGER_CANISTER_ID } from '$env/networks.icp.env';
+import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { OptionIdentity } from '$lib/types/identity';

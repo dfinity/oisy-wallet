@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { Markdown } from '@dfinity/gix-components';
 	import type {
-		icrc21_consent_info,
 		ConsentMessageApproval,
-		Rejection
+		Rejection,
+		ResultConsentInfo
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
@@ -22,7 +24,7 @@
 
 	let approve: ConsentMessageApproval | undefined;
 	let reject: Rejection | undefined;
-	let consentInfo: icrc21_consent_info | undefined;
+	let consentInfo: ResultConsentInfo | undefined;
 
 	$: ({ approve, reject, consentInfo } =
 		nonNullish($payload) && $payload.status === 'result'
@@ -54,9 +56,15 @@
 			return;
 		}
 
+		const consentInfoMsg = nonNullish(consentInfo)
+			? 'Warn' in consentInfo
+				? consentInfo.Warn.consentInfo
+				: consentInfo.Ok
+			: undefined;
+
 		displayMessage =
-			nonNullish(consentInfo) && 'GenericDisplayMessage' in consentInfo.consent_message
-				? consentInfo.consent_message.GenericDisplayMessage
+			nonNullish(consentInfoMsg) && 'GenericDisplayMessage' in consentInfoMsg.consent_message
+				? consentInfoMsg.consent_message.GenericDisplayMessage
 				: undefined;
 	};
 
@@ -122,15 +130,19 @@
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="msg mb-6 rounded-lg border border-dust px-8 py-4">
+		<SignerConsentMessageWarning {consentInfo} />
+
+		<div class="msg mb-6 rounded-lg border border-off-white px-8 py-4">
 			<Markdown text={content} />
 		</div>
 
 		<ButtonGroup>
-			<button type="button" class="error flex-1" on:click={onReject}
-				>{$i18n.core.text.reject}</button
-			>
-			<button type="submit" class="success flex-1">{$i18n.core.text.approve}</button>
+			<Button colorStyle="error" on:click={onReject}>
+				{$i18n.core.text.reject}
+			</Button>
+			<Button colorStyle="success" type="submit">
+				{$i18n.core.text.approve}
+			</Button>
 		</ButtonGroup>
 	</form>
 {/if}

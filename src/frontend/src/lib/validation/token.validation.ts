@@ -1,6 +1,6 @@
 import { TokenIdSchema, TokenSchema } from '$lib/schema/token.schema';
 import type { Token, TokenId } from '$lib/types/token';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const TokenIdStringSchema = z.string();
 

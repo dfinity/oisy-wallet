@@ -1,10 +1,10 @@
 import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { busy } from '$lib/stores/busy.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { token as tokenStore } from '$lib/stores/token.store';
+import type { SaveCustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenStandard } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';

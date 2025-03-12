@@ -1,5 +1,17 @@
 <!-- source: ICONLY PRO - The license is bought and owned by the DFINITY Foundation - Please read the documentation in the README file, or see terms and conditions here https://iconly.pro/pages/terms -->
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<script lang="ts">
+	export let styleClass: string | undefined = undefined;
+	export let size = '24';
+</script>
+
+<svg
+	width={size}
+	height={size}
+	class={styleClass}
+	viewBox="0 0 24 24"
+	fill="none"
+	xmlns="http://www.w3.org/2000/svg"
+>
 	<path
 		fill-rule="evenodd"
 		clip-rule="evenodd"

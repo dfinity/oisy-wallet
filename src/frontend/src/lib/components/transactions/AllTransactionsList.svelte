@@ -12,22 +12,28 @@
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import AllTransactionsScroll from '$lib/components/transactions/AllTransactionsScroll.svelte';
+	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
+	import { ACTIVITY_TRANSACTION_SKELETON_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		modalBtcTransaction,
+		modalEthTransaction,
 		modalIcTransaction,
-		modalEthTransaction
+		modalSolTransaction
 	} from '$lib/derived/modal.derived';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AllTransactionUi, TransactionsUiDateGroup } from '$lib/types/transaction';
+	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
+	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
+	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	let transactions: AllTransactionUi[];
+	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
 		tokens: $enabledNetworkTokens,
 		$btcTransactions: $btcTransactionsStore,
@@ -35,15 +41,16 @@
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
 		$ethAddress: $ethAddress,
 		$icTransactions: $icTransactionsStore,
-		$btcStatuses: $btcStatusesStore
+		$btcStatuses: $btcStatusesStore,
+		$solTransactions: $solTransactionsStore
 	});
 
-	let sortedTransactions: AllTransactionUi[];
-	$: sortedTransactions = transactions.sort((a, b) =>
+	let sortedTransactions: AllTransactionUiWithCmp[];
+	$: sortedTransactions = transactions.sort(({ transaction: a }, { transaction: b }) =>
 		sortTransactions({ transactionA: a, transactionB: b })
 	);
 
-	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUi> | undefined;
+	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
 	$: groupedTransactions = nonNullish(sortedTransactions)
 		? groupTransactionsByDate(sortedTransactions)
 		: undefined;
@@ -71,20 +78,33 @@
 			$modalOpen: $modalIcTransaction,
 			$modalStore: $modalStore
 		}));
+
+	let selectedSolTransaction: SolTransactionUi | undefined;
+	let selectedSolToken: OptionToken;
+	$: ({ transaction: selectedSolTransaction, token: selectedSolToken } =
+		mapTransactionModalData<SolTransactionUi>({
+			$modalOpen: $modalSolTransaction,
+			$modalStore: $modalStore
+		}));
 </script>
 
-<!--TODO: include skeleton for loading transactions and remove nullish checks-->
-{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
-	<AllTransactionsScroll>
-		{#each Object.entries(groupedTransactions) as [date, transactions] (date)}
-			<TransactionsDateGroup {date} {transactions} />
+<AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
+	{#if nonNullish(groupedTransactions) && sortedTransactions.length > 0}
+  <AllTransactionsScroll>
+		{#each Object.entries(groupedTransactions) as [date, transactions], index (date)}
+			<TransactionsDateGroup
+				{date}
+				{transactions}
+				testId={`all-transactions-date-group-${index}`}
+			/>
 		{/each}
-	</AllTransactionsScroll>
-{/if}
+    </AllTransactionsScroll>
+	{/if}
 
-{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
-	<TransactionsPlaceholder />
-{/if}
+	{#if isNullish(groupedTransactions) || sortedTransactions.length === 0}
+		<TransactionsPlaceholder />
+	{/if}
+</AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
 	<BtcTransactionModal transaction={selectedBtcTransaction} token={selectedBtcToken} />
@@ -92,4 +112,6 @@
 	<EthTransactionModal transaction={selectedEthTransaction} token={selectedEthToken} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
 	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
+{:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
+	<SolTransactionModal transaction={selectedSolTransaction} token={selectedSolToken} />
 {/if}

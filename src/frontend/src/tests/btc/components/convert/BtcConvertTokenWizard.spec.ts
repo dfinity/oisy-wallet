@@ -1,5 +1,6 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
+import * as btcSendApi from '$btc/services/btc-send.services';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
@@ -11,20 +12,23 @@ import { btcAddressStore } from '$icp/stores/btc.store';
 import * as backendApi from '$lib/api/backend.api';
 import * as signerApi from '$lib/api/signer.api';
 import * as addressesStore from '$lib/derived/address.derived';
-import * as authStore from '$lib/derived/auth.derived';
 import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
+
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
 
 describe('BtcConvertTokenWizard', () => {
 	const sendAmount = 0.001;
@@ -58,12 +62,12 @@ describe('BtcConvertTokenWizard', () => {
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
+	const mockSelectUtxosFeeApi = () =>
+		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
 			.mockResolvedValue(pendingBtcTransactionResponse);
-	const mockAuthStore = (value: Identity | null = mockIdentity) =>
-		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 	const mockBtcAddressStore = (address: string | undefined = mockBtcAddress) => {
 		btcAddressStore.set({
 			tokenId: ICP_TOKEN.id,
@@ -96,6 +100,7 @@ describe('BtcConvertTokenWizard', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
+		mockSelectUtxosFeeApi();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {

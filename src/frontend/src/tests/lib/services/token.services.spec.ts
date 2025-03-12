@@ -71,7 +71,7 @@ describe('token.services', () => {
 		let spyBusyStop: MockInstance;
 
 		// we mock console.error just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		vi.spyOn(console, 'error').mockImplementation(() => {});
 
 		beforeEach(() => {
 			mockAssertSendTokenData = vi.fn();

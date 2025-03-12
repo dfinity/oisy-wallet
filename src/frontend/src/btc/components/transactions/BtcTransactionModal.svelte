@@ -72,12 +72,6 @@
 
 	<Value ref="status" slot="transaction-status">
 		<svelte:fragment slot="label">{$i18n.transaction.text.status}</svelte:fragment>
-		{`${
-			status === 'pending'
-				? $i18n.transaction.text.pending
-				: status === 'unconfirmed'
-					? $i18n.transaction.text.unconfirmed
-					: $i18n.transaction.text.confirmed
-		}`}
+		{`${$i18n.transaction.status[status]}`}
 	</Value>
 </TransactionModal>

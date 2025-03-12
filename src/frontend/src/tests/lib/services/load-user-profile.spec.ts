@@ -23,7 +23,7 @@ describe('loadUserProfile', () => {
 		vi.clearAllMocks();
 	});
 
-	it("doesn't create a user profile if uncertified profile is found", async () => {
+	it('should not create a user profile if uncertified profile is found', async () => {
 		const getUserProfileSpy = vi
 			.spyOn(backendApi, 'getUserProfile')
 			.mockResolvedValue({ Ok: mockProfile });
@@ -40,7 +40,7 @@ describe('loadUserProfile', () => {
 		expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
 	});
 
-	it('creates a user profile if uncertified profile is not found', async () => {
+	it('should create a user profile if uncertified profile is not found', async () => {
 		const getUserProfileSpy = vi
 			.spyOn(backendApi, 'getUserProfile')
 			.mockResolvedValue({ Err: { NotFound: null } });
@@ -62,7 +62,7 @@ describe('loadUserProfile', () => {
 		expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile });
 	});
 
-	it('loads the store with certified data when uncertified profile is found', async () => {
+	it('should load the store with certified data when uncertified profile is found', async () => {
 		const getUserProfileSpy = vi
 			.spyOn(backendApi, 'getUserProfile')
 			.mockResolvedValue({ Ok: mockProfile });
@@ -82,5 +82,26 @@ describe('loadUserProfile', () => {
 		await waitFor(() =>
 			expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile })
 		);
+	});
+
+	it('should not load the user profile if reload is false and the store is not empty', async () => {
+		const anotherProfile: UserProfile = { ...mockProfile, version: [2n] };
+
+		userProfileStore.set({ certified: true, profile: anotherProfile });
+
+		const getUserProfileSpy = vi.spyOn(backendApi, 'getUserProfile');
+
+		await loadUserProfile({ identity: mockIdentity, reload: false });
+
+		expect(getUserProfileSpy).not.toHaveBeenCalled();
+		expect(get(userProfileStore)).toEqual({ certified: true, profile: anotherProfile });
+	});
+
+	it('should load the user profile if reload is false but the store is nullish', async () => {
+		userProfileStore.reset();
+
+		await loadUserProfile({ identity: mockIdentity, reload: false });
+
+		expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
 	});
 });

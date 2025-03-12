@@ -83,7 +83,7 @@ export const loadAndAssertAddCustomToken = async ({
 		}
 
 		return { result: 'success', data: { token, balance } };
-	} catch (err: unknown) {
+	} catch (_err: unknown) {
 		return { result: 'error' };
 	}
 };

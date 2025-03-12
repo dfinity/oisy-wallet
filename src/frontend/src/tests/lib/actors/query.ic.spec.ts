@@ -6,7 +6,7 @@ describe('query.ic', () => {
 	const identity = new AnonymousIdentity();
 
 	// we mock console.error just to avoid unnecessary logs while running the tests
-	vi.spyOn(console, 'error').mockImplementation(() => undefined);
+	vi.spyOn(console, 'error').mockImplementation(() => {});
 
 	beforeEach(() => {
 		vi.clearAllMocks();

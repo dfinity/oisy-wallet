@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { Readable } from 'svelte/store';
-	import BtcConvertFeeTotal from '$btc/components/convert/BtcConvertFeeTotal.svelte';
 	import BtcConvertFees from '$btc/components/convert/BtcConvertFees.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import {
@@ -10,9 +9,8 @@
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
+	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
-	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
@@ -30,6 +28,9 @@
 
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+
+	let utxosFee: UtxosFee | undefined;
+	$: utxosFee = nonNullish(sendAmount) ? $storeUtxosFeeData?.utxosFee : undefined;
 
 	let invalid: boolean;
 	$: invalid =
@@ -53,25 +54,14 @@
 	disabled={invalid}
 >
 	<svelte:fragment slot="message">
-		{#if insufficientFundsForFee}
-			<InsufficientFundsForFee testId="btc-convert-form-insufficient-funds-for-fee" />
-		{:else if nonNullish($hasPendingTransactionsStore)}
+		{#if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
-				<BtcSendWarnings
-					utxosFee={$storeUtxosFeeData?.utxosFee}
-					pendingTransactionsStatus={$hasPendingTransactionsStore}
-				/>
+				<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
 			</div>
 		{/if}
 	</svelte:fragment>
 
-	<svelte:fragment slot="fee">
-		<BtcConvertFees {sendAmount} />
-
-		<Hr spacing="md" />
-
-		<BtcConvertFeeTotal bind:totalFee />
-	</svelte:fragment>
+	<BtcConvertFees bind:totalFee slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </ConvertForm>

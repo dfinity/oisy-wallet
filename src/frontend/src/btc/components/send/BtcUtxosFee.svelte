@@ -2,9 +2,9 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
+	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -13,14 +13,14 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let utxosFee: UtxosFee | undefined = undefined;
 	export let amount: OptionAmount = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -63,13 +63,11 @@
 	{#if isNullish(utxosFee)}
 		<span class="mt-2 block w-full max-w-[140px]"><SkeletonText /></span>
 	{:else}
-		<span in:fade>
-			{formatToken({
-				value: BigNumber.from(utxosFee.feeSatoshis),
-				unitName: $sendTokenDecimals,
-				displayDecimals: $sendTokenDecimals
-			})}
-		</span>
-		BTC
+		<ExchangeAmountDisplay
+			amount={BigNumber.from(utxosFee.feeSatoshis)}
+			decimals={$sendTokenDecimals}
+			symbol={$sendTokenSymbol}
+			exchangeRate={$sendTokenExchangeRate}
+		/>
 	{/if}
 </Value>

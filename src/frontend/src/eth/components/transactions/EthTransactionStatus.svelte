@@ -4,10 +4,10 @@
 	import { fade } from 'svelte/transition';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
-	import type { WebSocketListener } from '$eth/types/listener';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { WebSocketListener } from '$lib/types/listener';
 
 	export let blockNumber: number;
 
@@ -75,9 +75,9 @@
 	})();
 </script>
 
-<label for="to" class="px-4.5 font-bold">{$i18n.transaction.text.status}:</label>
+<label for="to" class="font-bold">{$i18n.transaction.text.status}:</label>
 
-<p id="to" class="px-4.5 mb-4 break-all font-normal first-letter:capitalize">
+<p id="to" class="mb-4 break-all font-normal first-letter:capitalize">
 	{#if nonNullish(status)}
 		<span in:fade>{$i18n.transaction.status[status]}</span>
 	{:else}

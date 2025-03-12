@@ -14,7 +14,7 @@
 	export let hideNetworkLogo = false;
 </script>
 
-<Card noMargin testId={`${testIdPrefix}-${data.symbol}`}>
+<Card noMargin testId={`${testIdPrefix}-${data.symbol}-${data.network.id.description}`}>
 	<TokenSymbol {data} {hideNetworkLogo} />
 
 	<TokenName {data} slot="description" />

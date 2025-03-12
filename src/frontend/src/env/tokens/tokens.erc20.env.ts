@@ -1,5 +1,5 @@
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
+import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
 import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
@@ -13,7 +13,6 @@ import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
 import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
-import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { TokenId } from '$lib/types/token';
 
 // TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
@@ -111,10 +110,6 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 		: []),
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
 ];
-
-export const ERC20_CONTRACTS_ADDRESSES = ERC20_CONTRACTS.map(({ address }) =>
-	mapAddressStartsWith0x(address).toLowerCase()
-);
 
 /**
  * ERC20 which have twin tokens counterparts.

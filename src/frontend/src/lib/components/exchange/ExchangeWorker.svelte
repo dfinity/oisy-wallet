@@ -5,6 +5,7 @@
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
+	import { enabledSplTokenAddresses } from '$sol/derived/spl.derived';
 
 	let worker: ExchangeWorker | undefined;
 
@@ -23,7 +24,8 @@
 		worker?.stopExchangeTimer();
 		worker?.startExchangeTimer({
 			erc20Addresses: $enabledMergedErc20TokensAddresses,
-			icrcCanisterIds: $enabledIcrcLedgerCanisterIdsNoCk
+			icrcCanisterIds: $enabledIcrcLedgerCanisterIdsNoCk,
+			splAddresses: $enabledSplTokenAddresses
 		});
 	};
 
@@ -32,6 +34,7 @@
 	$: worker,
 		$enabledMergedErc20TokensAddresses,
 		$enabledIcrcLedgerCanisterIdsNoCk,
+		$enabledSplTokenAddresses,
 		debounceSyncTimer();
 </script>
 

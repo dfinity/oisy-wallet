@@ -1,5 +1,8 @@
-import * as NetworksModule from '$env/networks.icrc.env';
-import { IC_CKBTC_LEDGER_CANISTER_ID, IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
+import * as NetworksModule from '$env/networks/networks.icrc.env';
+import {
+	IC_CKBTC_LEDGER_CANISTER_ID,
+	IC_CKETH_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
@@ -11,6 +14,7 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import type { TokenStandard, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	calculateTokenUsdAmount,
 	calculateTokenUsdBalance,
 	findTwinToken,
 	getMaxTransactionAmount,
@@ -102,6 +106,16 @@ describe('getMaxTransactionAmount', () => {
 		});
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});
+
+	it('should return the untouched amount if the token is SPL', () => {
+		const result = getMaxTransactionAmount({
+			balance: BigNumber.from(balance),
+			fee: BigNumber.from(fee),
+			tokenDecimals: tokenDecimals,
+			tokenStandard: 'spl'
+		});
+		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+	});
 });
 
 describe('calculateTokenUsdBalance', () => {
@@ -146,6 +160,45 @@ describe('calculateTokenUsdBalance', () => {
 		const result = calculateTokenUsdBalance({
 			token: ETHEREUM_TOKEN,
 			$balances: undefined,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual(0);
+	});
+});
+
+describe('calculateTokenUsdAmount', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should correctly calculate USD amount for the token and amount', () => {
+		const result = calculateTokenUsdAmount({
+			token: ICP_TOKEN,
+			amount: bn3,
+			$exchanges: mockExchanges
+		});
+		expect(result).toEqual(bn3.toNumber());
+	});
+
+	it('should return undefined if exchange rate is not available', () => {
+		const result = calculateTokenUsdAmount({
+			token: ICP_TOKEN,
+			amount: bn3,
+			$exchanges: {}
+		});
+		expect(result).toEqual(undefined);
+	});
+
+	it('should return 0 if amount is not available', () => {
+		const result = calculateTokenUsdAmount({
+			token: ICP_TOKEN,
+			amount: undefined,
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual(0);

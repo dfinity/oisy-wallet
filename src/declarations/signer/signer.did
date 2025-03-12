@@ -149,6 +149,21 @@ type Result_7 = variant {
   Ok : record { SignWithEcdsaResponse };
   Err : EthAddressError;
 };
+type Result_8 = variant {
+  Ok : record { EcdsaPublicKeyResponse };
+  Err : EthAddressError;
+};
+type Result_9 = variant {
+  Ok : record { SignWithEcdsaResponse };
+  Err : EthAddressError;
+};
+type SchnorrAlgorithm = variant { ed25519; bip340secp256k1 };
+type SchnorrKeyId = record { algorithm : SchnorrAlgorithm; name : text };
+type SchnorrPublicKeyArgument = record {
+  key_id : SchnorrKeyId;
+  canister_id : opt principal;
+  derivation_path : vec blob;
+};
 type SendBtcError = variant {
   BuildP2wpkhError : BuildP2wpkhTxError;
   InternalError : record { msg : text };
@@ -168,6 +183,11 @@ type SignWithEcdsaArgument = record {
   message_hash : blob;
 };
 type SignWithEcdsaResponse = record { signature : blob };
+type SignWithSchnorrArgument = record {
+  key_id : SchnorrKeyId;
+  derivation_path : vec blob;
+  message : blob;
+};
 type TransferFromError = variant {
   GenericError : record { message : text; error_code : nat };
   TemporarilyUnavailable;
@@ -218,4 +238,8 @@ service : (Arg) -> {
     );
   get_canister_status : () -> (CanisterStatusResultV2);
   http_request : (HttpRequest) -> (HttpResponse) query;
+  schnorr_public_key : (SchnorrPublicKeyArgument, opt PaymentType) -> (
+      Result_8,
+    );
+  schnorr_sign : (SignWithSchnorrArgument, opt PaymentType) -> (Result_9);
 }

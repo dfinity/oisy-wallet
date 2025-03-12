@@ -1,7 +1,7 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { testDerivedUpdates } from '$tests/utils/derived.utils';
+import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { BigNumber } from 'alchemy-sdk';
 
 describe('balancesStore', () => {

@@ -180,6 +180,18 @@ export type Result_4 = { Ok: EthPersonalSignResponse } | { Err: EthAddressError 
 export type Result_5 = { Ok: EthSignPrehashResponse } | { Err: EthAddressError };
 export type Result_6 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
 export type Result_7 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
+export type Result_8 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
+export type Result_9 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
+export type SchnorrAlgorithm = { ed25519: null } | { bip340secp256k1: null };
+export interface SchnorrKeyId {
+	algorithm: SchnorrAlgorithm;
+	name: string;
+}
+export interface SchnorrPublicKeyArgument {
+	key_id: SchnorrKeyId;
+	canister_id: [] | [Principal];
+	derivation_path: Array<Uint8Array | number[]>;
+}
 export type SendBtcError =
 	| { BuildP2wpkhError: BuildP2wpkhTxError }
 	| { InternalError: { msg: string } }
@@ -201,6 +213,11 @@ export interface SignWithEcdsaArgument {
 }
 export interface SignWithEcdsaResponse {
 	signature: Uint8Array | number[];
+}
+export interface SignWithSchnorrArgument {
+	key_id: SchnorrKeyId;
+	derivation_path: Array<Uint8Array | number[]>;
+	message: Uint8Array | number[];
 }
 export type TransferFromError =
 	| {
@@ -256,6 +273,8 @@ export interface _SERVICE {
 	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_7>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	schnorr_public_key: ActorMethod<[SchnorrPublicKeyArgument, [] | [PaymentType]], Result_8>;
+	schnorr_sign: ActorMethod<[SignWithSchnorrArgument, [] | [PaymentType]], Result_9>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

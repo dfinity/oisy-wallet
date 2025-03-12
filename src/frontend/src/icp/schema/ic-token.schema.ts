@@ -2,7 +2,7 @@ import { TokenSchema } from '$lib/schema/token.schema';
 import { CanisterIdTextSchema } from '$lib/types/canister';
 import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const IcFeeSchema = z.object({
 	fee: z.bigint()

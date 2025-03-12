@@ -9,7 +9,7 @@ import type { ModalData } from '$lib/stores/modal.store';
 import type { OptionToken } from '$lib/types/token';
 import type {
 	AnyTransactionUi,
-	Transaction,
+	AnyTransactionUiWithCmp,
 	TransactionStatus,
 	TransactionsUiDateGroup,
 	TransactionType
@@ -53,19 +53,19 @@ export const mapTransactionIcon = ({
  * @param transactions - List of transactions to group.
  * @returns Object where the keys are the date and the values are the transactions for that date.
  */
-export const groupTransactionsByDate = <T extends AnyTransactionUi>(
+export const groupTransactionsByDate = <T extends AnyTransactionUiWithCmp>(
 	transactions: T[]
 ): TransactionsUiDateGroup<T> => {
 	const currentDate = new Date();
 	const undefinedKey = get(i18n).transaction.label.no_date_available;
 
 	return transactions.reduce<TransactionsUiDateGroup<T>>((acc, transaction) => {
-		if (isNullish(transaction.timestamp)) {
+		if (isNullish(transaction.transaction.timestamp)) {
 			return { ...acc, [undefinedKey]: [...(acc['undefined'] ?? []), transaction] };
 		}
 
 		const date = formatSecondsToNormalizedDate({
-			seconds: normalizeTimestampToSeconds(transaction.timestamp),
+			seconds: normalizeTimestampToSeconds(transaction.transaction.timestamp),
 			currentDate
 		});
 
@@ -73,7 +73,7 @@ export const groupTransactionsByDate = <T extends AnyTransactionUi>(
 	}, {});
 };
 
-export const mapTransactionModalData = <T extends AnyTransactionUi | Transaction>({
+export const mapTransactionModalData = <T extends AnyTransactionUi>({
 	$modalOpen,
 	$modalStore
 }: {

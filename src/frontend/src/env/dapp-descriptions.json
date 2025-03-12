@@ -224,5 +224,51 @@
 		"description": "Sonic, a multichain decentralized exchange built on the Internet Computer Protocol (ICP), offers a wide range of DeFi services. Users can easily trade tokens and perpetuals, provide liquidity, and participate in the LBP token sale. Users can engage in DAO governance, stake for rewards, and vote on platform decisions.<br/><br/>Fully on-chain & open-source! Swap tokens like a pro, stack those fees as a liquidity provider, join the AMM vibe, and be an integral part of the Sonic DAO.",
 		"logo": "/images/dapps/sonic-logo.svg",
 		"screenshots": ["/images/dapps/sonic.webp"]
+	},
+	{
+		"id": "raydium",
+		"name": "Raydium",
+		"oneLiner": "DEX and automated market maker built on the Solana blockchain, offering a central limit order book that enables fast trades.",
+		"callToAction": "Power the evolution of DeFi",
+		"website": "https://raydium.io/",
+		"twitter": "https://twitter.com/RaydiumProtocol",
+		"github": "https://github.com/raydium-io",
+		"tags": ["DeFi", "WalletConnect"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Raydium is an automated market maker (AMM) built on the Solana blockchain, offering a unique blend of AMM technology and access to the Serum decentralized exchange’s liquidity. As an AMM, Raydium allows for trading digital assets in a permissionless way, using liquidity pools.",
+		"logo": "/images/dapps/raydium-logo.svg",
+		"screenshots": ["/images/dapps/raydium.webp"]
+	},
+	{
+		"id": "jupiter",
+		"name": "Jupiter",
+		"oneLiner": "Solana-based DEX aggregator that optimizes for the best available swaps between any supported token pair.",
+		"callToAction": "To infinity and beyond",
+		"website": "https://jup.ag/",
+		"twitter": "https://twitter.com/JupiterExchange",
+		"tags": ["DeFi", "WalletConnect"],
+		"stats": "",
+		"usesInternetIdentity": true,
+		"description": "Jupiter is a decentralized finance platform on the Solana blockchain, that functions as a liquidity aggregator, streamlining and optimizing trading activities within the DeFi space. Its protocol is designed to facilitate liquidity provision and token swapping and ensures efficient, low-latency, and cost-effective transactions. The platform allows users to swap tokens, provide liquidity, and participate in yield farming through an automated market maker (AMM) model.",
+		"logo": "/images/dapps/jupiter-logo.svg",
+		"screenshots": ["/images/dapps/jupiter.webp"]
+	},
+	{
+		"id": "waterneuron",
+		"name": "WaterNeuron",
+		"oneLiner": "ICP liquid staking - Maximize your capital efficiency by liquid staking your ICP.",
+		"website": "https://waterneuron.fi",
+		"twitter": "https://x.com/waterneuron",
+		"github": "https://github.com/WaterNeuron/",
+		"openChat": "https://oc.app/community/3fudd-diaaa-aaaar-bgmca-cai/channel/29339715467843792089109453577797225214",
+		"telegram": "https://t.me/waterneuron",
+		"tags": ["Staking"],
+		"description": "WaterNeuron offers a more capital-efficient method of staking by allowing you to maintain exposure to ICP staking rewards while keeping your tokens liquid. This approach simplifies the staking process, removing the need to select specific validators to maximize rewards.",
+		"usesInternetIdentity": true,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/waterneuron.webp",
+		"screenshots": ["/images/dapps/waterneuron-screenshot.webp"]
 	}
 ]

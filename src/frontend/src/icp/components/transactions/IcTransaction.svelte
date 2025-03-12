@@ -33,8 +33,8 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	let amount: bigint | undefined;
-	$: amount = !incoming && nonNullish(value) ? value * -1n : value;
+	let amount: BigNumber | undefined;
+	$: amount = nonNullish(value) ? BigNumber.from(incoming ? value : value * -1n) : value;
 
 	let timestamp: number | undefined;
 	$: timestamp = nonNullish(timestampNanoseconds)
@@ -45,7 +45,7 @@
 <Transaction
 	on:click={() => modalStore.openIcTransaction({ transaction, token })}
 	styleClass="block w-full border-0"
-	amount={BigNumber.from(amount)}
+	{amount}
 	{type}
 	{timestamp}
 	{status}
