@@ -216,6 +216,38 @@ const mapTokenParsedInstruction = async ({
 
 		return { value, from, to };
 	}
+
+	if (type === 'mintTo') {
+		// We need to cast the type since it is not implied
+		const {
+			account: to,
+			mint: tokenAddress,
+			amount: value
+		} = info as {
+			account: SolAddress;
+			mint: SplTokenAddress;
+			amount: string;
+		};
+
+		// For a mint transaction, we consider the token as the source of the transaction
+		return { value: BigInt(value), from: tokenAddress, to, tokenAddress };
+	}
+
+	if (type === 'burn') {
+		// We need to cast the type since it is not implied
+		const {
+			account: from,
+			mint: tokenAddress,
+			amount: value
+		} = info as {
+			account: SolAddress;
+			mint: SplTokenAddress;
+			amount: string;
+		};
+
+		// For a burn transaction, we consider the token as the destination of the transaction
+		return { value: BigInt(value), from, to: tokenAddress, tokenAddress };
+	}
 };
 
 const mapToken2022ParsedInstruction = async ({
