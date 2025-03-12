@@ -1,6 +1,6 @@
-import type { AirdropDescription } from '$env/types/env-airdrop';
+import type { RewardDescription } from '$env/types/env-reward';
 
-export const mockAirdropCampaigns: AirdropDescription[] = [
+export const mockRewardCampaigns: RewardDescription[] = [
 	{
 		id: 'OISY Airdrop #1',
 		title: 'OISY Airdrop',
@@ -12,7 +12,7 @@ export const mockAirdropCampaigns: AirdropDescription[] = [
 			'Complete 2 transactions in last 7 days',
 			'Hold $20 USD at the time of issuance'
 		],
-		logo: '/images/airdrops/oisy-airdrop-logo.svg',
+		logo: '/images/rewards/oisy-reward-logo.svg',
 		campaignHref:
 			'https://x.com/intent/post?text=Sprinkles%20from%20%40OISY%20Wallet%20just%20went%20live%0A%0A%24BTC%20drops%2C%20all%20day%2C%20every%20day%0A%0ATry%20OISY.com%20and%20get%20some%20free%20Bitcoin%21%20%F0%9F%9A%80',
 		jackpotHref:
@@ -34,7 +34,7 @@ export const mockAirdropCampaigns: AirdropDescription[] = [
 			'Complete 2 transactions in last 7 days',
 			'Hold $20 USD at the time of issuance'
 		],
-		logo: '/images/airdrops/oisy-airdrop-logo.svg',
+		logo: '/images/rewards/oisy-reward-logo.svg',
 		campaignHref:
 			'https://x.com/intent/post?text=%F0%9F%8E%81%20Airdrop%20season%201%20started%20on%20%40oisy!%0A%0ASign-up%20and%20participate%20in%3A%20https%3A%2F%2Foisy.com',
 		jackpotHref:

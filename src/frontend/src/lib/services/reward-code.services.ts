@@ -9,8 +9,8 @@ import {
 import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { AirdropInfo, AirdropsResponse } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
+import type { RewardResponseInfo, RewardsResponse } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
@@ -57,10 +57,10 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 	}
 };
 
-const queryAirdrops = async (params: {
+const queryRewards = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<AirdropsResponse> => {
+}): Promise<RewardsResponse> => {
 	const { usage_awards, last_snapshot_timestamp } = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
@@ -69,31 +69,31 @@ const queryAirdrops = async (params: {
 	const awards: RewardInfo[] | undefined = fromNullable(usage_awards);
 
 	return {
-		airdrops: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
+		rewards: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
 		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? 0n
 	};
 };
 
-const mapRewardsInfo = ({ name, ...rest }: RewardInfo): AirdropInfo => ({
+const mapRewardsInfo = ({ name, ...rest }: RewardInfo): RewardResponseInfo => ({
 	...rest,
 	name: fromNullable(name)
 });
 
 /**
- * Gets the airdrops the user received.
+ * Gets the rewards the user received.
  *
- * This function performs **always** a query (not certified) to get the airdrops of a user.
+ * This function performs **always** a query (not certified) to get the rewards of a user.
  *
  * @async
  * @param {Object} params - The parameters required to load the user data.
  * @param {Identity} params.identity - The user's identity for authentication.
- * @returns {Promise<AirdropsResponse>} - Resolves with the received airdrops and the last timestamp of the user.
+ * @returns {Promise<RewardsResponse>} - Resolves with the received rewards and the last timestamp of the user.
  *
- * @throws {Error} Displays an error toast and returns an empty list of airdrops if the query fails.
+ * @throws {Error} Displays an error toast and returns an empty list of rewards if the query fails.
  */
-export const getAirdrops = async (params: { identity: Identity }): Promise<AirdropsResponse> => {
+export const getRewards = async (params: { identity: Identity }): Promise<RewardsResponse> => {
 	try {
-		return await queryAirdrops({ ...params, certified: false });
+		return await queryRewards({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -102,7 +102,7 @@ export const getAirdrops = async (params: { identity: Identity }): Promise<Airdr
 		});
 	}
 
-	return { airdrops: [], lastTimestamp: 0n };
+	return { rewards: [], lastTimestamp: 0n };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {

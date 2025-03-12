@@ -137,17 +137,17 @@ export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'
 );
+export const modalVipRewardState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'vip-reward-state'
+);
+export const modalRewardDetails: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'reward-details'
+);
 export const modalRewardState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'reward-state'
-);
-export const modalAirdropDetails: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'airdrop-details'
-);
-export const modalAirdropState: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'airdrop-state'
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(

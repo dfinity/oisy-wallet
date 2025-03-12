@@ -7,7 +7,7 @@
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import type { IcToken } from '$icp/types/ic-token';
-	import AirdropEarningsCard from '$lib/components/airdrops/AirdropEarningsCard.svelte';
+	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -120,26 +120,26 @@
 			class:duration-500={loading}
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
-			>{replacePlaceholders($i18n.airdrops.text.sprinkles_earned, {
+			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
 				$amount: formatUSD({ value: totalRewardUsd })
 			})}
 		</div>
 
 		<div class="flex w-full gap-2">
-			<AirdropEarningsCard
+			<RewardEarningsCard
 				{loading}
 				token={ckBtcToken}
 				amount={ckBtcReward}
 				usdAmount={ckBtcRewardUsd}
 			/>
-			<AirdropEarningsCard
+			<RewardEarningsCard
 				{loading}
 				token={ckUsdcToken}
 				amount={ckUsdcReward}
 				usdAmount={ckUsdcRewardUsd}
 			/>
-			<AirdropEarningsCard {loading} token={icpToken} amount={icpReward} usdAmount={icpRewardUsd} />
+			<RewardEarningsCard {loading} token={icpToken} amount={icpReward} usdAmount={icpRewardUsd} />
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
@@ -149,8 +149,8 @@
 				styleClass="font-semibold bg-transparent text-brand-primary-alt"
 			>
 				{isMobile()
-					? $i18n.airdrops.text.activity_button_text_short
-					: $i18n.airdrops.text.activity_button_text}
+					? $i18n.rewards.text.activity_button_text_short
+					: $i18n.rewards.text.activity_button_text}
 			</Button>
 		</div>
 	</div>

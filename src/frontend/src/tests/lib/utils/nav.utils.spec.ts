@@ -11,8 +11,8 @@ import {
 	back,
 	gotoReplaceRoot,
 	isRouteActivity,
-	isRouteAirdrops,
 	isRouteDappExplorer,
+	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
 	isRouteTransactions,
@@ -343,20 +343,20 @@ describe('nav.utils', () => {
 
 		describe('isRouteAirdrops', () => {
 			it('should return true when route id matches Airdrops path', () => {
-				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Airdrops}`;
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 
-				expect(isRouteAirdrops(mockPage(mockPath))).toBe(true);
-				expect(isRouteAirdrops(mockPage(mockPath.slice(0, -1)))).toBe(true);
+				expect(isRouteRewards(mockPage(mockPath))).toBe(true);
+				expect(isRouteRewards(mockPage(mockPath.slice(0, -1)))).toBe(true);
 			});
 
 			it('should return false when route id does not match Airdrops path', () => {
-				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBe(false);
 
-				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBe(false);
 
-				expect(isRouteAirdrops(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
+				expect(isRouteRewards(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBe(false);
 
-				expect(isRouteAirdrops(mockPage(`/anotherGroup/${AppPath.Airdrops}`))).toBe(false);
+				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBe(false);
 			});
 		});
 	});

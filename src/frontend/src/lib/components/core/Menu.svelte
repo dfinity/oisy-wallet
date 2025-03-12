@@ -29,7 +29,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		isRouteActivity,
-		isRouteAirdrops,
+		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings
 	} from '$lib/utils/nav.utils';
@@ -59,11 +59,11 @@
 	let activityRoute = false;
 	$: activityRoute = isRouteActivity($page);
 
-	let airdropsRoute = false;
-	$: airdropsRoute = isRouteAirdrops($page);
+	let rewardsRoute = false;
+	$: rewardsRoute = isRouteRewards($page);
 
 	let addressesOption = true;
-	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !airdropsRoute;
+	$: addressesOption = !settingsRoute && !dAppExplorerRoute && !activityRoute && !rewardsRoute;
 </script>
 
 <ButtonIcon
