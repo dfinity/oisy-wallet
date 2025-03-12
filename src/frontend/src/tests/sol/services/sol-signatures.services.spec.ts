@@ -52,7 +52,7 @@ describe('sol-transactions.services', () => {
 					address,
 					network: SolanaNetworks.mainnet,
 					before: lastSignature,
-					limit: 100
+					limit: 10
 				});
 
 				if (transactions.length === 0) {
