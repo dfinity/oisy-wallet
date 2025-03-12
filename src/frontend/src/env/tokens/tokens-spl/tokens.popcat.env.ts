@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import popcat from '$sol/assets/popcat.svg';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,6 +21,6 @@ export const POPCAT_TOKEN: RequiredSplToken = {
 	symbol: POPCAT_SYMBOL,
 	decimals: POPCAT_DECIMALS,
 	icon: popcat,
-	address: '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr',
+	address: parseSolAddress('7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr'),
 	owner: TOKEN_PROGRAM_ADDRESS
 };
