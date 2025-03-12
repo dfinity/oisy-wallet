@@ -69,7 +69,7 @@ export const SUPPORTED_ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork
 	SEPOLIA_NETWORK
 ];
 
-export const SUPPORTED_ETHEREUM_NETWORKS_IDS: symbol[] = SUPPORTED_ETHEREUM_NETWORKS.map(
+export const SUPPORTED_ETHEREUM_NETWORKS_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
 	({ id }) => id
 );
 
@@ -139,6 +139,6 @@ const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
 	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])
 ];
 
-export const SUPPORTED_BITCOIN_NETWORKS_IDS: symbol[] = SUPPORTED_BITCOIN_NETWORKS.map(
+export const SUPPORTED_BITCOIN_NETWORKS_IDS: NetworkId[] = SUPPORTED_BITCOIN_NETWORKS.map(
 	({ id }) => id
 );
