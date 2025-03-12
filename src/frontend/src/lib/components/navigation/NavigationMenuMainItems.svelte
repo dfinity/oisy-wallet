@@ -3,7 +3,7 @@
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { AIRDROPS_ENABLED } from '$env/airdrops.env.js';
+	import { REWARDS_ENABLED } from '$env/rewards.env.js';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -81,7 +81,7 @@
 	{$i18n.navigation.text.activity}
 </NavigationItem>
 
-{#if AIRDROPS_ENABLED}
+{#if REWARDS_ENABLED}
 	<NavigationItem
 		href={networkUrl({
 			path: AppPath.Rewards,
