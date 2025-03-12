@@ -19,6 +19,7 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 
 	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
@@ -40,6 +41,10 @@
 
 	let toExplorerUrl: string | undefined;
 	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
+
+	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
+	let toDisplay: string | undefined;
+	$: toDisplay = $erc20Tokens.find(({ address }) => address === to)?.name ?? to;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -49,19 +54,23 @@
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis({ text: hash })}</output><Copy
+				<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
+				<Copy
 					value={hash}
 					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
 						$hash: hash
 					})}
 					inline
-				/>{#if nonNullish(explorerUrl)}<ExternalLink
+				/>
+				{#if nonNullish(explorerUrl)}
+					<ExternalLink
 						iconSize="18"
 						href={explorerUrl}
 						ariaLabel={$i18n.transaction.alt.open_block_explorer}
 						inline
 						color="blue"
-					/>{/if}
+					/>
+				{/if}
 			</Value>
 		{/if}
 
@@ -88,33 +97,41 @@
 
 		<Value ref="from">
 			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
-			<output>{from}</output><Copy
+			<output>{from}</output>
+			<Copy
 				value={from}
 				text={$i18n.transaction.text.from_copied}
 				inline
-			/>{#if nonNullish(fromExplorerUrl)}<ExternalLink
+			/>
+			{#if nonNullish(fromExplorerUrl)}
+				<ExternalLink
 					iconSize="18"
 					href={fromExplorerUrl}
 					ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
 					inline
 					color="blue"
-				/>{/if}
+				/>
+			{/if}
 		</Value>
 
-		{#if nonNullish(to)}
+		{#if nonNullish(to) && nonNullish(toDisplay)}
 			<Value ref="to">
 				<svelte:fragment slot="label">{$i18n.transaction.text.interacted_with}</svelte:fragment>
-				<output>{to}</output><Copy
+				<output>{toDisplay}</output>
+				<Copy
 					value={to}
 					text={$i18n.transaction.text.to_copied}
 					inline
-				/>{#if nonNullish(toExplorerUrl)}<ExternalLink
+				/>
+				{#if nonNullish(toExplorerUrl)}
+					<ExternalLink
 						iconSize="18"
 						href={toExplorerUrl}
 						ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						inline
 						color="blue"
-					/>{/if}
+					/>
+				{/if}
 			</Value>
 		{/if}
 
