@@ -20,7 +20,9 @@ KONG_BUILDENV="$DFX_NETWORK"
 export KONG_BUILDENV
 
 KONG_REPO_URL="https://raw.githubusercontent.com/KongSwap/kong/refs/heads/main/canisters"
+# shellcheck disable=SC2034
 CANDID_URL="${KONG_REPO_URL}/kong_backend.did"
+# shellcheck disable=SC2034
 WASM_URL="${KONG_REPO_URL}/kong_backend.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.kong_backend.candid dfx.json)"
@@ -38,7 +40,7 @@ download() {
   if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
     echo "Using existing kong $asset file."
   else
-    echo Downloading ${!asset_url} "-->" ${!asset_file}
+    echo "Downloading ${!asset_url} --> ${!asset_file}"
     mkdir -p "$(dirname "${!asset_file}")"
     curl -sSL "${!asset_url}" >"${!asset_file}"
   fi

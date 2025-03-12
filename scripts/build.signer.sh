@@ -31,6 +31,7 @@ ARG_FILE="$(jq -r .canisters.signer.init_arg_file dfx.json)"
 
 download() {
   : 'Downloads a URL to a given file.'
+  # shellcheck disable=SC2016
   : '* With argument x, the filename is $X_FILE and the URL is $X_URL'
   : '* If the file already exists, the user is prompted whether to overwrite, keeping the existing file by default.'
   local asset asset_url asset_file response
@@ -41,7 +42,7 @@ download() {
   if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
     echo "Using existing signer $asset file."
   else
-    echo Downloading ${!asset_url} "-->" ${!asset_file}
+    echo "Downloading ${!asset_url} --> ${!asset_file}"
     mkdir -p "$(dirname "${!asset_file}")"
     curl -sSL "${!asset_url}" >"${!asset_file}"
   fi

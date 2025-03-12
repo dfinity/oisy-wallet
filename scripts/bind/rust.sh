@@ -9,7 +9,7 @@ set -euo pipefail
 	- Rust crates at src/\$canister/{types,client,pic}/
 
 	Usage:
-	  $(basename $0) [canister_name..]
+	  $(basename "$0") [canister_name..]
 
 	Properties:
 	- Creates Rust bindings files at src/\$canister/{types,client,pic}/src/lib.rs
