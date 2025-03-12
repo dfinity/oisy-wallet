@@ -44,7 +44,9 @@ export const processErc20Transaction = async ({
 	type: 'pending' | 'mined';
 }) => {
 	if (type === 'mined') {
-		await processMinedTransaction({ ...rest });
+		// await processMinedTransaction({ ...rest });
+		// Reload transactions as a transaction has been mined
+		await loadEthereumTransactions({ tokenId: rest.token.id, networkId: rest.token.network.id });
 		return;
 	}
 
@@ -95,7 +97,10 @@ const processPendingTransaction = async ({
 
 	await wait();
 
-	await processMinedTransaction({ hash: transactionHash, token, value });
+	// Reload transactions as a transaction has been mined
+	await loadEthereumTransactions({ tokenId: token.id, networkId: token.network.id });
+
+	// await processMinedTransaction({ hash: transactionHash, token, value });
 };
 
 const processMinedTransaction = async ({
