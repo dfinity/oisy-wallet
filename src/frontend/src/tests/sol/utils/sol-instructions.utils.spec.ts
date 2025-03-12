@@ -390,6 +390,58 @@ describe('sol-instructions.utils', () => {
 				});
 			});
 
+			it('should map a valid `mintToChecked` instruction', async () => {
+				const mockMintToCheckedInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'mintToChecked',
+						info: {
+							account: mockSolAddress,
+							mint: mockTokenAddress,
+							tokenAmount: { amount: '12345' }
+						}
+					}
+				};
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockMintToCheckedInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 12345n,
+					from: mockTokenAddress,
+					to: mockSolAddress,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
+			it('should map a valid `burnChecked` instruction', async () => {
+				const mockBurnCheckedInstruction: SolRpcInstruction = {
+					...mockTokenInstruction,
+					parsed: {
+						type: 'burnChecked',
+						info: {
+							account: mockSolAddress,
+							mint: mockTokenAddress,
+							tokenAmount: { amount: '12345' }
+						}
+					}
+				};
+
+				await expect(
+					mapSolParsedInstruction({
+						instruction: mockBurnCheckedInstruction,
+						network
+					})
+				).resolves.toEqual({
+					value: 12345n,
+					from: mockSolAddress,
+					to: mockTokenAddress,
+					tokenAddress: mockTokenAddress
+				});
+			});
+
 			it('should return undefined for non-mapped instruction', async () => {
 				const result = await mapSolParsedInstruction({
 					instruction: { ...mockTokenInstruction, parsed: { type: 'other-type', info: {} } },
