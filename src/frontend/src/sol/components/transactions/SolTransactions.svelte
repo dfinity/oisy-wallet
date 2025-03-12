@@ -18,6 +18,7 @@
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 
 	let selectedTransaction: SolTransactionUi | undefined;
 	let selectedToken: OptionToken;
@@ -34,10 +35,10 @@
 
 <SolTransactionsSkeletons>
 	{#if $solTransactions.length > 0}
-		<SolTransactionsScroll token={$token ?? SOLANA_TOKEN}>
+		<SolTransactionsScroll token={$token ?? DEFAULT_SOLANA_TOKEN}>
 			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
 				<li in:slide={SLIDE_DURATION}>
-					<SolTransaction {transaction} token={$token ?? SOLANA_TOKEN} />
+					<SolTransaction {transaction} token={$token ?? DEFAULT_SOLANA_TOKEN} />
 				</li>
 			{/each}
 		</SolTransactionsScroll>
