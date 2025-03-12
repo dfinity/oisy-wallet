@@ -1,4 +1,4 @@
-name: Formatting Backend and Scripts
+name: Check devops code
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install shellcheck
-        uses: ./scripts/setup shellcheck
+        run: ./scripts/setup shellcheck
 
       - name: Lint shell scripts
         run: scripts/lint.sh.sh
