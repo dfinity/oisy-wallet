@@ -22,7 +22,7 @@
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import {
 		isRouteActivity,
-		isRouteAirdrops,
+		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
@@ -84,13 +84,13 @@
 {#if AIRDROPS_ENABLED}
 	<NavigationItem
 		href={networkUrl({
-			path: AppPath.Airdrops,
+			path: AppPath.Rewards,
 			networkId: $networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
 		ariaLabel={$i18n.navigation.alt.airdrops}
-		selected={isRouteAirdrops(pageData)}
+		selected={isRouteRewards(pageData)}
 		testId={addTestIdPrefix(NAVIGATION_ITEM_AIRDROPS)}
 	>
 		<IconGift />
