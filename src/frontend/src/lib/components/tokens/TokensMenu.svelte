@@ -13,11 +13,11 @@
 	let button: HTMLButtonElement | undefined;
 </script>
 
-<div class="sm:block hidden">
+<div class="hidden sm:block">
 	<TokensZeroBalanceCheckbox />
 </div>
 
-<div class="sm:hidden block">
+<div class="block sm:hidden">
 	<ButtonIcon
 		bind:button
 		on:click={() => (visible = true)}
@@ -29,7 +29,7 @@
 	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
-		<div class="gap-3 flex flex-col">
+		<div class="flex flex-col gap-3">
 			<TokensZeroBalance />
 
 			<Hr />

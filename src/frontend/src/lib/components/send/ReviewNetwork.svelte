@@ -39,7 +39,7 @@
 	<Value ref="destination-network" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
 		{#if isNetworkBitcoin}
-			<span class="gap-1 flex">
+			<span class="flex gap-1">
 				<SendBtcNetwork networkId={destinationNetworkId} />
 				<Logo
 					src={bitcoin}

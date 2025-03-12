@@ -46,8 +46,8 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="mt-2 mb-4 rounded-lg p-4 bg-brand-subtle">
-			<p class="font-bold break-normal">
+		<div class="mb-4 mt-2 rounded-lg bg-brand-subtle-20 p-4">
+			<p class="break-normal font-bold">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
 				})}
@@ -59,7 +59,7 @@
 				})}
 			</p>
 
-			<p class="pt-4 break-normal">
+			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
 						value: $ckEthereumNativeTokenBalance ?? ZERO,
@@ -71,14 +71,14 @@
 		</div>
 	{/if}
 
-	<div class="mt-4 gap-x-4 grid grid-cols-[1fr_auto]">
-		<div class="mb-2 gap-2 flex flex-col items-center overflow-hidden">
+	<div class="mt-4 grid grid-cols-[1fr_auto] gap-x-4">
+		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-misty-rose"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
 				>1</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<ReceiveAddress
@@ -99,13 +99,13 @@
 			>
 		</ReceiveAddress>
 
-		<div class="mb-2 gap-2 flex flex-col items-center overflow-hidden">
+		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-misty-rose"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
 				>2</span
 			>
 
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+			<div class="h-full w-[1.5px] bg-tertiary"></div>
 		</div>
 
 		<div>
@@ -129,7 +129,7 @@
 
 		<div class="flex justify-center">
 			<span
-				class="h-4 w-4 p-2.5 text-xs font-bold inline-flex items-center justify-center rounded-full border-[1.5px] text-misty-rose"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
 				>3</span
 			>
 		</div>

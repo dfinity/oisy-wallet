@@ -1,16 +1,16 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
-import type { TransactionType, TransactionUiCommon } from '$lib/types/transaction';
+import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import type { SplTokenAddress } from '$sol/types/spl';
-import type { Address } from '@solana/addresses';
-import type { Signature } from '@solana/keys';
-import type { GetSignaturesForAddressApi } from '@solana/rpc';
-import type { Commitment } from '@solana/rpc-types';
 import type {
+	Address,
+	Commitment,
 	FullySignedTransaction,
+	GetSignaturesForAddressApi,
+	Signature,
 	TransactionWithBlockhashLifetime
-} from '@solana/transactions';
+} from '@solana/web3.js';
 
 export type SolTransactionType = Extract<
 	TransactionType,
@@ -18,7 +18,7 @@ export type SolTransactionType = Extract<
 >;
 
 export interface SolTransactionUi extends TransactionUiCommon {
-	id: string;
+	id: TransactionId;
 	signature: Signature;
 	type: SolTransactionType;
 	status: Commitment | null;
@@ -67,7 +67,7 @@ export interface MappedSolTransaction {
 }
 
 export interface SolMappedTransaction {
-	value: bigint | undefined;
+	value: bigint;
 	from: SolAddress;
 	to: SolAddress;
 	tokenAddress?: SplTokenAddress;

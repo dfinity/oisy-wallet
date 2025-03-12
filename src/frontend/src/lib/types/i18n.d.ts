@@ -21,6 +21,8 @@ interface I18nCore {
 		view: string;
 		copy: string;
 		clear_filter: string;
+		not_available: string;
+		new: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -38,7 +40,8 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		confirm_navigate: string;
 		vip_qr_code: string;
 	};
@@ -51,10 +54,12 @@ interface I18nNavigation {
 		more_settings: string;
 		menu: string;
 		changelog: string;
-		support_email: string;
+		documentation: string;
+		support: string;
 		open_twitter: string;
 		vip_qr_code: string;
 	};
+	short: { documentation: string };
 }
 
 interface I18nAuth {
@@ -107,13 +112,37 @@ interface I18nDapps {
 	};
 }
 
-interface I18nAirdrops {
-	text: { title: string };
+interface I18nRewards {
+	text: {
+		title: string;
+		active_campaigns: string;
+		upcoming_campaigns: string;
+		active_date: string;
+		participate_title: string;
+		share: string;
+		learn_more: string;
+		check_status: string;
+		requirements_title: string;
+		modal_button_text: string;
+		activity_button_text: string;
+		activity_button_text_short: string;
+		no_balance_title: string;
+		no_balance_description: string;
+		open_wallet: string;
+		state_modal_title: string;
+		state_modal_title_jackpot: string;
+		state_modal_content_text: string;
+		carousel_slide_title: string;
+		carousel_slide_cta: string;
+		sprinkles_earned: string;
+		youre_eligible: string;
+	};
+	alt: { upcoming_campaigns: string };
 }
 
 interface I18nFooter {
 	text: { incubated_with: string; by: string; dfinity_foundation: string; copyright: string };
-	alt: { dfinity: string; status: string };
+	alt: { dfinity: string };
 }
 
 interface I18nWallet {
@@ -131,7 +160,12 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: { initializing_wallet: string; securing_session: string; retrieving_public_keys: string };
+	text: {
+		initializing_wallet: string;
+		securing_session: string;
+		retrieving_public_keys: string;
+		done: string;
+	};
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -220,6 +254,7 @@ interface I18nNetworks {
 	test_networks: string;
 	more: string;
 	chain_fusion: string;
+	network: string;
 }
 
 interface I18nReceive {
@@ -329,8 +364,10 @@ interface I18nSend {
 		insufficient_funds: string;
 		unknown_minimum_ckbtc_amount: string;
 		unknown_minimum_cketh_amount: string;
+		unknown_minimum_amount: string;
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
+		minimum_amount: string;
 		minimum_ledger_fees: string;
 		minimum_cketh_balance: string;
 		unknown_cketh: string;
@@ -419,7 +456,8 @@ interface I18nSwap {
 		not_available: string;
 		value_difference: string;
 		total_fee: string;
-		token_fee: string;
+		network_fee: string;
+		approval_fee: string;
 		gas_fee: string;
 		lp_fee: string;
 		max_slippage_info: string;
@@ -433,7 +471,12 @@ interface I18nSwap {
 		refreshing_ui: string;
 		swap_provider: string;
 	};
-	error: { unexpected: string; unexpected_missing_data: string };
+	error: {
+		kong_not_available: string;
+		unexpected: string;
+		unexpected_missing_data: string;
+		slippage_exceeded: string;
+	};
 }
 
 interface I18nBuy {
@@ -825,7 +868,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
-	airdrops: I18nAirdrops;
+	rewards: I18nRewards;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;

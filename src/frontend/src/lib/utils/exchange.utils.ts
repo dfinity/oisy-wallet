@@ -1,15 +1,14 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
-import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
 
 export const usdValue = ({
-	token: { decimals },
+	decimals,
 	balance,
 	exchangeRate
 }: {
-	token: Token;
+	decimals: number;
 	balance: Exclude<OptionBalance, null>;
 	exchangeRate: number;
 }): number =>
