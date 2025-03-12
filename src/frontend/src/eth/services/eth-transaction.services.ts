@@ -103,6 +103,10 @@ const processPendingTransaction = async ({
 	await processMinedTransaction({ token });
 };
 
+// At some point in the past, we were fetching the transactions from the provider. But, with ERC20 transactions,
+// we noticed that, even if the transaction is mined, the source or the destination address is not
+// the real address, but the token address. That gave wrong data in the UI.
+// So, we decided to call the service that reloads all transactions.
 const processMinedTransaction = async ({ token }: { token: Token }) => {
 	const {
 		id: tokenId,
