@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import {
 		BTC_MAINNET_NETWORK_ID,
@@ -66,14 +67,58 @@
 			wallets: [],
 			networkWallets,
 			supportRecurringPayments: true,
-			enableCountrySelector: true
+			enableCountrySelector: true,
+
+			themeName: 'dark' // we always pass dark, as some card elements arent styled correctly (white text on white background) in light theme / onramper bug?
 		}));
+
+	let themeLoaded: boolean;
+	$: themeLoaded = false;
+	const changeThemeOnIframeLoad = (e: Event) => {
+		try {
+			const styles = window.getComputedStyle(document.body);
+			const iframeElement = e.currentTarget as HTMLIFrameElement;
+			iframeElement?.contentWindow?.postMessage(
+				{
+					type: 'change-theme',
+					id: 'change-theme',
+					theme: {
+						primaryColor: styles.getPropertyValue('--color-background-brand-primary'),
+						secondaryColor: styles.getPropertyValue('--color-background-brand-subtle-20'),
+						primaryTextColor: styles.getPropertyValue('--color-foreground-primary'),
+						secondaryTextColor: styles.getPropertyValue('--color-foreground-secondary'),
+						containerColor: styles.getPropertyValue('--color-background-surface'),
+						cardColor: styles.getPropertyValue('--color-background-brand-subtle-10'),
+						primaryBtnTextColor: styles.getPropertyValue('--color-foreground-primary-inverted'),
+						borderRadius: '0.5rem',
+						widgetBorderRadius: '0rem'
+					}
+				},
+				'*'
+			);
+		} catch (error) {
+			console.error('Could not apply onramper widget theme', error);
+		} finally {
+			themeLoaded = true;
+		}
+	};
 </script>
 
 <!-- The `allow` prop is set as suggested in the Onramper documentation that can be found at https://docs.onramper.com/docs/customise-the-ux -->
 <!-- When Onramper engineers were inquired about the reason, they answered: -->
 <!-- "In order to do customer verification before purchase, we require the following permissions to be given to the app. So this is definitely merely for the KYC  and also for fraud detection algorithms i suppose" -->
+
+<div
+	class="absolute bottom-0 left-0 right-0 top-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
+	class:opacity-100={!themeLoaded}
+	class:opacity-0={themeLoaded}
+	class:invisible={themeLoaded}
+>
+	<Spinner inline />
+</div>
+
 <iframe
+	on:load={changeThemeOnIframeLoad}
 	{src}
 	title={$i18n.buy.onramper.title}
 	height="680px"

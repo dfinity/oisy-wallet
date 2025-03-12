@@ -1,3 +1,4 @@
+@use '../mixins/media';
 @use '../theme/base-colors.scss';
 
 a.no-underline {
@@ -8,5 +9,98 @@ a.no-underline {
 }
 
 a.blue-link {
-	color: #{base-colors.$brandeis-blue};
+	color: var(--color-foreground-brand-primary-alt);
+}
+
+// NAV ITEMS
+a.nav-item:not([disabled]):not(.disabled):not(.loading),
+button.nav-item:not([disabled]):not(.disabled):not(.loading) {
+	@apply text-primary;
+	@apply flex;
+	@apply w-full;
+	@apply flex-row;
+	@apply gap-3;
+	@apply rounded-xl;
+	@apply px-3;
+	@apply text-left;
+	@apply no-underline;
+	@apply transition-colors;
+	@apply duration-700;
+
+	&:hover,
+	&.selected {
+		@apply text-brand-primary-alt;
+		@apply bg-brand-subtle-10;
+	}
+
+	&:active {
+		@apply text-brand-primary-alt;
+		@apply bg-brand-subtle-10;
+	}
+
+	&[focus],
+	&:focus {
+		outline-offset: 2px;
+		outline: var(--color-background-brand-primary) solid 2px;
+	}
+
+	&:focus:not(:focus-visible) {
+		outline: none;
+		box-shadow: none;
+	}
+
+	&[active],
+	&:active {
+		&[focus],
+		&:focus {
+			outline: none;
+			box-shadow: none;
+		}
+	}
+}
+
+a.nav-item.disabled:not(.loading),
+a.nav-item[disabled]:not(.loading),
+button.nav-item.disabled:not(.loading),
+button.nav-item[disabled]:not(.loading) {
+	@apply text-disabled;
+	@apply bg-disabled;
+}
+
+.nav-item {
+	@apply py-3;
+}
+
+.nav-item-condensed {
+	@apply py-1.5;
+}
+
+div.mobile-nav {
+	// iOS bottom bar offset so the nav doesnt get overrun by OS bottom bar
+	padding-bottom: calc(0.1rem + env(safe-area-inset-bottom));
+
+	a.nav-item:not([disabled]):not(.disabled):not(.loading),
+	button.nav-item:not([disabled]):not(.disabled):not(.loading),
+	a.nav-item:hover:not([disabled]):not(.disabled):not(.loading),
+	button.nav-item:hover:not([disabled]):not(.disabled):not(.loading) {
+		@apply flex;
+		@apply flex-col;
+		@apply text-center;
+		@apply text-primary;
+		@apply bg-transparent;
+		@apply items-center;
+		@apply gap-0;
+		@apply p-1.5;
+		@apply pt-2.25;
+		@apply text-sm;
+
+		svg {
+			width: 24px;
+			height: 24px;
+		}
+
+		&.selected {
+			@apply text-brand-primary-alt;
+		}
+	}
 }

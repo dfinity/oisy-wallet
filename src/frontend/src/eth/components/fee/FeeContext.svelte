@@ -52,9 +52,8 @@
 	const updateFeeData = async () => {
 		try {
 			const params: GetFeeData = {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress!),
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 				from: mapAddressStartsWith0x($ethAddress!)
 			};
 
@@ -65,10 +64,9 @@
 					...(await getFeeData()),
 					gas: getEthFeeData({
 						...params,
-						helperContractAddress: toCkEthHelperContractAddress({
-							minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
-							networkId: sourceNetwork.id
-						})
+						helperContractAddress: toCkEthHelperContractAddress(
+							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+						)
 					})
 				});
 				return;

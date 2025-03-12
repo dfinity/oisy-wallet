@@ -36,7 +36,7 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 		sourceAmount
 	}: KongSwapAmountsParams): Promise<SwapAmountsReply> => {
 		const { swap_amounts } = this.caller({
-			certified: true
+			certified: false
 		});
 
 		const response = await swap_amounts(sourceToken.symbol, sourceAmount, destinationToken.symbol);
@@ -82,7 +82,7 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 
 	tokens = async (): Promise<TokenReply[]> => {
 		const { tokens } = this.caller({
-			certified: true
+			certified: false
 		});
 
 		const response = await tokens(toNullable());

@@ -1,5 +1,6 @@
-use super::btc_user_pending_tx_state::BtcUserPendingTransactions;
 use std::cell::RefCell;
+
+use super::btc_user_pending_tx_state::BtcUserPendingTransactions;
 
 thread_local! {
   static HEAP_STATE: HeapState = HeapState::default();

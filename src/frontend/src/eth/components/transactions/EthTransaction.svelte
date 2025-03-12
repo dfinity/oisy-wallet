@@ -26,7 +26,7 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	$: ({ value, timestamp, displayTimestamp, uiType: type } = transaction);
+	$: ({ value, timestamp, displayTimestamp, type } = transaction);
 
 	let ckTokenSymbol: string;
 	$: ckTokenSymbol = isSupportedEthToken(token)

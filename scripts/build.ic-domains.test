@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+# Prints all known dfx networks:
+# - Built-in networks (local & ic)
+# - Networks listed in dfx.json
+dfx_networks() {
+  echo ic
+  echo local
+  jq -r '.networks|keys[]' dfx.json
+}
+
+# Prints the Oisy domain name for every network.
+# - The URL is the one in .well-known/ic-domains, used by the Internet Computer.
+dfx_network_domains() {
+  dfx_networks | while read i; do dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"; done
+}
+
+(
+  echo Checking domains for all known networks...
+  actual="$(dfx_networks)"
+  EXPECTED_DOMAINS="$0.expected"
+  ACTUAL_DOMAINS="$(mktemp $0.actual.XXXXXXXXXX)"
+  dfx_network_domains >"$ACTUAL_DOMAINS"
+  if diff --ignore-all-space --ignore-blank-lines <(sort <"$EXPECTED_DOMAINS") <(sort <"$ACTUAL_DOMAINS"); then
+    echo OK: ic-domains
+    rm "$ACTUAL_DOMAINS"
+  else
+    echo "ERROR: Incorrect .well-known/ic-domains"
+    echo "Expected: $EXPECTED_DOMAINS"
+    echo "Found:    $ACTUAL_DOMAINS"
+    echo "==== START DIFF"
+    diff "$EXPECTED_DOMAINS" "$ACTUAL_DOMAINS" || true
+    echo "==== END DIFF"
+    exit 1
+  fi
+)

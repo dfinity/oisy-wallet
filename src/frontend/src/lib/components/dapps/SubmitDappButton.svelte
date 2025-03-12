@@ -4,7 +4,7 @@
 </script>
 
 <a
-	class="as-button tertiary padding-sm my-10 text-sm mx-auto w-fit no-underline"
+	class="as-button tertiary padding-sm mx-auto my-10 w-fit text-sm no-underline"
 	href="https://github.com/dfinity/oisy-wallet#submit-your-dapp"
 	rel="external noopener noreferrer"
 	target="_blank"

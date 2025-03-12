@@ -7,7 +7,8 @@
 		"beta": "yrinv-sqaaa-aaaan-qzmxq-cai",
 		"ic": "doked-biaaa-aaaar-qag2a-cai",
 		"staging": "d3nvo-aaaaa-aaaar-qagzq-cai",
-		"test_be_1": "jloto-byaaa-aaaap-anryq-cai"
+		"test_be_1": "jloto-byaaa-aaaap-anryq-cai",
+		"audit": "vhcnk-oqaaa-aaaah-araya-cai"
 	},
 	"frontend": {
 		"beta": "v7iq7-yiaaa-aaaan-qmrtq-cai",
@@ -16,6 +17,7 @@
 		"test_fe_1": "6qzfn-gyaaa-aaaar-qaisa-cai",
 		"test_fe_2": "6xydz-laaaa-aaaar-qaisq-cai",
 		"test_fe_3": "dxvmu-wiaaa-aaaah-aqzaa-cai",
-		"test_fe_4": "gwqec-uqaaa-aaaak-qlnza-cai"
+		"test_fe_4": "gwqec-uqaaa-aaaak-qlnza-cai",
+		"audit": "vadl6-diaaa-aaaah-arayq-cai"
 	}
 }

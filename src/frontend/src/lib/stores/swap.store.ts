@@ -4,7 +4,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapData {
 	sourceToken?: IcTokenToggleable;
@@ -55,6 +55,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
+		failedSwapError: writable<string | undefined>(undefined),
 		setSourceToken: (token: IcTokenToggleable) =>
 			update((state) => ({
 				...state,
@@ -81,6 +82,7 @@ export interface SwapContext {
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean>;
+	failedSwapError: Writable<string | undefined>;
 	setSourceToken: (token: IcTokenToggleable) => void;
 	setDestinationToken: (token: IcTokenToggleable) => void;
 	switchTokens: () => void;

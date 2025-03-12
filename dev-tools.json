@@ -1,7 +1,7 @@
 {
 	"rustup": {
 		"method": "curl",
-		"version": "1.25.2",
+		"version": "1.28.1",
 		"url": "https://raw.githubusercontent.com/rust-lang/rustup/${VERSION}/rustup-init.sh",
 		"pipe": [["sh"]]
 	},
@@ -34,7 +34,7 @@
 	},
 	"ic-wasm": {
 		"method": "cargo-binstall",
-		"version": "0.3.6"
+		"version": "0.8.5"
 	},
 	"cargo-audit": {
 		"method": "cargo-binstall",
