@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
 	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
-	import UserSnapshotWorker from '$lib/components/airdrops/UserSnapshotWorker.svelte';
+	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import AirdropGuard from '$lib/components/guard/AirdropGuard.svelte';

@@ -1,6 +1,6 @@
 import type { Settings, UserProfile } from '$declarations/backend/backend.did';
-import * as airdrops from '$env/airdrop-campaigns.env';
-import { FEATURED_AIRDROP_CAROUSEL_SLIDE_ID } from '$env/airdrop-campaigns.env';
+import * as airdrops from '$env/reward-campaigns.env';
+import { FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 import * as dapps from '$env/dapp-descriptions.env';
 import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
@@ -18,7 +18,7 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: mockUserProfile, certified: false });
 	});
 
-	it('should render nothing if there is no dApps and airdrops', () => {
+	it('should render nothing if there is no dApps and rewards', () => {
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 		vi.spyOn(airdrops, 'airdropCampaigns', 'get').mockReturnValue([]);
 
@@ -26,7 +26,7 @@ describe('DappsCarousel', () => {
 		expect(container.textContent).toBe('');
 	});
 
-	it('should render nothing if no dApps has the carousel prop and no airdrops', () => {
+	it('should render nothing if no dApps has the carousel prop and no rewards', () => {
 		vi.spyOn(airdrops, 'airdropCampaigns', 'get').mockReturnValue([]);
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue(
 			mockDappsDescriptions.map((dapp) => ({ ...dapp, carousel: undefined }))
@@ -38,7 +38,7 @@ describe('DappsCarousel', () => {
 
 	it('should render nothing if no dApps and featured airdrop is unknown', () => {
 		vi.spyOn(airdrops, 'FEATURED_AIRDROP_CAROUSEL_SLIDE_ID', 'get').mockReturnValue(
-			'test' as typeof FEATURED_AIRDROP_CAROUSEL_SLIDE_ID
+			'test' as typeof FEATURED_REWARD_CAROUSEL_SLIDE_ID
 		);
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 
@@ -54,7 +54,7 @@ describe('DappsCarousel', () => {
 				dapp_carousel: {
 					...mockUserSettings.dapp.dapp_carousel,
 					hidden_dapp_ids: [
-						FEATURED_AIRDROP_CAROUSEL_SLIDE_ID,
+						FEATURED_REWARD_CAROUSEL_SLIDE_ID,
 						...mockDappsDescriptions.map(({ id }) => id)
 					]
 				}

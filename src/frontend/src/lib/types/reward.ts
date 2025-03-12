@@ -1,18 +1,18 @@
 import type { Principal } from '@dfinity/principal';
 
-export interface AirdropsResponse {
-	airdrops: AirdropInfo[];
+export interface RewardsResponse {
+	rewards: RewardInfo[];
 	lastTimestamp: bigint;
 }
 
-export interface AirdropInfo {
+export interface RewardInfo {
 	name: string | undefined;
 	ledger: Principal;
 	timestamp: bigint;
 	amount: bigint;
 }
 
-export interface AirdropResult {
-	receivedAirdrop: boolean;
+export interface RewardResult {
+	receivedReward: boolean;
 	receivedJackpot: boolean;
 }

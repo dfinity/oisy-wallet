@@ -9,7 +9,7 @@ import * as rewardApi from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import {
 	claimVipReward,
-	getAirdrops,
+	getRewards,
 	getNewReward,
 	getRewardRequirementsFulfilled,
 	getUserRewardsTokenAmounts,
@@ -17,7 +17,7 @@ import {
 } from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import type { AirdropInfo } from '$lib/types/airdrop';
+import type { RewardInfo } from '$lib/types/reward';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
@@ -184,19 +184,19 @@ describe('reward-code', () => {
 			last_snapshot_timestamp: [lastTimestamp],
 			sprinkles: []
 		};
-		const expectedAirdrop: AirdropInfo = {
+		const expectedAirdrop: RewardInfo = {
 			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot'
 		};
 
-		it('should return a list of airdrops and the last timestamp', async () => {
+		it('should return a list of rewards and the last timestamp', async () => {
 			const getUserInfoSpy = vi
 				.spyOn(rewardApi, 'getUserInfo')
 				.mockResolvedValueOnce(mockedUserData);
 
-			const result = await getAirdrops({ identity: mockIdentity });
+			const result = await getRewards({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
