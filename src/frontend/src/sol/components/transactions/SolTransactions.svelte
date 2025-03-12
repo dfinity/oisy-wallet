@@ -4,6 +4,7 @@
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalSolToken, modalSolTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -18,7 +19,6 @@
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 
 	let selectedTransaction: SolTransactionUi | undefined;
 	let selectedToken: OptionToken;
