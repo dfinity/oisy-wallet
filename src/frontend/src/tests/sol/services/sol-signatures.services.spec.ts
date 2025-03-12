@@ -42,7 +42,7 @@ describe('sol-transactions.services', () => {
 				'ALCHEMY_API_KEY is empty, please provide a valid key in the env file as VITE_ALCHEMY_API_KEY'
 			);
 
-			// We use a real address here to test the function. Ideally, the address is a very active one.
+			// We use a real address to test the function. Ideally, the address is a very active one.
 			const address = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
 
 			const loadTransactions = async (
