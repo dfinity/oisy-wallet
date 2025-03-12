@@ -3,6 +3,7 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -19,7 +20,6 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
 
 	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
@@ -98,11 +98,7 @@
 		<Value ref="from">
 			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
 			<output>{from}</output>
-			<Copy
-				value={from}
-				text={$i18n.transaction.text.from_copied}
-				inline
-			/>
+			<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
 			{#if nonNullish(fromExplorerUrl)}
 				<ExternalLink
 					iconSize="18"
@@ -118,11 +114,7 @@
 			<Value ref="to">
 				<svelte:fragment slot="label">{$i18n.transaction.text.interacted_with}</svelte:fragment>
 				<output>{toDisplay}</output>
-				<Copy
-					value={to}
-					text={$i18n.transaction.text.to_copied}
-					inline
-				/>
+				<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
 				{#if nonNullish(toExplorerUrl)}
 					<ExternalLink
 						iconSize="18"
