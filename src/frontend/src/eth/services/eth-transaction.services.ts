@@ -42,6 +42,8 @@ export const processErc20Transaction = async ({
 	token: Token;
 	type: 'pending' | 'mined';
 }) => {
+	console.log('processErc20Transaction', type, rest);
+
 	if (type === 'mined') {
 		await processMinedTransaction({ ...rest });
 		return;
@@ -78,6 +80,8 @@ const processPendingTransaction = async ({
 		});
 		return;
 	}
+
+	console.log('processPendingTransaction', token, transaction, hash);
 
 	ethTransactionsStore.add({
 		tokenId: token.id,
@@ -125,6 +129,8 @@ const processMinedTransaction = async ({
 		});
 		return;
 	}
+
+	console.log('minedTransaction', token, minedTransaction);
 
 	// We noticed that the timestamp was not provided when retrieving the transaction at this stage, i.e., after transaction.wait().
 	// Therefore, because the transaction has just been mined and as the UI displays a transaction date in the list of transactions, we display now timestamp if undefined.
