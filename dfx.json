@@ -327,6 +327,8 @@
 		},
 		"cketh_index": {
 			"type": "custom",
+			"build": "scripts/build.cketh_index.sh",
+			"init_arg_file": "target/ic/cketh_index.args.did",
 			"candid": "target/ic/cketh_index.did",
 			"wasm": "target/ic/cketh_index.wasm",
 			"specified_id": "sh5u2-cqaaa-aaaar-qacna-cai",
