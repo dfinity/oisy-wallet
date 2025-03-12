@@ -18,12 +18,12 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
+import type { RewardResponseInfo } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
-import type {RewardResponseInfo} from "$lib/types/reward";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
