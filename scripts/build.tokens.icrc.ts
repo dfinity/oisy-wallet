@@ -34,8 +34,12 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 			const { ledgerCanisterId: savedLedgerCanisterId, indexCanisterId: savedIndexCanisterId } =
 				token;
 
-			if (isNullish(savedLedgerCanisterId) || isNullish(savedIndexCanisterId)) {
-				throw new Error(`Ledger or index canister ID is missing for token symbol ${key}.`);
+			if (isNullish(savedLedgerCanisterId)) {
+				throw new Error(`Ledger canister ID is missing for token symbol ${key}.`);
+			}
+
+			if (isNullish(savedIndexCanisterId)) {
+				throw new Error(`Index canister ID is missing for token symbol ${key}.`);
 			}
 
 			const { tokens: accTokens, icons: accIcons } = await acc;
@@ -92,7 +96,8 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp', 'assets');
 
 const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: string }) => {
-	const file = join(LOGO_FOLDER, `${name}.svg`);
+	const logoName = name.toLowerCase();
+	const file = join(LOGO_FOLDER, `${logoName}.svg`);
 
 	if (existsSync(file)) {
 		return;
