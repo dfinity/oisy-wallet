@@ -1,7 +1,7 @@
 import type { Settings, UserProfile } from '$declarations/backend/backend.did';
+import * as dapps from '$env/dapp-descriptions.env';
 import * as airdrops from '$env/reward-campaigns.env';
 import { FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
-import * as dapps from '$env/dapp-descriptions.env';
 import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
 import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';

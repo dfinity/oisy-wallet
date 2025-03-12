@@ -1,7 +1,6 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import { ZERO } from '$lib/constants/app.constants';
-import type { RewardInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
 	getRewardsBalance,

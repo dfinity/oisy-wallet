@@ -10,8 +10,8 @@
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
 
 	let ongoingCampaigns: RewardDescription[];
 	$: ongoingCampaigns = rewardCampaigns.filter(({ startDate, endDate }) =>

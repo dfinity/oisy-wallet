@@ -11,9 +11,7 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 	const initialLoading: string | null = sessionStorage.getItem(INITIAL_REWARD_RESULT);
 	if (isNullish(initialLoading)) {
 		const { rewards, lastTimestamp } = await getRewards({ identity });
-		const newRewards: RewardInfo[] = rewards.filter(
-			({ timestamp }) => timestamp >= lastTimestamp
-		);
+		const newRewards: RewardInfo[] = rewards.filter(({ timestamp }) => timestamp >= lastTimestamp);
 
 		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
 

@@ -9,15 +9,14 @@ import * as rewardApi from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import {
 	claimVipReward,
-	getRewards,
 	getNewReward,
 	getRewardRequirementsFulfilled,
+	getRewards,
 	getUserRewardsTokenAmounts,
 	isVipUser
 } from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import type { RewardInfo } from '$lib/types/reward';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';

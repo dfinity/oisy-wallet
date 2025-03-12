@@ -1,8 +1,8 @@
 <script lang="ts">
 	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
-	import AirdropModalDetails from '$lib/components/rewards/RewardModalDetails.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
+	import AirdropModalDetails from '$lib/components/rewards/RewardModalDetails.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,

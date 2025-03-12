@@ -11,8 +11,7 @@
 	export let requirementsFulfilled: boolean[];
 
 	const isRequirementFulfilled = (index: number) =>
-		(reward.requirements.length === requirementsFulfilled.length &&
-			requirementsFulfilled[index]) ??
+		(reward.requirements.length === requirementsFulfilled.length && requirementsFulfilled[index]) ??
 		false;
 </script>
 

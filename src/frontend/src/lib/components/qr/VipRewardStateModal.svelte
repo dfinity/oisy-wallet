@@ -22,7 +22,10 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<ImgBanner src={isSuccessful ? successfulVipReward : failedVipReward} styleClass="aspect-auto" />
+		<ImgBanner
+			src={isSuccessful ? successfulVipReward : failedVipReward}
+			styleClass="aspect-auto"
+		/>
 
 		<h3 class="my-3 text-center"
 			>{isSuccessful

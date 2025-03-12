@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
