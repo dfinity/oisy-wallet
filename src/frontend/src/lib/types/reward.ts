@@ -1,11 +1,11 @@
 import type { Principal } from '@dfinity/principal';
 
 export interface RewardsResponse {
-	rewards: RewardInfo[];
+	rewards: RewardResponseInfo[];
 	lastTimestamp: bigint;
 }
 
-export interface RewardInfo {
+export interface RewardResponseInfo {
 	name: string | undefined;
 	ledger: Principal;
 	timestamp: bigint;

@@ -10,7 +10,7 @@ import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
-import type { RewardsResponse } from '$lib/types/reward';
+import type { RewardResponseInfo, RewardsResponse } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
@@ -74,7 +74,7 @@ const queryRewards = async (params: {
 	};
 };
 
-const mapRewardsInfo = ({ name, ...rest }: RewardInfo): RewardInfo => ({
+const mapRewardsInfo = ({ name, ...rest }: RewardInfo): RewardResponseInfo => ({
 	...rest,
 	name: fromNullable(name)
 });

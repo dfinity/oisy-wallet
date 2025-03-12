@@ -1,6 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { getRewards } from '$lib/services/reward-code.services';
-import type { RewardInfo, RewardResult } from '$lib/types/reward';
+import type { RewardResponseInfo, RewardResult } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -11,7 +11,7 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 	const initialLoading: string | null = sessionStorage.getItem(INITIAL_REWARD_RESULT);
 	if (isNullish(initialLoading)) {
 		const { rewards, lastTimestamp } = await getRewards({ identity });
-		const newRewards: RewardInfo[] = rewards.filter(({ timestamp }) => timestamp >= lastTimestamp);
+		const newRewards: RewardResponseInfo[] = rewards.filter(({ timestamp }) => timestamp >= lastTimestamp);
 
 		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
 
@@ -39,5 +39,5 @@ export const isUpcomingCampaign = (startDate: Date) => {
 	return startDiff > 0;
 };
 
-export const getRewardsBalance = (rewards: RewardInfo[]) =>
+export const getRewardsBalance = (rewards: RewardResponseInfo[]) =>
 	rewards.reduce((total, { amount }) => total.add(BigNumber.from(amount)), ZERO);
