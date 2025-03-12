@@ -43,6 +43,12 @@
 	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
 
 	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
+	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
+	let fromDisplay: string;
+	$: fromDisplay = $erc20Tokens.find(({ address }) => address === from)?.name ?? from;
+
+	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
+	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
 	let toDisplay: string | undefined;
 	$: toDisplay = $erc20Tokens.find(({ address }) => address === to)?.name ?? to;
 </script>
@@ -97,7 +103,7 @@
 
 		<Value ref="from">
 			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
-			<output>{from}</output>
+			<output>{fromDisplay}</output>
 			<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
 			{#if nonNullish(fromExplorerUrl)}
 				<ExternalLink
