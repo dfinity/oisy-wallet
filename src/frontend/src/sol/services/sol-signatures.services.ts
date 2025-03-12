@@ -45,10 +45,6 @@ export const getSolSignatures = async ({
 
 	const ataSignatures: SolSignature[] = await tokensList.reduce<Promise<SolSignature[]>>(
 		async (acc, { address: tokenAddress, owner: tokenOwnerAddress }) => {
-			if (isNullish(tokenAddress) || isNullish(tokenOwnerAddress)) {
-				return acc;
-			}
-
 			assertIsAddress(tokenAddress);
 			assertIsAddress(tokenOwnerAddress);
 
