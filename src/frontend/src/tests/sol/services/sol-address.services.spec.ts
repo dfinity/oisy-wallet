@@ -28,6 +28,7 @@ import {
 import { SolanaNetworks } from '$sol/types/network';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { getAddressDecoder } from '@solana/web3.js';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -37,7 +38,6 @@ vi.mock('@solana/web3.js', () => ({
 }));
 
 describe('sol-address.services', () => {
-	const mockSolAddress = 'solana123';
 	const mockPublicKey = new Uint8Array([1, 2, 3]);
 
 	let spyGetSchnorrPublicKey: MockInstance;
