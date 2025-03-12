@@ -9,16 +9,16 @@ import * as rewardApi from '$lib/api/reward.api';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import {
 	claimVipReward,
-	getAirdrops,
 	getNewReward,
 	getRewardRequirementsFulfilled,
+	getRewards,
 	getUserRewardsTokenAmounts,
 	isVipUser
 } from '$lib/services/reward-code.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import type { AirdropInfo } from '$lib/types/airdrop';
 import { AlreadyClaimedError, InvalidCodeError } from '$lib/types/errors';
+import type { RewardResponseInfo } from '$lib/types/reward';
 import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -168,10 +168,10 @@ describe('reward-code', () => {
 		});
 	});
 
-	describe('getAirdrops', () => {
+	describe('getRewards', () => {
 		const lastTimestamp = BigInt(Date.now());
 
-		const mockedAirdrop: RewardInfo = {
+		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
@@ -180,23 +180,23 @@ describe('reward-code', () => {
 		const mockedUserData: UserData = {
 			is_vip: [false],
 			airdrops: [],
-			usage_awards: [[mockedAirdrop]],
+			usage_awards: [[mockedReward]],
 			last_snapshot_timestamp: [lastTimestamp],
 			sprinkles: []
 		};
-		const expectedAirdrop: AirdropInfo = {
+		const expectedReward: RewardResponseInfo = {
 			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
 			name: 'jackpot'
 		};
 
-		it('should return a list of airdrops and the last timestamp', async () => {
+		it('should return a list of rewards and the last timestamp', async () => {
 			const getUserInfoSpy = vi
 				.spyOn(rewardApi, 'getUserInfo')
 				.mockResolvedValueOnce(mockedUserData);
 
-			const result = await getAirdrops({ identity: mockIdentity });
+			const result = await getRewards({ identity: mockIdentity });
 
 			expect(getUserInfoSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -204,7 +204,7 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 
-			expect(result).toEqual({ airdrops: [expectedAirdrop], lastTimestamp });
+			expect(result).toEqual({ rewards: [expectedReward], lastTimestamp });
 		});
 	});
 
