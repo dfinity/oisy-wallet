@@ -23,20 +23,22 @@
 </script>
 
 <div class="relative">
-	<ConvertAmountSource
-		bind:sendAmount
-		bind:insufficientFunds
-		bind:insufficientFundsForFee
-		bind:amountLessThanLedgerFee
-		bind:minimumAmountNotReached
-		bind:unknownMinimumAmount
-		bind:minterInfoNotCertified
-		bind:exchangeValueUnit
-		{inputUnit}
-		{totalFee}
-		{minFee}
-		{ethereumEstimateFee}
-	/>
+	<div class="mb-2">
+		<ConvertAmountSource
+			bind:sendAmount
+			bind:insufficientFunds
+			bind:insufficientFundsForFee
+			bind:amountLessThanLedgerFee
+			bind:minimumAmountNotReached
+			bind:unknownMinimumAmount
+			bind:minterInfoNotCertified
+			bind:exchangeValueUnit
+			{inputUnit}
+			{totalFee}
+			{minFee}
+			{ethereumEstimateFee}
+		/>
+	</div>
 
 	<div
 		class="absolute bottom-0 left-0 right-0 top-0 m-auto flex h-9 w-9 items-center justify-center rounded-lg border border-solid border-secondary bg-surface shadow-sm"

@@ -26,6 +26,10 @@ const appleProjects = [
 		use: devices['Desktop Safari']
 	},
 	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome']
+	},
+	{
 		name: 'iPhone SE',
 		use: {
 			...devices['iPhone SE'],
@@ -59,7 +63,7 @@ const TIMEOUT = 5 * 60 * 1000;
 export default defineConfig({
 	retries: 3,
 	timeout: TIMEOUT,
-	workers: DEV ? 5 : 2,
+	workers: 5,
 	expect: {
 		toHaveScreenshot: {
 			// disable any animations caught by playwright for better screenshots and less flaky tests.

@@ -1,34 +1,34 @@
 {
 	"BURN": {
-		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai",
-		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai"
+		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai",
+		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai"
 	},
 	"POPEYE": {
-		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai",
-		"ledgerCanisterId": "6fvyi-faaaa-aaaam-qbiga-cai"
+		"ledgerCanisterId": "6fvyi-faaaa-aaaam-qbiga-cai",
+		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai"
 	},
 	"CLOUD": {
-		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
-		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai"
+		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
+		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai"
 	},
 	"AAA": {
-		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai",
-		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai"
+		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
+		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai"
 	},
 	"GLDT": {
-		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
-		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai"
+		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
+		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai"
 	},
 	"nICP": {
-		"indexCanisterId": "btxkl-saaaa-aaaar-qagvq-cai",
-		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai"
+		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai",
+		"indexCanisterId": "btxkl-saaaa-aaaar-qagvq-cai"
 	},
 	"vUSD": {
-		"indexCanisterId": "wdqhz-qyaaa-aaaam-aeccq-cai",
-		"ledgerCanisterId": "aiw2p-tyaaa-aaaam-aebyq-cai"
+		"ledgerCanisterId": "aiw2p-tyaaa-aaaam-aebyq-cai",
+		"indexCanisterId": "wdqhz-qyaaa-aaaam-aeccq-cai"
 	},
 	"RUGGY": {
-		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai",
-		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai"
+		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai",
+		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai"
 	}
 }
