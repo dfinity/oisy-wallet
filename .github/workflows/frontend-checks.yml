@@ -86,6 +86,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Prepare
         uses: ./.github/actions/prepare
+      - name: Set Environment Variables
+        run: echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_DEV }}" >> $GITHUB_ENV
       - name: Test
         run: npm run test
 
@@ -104,7 +106,7 @@ jobs:
 
   may-merge:
     if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+    needs: [ 'format', 'lint', 'check', 'test', 'config' ]
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging
