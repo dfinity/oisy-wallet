@@ -2,16 +2,16 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import type { RewardDescription } from '$env/types/env-reward';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { btcStatusesStore } from '$icp/stores/btc.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import AirdropBanner from '$lib/components/airdrops/AirdropBanner.svelte';
-	import AirdropDateBadge from '$lib/components/airdrops/AirdropDateBadge.svelte';
-	import AirdropEarnings from '$lib/components/airdrops/AirdropEarnings.svelte';
-	import AirdropsRequirements from '$lib/components/airdrops/AirdropsRequirements.svelte';
+	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
+	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
+	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
+	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -38,7 +38,7 @@
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 
-	export let airdrop: AirdropDescription;
+	export let reward: RewardDescription;
 
 	let totalUsdBalance: number;
 	$: totalUsdBalance = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
@@ -83,47 +83,47 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<span class="text-center text-xl" slot="title">{airdrop.title}</span>
+	<span class="text-center text-xl" slot="title">{reward.title}</span>
 
 	<ContentWithToolbar>
-		<AirdropBanner />
+		<RewardBanner />
 
-		<AirdropEarnings {isEligible} />
+		<RewardEarnings {isEligible} />
 		{#if isEligible}
 			<Hr spacing="md" />
 		{/if}
 
 		<div class="flex w-full justify-between text-lg font-semibold"
-			><span class="inline-flex">{$i18n.airdrops.text.participate_title}</span>
-			<span class="inline-flex"><AirdropDateBadge date={airdrop.endDate} /></span></div
+			><span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex"><RewardDateBadge date={reward.endDate} /></span></div
 		>
-		<p class="my-3">{airdrop.description}</p>
+		<p class="my-3">{reward.description}</p>
 
 		<ExternalLink
-			href={airdrop.learnMoreHref}
-			ariaLabel={$i18n.airdrops.text.learn_more}
+			href={reward.learnMoreHref}
+			ariaLabel={$i18n.rewards.text.learn_more}
 			iconVisible={false}
 			asButton
 			styleClass={`rounded-xl px-3 py-2 secondary-light mb-3`}
 		>
-			{$i18n.airdrops.text.learn_more}
+			{$i18n.rewards.text.learn_more}
 		</ExternalLink>
 
-		<Share text={$i18n.airdrops.text.share} href={airdrop.campaignHref} styleClass="my-2" />
+		<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
 
-		{#if airdrop.requirements.length > 0}
+		{#if reward.requirements.length > 0}
 			<Hr spacing="md" />
 
-			<AirdropsRequirements
+			<RewardsRequirements
 				loading={isRequirementsLoading}
-				{airdrop}
+				{reward}
 				{isEligible}
 				{requirementsFulfilled}
 			/>
 		{/if}
 
 		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
-			{$i18n.airdrops.text.modal_button_text}
+			{$i18n.rewards.text.modal_button_text}
 		</Button>
 	</ContentWithToolbar>
 </Modal>
