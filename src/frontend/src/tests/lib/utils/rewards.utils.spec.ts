@@ -1,6 +1,7 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import { ZERO } from '$lib/constants/app.constants';
+import type { RewardResponseInfo } from '$lib/types/reward';
 import {
 	INITIAL_REWARD_RESULT,
 	getRewardsBalance,
@@ -10,7 +11,6 @@ import {
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { BigNumber } from '@ethersproject/bignumber';
-import type {RewardResponseInfo} from "$lib/types/reward";
 
 describe('rewards utils', () => {
 	describe('loadRewardResult', () => {
