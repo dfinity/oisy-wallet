@@ -69,13 +69,13 @@ describe('sol-transactions.services', () => {
 
 		beforeEach(() => {
 			spyFetchSignatures = vi.spyOn(solanaApi, 'fetchSignatures');
-			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) => {
-				return wallet.toString() === mockAtaAddress
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockAtaAddress
 					? mockSignaturesAta1
 					: wallet.toString() === mockAtaAddress2
 						? mockSignaturesAta2
-						: mockSignaturesSol;
-			});
+						: mockSignaturesSol
+			);
 
 			spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
 			spyFindAssociatedTokenPda.mockImplementation(({ mint }: { mint: Address }) => [
@@ -104,13 +104,13 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should remove duplicates signatures', async () => {
-			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) => {
-				return wallet.toString() === mockAtaAddress
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockAtaAddress
 					? mockSignaturesAta1
 					: wallet.toString() === mockAtaAddress2
 						? mockSignaturesSol
-						: mockSignaturesSol;
-			});
+						: mockSignaturesSol
+			);
 
 			const signatures = await getSolSignatures(mockParams);
 
@@ -149,13 +149,13 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should handle empty signatures for a token', async () => {
-			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) => {
-				return wallet.toString() === mockAtaAddress
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockAtaAddress
 					? mockSignaturesAta1
 					: wallet.toString() === mockAtaAddress2
 						? []
-						: mockSignaturesSol;
-			});
+						: mockSignaturesSol
+			);
 
 			const signatures = await getSolSignatures(mockParams);
 
@@ -163,13 +163,13 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should handle empty signatures for the native token', async () => {
-			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) => {
-				return wallet.toString() === mockAtaAddress
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) =>
+				wallet.toString() === mockAtaAddress
 					? mockSignaturesAta1
 					: wallet.toString() === mockAtaAddress2
 						? mockSignaturesAta2
-						: [];
-			});
+						: []
+			);
 
 			const signatures = await getSolSignatures(mockParams);
 
