@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  format:
+  lint-shell:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
