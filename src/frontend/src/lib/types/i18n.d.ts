@@ -112,7 +112,7 @@ interface I18nDapps {
 	};
 }
 
-interface I18nAirdrops {
+interface I18nRewards {
 	text: {
 		title: string;
 		active_campaigns: string;
@@ -358,7 +358,6 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
-		ata_will_be_calculated: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -869,7 +868,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
-	airdrops: I18nAirdrops;
+	rewards: I18nRewards;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
