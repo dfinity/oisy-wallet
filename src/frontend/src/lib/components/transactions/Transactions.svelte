@@ -1,17 +1,17 @@
 <script lang="ts">
-	import {isNullish, nonNullish} from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
+	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 	import { networkBitcoin, networkICP, networkSolana } from '$lib/derived/network.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
+	import type { OptionToken } from '$lib/types/token';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
-	import {pageToken} from "$lib/derived/page-token.derived";
-	import {allTokens} from "$lib/derived/all-tokens.derived";
-	import type {OptionToken} from "$lib/types/token";
-	import {goto} from "$app/navigation";
-	import {FALLBACK_TIMEOUT} from "$lib/constants/app.constants";
-	import ManageTokensModal from "$lib/components/manage/ManageTokensModal.svelte";
 
 	let token: OptionToken;
 	$: token = $allTokens.find((token) => token.name === $routeToken);
