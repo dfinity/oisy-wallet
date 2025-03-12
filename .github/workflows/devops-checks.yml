@@ -1,0 +1,22 @@
+name: Formatting Backend and Scripts
+
+on:
+  pull_request:
+    paths:
+      - # Note: shell scripts not ending in .sh can be found with: scripts/format.sh.sh --list | grep -vE '[.]sh$'
+        '**/*.sh'
+  merge_group:
+  workflow_dispatch:
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        uses: ./scripts/setup shellcheck
+
+      - name: Lint shell scripts
+        run: scripts/lint.sh.sh
