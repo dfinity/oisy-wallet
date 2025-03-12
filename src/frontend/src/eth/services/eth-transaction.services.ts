@@ -130,12 +130,17 @@ const processMinedTransaction = async ({
 		return;
 	}
 
-	console.log('minedTransaction', token, minedTransaction);
-
 	// We noticed that the timestamp was not provided when retrieving the transaction at this stage, i.e., after transaction.wait().
 	// Therefore, because the transaction has just been mined and as the UI displays a transaction date in the list of transactions, we display now timestamp if undefined.
 	// This is for simplicity reasons and because it allows us to avoid making an additional call to getTransaction.
 	const { timestamp, ...rest } = minedTransaction;
+
+	// await 5 seconds
+	await new Promise((resolve) => setTimeout(resolve, 5000));
+
+	const foo = await getTransaction(hash);
+
+	console.log('minedTransaction', token, minedTransaction, foo);
 
 	ethTransactionsStore.update({
 		tokenId: token.id,
