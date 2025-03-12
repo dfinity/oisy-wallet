@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-export const AirdropEventsSchema = z.object({
+export const RewardEventsSchema = z.object({
 	id: z.string(),
 	title: z.string(),
 	cardTitle: z.string(),

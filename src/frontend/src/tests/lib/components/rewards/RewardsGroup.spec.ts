@@ -1,24 +1,24 @@
-import type { AirdropDescription } from '$env/types/env-airdrop';
-import AirdropsGroup from '$lib/components/airdrops/AirdropsGroup.svelte';
-import { mockAirdropCampaigns } from '$tests/mocks/airdrop-campaigns.mock';
+import type { RewardDescription } from '$env/types/env-reward';
+import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
-describe('AirdropsGroups', () => {
-	const mockAirdropCampaign: AirdropDescription | undefined = mockAirdropCampaigns.find(
+describe('RewardsGroups', () => {
+	const mockRewardCampaign: RewardDescription | undefined = mockRewardCampaigns.find(
 		({ id }) => id === 'OISY Airdrop #1'
 	);
-	assertNonNullish(mockAirdropCampaign);
+	assertNonNullish(mockRewardCampaign);
 
 	const title = 'Active campaigns';
 	const groupTitle = 'campaign';
-	const activeGroupSelector = `button[data-tid="${groupTitle}-${mockAirdropCampaign.id}"]`;
+	const activeGroupSelector = `button[data-tid="${groupTitle}-${mockRewardCampaign.id}"]`;
 
 	it('should render campaigns', () => {
-		const { container, getByText } = render(AirdropsGroup, {
+		const { container, getByText } = render(RewardsGroup, {
 			props: {
 				title,
-				airdrops: mockAirdropCampaigns,
+				rewards: mockRewardCampaigns,
 				testId: groupTitle
 			}
 		});
@@ -32,10 +32,10 @@ describe('AirdropsGroups', () => {
 	it('should render alternative text', () => {
 		const altText = 'Stay tuned';
 
-		const { container, getByText } = render(AirdropsGroup, {
+		const { container, getByText } = render(RewardsGroup, {
 			props: {
 				title,
-				airdrops: [],
+				rewards: [],
 				testId: groupTitle,
 				altText: altText
 			}
@@ -51,10 +51,10 @@ describe('AirdropsGroups', () => {
 	it('should render campaigns even if alternative text is defined', () => {
 		const altText = 'Stay tuned';
 
-		const { container, queryByText } = render(AirdropsGroup, {
+		const { container, queryByText } = render(RewardsGroup, {
 			props: {
 				title,
-				airdrops: mockAirdropCampaigns,
+				rewards: mockRewardCampaigns,
 				testId: groupTitle,
 				altText: altText
 			}
