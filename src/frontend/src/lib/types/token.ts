@@ -51,6 +51,6 @@ export interface TokenFinancialData {
 	usdBalance?: number;
 }
 
-export type TokenUi = Token & TokenFinancialData;
+export type TokenUi<T extends Token = Token> = T & TokenFinancialData;
 
 export type OptionTokenUi = Option<TokenUi>;

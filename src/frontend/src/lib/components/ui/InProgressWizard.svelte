@@ -3,6 +3,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { IN_PROGRESS_MODAL } from '$lib/constants/test-ids.constants';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -40,8 +41,8 @@
 		})();
 </script>
 
-<div class="stretch">
-	<MessageBox level="light-warning">
+<div class="stretch" data-tid={IN_PROGRESS_MODAL}>
+	<MessageBox level="warning">
 		<span>
 			{replaceOisyPlaceholders(
 				warningType === 'manage'

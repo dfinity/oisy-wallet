@@ -1,1 +1,5 @@
 blank_issues_enabled: true # Allows users to open a blank issue.
+contact_links:
+  - name: Discord Chat
+    url: https://discord.gg/d3xwcUTuJS
+    about: Ask questions and discuss with other OISY users in real time.

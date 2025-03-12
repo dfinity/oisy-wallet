@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import DappCard from '$lib/components/dapps/DappCard.svelte';
 	import DappPromoBanner from '$lib/components/dapps/DappPromoBanner.svelte';
 	import SubmitDappButton from '$lib/components/dapps/SubmitDappButton.svelte';
@@ -8,7 +9,7 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { dAppDescriptions, type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
+	import { type FeaturedOisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// For the moment only the first featured dapp is highlighted

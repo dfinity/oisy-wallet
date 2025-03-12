@@ -2,6 +2,7 @@ import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import trump from '$sol/assets/trump.svg';
+import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import type { RequiredSplToken } from '$sol/types/spl';
 
 export const TRUMP_DECIMALS = 6;
@@ -19,5 +20,9 @@ export const TRUMP_TOKEN: RequiredSplToken = {
 	symbol: TRUMP_SYMBOL,
 	decimals: TRUMP_DECIMALS,
 	icon: trump,
-	address: '6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN'
+	address: '6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN',
+	owner: TOKEN_PROGRAM_ADDRESS,
+	buy: {
+		onramperId: 'trump_solana'
+	}
 };

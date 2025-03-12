@@ -7,9 +7,10 @@
 	export let filter = '';
 	export let noMatch = false;
 	export let placeholder: string;
+	export let autofocus = false;
 </script>
 
-<InputTextWithAction name="filter" required={false} bind:value={filter} {placeholder}>
+<InputTextWithAction name="filter" required={false} bind:value={filter} {placeholder} {autofocus}>
 	<svelte:fragment slot="inner-end">
 		{#if noMatch}
 			<button on:click={() => (filter = '')} aria-label={$i18n.core.text.clear_filter}>

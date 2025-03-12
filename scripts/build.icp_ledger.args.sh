@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 # Ensure that a minter id exists:
-dfx identity get-principal --identity minter 2>/dev/null || dfx identity new minter
+dfx identity get-principal --identity minter 2>/dev/null || dfx identity new minter --storage-mode=plaintext
 
 MINTER_ACCOUNT_ID=$(dfx ledger account-id --identity minter)
 CALLER_ACCOUNT_ID=$(dfx ledger account-id)

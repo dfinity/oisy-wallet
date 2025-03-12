@@ -3,6 +3,7 @@ import type {
 	NewVipRewardResponse,
 	_SERVICE as RewardService,
 	UserData,
+	UserSnapshot,
 	VipReward
 } from '$declarations/rewards/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
@@ -46,5 +47,11 @@ export class RewardCanister extends Canister<RewardService> {
 		const { claim_vip_reward } = this.caller({ certified: true });
 
 		return claim_vip_reward(vipReward);
+	};
+
+	registerAirdropRecipient = (userSnapshot: UserSnapshot): Promise<void> => {
+		const { register_airdrop_recipient } = this.caller({ certified: true });
+
+		return register_airdrop_recipient(userSnapshot);
 	};
 }

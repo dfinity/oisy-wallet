@@ -1,6 +1,5 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
-import * as agent from '$lib/actors/agents.ic';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as blockchainRest from '$lib/rest/blockchain.rest';
@@ -10,7 +9,6 @@ import * as authUtils from '$lib/utils/auth.utils';
 import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent } from '@dfinity/agent';
 import { BitcoinCanister, type BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer } from '@dfinity/utils';
 import { waitFor } from '@testing-library/svelte';
@@ -95,8 +93,6 @@ describe('btc-wallet.worker', () => {
 		vi.useFakeTimers();
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
-
-		vi.spyOn(agent, 'getAgent').mockResolvedValue(mock<HttpAgent>());
 
 		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(1000);
 

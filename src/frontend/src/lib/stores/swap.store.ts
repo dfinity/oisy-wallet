@@ -1,13 +1,14 @@
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { derived, writable, type Readable } from 'svelte/store';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapData {
-	sourceToken?: IcToken;
-	destinationToken?: IcToken;
+	sourceToken?: IcTokenToggleable;
+	destinationToken?: IcTokenToggleable;
 }
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
@@ -37,6 +38,15 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			nonNullish($destinationToken) ? $exchanges?.[$destinationToken.id]?.usd : undefined
 	);
 
+	const isSourceTokenIcrc2 = derived(
+		[kongSwapTokensStore, sourceToken],
+		([$kongSwapTokensStore, $sourceToken]) =>
+			nonNullish($sourceToken) &&
+			nonNullish($kongSwapTokensStore) &&
+			nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
+			$kongSwapTokensStore[$sourceToken.symbol].icrc2
+	);
+
 	return {
 		sourceToken,
 		destinationToken,
@@ -44,12 +54,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		destinationTokenBalance,
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
-		setSourceToken: (token: IcToken) =>
+		isSourceTokenIcrc2,
+		failedSwapError: writable<string | undefined>(undefined),
+		setSourceToken: (token: IcTokenToggleable) =>
 			update((state) => ({
 				...state,
 				sourceToken: token
 			})),
-		setDestinationToken: (token: IcToken) =>
+		setDestinationToken: (token: IcTokenToggleable) =>
 			update((state) => ({
 				...state,
 				destinationToken: token
@@ -63,14 +75,16 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 };
 
 export interface SwapContext {
-	sourceToken: Readable<IcToken | undefined>;
-	destinationToken: Readable<IcToken | undefined>;
+	sourceToken: Readable<IcTokenToggleable | undefined>;
+	destinationToken: Readable<IcTokenToggleable | undefined>;
 	sourceTokenBalance: Readable<BigNumber | undefined>;
 	destinationTokenBalance: Readable<BigNumber | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
-	setSourceToken: (token: IcToken) => void;
-	setDestinationToken: (token: IcToken) => void;
+	isSourceTokenIcrc2: Readable<boolean>;
+	failedSwapError: Writable<string | undefined>;
+	setSourceToken: (token: IcTokenToggleable) => void;
+	setDestinationToken: (token: IcTokenToggleable) => void;
 	switchTokens: () => void;
 }
 

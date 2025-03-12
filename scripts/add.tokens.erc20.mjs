@@ -112,7 +112,7 @@ const fetchTokenDetails = async ({ contractAddress, isTestnet }) => {
 const loadFileContentOrEmpty = (filePath) => {
 	try {
 		return readFileSync(filePath, 'utf8');
-	} catch (err) {
+	} catch (_err) {
 		console.log(`File ${filePath} does not exist, it will be created.`);
 		return '';
 	}

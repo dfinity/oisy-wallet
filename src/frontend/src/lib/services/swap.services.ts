@@ -1,21 +1,26 @@
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
-import type { IcToken } from '$icp/types/ic-token';
+import { loadCustomTokens } from '$icp/services/icrc.services';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { setCustomToken } from '$lib/api/backend.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { KONG_BACKEND_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Amount } from '$lib/types/send';
+import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const swap = async ({
 	identity,
@@ -25,15 +30,17 @@ export const swap = async ({
 	swapAmount,
 	receiveAmount,
 	slippageValue,
+	sourceTokenFee,
 	isSourceTokenIcrc2
 }: {
 	identity: OptionIdentity;
 	progress: (step: ProgressStepsSwap) => void;
-	sourceToken: IcToken;
-	destinationToken: IcToken;
+	sourceToken: IcTokenToggleable;
+	destinationToken: IcTokenToggleable;
 	swapAmount: Amount;
 	receiveAmount: bigint;
 	slippageValue: Amount;
+	sourceTokenFee: bigint;
 	isSourceTokenIcrc2: boolean;
 }) => {
 	progress(ProgressStepsSwap.SWAP);
@@ -63,7 +70,8 @@ export const swap = async ({
 		(await approve({
 			identity,
 			ledgerCanisterId,
-			amount: parsedSwapAmount.toBigInt() + (sourceToken.fee ?? 0n),
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+			amount: parsedSwapAmount.toBigInt() + sourceTokenFee * 2n,
 			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 			spender: {
 				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
@@ -81,6 +89,15 @@ export const swap = async ({
 	});
 
 	progress(ProgressStepsSwap.UPDATE_UI);
+
+	if (!destinationToken.enabled) {
+		await setCustomToken({
+			token: toCustomToken({ ...destinationToken, enabled: true, networkKey: 'Icrc' }),
+			identity,
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
+		await loadCustomTokens({ identity });
+	}
 
 	await waitAndTriggerWallet();
 };

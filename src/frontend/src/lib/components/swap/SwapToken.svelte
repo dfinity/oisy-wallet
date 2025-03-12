@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import SwapAmountExchange from '$lib/components/swap/SwapAmountExchange.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
@@ -22,7 +22,7 @@
 				{token.symbol}
 			</span>
 			<span class="text-sm text-tertiary">
-				<SwapAmountExchange disabled {amount} {exchangeRate} />
+				<TokenInputAmountExchange disabled {amount} {exchangeRate} />
 			</span>
 		</div>
 	</div>

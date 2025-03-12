@@ -42,6 +42,7 @@ export const RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON =
 	'receive-tokens-modal-copy-icp-account-id-button';
 
 export const SEND_TOKENS_MODAL_OPEN_BUTTON = 'send-tokens-modal-open-button';
+export const SEND_TOKENS_MODAL = 'send-tokens-modal';
 export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
@@ -52,10 +53,18 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
+export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-rewards';
+
+export const AMOUNT_DATA = 'amount-data';
+export const AMOUNT_INPUT = 'amount-input';
+export const DESTINATION_INPUT = 'destination-input';
+
+export const IN_PROGRESS_MODAL = 'in-progress-modal';
 
 export const TESTNET_TOGGLE = 'testnet-toggle';
 
 export const CAROUSEL_CONTAINER = 'carousel-container';
+export const CAROUSEL_SLIDE = 'carousel-slide';
 export const CAROUSEL_SLIDE_NAVIGATION = 'carousel-slide-navigation-';
 
 export const TOKEN_MENU_IC = 'token-menu-ic';
@@ -73,13 +82,34 @@ export const VIP_CODE_REGENERATE_BUTTON = 'vip-code-regenerate-button';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
-export const SWAP_INPUT_CURRENCY_TOKEN = 'swap-input-currency-token';
-export const SWAP_INPUT_CURRENCY_USD = 'swap-input-currency-usd';
-export const SWAP_INPUT_CURRENCY_USD_SYMBOL = 'swap-input-currency-usd-symbol';
+export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
+export const TOKEN_INPUT_CURRENCY_USD = 'token-input-currency-usd';
+export const TOKEN_INPUT_CURRENCY_USD_SYMBOL = 'token-input-currency-usd-symbol';
 
-export const SWAP_AMOUNT_EXCHANGE = 'swap-amount-exchange';
-export const SWAP_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
-export const SWAP_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
-export const SWAP_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE = 'swap-amount-exchange';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON = 'swap-amount-exchange-button';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE = 'swap-amount-exchange-value';
+export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-unavailable';
 
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
+
+export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
+export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
+export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
+export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
+
+export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
+export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
+
+export const THEME_SELECTOR_CARD = 'theme-selector-card';
+
+export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
+export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
+export const REWARDS_MODAL_IMAGE_BANNER = 'reward-modal-image-banner';
+export const REWARDS_STATE_MODAL_IMAGE_BANNER = 'reward-state-modal-image-banner';
+export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button';
+export const REWARDS_BANNER = 'rewards-banner';
+export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
+
+export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
+export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';

@@ -1,24 +1,16 @@
 import type {
 	NewVipRewardResponse,
 	_SERVICE as RewardService,
-	UserData
+	UserData,
+	UserSnapshot
 } from '$declarations/rewards/rewards.did';
 import { RewardCanister } from '$lib/canisters/reward.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { HttpAgent, type ActorSubclass } from '@dfinity/agent';
+import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
-
-vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		// eslint-disable-next-line require-await
-		getAgent: async () => mock<HttpAgent>()
-	};
-});
 
 describe('reward.canister', () => {
 	const createRewardCanister = ({
@@ -41,6 +33,8 @@ describe('reward.canister', () => {
 			const mockedUserData: UserData = {
 				is_vip: [true],
 				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [BigInt(Date.now())],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);
@@ -59,6 +53,8 @@ describe('reward.canister', () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [BigInt(Date.now())],
 				sprinkles: []
 			};
 			service.user_info.mockResolvedValue(mockedUserData);
@@ -146,6 +142,36 @@ describe('reward.canister', () => {
 			});
 
 			const result = claimVipReward({ code: '1234567890' });
+			await expect(result).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('registerAirdropRecipient', () => {
+		const mockUserSnapshot: UserSnapshot = {
+			accounts: [],
+			timestamp: toNullable(BigInt(Date.now()))
+		};
+
+		it('should register an user as a recipient', async () => {
+			const { registerAirdropRecipient } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			await registerAirdropRecipient(mockUserSnapshot);
+			expect(service.register_airdrop_recipient).toHaveBeenCalledWith(mockUserSnapshot);
+		});
+
+		it('should throw an error if register_airdrop_recipient throws', async () => {
+			service.register_airdrop_recipient.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { registerAirdropRecipient } = await createRewardCanister({
+				serviceOverride: service
+			});
+
+			const result = registerAirdropRecipient(mockUserSnapshot);
 			await expect(result).rejects.toThrow(mockResponseError);
 		});
 	});

@@ -1,4 +1,3 @@
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
@@ -17,18 +16,11 @@ describe('networks.derived', () => {
 
 			testnetsStore.reset({ key: 'testnets' });
 
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
-
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
 		});
 
 		it('should return only mainnet by default', () => {
 			expect(get(enabledSolanaNetworks)).toEqual([SOLANA_MAINNET_NETWORK]);
-		});
-
-		it('should return empty array if feature flag is turned off', () => {
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
-			expect(get(enabledSolanaNetworks)).toEqual([]);
 		});
 
 		it('should return testnets when they are enabled', () => {

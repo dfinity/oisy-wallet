@@ -10,20 +10,10 @@
 	aria-label={ariaLabel}
 	on:click
 	in:fade
-	class="tertiary h-10 text-brand-primary"
+	class="tertiary-alt h-10"
 	class:icon={!$$slots.default}
 	disabled={$ethAddressNotLoaded}
 >
 	<IconWalletConnect size="24" />
 	<slot />
 </button>
-
-<style lang="scss">
-	button {
-		border-radius: var(--border-radius-sm-1_5x);
-
-		&:hover {
-			color: inherit;
-		}
-	}
-</style>

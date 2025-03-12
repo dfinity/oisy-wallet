@@ -3,7 +3,6 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks/networks.env';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import { isDestinationContractAddress } from '$eth/utils/send.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
@@ -14,8 +13,6 @@
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
-	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
-	export let sourceNetwork: EthereumNetwork;
 
 	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -35,10 +32,7 @@
 		if (
 			isDestinationContractAddress({
 				destination,
-				contractAddress: toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
-					networkId: sourceNetwork.id
-				})
+				contractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			})
 		) {
 			networkName = ICP_NETWORK.name;
@@ -73,7 +67,7 @@
 		})();
 </script>
 
-<label for="network" class="px-4.5 font-bold">{$i18n.send.text.network}:</label>
+<label for="network" class="font-bold">{$i18n.send.text.network}:</label>
 
 <div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>

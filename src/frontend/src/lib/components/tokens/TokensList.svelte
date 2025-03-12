@@ -52,18 +52,23 @@
 <TokensDisplayHandler bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="mb-3 flex flex-col gap-3" class:shake>
-			{#each tokens ?? [] as token (token.id)}
+			{#each tokens ?? [] as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
+					class="overflow-hidden rounded-xl"
 					transition:fade
 					animate:flip={{ duration: 2000 }}
 					on:animationstart={handleAnimationStart}
 					on:animationend={handleAnimationEnd}
 				>
-					{#if isTokenUiGroup(token)}
-						<TokenGroupCard tokenGroup={token} />
+					{#if isTokenUiGroup(tokenOrGroup)}
+						{@const { group: tokenGroup } = tokenOrGroup}
+
+						<TokenGroupCard {tokenGroup} />
 					{:else}
+						{@const { token } = tokenOrGroup}
+
 						<Listener {token}>
-							<TokenCardWithUrl {token} disabled={animating} on:click={onClick}>
+							<TokenCardWithUrl styleClass="rounded-xl px-3 py-2 hover:bg-brand-subtle-10" {token} disabled={animating}  on:click={onClick}>
 								<TokenCardContent data={token} />
 							</TokenCardWithUrl>
 						</Listener>

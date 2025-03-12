@@ -2,6 +2,7 @@ name: E2E Tests
 
 on:
   pull_request:
+  merge_group:
   workflow_dispatch:
 
 concurrency:
@@ -62,6 +63,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend.wasm.gz
+          path: out/
 
       - name: Prepare macOS
         if: runner.os == 'macOS'

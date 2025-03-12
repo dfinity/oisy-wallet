@@ -6,14 +6,16 @@
 
 	export let token: Token;
 	export let disabled = false;
+	export let disableTabSelector = false;
+	export let styleClass = '';
 
 	let url: string;
 	$: url = transactionsUrl({ token });
 </script>
 
-<div class="group flex gap-3 rounded-xl px-3 py-2 hover:bg-white active:bg-white sm:gap-8">
+<div class={`group flex gap-3 sm:gap-8 ${styleClass}`}>
 	<a
-		class="flex-1 no-underline"
+		class="unstyled flex-1 no-underline"
 		href={disabled ? undefined : url}
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol

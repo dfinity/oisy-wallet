@@ -1,6 +1,7 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -37,7 +38,6 @@ describe('ConvertAmountSource', () => {
 			]
 		]);
 
-	const amountInfoTestId = 'convert-amount-source-amount-info';
 	const balanceTestId = 'convert-amount-source-balance';
 
 	it('should display values correctly without error if insufficientFundsForFee is false', () => {
@@ -46,11 +46,18 @@ describe('ConvertAmountSource', () => {
 			context: mockContext()
 		});
 
-		expect(getByTestId(amountInfoTestId)).toHaveTextContent('$0.20');
+		expect(getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE)).toHaveTextContent('$0.20');
 		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
 	});
 
-	it('should display values correctly without error if insufficientFundsForFee is true', async () => {
+	it.each([
+		{ type: 'insufficientFunds' },
+		{ type: 'insufficientFundsForFee' },
+		{ type: 'amountLessThanLedgerFee' },
+		{ type: 'minimumAmountNotReached' },
+		{ type: 'unknownMinimumAmount' },
+		{ type: 'minterInfoNotCertified' }
+	])('should display values correctly with $type error', async ({ type }) => {
 		const { getByTestId, rerender } = render(ConvertAmountSource, {
 			props,
 			context: mockContext()
@@ -58,27 +65,10 @@ describe('ConvertAmountSource', () => {
 
 		await rerender({
 			...props,
-			insufficientFundsForFee: true
+			[type]: true
 		});
 
-		expect(getByTestId(amountInfoTestId)).toHaveTextContent('$0.20');
-		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
-	});
-
-	it('should display values correctly with error', async () => {
-		const { getByTestId, rerender } = render(ConvertAmountSource, {
-			props,
-			context: mockContext()
-		});
-
-		await rerender({
-			...props,
-			insufficientFunds: true
-		});
-
-		expect(getByTestId(amountInfoTestId)).toHaveTextContent(
-			en.convert.assertion.insufficient_funds
-		);
+		expect(getByTestId(TOKEN_INPUT_AMOUNT_EXCHANGE)).toHaveTextContent('$0.20');
 		expect(getByTestId(balanceTestId)).toHaveTextContent(maxButtonText);
 	});
 

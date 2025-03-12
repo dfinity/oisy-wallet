@@ -3,7 +3,6 @@ import {
 	SOL_MAINNET_EXPLORER_URL,
 	SOL_TESTNET_EXPLORER_URL
 } from '$env/explorers.env';
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_MAINNET_NETWORK,
@@ -41,8 +40,6 @@ describe('SolTokenMenu', () => {
 
 	beforeEach(() => {
 		mockPage.reset();
-
-		vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 
 		solAddressMainnetStore.reset();
 		solAddressTestnetStore.reset();

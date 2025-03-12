@@ -4,27 +4,26 @@
 	import { get } from 'svelte/store';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+	import { saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
-	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
+	import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import {
-		saveErc20UserTokens,
-		saveIcrcCustomTokens
-	} from '$icp-eth/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
+	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
 	import type { TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -77,7 +76,7 @@
 		}
 
 		await Promise.allSettled([
-			...(icrc.length > 0 ? [saveIcrc(icrc)] : []),
+			...(icrc.length > 0 ? [saveIcrc(icrc.map((t) => ({ ...t, networkKey: 'Icrc' })))] : []),
 			...(erc20.length > 0 ? [saveErc20(erc20)] : []),
 			...(spl.length > 0 ? [saveSpl(spl)] : [])
 		]);
@@ -94,6 +93,7 @@
 		await saveIcrc([
 			{
 				enabled: true,
+				networkKey: 'Icrc',
 				ledgerCanisterId,
 				indexCanisterId
 			}
@@ -152,7 +152,7 @@
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
-	const saveIcrc = (tokens: SaveCustomToken[]): Promise<void> =>
+	const saveIcrc = (tokens: SaveCustomTokenWithKey[]): Promise<void> =>
 		saveIcrcCustomTokens({
 			tokens,
 			progress,
@@ -172,8 +172,7 @@
 			identity: $authIdentity
 		});
 
-	// TODO: implement this function in the backend
-	const saveSpl = (tokens: SaveSplUserToken[]): void => {
+	const saveSpl = (tokens: SaveSplUserToken[]): Promise<void> =>
 		saveSplUserTokens({
 			tokens,
 			progress,
@@ -182,7 +181,6 @@
 			onError: () => modal.set(0),
 			identity: $authIdentity
 		});
-	};
 
 	const close = () => {
 		modalStore.close();
@@ -212,6 +210,7 @@
 	bind:this={modal}
 	on:nnsClose={close}
 	disablePointerEvents={currentStep?.name === 'Saving'}
+	testId={MANAGE_TOKENS_MODAL}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 

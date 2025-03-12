@@ -4,27 +4,33 @@
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
+	import VipRewardGuard from '$lib/components/guard/VipRewardGuard.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
+	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 </script>
 
 <AddressGuard>
 	<Loader>
-		<RewardGuard>
-			<LoaderEthBalances>
-				<LoaderWallets>
-					<ExchangeWorker>
-						<LoaderMetamask
-							><LoaderUserProfile>
-								<slot />
-							</LoaderUserProfile>
-						</LoaderMetamask>
-					</ExchangeWorker>
-				</LoaderWallets>
-			</LoaderEthBalances>
-		</RewardGuard>
+		<VipRewardGuard>
+			<RewardGuard>
+				<LoaderEthBalances>
+					<LoaderWallets>
+						<ExchangeWorker>
+							<LoaderMetamask>
+								<LoaderUserProfile>
+									<UserSnapshotWorker>
+										<slot />
+									</UserSnapshotWorker>
+								</LoaderUserProfile>
+							</LoaderMetamask>
+						</ExchangeWorker>
+					</LoaderWallets>
+				</LoaderEthBalances>
+			</RewardGuard>
+		</VipRewardGuard>
 	</Loader>
 </AddressGuard>
 

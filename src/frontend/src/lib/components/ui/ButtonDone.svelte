@@ -5,6 +5,6 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<Button paddingSmall {testId} fullWidth type="button" on:click>
+<Button colorStyle="primary" paddingSmall {testId} fullWidth type="button" on:click>
 	{$i18n.core.text.done}
 </Button>

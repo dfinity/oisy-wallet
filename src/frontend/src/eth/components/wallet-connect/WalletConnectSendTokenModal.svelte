@@ -85,11 +85,7 @@
 
 	let targetNetwork: Network | undefined = undefined;
 	$: targetNetwork =
-		destination ===
-		toCkEthHelperContractAddress({
-			minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
-			networkId: sourceNetwork.id
-		})
+		destination === toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			? ICP_NETWORK
 			: $sendToken.network;
 
@@ -174,6 +170,8 @@
 
 	<FeeContext
 		amount={amount.toString()}
+		sendToken={$sendToken}
+		sendTokenId={$sendTokenId}
 		{destination}
 		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}

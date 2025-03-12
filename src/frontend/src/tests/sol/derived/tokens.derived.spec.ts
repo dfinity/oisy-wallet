@@ -1,4 +1,3 @@
-import * as solEnv from '$env/networks/networks.sol.env';
 import {
 	SOLANA_DEVNET_TOKEN,
 	SOLANA_LOCAL_TOKEN,
@@ -16,17 +15,10 @@ describe('tokens.derived', () => {
 			vi.resetAllMocks();
 
 			testnetsStore.reset({ key: 'testnets' });
-
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => true);
 		});
 
 		it('should return only mainnet token by default', () => {
 			expect(get(enabledSolanaTokens)).toEqual([SOLANA_TOKEN]);
-		});
-
-		it('should return emtpy array if feature flag false', () => {
-			vi.spyOn(solEnv, 'SOLANA_NETWORK_ENABLED', 'get').mockImplementation(() => false);
-			expect(get(enabledSolanaTokens)).toEqual([]);
 		});
 
 		it('should return testnet tokens when they are enabled', () => {

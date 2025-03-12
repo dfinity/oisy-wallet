@@ -1,10 +1,11 @@
-use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
 use ic_cdk::api::time;
-use shared::types::dapp::AddDappSettingsError;
 use shared::types::{
+    dapp::AddDappSettingsError,
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     CredentialType, Version,
 };
+
+use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
 
 pub fn find_profile(
     principal: StoredPrincipal,

@@ -17,6 +17,9 @@ import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SolanaNetwork } from '$sol/types/network';
 
+export const SOL_MAINNET_ENABLED =
+	JSON.parse(import.meta.env.VITE_SOLANA_MAINNET_DISABLED ?? false) === false;
+
 /**
  * RPC URLs
  */
@@ -92,18 +95,16 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	iconBW: solLocalnetIconBW
 };
 
-export const SOLANA_NETWORKS: Network[] = [
-	SOLANA_MAINNET_NETWORK,
+export const SUPPORTED_SOLANA_NETWORKS: Network[] = [
+	...(SOL_MAINNET_ENABLED ? [SOLANA_MAINNET_NETWORK] : []),
 	SOLANA_TESTNET_NETWORK,
 	SOLANA_DEVNET_NETWORK,
 	...(LOCAL ? [SOLANA_LOCAL_NETWORK] : [])
 ];
 
-export const SOLANA_NETWORKS_IDS: NetworkId[] = SOLANA_NETWORKS.map(({ id }) => id);
-
-// TODO: to be removed when the feature is fully implemented
-export const SOLANA_NETWORK_ENABLED =
-	JSON.parse(import.meta.env.VITE_SOLANA_NETWORK_ENABLED ?? false) === true;
+export const SUPPORTED_SOLANA_NETWORKS_IDS: NetworkId[] = SUPPORTED_SOLANA_NETWORKS.map(
+	({ id }) => id
+);
 
 export const SOLANA_KEY_ID: SchnorrKeyId = {
 	algorithm: { ed25519: null },

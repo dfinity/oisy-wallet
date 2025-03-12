@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { Commitment } from '@solana/rpc-types';
+	import type { Commitment } from '@solana/web3.js';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -30,7 +30,11 @@
 	$: transactionStatus = pending ? 'pending' : 'confirmed';
 
 	let amount: BigNumber | undefined;
-	$: amount = nonNullish(value) ? BigNumber.from(value) : value;
+	$: amount = nonNullish(value)
+		? type === 'send'
+			? BigNumber.from(value * -1n)
+			: BigNumber.from(value)
+		: value;
 </script>
 
 <Transaction

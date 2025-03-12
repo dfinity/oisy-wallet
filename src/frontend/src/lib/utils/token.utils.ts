@@ -118,15 +118,30 @@ export const calculateTokenUsdBalance = ({
 	token: Token;
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): number | undefined => {
-	const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
+}): number | undefined =>
+	calculateTokenUsdAmount({ amount: $balances?.[token.id]?.data, $exchanges, token });
 
+/**
+ * Calculates USD amount for the provided token and token amount.
+ *
+ * @param amount - Amount in token for which USD balance will be calculated.
+ * @param token - Token for which USD balance will be calculated.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns The USD balance or Number(0) in case the number cannot be calculated.
+ *
+ */
+export const calculateTokenUsdAmount = ({
+	amount,
+	token,
+	$exchanges
+}: {
+	amount: BigNumber | undefined;
+	token: Token;
+	$exchanges: ExchangesData;
+}): number | undefined => {
+	const exchangeRate = $exchanges?.[token.id]?.usd;
 	return nonNullish(exchangeRate)
-		? usdValue({
-				token,
-				balance: $balances?.[token.id]?.data,
-				exchangeRate
-			})
+		? usdValue({ decimals: token.decimals, balance: amount, exchangeRate })
 		: undefined;
 };
 
@@ -137,15 +152,15 @@ export const calculateTokenUsdBalance = ({
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The token UI.
  */
-export const mapTokenUi = ({
+export const mapTokenUi = <T extends Token>({
 	token,
 	$balances,
 	$exchanges
 }: {
-	token: Token;
+	token: T;
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): TokenUi => ({
+}): TokenUi<T> => ({
 	...token,
 	// There is a difference between undefined and null for the balance.
 	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.

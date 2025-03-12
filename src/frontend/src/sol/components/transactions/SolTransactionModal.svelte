@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { Commitment } from '@solana/rpc-types';
+	import type { Commitment } from '@solana/web3.js';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,7 +24,7 @@
 	let explorerUrl: string | undefined;
 	$: explorerUrl = isNetworkSolana(token?.network) ? token.network.explorerUrl : undefined;
 
-	$: ({ from, value, timestamp, id, blockNumber, to, type, status } = transaction);
+	$: ({ from, value, timestamp, signature: id, blockNumber, to, type, status } = transaction);
 
 	let txExplorerUrl: string | undefined;
 	$: txExplorerUrl = nonNullish(explorerUrl)

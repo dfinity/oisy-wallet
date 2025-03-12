@@ -1,5 +1,5 @@
-import { getBase58Decoder } from '@solana/codecs';
-import { signature } from '@solana/keys';
+import type { SolSignature } from '$sol/types/sol-transaction';
+import { getBase58Decoder, signature, type UnixTimestamp } from '@solana/web3.js';
 
 export const mockSolSignature = () => {
 	const randomBytes = new Uint8Array(64);
@@ -8,10 +8,13 @@ export const mockSolSignature = () => {
 	return signature(base58);
 };
 
-export const mockSolSignatureResponse = () => ({
+export const mockSolSignatureResponse = (): SolSignature => ({
 	signature: mockSolSignature(),
 	err: null,
-	confirmationStatus: 'finalized'
+	confirmationStatus: 'finalized',
+	blockTime: 1234567890n as UnixTimestamp,
+	slot: 1234567890n,
+	memo: 'Some memo'
 });
 
 export const mockSolSignatureWithErrorResponse = () => ({
@@ -19,3 +22,6 @@ export const mockSolSignatureWithErrorResponse = () => ({
 	err: 'Some error',
 	confirmationStatus: 'finalized'
 });
+
+export const mockSolSignatureResponses = (n: number): SolSignature[] =>
+	Array.from({ length: n }, () => mockSolSignatureResponse());

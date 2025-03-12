@@ -26,8 +26,16 @@ const appleProjects = [
 		use: devices['Desktop Safari']
 	},
 	{
+		name: 'Google Chrome',
+		use: devices['Desktop Chrome']
+	},
+	{
 		name: 'iPhone SE',
-		use: devices['iPhone SE']
+		use: {
+			...devices['iPhone SE'],
+			screen: { width: 375, height: 667 },
+			viewport: { width: 375, height: 667 }
+		}
 	}
 ];
 
@@ -41,8 +49,12 @@ const nonAppleProjects = [
 		use: devices['Desktop Firefox']
 	},
 	{
-		name: 'Pixel 5',
-		use: devices['Pixel 5']
+		name: 'Pixel 7',
+		use: {
+			...devices['Pixel 7'],
+			screen: { width: 412, height: 915 },
+			viewport: { width: 412, height: 915 }
+		}
 	}
 ];
 
@@ -51,7 +63,7 @@ const TIMEOUT = 5 * 60 * 1000;
 export default defineConfig({
 	retries: 3,
 	timeout: TIMEOUT,
-	workers: DEV ? 5 : 2,
+	workers: 5,
 	expect: {
 		toHaveScreenshot: {
 			// disable any animations caught by playwright for better screenshots and less flaky tests.

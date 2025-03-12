@@ -2,7 +2,6 @@ import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK,
-	SOLANA_NETWORK_ENABLED,
 	SOLANA_TESTNET_NETWORK
 } from '$env/networks/networks.sol.env';
 import { LOCAL } from '$lib/constants/app.constants';
@@ -13,19 +12,12 @@ import { derived, type Readable } from 'svelte/store';
 
 export const enabledSolanaNetworks: Readable<SolanaNetwork[]> = derived(
 	[testnets],
-	([$testnets]) =>
-		SOLANA_NETWORK_ENABLED
-			? [
-					SOLANA_MAINNET_NETWORK,
-					...($testnets
-						? [
-								SOLANA_TESTNET_NETWORK,
-								SOLANA_DEVNET_NETWORK,
-								...(LOCAL ? [SOLANA_LOCAL_NETWORK] : [])
-							]
-						: [])
-				]
-			: []
+	([$testnets]) => [
+		SOLANA_MAINNET_NETWORK,
+		...($testnets
+			? [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK, ...(LOCAL ? [SOLANA_LOCAL_NETWORK] : [])]
+			: [])
+	]
 );
 
 export const enabledSolanaNetworksIds: Readable<NetworkId[]> = derived(
