@@ -53,7 +53,7 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
-export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-airdrops';
+export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-rewards';
 
 export const AMOUNT_DATA = 'amount-data';
 export const AMOUNT_INPUT = 'amount-input';
@@ -103,13 +103,13 @@ export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
 
 export const THEME_SELECTOR_CARD = 'theme-selector-card';
 
-export const AIRDROPS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-airdrop-campaigns-container';
-export const AIRDROPS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-airdrop-campaigns-container';
-export const AIRDROPS_MODAL_IMAGE_BANNER = 'airdrop-modal-image-banner';
-export const AIRDROPS_STATE_MODAL_IMAGE_BANNER = 'airdrop-state-modal-image-banner';
-export const AIRDROPS_STATE_MODAL_SHARE_BUTTON = 'airdrop-state-modal-share-button';
-export const AIRDROPS_BANNER = 'airdrops-banner';
-export const AIRDROPS_REQUIREMENTS_STATUS = 'airdrop-requirement-status';
+export const REWARDS_ACTIVE_CAMPAIGNS_CONTAINER = 'active-reward-campaigns-container';
+export const REWARDS_UPCOMING_CAMPAIGNS_CONTAINER = 'upcoming-reward-campaigns-container';
+export const REWARDS_MODAL_IMAGE_BANNER = 'reward-modal-image-banner';
+export const REWARDS_STATE_MODAL_IMAGE_BANNER = 'reward-state-modal-image-banner';
+export const REWARDS_STATE_MODAL_SHARE_BUTTON = 'reward-state-modal-share-button';
+export const REWARDS_BANNER = 'rewards-banner';
+export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';

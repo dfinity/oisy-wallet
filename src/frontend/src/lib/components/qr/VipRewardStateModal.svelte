@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import failedReward from '$lib/assets/failed-reward.svg';
-	import successfulReward from '$lib/assets/successful-reward.svg';
+	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
+	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
@@ -22,7 +22,10 @@
 	</svelte:fragment>
 
 	<ContentWithToolbar>
-		<ImgBanner src={isSuccessful ? successfulReward : failedReward} styleClass="aspect-auto" />
+		<ImgBanner
+			src={isSuccessful ? successfulVipReward : failedVipReward}
+			styleClass="aspect-auto"
+		/>
 
 		<h3 class="my-3 text-center"
 			>{isSuccessful
