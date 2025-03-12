@@ -125,7 +125,7 @@ describe('network utils', () => {
 		});
 
 		it('should return false for Bitcoin regtest network ID when it is not LOCAL env', () => {
-			vi.spyOn(networkEnv, 'BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(() => [
+			vi.spyOn(networkEnv, 'SUPPORTED_BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(() => [
 				BTC_MAINNET_NETWORK_ID,
 				BTC_TESTNET_NETWORK_ID
 			]);
