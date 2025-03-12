@@ -8,13 +8,7 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
-import {
-	Alchemy,
-	AlchemySubscription,
-	type AlchemySettings,
-	type Network,
-	type TransactionReceipt
-} from 'alchemy-sdk';
+import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
 const configs: Record<NetworkId, AlchemySettings> = {
@@ -114,9 +108,6 @@ export class AlchemyProvider {
 
 	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
 		this.provider.core.getTransaction(hash);
-
-	getTransactionReceipt = (hash: string): Promise<TransactionReceipt | null> =>
-		this.provider.core.getTransactionReceipt(hash);
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {

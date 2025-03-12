@@ -43,8 +43,6 @@ export const processErc20Transaction = async ({
 	token: Token;
 	type: 'pending' | 'mined';
 }) => {
-	console.log('processErc20Transaction', type, rest);
-
 	if (type === 'mined') {
 		await processMinedTransaction({ ...rest });
 		return;
@@ -82,8 +80,6 @@ const processPendingTransaction = async ({
 		return;
 	}
 
-	console.log('processPendingTransaction', token, transaction, hash);
-
 	ethTransactionsStore.add({
 		tokenId: token.id,
 		transactions: [
@@ -111,7 +107,7 @@ const processMinedTransaction = async ({
 	token: Token;
 	value?: BigNumber;
 }) => {
-	const { getTransaction, getTransactionReceipt } = alchemyProviders(token.network.id);
+	const { getTransaction } = alchemyProviders(token.network.id);
 	const minedTransaction = await getTransaction(hash);
 
 	if (isNullish(minedTransaction)) {
@@ -135,10 +131,6 @@ const processMinedTransaction = async ({
 	// Therefore, because the transaction has just been mined and as the UI displays a transaction date in the list of transactions, we display now timestamp if undefined.
 	// This is for simplicity reasons and because it allows us to avoid making an additional call to getTransaction.
 	const { timestamp, ...rest } = minedTransaction;
-
-	const foo = await getTransactionReceipt(hash);
-
-	console.log('minedTransaction', token, minedTransaction, foo);
 
 	ethTransactionsStore.update({
 		tokenId: token.id,
