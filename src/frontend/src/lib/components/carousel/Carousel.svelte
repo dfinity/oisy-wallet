@@ -8,7 +8,7 @@
 		TRACK_COUNT_CAROUSEL_NEXT,
 		TRACK_COUNT_CAROUSEL_PREVIOUS
 	} from '$lib/constants/analytics.contants';
-	import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
+	import { CAROUSEL_CONTAINER, CAROUSEL_SLIDE } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
@@ -285,7 +285,7 @@
 	out:slide={SLIDE_PARAMS}
 >
 	<div class="w-full overflow-hidden" bind:this={container}>
-		<div data-tid="carousel-slide" class="flex" bind:this={sliderFrame}>
+		<div data-tid={CAROUSEL_SLIDE} class="flex" bind:this={sliderFrame}>
 			<slot />
 		</div>
 	</div>

@@ -3,7 +3,7 @@
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { AIRDROPS_ENABLED } from '$env/airdrops.env.js';
+	import { REWARDS_ENABLED } from '$env/rewards.env.js';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -22,7 +22,7 @@
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import {
 		isRouteActivity,
-		isRouteAirdrops,
+		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
@@ -81,24 +81,22 @@
 	{$i18n.navigation.text.activity}
 </NavigationItem>
 
-{#if AIRDROPS_ENABLED}
+{#if REWARDS_ENABLED}
 	<NavigationItem
 		href={networkUrl({
-			path: AppPath.Airdrops,
+			path: AppPath.Rewards,
 			networkId: $networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
 		ariaLabel={$i18n.navigation.alt.airdrops}
-		selected={isRouteAirdrops(pageData)}
+		selected={isRouteRewards(pageData)}
 		testId={addTestIdPrefix(NAVIGATION_ITEM_AIRDROPS)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
 	>
 		<IconGift />
 		{$i18n.navigation.text.airdrops}
-		<div
-			class="md:h-5.5 md:mt-0.25 text-xs/4.5 absolute -mt-2 ml-10 h-5 scale-75 rounded-md bg-error-primary px-1 py-0.5 font-bold uppercase text-white md:relative md:ml-1 md:scale-100 md:px-2"
-			>{$i18n.core.text.new}</div
-		>
 	</NavigationItem>
 {/if}
 
