@@ -68,7 +68,7 @@ describe('sol-transactions.services', () => {
 
 			const transactions = await loadTransactions();
 
-			const { solBalance, totalFee } = transactions.reduce<{
+			const { solBalance: transactionSolBalance, totalFee } = transactions.reduce<{
 				solBalance: bigint;
 				totalFee: bigint;
 				signatures: string[];
@@ -90,7 +90,7 @@ describe('sol-transactions.services', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(solBalance - totalFee).toBe(fetchedSolBalance);
+			expect(transactionSolBalance - totalFee).toBe(fetchedSolBalance);
 		}, 600000);
 
 		// describe('with mocked dependencies', () => {
