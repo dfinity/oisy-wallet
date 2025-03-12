@@ -36,7 +36,7 @@ describe('sol-transactions.services', () => {
 
 	describe('getSolTransactions', () => {
 		it('should match the total balance of an account', async () => {
-			// If the Alchemy API is empty, the test will fail.
+			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
 			assert(
 				notEmptyString(ALCHEMY_API_KEY),
 				'ALCHEMY_API_KEY is empty, please provide a valid key in the env file as VITE_ALCHEMY_API_KEY'
