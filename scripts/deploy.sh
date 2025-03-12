@@ -18,7 +18,7 @@ dfx deploy icp_index
 ./scripts/deploy.cketh.sh
 ./scripts/deploy.ckerc20.sh
 
-./scripts/deploy.kong_backend.sh
+dfx deploy kong_backend
 
 dfx deploy internet_identity
 dfx deploy pouh_issuer

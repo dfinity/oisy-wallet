@@ -300,6 +300,8 @@ abstract class Homepage {
 
 		await this.promotionCarousel.navigateToSlide(1);
 		await this.promotionCarousel.freezeCarousel();
+
+		await this.waitForLoadState();
 	}
 
 	async waitForLoadState() {
@@ -309,11 +311,10 @@ abstract class Homepage {
 	async navigateTo(testId: string): Promise<void> {
 		if (await this.isVisibleByTestId(testId)) {
 			await this.clickByTestId({ testId });
+		} else if (await this.isVisibleByTestId(`mobile-${testId}`)) {
+			await this.clickByTestId({ testId: `mobile-${testId}` });
 		} else {
-			const navigationMenuButton = this.#page.getByTestId(NAVIGATION_MENU_BUTTON);
-			await navigationMenuButton.click();
-			const navigationMenu = this.#page.getByTestId(NAVIGATION_MENU);
-			await navigationMenu.getByTestId(testId).click();
+			throw new Error('Cannot reach navigation menu!');
 		}
 	}
 
@@ -366,6 +367,24 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
+	private async viewportAdjuster(): Promise<void> {
+		const maxPageHeight = await this.#page.evaluate(() =>
+			Math.max(
+				document.body.scrollHeight,
+				document.documentElement.scrollHeight,
+				document.body.offsetHeight,
+				document.documentElement.offsetHeight,
+				document.body.clientHeight,
+				document.documentElement.clientHeight
+			)
+		);
+
+		const currentViewport = this.#page.viewportSize();
+		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
+
+		await this.#page.setViewportSize({ height: maxPageHeight, width });
+	}
+
 	async takeScreenshot(
 		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
 			freezeCarousel: false
@@ -391,9 +410,9 @@ abstract class Homepage {
 					timeout: 5 * 60 * 1000
 				});
 			} else {
+				await this.viewportAdjuster();
 				await expect(this.#page).toHaveScreenshot({
 					// creates a snapshot as a fullPage and not just certain parts.
-					fullPage: true,
 					// playwright can retry flaky tests in the amount of time set below.
 					timeout: 5 * 60 * 1000
 				});

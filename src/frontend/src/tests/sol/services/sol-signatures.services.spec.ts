@@ -14,7 +14,7 @@ import {
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
-import { address } from '@solana/addresses';
+import { address } from '@solana/web3.js';
 import { type MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
@@ -75,6 +75,7 @@ describe('sol-transactions.services', () => {
 				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 			});
 
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
 			expect(spyFindAssociatedTokenPda).toHaveBeenCalledWith({
 				owner: mockSolAddress,
 				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),

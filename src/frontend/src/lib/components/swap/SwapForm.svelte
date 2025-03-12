@@ -30,8 +30,8 @@
 	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import { validateConvertAmount } from '$lib/utils/convert.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -110,11 +110,12 @@
 
 	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
 		nonNullish($sourceToken)
-			? validateConvertAmount({
+			? validateUserAmount({
 					userAmount,
 					token: $sourceToken,
 					balance: $sourceTokenBalance,
-					fee: totalFee
+					fee: totalFee,
+					isSwapFlow: true
 				})
 			: undefined;
 </script>
@@ -122,46 +123,48 @@
 <ContentWithToolbar>
 	<div>
 		<div class="relative">
-			<TokenInput
-				bind:amount={swapAmount}
-				displayUnit={inputUnit}
-				exchangeRate={$sourceTokenExchangeRate}
-				bind:errorType
-				bind:amountSetToMax
-				token={$sourceToken}
-				{customValidate}
-				on:click={() => {
-					dispatch('icShowTokensList', 'source');
-				}}
-			>
-				<span slot="title">{$i18n.tokens.text.source_token_title}</span>
+			<div class="mb-2">
+				<TokenInput
+					bind:amount={swapAmount}
+					displayUnit={inputUnit}
+					exchangeRate={$sourceTokenExchangeRate}
+					bind:errorType
+					bind:amountSetToMax
+					token={$sourceToken}
+					{customValidate}
+					on:click={() => {
+						dispatch('icShowTokensList', 'source');
+					}}
+				>
+					<span slot="title">{$i18n.tokens.text.source_token_title}</span>
 
-				<svelte:fragment slot="amount-info">
-					{#if nonNullish($sourceToken)}
-						<div class="text-tertiary">
-							<TokenInputAmountExchange
-								amount={swapAmount}
-								exchangeRate={$sourceTokenExchangeRate}
+					<svelte:fragment slot="amount-info">
+						{#if nonNullish($sourceToken)}
+							<div class="text-tertiary">
+								<TokenInputAmountExchange
+									amount={swapAmount}
+									exchangeRate={$sourceTokenExchangeRate}
+									token={$sourceToken}
+									bind:displayUnit={exchangeValueUnit}
+								/>
+							</div>
+						{/if}
+					</svelte:fragment>
+
+					<svelte:fragment slot="balance">
+						{#if nonNullish($sourceToken)}
+							<MaxBalanceButton
+								bind:amountSetToMax
+								bind:amount={swapAmount}
+								error={nonNullish(errorType)}
+								balance={$sourceTokenBalance}
 								token={$sourceToken}
-								bind:displayUnit={exchangeValueUnit}
+								fee={BigNumber.from(totalFee)}
 							/>
-						</div>
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="balance">
-					{#if nonNullish($sourceToken)}
-						<MaxBalanceButton
-							bind:amountSetToMax
-							bind:amount={swapAmount}
-							error={nonNullish(errorType)}
-							balance={$sourceTokenBalance}
-							token={$sourceToken}
-							fee={BigNumber.from(totalFee)}
-						/>
-					{/if}
-				</svelte:fragment>
-			</TokenInput>
+						{/if}
+					</svelte:fragment>
+				</TokenInput>
+			</div>
 
 			<SwapSwitchTokensButton disabled={disableSwitchTokens} on:icSwitchTokens={onTokensSwitch} />
 

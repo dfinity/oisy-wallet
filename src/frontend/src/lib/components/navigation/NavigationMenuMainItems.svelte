@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget, Page } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { AIRDROPS_ENABLED } from '$env/airdrops.env.js';
+	import { REWARDS_ENABLED } from '$env/rewards.env.js';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
@@ -21,13 +22,18 @@
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import {
 		isRouteActivity,
-		isRouteAirdrops,
+		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings,
 		isRouteTokens,
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils.js';
+
+	export let testIdPrefix: string | undefined = undefined;
+
+	const addTestIdPrefix = (testId: string): string =>
+		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
 
 	// If we pass $page directly, we get a type error: for some reason (I cannot find any
 	// documentation on it), the type of $page is not `Page`, but `unknown`. So we need to manually
@@ -54,7 +60,7 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.tokens}
 	selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
-	testId={NAVIGATION_ITEM_TOKENS}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
 	<IconWallet />
 	{$i18n.navigation.text.tokens}
@@ -69,23 +75,25 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.activity}
 	selected={isRouteActivity(pageData)}
-	testId={NAVIGATION_ITEM_ACTIVITY}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
 	<IconActivity />
 	{$i18n.navigation.text.activity}
 </NavigationItem>
 
-{#if AIRDROPS_ENABLED}
+{#if REWARDS_ENABLED}
 	<NavigationItem
 		href={networkUrl({
-			path: AppPath.Airdrops,
+			path: AppPath.Rewards,
 			networkId: $networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
 		ariaLabel={$i18n.navigation.alt.airdrops}
-		selected={isRouteAirdrops(pageData)}
-		testId={NAVIGATION_ITEM_AIRDROPS}
+		selected={isRouteRewards(pageData)}
+		testId={addTestIdPrefix(NAVIGATION_ITEM_AIRDROPS)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
 	>
 		<IconGift />
 		{$i18n.navigation.text.airdrops}
@@ -101,7 +109,7 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	selected={isRouteDappExplorer(pageData)}
-	testId={NAVIGATION_ITEM_EXPLORER}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
 	<IconlyUfo />
 	{$i18n.navigation.text.dapp_explorer}
@@ -116,7 +124,7 @@
 	})}
 	ariaLabel={$i18n.navigation.alt.settings}
 	selected={isRouteSettings(pageData)}
-	testId={NAVIGATION_ITEM_SETTINGS}
+	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >
 	<IconlySettings />
 	{$i18n.navigation.text.settings}

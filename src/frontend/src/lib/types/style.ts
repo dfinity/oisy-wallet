@@ -7,3 +7,14 @@ export type ButtonColorStyle =
 	| 'tertiary-alt'
 	| 'error'
 	| 'success';
+
+export type BadgeVariant = 'default' | 'info' | 'error' | 'warning' | 'success' | 'outline';
+
+export type TagVariant =
+	| 'default'
+	| 'emphasis'
+	| 'info'
+	| 'error'
+	| 'warning'
+	| 'success'
+	| 'outline';

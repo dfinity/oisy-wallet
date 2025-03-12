@@ -22,6 +22,7 @@ interface I18nCore {
 		copy: string;
 		clear_filter: string;
 		not_available: string;
+		new: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string; back: string };
@@ -111,7 +112,7 @@ interface I18nDapps {
 	};
 }
 
-interface I18nAirdrops {
+interface I18nRewards {
 	text: {
 		title: string;
 		active_campaigns: string;
@@ -120,6 +121,7 @@ interface I18nAirdrops {
 		participate_title: string;
 		share: string;
 		learn_more: string;
+		check_status: string;
 		requirements_title: string;
 		modal_button_text: string;
 		activity_button_text: string;
@@ -132,6 +134,8 @@ interface I18nAirdrops {
 		state_modal_content_text: string;
 		carousel_slide_title: string;
 		carousel_slide_cta: string;
+		sprinkles_earned: string;
+		youre_eligible: string;
 	};
 	alt: { upcoming_campaigns: string };
 }
@@ -354,15 +358,16 @@ interface I18nSend {
 		cketh_certified: string;
 		pending_bitcoin_transaction: string;
 		no_available_utxos: string;
-		ata_will_be_calculated: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
 		insufficient_funds: string;
 		unknown_minimum_ckbtc_amount: string;
 		unknown_minimum_cketh_amount: string;
+		unknown_minimum_amount: string;
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
+		minimum_amount: string;
 		minimum_ledger_fees: string;
 		minimum_cketh_balance: string;
 		unknown_cketh: string;
@@ -863,7 +868,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
-	airdrops: I18nAirdrops;
+	rewards: I18nRewards;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;

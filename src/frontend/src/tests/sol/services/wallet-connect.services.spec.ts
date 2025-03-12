@@ -7,7 +7,7 @@ import {
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
-import type { CompilableTransactionMessage } from '@solana/transaction-messages';
+import type { CompilableTransactionMessage } from '@solana/web3.js';
 
 describe('wallet-connect.services', () => {
 	describe('decode', () => {
