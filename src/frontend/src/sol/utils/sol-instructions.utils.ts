@@ -193,9 +193,7 @@ const mapTokenParsedInstruction = async ({
 			mint: tokenAddress
 		} = info as {
 			destination: SolAddress;
-			tokenAmount: {
-				amount: string;
-			};
+			tokenAmount: { amount: string };
 			source: SolAddress;
 			mint: SplTokenAddress;
 		};
@@ -215,6 +213,70 @@ const mapTokenParsedInstruction = async ({
 		const value = cumulativeBalances?.[from] ?? 0n;
 
 		return { value, from, to };
+	}
+
+	if (type === 'mintTo') {
+		// We need to cast the type since it is not implied
+		const {
+			account: to,
+			mint: tokenAddress,
+			amount: value
+		} = info as {
+			account: SolAddress;
+			mint: SplTokenAddress;
+			amount: string;
+		};
+
+		// For a mint transaction, we consider the token as the source of the transaction
+		return { value: BigInt(value), from: tokenAddress, to, tokenAddress };
+	}
+
+	if (type === 'burn') {
+		// We need to cast the type since it is not implied
+		const {
+			account: from,
+			mint: tokenAddress,
+			amount: value
+		} = info as {
+			account: SolAddress;
+			mint: SplTokenAddress;
+			amount: string;
+		};
+
+		// For a burn transaction, we consider the token as the destination of the transaction
+		return { value: BigInt(value), from, to: tokenAddress, tokenAddress };
+	}
+
+	if (type === 'mintToChecked') {
+		// We need to cast the type since it is not implied
+		const {
+			account: to,
+			mint: tokenAddress,
+			tokenAmount: { amount: value }
+		} = info as {
+			account: SolAddress;
+			mint: SplTokenAddress;
+			tokenAmount: { amount: string };
+		};
+
+		// For a mint transaction, we consider the token as the source of the transaction
+		return { value: BigInt(value), from: tokenAddress, to, tokenAddress };
+	}
+
+	if (type === 'burnChecked') {
+		// We need to cast the type since it is not implied
+		const {
+			account: from,
+			mint: tokenAddress,
+			tokenAmount: { amount: value }
+		} = info as {
+			account: SolAddress;
+			mint: SplTokenAddress;
+			tokenAmount: { amount: string };
+		};
+
+		// For a burn transaction, we consider the token as the destination of the transaction
+		return { value: BigInt(value), from, to: tokenAddress, tokenAddress };
 	}
 };
 
@@ -291,9 +353,7 @@ const mapToken2022ParsedInstruction = async ({
 			mint: tokenAddress
 		} = info as {
 			destination: SolAddress;
-			tokenAmount: {
-				amount: string;
-			};
+			tokenAmount: { amount: string };
 			source: SolAddress;
 			mint: SplTokenAddress;
 		};
