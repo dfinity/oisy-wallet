@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
