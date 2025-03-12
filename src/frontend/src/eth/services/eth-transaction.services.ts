@@ -1,5 +1,6 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
+import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -99,6 +100,8 @@ const processPendingTransaction = async ({
 	await wait();
 
 	await processMinedTransaction({ hash: transactionHash, token, value });
+
+	await loadEthereumTransactions({ tokenId: token.id, networkId: token.network.id });
 };
 
 const processMinedTransaction = async ({

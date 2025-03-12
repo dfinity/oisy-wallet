@@ -22,6 +22,8 @@ export const loadEthereumTransactions = ({
 	tokenId: TokenId;
 	networkId: NetworkId;
 }): Promise<ResultSuccess> => {
+	console.log('loadEthereumTransactions', { networkId, tokenId });
+
 	if (isSupportedEthTokenId(tokenId)) {
 		return loadEthTransactions({ networkId, tokenId });
 	}
