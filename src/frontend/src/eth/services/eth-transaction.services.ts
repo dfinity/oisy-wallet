@@ -100,8 +100,6 @@ const processPendingTransaction = async ({
 	await wait();
 
 	await processMinedTransaction({ hash: transactionHash, token, value });
-
-	await loadEthereumTransactions({ tokenId: token.id, networkId: token.network.id });
 };
 
 const processMinedTransaction = async ({
@@ -138,12 +136,7 @@ const processMinedTransaction = async ({
 	// This is for simplicity reasons and because it allows us to avoid making an additional call to getTransaction.
 	const { timestamp, ...rest } = minedTransaction;
 
-	// await 5 seconds
-	await new Promise((resolve) => setTimeout(resolve, 5000));
-
-	const foo = await getTransaction(hash);
-
-	console.log('minedTransaction', token, minedTransaction, foo);
+	console.log('minedTransaction', token, minedTransaction);
 
 	ethTransactionsStore.update({
 		tokenId: token.id,
@@ -154,6 +147,8 @@ const processMinedTransaction = async ({
 			...(nonNullish(value) && { value })
 		}
 	});
+
+	await loadEthereumTransactions({ tokenId: token.id, networkId: token.network.id });
 
 	// Reload balance as a transaction has been mined
 	await reloadEthereumBalance(token);
