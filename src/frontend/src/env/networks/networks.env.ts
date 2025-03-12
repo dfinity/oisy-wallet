@@ -6,7 +6,6 @@ import {
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { BTC_MAINNET_ENABLED } from '$env/networks/networks.btc.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
@@ -19,7 +18,6 @@ import bitcoinTestnetBW from '$lib/assets/networks/bitcoin-testnet-bw.svg';
 import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
 import icpBW from '$lib/assets/networks/icp-bw.svg';
 import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
-import { LOCAL } from '$lib/constants/app.constants';
 import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
@@ -132,13 +130,3 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin (Regtest)',
 	explorerUrl: BTC_REGTEST_EXPLORER_URL
 };
-
-const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
-	...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_NETWORK] : []),
-	BTC_TESTNET_NETWORK,
-	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])
-];
-
-export const SUPPORTED_BITCOIN_NETWORKS_IDS: NetworkId[] = SUPPORTED_BITCOIN_NETWORKS.map(
-	({ id }) => id
-);
