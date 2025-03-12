@@ -18,7 +18,7 @@ filter() {
   while read -r line; do if [[ "$line" = *.sh ]] || file "$line" | grep -qw Bourne; then echo "$line"; fi; done
 }
 
-options=(-e SC1091)
+options=(-e SC1090 -e SC1091)
 
 case "${1:-}" in
 --help) print_help && exit 0 ;;
