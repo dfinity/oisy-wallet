@@ -103,6 +103,20 @@ describe('sol-transactions.services', () => {
 			});
 		});
 
+		it('should remove duplicates signatures', async () => {
+			spyFetchSignatures.mockImplementation(({ wallet }: { wallet: Address }) => {
+				return wallet.toString() === mockAtaAddress
+					? mockSignaturesAta1
+					: wallet.toString() === mockAtaAddress2
+						? mockSignaturesSol
+						: mockSignaturesSol;
+			});
+
+			const signatures = await getSolSignatures(mockParams);
+
+			expect(signatures).toEqual([...mockSignaturesSol, ...mockSignaturesAta1]);
+		});
+
 		it('should handle no token list', async () => {
 			const { tokensList: _, ...params } = mockParams;
 

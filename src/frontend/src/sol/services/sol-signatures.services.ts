@@ -66,7 +66,12 @@ export const getSolSignatures = async ({
 		Promise.resolve([])
 	);
 
-	return [...solSignatures, ...ataSignatures];
+	const allSignatures = [...solSignatures, ...ataSignatures];
+
+	// Since the same signature can be associated with multiple addresses (either the owner address or any of its ATA addresses), we need to filter out duplicates
+	return allSignatures.filter(
+		(signature, index, self) => self.findIndex((s) => s.signature === signature.signature) === index
+	);
 };
 
 /**
