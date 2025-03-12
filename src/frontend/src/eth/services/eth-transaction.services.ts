@@ -111,7 +111,7 @@ const processMinedTransaction = async ({
 	token: Token;
 	value?: BigNumber;
 }) => {
-	const { getTransaction } = alchemyProviders(token.network.id);
+	const { getTransaction, getTransactionReceipt } = alchemyProviders(token.network.id);
 	const minedTransaction = await getTransaction(hash);
 
 	if (isNullish(minedTransaction)) {
@@ -136,7 +136,9 @@ const processMinedTransaction = async ({
 	// This is for simplicity reasons and because it allows us to avoid making an additional call to getTransaction.
 	const { timestamp, ...rest } = minedTransaction;
 
-	console.log('minedTransaction', token, minedTransaction);
+	const foo = await getTransactionReceipt(hash);
+
+	console.log('minedTransaction', token, minedTransaction, foo);
 
 	ethTransactionsStore.update({
 		tokenId: token.id,
@@ -148,6 +150,7 @@ const processMinedTransaction = async ({
 		}
 	});
 
+	// Reload transactions as a transaction has been mined
 	await loadEthereumTransactions({ tokenId: token.id, networkId: token.network.id });
 
 	// Reload balance as a transaction has been mined
