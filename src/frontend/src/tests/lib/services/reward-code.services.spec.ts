@@ -167,10 +167,10 @@ describe('reward-code', () => {
 		});
 	});
 
-	describe('getAirdrops', () => {
+	describe('getRewards', () => {
 		const lastTimestamp = BigInt(Date.now());
 
-		const mockedAirdrop: RewardInfo = {
+		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
@@ -179,11 +179,11 @@ describe('reward-code', () => {
 		const mockedUserData: UserData = {
 			is_vip: [false],
 			airdrops: [],
-			usage_awards: [[mockedAirdrop]],
+			usage_awards: [[mockedReward]],
 			last_snapshot_timestamp: [lastTimestamp],
 			sprinkles: []
 		};
-		const expectedAirdrop: RewardInfo = {
+		const expectedReward: RewardInfo = {
 			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
@@ -203,7 +203,7 @@ describe('reward-code', () => {
 				nullishIdentityErrorMessage
 			});
 
-			expect(result).toEqual({ airdrops: [expectedAirdrop], lastTimestamp });
+			expect(result).toEqual({ rewards: [expectedReward], lastTimestamp });
 		});
 	});
 

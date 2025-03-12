@@ -10,22 +10,23 @@ import {
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { BigNumber } from '@ethersproject/bignumber';
+import type {RewardResponseInfo} from "$lib/types/reward";
 
 describe('rewards utils', () => {
-	describe('loadAirdropResult', () => {
+	describe('loadRewardResult', () => {
 		beforeEach(() => {
 			sessionStorage.clear();
 		});
 
 		const lastTimestamp = BigInt(Date.now());
-		const mockedAirdrop: RewardInfo = {
+		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
 			name: ['airdrop']
 		};
 
-		it('should return falsy airdrop result if result was already loaded', async () => {
+		it('should return falsy reward result if result was already loaded', async () => {
 			sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
 
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
@@ -36,7 +37,7 @@ describe('rewards utils', () => {
 			expect(receivedJackpot).toBe(false);
 		});
 
-		it('should return falsy airdrop result and set entry in the session storage', async () => {
+		it('should return falsy reward result and set entry in the session storage', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],
@@ -56,11 +57,11 @@ describe('rewards utils', () => {
 			expect(sessionStorage.getItem(INITIAL_REWARD_RESULT)).toBe('true');
 		});
 
-		it('should return isAirdrop as true and set entry in the session storage', async () => {
+		it('should return isReward as true and set entry in the session storage', async () => {
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],
-				usage_awards: [[mockedAirdrop]],
+				usage_awards: [[mockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
 				sprinkles: []
 			};
@@ -77,11 +78,11 @@ describe('rewards utils', () => {
 		});
 
 		it('should return isJackpot as true and set entry in the session storage', async () => {
-			const customMockedAirdrop: RewardInfo = { ...mockedAirdrop, name: ['jackpot'] };
+			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],
-				usage_awards: [[customMockedAirdrop]],
+				usage_awards: [[customMockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
 				sprinkles: []
 			};
@@ -98,11 +99,11 @@ describe('rewards utils', () => {
 		});
 
 		it('should return isJackpot as true if one of several received rewards is a jackpot and set entry in the session storage', async () => {
-			const customMockedAirdrop: RewardInfo = { ...mockedAirdrop, name: ['jackpot'] };
+			const customMockedReward: RewardInfo = { ...mockedReward, name: ['jackpot'] };
 			const mockedUserData: UserData = {
 				is_vip: [false],
 				airdrops: [],
-				usage_awards: [[mockedAirdrop, customMockedAirdrop]],
+				usage_awards: [[mockedReward, customMockedReward]],
 				last_snapshot_timestamp: [lastTimestamp],
 				sprinkles: []
 			};
@@ -164,10 +165,10 @@ describe('rewards utils', () => {
 		});
 	});
 
-	describe('getAirdropsBalance', () => {
+	describe('getRewardsBalance', () => {
 		const lastTimestamp = BigInt(Date.now());
 
-		const mockedAirdrop: RewardInfo = {
+		const mockedReward: RewardResponseInfo = {
 			amount: BigInt(100),
 			timestamp: lastTimestamp,
 			name: 'airdrop',
@@ -175,29 +176,29 @@ describe('rewards utils', () => {
 		};
 
 		it('should return the correct rewards balance of multiple rewards', () => {
-			const mockedAirdrops: RewardInfo[] = [
-				mockedAirdrop,
-				{ ...mockedAirdrop, amount: BigInt(200) },
-				{ ...mockedAirdrop, amount: BigInt(300) }
+			const mockedRewards: RewardResponseInfo[] = [
+				mockedReward,
+				{ ...mockedReward, amount: BigInt(200) },
+				{ ...mockedReward, amount: BigInt(300) }
 			];
 
-			const result = getRewardsBalance(mockedAirdrops);
+			const result = getRewardsBalance(mockedRewards);
 
 			expect(result).toEqual(BigNumber.from(600));
 		});
 
 		it('should return the correct rewards balance of a single airdrop', () => {
-			const mockedAirdrops: RewardInfo[] = [mockedAirdrop];
+			const mockedRewards: RewardResponseInfo[] = [mockedReward];
 
-			const result = getRewardsBalance(mockedAirdrops);
+			const result = getRewardsBalance(mockedRewards);
 
 			expect(result).toEqual(BigNumber.from(100));
 		});
 
 		it('should return zero for an empty list of rewards', () => {
-			const mockedAirdrops: RewardInfo[] = [];
+			const mockedRewards: RewardResponseInfo[] = [];
 
-			const result = getRewardsBalance(mockedAirdrops);
+			const result = getRewardsBalance(mockedRewards);
 
 			expect(result).toEqual(ZERO);
 		});
