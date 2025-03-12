@@ -23,6 +23,7 @@ import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
+import type {RewardResponseInfo} from "$lib/types/reward";
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
@@ -183,7 +184,7 @@ describe('reward-code', () => {
 			last_snapshot_timestamp: [lastTimestamp],
 			sprinkles: []
 		};
-		const expectedReward: RewardInfo = {
+		const expectedReward: RewardResponseInfo = {
 			timestamp: lastTimestamp,
 			amount: BigInt(1000000),
 			ledger: mockIdentity.getPrincipal(),
