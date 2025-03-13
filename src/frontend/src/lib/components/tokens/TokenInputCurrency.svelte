@@ -49,6 +49,6 @@
 		height: 100%;
 		border: none;
 		border-radius: 0;
-		padding: 0 0 0 0.75rem;
+		padding: 0 4rem 0 0.75rem;
 	}
 </style>
