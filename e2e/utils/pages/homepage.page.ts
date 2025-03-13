@@ -25,6 +25,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
+import { ViewportAdjuster } from '../helpers/viewport-utils';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import {
 	getReceiveTokensModalAddressLabelSelector,
@@ -390,6 +391,8 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		const viewportAdjuster = new ViewportAdjuster(this.#page);
+		await viewportAdjuster.checkAndAdjustViewport();
 		if (freezeCarousel) {
 			await this.setCarouselFirstSlide();
 			await this.waitForLoadState();
