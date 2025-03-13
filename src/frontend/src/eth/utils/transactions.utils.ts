@@ -1,6 +1,6 @@
 import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
-import type { OptionEthAddress } from '$lib/types/address';
+import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -30,7 +30,7 @@ export const mapEthTransactionUi = ({
 	$ethAddress
 }: {
 	transaction: Transaction;
-	ckMinterInfoAddresses: OptionEthAddress[];
+	ckMinterInfoAddresses: EthAddress[];
 	$ethAddress: OptionEthAddress;
 }): EthTransactionUi => {
 	const { from, to } = transaction;
@@ -40,7 +40,7 @@ export const mapEthTransactionUi = ({
 		id: transaction.hash ?? '',
 		type: ckMinterInfoAddresses.includes(from.toLowerCase())
 			? 'withdraw'
-			: ckMinterInfoAddresses.includes(to?.toLowerCase())
+			: nonNullish(to) && ckMinterInfoAddresses.includes(to.toLowerCase())
 				? 'deposit'
 				: from?.toLowerCase() === $ethAddress?.toLowerCase()
 					? 'send'
