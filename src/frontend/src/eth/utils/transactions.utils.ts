@@ -4,7 +4,8 @@ import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import {
 	toCkErc20HelperContractAddress,
-	toCkEthHelperContractAddress
+	toCkEthHelperContractAddress,
+	toCkMinterAddress
 } from '$icp-eth/utils/cketh.utils';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -53,6 +54,7 @@ export const mapAddressToName = ({
 
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(ckMinterInfo);
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(ckMinterInfo);
+	const ckMinerAddress = toCkMinterAddress(ckMinterInfo);
 
 	return (
 		putativeErc20TokenName ??
@@ -60,7 +62,9 @@ export const mapAddressToName = ({
 			? 'ckETH Minter Helper Contract'
 			: address === ckErc20HelperContractAddress
 				? 'ckERC20 Minter Helper Contract'
-				: undefined)
+				: address === ckMinerAddress
+					? 'CK Ethereum Minter'
+					: undefined)
 	);
 };
 

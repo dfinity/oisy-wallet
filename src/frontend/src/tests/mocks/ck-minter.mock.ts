@@ -5,6 +5,8 @@ export const mockEthHelperContractAddress = 'eth-helper-contract-address';
 
 export const mockErc20HelperContractAddress = 'erc20-helper-contract-address';
 
+export const mockCkEthereumMinterAddress = 'ck-minter-address';
+
 export const mockCkMinterInfo = {
 	deposit_with_subaccount_helper_contract_address: toNullable(''),
 	eth_balance: toNullable(100n),
@@ -24,7 +26,7 @@ export const mockCkMinterInfo = {
 	last_eth_scraped_block_number: toNullable(100n),
 	minimum_withdrawal_amount: toNullable(100n),
 	erc20_balances: toNullable([]),
-	minter_address: toNullable(''),
+	minter_address: toNullable(mockCkEthereumMinterAddress),
 	last_deposit_with_subaccount_scraped_block_number: toNullable(100n),
 	ethereum_block_height: toNullable({ Safe: null })
 };

@@ -9,6 +9,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction } from '$lib/types/transaction';
 import {
+	mockCkEthereumMinterAddress,
 	mockCkMinterInfo,
 	mockErc20HelperContractAddress,
 	mockEthHelperContractAddress
@@ -123,6 +124,15 @@ describe('transactions.utils', () => {
 					address: mockErc20HelperContractAddress
 				})
 			).toBe('ckERC20 Minter Helper Contract');
+		});
+
+		it('should return the CK Minter name if the address matches the CK Minter', () => {
+			expect(
+				mapAddressToName({
+					...mockParams,
+					address: mockCkEthereumMinterAddress
+				})
+			).toBe('CK Ethereum Minter');
 		});
 
 		it('should return undefined if the CK Helper Contract info are nullish', () => {
