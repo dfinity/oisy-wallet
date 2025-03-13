@@ -8,8 +8,10 @@
 		modalDAppDetails,
 		modalHideToken,
 		modalIcHideToken,
-		modalAirdropDetails
+		modalAirdropDetails,
+		modalVipQrCode
 	} from '$lib/derived/modal.derived';
+	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -26,4 +28,8 @@
 	{:else if $modalAirdropDetails}
 		<AirdropModalDetails />
 	{/if}
+{/if}
+
+{#if $modalVipQrCode}
+	<VipQrCodeModal />
 {/if}

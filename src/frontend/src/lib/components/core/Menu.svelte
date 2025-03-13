@@ -126,7 +126,3 @@
 		</span>
 	</div>
 </Popover>
-
-{#if $modalVipQrCode}
-	<VipQrCodeModal />
-{/if}
