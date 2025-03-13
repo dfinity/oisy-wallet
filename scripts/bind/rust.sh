@@ -9,7 +9,7 @@ set -euo pipefail
 	- Rust crates at src/\$canister/{types,client,pic}/
 
 	Usage:
-	  $(basename $0) [canister_name..]
+	  $(basename "$0") [canister_name..]
 
 	Properties:
 	- Creates Rust bindings files at src/\$canister/{types,client,pic}/src/lib.rs
@@ -25,8 +25,10 @@ else
   canisters=("${@}")
 fi
 
+BINDINGS=(types) # TODO: Bindings for client & pic
+
 for canister in "${canisters[@]}"; do
-  for binding in types; do # TODO: Bindings for client & pic
+  for binding in "${BINDINGS[@]}"; do
     # Paths:
     canister_binding_config="./scripts/bind/rust/${canister}.${binding}.toml"
     candid_file=".dfx/local/canisters/$canister/${canister}.did"

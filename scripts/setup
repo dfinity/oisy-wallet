@@ -14,7 +14,7 @@ for tool in "${@}"; do
     ;;
   "curl")
     url="$(jq -r '.[env.tool].version as $version | .[env.tool].url | gsub("[$]{VERSION}"; $version)' dev-tools.json)"
-    pipe=($(jq -r '.[env.tool].pipe // "cat"' dev-tools.json))
+    mapfile -t pipe < <(jq -r '.[env.tool].pipe // "cat"' dev-tools.json)
     mkdir -p "$(dirname "$target")"
     curl -Lf "$url" | "${pipe[@]}" | install -m 755 /dev/stdin "$target"
     ;;

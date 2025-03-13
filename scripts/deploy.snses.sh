@@ -1,8 +1,8 @@
 #!/bin/bash
 
 dfx identity new minter
-MINTER_ID=$(dfx identity get-principal --identity minter)
+MINTER_ID="$(dfx identity get-principal --identity minter)"
 
-PEM_FILE=/Users/daviddalbusco/.config/dfx/identity/default/identity.pem
+PEM_FILE="/Users/daviddalbusco/.config/dfx/identity/default/identity.pem"
 
-node ./scripts/deploy.snses.mjs --minterId $MINTER_ID --pemFile $PEM_FILE
+node ./scripts/deploy.snses.mjs --minterId "$MINTER_ID" --pemFile "$PEM_FILE"
