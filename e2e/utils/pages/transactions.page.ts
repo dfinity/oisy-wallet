@@ -45,6 +45,6 @@ export class TransactionsPage extends HomepageLoggedIn {
 			state: 'hidden'
 		});
 		await this.waitForLoadState();
-		await this.takeScreenshot({ freezeCarousel: true });
+		await this.takeScreenshot();
 	};
 }
