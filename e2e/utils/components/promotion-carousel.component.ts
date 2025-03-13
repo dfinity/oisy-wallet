@@ -1,4 +1,4 @@
-import { CAROUSEL_SLIDE, CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
+import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 import type { Page } from '@playwright/test';
 
 export class PromotionCarousel {
@@ -12,7 +12,7 @@ export class PromotionCarousel {
 		const navigation1Selector = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}"]:visible`;
 		await this.#page.click(navigation1Selector);
 		await this.#page.evaluate(() => {
-			const slide = document.querySelector(`div[data-tid="${CAROUSEL_SLIDE}"]`);
+			const slide = document.querySelector(`div[data-tid="carousel-slide"]`);
 			if (slide) {
 				slide.setAttribute(
 					'style',
