@@ -72,8 +72,10 @@
 </div>
 
 <div class="-m-2">
+	<!-- todo: css hack, fix in gix component -->
 	<Collapsible expandButton={false} externalToggle={true} bind:toggleContent>
-		<div class="p-2">
+		<div class="p-2"
+			><!-- offset above hack -->
 			<div class="flex items-center">
 				<TokenInputContainer {focused} error={slippageValueError} styleClass="h-12">
 					<TokenInputCurrency
