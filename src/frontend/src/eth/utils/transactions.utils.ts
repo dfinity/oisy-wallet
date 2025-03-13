@@ -71,9 +71,9 @@ export const mapAddressToName = ({
 		...(nonNullish(ckMinterAddress) && { [ckMinterAddress.toLowerCase()]: 'CK Ethereum Minter' })
 	};
 
-	const putativeMinterName: string | undefined = ckMinterNameMap[address.toLowerCase()];
+	const putativeCkMinterName: string | undefined = ckMinterNameMap[address.toLowerCase()];
 
-	return putativeErc20TokenName ?? putativeMinterName;
+	return putativeErc20TokenName ?? putativeCkMinterName;
 };
 
 /**
