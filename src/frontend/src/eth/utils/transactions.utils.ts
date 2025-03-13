@@ -60,10 +60,9 @@ export const mapAddressToName = ({
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(ckMinterInfo);
 	const ckMinterAddress = toCkMinterAddress(ckMinterInfo);
 
-	return (
-		putativeErc20TokenName ??
-		// TODO: find a way to get the contracts name more dynamically
-		(nonNullish(ckEthHelperContractAddress) &&
+	// TODO: find a way to get the contracts name more dynamically
+	const putativeMinterName: string | undefined =
+		nonNullish(ckEthHelperContractAddress) &&
 		address.toLowerCase() === ckEthHelperContractAddress.toLowerCase()
 			? 'ckETH Minter Helper Contract'
 			: nonNullish(ckErc20HelperContractAddress) &&
@@ -71,8 +70,9 @@ export const mapAddressToName = ({
 				? 'ckERC20 Minter Helper Contract'
 				: nonNullish(ckMinterAddress) && address.toLowerCase() === ckMinterAddress.toLowerCase()
 					? 'CK Ethereum Minter'
-					: undefined)
-	);
+					: undefined;
+
+	return putativeErc20TokenName ?? putativeMinterName;
 };
 
 /**
