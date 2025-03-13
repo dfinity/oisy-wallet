@@ -387,16 +387,16 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		if (freezeCarousel) {
-			await this.setCarouselFirstSlide();
-			await this.waitForLoadState();
-		}
-
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
 		await this.#page.mouse.move(0, 0);
+
+		if (freezeCarousel) {
+			await this.setCarouselFirstSlide();
+			await this.waitForLoadState();
+		}
 
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
