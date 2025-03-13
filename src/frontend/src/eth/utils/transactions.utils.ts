@@ -58,6 +58,7 @@ export const mapAddressToName = ({
 
 	return (
 		putativeErc20TokenName ??
+		// TODO: find a way to get the contracts name more dynamically
 		(address === ckEthHelperContractAddress
 			? 'ckETH Minter Helper Contract'
 			: address === ckErc20HelperContractAddress
