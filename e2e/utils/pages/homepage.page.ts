@@ -297,10 +297,7 @@ abstract class Homepage {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
 		}
-
-		await this.promotionCarousel.navigateToSlide(1);
-		await this.promotionCarousel.freezeCarousel();
-
+		await this.promotionCarousel.freezeCarousel(1);
 		await this.waitForLoadState();
 	}
 
