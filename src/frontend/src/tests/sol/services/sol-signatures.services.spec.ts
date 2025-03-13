@@ -1,5 +1,8 @@
+import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { last } from '$lib/utils/array.utils';
 import * as solanaApi from '$sol/api/solana.api';
+import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import * as solTransactionsServices from '$sol/services/sol-transactions.services';
@@ -13,6 +16,7 @@ import {
 } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
+import { notEmptyString } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
 import { address } from '@solana/web3.js';
 import { type MockInstance } from 'vitest';
@@ -31,6 +35,65 @@ describe('sol-transactions.services', () => {
 	});
 
 	describe('getSolTransactions', () => {
+		it('should match the total balance of an account', async () => {
+			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
+			assert(
+				notEmptyString(ALCHEMY_API_KEY),
+				'ALCHEMY_API_KEY is empty, please provide a valid key in the env file as VITE_ALCHEMY_API_KEY'
+			);
+
+			// We use a real address to test the function. Ideally, the address is a very active one.
+			const address = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
+
+			const loadTransactions = async (
+				lastSignature?: string | undefined
+			): Promise<SolTransactionUi[]> => {
+				const transactions = await getSolTransactions({
+					address,
+					network: SolanaNetworks.mainnet,
+					before: lastSignature,
+					limit: 10
+				});
+
+				if (transactions.length === 0) {
+					return transactions;
+				}
+
+				const nextTransactions: SolTransactionUi[] = await loadTransactions(
+					last(transactions)?.signature
+				);
+
+				return [...transactions, ...nextTransactions];
+			};
+
+			const transactions = await loadTransactions();
+
+			const { solBalance: transactionSolBalance, totalFee } = transactions.reduce<{
+				solBalance: bigint;
+				totalFee: bigint;
+				signatures: string[];
+			}>(
+				({ solBalance, totalFee, signatures }, { value, type, fee, signature }) => ({
+					solBalance: solBalance + (value ?? 0n) * (type === 'send' ? -1n : 1n),
+					totalFee: signatures.includes(signature) ? totalFee : totalFee + (fee ?? 0n),
+					signatures: [...signatures, signature]
+				}),
+				{
+					solBalance: 0n,
+					totalFee: 0n,
+					signatures: []
+				}
+			);
+
+			const fetchedSolBalance = await loadSolLamportsBalance({
+				address,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(transactionSolBalance - totalFee).toBe(fetchedSolBalance);
+		}, 600000);
+
+		// describe('with mocked dependencies', () => {
 		let spyFetchSignatures: MockInstance;
 		let spyFetchTransactionsForSignature: MockInstance;
 		let spyFindAssociatedTokenPda: MockInstance;
@@ -146,5 +209,6 @@ describe('sol-transactions.services', () => {
 				})
 			).rejects.toThrow(mockError);
 		});
+		// });
 	});
 });
