@@ -15,7 +15,7 @@
 
 	let loading = false;
 
-	const load = async ({ reloading = false }: { reloading?: boolean } = {}) => {
+	const load = async ({ reload = false }: { reload?: boolean } = {}) => {
 		if (loading) {
 			return;
 		}
@@ -49,11 +49,11 @@
 
 		tokenIdLoaded = tokenId;
 
-		const { success } = reloading
+		const { success } = reload
 			? await reloadEthereumTransactions({
-					tokenId,
-					networkId
-				})
+				tokenId,
+				networkId
+			})
 			: await loadEthereumTransactions({ tokenId, networkId });
 
 		if (!success) {
@@ -68,7 +68,7 @@
 	let timer: NodeJS.Timeout | undefined = undefined;
 
 	const reload = async () => {
-		await load({ reloading: true });
+		await load({ reload: true });
 	};
 
 	const startTimer = async () => {
