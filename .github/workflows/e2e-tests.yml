@@ -50,7 +50,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-14-xlarge]
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ needs.check-e2e-changes.outputs.e2e-or-config-changed == 'true' }}
@@ -103,7 +103,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14]
+        os: [ubuntu-24.04, macos-14-xlarge]
     steps:
       - name: Cleared for merging
         run: |
