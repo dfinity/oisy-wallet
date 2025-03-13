@@ -3,6 +3,7 @@
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AirdropModalDetails from '$lib/components/airdrops/AirdropModalDetails.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
+	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,
@@ -11,7 +12,6 @@
 		modalAirdropDetails,
 		modalVipQrCode
 	} from '$lib/derived/modal.derived';
-	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
