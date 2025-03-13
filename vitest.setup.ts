@@ -1,8 +1,4 @@
 import { mockPage } from '$tests/mocks/page.store.mock';
-import {
-	allowLoggingForDebugging,
-	failTestsThatLogToConsole
-} from '$tests/utils/console.test-utils';
 import { HttpAgent } from '@dfinity/agent';
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/svelte';
@@ -22,12 +18,6 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 		getAgent: async () => mock<HttpAgent>()
 	};
 });
-
-failTestsThatLogToConsole();
-
-if (process.env.ALLOW_LOGGING_FOR_DEBUGGING) {
-	allowLoggingForDebugging();
-}
 
 configure({
 	testIdAttribute: 'data-tid'
