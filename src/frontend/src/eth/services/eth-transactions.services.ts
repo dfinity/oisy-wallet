@@ -31,6 +31,13 @@ export const loadEthereumTransactions = ({
 	return loadErc20Transactions({ networkId, tokenId, updateOnly });
 };
 
+// If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
+// Plus we add new transactions to the existing ones.
+export const reloadEthereumTransactions = (params: {
+	tokenId: TokenId;
+	networkId: NetworkId;
+}): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
+
 const loadEthTransactions = async ({
 	networkId,
 	tokenId,
