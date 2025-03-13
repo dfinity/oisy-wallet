@@ -6,6 +6,7 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -13,6 +14,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import {
 		formatSecondsToDate,
@@ -42,15 +44,23 @@
 	let toExplorerUrl: string | undefined;
 	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
 
-	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
-	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
-	let fromDisplay: string;
-	$: fromDisplay = $erc20Tokens.find(({ address }) => address === from)?.name ?? from;
+	let fromDisplay: OptionString;
+	$: fromDisplay = nonNullish(token)
+		? (mapAddressToName({
+				address: from,
+				networkId: token.network.id,
+				erc20Tokens: $erc20Tokens
+			}) ?? from)
+		: from;
 
-	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
-	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
-	let toDisplay: string | undefined;
-	$: toDisplay = $erc20Tokens.find(({ address }) => address === to)?.name ?? to;
+	let toDisplay: OptionString;
+	$: toDisplay = nonNullish(token)
+		? (mapAddressToName({
+				address: to,
+				networkId: token.network.id,
+				erc20Tokens: $erc20Tokens
+			}) ?? to)
+		: to;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
