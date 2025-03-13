@@ -394,6 +394,9 @@ abstract class Homepage {
 		await this.#page.mouse.move(0, 0);
 
 		if (freezeCarousel) {
+			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
+			await this.#page.clock.install();
+			await this.#page.clock.pauseAt(Date.now());
 			await this.setCarouselFirstSlide();
 			await this.waitForLoadState();
 		}
@@ -416,6 +419,11 @@ abstract class Homepage {
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
+
+		if (freezeCarousel) {
+			// Resuming the time that we froze because of the carousel animations.
+			await this.#page.clock.resume();
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
