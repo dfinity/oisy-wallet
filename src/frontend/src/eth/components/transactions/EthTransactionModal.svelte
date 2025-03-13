@@ -6,6 +6,7 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { mapAddressToName } from '$eth/utils/transactions.utils';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -13,6 +14,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
 	import {
 		formatSecondsToDate,
@@ -20,8 +22,6 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { OptionString } from '$lib/types/string';
-	import { mapAddressToName } from '$eth/utils/transactions.utils';
 
 	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
@@ -44,21 +44,23 @@
 	let toExplorerUrl: string | undefined;
 	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
 
-
 	let fromDisplay: OptionString;
-	$: fromDisplay = nonNullish(token) ? (mapAddressToName({
-		address: from,
-		networkId: token.network.id,
-		erc20Tokens: $erc20Tokens
-	}) ?? from) : from;
-
+	$: fromDisplay = nonNullish(token)
+		? (mapAddressToName({
+				address: from,
+				networkId: token.network.id,
+				erc20Tokens: $erc20Tokens
+			}) ?? from)
+		: from;
 
 	let toDisplay: OptionString;
-	$: toDisplay = nonNullish(token) ? (mapAddressToName({
-		address: to,
-		networkId: token.network.id,
-		erc20Tokens: $erc20Tokens
-	}) ?? to) : to;
+	$: toDisplay = nonNullish(token)
+		? (mapAddressToName({
+				address: to,
+				networkId: token.network.id,
+				erc20Tokens: $erc20Tokens
+			}) ?? to)
+		: to;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
