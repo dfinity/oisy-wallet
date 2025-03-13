@@ -1,34 +1,82 @@
 {
 	"BURN": {
 		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai",
-		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai"
+		"name": "MSQ Cycle Burn",
+		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai",
+		"decimals": 8,
+		"symbol": "BURN",
+		"fee": {
+			"__bigint__": "10000"
+		}
 	},
 	"POPEYE": {
 		"ledgerCanisterId": "6fvyi-faaaa-aaaam-qbiga-cai",
-		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai"
+		"name": "Popeye The Sailor",
+		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai",
+		"decimals": 8,
+		"symbol": "POPEYE",
+		"fee": {
+			"__bigint__": "1000000"
+		}
 	},
 	"CLOUD": {
 		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
-		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai"
+		"name": "Crypto Cloud",
+		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
+		"decimals": 8,
+		"symbol": "CLOUD",
+		"fee": {
+			"__bigint__": "100000000"
+		}
 	},
 	"AAA": {
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
-		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai"
+		"name": "aaaaa-aa ∞",
+		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai",
+		"decimals": 8,
+		"symbol": "AAA",
+		"fee": {
+			"__bigint__": "10000"
+		}
 	},
 	"GLDT": {
 		"ledgerCanisterId": "6c7su-kiaaa-aaaar-qaira-cai",
-		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai"
+		"name": "Gold Token",
+		"indexCanisterId": "oo6x4-xiaaa-aaaap-abrza-cai",
+		"decimals": 8,
+		"symbol": "GLDT",
+		"fee": {
+			"__bigint__": "10000000"
+		}
 	},
 	"nICP": {
 		"ledgerCanisterId": "buwm7-7yaaa-aaaar-qagva-cai",
-		"indexCanisterId": "btxkl-saaaa-aaaar-qagvq-cai"
+		"name": "neuron ICP",
+		"indexCanisterId": "btxkl-saaaa-aaaar-qagvq-cai",
+		"decimals": 8,
+		"symbol": "nICP",
+		"fee": {
+			"__bigint__": "10000"
+		}
 	},
 	"vUSD": {
 		"ledgerCanisterId": "aiw2p-tyaaa-aaaam-aebyq-cai",
-		"indexCanisterId": "wdqhz-qyaaa-aaaam-aeccq-cai"
+		"name": "vUSD",
+		"indexCanisterId": "wdqhz-qyaaa-aaaam-aeccq-cai",
+		"decimals": 6,
+		"symbol": "vUSD",
+		"fee": {
+			"__bigint__": "0"
+		}
 	},
 	"RUGGY": {
 		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai",
-		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai"
+		"name": "RUGGY",
+		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai",
+		"decimals": 8,
+		"symbol": "RUGGY",
+		"fee": {
+			"__bigint__": "1000000"
+		}
 	}
 }
