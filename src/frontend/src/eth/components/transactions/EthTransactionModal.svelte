@@ -3,6 +3,7 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -40,6 +41,16 @@
 
 	let toExplorerUrl: string | undefined;
 	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
+
+	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
+	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
+	let fromDisplay: string;
+	$: fromDisplay = $erc20Tokens.find(({ address }) => address === from)?.name ?? from;
+
+	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
+	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
+	let toDisplay: string | undefined;
+	$: toDisplay = $erc20Tokens.find(({ address }) => address === to)?.name ?? to;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -49,19 +60,23 @@
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis({ text: hash })}</output><Copy
+				<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
+				<Copy
 					value={hash}
 					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
 						$hash: hash
 					})}
 					inline
-				/>{#if nonNullish(explorerUrl)}<ExternalLink
+				/>
+				{#if nonNullish(explorerUrl)}
+					<ExternalLink
 						iconSize="18"
 						href={explorerUrl}
 						ariaLabel={$i18n.transaction.alt.open_block_explorer}
 						inline
 						color="blue"
-					/>{/if}
+					/>
+				{/if}
 			</Value>
 		{/if}
 
@@ -88,33 +103,33 @@
 
 		<Value ref="from">
 			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
-			<output>{from}</output><Copy
-				value={from}
-				text={$i18n.transaction.text.from_copied}
-				inline
-			/>{#if nonNullish(fromExplorerUrl)}<ExternalLink
+			<output>{fromDisplay}</output>
+			<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
+			{#if nonNullish(fromExplorerUrl)}
+				<ExternalLink
 					iconSize="18"
 					href={fromExplorerUrl}
 					ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
 					inline
 					color="blue"
-				/>{/if}
+				/>
+			{/if}
 		</Value>
 
-		{#if nonNullish(to)}
+		{#if nonNullish(to) && nonNullish(toDisplay)}
 			<Value ref="to">
 				<svelte:fragment slot="label">{$i18n.transaction.text.interacted_with}</svelte:fragment>
-				<output>{to}</output><Copy
-					value={to}
-					text={$i18n.transaction.text.to_copied}
-					inline
-				/>{#if nonNullish(toExplorerUrl)}<ExternalLink
+				<output>{toDisplay}</output>
+				<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
+				{#if nonNullish(toExplorerUrl)}
+					<ExternalLink
 						iconSize="18"
 						href={toExplorerUrl}
 						ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						inline
 						color="blue"
-					/>{/if}
+					/>
+				{/if}
 			</Value>
 		{/if}
 
