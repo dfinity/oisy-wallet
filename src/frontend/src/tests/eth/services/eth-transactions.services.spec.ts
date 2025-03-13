@@ -5,7 +5,10 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import * as foo from '$eth/rest/etherscan.rest';
 import { EtherscanRest } from '$eth/rest/etherscan.rest';
-import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
+import {
+	loadEthereumTransactions,
+	reloadEthereumTransactions
+} from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ethAddressStore } from '$lib/stores/address.store';
@@ -22,40 +25,43 @@ vi.mock('$eth/rest/etherscan.rest', () => ({
 }));
 
 describe('eth-transactions.services', () => {
+	let spyToastsError: MockInstance;
+	let spyToastsErrorNoTrace: MockInstance;
+
+	const mockErc20UserTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
+		data: { ...token, enabled: true },
+		certified: false
+	}));
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+		spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
+
+		// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		ethAddressStore.set({ data: mockEthAddress, certified: false });
+		erc20UserTokensStore.setAll(mockErc20UserTokens);
+	});
+
 	describe('loadEthereumTransactions', () => {
-		let spyToastsError: MockInstance;
-		let spyToastsErrorNoTrace: MockInstance;
-
-		beforeEach(() => {
-			vi.resetAllMocks();
-
-			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
-			spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
-
-			// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
-			vi.spyOn(console, 'error').mockImplementation(() => {});
-			vi.spyOn(console, 'warn').mockImplementation(() => {});
-		});
-
 		describe('when token is ERC20', () => {
+			let etherscanRestsSpy: MockInstance;
+
+			const mockTransactionsRest = vi.fn();
+
 			const {
 				id: mockTokenId,
 				network: { id: mockNetworkId },
 				symbol: mockSymbol
 			} = USDC_TOKEN;
 
-			const mockErc20UserTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
-				data: { ...token, enabled: true },
-				certified: false
-			}));
-
-			const mockTransactionsRest = vi.fn();
-			let etherscanRestsSpy: MockInstance;
+			const mockTransactions = createMockEthTransactions(3);
 
 			beforeEach(() => {
-				ethAddressStore.set({ data: mockEthAddress, certified: false });
-				erc20UserTokensStore.setAll(mockErc20UserTokens);
-
 				etherscanRestsSpy = vi.spyOn(foo, 'etherscanRests');
 
 				etherscanRestsSpy.mockReturnValue({
@@ -104,7 +110,6 @@ describe('eth-transactions.services', () => {
 			});
 
 			it('should handle ERC20 token transactions correctly', async () => {
-				const mockTransactions = createMockEthTransactions(3);
 				mockTransactionsRest.mockResolvedValueOnce(mockTransactions);
 
 				const result = await loadEthereumTransactions({
@@ -116,8 +121,28 @@ describe('eth-transactions.services', () => {
 				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: mockTransactions });
 			});
 
+			it('should handle ERC20 token transactions correctly when it is update only', async () => {
+				mockTransactionsRest.mockResolvedValueOnce(mockTransactions);
+
+				const existingTransactions = createMockEthTransactions(5);
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: [...existingTransactions, mockTransactions[0]]
+				});
+
+				const result = await loadEthereumTransactions({
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					updateOnly: true
+				});
+
+				expect(result).toEqual({ success: true });
+				expect(get(ethTransactionsStore)).toEqual({
+					[mockTokenId]: [...existingTransactions, ...mockTransactions]
+				});
+			});
+
 			it('should handle errors during transaction fetching gracefully', async () => {
-				const mockTransactions = createMockEthTransactions(5);
 				ethTransactionsStore.set({ tokenId: mockTokenId, transactions: mockTransactions });
 
 				const mockError = new Error('Mock Error');
@@ -140,5 +165,46 @@ describe('eth-transactions.services', () => {
 				});
 			});
 		}, 60000);
+	});
+
+	describe('reloadEthereumTransactions', () => {
+		let etherscanRestsSpy: MockInstance;
+
+		const mockTransactionsRest = vi.fn();
+
+		const {
+			id: mockTokenId,
+			network: { id: mockNetworkId }
+		} = USDC_TOKEN;
+
+		const mockTransactions = createMockEthTransactions(3);
+
+		beforeEach(() => {
+			etherscanRestsSpy = vi.spyOn(foo, 'etherscanRests');
+
+			etherscanRestsSpy.mockReturnValue({
+				transactions: mockTransactionsRest
+			} as unknown as EtherscanRest);
+		});
+
+		it('should handle ERC20 token transactions correctly', async () => {
+			mockTransactionsRest.mockResolvedValueOnce(mockTransactions);
+
+			const existingTransactions = createMockEthTransactions(5);
+			ethTransactionsStore.set({
+				tokenId: mockTokenId,
+				transactions: [...existingTransactions, mockTransactions[0]]
+			});
+
+			const result = await reloadEthereumTransactions({
+				networkId: mockNetworkId,
+				tokenId: mockTokenId
+			});
+
+			expect(result).toEqual({ success: true });
+			expect(get(ethTransactionsStore)).toEqual({
+				[mockTokenId]: [...existingTransactions, ...mockTransactions]
+			});
+		});
 	});
 });
