@@ -12,8 +12,8 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_NETWORKS_IDS,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_TESTNET_NETWORK_ID,
+	SUPPORTED_SOLANA_NETWORKS_IDS
 } from '$env/networks/networks.sol.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -49,7 +49,7 @@ export const isNetworkIdBTCRegtest: IsNetworkIdUtil = (networkId) =>
 export const isNetworkIdSepolia: IsNetworkIdUtil = (networkId) => SEPOLIA_NETWORK_ID === networkId;
 
 export const isNetworkIdSolana: IsNetworkIdUtil = (networkId) =>
-	nonNullish(networkId) && SOLANA_NETWORKS_IDS.includes(networkId);
+	nonNullish(networkId) && SUPPORTED_SOLANA_NETWORKS_IDS.includes(networkId);
 
 export const isNetworkIdSOLMainnet: IsNetworkIdUtil = (networkId) =>
 	SOLANA_MAINNET_NETWORK_ID === networkId;
