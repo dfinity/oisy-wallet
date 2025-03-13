@@ -51,9 +51,9 @@
 
 		const { success } = reload
 			? await reloadEthereumTransactions({
-				tokenId,
-				networkId
-			})
+					tokenId,
+					networkId
+				})
 			: await loadEthereumTransactions({ tokenId, networkId });
 
 		if (!success) {
