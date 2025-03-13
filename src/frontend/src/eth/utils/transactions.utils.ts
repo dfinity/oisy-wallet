@@ -47,6 +47,10 @@ export const mapAddressToName = ({
 	erc20Tokens: Erc20Token[];
 	ckMinterInfo: OptionCertifiedMinterInfo;
 }): OptionString => {
+	if (isNullish(address)) {
+		return undefined;
+	}
+
 	const putativeErc20TokenName: string | undefined = erc20Tokens.find(
 		({ address: tokenAddress, network: { id: tokenNetworkId } }) =>
 			tokenAddress === address && tokenNetworkId === networkId
@@ -54,16 +58,18 @@ export const mapAddressToName = ({
 
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(ckMinterInfo);
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(ckMinterInfo);
-	const ckMinerAddress = toCkMinterAddress(ckMinterInfo);
+	const ckMinterAddress = toCkMinterAddress(ckMinterInfo);
 
 	return (
 		putativeErc20TokenName ??
 		// TODO: find a way to get the contracts name more dynamically
-		(address === ckEthHelperContractAddress
+		(nonNullish(ckEthHelperContractAddress) &&
+		address.toLowerCase() === ckEthHelperContractAddress.toLowerCase()
 			? 'ckETH Minter Helper Contract'
-			: address === ckErc20HelperContractAddress
+			: nonNullish(ckErc20HelperContractAddress) &&
+				  address.toLowerCase() === ckErc20HelperContractAddress.toLowerCase()
 				? 'ckERC20 Minter Helper Contract'
-				: address === ckMinerAddress
+				: nonNullish(ckMinterAddress) && address.toLowerCase() === ckMinterAddress.toLowerCase()
 					? 'CK Ethereum Minter'
 					: undefined)
 	);
