@@ -41,16 +41,13 @@
 			return;
 		}
 
-
 		// We don't reload the same token in a row.
 		if (tokenIdLoaded === tokenId && !reload) {
 			loading = false;
 			return;
 		}
 
-
 		tokenIdLoaded = tokenId;
-
 
 		const { success } = reload
 			? await reloadEthereumTransactions({ tokenId, networkId })
@@ -79,18 +76,15 @@
 		await reload();
 
 		timer = setInterval(reload, WALLET_TIMER_INTERVAL_MILLIS);
-
 	};
 
 	const stopTimer = () => {
-
 		if (isNullish(timer)) {
 			return;
 		}
 
 		clearInterval(timer);
 		timer = undefined;
-
 	};
 
 	onMount(startTimer);
