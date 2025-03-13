@@ -7,7 +7,7 @@ import {
 	toCkEthHelperContractAddress,
 	toCkMinterAddress
 } from '$icp-eth/utils/cketh.utils';
-import type { OptionEthAddress } from '$lib/types/address';
+import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
@@ -47,6 +47,10 @@ export const mapAddressToName = ({
 	erc20Tokens: Erc20Token[];
 	ckMinterInfo: OptionCertifiedMinterInfo;
 }): OptionString => {
+	if (isNullish(address)) {
+		return undefined;
+	}
+
 	const putativeErc20TokenName: string | undefined = erc20Tokens.find(
 		({ address: tokenAddress, network: { id: tokenNetworkId } }) =>
 			tokenAddress === address && tokenNetworkId === networkId
@@ -54,19 +58,22 @@ export const mapAddressToName = ({
 
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(ckMinterInfo);
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(ckMinterInfo);
-	const ckMinerAddress = toCkMinterAddress(ckMinterInfo);
+	const ckMinterAddress = toCkMinterAddress(ckMinterInfo);
 
-	return (
-		putativeErc20TokenName ??
-		// TODO: find a way to get the contracts name more dynamically
-		(address === ckEthHelperContractAddress
-			? 'ckETH Minter Helper Contract'
-			: address === ckErc20HelperContractAddress
-				? 'ckERC20 Minter Helper Contract'
-				: address === ckMinerAddress
-					? 'CK Ethereum Minter'
-					: undefined)
-	);
+	// TODO: find a way to get the contracts name more dynamically
+	const ckMinterNameMap: Record<EthAddress, string> = {
+		...(nonNullish(ckEthHelperContractAddress) && {
+			[ckEthHelperContractAddress.toLowerCase()]: 'ckETH Minter Helper Contract'
+		}),
+		...(nonNullish(ckErc20HelperContractAddress) && {
+			[ckErc20HelperContractAddress.toLowerCase()]: 'ckERC20 Minter Helper Contract'
+		}),
+		...(nonNullish(ckMinterAddress) && { [ckMinterAddress.toLowerCase()]: 'CK Ethereum Minter' })
+	};
+
+	const putativeCkMinterName: string | undefined = ckMinterNameMap[address.toLowerCase()];
+
+	return putativeErc20TokenName ?? putativeCkMinterName;
 };
 
 /**
