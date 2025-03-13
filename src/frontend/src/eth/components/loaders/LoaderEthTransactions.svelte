@@ -1,12 +1,15 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { onDestroy, onMount } from 'svelte';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
-	import { loadEthereumTransactions, reloadEthereumTransactions } from '$eth/services/eth-transactions.services';
+	import {
+		loadEthereumTransactions,
+		reloadEthereumTransactions
+	} from '$eth/services/eth-transactions.services';
+	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import type { TokenId } from '$lib/types/token';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-	import { onDestroy, onMount } from 'svelte';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -46,10 +49,12 @@
 
 		tokenIdLoaded = tokenId;
 
-		const { success } = reloading ? await reloadEthereumTransactions({
-			tokenId,
-			networkId
-		}) : await loadEthereumTransactions({ tokenId, networkId });
+		const { success } = reloading
+			? await reloadEthereumTransactions({
+					tokenId,
+					networkId
+				})
+			: await loadEthereumTransactions({ tokenId, networkId });
 
 		if (!success) {
 			tokenIdLoaded = undefined;
@@ -58,17 +63,13 @@
 		loading = false;
 	};
 
-
 	$: $tokenWithFallback, $tokenNotInitialized, (async () => await load())();
 
-
 	let timer: NodeJS.Timeout | undefined = undefined;
-
 
 	const reload = async () => {
 		await load({ reloading: true });
 	};
-
 
 	const startTimer = async () => {
 		if (nonNullish(timer)) {
@@ -89,12 +90,9 @@
 		timer = undefined;
 	};
 
-
 	onMount(startTimer);
 
 	onDestroy(stopTimer);
-
-
 </script>
 
 <slot />
