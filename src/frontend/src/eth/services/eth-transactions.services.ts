@@ -32,7 +32,7 @@ export const loadEthereumTransactions = ({
 };
 
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
-// Plus we add new transactions to the existing ones.
+// Plus, we add new transactions to the existing ones.
 export const reloadEthereumTransactions = (params: {
 	tokenId: TokenId;
 	networkId: NetworkId;
