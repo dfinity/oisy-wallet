@@ -394,11 +394,11 @@ abstract class Homepage {
 		await this.#page.mouse.move(0, 0);
 
 		if (freezeCarousel) {
+			await this.setCarouselFirstSlide();
+			await this.waitForLoadState();
 			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
 			await this.#page.clock.install();
 			await this.#page.clock.pauseAt(Date.now());
-			await this.setCarouselFirstSlide();
-			await this.waitForLoadState();
 		}
 
 		const colorSchemes = ['light', 'dark'] as const;
