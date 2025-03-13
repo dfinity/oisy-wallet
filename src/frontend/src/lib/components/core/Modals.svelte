@@ -28,8 +28,7 @@
 	{:else if $modalAirdropDetails}
 		<AirdropModalDetails />
 	{/if}
-{/if}
-
-{#if $modalVipQrCode}
-	<VipQrCodeModal />
+	{#if $modalVipQrCode}
+		<VipQrCodeModal />
+	{/if}
 {/if}
