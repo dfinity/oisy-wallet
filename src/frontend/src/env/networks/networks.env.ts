@@ -18,7 +18,6 @@ import bitcoinTestnetBW from '$lib/assets/networks/bitcoin-testnet-bw.svg';
 import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
 import icpBW from '$lib/assets/networks/icp-bw.svg';
 import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
-import { LOCAL } from '$lib/constants/app.constants';
 import type { Network, NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
 
@@ -131,11 +130,3 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin (Regtest)',
 	explorerUrl: BTC_REGTEST_EXPLORER_URL
 };
-
-export const BITCOIN_NETWORKS: BitcoinNetwork[] = [
-	BTC_MAINNET_NETWORK,
-	BTC_TESTNET_NETWORK,
-	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])
-];
-
-export const BITCOIN_NETWORKS_IDS: symbol[] = BITCOIN_NETWORKS.map(({ id }) => id);
