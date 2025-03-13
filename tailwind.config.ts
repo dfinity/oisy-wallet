@@ -10,11 +10,11 @@ export default {
 		},
 		screens: {
 			...defaultTheme.screens,
-			'1.5md': '896px',
-			'1.5lg': '1152px',
-			'1.5xl': '1408px',
-			'2.5xl': '1728px',
-			'h-md': { raw: '(max-height: 1090px)' }
+			'1.5md': '56rem',
+			'1.5lg': '72rem',
+			'1.5xl': '88rem',
+			'2.5xl': '108rem',
+			'h-md': { raw: '(max-height: 68rem)' }
 		},
 		colors: {
 			// base colors, can be left in
