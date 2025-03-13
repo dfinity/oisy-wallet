@@ -22,7 +22,9 @@ DFX_NETWORK="${DFX_NETWORK:-local}"
 
 SIGNER_RELEASE="v0.2.8"
 SIGNER_RELEASE_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}"
+# shellcheck disable=SC2034
 CANDID_URL="${SIGNER_RELEASE_URL}/signer.did"
+# shellcheck disable=SC2034
 WASM_URL="${SIGNER_RELEASE_URL}/signer.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.signer.candid dfx.json)"
