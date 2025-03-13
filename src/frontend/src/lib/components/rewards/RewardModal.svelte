@@ -95,7 +95,7 @@
 
 		<div class="flex w-full justify-between text-lg font-semibold"
 			><span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
-			<span class="inline-flex"><RewardDateBadge date={reward.endDate} /></span></div
+			<span class="inline-flex"><RewardDateBadge date={reward.endDate} testId="rewards-modal-date-badge" /></span></div
 		>
 		<p class="my-3">{reward.description}</p>
 
