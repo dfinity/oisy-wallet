@@ -44,7 +44,7 @@ vi.mock('@ethersproject/providers', () => {
 		maxPriorityFeePerGas: null,
 		gasPrice: null
 	});
-	return { InfuraProvider: provider, JsonRpcProvider: provider };
+	return { InfuraProvider: provider, JsonRpcProvider: provider, EtherscanProvider: provider };
 });
 
 describe('EthConvertTokenWizard', () => {
