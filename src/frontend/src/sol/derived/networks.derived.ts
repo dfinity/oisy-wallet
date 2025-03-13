@@ -1,4 +1,5 @@
 import {
+	SOL_MAINNET_ENABLED,
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK,
@@ -13,7 +14,7 @@ import { derived, type Readable } from 'svelte/store';
 export const enabledSolanaNetworks: Readable<SolanaNetwork[]> = derived(
 	[testnets],
 	([$testnets]) => [
-		SOLANA_MAINNET_NETWORK,
+		...(SOL_MAINNET_ENABLED ? [SOLANA_MAINNET_NETWORK] : []),
 		...($testnets
 			? [SOLANA_TESTNET_NETWORK, SOLANA_DEVNET_NETWORK, ...(LOCAL ? [SOLANA_LOCAL_NETWORK] : [])]
 			: [])

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalSolToken, modalSolTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -34,10 +34,10 @@
 
 <SolTransactionsSkeletons>
 	{#if $solTransactions.length > 0}
-		<SolTransactionsScroll token={$token ?? SOLANA_TOKEN}>
+		<SolTransactionsScroll token={$token ?? DEFAULT_SOLANA_TOKEN}>
 			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
 				<li in:slide={SLIDE_DURATION}>
-					<SolTransaction {transaction} token={$token ?? SOLANA_TOKEN} />
+					<SolTransaction {transaction} token={$token ?? DEFAULT_SOLANA_TOKEN} />
 				</li>
 			{/each}
 		</SolTransactionsScroll>
