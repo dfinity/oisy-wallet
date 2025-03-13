@@ -42,7 +42,7 @@ export const mapAddressToName = ({
 	erc20Tokens.find(
 		({ address: tokenAddress, network: { id: tokenNetworkId } }) =>
 			tokenAddress === address && tokenNetworkId === networkId
-	)?.name ?? address;
+	)?.name;
 
 /**
  * It maps a transaction to an Ethereum transaction UI object

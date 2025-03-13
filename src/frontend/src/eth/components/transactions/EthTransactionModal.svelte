@@ -46,19 +46,19 @@
 
 
 	let fromDisplay: OptionString;
-	$: fromDisplay = nonNullish(token) ? mapAddressToName({
+	$: fromDisplay = nonNullish(token) ? (mapAddressToName({
 		address: from,
 		networkId: token.network.id,
 		erc20Tokens: $erc20Tokens
-	}) : from;
+	}) ?? from) : from;
 
 
 	let toDisplay: OptionString;
-	$: toDisplay = nonNullish(token) ? mapAddressToName({
+	$: toDisplay = nonNullish(token) ? (mapAddressToName({
 		address: to,
 		networkId: token.network.id,
 		erc20Tokens: $erc20Tokens
-	}) : to;
+	}) ?? to) : to;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

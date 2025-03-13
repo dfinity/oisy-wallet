@@ -34,14 +34,14 @@ describe('transactions.utils', () => {
 			erc20Tokens: mockErc20Tokens
 		};
 
-		it('should return nullish value if the address is nullish', () => {
+		it('should return undefined if the address is nullish', () => {
 			expect(mapAddressToName({ ...mockParams, address: undefined })).toBeUndefined();
 
-			expect(mapAddressToName({ ...mockParams, address: null })).toBeNull();
+			expect(mapAddressToName({ ...mockParams, address: null })).toBeUndefined();
 		});
 
-		it('should return the original address if it does not match any known ERC20 token', () => {
-			expect(mapAddressToName(mockParams)).toBe(mockAddress);
+		it('should return undefined if it does not match any known ERC20 token', () => {
+			expect(mapAddressToName(mockParams)).toBeUndefined();
 		});
 
 		it('should return the token name if the address matches a known ERC20 token', () => {
@@ -58,24 +58,24 @@ describe('transactions.utils', () => {
 			).toBe(SEPOLIA_USDC_TOKEN.name);
 		});
 
-		it('should return the original address if the network does not match', () => {
+		it('should return undefined if the network does not match', () => {
 			expect(
 				mapAddressToName({
 					...mockParams,
 					address: PEPE_TOKEN.address,
 					networkId: SEPOLIA_NETWORK_ID
 				})
-			).toBe(PEPE_TOKEN.address);
+			).toBeUndefined();
 		});
 
-		it('should return the original address if the ERC20 token is not found', () => {
+		it('should return undefined if the ERC20 token is not found', () => {
 			expect(
 				mapAddressToName({
 					...mockParams,
 					address: PEPE_TOKEN.address,
 					erc20Tokens: [USDC_TOKEN, SEPOLIA_USDC_TOKEN]
 				})
-			).toBe(PEPE_TOKEN.address);
+			).toBeUndefined();
 
 			expect(
 				mapAddressToName({
@@ -84,13 +84,13 @@ describe('transactions.utils', () => {
 					networkId: SEPOLIA_NETWORK_ID,
 					erc20Tokens: [USDC_TOKEN, PEPE_TOKEN]
 				})
-			).toBe(SEPOLIA_USDC_TOKEN.address);
+			).toBeUndefined();
 		});
 
-		it('should return the original address if the ERC20 token list is empty', () => {
+		it('should return undefined if the ERC20 token list is empty', () => {
 			expect(
 				mapAddressToName({ ...mockParams, address: PEPE_TOKEN.address, erc20Tokens: [] })
-			).toBe(PEPE_TOKEN.address);
+			).toBeUndefined();
 		});
 	});
 
