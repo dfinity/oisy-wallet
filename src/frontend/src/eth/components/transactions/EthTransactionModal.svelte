@@ -2,11 +2,14 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
+	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapAddressToName } from '$eth/utils/transactions.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -22,6 +25,7 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkIdSepolia } from '$lib/utils/network.utils';
 
 	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
@@ -44,12 +48,19 @@
 	let toExplorerUrl: string | undefined;
 	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
 
+	let ckMinterInfo: OptionCertifiedMinterInfo;
+	$: ckMinterInfo =
+		$ckEthMinterInfoStore?.[
+			isNetworkIdSepolia(token?.network.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
+		];
+
 	let fromDisplay: OptionString;
 	$: fromDisplay = nonNullish(token)
 		? (mapAddressToName({
 				address: from,
 				networkId: token.network.id,
-				erc20Tokens: $erc20Tokens
+				erc20Tokens: $erc20Tokens,
+				ckMinterInfo
 			}) ?? from)
 		: from;
 
@@ -58,7 +69,8 @@
 		? (mapAddressToName({
 				address: to,
 				networkId: token.network.id,
-				erc20Tokens: $erc20Tokens
+				erc20Tokens: $erc20Tokens,
+				ckMinterInfo
 			}) ?? to)
 		: to;
 </script>
