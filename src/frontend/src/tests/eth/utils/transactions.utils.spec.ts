@@ -1,11 +1,20 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import type { Erc20Token } from '$eth/types/erc20';
 import { mapAddressToName, mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { OptionEthAddress } from '$lib/types/address';
+import type { EthAddress, OptionEthAddress } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
+import type { CertifiedData } from '$lib/types/store';
 import type { Transaction } from '$lib/types/transaction';
+import {
+	mockCkMinterInfo,
+	mockErc20HelperContractAddress,
+	mockEthHelperContractAddress
+} from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import type { MinterInfo } from '@dfinity/cketh';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
@@ -24,14 +33,19 @@ const $ethAddress: OptionEthAddress = '0xffff';
 
 describe('transactions.utils', () => {
 	describe('mapAddressToName', () => {
-		const mockAddress = mockEthAddress;
-		const mockNetworkId = ETHEREUM_NETWORK_ID;
-		const mockErc20Tokens = [USDC_TOKEN, SEPOLIA_USDC_TOKEN, PEPE_TOKEN];
+		const mockAddress: EthAddress = mockEthAddress;
+		const mockNetworkId: NetworkId = ETHEREUM_NETWORK_ID;
+		const mockErc20Tokens: Erc20Token[] = [USDC_TOKEN, SEPOLIA_USDC_TOKEN, PEPE_TOKEN];
+		const mockMinterInfo: CertifiedData<MinterInfo> = {
+			data: mockCkMinterInfo,
+			certified: false
+		};
 
 		const mockParams = {
 			address: mockAddress,
 			networkId: mockNetworkId,
-			erc20Tokens: mockErc20Tokens
+			erc20Tokens: mockErc20Tokens,
+			ckMinterInfo: mockMinterInfo
 		};
 
 		it('should return undefined if the address is nullish', () => {
@@ -40,7 +54,7 @@ describe('transactions.utils', () => {
 			expect(mapAddressToName({ ...mockParams, address: null })).toBeUndefined();
 		});
 
-		it('should return undefined if it does not match any known ERC20 token', () => {
+		it('should return undefined if it does not match any known ERC20 token nor any CK Helper contracts', () => {
 			expect(mapAddressToName(mockParams)).toBeUndefined();
 		});
 
@@ -90,6 +104,42 @@ describe('transactions.utils', () => {
 		it('should return undefined if the ERC20 token list is empty', () => {
 			expect(
 				mapAddressToName({ ...mockParams, address: PEPE_TOKEN.address, erc20Tokens: [] })
+			).toBeUndefined();
+		});
+
+		it('should return the ckETH Helper Contract name if the address matches the ckETH Helper Contract', () => {
+			expect(
+				mapAddressToName({
+					...mockParams,
+					address: mockEthHelperContractAddress
+				})
+			).toBe('ckETH Minter Helper Contract');
+		});
+
+		it('should return the ckERC20 Helper Contract name if the address matches the ckERC20 Helper Contract', () => {
+			expect(
+				mapAddressToName({
+					...mockParams,
+					address: mockErc20HelperContractAddress
+				})
+			).toBe('ckERC20 Minter Helper Contract');
+		});
+
+		it('should return undefined if the CK Helper Contract info are nullish', () => {
+			expect(
+				mapAddressToName({
+					...mockParams,
+					address: mockEthHelperContractAddress,
+					ckMinterInfo: undefined
+				})
+			).toBeUndefined();
+
+			expect(
+				mapAddressToName({
+					...mockParams,
+					address: mockErc20HelperContractAddress,
+					ckMinterInfo: null
+				})
 			).toBeUndefined();
 		});
 	});

@@ -1,6 +1,11 @@
 import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
+import {
+	toCkErc20HelperContractAddress,
+	toCkEthHelperContractAddress
+} from '$icp-eth/utils/cketh.utils';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
@@ -33,16 +38,31 @@ export const decodeErc20AbiDataValue = (data: string): BigNumber => {
 export const mapAddressToName = ({
 	address,
 	networkId,
-	erc20Tokens
+	erc20Tokens,
+	ckMinterInfo
 }: {
 	address: OptionEthAddress;
 	networkId: NetworkId;
 	erc20Tokens: Erc20Token[];
-}): OptionString =>
-	erc20Tokens.find(
+	ckMinterInfo: OptionCertifiedMinterInfo;
+}): OptionString => {
+	const putativeErc20TokenName: string | undefined = erc20Tokens.find(
 		({ address: tokenAddress, network: { id: tokenNetworkId } }) =>
 			tokenAddress === address && tokenNetworkId === networkId
 	)?.name;
+
+	const ckEthHelperContractAddress = toCkEthHelperContractAddress(ckMinterInfo);
+	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(ckMinterInfo);
+
+	return (
+		putativeErc20TokenName ??
+		(address === ckEthHelperContractAddress
+			? 'ckETH Minter Helper Contract'
+			: address === ckErc20HelperContractAddress
+				? 'ckERC20 Minter Helper Contract'
+				: undefined)
+	);
+};
 
 /**
  * It maps a transaction to an Ethereum transaction UI object
