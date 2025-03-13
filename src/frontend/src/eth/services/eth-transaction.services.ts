@@ -1,6 +1,7 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { reloadEthereumBalance } from '$eth/services/eth-balance.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { i18n } from '$lib/stores/i18n.store';
@@ -79,11 +80,16 @@ const processPendingTransaction = async ({
 		return;
 	}
 
+	const { to, ...rest } = transaction;
+
 	ethTransactionsStore.add({
 		tokenId: token.id,
 		transactions: [
 			{
-				...transaction,
+				...rest,
+				// For ERC20 pending transactions we noticed that the `to` field is not correct, since it shows the token address instead of the recipient address.
+				// To avoid confusions on the user side, we prefer not to display the `to` field for ERC20 pending transactions.
+				...(!isTokenErc20(token) && { to }),
 				pendingTimestamp: Date.now(),
 				...(nonNullish(value) && { value })
 			}
