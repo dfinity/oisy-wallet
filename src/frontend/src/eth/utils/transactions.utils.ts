@@ -7,7 +7,7 @@ import {
 	toCkEthHelperContractAddress,
 	toCkMinterAddress
 } from '$icp-eth/utils/cketh.utils';
-import type { OptionEthAddress } from '$lib/types/address';
+import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';
@@ -61,16 +61,17 @@ export const mapAddressToName = ({
 	const ckMinterAddress = toCkMinterAddress(ckMinterInfo);
 
 	// TODO: find a way to get the contracts name more dynamically
-	const putativeMinterName: string | undefined =
-		nonNullish(ckEthHelperContractAddress) &&
-		address.toLowerCase() === ckEthHelperContractAddress.toLowerCase()
-			? 'ckETH Minter Helper Contract'
-			: nonNullish(ckErc20HelperContractAddress) &&
-				  address.toLowerCase() === ckErc20HelperContractAddress.toLowerCase()
-				? 'ckERC20 Minter Helper Contract'
-				: nonNullish(ckMinterAddress) && address.toLowerCase() === ckMinterAddress.toLowerCase()
-					? 'CK Ethereum Minter'
-					: undefined;
+	const ckMinterNameMap: Record<EthAddress, string> = {
+		...(nonNullish(ckEthHelperContractAddress) && {
+			[ckEthHelperContractAddress.toLowerCase()]: 'ckETH Minter Helper Contract'
+		}),
+		...(nonNullish(ckErc20HelperContractAddress) && {
+			[ckErc20HelperContractAddress.toLowerCase()]: 'ckERC20 Minter Helper Contract'
+		}),
+		...(nonNullish(ckMinterAddress) && { [ckMinterAddress.toLowerCase()]: 'CK Ethereum Minter' })
+	};
+
+	const putativeMinterName: string | undefined = ckMinterNameMap[address.toLowerCase()];
 
 	return putativeErc20TokenName ?? putativeMinterName;
 };
