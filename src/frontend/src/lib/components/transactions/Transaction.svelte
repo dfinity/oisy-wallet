@@ -28,30 +28,32 @@
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} on:click>
-	<Card>
-		<span class="inline-block"><slot /></span>
+	<div class="rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
+		<Card noMargin>
+			<span class="inline-block"><slot /></span>
 
-		<div slot="icon">
-			{#if iconType === 'token'}
-				<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
-			{:else}
-				<RoundedIcon {icon} opacity={iconWithOpacity} />
-			{/if}
-		</div>
-
-		<svelte:fragment slot="amount">
-			{#if nonNullish(amount)}
-				<Amount {amount} decimals={token.decimals} symbol={token.symbol} formatPositiveAmount />
-			{/if}
-		</svelte:fragment>
-
-		<svelte:fragment slot="description">
-			<span data-tid="receive-tokens-modal-transaction-timestamp">
-				{#if nonNullish(timestamp)}
-					{formatSecondsToDate(timestamp)}
+			<div slot="icon">
+				{#if iconType === 'token'}
+					<TokenLogo data={token} badge={{ type: 'icon', icon, ariaLabel: type }} />
+				{:else}
+					<RoundedIcon {icon} opacity={iconWithOpacity} />
 				{/if}
-			</span>
-			<TransactionStatusComponent {status} />
-		</svelte:fragment>
-	</Card>
+			</div>
+
+			<svelte:fragment slot="amount">
+				{#if nonNullish(amount)}
+					<Amount {amount} decimals={token.decimals} symbol={token.symbol} formatPositiveAmount />
+				{/if}
+			</svelte:fragment>
+
+			<svelte:fragment slot="description">
+				<span data-tid="receive-tokens-modal-transaction-timestamp">
+					{#if nonNullish(timestamp)}
+						{formatSecondsToDate(timestamp)}
+					{/if}
+				</span>
+				<TransactionStatusComponent {status} />
+			</svelte:fragment>
+		</Card>
+	</div>
 </button>
