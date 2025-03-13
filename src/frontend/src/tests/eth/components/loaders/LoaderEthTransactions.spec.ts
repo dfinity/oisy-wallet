@@ -29,7 +29,6 @@ describe('LoaderEthTransactions', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		// vi.useFakeTimers();
 
 		mockLoadTransactions.mockResolvedValue({ success: true });
 		mockReloadTransactions.mockResolvedValue({ success: true });
@@ -41,10 +40,6 @@ describe('LoaderEthTransactions', () => {
 			{ data: { ...SEPOLIA_PEPE_TOKEN, enabled: true }, certified: false }
 		]);
 	});
-
-	// afterEach(() => {
-	// 	vi.useRealTimers();
-	// });
 
 	it('should not load transactions if token is not initialized', async () => {
 		render(LoaderEthTransactions);
