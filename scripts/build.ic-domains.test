@@ -18,7 +18,6 @@ dfx_network_domains() {
 
 (
   echo Checking domains for all known networks...
-  actual="$(dfx_networks)"
   EXPECTED_DOMAINS="$0.expected"
   ACTUAL_DOMAINS="$(mktemp "$0.actual.XXXXXXXXXX")"
   dfx_network_domains >"$ACTUAL_DOMAINS"
