@@ -3,26 +3,35 @@ import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
-import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
+import {
+	loadEthereumTransactions,
+	reloadEthereumTransactions
+} from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { token } from '$lib/stores/token.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
-	loadEthereumTransactions: vi.fn()
+	loadEthereumTransactions: vi.fn(),
+	reloadEthereumTransactions: vi.fn()
 }));
 
 describe('LoaderEthTransactions', () => {
 	const mockLoadTransactions = loadEthereumTransactions as MockedFunction<
 		typeof loadEthereumTransactions
 	>;
+	const mockReloadTransactions = reloadEthereumTransactions as MockedFunction<
+		typeof reloadEthereumTransactions
+	>;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		mockLoadTransactions.mockResolvedValue({ success: true });
+		mockReloadTransactions.mockResolvedValue({ success: true });
 
 		mockPage.reset();
 		token.reset();
@@ -192,5 +201,28 @@ describe('LoaderEthTransactions', () => {
 		await waitFor(() => {
 			expect(loadEthereumTransactions).toHaveBeenCalledTimes(2);
 		});
+	});
+
+	it('should call the load function every interval', async () => {
+		vi.useFakeTimers();
+
+		render(LoaderEthTransactions);
+
+		mockPage.mock({ token: SEPOLIA_TOKEN.name });
+		token.set(SEPOLIA_TOKEN);
+
+		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+		expect(reloadEthereumTransactions).toHaveBeenCalledOnce();
+
+		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+		expect(reloadEthereumTransactions).toHaveBeenCalledTimes(2);
+
+		await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS * 5);
+
+		expect(reloadEthereumTransactions).toHaveBeenCalledTimes(7);
+
+		vi.useRealTimers();
 	});
 });

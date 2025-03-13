@@ -728,11 +728,7 @@ interface I18nTransaction {
 		open_from_block_explorer: string;
 		open_to_block_explorer: string;
 	};
-	error: {
-		get_block_number: string;
-		failed_get_transaction: string;
-		failed_get_mined_transaction: string;
-	};
+	error: { get_block_number: string; failed_get_transaction: string };
 }
 
 interface I18nTransactions {

@@ -24,6 +24,7 @@ import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -74,6 +75,12 @@ describe('IcConvertTokenWizard', () => {
 			data: address
 		});
 	};
+	const mockEthAddressStore = (address = mockEthAddress) => {
+		ethAddressStore.set({
+			certified: true,
+			data: address
+		});
+	};
 
 	const clickConvertButton = async (container: HTMLElement) => {
 		const convertButtonSelector = '[data-tid="convert-review-button-next"]';
@@ -93,6 +100,7 @@ describe('IcConvertTokenWizard', () => {
 	it('should call send if all requirements are met', async () => {
 		mockAuthStore();
 		mockBtcAddressStore();
+		mockEthAddressStore();
 
 		const { container } = render(IcConvertTokenWizard, {
 			props,
@@ -125,6 +133,7 @@ describe('IcConvertTokenWizard', () => {
 
 	it('should not call send if authIdentity is not defined', async () => {
 		mockBtcAddressStore();
+		mockEthAddressStore();
 
 		const { container } = render(IcConvertTokenWizard, {
 			props,
@@ -139,6 +148,7 @@ describe('IcConvertTokenWizard', () => {
 	it('should not call send if sendAmount is not defined', async () => {
 		mockAuthStore();
 		mockBtcAddressStore();
+		mockEthAddressStore();
 
 		const { container } = render(IcConvertTokenWizard, {
 			props: {
@@ -156,6 +166,7 @@ describe('IcConvertTokenWizard', () => {
 	it('should not call send if sendAmount is invalid', async () => {
 		mockAuthStore();
 		mockBtcAddressStore();
+		mockEthAddressStore();
 
 		const { container } = render(IcConvertTokenWizard, {
 			props: {
@@ -173,6 +184,7 @@ describe('IcConvertTokenWizard', () => {
 	it('should render convert form if currentStep is CONVERT', () => {
 		mockAuthStore();
 		mockBtcAddressStore();
+		mockEthAddressStore();
 
 		const { getByTestId } = render(IcConvertTokenWizard, {
 			props: {
@@ -191,6 +203,7 @@ describe('IcConvertTokenWizard', () => {
 	it('should render convert progress if currentStep is CONVERTING', () => {
 		mockAuthStore();
 		mockBtcAddressStore();
+		mockEthAddressStore();
 
 		const { container } = render(IcConvertTokenWizard, {
 			props: {

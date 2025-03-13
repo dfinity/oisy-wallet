@@ -794,8 +794,7 @@
 		},
 		"error": {
 			"get_block_number": "Cannot get block number.",
-			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp.",
-			"failed_get_mined_transaction": "Failed to get the mined transaction (hash: $hash). Please reload the wallet dapp."
+			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp."
 		}
 	},
 	"transactions": {
