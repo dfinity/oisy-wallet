@@ -10,11 +10,13 @@ export default {
 		},
 		screens: {
 			...defaultTheme.screens,
-			'1.5md': '56rem',
-			'1.5lg': '72rem',
-			'1.5xl': '88rem',
-			'2.5xl': '108rem',
-			'h-md': { raw: '(max-height: 68rem)' }
+			// we need to use rem instead of px because the default tailwind values changed to rem,
+			// and mixing units breaks custom screen definitions
+			'1.5md': '56rem', // 896px
+			'1.5lg': '72rem', // 1152px
+			'1.5xl': '88rem', // 1408px
+			'2.5xl': '108rem', // 1728px
+			'h-md': { raw: '(max-height: 68rem)' } // ~1090px
 		},
 		colors: {
 			// base colors, can be left in
