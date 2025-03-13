@@ -20,6 +20,8 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { OptionString } from '$lib/types/string';
+	import { mapAddressToName } from '$eth/utils/transactions.utils';
 
 	export let transaction: EthTransactionUi;
 	export let token: OptionToken;
@@ -42,15 +44,21 @@
 	let toExplorerUrl: string | undefined;
 	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
 
-	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
-	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
-	let fromDisplay: string;
-	$: fromDisplay = $erc20Tokens.find(({ address }) => address === from)?.name ?? from;
 
-	// To avoid possible confusion, we display the token name instead of the address, in case the destination is a known ERC20 token
-	// TODO: check if can try and fetch metadata for the putative token if it is not in the list
-	let toDisplay: string | undefined;
-	$: toDisplay = $erc20Tokens.find(({ address }) => address === to)?.name ?? to;
+	let fromDisplay: OptionString;
+	$: fromDisplay = nonNullish(token) ? mapAddressToName({
+		address: from,
+		networkId: token.network.id,
+		erc20Tokens: $erc20Tokens
+	}) : from;
+
+
+	let toDisplay: OptionString;
+	$: toDisplay = nonNullish(token) ? mapAddressToName({
+		address: to,
+		networkId: token.network.id,
+		erc20Tokens: $erc20Tokens
+	}) : to;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
