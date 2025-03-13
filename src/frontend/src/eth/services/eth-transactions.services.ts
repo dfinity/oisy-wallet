@@ -17,24 +17,28 @@ import { get } from 'svelte/store';
 
 export const loadEthereumTransactions = ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
+	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId)) {
-		return loadEthTransactions({ networkId, tokenId });
+		return loadEthTransactions({ networkId, tokenId, updateOnly });
 	}
 
-	return loadErc20Transactions({ networkId, tokenId });
+	return loadErc20Transactions({ networkId, tokenId, updateOnly });
 };
 
 const loadEthTransactions = async ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
@@ -55,7 +59,12 @@ const loadEthTransactions = async ({
 	try {
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
-		ethTransactionsStore.set({ tokenId, transactions });
+
+		if (updateOnly) {
+			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+		} else {
+			ethTransactionsStore.set({ tokenId, transactions });
+		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
 
@@ -77,10 +86,12 @@ const loadEthTransactions = async ({
 
 const loadErc20Transactions = async ({
 	networkId,
-	tokenId
+	tokenId,
+	updateOnly = false
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
+	updateOnly?: boolean;
 }): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
@@ -121,7 +132,12 @@ const loadErc20Transactions = async ({
 			request: async () => await transactionsRest({ contract: token, address }),
 			onRetry: async () => await randomWait({})
 		});
-		ethTransactionsStore.set({ tokenId, transactions });
+
+		if (updateOnly) {
+			transactions.forEach((transaction) => ethTransactionsStore.update({ tokenId, transaction }));
+		} else {
+			ethTransactionsStore.set({ tokenId, transactions });
+		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
 

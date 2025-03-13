@@ -116,6 +116,28 @@ describe('eth-transactions.services', () => {
 				expect(get(ethTransactionsStore)).toEqual({ [mockTokenId]: mockTransactions });
 			});
 
+			it('should handle ERC20 token transactions correctly when it is update only', async () => {
+				const mockTransactions = createMockEthTransactions(3);
+				mockTransactionsRest.mockResolvedValueOnce(mockTransactions);
+
+				const existingTransactions = createMockEthTransactions(5);
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: [...existingTransactions, mockTransactions[0]]
+				});
+
+				const result = await loadEthereumTransactions({
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					updateOnly: true
+				});
+
+				expect(result).toEqual({ success: true });
+				expect(get(ethTransactionsStore)).toEqual({
+					[mockTokenId]: [...existingTransactions, ...mockTransactions]
+				});
+			});
+
 			it('should handle errors during transaction fetching gracefully', async () => {
 				const mockTransactions = createMockEthTransactions(5);
 				ethTransactionsStore.set({ tokenId: mockTokenId, transactions: mockTransactions });
