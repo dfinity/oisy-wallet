@@ -5,7 +5,7 @@ TransactionCases.forEach(({ tokenSymbol, networkId }) => {
 	testWithII(`should display ${tokenSymbol} transactions page`, async ({ page, iiPage }) => {
 		const transactionsPage = new TransactionsPage({
 			page,
-			iiPage,
+			iiPage
 		});
 		await transactionsPage.waitForReady();
 		await transactionsPage.showTransactions({ tokenSymbol, networkId });

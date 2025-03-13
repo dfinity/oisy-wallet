@@ -24,7 +24,7 @@ export const TransactionCases: TransactionsConfig[] = [
 	{
 		tokenSymbol: 'SOL',
 		networkId: 'SOL'
-	},
+	}
 ];
 
 export class TransactionsPage extends HomepageLoggedIn {
