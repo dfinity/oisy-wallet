@@ -9,7 +9,6 @@
 		modalDAppDetails,
 		modalHideToken,
 		modalIcHideToken,
-		modalAirdropDetails,
 		modalVipQrCode,
 		modalRewardDetails
 	} from '$lib/derived/modal.derived';
@@ -28,8 +27,7 @@
 		<DappModalDetails />
 	{:else if $modalRewardDetails}
 		<AirdropModalDetails />
-	{/if}
-	{#if $modalVipQrCode}
+	{:else if $modalVipQrCode}
 		<VipQrCodeModal />
 	{/if}
 {/if}
