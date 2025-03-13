@@ -391,13 +391,19 @@ abstract class Homepage {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
+		if (isNullish(screenshotTarget)) {
+			// Creates a snapshot as a fullPage and not just certain parts.
+			await this.viewportAdjuster();
+		}
+
+		const element = screenshotTarget ?? this.#page;
+
 		await this.#page.mouse.move(0, 0);
 
 		if (freezeCarousel) {
-			await this.setCarouselFirstSlide();
-			await this.waitForLoadState();
 			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
 			await this.#page.clock.install();
+			await this.setCarouselFirstSlide();
 			await this.#page.clock.pauseAt(Date.now());
 		}
 
@@ -405,18 +411,8 @@ abstract class Homepage {
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 
-			if (screenshotTarget) {
-				await expect(screenshotTarget).toHaveScreenshot({
-					timeout: 5 * 60 * 1000
-				});
-			} else {
-				await this.viewportAdjuster();
-				await expect(this.#page).toHaveScreenshot({
-					// creates a snapshot as a fullPage and not just certain parts.
-					// playwright can retry flaky tests in the amount of time set below.
-					timeout: 5 * 60 * 1000
-				});
-			}
+			// Playwright can retry flaky tests in the amount of time set below.
+			await expect(element).toHaveScreenshot({ timeout: 5 * 60 * 1000 });
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
 
