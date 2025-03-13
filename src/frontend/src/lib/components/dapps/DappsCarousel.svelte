@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-	import { airdropCampaigns, FEATURED_AIRDROP_CAROUSEL_SLIDE_ID } from '$env/airdrop-campaigns.env';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
-	import type { AirdropDescription } from '$env/types/env-airdrop';
+	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
+	import type { RewardDescription } from '$env/types/env-reward';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
@@ -32,16 +32,16 @@
 		...temporaryHiddenDappsIds
 	];
 
-	let featuredAirdrop: AirdropDescription | undefined;
-	$: featuredAirdrop = airdropCampaigns.find(({ id }) => id === FEATURED_AIRDROP_CAROUSEL_SLIDE_ID);
+	let featuredAirdrop: RewardDescription | undefined;
+	$: featuredAirdrop = rewardCampaigns.find(({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID);
 
 	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
 	$: featureAirdropSlide = nonNullish(featuredAirdrop)
 		? ({
 				id: featuredAirdrop.id,
 				carousel: {
-					text: replaceOisyPlaceholders($i18n.airdrops.text.carousel_slide_title),
-					callToAction: $i18n.airdrops.text.carousel_slide_cta
+					text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
+					callToAction: $i18n.rewards.text.carousel_slide_cta
 				},
 				logo: featuredAirdrop.logo,
 				name: featuredAirdrop.title

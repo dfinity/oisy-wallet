@@ -260,8 +260,8 @@
 		"indexCanisterId": "dnqcx-eyaaa-aaaaq-aacrq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "OpenFPL",
-			"symbol": "FPL",
+			"name": "ICFC",
+			"symbol": "ICFC",
 			"fee": {
 				"__bigint__": "100000"
 			},
