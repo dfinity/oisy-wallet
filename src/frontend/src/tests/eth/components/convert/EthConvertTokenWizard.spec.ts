@@ -17,12 +17,13 @@ import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
-import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
 import { get, readable, writable } from 'svelte/store';
@@ -44,7 +45,7 @@ vi.mock('@ethersproject/providers', () => {
 		maxPriorityFeePerGas: null,
 		gasPrice: null
 	});
-	return { InfuraProvider: provider, JsonRpcProvider: provider };
+	return { InfuraProvider: provider, JsonRpcProvider: provider, EtherscanProvider: provider };
 });
 
 describe('EthConvertTokenWizard', () => {
@@ -60,29 +61,7 @@ describe('EthConvertTokenWizard', () => {
 				}
 			]
 		]);
-	const mockMinterInfo = {
-		deposit_with_subaccount_helper_contract_address: toNullable(''),
-		eth_balance: toNullable(100n),
-		eth_helper_contract_address: toNullable(''),
-		last_observed_block_number: toNullable(100n),
-		evm_rpc_id: toNullable(mockPrincipal),
-		erc20_helper_contract_address: toNullable(''),
-		last_erc20_scraped_block_number: toNullable(100n),
-		supported_ckerc20_tokens: toNullable([]),
-		last_gas_fee_estimate: toNullable({
-			max_priority_fee_per_gas: 100n,
-			max_fee_per_gas: 100n,
-			timestamp: 100n
-		}),
-		cketh_ledger_id: toNullable(mockPrincipal),
-		smart_contract_address: toNullable(''),
-		last_eth_scraped_block_number: toNullable(100n),
-		minimum_withdrawal_amount: toNullable(100n),
-		erc20_balances: toNullable([]),
-		minter_address: toNullable(''),
-		last_deposit_with_subaccount_scraped_block_number: toNullable(100n),
-		ethereum_block_height: toNullable({ Safe: null })
-	};
+	const mockMinterInfo = mockCkMinterInfo;
 	const mockFees = {
 		gas: BigNumber.from(100n),
 		maxFeePerGas: BigNumber.from(100n),
