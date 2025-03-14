@@ -16,6 +16,7 @@ export class PromotionCarousel {
 		await this.#page.click(navigationSelector1);
 		await this.#page.evaluate(() => {
 			const slide = document.querySelector(`div[data-tid="carousel-slide"]`);
+			console.log('slide', slide);
 			if (slide) {
 				slide.setAttribute(
 					'style',

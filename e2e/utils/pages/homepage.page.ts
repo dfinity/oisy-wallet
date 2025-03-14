@@ -301,11 +301,11 @@ abstract class Homepage {
 		await this.waitForLoadState();
 	}
 
-	async setClock() {
-		const now = Date.now();
-		await this.#page.clock.install();
-		await this.#page.clock.setFixedTime(now);
-	}
+	// async setClock() {
+	// 	const now = Date.now();
+	// 	await this.#page.clock.install();
+	// 	await this.#page.clock.setFixedTime(now);
+	// }
 
 	async waitForLoadState() {
 		await this.#page.waitForLoadState('networkidle');
@@ -408,9 +408,10 @@ abstract class Homepage {
 
 		if (freezeCarousel) {
 			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
-			//await this.#page.clock.install();
+			// await this.#page.clock.install();
+			await this.#page.clock.pauseAt(Date.now());
 			await this.setCarouselFirstSlide();
-			//await this.#page.clock.pauseAt(Date.now());
+			await this.#page.clock.pauseAt(Date.now());
 		}
 
 		const colorSchemes = ['light', 'dark'] as const;
@@ -525,7 +526,7 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
-		await this.setClock();
+		// await this.setClock();
 
 		await this.waitForContentReady();
 	}
