@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getSdkError } from '@walletconnect/utils';
-	import type { WalletKitTypes } from "@reown/walletkit";
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,

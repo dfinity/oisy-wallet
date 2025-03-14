@@ -2,7 +2,7 @@
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { ProposalTypes } from '@walletconnect/types';
-	import type { WalletKitTypes } from "@reown/walletkit";
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';

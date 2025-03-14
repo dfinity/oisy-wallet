@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { WalletKitTypes } from "@reown/walletkit";
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import {
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex

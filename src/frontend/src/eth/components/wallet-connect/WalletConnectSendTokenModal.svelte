@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { WalletKitTypes } from "@reown/walletkit";
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.env';

@@ -16,6 +16,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
+import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
 	formatJsonRpcResult,
@@ -23,7 +24,6 @@ import {
 	type JsonRpcResponse
 } from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
-import { WalletKit, type WalletKitTypes } from "@reown/walletkit";
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 

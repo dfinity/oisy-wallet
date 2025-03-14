@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import type { WalletKitTypes } from "@reown/walletkit";
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onMount } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,

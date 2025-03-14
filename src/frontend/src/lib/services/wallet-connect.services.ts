@@ -4,8 +4,8 @@ import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener, WalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
+import type { WalletKitTypes } from '@reown/walletkit';
 import { getSdkError } from '@walletconnect/utils';
-import type { WalletKitTypes } from "@reown/walletkit";
 import { get } from 'svelte/store';
 
 export interface WalletConnectCallBackParams {

@@ -2,9 +2,9 @@ import type { WalletConnectEthApproveRequestMessage } from '$eth/types/wallet-co
 import type { WebSocketListener } from '$lib/types/listener';
 import type { Option } from '$lib/types/utils';
 import type { WalletConnectSolApproveRequestMessage } from '$sol/types/wallet-connect';
+import type { WalletKitTypes } from '@reown/walletkit';
 import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
 import type { PairingTypes } from '@walletconnect/types';
-import type { WalletKitTypes } from "@reown/walletkit";
 
 export type WalletConnectApproveRequestMessage =
 	| WalletConnectEthApproveRequestMessage

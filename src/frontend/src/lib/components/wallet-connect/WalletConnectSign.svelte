@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { WalletKitTypes } from "@reown/walletkit";
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import WalletConnectSignModal from '$eth/components/wallet-connect/WalletConnectSignModal.svelte';
