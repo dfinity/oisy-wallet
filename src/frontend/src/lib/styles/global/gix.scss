@@ -191,6 +191,9 @@ div.modal {
 	}
 
 	div.container {
+		// hack for fixing blurry text/content on Mac OS when modal content scroll bar is showing
+		border-radius: 0 !important;
+
 		// If using ContentWithToolbar, we need to set some padding manually
 		& > div.content div.stretch {
 			--dialog-padding-x: 12px;
