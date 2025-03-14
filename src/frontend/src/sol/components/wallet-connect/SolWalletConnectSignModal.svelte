@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onMount } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -41,7 +41,7 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 
 	export let listener: OptionWalletConnectListener;
-	export let request: Web3WalletTypes.SessionRequest;
+	export let request: WalletKitTypes.SessionRequest;
 	export let network: SolanaNetwork;
 
 	/**
@@ -142,7 +142,7 @@
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
 	<WalletConnectModalTitle slot="title"
-		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
+	>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
 	>
 
 	{#if currentStep?.name === WizardStepsSign.SIGNING}

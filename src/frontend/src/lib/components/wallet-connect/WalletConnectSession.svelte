@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getSdkError } from '@walletconnect/utils';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
@@ -57,7 +57,7 @@
 		close();
 	};
 
-	let proposal: Option<Web3WalletTypes.SessionProposal>;
+	let proposal: Option<WalletKitTypes.SessionProposal>;
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -207,7 +207,7 @@
 			goToFirstStep();
 		});
 
-		listener.sessionRequest(async (sessionRequest: Web3WalletTypes.SessionRequest) => {
+		listener.sessionRequest(async (sessionRequest: WalletKitTypes.SessionRequest) => {
 			// Prevent race condition
 			if (isNullish(listener)) {
 				return;
@@ -306,10 +306,10 @@
 		});
 
 	const answer = async ({
-		callback,
-		toast
-	}: {
-		callback: ((proposal: Web3WalletTypes.SessionProposal) => Promise<void>) | undefined;
+													callback,
+													toast
+												}: {
+		callback: ((proposal: WalletKitTypes.SessionProposal) => Promise<void>) | undefined;
 		toast?: () => void;
 	}) => {
 		if (isNullish(listener) || isNullish(callback)) {
@@ -365,7 +365,7 @@
 
 {#if nonNullish(listener)}
 	<WalletConnectButton on:click={disconnect}
-		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
+	>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
 	>
 {:else}
 	<WalletConnectButton
