@@ -206,6 +206,10 @@ impl StoredUserProfile {
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
 
+        if new_hidden_dapp_ids.len() == crate::types::MAX_DAPP_ID_LIST_LENGTH {
+            return Err(AddDappSettingsError::MaxHiddenDappIds);
+        }
+
         new_hidden_dapp_ids.push(dapp_id);
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
         new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;

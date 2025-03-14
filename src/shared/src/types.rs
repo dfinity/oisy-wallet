@@ -361,6 +361,7 @@ pub mod signer {
             Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>;
     }
 }
+pub const MAX_DAPP_ID_LIST_LENGTH: usize = 1000;
 
 pub mod dapp {
     use candid::{CandidType, Deserialize};
@@ -382,6 +383,7 @@ pub mod dapp {
         DappIdTooLong,
         UserNotFound,
         VersionMismatch,
+        MaxHiddenDappIds,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

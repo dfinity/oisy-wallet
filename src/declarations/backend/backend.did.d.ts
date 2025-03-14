@@ -3,6 +3,7 @@ import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
 export type AddDappSettingsError =
+	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
 	| { DappIdTooLong: null }
 	| { UserNotFound: null };
