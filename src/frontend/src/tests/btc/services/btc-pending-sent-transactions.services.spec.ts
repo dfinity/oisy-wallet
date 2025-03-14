@@ -16,7 +16,6 @@ describe('BTC Pending Sent Transactions Services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		btcPendingSentTransactionsStore.reset();
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 	});
 
 	describe('loadBtcPendingSentTransactions', () => {
