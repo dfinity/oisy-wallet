@@ -20,15 +20,17 @@
 				exchangeRate
 			})
 		: undefined;
-</script>
 
-<div transition:fade class="flex gap-4">
-	{formatToken({
+	let displayAmount: string;
+	$: displayAmount = `${formatToken({
 		value: amount,
 		unitName: decimals,
 		displayDecimals: EIGHT_DECIMALS
-	})}
-	{symbol}
+	})} ${symbol}`;
+</script>
+
+<div transition:fade class="flex gap-4">
+	{displayAmount}
 
 	{#if nonNullish(usdAmount)}
 		<div class="text-tertiary">
