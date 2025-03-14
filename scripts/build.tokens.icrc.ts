@@ -60,6 +60,7 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 
 			const { icon, ...metadata } = metadataWithIcon;
 
+
 			return {
 				tokens: {
 					...accTokens,
