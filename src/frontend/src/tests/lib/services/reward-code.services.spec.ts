@@ -30,7 +30,6 @@ const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 describe('reward-code', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 	});
 
 	describe('isVip', () => {

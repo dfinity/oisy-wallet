@@ -22,9 +22,6 @@ describe('custom-token.services', () => {
 
 	let spyToastsError: MockInstance;
 
-	// we mock console.error just to avoid unnecessary logs while running the tests
-	vi.spyOn(console, 'error').mockImplementation(() => {});
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 

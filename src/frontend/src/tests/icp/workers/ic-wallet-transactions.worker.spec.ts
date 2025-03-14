@@ -262,8 +262,6 @@ describe('ic-wallet-transactions.worker', () => {
 
 		beforeEach(() => {
 			scheduler = initScheduler(startData);
-
-			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 
 		afterEach(() => {

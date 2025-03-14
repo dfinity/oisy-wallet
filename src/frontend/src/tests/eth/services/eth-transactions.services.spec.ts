@@ -39,10 +39,6 @@ describe('eth-transactions.services', () => {
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 		spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
 
-		// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => {});
-		vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		erc20UserTokensStore.setAll(mockErc20UserTokens);
 	});
