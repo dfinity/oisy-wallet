@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Verify } from '@walletconnect/types';
-	import type { WalletKitTypes } from '@reown/walletkit';
+	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
 
-	export let proposal: Option<WalletKitTypes.SessionProposal>;
+	export let proposal: Option<Web3WalletTypes.SessionProposal>;
 
 	let context: Verify.Context | undefined = undefined;
 	$: context = proposal?.verifyContext;
