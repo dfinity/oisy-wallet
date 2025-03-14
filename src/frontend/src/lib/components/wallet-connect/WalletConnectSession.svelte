@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getSdkError } from '@walletconnect/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import { getSdkError } from '@walletconnect/utils';
 	import { onDestroy } from 'svelte';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
@@ -306,9 +306,9 @@
 		});
 
 	const answer = async ({
-													callback,
-													toast
-												}: {
+		callback,
+		toast
+	}: {
 		callback: ((proposal: WalletKitTypes.SessionProposal) => Promise<void>) | undefined;
 		toast?: () => void;
 	}) => {
@@ -365,7 +365,7 @@
 
 {#if nonNullish(listener)}
 	<WalletConnectButton on:click={disconnect}
-	>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
+		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
 	>
 {:else}
 	<WalletConnectButton

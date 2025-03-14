@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { ProposalTypes } from '@walletconnect/types';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import type { ProposalTypes } from '@walletconnect/types';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -52,7 +52,7 @@
 		</p>
 		<p class="mb-0">{params.proposer.metadata.description}</p>
 		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
-		>{params.proposer.metadata.url}</a
+			>{params.proposer.metadata.url}</a
 		>
 
 		<WalletConnectDomainVerification {proposal} />

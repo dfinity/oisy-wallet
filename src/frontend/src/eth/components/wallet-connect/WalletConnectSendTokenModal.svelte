@@ -165,7 +165,7 @@
 	{@const data = firstTransaction.data}
 
 	<WalletConnectModalTitle slot="title"
-	>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
+		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
 	>
 
 	<FeeContext

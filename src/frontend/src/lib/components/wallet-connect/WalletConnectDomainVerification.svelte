@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Verify } from '@walletconnect/types';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import type { Verify } from '@walletconnect/types';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
@@ -16,7 +16,7 @@
 
 <div class="mt-6">
 	<label for="verification" class="font-bold"
-	>{$i18n.wallet_connect.domain.title}:
+		>{$i18n.wallet_connect.domain.title}:
 		{#if validation === 'VALID'}
 			{$i18n.wallet_connect.domain.valid}
 		{:else if validation === 'INVALID'}
@@ -26,8 +26,7 @@
 		{:else}
 			{$i18n.wallet_connect.domain.unknown}
 		{/if}
-	</label
-	>
+	</label>
 	<div id="verification" class="mb-4 break-all font-normal">
 		{#if validation === 'VALID'}
 			{$i18n.wallet_connect.domain.valid_description}

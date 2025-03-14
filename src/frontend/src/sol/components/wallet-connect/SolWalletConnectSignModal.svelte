@@ -142,7 +142,7 @@
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
 	<WalletConnectModalTitle slot="title"
-	>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
+		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
 	>
 
 	{#if currentStep?.name === WizardStepsSign.SIGNING}
