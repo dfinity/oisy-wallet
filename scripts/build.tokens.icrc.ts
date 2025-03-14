@@ -58,12 +58,6 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 
 			const { ledgerCanisterId, name, icon, ...rest } = valueWithMetadata;
 
-			if (ledgerCanisterId !== savedLedgerCanisterId) {
-				throw new Error(
-					`Ledger canister ID mismatch for token symbol ${key}. Expected ${savedLedgerCanisterId}, got ${ledgerCanisterId}.`
-				);
-			}
-
 			return {
 				tokens: {
 					...accTokens,
