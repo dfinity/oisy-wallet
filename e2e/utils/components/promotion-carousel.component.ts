@@ -1,5 +1,4 @@
 import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
-import { nonNullish } from '@dfinity/utils';
 import type { Page } from '@playwright/test';
 
 export class PromotionCarousel {
@@ -14,7 +13,7 @@ export class PromotionCarousel {
 		await this.#page.click(navigationSelector1);
 		await this.#page.evaluate(() => {
 			const slide = document.querySelector(`div[data-tid="carousel-slide"]`);
-			if (nonNullish(slide)) {
+			if (slide) {
 				slide.setAttribute(
 					'style',
 					'width: 1584px; ' +
