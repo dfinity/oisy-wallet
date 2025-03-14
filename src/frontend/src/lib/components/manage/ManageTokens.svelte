@@ -157,6 +157,8 @@
 	</p>
 {/if}
 
+<slot name="info-element" />
+
 {#if noTokensMatch}
 	<button
 		class="flex w-full flex-col items-center justify-center py-16"
