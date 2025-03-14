@@ -332,6 +332,9 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should render convert form if currentStep is CONVERT', () => {
+		mockCkEthMinterInfoStore(mockMinterInfo);
+		mockEthAddressStore();
+		mockAuthStore();
 		mockFeeStore(mockFees);
 
 		const { getByTestId } = render(EthConvertTokenWizard, {
@@ -349,6 +352,9 @@ describe('EthConvertTokenWizard', () => {
 	});
 
 	it('should render convert progress if currentStep is CONVERTING', () => {
+		mockCkEthMinterInfoStore(mockMinterInfo);
+		mockEthAddressStore();
+		mockAuthStore();
 		mockFeeStore(mockFees);
 
 		const { container } = render(EthConvertTokenWizard, {
