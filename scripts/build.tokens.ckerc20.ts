@@ -114,18 +114,22 @@ const buildOrchestratorInfo = async (orchestratorId: Principal): Promise<TokensA
 		async (acc, [key, value]) => {
 			const { tokens: accTokens, icons: accIcons } = await acc;
 
-			const valueWithMetadata = await loadMetadata(value[0]);
+			const token = value[0];
 
-			if (isNullish(valueWithMetadata)) {
+			const { ledgerCanisterId, ...rest } = token;
+
+			const metadataWithIcon = await loadMetadata(ledgerCanisterId);
+
+			if (isNullish(metadataWithIcon)) {
 				return { tokens: accTokens, icons: accIcons };
 			}
 
-			const { ledgerCanisterId, name, icon, ...rest } = valueWithMetadata;
+			const { icon, ...metadata } = metadataWithIcon;
 
 			return {
 				tokens: {
 					...accTokens,
-					[key]: { ledgerCanisterId, name, ...rest }
+					[key]: { ledgerCanisterId, ...rest, ...metadata }
 				},
 				icons: [
 					...accIcons,
