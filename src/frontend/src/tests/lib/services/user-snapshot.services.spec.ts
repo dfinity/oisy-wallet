@@ -8,11 +8,13 @@ import type {
 import * as networkEnv from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import * as airdropEnv from '$env/reward-campaigns.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
@@ -27,11 +29,12 @@ import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.sto
 import type { WritableUpdateStore } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mocks';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
@@ -55,12 +58,19 @@ describe('user-snapshot.services', () => {
 		const now = Date.now();
 		const nowNanoseconds = BigInt(now) * NANO_SECONDS_IN_MILLISECOND;
 
+		const mockIcrcTestnetToken: IcCkToken = {
+			...mockValidIcCkToken,
+			id: parseTokenId('IcrcTestnetTokenId'),
+			ledgerCanisterId: ICRC_LEDGER_CANISTER_TESTNET_IDS[0]
+		};
+
 		const tokens: Token[] = [
 			...mockTokens,
 			mockValidIcToken,
 			mockValidErc20Token,
 			SOLANA_TOKEN,
-			mockValidSplToken
+			mockValidSplToken,
+			mockIcrcTestnetToken
 		];
 
 		const mockIcAmount = 123456n;
@@ -291,6 +301,20 @@ describe('user-snapshot.services', () => {
 		});
 
 		it('should handle multiple tokens and send correct snapshots', async () => {
+			await registerUserSnapshot();
+
+			expect(registerAirdropRecipient).toHaveBeenCalledWith({
+				userSnapshot,
+				identity: mockIdentity
+			});
+		});
+
+		it('should not include ICRC testnet tokens', async () => {
+			balancesStore.set({
+				tokenId: mockIcrcTestnetToken.id,
+				data: { data: BigNumber.from(987n), certified }
+			});
+
 			await registerUserSnapshot();
 
 			expect(registerAirdropRecipient).toHaveBeenCalledWith({

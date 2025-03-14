@@ -19,6 +19,7 @@ import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
 import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
@@ -38,9 +39,12 @@ import type { Token } from '$lib/types/token';
 import type { TransactionType } from '$lib/types/transaction';
 import {
 	isNetworkIdBTCMainnet,
+	isNetworkIdBTCRegtest,
 	isNetworkIdBTCTestnet,
 	isNetworkIdEthereum,
 	isNetworkIdSOLDevnet,
+	isNetworkIdSOLLocal,
+	isNetworkIdSOLTestnet,
 	isNetworkIdSepolia
 } from '$lib/utils/network.utils';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -148,7 +152,12 @@ const toIcrcSnapshot = ({
 	balance,
 	exchangeRate,
 	timestamp
-}: ToSnapshotParams<IcToken>): AccountSnapshotFor => {
+}: ToSnapshotParams<IcToken>): AccountSnapshotFor | undefined => {
+	// We ignore the ICRC testnet tokens.
+	if (isTokenIcrcTestnet(token)) {
+		return;
+	}
+
 	const { id, ledgerCanisterId } = token;
 
 	const identity = get(authIdentity);
@@ -184,6 +193,12 @@ const toSplSnapshot = ({
 		address: tokenAddress,
 		network: { id: networkId }
 	} = token;
+
+	// We ignore the local networks.
+	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+	if (isNetworkIdBTCRegtest(networkId) || isNetworkIdSOLLocal(networkId)) {
+		return;
+	}
 
 	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 	const address =
@@ -243,7 +258,14 @@ const toSplSnapshot = ({
 		)
 	};
 
-	return isNetworkIdSOLDevnet(networkId) ? { SplDevnet: snapshot } : { SplMainnet: snapshot };
+	// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
+	const isTestnet =
+		isNetworkIdBTCTestnet(networkId) ||
+		isNetworkIdSepolia(networkId) ||
+		isNetworkIdSOLDevnet(networkId) ||
+		isNetworkIdSOLTestnet(networkId);
+
+	return isTestnet ? { SplDevnet: snapshot } : { SplMainnet: snapshot };
 };
 
 const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
