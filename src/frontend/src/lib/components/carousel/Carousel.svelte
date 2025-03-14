@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import { E2E_ENABLED } from '$env/e2e.env';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import {
@@ -12,7 +13,6 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
-	import { E2E_ENABLED } from '$env/e2e.env';
 
 	export let autoplay = 5000;
 	export let duration = 300;
