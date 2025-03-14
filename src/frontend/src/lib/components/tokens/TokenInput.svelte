@@ -119,7 +119,7 @@
 			{/if}
 		</div>
 
-		<div class="h-3/4 w-[1px] bg-disabled" />
+		<div class="h-3/4 w-[1px] bg-disabled"></div>
 
 		<button class="flex h-full gap-1 px-3" on:click disabled={!isSelectable}>
 			{#if token}
