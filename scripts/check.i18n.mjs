@@ -18,7 +18,7 @@ const extractKeys = ({ obj, prefix = '' }) =>
 
 // It checks if the key is used in the content or if the key is used in a dynamic way
 const checkKeyUsage = ({ key, content }) =>
-	content.includes(key) ||
+	content.includes(key) ??
 	(content.includes(`get(i18n)`) && key.split('.').every((k) => content.includes(k)));
 
 const main = () => {
