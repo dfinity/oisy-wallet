@@ -57,8 +57,8 @@ export default defineConfig(
 					replacement: resolve(__dirname, 'src/declarations')
 				},
 				{
-					find: /^@walletconnect\/utils\/dist$/,
-					replacement: '@walletconnect/utils/dist/index.es.js'
+					find: /^uint8arrays$/,
+					replacement: 'uint8arrays/cjs/src/index.js'
 				}
 			]
 		},
