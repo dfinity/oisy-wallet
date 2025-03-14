@@ -18,4 +18,4 @@ runs:
 
     - name: Prepare
       shell: bash
-      run: npm prepare
+      run: npm run prepare
