@@ -806,7 +806,8 @@
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "The token ledger is working fine, but the index canister is missing, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
-			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual."
+			"index_canister_not_working_explanation": "The token ledger is working fine, but the index canister is having issues, so $oisy_short can’t fetch a list of transactions. You can still Send and Receive your tokens as usual.",
+			"token_needs_enabling": "The token needs to be enabled in order to view transactions."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
@@ -815,7 +816,9 @@
 			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
 			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
 			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
-			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash.",
+			"loading_token_with_network": "The token $token on the $network network could not be loaded because it's not in your token list.",
+			"loading_token": "The token $token could not be loaded because it's not in your token list."
 		}
 	},
 	"about": {

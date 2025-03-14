@@ -741,6 +741,7 @@ interface I18nTransactions {
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;
 		index_canister_not_working_explanation: string;
+		token_needs_enabling: string;
 	};
 	error: {
 		loading_transactions: string;
@@ -750,6 +751,8 @@ interface I18nTransactions {
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
 		unexpected_transaction_for_hash: string;
+		loading_token_with_network: string;
+		loading_token: string;
 	};
 }
 
