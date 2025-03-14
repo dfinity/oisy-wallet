@@ -12,6 +12,7 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
+	import { E2E_ENABLED } from '$env/e2e.env';
 
 	export let autoplay = 5000;
 	export let duration = 300;
@@ -112,7 +113,7 @@
 			});
 
 			// Start autoplay timer if it is not running
-			if (isNullish(autoplayTimer)) {
+			if (isNullish(autoplayTimer) && !E2E_ENABLED) {
 				initialiseAutoplayTimer();
 			}
 		}
