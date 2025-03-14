@@ -8,11 +8,14 @@ export class PromotionCarousel {
 		this.#page = page;
 	}
 
-	public async freezeCarousel(slideNumber: number): Promise<void> {
-		const navigation1Selector = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}"]:visible`;
-		await this.#page.click(navigation1Selector);
+	public async freezeCarouselToSlide(slideNumber: number): Promise<void> {
+		//const currentTimestamp = Date.now();
+		//await this.#page.clock.setFixedTime(currentTimestamp);
+
+		const navigationSelector1 = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}"]:visible`;
+		await this.#page.click(navigationSelector1);
 		await this.#page.evaluate(() => {
-			const slide = document.querySelector('div[data-tid="carousel-slide"]');
+			const slide = document.querySelector(`div[data-tid="carousel-slide"]`);
 			if (slide) {
 				slide.setAttribute(
 					'style',

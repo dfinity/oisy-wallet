@@ -297,8 +297,14 @@ abstract class Homepage {
 		if (isNullish(this.promotionCarousel)) {
 			this.promotionCarousel = new PromotionCarousel(this.#page);
 		}
-		await this.promotionCarousel.freezeCarousel(1);
+		await this.promotionCarousel.freezeCarouselToSlide(1);
 		await this.waitForLoadState();
+	}
+
+	async setClock() {
+		const now = Date.now();
+		await this.#page.clock.install();
+		await this.#page.clock.setFixedTime(now);
 	}
 
 	async waitForLoadState() {
@@ -387,35 +393,39 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		if (freezeCarousel) {
-			await this.setCarouselFirstSlide();
-			await this.waitForLoadState();
-		}
-
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
+		if (isNullish(screenshotTarget)) {
+			// Creates a snapshot as a fullPage and not just certain parts.
+			await this.viewportAdjuster();
+		}
+
+		const element = screenshotTarget ?? this.#page;
+
 		await this.#page.mouse.move(0, 0);
+
+		if (freezeCarousel) {
+			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
+			//await this.#page.clock.install();
+			await this.setCarouselFirstSlide();
+			//await this.#page.clock.pauseAt(Date.now());
+		}
 
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 
-			if (screenshotTarget) {
-				await expect(screenshotTarget).toHaveScreenshot({
-					timeout: 5 * 60 * 1000
-				});
-			} else {
-				await this.viewportAdjuster();
-				await expect(this.#page).toHaveScreenshot({
-					// creates a snapshot as a fullPage and not just certain parts.
-					// playwright can retry flaky tests in the amount of time set below.
-					timeout: 5 * 60 * 1000
-				});
-			}
+			// Playwright can retry flaky tests in the amount of time set below.
+			await expect(element).toHaveScreenshot({ timeout: 5 * 60 * 1000 });
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
+
+		if (freezeCarousel) {
+			// Resuming the time that we froze because of the carousel animations.
+			await this.#page.clock.resume();
+		}
 	}
 
 	abstract extendWaitForReady(): Promise<void>;
@@ -515,6 +525,8 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForLoaderModal({ state: 'hidden', timeout: 60000 });
 
+		await this.setClock();
+
 		await this.waitForContentReady();
 	}
 
@@ -523,7 +535,7 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForLoadState();
 
-		await this.setCarouselFirstSlide();
+		//await this.setCarouselFirstSlide();
 
 		await this.extendWaitForReady();
 	}

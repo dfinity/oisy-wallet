@@ -15,5 +15,5 @@ testWithII('should display homepage in logged in state', async ({ page, iiPage }
 
 	await homepageLoggedIn.waitForReady();
 
-	await homepageLoggedIn.takeScreenshot();
+	await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
 });
