@@ -16,7 +16,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
-import { type WalletKitTypes } from '@reown/walletkit';
+import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
 	formatJsonRpcResult,
@@ -48,7 +48,7 @@ export const initWalletConnect = async ({
 	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
 	clearLocalStorage();
 
-	const WalletKit = await WalletKit.init({
+	const walletKit = await WalletKit.init({
 		core: new Core({
 			projectId: PROJECT_ID
 		}),
@@ -59,13 +59,13 @@ export const initWalletConnect = async ({
 		const disconnectExistingSessions = async ([_key, session]: [string, { topic: string }]) => {
 			const { topic } = session;
 
-			await WalletKit.disconnectSession({
+			await walletKit.disconnectSession({
 				topic,
 				reason: getSdkError('USER_DISCONNECTED')
 			});
 		};
 
-		const promises = Object.entries(WalletKit.getActiveSessions()).map(disconnectExistingSessions);
+		const promises = Object.entries(walletKit.getActiveSessions()).map(disconnectExistingSessions);
 		await Promise.all(promises);
 	};
 
@@ -73,15 +73,15 @@ export const initWalletConnect = async ({
 	await disconnectActiveSessions();
 
 	const sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
-		WalletKit.on('session_proposal', callback);
+		walletKit.on('session_proposal', callback);
 	};
 
 	const sessionDelete = (callback: () => void) => {
-		WalletKit.on('session_delete', callback);
+		walletKit.on('session_delete', callback);
 	};
 
 	const sessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => {
-		WalletKit.on('session_request', callback);
+		walletKit.on('session_request', callback);
 	};
 
 	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
@@ -120,7 +120,7 @@ export const initWalletConnect = async ({
 			}
 		});
 
-		await WalletKit.approveSession({
+		await walletKit.approveSession({
 			id: proposal.id,
 			namespaces
 		});
@@ -129,14 +129,14 @@ export const initWalletConnect = async ({
 	const rejectSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { id } = proposal;
 
-		await WalletKit.rejectSession({
+		await walletKit.rejectSession({
 			id,
 			reason: getSdkError('USER_REJECTED_METHODS')
 		});
 	};
 
 	const respond = async ({ topic, response }: { topic: string; response: JsonRpcResponse }) =>
-		await WalletKit.respondSessionRequest({ topic, response });
+		await walletKit.respondSessionRequest({ topic, response });
 
 	const rejectRequest = async ({
 		id,
@@ -171,7 +171,7 @@ export const initWalletConnect = async ({
 		});
 
 	return {
-		pair: () => WalletKit.core.pairing.pair({ uri }),
+		pair: () => walletKit.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,
@@ -181,12 +181,12 @@ export const initWalletConnect = async ({
 		sessionRequest,
 		disconnect: async () => {
 			const disconnectPairings = async () => {
-				const pairings = WalletKit.engine.signClient.core.pairing.pairings.values;
+				const pairings = walletKit.engine.signClient.core.pairing.pairings.values;
 
 				for (const pairing of pairings) {
 					const { topic } = pairing;
 
-					await WalletKit.disconnectSession({
+					await walletKit.disconnectSession({
 						topic,
 						reason: getSdkError('USER_DISCONNECTED')
 					});
