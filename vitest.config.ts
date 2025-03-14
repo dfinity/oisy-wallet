@@ -55,10 +55,6 @@ export default defineConfig(
 				{
 					find: '$declarations',
 					replacement: resolve(__dirname, 'src/declarations')
-				},
-				{
-					find: /^uint8arrays$/,
-					replacement: 'uint8arrays/cjs/src/index.js'
 				}
 			]
 		},
