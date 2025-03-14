@@ -55,6 +55,10 @@ export default defineConfig(
 				{
 					find: '$declarations',
 					replacement: resolve(__dirname, 'src/declarations')
+				},
+				{
+					find: /^@walletconnect\/utils\/dist$/,
+					replacement: '@walletconnect/utils/dist/index.es.js'
 				}
 			]
 		},
