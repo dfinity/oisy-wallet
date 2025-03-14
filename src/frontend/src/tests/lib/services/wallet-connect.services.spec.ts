@@ -25,7 +25,6 @@ describe('wallet-connect.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			vi.spyOn(console, 'error').mockImplementation(() => {});
 
 			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
