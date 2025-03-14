@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import orca from '$sol/assets/orca.svg';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,6 +21,6 @@ export const ORCA_TOKEN: RequiredSplToken = {
 	symbol: ORCA_SYMBOL,
 	decimals: ORCA_DECIMALS,
 	icon: orca,
-	address: 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE',
+	address: parseSolAddress('orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE'),
 	owner: TOKEN_PROGRAM_ADDRESS
 };
