@@ -14,6 +14,8 @@ export const ENV =
 			? 'staging'
 			: REQUESTED_ENV === 'audit'
 				? 'staging'
+			: REQUESTED_ENV === 'e2e'
+				? 'staging'
 				: ['staging', 'beta'].includes(REQUESTED_ENV)
 					? REQUESTED_ENV
 					: 'development';
