@@ -3,6 +3,10 @@ import { MODALS_VIEWPORT_WIDTH, MODAL_VIEWPORT_HEIGHT } from './utils/constants/
 import { ManageTokensCases, ManageTokensPage } from './utils/pages/manage-tokens.page';
 
 ManageTokensCases.forEach(({ type, tokenSymbol, networkSymbol }) => {
+	testWithII.beforeEach(async ({ page }) => {
+		await page.clock.install();
+	});
+
 	testWithII(`should enable and disable ${type} token`, async ({ page, iiPage, isMobile }) => {
 		const manageTokensPage = new ManageTokensPage({
 			page,
