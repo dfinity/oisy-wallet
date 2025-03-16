@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import { E2E_ENABLED } from '$env/e2e.env';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
 	import {
@@ -113,7 +112,7 @@
 			});
 
 			// Start autoplay timer if it is not running
-			if (isNullish(autoplayTimer) && !E2E_ENABLED) {
+			if (isNullish(autoplayTimer)) {
 				initialiseAutoplayTimer();
 			}
 		}
@@ -248,9 +247,9 @@
 	 * Switch to the provided slide
 	 */
 	const goToSlide = ({
-		slide,
-		withTransition = true
-	}: {
+											 slide,
+											 withTransition = true
+										 }: {
 		slide: number;
 		withTransition?: boolean;
 	}) => {

@@ -10,6 +10,6 @@ TestnetCases.forEach(({ networkSymbol, tokenSymbol }) => {
 		const testnetsPage = new TestnetsPage({ page, iiPage });
 		await testnetsPage.waitForReady();
 		await testnetsPage.enableTestnets({ networkSymbol, tokenSymbol });
-		await testnetsPage.takeScreenshot({ freezeCarousel: true });
+		await testnetsPage.takeScreenshot();
 	});
 });
