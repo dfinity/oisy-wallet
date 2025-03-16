@@ -47,6 +47,7 @@ import {
 	isNetworkIdSOLTestnet,
 	isNetworkIdSepolia
 } from '$lib/utils/network.utils';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -254,7 +255,9 @@ const toSplSnapshot = ({
 		account: address,
 		token_address: tokenAddress,
 		last_transactions: filterTransactions(
-			lastTransactions.map((transaction) => toSplTransaction({ transaction, address }))
+			lastTransactions.map((transaction) =>
+				toSplTransaction({ transaction, address: parseSolAddress(address) })
+			)
 		)
 	};
 

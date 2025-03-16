@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import type { TokenId } from '$lib/types/token';
+import { parseSolAddress } from '$lib/validation/address.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import wsol from '$sol/assets/wsol.svg';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -20,7 +21,7 @@ export const WSOL_TOKEN: RequiredSplToken = {
 	symbol: WSOL_SYMBOL,
 	decimals: WSOL_DECIMALS,
 	icon: wsol,
-	address: 'So11111111111111111111111111111111111111112',
+	address: parseSolAddress('So11111111111111111111111111111111111111112'),
 	owner: TOKEN_PROGRAM_ADDRESS,
 	buy: {
 		onramperId: 'sol'
