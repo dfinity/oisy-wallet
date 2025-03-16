@@ -81,7 +81,7 @@
 		"@solana-program/compute-budget": "^0.6.1",
 		"@solana-program/system": "^0.6.2",
 		"@solana-program/token": "^0.4.1",
-		"@solana/web3.js": "^2.0.0",
+		"@solana/kit": "^2.1.0",
 		"@walletconnect/auth-client": "^2.1.2",
 		"alchemy-sdk": "3.4.1",
 		"buffer": "^6.0.3",
