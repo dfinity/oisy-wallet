@@ -389,8 +389,8 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{ freezeCarousel = true, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
-			freezeCarousel: true
+		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
+			freezeCarousel: false
 		}
 	): Promise<void> {
 		if (nonNullish(centeredElementTestId)) {
