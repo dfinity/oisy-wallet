@@ -17,6 +17,8 @@ const RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT = 900;
 let homepageLoggedIn: HomepageLoggedIn;
 
 testWithII.beforeEach(async ({ page, iiPage, isMobile }) => {
+	await page.clock.install();
+
 	homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
