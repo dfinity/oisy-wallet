@@ -9,14 +9,10 @@ export class PromotionCarousel {
 	}
 
 	public async freezeCarouselToSlide(slideNumber: number): Promise<void> {
-		//const currentTimestamp = Date.now();
-		//await this.#page.clock.setFixedTime(currentTimestamp);
-
 		const navigationSelector1 = `[data-tid="${CAROUSEL_SLIDE_NAVIGATION}${slideNumber}"]:visible`;
 		await this.#page.click(navigationSelector1);
 		await this.#page.evaluate(() => {
 			const slide = document.querySelector(`div[data-tid="carousel-slide"]`);
-			console.log('slide', slide);
 			if (slide) {
 				slide.setAttribute(
 					'style',
