@@ -229,8 +229,6 @@ describe('icrc.services', () => {
 					certified: true
 				});
 
-				vi.spyOn(console, 'error').mockImplementation(() => {});
-
 				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 			});
 
