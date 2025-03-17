@@ -1,4 +1,4 @@
-import type {Token} from "$lib/types/token";
+import type { Token } from '$lib/types/token';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 

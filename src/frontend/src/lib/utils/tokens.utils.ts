@@ -214,5 +214,10 @@ export const filterTokens = <T extends Token>({
  * @param symbol - symbol of the token to find.
  * @returns Token with the given symbol or undefined.
  */
-export const findToken = ({ tokens, symbol }: { tokens: Token[]; symbol: string }): Token | undefined =>
-	tokens.find((token) => token.symbol === symbol);
+export const findToken = ({
+	tokens,
+	symbol
+}: {
+	tokens: Token[];
+	symbol: string;
+}): Token | undefined => tokens.find((token) => token.symbol === symbol);
