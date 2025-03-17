@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { KeyValuePairInfo } from '@dfinity/gix-components';
+	import { KeyValuePairInfo, Card } from '@dfinity/gix-components';
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
@@ -22,6 +22,10 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { modalStore } from '$lib/stores/modal.store';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import { modalSettingsData, modalSettingsState } from '$lib/derived/modal.derived';
+	import type { SettingsModalType } from '$lib/types/settings';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -42,77 +46,83 @@
 			}
 		}
 	};
+
+	const openSettingsModal = (t: SettingsModalType) => modalStore.openSettings(t);
 </script>
 
-<KeyValuePairInfo>
-	<svelte:fragment slot="key">
-		<span class="font-bold">{$i18n.settings.text.principal}:</span>
-	</svelte:fragment>
-	<svelte:fragment slot="value">
-		<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
-			{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
-		</output>
-		<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
-	</svelte:fragment>
-	<svelte:fragment slot="info">
-		{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
-	</svelte:fragment>
-</KeyValuePairInfo>
+<div class="rounded-xl bg-primary p-5">
+	<h4 class="mb-5">General</h4>
 
-<div class="mt-4">
-	<KeyValuePairInfo>
-		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.text.session}:</span></svelte:fragment
-		>
-		<output slot="value" class="mr-1.5">
-			{#if nonNullish(remainingTimeMilliseconds)}
-				{remainingTimeMilliseconds <= 0
-					? '0'
-					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
-			{/if}
-		</output>
+	<div class="my-3">
+		<KeyValuePairInfo>
+			<svelte:fragment slot="key">
+				<span>{$i18n.settings.text.principal}</span>
+			</svelte:fragment>
+			<svelte:fragment slot="value">
+				<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
+					{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
+				</output>
+				<Copy
+					inline
+					value={principal?.toText() ?? ''}
+					text={$i18n.settings.text.principal_copied}
+				/>
+			</svelte:fragment>
+			<svelte:fragment slot="info">
+				{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
+			</svelte:fragment>
+		</KeyValuePairInfo>
+	</div>
 
-		<svelte:fragment slot="info">
-			{$i18n.settings.text.session_description}
-		</svelte:fragment>
-	</KeyValuePairInfo>
+	<div class="my-3">
+		<KeyValuePairInfo>
+			<span class="flex flex-col" slot="key">
+				<span>{$i18n.settings.text.session}</span>
+				{#if nonNullish(remainingTimeMilliseconds)}
+					<span class="text-sm text-tertiary">
+						{remainingTimeMilliseconds <= 0
+							? '0'
+							: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
+					</span>
+				{/if}
+			</span>
+			<output slot="value" class="mr-1.5">
+				<Button link on:click={() => openSettingsModal('sessionDuration')} disabled>Edit ></Button>
+			</output>
+
+			<svelte:fragment slot="info">
+				{$i18n.settings.text.session_description}
+			</svelte:fragment>
+		</KeyValuePairInfo>
+	</div>
 </div>
 
-<div class="mt-2">
-	<KeyValuePairInfo>
-		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.text.testnets}:</span></svelte:fragment
-		>
+<div class="mt-5 flex-col gap-4 rounded-xl bg-primary p-5">
+	<h4 class="mb-5">Networks</h4>
 
-		<NetworksTestnetsToggle slot="value" />
+	<div class="my-3">
+		<KeyValuePairInfo>
+			<svelte:fragment slot="key"><span>{$i18n.settings.text.testnets}</span></svelte:fragment>
 
-		<svelte:fragment slot="info">
-			{$i18n.settings.text.testnets_description}
-		</svelte:fragment>
-	</KeyValuePairInfo>
-</div>
+			<svelte:fragment slot="value"
+				><Button link on:click={() => openSettingsModal('enabledNetworks')}>Edit ></Button
+				></svelte:fragment
+			>
 
-<div class="mt-2">
-	<KeyValuePairInfo>
-		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.tokens.text.hide_zero_balances}:</span></svelte:fragment
-		>
-
-		<TokensZeroBalanceToggle slot="value" />
-
-		<svelte:fragment slot="info">
-			{$i18n.settings.text.hide_zero_balances_description}
-		</svelte:fragment>
-	</KeyValuePairInfo>
+			<svelte:fragment slot="info">
+				{$i18n.settings.text.testnets_description}
+			</svelte:fragment>
+		</KeyValuePairInfo>
+	</div>
 </div>
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
-	<div class="mt-8" in:fade>
-		<h2 class="mb-6 pb-1 text-base">{$i18n.settings.text.credentials_title}</h2>
+	<div class="mt-5 flex-col gap-4 rounded-xl bg-primary p-5" in:fade>
+		<h4 class="mb-5">{$i18n.settings.text.credentials_title}</h4>
 
 		<div class="mt-4">
 			<KeyValuePairInfo>
-				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
+				<span slot="key">{$i18n.settings.text.pouh_credential}</span>
 				<svelte:fragment slot="value">
 					{#if $userHasPouhCredential}
 						<output in:fade class="mr-1.5">
@@ -133,9 +143,14 @@
 	</div>
 {/if}
 
-<div class="mt-10">
-	<h2 class="mb-4 pb-1 text-base">{$i18n.settings.text.appearance}:</h2>
+<div class="mt-5 flex-col gap-4 rounded-xl bg-primary p-5">
+	<h4 class="mb-5">{$i18n.settings.text.appearance}</h4>
+
 	<ThemeSelector />
 </div>
 
 <SettingsVersion />
+
+{#if $modalSettingsState}
+	<SettingsModal />
+{/if}

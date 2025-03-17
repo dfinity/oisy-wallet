@@ -1,4 +1,8 @@
-import { hideZeroBalancesStore, testnetsStore } from '$lib/stores/settings.store';
+import {
+	enabledNetworksStore,
+	hideZeroBalancesStore,
+	testnetsStore
+} from '$lib/stores/settings.store';
 import { derived, type Readable } from 'svelte/store';
 
 export const testnetsEnabled: Readable<boolean> = derived(
@@ -14,4 +18,9 @@ export const hideZeroBalances: Readable<boolean> = derived(
 export const showZeroBalances: Readable<boolean> = derived(
 	[hideZeroBalances],
 	([$hideZeroBalances]) => !$hideZeroBalances
+);
+
+export const enabledNetworks: Readable<{ [id: symbol]: boolean }> = derived(
+	[enabledNetworksStore],
+	([$enabledNetworksStore]) => $enabledNetworksStore ?? {}
 );

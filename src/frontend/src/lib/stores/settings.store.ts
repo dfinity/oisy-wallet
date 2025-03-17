@@ -6,3 +6,6 @@ export interface SettingsData {
 
 export const testnetsStore = initStorageStore<SettingsData>({ key: 'testnets' });
 export const hideZeroBalancesStore = initStorageStore<SettingsData>({ key: 'hide-zero-balances' });
+export const enabledNetworksStore = initStorageStore<{ [id: symbol]: boolean }>({
+	key: 'enabledNetworksStore'
+});
