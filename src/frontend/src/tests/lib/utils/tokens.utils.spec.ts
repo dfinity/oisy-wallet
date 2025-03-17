@@ -4,7 +4,11 @@ import {
 	ICP_NETWORK_ID
 } from '$env/networks/networks.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import {BTC_MAINNET_SYMBOL, BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN} from '$env/tokens/tokens.btc.env';
+import {
+	BTC_MAINNET_SYMBOL,
+	BTC_MAINNET_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
@@ -17,7 +21,8 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	filterEnabledTokens,
-	filterTokens, findToken,
+	filterTokens,
+	findToken,
 	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
@@ -451,12 +456,12 @@ describe('filterTokens', () => {
 
 describe('findToken', () => {
 	it('should return the correct token by symbol', () => {
-		const result = findToken({tokens: mockTokens, symbol: BTC_MAINNET_SYMBOL});
+		const result = findToken({ tokens: mockTokens, symbol: BTC_MAINNET_SYMBOL });
 		expect(result).toEqual(BTC_MAINNET_TOKEN);
 	});
 
 	it('should return undefined if token is not found', () => {
-		const result = findToken({tokens: mockTokens, symbol: 'UNKNOWN_TOKEN'});
+		const result = findToken({ tokens: mockTokens, symbol: 'UNKNOWN_TOKEN' });
 		expect(result).toBeUndefined();
 	});
 });
