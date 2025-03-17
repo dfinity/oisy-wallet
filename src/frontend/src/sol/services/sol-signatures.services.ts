@@ -8,7 +8,7 @@ import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction'
 import type { SplToken } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { assertIsAddress, signature, address as solAddress } from '@solana/web3.js';
+import { assertIsAddress, signature, address as solAddress } from '@solana/kit';
 
 interface GetSolSignaturesParams {
 	address: SolAddress;

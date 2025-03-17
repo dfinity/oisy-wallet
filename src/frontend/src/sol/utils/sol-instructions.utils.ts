@@ -74,11 +74,7 @@ import {
 	parseTransferInstruction,
 	parseUiAmountToAmountInstruction
 } from '@solana-program/token';
-import {
-	address,
-	assertIsInstructionWithAccounts,
-	assertIsInstructionWithData
-} from '@solana/web3.js';
+import { address, assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/kit';
 
 const mapSystemParsedInstruction = ({
 	type,
@@ -431,7 +427,7 @@ export const mapSolParsedInstruction = async ({
 const parseSolComputeBudgetInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedComputeBudgetInstruction => {
-	assertIsInstructionWithData(instruction);
+	assertIsInstructionWithData<Uint8Array>(instruction);
 
 	const decodedInstruction = identifyComputeBudgetInstruction(instruction);
 	switch (decodedInstruction) {
@@ -468,7 +464,7 @@ const parseSolComputeBudgetInstruction = (
 const parseSolSystemInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedSystemInstruction => {
-	assertIsInstructionWithData(instruction);
+	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
 	const decodedInstruction = identifySystemInstruction(instruction);
@@ -546,7 +542,7 @@ const parseSolSystemInstruction = (
 const parseSolTokenInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedTokenInstruction => {
-	assertIsInstructionWithData(instruction);
+	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
 	const decodedInstruction = identifyTokenInstruction(instruction);

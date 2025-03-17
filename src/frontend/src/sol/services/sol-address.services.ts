@@ -36,7 +36,7 @@ import type { TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import { getAddressDecoder } from '@solana/web3.js';
+import { getAddressDecoder } from '@solana/kit';
 
 const getSolanaPublicKey = async (
 	params: CanisterApiFunctionParams<{ derivationPath: string[] }>

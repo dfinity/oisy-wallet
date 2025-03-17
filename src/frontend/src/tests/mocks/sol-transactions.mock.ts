@@ -23,7 +23,7 @@ import {
 	type Blockhash,
 	type TransactionMessageBytes,
 	type UnixTimestamp
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 const mockSignature =
 	'4UjEjyVYfPNkr5TzZ3oH8ZS8PiEzbHsBdhvRtrLiuBfk8pQMRNvY3UUxjHe4nSzxAnhd8JCSQ3YYmAj651ZWeArM';

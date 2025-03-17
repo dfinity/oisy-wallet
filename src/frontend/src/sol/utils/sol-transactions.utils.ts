@@ -12,7 +12,7 @@ import {
 	type SolanaRpcApi,
 	type Transaction,
 	type TransactionMessage
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
