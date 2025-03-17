@@ -11,6 +11,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
+    import {getLiquidityFees, getNetworkFee, getSwapRoute} from "$lib/utils/swap.utils";
+    import {tokens} from "$lib/derived/tokens.derived";
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
 	export let destinationToken: Token | undefined;
@@ -59,8 +61,9 @@
 				swapAmounts: {
 					slippage: swapAmounts.slippage,
 					receiveAmount: swapAmounts.receive_amount,
-					liquidityProvidersFee: transaction?.lp_fee,
-					gasFee: transaction?.gas_fee
+                    route: getSwapRoute(swapAmounts.txs ?? []),
+                    liquidityFees: getLiquidityFees({ transactions: swapAmounts.txs ?? [], tokens: $tokens }),
+                    networkFee: getNetworkFee({ transactions: swapAmounts.txs ?? [], tokens: $tokens })
 				},
 				amountForSwap: parsedAmount
 			});
