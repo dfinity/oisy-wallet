@@ -23,7 +23,7 @@
 	};
 
 	const toggleNetwork = (network: Network) => {
-		enabledNetworksData[network.id] = !$enabledNetworks[network.id];
+		enabledNetworksData[network.id] = !$enabledNetworks?.[network.id] ?? false;
 	};
 
 	const save = async () => {
