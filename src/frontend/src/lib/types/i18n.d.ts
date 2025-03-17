@@ -10,12 +10,15 @@ interface I18nCore {
 		back: string;
 		done: string;
 		close: string;
+		change: string;
+		apply: string;
 		refresh: string;
 		name: string;
 		symbol: string;
 		decimals: string;
 		amount: string;
 		max: string;
+		destination: string;
 		reject: string;
 		approve: string;
 		view: string;
@@ -409,6 +412,8 @@ interface I18nSend {
 interface I18nConvert {
 	text: {
 		converting: string;
+		conversion_destination: string;
+		default_destination: string;
 		convert_to_btc: string;
 		convert_to_ckbtc: string;
 		convert_to_token: string;
@@ -438,6 +443,8 @@ interface I18nConvert {
 		refreshing_ui: string;
 		unsupported_token_conversion: string;
 		calculating_max_amount: string;
+		send_to: string;
+		custom_destination: string;
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
