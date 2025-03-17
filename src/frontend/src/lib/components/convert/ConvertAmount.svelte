@@ -8,6 +8,7 @@
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
+	export let destinationTokenFee: bigint | undefined = undefined;
 	export let minFee: bigint | undefined = undefined;
 	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let insufficientFunds: boolean;
@@ -46,5 +47,11 @@
 		<IconMoveDown />
 	</div>
 
-	<ConvertAmountDestination bind:receiveAmount bind:exchangeValueUnit {sendAmount} {inputUnit} />
+	<ConvertAmountDestination
+		bind:receiveAmount
+		bind:exchangeValueUnit
+		{sendAmount}
+		{destinationTokenFee}
+		{inputUnit}
+	/>
 </div>
