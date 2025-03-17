@@ -18,6 +18,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import { REWARDS_MODAL } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		combinedDerivedSortedNetworkTokensUi,
@@ -37,7 +38,6 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import { REWARDS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let reward: RewardDescription;
 
