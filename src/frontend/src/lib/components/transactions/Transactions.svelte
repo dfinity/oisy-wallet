@@ -8,15 +8,20 @@
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-	import { networkBitcoin, networkICP, networkSolana } from '$lib/derived/network.derived';
+	import {networkBitcoin, networkICP, networkSolana} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import type { OptionToken } from '$lib/types/token';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 
 	let token: OptionToken;
-	$: token = $allTokens.find((token) => token.name === $routeToken);
+	$: token = $allTokens.find((token) => {
+		return token.name === $routeToken && token.network.id.toString().includes($routeNetwork);
+	});
+
 	let showTokenModal = false;
 
+	// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
+	// After the timeout, we assume that the fetch has failed and open the token modal.
 	$: if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
 		setTimeout(() => {
 			showTokenModal = true;
