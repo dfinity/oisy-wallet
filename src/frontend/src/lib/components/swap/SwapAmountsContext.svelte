@@ -12,6 +12,7 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
     import {getLiquidityFees, getNetworkFee, getSwapRoute} from "$lib/utils/swap.utils";
+    import {tokens} from "$lib/derived/tokens.derived";
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
 	export let destinationToken: Token | undefined;
@@ -59,8 +60,8 @@
 					slippage: swapAmounts.slippage,
 					receiveAmount: swapAmounts.receive_amount,
                     route: getSwapRoute(swapAmounts.txs ?? []),
-                    liquidityFees: getLiquidityFees(swapAmounts.txs ?? []),
-                    networkFee: getNetworkFee(swapAmounts.txs ?? [])
+                    liquidityFees: getLiquidityFees(swapAmounts.txs ?? [], $tokens),
+                    networkFee: getNetworkFee(swapAmounts.txs ?? [], $tokens)
 				},
 				amountForSwap: parsedAmount
 			});

@@ -15,6 +15,19 @@
 	import SwapRoute from "$lib/components/swap/SwapRoute.svelte";
 	import SwapLiquidityFees from "$lib/components/swap/SwapLiquidityFees.svelte";
 	import SwapNetworkFee from "$lib/components/swap/SwapNetworkFee.svelte";
+	import {getContext} from "svelte";
+	import {SWAP_AMOUNTS_CONTEXT_KEY, type SwapAmountsContext} from "$lib/stores/swap-amounts.store";
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
+
+	let route: string[] | undefined;
+	$: route = $swapAmountsStore?.swapAmounts?.route;
+
+	let networkFee: ProviderFee | undefined;
+	$: networkFee = $swapAmountsStore?.swapAmounts?.networkFee;
+
+	let liquidityFees: ProviderFee[] | undefined;
+	$: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
 
 	export let route: string[] | undefined;
 	export let liquidityFees: ProviderFee[] | undefined;
@@ -71,13 +84,13 @@
 		</ModalValue>
 
 		<svelte:fragment slot="list-items">
-			{#if nonNullish(route)}
+			{#if nonNullish(route) && route.length > 0}
 				<SwapRoute {route} />
 			{/if}
 			{#if nonNullish(networkFee)}
 				<SwapNetworkFee {networkFee} />
 			{/if}
-			{#if nonNullish(liquidityFees)}
+			{#if nonNullish(liquidityFees) && liquidityFees.length > 0}
 				<SwapLiquidityFees {liquidityFees} />
 			{/if}
 		</svelte:fragment>
