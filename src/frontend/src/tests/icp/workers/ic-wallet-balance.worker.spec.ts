@@ -187,8 +187,6 @@ describe('ic-wallet-balance.worker', () => {
 
 		beforeEach(() => {
 			scheduler = initScheduler(startData);
-
-			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 
 		afterEach(() => {
