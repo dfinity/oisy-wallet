@@ -30,7 +30,7 @@ export const getLiquidityFees = ({
 	}
 
 	transactions.forEach((transaction) => {
-		const token = findToken(tokens, transaction.receive_symbol);
+		const token = findToken({tokens, symbol: transaction.receive_symbol});
 		if (nonNullish(token)) {
 			liquidityFees.push({
 				fee: transaction.lp_fee,
@@ -52,7 +52,7 @@ export const getNetworkFee = ({
 	if (transactions.length === 0) {
 		return undefined;
 	}
-	const token = findToken(tokens, transactions[transactions.length - 1].receive_symbol);
+	const token = findToken({tokens, symbol: transactions[transactions.length - 1].receive_symbol});
 	if (isNullish(token)) {
 		return undefined;
 	}
