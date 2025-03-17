@@ -12,6 +12,9 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import type { OptionToken } from '$lib/types/token';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
+	import {modalStore} from "$lib/stores/modal.store";
+	import {modalManageTokens} from "$lib/derived/modal.derived";
+	import {onMount} from "svelte";
 
 	let token: OptionToken;
 	$: token = $allTokens.find((token) => {
@@ -20,13 +23,17 @@
 
 	let showTokenModal = false;
 
-	// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
-	// After the timeout, we assume that the fetch has failed and open the token modal.
-	$: if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
+	onMount(() => {
+		// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
+		// After the timeout, we assume that the fetch has failed and open the token modal.
 		setTimeout(() => {
-			showTokenModal = true;
+			if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
+				modalStore.openManageTokens();
+				showTokenModal = true;
+			}
 		}, FALLBACK_TIMEOUT);
-	}
+	});
+
 	const handleClose = async () => {
 		if (isNullish($pageToken)) {
 			await goto('/');
@@ -34,7 +41,7 @@
 	};
 </script>
 
-{#if showTokenModal && nonNullish(token)}
+{#if $modalManageTokens && showTokenModal && nonNullish(token)}
 	<ManageTokensModal onClose={handleClose} />
 {:else if nonNullish($routeNetwork)}
 	{#if $networkICP}
