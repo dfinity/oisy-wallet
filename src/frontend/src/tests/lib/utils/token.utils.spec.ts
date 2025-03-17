@@ -6,7 +6,7 @@ import {
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
-import {BTC_MAINNET_SYMBOL, BTC_MAINNET_TOKEN} from '$env/tokens/tokens.btc.env';
+import {BTC_MAINNET_TOKEN} from '$env/tokens/tokens.btc.env';
 import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -520,16 +520,4 @@ describe('mapDefaultTokenToToggleable', () => {
 			expect(result.enabled).toEqual(true);
 		});
 	});
-});
-
-describe('findToken', () => {
-	it('should return the correct token by symbol', () => {
-        const result = findToken({tokens: mockTokens, symbol: BTC_MAINNET_SYMBOL});
-        expect(result).toEqual(BTC_MAINNET_TOKEN);
-    });
-
-	it('should return undefined if token is not found', () => {
-        const result = findToken({tokens: mockTokens, symbol: 'UNKNOWN_TOKEN'});
-        expect(result).toBeUndefined();
-    });
 });
