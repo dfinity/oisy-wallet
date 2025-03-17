@@ -20,11 +20,11 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionEthAddress } from '$lib/types/address';
+	import type { EthAddress } from '$lib/types/address';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let ckMinterInfoAddresses: OptionEthAddress[] = [];
+	let ckMinterInfoAddresses: EthAddress[] = [];
 	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
 
 	let sortedTransactionsUi: EthTransactionUi[];

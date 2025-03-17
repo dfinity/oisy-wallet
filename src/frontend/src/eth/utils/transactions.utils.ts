@@ -85,7 +85,7 @@ export const mapEthTransactionUi = ({
 	$ethAddress
 }: {
 	transaction: Transaction;
-	ckMinterInfoAddresses: OptionEthAddress[];
+	ckMinterInfoAddresses: EthAddress[];
 	$ethAddress: OptionEthAddress;
 }): EthTransactionUi => {
 	const { from, to } = transaction;
@@ -95,7 +95,7 @@ export const mapEthTransactionUi = ({
 		id: transaction.hash ?? '',
 		type: ckMinterInfoAddresses.includes(from.toLowerCase())
 			? 'withdraw'
-			: ckMinterInfoAddresses.includes(to?.toLowerCase())
+			: nonNullish(to) && ckMinterInfoAddresses.includes(to.toLowerCase())
 				? 'deposit'
 				: from?.toLowerCase() === $ethAddress?.toLowerCase()
 					? 'send'
