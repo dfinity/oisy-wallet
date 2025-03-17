@@ -1,14 +1,16 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type {SwapAmountsReply} from '$declarations/kong_backend/kong_backend.did';
 import type { OptionAmount } from '$lib/types/send';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
+import type {ProviderFee} from "$lib/types/swap";
 
 export type SwapAmountsStoreData = Option<{
 	swapAmounts?: {
 		slippage: SwapAmountsReply['slippage'];
 		receiveAmount: SwapAmountsReply['receive_amount'];
-		liquidityProvidersFee?: bigint;
-		gasFee?: bigint;
+		route: string[];
+		liquidityFees: ProviderFee[];
+		networkFee: ProviderFee;
 	} | null;
 	// We need to save the inputted amount for which swap-amounts have been already fetched.
 	// It allows us to compare it with the new value to prevent a re-fetch on consumer component re-render.

@@ -11,6 +11,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
+    import {getLiquidityFees, getNetworkFee, getSwapRoute} from "$lib/utils/swap.utils";
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
 	export let destinationToken: Token | undefined;
@@ -53,14 +54,13 @@
 				return;
 			}
 
-			const transaction = swapAmounts.txs.length > 0 ? swapAmounts.txs[0] : undefined;
-
 			store.setSwapAmounts({
 				swapAmounts: {
 					slippage: swapAmounts.slippage,
 					receiveAmount: swapAmounts.receive_amount,
-					liquidityProvidersFee: transaction?.lp_fee,
-					gasFee: transaction?.gas_fee
+                    route: getSwapRoute(swapAmounts.txs ?? []),
+                    liquidityFees: getLiquidityFees(swapAmounts.txs ?? []),
+                    networkFee: getNetworkFee(swapAmounts.txs ?? [])
 				},
 				amountForSwap: parsedAmount
 			});

@@ -10,6 +10,15 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
+	import ModalExpandableValues from "$lib/components/ui/ModalExpandableValues.svelte";
+	import type {ProviderFee} from "$lib/types/swap";
+	import SwapRoute from "$lib/components/swap/SwapRoute.svelte";
+	import SwapLiquidityFees from "$lib/components/swap/SwapLiquidityFees.svelte";
+	import SwapNetworkFee from "$lib/components/swap/SwapNetworkFee.svelte";
+
+	export let route: string[] | undefined;
+	export let liquidityFees: ProviderFee[] | undefined;
+	export let networkFee: ProviderFee | undefined;
 
 	let kongSwapDApp: OisyDappDescription | undefined;
 	$: kongSwapDApp = dAppDescriptions.find(({ id }) => id === 'kongswap');
@@ -39,24 +48,38 @@
 </script>
 
 {#if nonNullish(kongSwapDApp)}
-	<ModalValue>
-		<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
+	<ModalExpandableValues>
+		<ModalValue slot="list-header">
+			<svelte:fragment slot="label">{$i18n.swap.text.swap_provider}</svelte:fragment>
 
-		<svelte:fragment slot="main-value">
-			<div class="flex gap-2">
-				<div class="mt-1">
-					<Logo
-						src={kongSwapDApp.logo}
-						alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: kongSwapDApp.name })}
-					/>
+			<svelte:fragment slot="main-value">
+				<div class="flex gap-2">
+					<div class="mt-1">
+						<Logo
+							src={kongSwapDApp.logo}
+							alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: kongSwapDApp.name })}
+						/>
+					</div>
+					<div class="mr-auto">
+						<div class="text-lg font-bold">{kongSwapDApp.name}</div>
+						{#if nonNullish(displayURL)}
+							<div class="text-sm text-tertiary">{displayURL}</div>
+						{/if}
+					</div>
 				</div>
-				<div class="mr-auto">
-					<div class="text-lg font-bold">{kongSwapDApp.name}</div>
-					{#if nonNullish(displayURL)}
-						<div class="text-sm text-tertiary">{displayURL}</div>
-					{/if}
-				</div>
-			</div>
+			</svelte:fragment>
+		</ModalValue>
+
+		<svelte:fragment slot="list-items">
+			{#if nonNullish(route)}
+				<SwapRoute {route} />
+			{/if}
+			{#if nonNullish(networkFee)}
+				<SwapNetworkFee {networkFee} />
+			{/if}
+			{#if nonNullish(liquidityFees)}
+				<SwapLiquidityFees {liquidityFees} />
+			{/if}
 		</svelte:fragment>
-	</ModalValue>
+	</ModalExpandableValues>
 {/if}

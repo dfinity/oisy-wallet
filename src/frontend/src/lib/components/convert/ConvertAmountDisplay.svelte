@@ -9,27 +9,49 @@
 	export let amount: OptionAmount = undefined;
 	export let symbol: string;
 	export let exchangeRate: number | undefined = undefined;
+	export let displayExchangeRate = true;
 	export let zeroAmountLabel: string | undefined = undefined;
 </script>
 
-<ModalValue>
-	<slot name="label" slot="label" />
+{#if displayExchangeRate}
+	<ModalValue>
+		<slot name="label" slot="label" />
 
-	<svelte:fragment slot="main-value">
-		{#if nonNullish(amount)}
-			<div in:fade data-tid="convert-amount-display-value">
-				{nonNullish(amount) && amount === 0 && nonNullish(zeroAmountLabel)
-					? zeroAmountLabel
-					: `${amount} ${symbol}`}
-			</div>
-		{:else}
-			<div class="w-14 sm:w-24" data-tid="convert-amount-display-skeleton">
-				<SkeletonText />
-			</div>
-		{/if}
-	</svelte:fragment>
+		<svelte:fragment slot="main-value">
+			{#if nonNullish(amount)}
+				<div in:fade data-tid="convert-amount-display-value">
+					{nonNullish(amount) && amount === 0 && nonNullish(zeroAmountLabel)
+							? zeroAmountLabel
+							: `${amount} ${symbol}`}
+				</div>
+			{:else}
+				<div class="w-14 sm:w-24" data-tid="convert-amount-display-skeleton">
+					<SkeletonText />
+				</div>
+			{/if}
+		</svelte:fragment>
 
-	<svelte:fragment slot="secondary-value">
-		<ConvertAmountExchange {amount} {exchangeRate} />
-	</svelte:fragment>
-</ModalValue>
+		<svelte:fragment slot="secondary-value">
+			<ConvertAmountExchange {amount} {exchangeRate} />
+		</svelte:fragment>
+	</ModalValue>
+{:else}
+	<ModalValue>
+		<slot name="label" slot="label" />
+
+		<svelte:fragment slot="main-value">
+			{#if nonNullish(amount)}
+				<div in:fade data-tid="convert-amount-display-value">
+					{nonNullish(amount) && amount === 0 && nonNullish(zeroAmountLabel)
+							? zeroAmountLabel
+							: `${amount} ${symbol}`}
+				</div>
+			{:else}
+				<div class="w-14 sm:w-24" data-tid="convert-amount-display-skeleton">
+					<SkeletonText />
+				</div>
+			{/if}
+		</svelte:fragment>
+	</ModalValue>
+{/if}
+

@@ -216,7 +216,11 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider />
+				<SwapProvider
+						route={$swapAmountsStore?.swapAmounts?.route}
+						liquidityFees={$swapAmountsStore?.swapAmounts?.liquidityFees}
+						networkFee={$swapAmountsStore?.swapAmounts?.networkFee}
+				/>
 				<SwapFees />
 			</div>
 		{/if}
