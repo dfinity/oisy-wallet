@@ -4,19 +4,10 @@ import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] => {
-	const swapRoute: string[] = [];
-	if (transactions.length === 0) {
-		return swapRoute;
-	}
-
-	swapRoute.push(transactions[0].pay_symbol);
-	transactions.forEach((transaction) => {
-		swapRoute.push(transaction.receive_symbol);
-	});
-
-	return swapRoute;
-};
+export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
+	transactions.length === 0
+		? []
+		: [transactions[0].pay_symbol, ...transactions.map(({receive_symbol}) => receive_symbol)]
 
 export const getLiquidityFees = ({
 	transactions,
@@ -24,24 +15,14 @@ export const getLiquidityFees = ({
 }: {
 	transactions: SwapAmountsTxReply[];
 	tokens: Token[];
-}): ProviderFee[] => {
-	const liquidityFees: ProviderFee[] = [];
-	if (transactions.length === 0) {
-		return liquidityFees;
-	}
-
-	transactions.forEach((transaction) => {
-		const token = findToken({ tokens, symbol: transaction.receive_symbol });
+}): ProviderFee[] =>
+	transactions.length === 0 ? [] : transactions.reduce<ProviderFee[]>((acc, {lp_fee, receive_symbol}) => {
+		const token = findToken({ tokens, symbol: receive_symbol });
 		if (nonNullish(token)) {
-			liquidityFees.push({
-				fee: transaction.lp_fee,
-				token
-			});
+			return [...acc, {fee: lp_fee, token}]
 		}
-	});
-
-	return liquidityFees;
-};
+		return acc;
+	}, []);
 
 export const getNetworkFee = ({
 	transactions,

@@ -6,7 +6,7 @@ import {
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import {BTC_MAINNET_SYMBOL, BTC_MAINNET_TOKEN} from '$env/tokens/tokens.btc.env';
 import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -29,6 +29,7 @@ import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.moc
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import { BigNumber } from 'alchemy-sdk';
 import type { MockedFunction } from 'vitest';
+import {findToken} from "$lib/utils/tokens.utils";
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -519,4 +520,16 @@ describe('mapDefaultTokenToToggleable', () => {
 			expect(result.enabled).toEqual(true);
 		});
 	});
+});
+
+describe('findToken', () => {
+	it('should return the correct token by symbol', () => {
+        const result = findToken({tokens: mockTokens, symbol: BTC_MAINNET_SYMBOL});
+        expect(result).toEqual(BTC_MAINNET_TOKEN);
+    });
+
+	it('should return undefined if token is not found', () => {
+        const result = findToken({tokens: mockTokens, symbol: 'UNKNOWN_TOKEN'});
+        expect(result).toBeUndefined();
+    });
 });
