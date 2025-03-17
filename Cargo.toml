@@ -35,3 +35,12 @@ pretty_assertions = "1.4.1"
 strum = "0.26.3"
 strum_macros = "0.26.4"
 bitcoin = "0.32.5"
+
+[workspace.lints.rust]
+deprecated = "allow" # Why is this allowed?
+warnings = "deny"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+struct_field_names = "allow"
