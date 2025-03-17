@@ -18,71 +18,73 @@ const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];
 
 const $ethAddress: OptionEthAddress = '0xffff';
 
-describe('mapEthTransactionUi', () => {
-	it('should map to "withdraw" when the "from" address is in ckMinterInfoAddresses', () => {
-		const ckMinterInfoAddresses: EthAddress[] = ['0x1234'];
+describe('transactions.utils', () => {
+	describe('mapEthTransactionUi', () => {
+		it('should map to "withdraw" when the "from" address is in ckMinterInfoAddresses', () => {
+			const ckMinterInfoAddresses: EthAddress[] = ['0x1234'];
 
-		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-		expect(result.type).toBe('withdraw');
-	});
-
-	it('should map to "deposit" when the "to" address is in ckMinterInfoAddresses', () => {
-		const ckMinterInfoAddresses: EthAddress[] = ['0xabcd'];
-
-		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
-
-		expect(result.type).toBe('deposit');
-	});
-
-	it('should map to "send" when the "from" address matches the $ethAddress', () => {
-		const result = mapEthTransactionUi({
-			transaction,
-			ckMinterInfoAddresses,
-			$ethAddress: '0x1234'
+			expect(result.type).toBe('withdraw');
 		});
 
-		expect(result.type).toBe('send');
-	});
+		it('should map to "deposit" when the "to" address is in ckMinterInfoAddresses', () => {
+			const ckMinterInfoAddresses: EthAddress[] = ['0xabcd'];
 
-	it('should map to "receive" when none of the other conditions match', () => {
-		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-		expect(result.type).toBe('receive');
-	});
-
-	it('should map to "receive" when it does not match MinterInfoAddresses and $ethAddress is undefined', () => {
-		const result = mapEthTransactionUi({
-			transaction,
-			ckMinterInfoAddresses,
-			$ethAddress: undefined
+			expect(result.type).toBe('deposit');
 		});
 
-		expect(result.type).toBe('receive');
-	});
+		it('should map to "send" when the "from" address matches the $ethAddress', () => {
+			const result = mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				$ethAddress: '0x1234'
+			});
 
-	it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are empty', () => {
-		const ckMinterInfoAddresses: EthAddress[] = [];
-
-		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
-
-		expect(result.type).not.toBe('withdraw');
-		expect(result.type).not.toBe('deposit');
-	});
-
-	it('should map an ID to the transaction hash if it exists', () => {
-		const result = mapEthTransactionUi({
-			transaction: { ...transaction, hash: '0x1234' },
-			ckMinterInfoAddresses,
-			$ethAddress
+			expect(result.type).toBe('send');
 		});
 
-		expect(result.id).toBe('0x1234');
-	});
+		it('should map to "receive" when none of the other conditions match', () => {
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-	it('should map an ID to undefined if the transaction hash does not exist', () => {
-		const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			expect(result.type).toBe('receive');
+		});
 
-		expect(result.id).toBeUndefined;
+		it('should map to "receive" when it does not match MinterInfoAddresses and $ethAddress is undefined', () => {
+			const result = mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				$ethAddress: undefined
+			});
+
+			expect(result.type).toBe('receive');
+		});
+
+		it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are empty', () => {
+			const ckMinterInfoAddresses: EthAddress[] = [];
+
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+
+			expect(result.type).not.toBe('withdraw');
+			expect(result.type).not.toBe('deposit');
+		});
+
+		it('should map an ID to the transaction hash if it exists', () => {
+			const result = mapEthTransactionUi({
+				transaction: { ...transaction, hash: '0x1234' },
+				ckMinterInfoAddresses,
+				$ethAddress
+			});
+
+			expect(result.id).toBe('0x1234');
+		});
+
+		it('should map an ID to undefined if the transaction hash does not exist', () => {
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+
+			expect(result.id).toBeUndefined;
+		});
 	});
 });
