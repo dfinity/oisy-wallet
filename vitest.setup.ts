@@ -1,6 +1,7 @@
 import { mockPage } from '$tests/mocks/page.store.mock';
 import {
 	allowLoggingForDebugging,
+	disableConsoleLog,
 	failTestsThatLogToConsole
 } from '$tests/utils/console.test-utils';
 import { HttpAgent } from '@dfinity/agent';
@@ -65,6 +66,8 @@ failTestsThatLogToConsole();
 if (process.env.ALLOW_LOGGING_FOR_DEBUGGING) {
 	allowLoggingForDebugging();
 }
+
+disableConsoleLog();
 
 configure({
 	testIdAttribute: 'data-tid'

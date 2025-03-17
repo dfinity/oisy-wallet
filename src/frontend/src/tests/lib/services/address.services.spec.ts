@@ -110,10 +110,6 @@ describe('address.services', () => {
 			addressStore: mockAddressStore
 		};
 
-		beforeEach(() => {
-			vi.spyOn(console, 'error').mockImplementation(() => {});
-		});
-
 		it('should return an error if no IDB address is found', async () => {
 			mockGetIdbAddress.mockResolvedValueOnce(undefined);
 
