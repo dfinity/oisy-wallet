@@ -22,7 +22,10 @@ describe('SwapForm', () => {
 		amountForSwap: 1,
 		swapAmounts: {
 			slippage: 0,
-			receiveAmount: 2000000n
+			receiveAmount: 2000000n,
+			route: [],
+			liquidityFees: [],
+			networkFee: undefined
 		}
 	};
 
