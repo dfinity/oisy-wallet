@@ -17,7 +17,12 @@
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 
 	let token: OptionToken;
-	$: token = $allTokens.find((token) => token.name === $routeToken && $routeNetwork && token.network.id.toString().includes($routeNetwork));
+	$: token = $allTokens.find(
+		(token) =>
+			token.name === $routeToken &&
+			$routeNetwork &&
+			token.network.id.toString().includes($routeNetwork)
+	);
 
 	let showTokenModal = false;
 
