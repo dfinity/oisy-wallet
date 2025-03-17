@@ -368,7 +368,7 @@ abstract class Homepage {
 		const maxPageHeight = await this.#page.evaluate(() =>
 			Math.max(
 				document.body.scrollHeight,
-				document.documentElement.scrollHeight,
+				document.documentElement.scrollHeight
 				//document.body.offsetHeight,
 				//document.documentElement.offsetHeight,
 				//document.body.clientHeight,
