@@ -55,8 +55,6 @@
 				return;
 			}
 
-			const transaction = swapAmounts.txs.length > 0 ? swapAmounts.txs[0] : undefined;
-
 			store.setSwapAmounts({
 				swapAmounts: {
 					slippage: swapAmounts.slippage,
