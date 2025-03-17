@@ -37,6 +37,7 @@
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+	import { REWARDS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let reward: RewardDescription;
 
@@ -82,7 +83,7 @@
 	$: isRequirementsLoading = areTransactionsStoresLoading(transactionsStores);
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
 	<span class="text-center text-xl" slot="title">{reward.title}</span>
 
 	<ContentWithToolbar>

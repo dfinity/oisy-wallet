@@ -379,7 +379,7 @@ abstract class Homepage {
 		const currentViewport = this.#page.viewportSize();
 		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
 
-		await this.#page.setViewportSize({ height: maxPageHeight, width });
+		await this.#page.setViewportSize({ height: 1124, width: 412 });
 	}
 
 	async takeScreenshot(

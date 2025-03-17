@@ -53,7 +53,7 @@ export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
-export const NAVIGATION_ITEM_AIRDROPS = 'navigation-item-rewards';
+export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 
 export const AMOUNT_DATA = 'amount-data';
 export const AMOUNT_INPUT = 'amount-input';
@@ -112,6 +112,7 @@ export const REWARDS_BANNER = 'rewards-banner';
 export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
+export const REWARDS_MODAL = 'rewards-modal';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';

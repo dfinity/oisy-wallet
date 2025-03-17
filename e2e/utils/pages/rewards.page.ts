@@ -1,5 +1,5 @@
 import {
-	NAVIGATION_ITEM_AIRDROPS,
+	NAVIGATION_ITEM_REWARDS,
 	REWARDS_MODAL_DATE_BADGE,
 	REWARDS_STATUS_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -13,7 +13,7 @@ export class RewardsPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_AIRDROPS);
+		await this.navigateTo(NAVIGATION_ITEM_REWARDS);
 		await this.clickByTestId({ testId: REWARDS_STATUS_BUTTON });
 		await this.mockSelector({ selector: `[data-tid="${REWARDS_MODAL_DATE_BADGE}"]` });
 		await this.waitForLoadState();
