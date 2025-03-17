@@ -60,8 +60,8 @@
 					slippage: swapAmounts.slippage,
 					receiveAmount: swapAmounts.receive_amount,
 					route: getSwapRoute(swapAmounts.txs ?? []),
-					liquidityFees: getLiquidityFees({transactions: swapAmounts.txs ?? [], tokens: $tokens}),
-					networkFee: getNetworkFee({transactions: swapAmounts.txs ?? [], tokens: $tokens})
+					liquidityFees: getLiquidityFees({ transactions: swapAmounts.txs ?? [], tokens: $tokens }),
+					networkFee: getNetworkFee({ transactions: swapAmounts.txs ?? [], tokens: $tokens })
 				},
 				amountForSwap: parsedAmount
 			});
