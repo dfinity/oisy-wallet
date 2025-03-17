@@ -29,10 +29,6 @@
 	let liquidityFees: ProviderFee[] | undefined;
 	$: liquidityFees = $swapAmountsStore?.swapAmounts?.liquidityFees;
 
-	export let route: string[] | undefined;
-	export let liquidityFees: ProviderFee[] | undefined;
-	export let networkFee: ProviderFee | undefined;
-
 	let kongSwapDApp: OisyDappDescription | undefined;
 	$: kongSwapDApp = dAppDescriptions.find(({ id }) => id === 'kongswap');
 
