@@ -20,6 +20,11 @@
 		: undefined;
 </script>
 
-<ConvertAmountDisplay amount={formattedFeeAmount} {exchangeRate} {symbol} {zeroAmountLabel} {displayExchangeRate}
+<ConvertAmountDisplay
+	amount={formattedFeeAmount}
+	{exchangeRate}
+	{symbol}
+	{zeroAmountLabel}
+	{displayExchangeRate}
 	><slot slot="label" name="label" />
 </ConvertAmountDisplay>

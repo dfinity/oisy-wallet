@@ -1,22 +1,25 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
+	import SwapLiquidityFees from '$lib/components/swap/SwapLiquidityFees.svelte';
+	import SwapNetworkFee from '$lib/components/swap/SwapNetworkFee.svelte';
+	import SwapRoute from '$lib/components/swap/SwapRoute.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 	import { type OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionString } from '$lib/types/string';
+	import type { ProviderFee } from '$lib/types/swap';
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
 	import { safeParse } from '$lib/validation/utils.validation';
-	import ModalExpandableValues from "$lib/components/ui/ModalExpandableValues.svelte";
-	import type {ProviderFee} from "$lib/types/swap";
-	import SwapRoute from "$lib/components/swap/SwapRoute.svelte";
-	import SwapLiquidityFees from "$lib/components/swap/SwapLiquidityFees.svelte";
-	import SwapNetworkFee from "$lib/components/swap/SwapNetworkFee.svelte";
-	import {getContext} from "svelte";
-	import {SWAP_AMOUNTS_CONTEXT_KEY, type SwapAmountsContext} from "$lib/stores/swap-amounts.store";
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 

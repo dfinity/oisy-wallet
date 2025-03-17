@@ -21,8 +21,8 @@
 			{#if nonNullish(amount)}
 				<div in:fade data-tid="convert-amount-display-value">
 					{nonNullish(amount) && amount === 0 && nonNullish(zeroAmountLabel)
-							? zeroAmountLabel
-							: `${amount} ${symbol}`}
+						? zeroAmountLabel
+						: `${amount} ${symbol}`}
 				</div>
 			{:else}
 				<div class="w-14 sm:w-24" data-tid="convert-amount-display-skeleton">
@@ -43,8 +43,8 @@
 			{#if nonNullish(amount)}
 				<div in:fade data-tid="convert-amount-display-value">
 					{nonNullish(amount) && amount === 0 && nonNullish(zeroAmountLabel)
-							? zeroAmountLabel
-							: `${amount} ${symbol}`}
+						? zeroAmountLabel
+						: `${amount} ${symbol}`}
 				</div>
 			{:else}
 				<div class="w-14 sm:w-24" data-tid="convert-amount-display-skeleton">
@@ -54,4 +54,3 @@
 		</svelte:fragment>
 	</ModalValue>
 {/if}
-

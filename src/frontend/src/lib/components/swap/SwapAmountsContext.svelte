@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import { kongSwapAmounts } from '$lib/api/kong_backend.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -11,8 +12,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
-    import {getLiquidityFees, getNetworkFee, getSwapRoute} from "$lib/utils/swap.utils";
-    import {tokens} from "$lib/derived/tokens.derived";
+	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
 	export let destinationToken: Token | undefined;
@@ -59,9 +59,9 @@
 				swapAmounts: {
 					slippage: swapAmounts.slippage,
 					receiveAmount: swapAmounts.receive_amount,
-                    route: getSwapRoute(swapAmounts.txs ?? []),
-                    liquidityFees: getLiquidityFees(swapAmounts.txs ?? [], $tokens),
-                    networkFee: getNetworkFee(swapAmounts.txs ?? [], $tokens)
+					route: getSwapRoute(swapAmounts.txs ?? []),
+					liquidityFees: getLiquidityFees(swapAmounts.txs ?? [], $tokens),
+					networkFee: getNetworkFee(swapAmounts.txs ?? [], $tokens)
 				},
 				amountForSwap: parsedAmount
 			});
