@@ -29,7 +29,6 @@ import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.moc
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import { BigNumber } from 'alchemy-sdk';
 import type { MockedFunction } from 'vitest';
-import {findToken} from "$lib/utils/tokens.utils";
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
