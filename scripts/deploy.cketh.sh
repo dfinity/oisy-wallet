@@ -18,6 +18,3 @@ dfx deploy cketh_ledger --network "$DFX_NETWORK"
 
 echo "Step 4: deploy index canister..."
 dfx deploy cketh_index --network "$DFX_NETWORK"
-
-echo "Step 5: transfer ckETH to principal..."
-dfx canister call cketh_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"x4w27-so7wg-cudsa-yy7fh-wcpy5-njul4-q54tv-euzzi-tdnzz-ill46-zqe\";}; amount=500_000_000_000_000_000; fee=null; memo=null; created_at_time=null;})"

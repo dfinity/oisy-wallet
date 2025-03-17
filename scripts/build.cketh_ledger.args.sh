@@ -16,7 +16,10 @@ cat <<-EOF >"$ARG_FILE"
      minting_account = record { owner = principal "$CANISTER_ID_CKETH_MINTER" };
      transfer_fee = 9_500;
      metadata = vec {};
-     initial_balances = vec { record { record { owner = principal "$PRINCIPAL"; }; 100_000_000_000_000_000_000; }; };
+     initial_balances = vec {
+        record { record { owner = principal "$PRINCIPAL"; }; 100_000_000_000_000_000_000; };
+        record {from=null; to=record { owner= principal "x4w27-so7wg-cudsa-yy7fh-wcpy5-njul4-q54tv-euzzi-tdnzz-ill46-zqe";}; amount=500_000_000_000_000_000; fee=null; memo=null; created_at_time=null;}
+     };
      archive_options = record {
          num_blocks_to_archive = 10_000;
          trigger_threshold = 20_000;
