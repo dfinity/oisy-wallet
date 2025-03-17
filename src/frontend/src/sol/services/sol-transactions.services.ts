@@ -23,7 +23,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { address as solAddress } from '@solana/web3.js';
+import { address as solAddress } from '@solana/kit';
 
 interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
 	signalEnd: () => void;
@@ -63,12 +63,16 @@ export const fetchSolTransactionsForSignature = async ({
 	// Inside the instructions there could be some that we are unable to decode, but that may have
 	// simpler (and decoded) inner instructions. We should try to map those as well.
 	// They are inserted in the instructions array in the order they refer to the main instruction.
-	const allInstructions = [...putativeInnerInstructions]
+	const { allInstructions } = [...putativeInnerInstructions]
 		.sort((a, b) => a.index - b.index)
-		.reduce((acc, { index, instructions }, offset) => {
-			const insertIndex = index + 1 + offset;
-			return [...acc.slice(0, insertIndex), ...instructions, ...acc.slice(insertIndex)];
-		}, instructions);
+		.reduce(
+			({ allInstructions, offset }, { index, instructions }) => {
+				const insertIndex = index + offset + 1;
+				allInstructions.splice(insertIndex, 0, ...instructions);
+				return { allInstructions, offset: offset + instructions.length };
+			},
+			{ allInstructions: [...instructions], offset: 0 }
+		);
 
 	const [ataAddress] =
 		nonNullish(tokenAddress) && nonNullish(tokenOwnerAddress)
