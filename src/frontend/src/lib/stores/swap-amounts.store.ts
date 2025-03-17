@@ -2,6 +2,7 @@ import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.d
 import type { OptionAmount } from '$lib/types/send';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
+import type {ProviderFee} from "$lib/types/swap";
 
 export type SwapAmountsStoreData = Option<{
 	swapAmounts?: {
