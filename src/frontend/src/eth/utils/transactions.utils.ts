@@ -1,7 +1,6 @@
 import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { EthTransactionUi } from '$eth/types/eth-transaction'
-import type { EthAddress, OptionEthAddress } from '$lib/types/address';
+import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import {
 	toCkErc20HelperContractAddress,

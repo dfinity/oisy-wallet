@@ -232,12 +232,11 @@ describe('transactions.utils', () => {
 		it('should map an ID to undefined if the transaction hash does not exist', () => {
 			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-      			expect(result.id).toBeUndefined;
+			expect(result.id).toBeUndefined;
 		});
 	});
-  
-  
-  describe('mapEthTransactionUi', () => {
+
+	describe('mapEthTransactionUi', () => {
 		it('should map to "withdraw" when the "from" address is in ckMinterInfoAddresses', () => {
 			const ckMinterInfoAddresses: EthAddress[] = ['0x1234'];
 
@@ -302,7 +301,7 @@ describe('transactions.utils', () => {
 		it('should map an ID to undefined if the transaction hash does not exist', () => {
 			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
-      			expect(result.id).toBeUndefined;
+			expect(result.id).toBeUndefined;
 		});
 	});
 });
