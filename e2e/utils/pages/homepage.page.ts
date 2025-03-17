@@ -291,7 +291,7 @@ abstract class Homepage {
 			);
 		}
 
-		await this.takeScreenshot({ fullPage: true, screenshotTarget: modal });
+		await this.takeScreenshot({ fullPage: false, screenshotTarget: modal });
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
@@ -386,12 +386,12 @@ abstract class Homepage {
 	async takeScreenshot(
 		{
 			freezeCarousel = false,
-			fullPage = false,
+			fullPage = true,
 			centeredElementTestId,
 			screenshotTarget
 		}: TakeScreenshotParams = {
 			freezeCarousel: false,
-			fullPage: false
+			fullPage: true
 		}
 	): Promise<void> {
 		if (nonNullish(centeredElementTestId)) {
