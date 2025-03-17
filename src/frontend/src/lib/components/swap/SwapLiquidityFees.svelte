@@ -1,8 +1,8 @@
 <script lang="ts">
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProviderFee } from '$lib/types/swap';
-	import {i18n} from "$lib/stores/i18n.store";
 
 	export let liquidityFees: ProviderFee[];
 </script>

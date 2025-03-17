@@ -18,14 +18,12 @@ export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] => {
 };
 
 export const getLiquidityFees = ({
-									 transactions,
-									 tokens
-
+	transactions,
+	tokens
 }: {
-									 transactions: SwapAmountsTxReply[],
-									 tokens: Token[]
-}
-): ProviderFee[] => {
+	transactions: SwapAmountsTxReply[];
+	tokens: Token[];
+}): ProviderFee[] => {
 	const liquidityFees: ProviderFee[] = [];
 	if (transactions.length === 0) {
 		return liquidityFees;
@@ -45,14 +43,12 @@ export const getLiquidityFees = ({
 };
 
 export const getNetworkFee = ({
-								  transactions,
-								  tokens
-							  }: {
-								  transactions: SwapAmountsTxReply[],
-								  tokens: Token[]
-}
-
-): ProviderFee | undefined => {
+	transactions,
+	tokens
+}: {
+	transactions: SwapAmountsTxReply[];
+	tokens: Token[];
+}): ProviderFee | undefined => {
 	if (transactions.length === 0) {
 		return undefined;
 	}
@@ -67,13 +63,5 @@ export const getNetworkFee = ({
 	};
 };
 
-const findToken = (
-	{
-		tokens,
-		symbol
-	}: {
-		tokens: Token[], symbol: string
-	}
-
-): Token | undefined =>
+const findToken = ({ tokens, symbol }: { tokens: Token[]; symbol: string }): Token | undefined =>
 	tokens.find((token) => token.symbol === symbol);

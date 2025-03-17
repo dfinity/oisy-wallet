@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let route: string[];
 </script>
