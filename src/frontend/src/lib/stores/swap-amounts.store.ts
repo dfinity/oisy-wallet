@@ -10,7 +10,7 @@ export type SwapAmountsStoreData = Option<{
 		receiveAmount: SwapAmountsReply['receive_amount'];
 		route: string[];
 		liquidityFees: ProviderFee[];
-		networkFee: ProviderFee;
+		networkFee: ProviderFee | undefined;
 	} | null;
 	// We need to save the inputted amount for which swap-amounts have been already fetched.
 	// It allows us to compare it with the new value to prevent a re-fetch on consumer component re-render.

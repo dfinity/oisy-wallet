@@ -4,7 +4,7 @@ export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
-export type ProviderFee = {
+export interface ProviderFee {
 	fee: bigint;
 	token: Token;
-};
+}

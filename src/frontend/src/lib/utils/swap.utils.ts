@@ -4,7 +4,7 @@ import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] => {
-	let swapRoute: string[] = [];
+	const swapRoute: string[] = [];
 	if (transactions.length === 0) {
 		return swapRoute;
 	}
@@ -17,11 +17,16 @@ export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] => {
 	return swapRoute;
 };
 
-export const getLiquidityFees = (
-	transactions: SwapAmountsTxReply[],
-	tokens: Token[]
+export const getLiquidityFees = ({
+									 transactions,
+									 tokens
+
+}: {
+									 transactions: SwapAmountsTxReply[],
+									 tokens: Token[]
+}
 ): ProviderFee[] => {
-	let liquidityFees: ProviderFee[] = [];
+	const liquidityFees: ProviderFee[] = [];
 	if (transactions.length === 0) {
 		return liquidityFees;
 	}
@@ -39,9 +44,14 @@ export const getLiquidityFees = (
 	return liquidityFees;
 };
 
-export const getNetworkFee = (
-	transactions: SwapAmountsTxReply[],
-	tokens: Token[]
+export const getNetworkFee = ({
+								  transactions,
+								  tokens
+							  }: {
+								  transactions: SwapAmountsTxReply[],
+								  tokens: Token[]
+}
+
 ): ProviderFee | undefined => {
 	if (transactions.length === 0) {
 		return undefined;
@@ -57,5 +67,13 @@ export const getNetworkFee = (
 	};
 };
 
-const findToken = (tokens: Token[], symbol: string): Token | undefined =>
+const findToken = (
+	{
+		tokens,
+		symbol
+	}: {
+		tokens: Token[], symbol: string
+	}
+
+): Token | undefined =>
 	tokens.find((token) => token.symbol === symbol);
