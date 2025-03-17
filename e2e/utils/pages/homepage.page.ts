@@ -56,6 +56,7 @@ interface WaitForModalParams {
 
 interface TakeScreenshotParams {
 	freezeCarousel?: boolean;
+	fullPage?: boolean;
 	centeredElementTestId?: string;
 	screenshotTarget?: Locator;
 }
@@ -290,7 +291,7 @@ abstract class Homepage {
 			);
 		}
 
-		await this.takeScreenshot({ screenshotTarget: modal });
+		await this.takeScreenshot({ fullPage: true, screenshotTarget: modal });
 	}
 
 	async setCarouselFirstSlide(): Promise<void> {
@@ -383,15 +384,21 @@ abstract class Homepage {
 	}
 
 	async takeScreenshot(
-		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
-			freezeCarousel: false
+		{
+			freezeCarousel = false,
+			fullPage = false,
+			centeredElementTestId,
+			screenshotTarget
+		}: TakeScreenshotParams = {
+			freezeCarousel: false,
+			fullPage: false
 		}
 	): Promise<void> {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
-		if (isNullish(screenshotTarget)) {
+		if (fullPage) {
 			// Creates a snapshot as a fullPage and not just certain parts.
 			await this.viewportAdjuster();
 		}
