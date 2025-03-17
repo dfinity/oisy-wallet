@@ -1,7 +1,4 @@
-import {
-	NAVIGATION_ITEM_REWARDS,
-	REWARDS_DATE_BADGE,
-} from '$lib/constants/test-ids.constants';
+import { NAVIGATION_ITEM_REWARDS, REWARDS_DATE_BADGE } from '$lib/constants/test-ids.constants';
 import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 
 export type RewardsPageParams = HomepageLoggedInParams;

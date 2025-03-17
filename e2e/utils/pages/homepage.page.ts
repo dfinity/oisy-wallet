@@ -289,7 +289,7 @@ abstract class Homepage {
 				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
 			);
 		}
-		
+
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 

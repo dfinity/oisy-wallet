@@ -113,7 +113,7 @@ export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REWARDS_MODAL_DATE_BADGE = 'rewards-modal-date-badge';
 export const REWARDS_MODAL = 'rewards-modal';
-export const REWARDS_DATE_BADGE = "active-reward-campaigns-container-OISY Airdrop #1-badge";
+export const REWARDS_DATE_BADGE = 'active-reward-campaigns-container-OISY Airdrop #1-badge';
 
 export const ACTIVITY_TRANSACTIONS_PLACEHOLDER = 'all-transactions-placeholder';
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
