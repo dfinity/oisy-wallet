@@ -289,7 +289,7 @@ abstract class Homepage {
 				selectorsToMock.map(async (selector) => await this.mockSelector({ selector }))
 			);
 		}
-
+		
 		await this.takeScreenshot({ screenshotTarget: modal });
 	}
 
@@ -365,7 +365,19 @@ abstract class Homepage {
 	}
 
 	private async viewportAdjuster(): Promise<void> {
-		await this.#page.setViewportSize({ height: 1124, width: 412 });
+		const maxPageHeight = await this.#page.evaluate(() =>
+			Math.max(
+				document.body.scrollHeight,
+				document.documentElement.scrollHeight,
+				document.body.offsetHeight,
+				document.documentElement.offsetHeight,
+				document.body.clientHeight,
+				document.documentElement.clientHeight
+			)
+		);
+		const currentViewport = this.#page.viewportSize();
+		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
+		await this.#page.setViewportSize({ height: maxPageHeight, width });
 	}
 
 	async takeScreenshot(
