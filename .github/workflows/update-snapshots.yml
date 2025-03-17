@@ -42,7 +42,7 @@ jobs:
     needs: oisy-backend-wasm
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14-xlarge]
+        os: [ubuntu-24.04, macos-14-large]
     env:
       MATRIX_OS: ${{ matrix.os }}
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-e2e-snapshots') }}
@@ -183,7 +183,7 @@ jobs:
         if: env.macos_status == 'true'
         uses: actions/download-artifact@v4
         with:
-          name: snapshots-macos-14
+          name: snapshots-macos-14-large
           path: e2e
 
       - name: Check for Final Changes
