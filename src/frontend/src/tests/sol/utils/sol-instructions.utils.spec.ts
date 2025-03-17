@@ -11,7 +11,7 @@ import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/web3.js';
+import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -65,8 +65,6 @@ describe('sol-instructions.utils', () => {
 		});
 
 		it('should log a warning if the program address is unrecognized', async () => {
-			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 			const instruction: SolRpcInstruction = {
 				...mockInstruction,
 				programId: address(mockSolAddress),
@@ -79,7 +77,7 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
-			expect(consoleWarnSpy).toHaveBeenCalledWith(
+			expect(console.warn).toHaveBeenCalledWith(
 				`Could not map Solana instruction of type ${instruction.parsed.type} for program ${instruction.programAddress}`,
 				instruction
 			);

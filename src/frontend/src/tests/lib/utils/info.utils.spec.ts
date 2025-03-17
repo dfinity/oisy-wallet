@@ -8,8 +8,6 @@ describe('info.utils', () => {
 			vi.resetAllMocks();
 
 			sessionStorage.clear();
-
-			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 
 		it('should save a value in localStorage', () => {
@@ -46,8 +44,6 @@ describe('info.utils', () => {
 			vi.resetAllMocks();
 
 			sessionStorage.clear();
-
-			vi.spyOn(console, 'error').mockImplementation(() => {});
 		});
 
 		it('should return true if the value for the key is "true"', () => {
