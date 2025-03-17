@@ -22,7 +22,8 @@
 	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
-<label for="destination" class="font-bold">{$i18n.send.text.destination}</label>
+<slot name="label" />
+
 <div class="mb-4">
 	<InputTextWithAction
 		name="destination"
