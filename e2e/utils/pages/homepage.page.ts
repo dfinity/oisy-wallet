@@ -380,12 +380,17 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	async takeScreenshot({
-		isMobile,
-		freezeCarousel = false,
-		centeredElementTestId,
-		screenshotTarget
-	}: TakeScreenshotParams): Promise<void> {
+	async takeScreenshot(
+		{
+			isMobile = false,
+			freezeCarousel = false,
+			centeredElementTestId,
+			screenshotTarget
+		}: TakeScreenshotParams = {
+			isMobile: false,
+			freezeCarousel: false
+		}
+	): Promise<void> {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
