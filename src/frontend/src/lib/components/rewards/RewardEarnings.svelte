@@ -25,7 +25,7 @@
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
 
-	export let isEligible = false;
+	export let amountOfRewards = 0;
 
 	let ckBtcToken: IcToken | undefined;
 	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
@@ -64,9 +64,6 @@
 
 	let totalRewardUsd: number;
 	$: totalRewardUsd = ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd;
-
-	let amountOfRewards: number;
-	$: amountOfRewards = 0;
 
 	let loading: boolean;
 	$: loading = true;
@@ -112,7 +109,7 @@
 	};
 </script>
 
-{#if isEligible}
+{#if amountOfRewards > 0}
 	<div transition:fade={SLIDE_DURATION}>
 		<div
 			class="mb-5 mt-2 w-full text-center text-xl font-bold text-success-primary"
