@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 	import type { RewardDescription } from '$env/types/env-reward';
@@ -14,7 +14,6 @@
 	} from '$lib/derived/user-profile.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import {
 		type CarouselSlideOisyDappDescription,
 		type OisyDappDescription
@@ -42,14 +41,14 @@
 	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
 	$: featureAirdropSlide = nonNullish(featuredAirdrop)
 		? ({
-				id: featuredAirdrop.id,
-				carousel: {
-					text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
-					callToAction: $i18n.rewards.text.carousel_slide_cta
-				},
-				logo: featuredAirdrop.logo,
-				name: featuredAirdrop.title
-			} as CarouselSlideOisyDappDescription)
+			id: featuredAirdrop.id,
+			carousel: {
+				text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
+				callToAction: $i18n.rewards.text.carousel_slide_cta
+			},
+			logo: featuredAirdrop.logo,
+			name: featuredAirdrop.title
+		} as CarouselSlideOisyDappDescription)
 		: undefined;
 
 	/*
@@ -71,8 +70,8 @@
 	let carousel: Carousel;
 
 	const closeSlide = async ({
-		detail: dappId
-	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+															detail: dappId
+														}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
 		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
 
 		temporaryHiddenDappsIds = [...temporaryHiddenDappsIds, dappId];
