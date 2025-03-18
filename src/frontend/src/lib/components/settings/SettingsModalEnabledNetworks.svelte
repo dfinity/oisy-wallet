@@ -1,20 +1,14 @@
 <script lang="ts">
-	import { Checkbox, KeyValuePair, Toggle } from '@dfinity/gix-components';
-	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
+	import { Checkbox, Toggle } from '@dfinity/gix-components';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import { testnetsEnabled, enabledNetworks } from '$lib/derived/settings.derived';
-	import { enabledNetworksStore, testnetsStore } from '$lib/stores/settings.store';
-	import type { Network } from '$lib/types/network';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { userSettings } from '$lib/derived/user-profile.derived';
 	import SettingsList from '$lib/components/settings/SettingsList.svelte';
 	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
+	import { userSettings } from '$lib/derived/user-profile.derived';
+	import type { Network } from '$lib/types/network';
 
 	let testnetsEnabledChecked: boolean;
 	$: testnetsEnabledChecked = $userSettings?.settings?.testnetsEnabled ?? false;
@@ -23,27 +17,15 @@
 	$: enabledNetworksData = { ...$userSettings?.settings?.enabledNetworks };
 
 	const toggleTestnets = async () => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: !testnetsEnabledChecked } });
+		// todo: call service to enable testnets
 	};
 
 	const toggleNetwork = (network: Network) => {
-		enabledNetworksData[network.id] = !enabledNetworksData?.[network.id] ?? false;
+		// todo: call service to toggle network
 	};
-
-	const save = async () => {
-		enabledNetworksStore.set({
-			key: 'enabledNetworks',
-			value: enabledNetworksData
-		});
-
-		modalStore.close();
-	};
-
-	let selected: any;
-	$: selected = null;
 </script>
 
-<div class="p-6">
+<ContentWithToolbar>
 	<SettingsList>
 		<svelte:fragment slot="title">Mainnets</svelte:fragment>
 		<svelte:fragment slot="title-action"
@@ -81,11 +63,7 @@
 			<svelte:fragment slot="title">Testnets</svelte:fragment>
 
 			{#each $networksTestnets as network}
-				<SettingsListItem
-					selectable
-					selected={network.id === selected}
-					on:click={() => (selected = network.id)}
-				>
+				<SettingsListItem>
 					<svelte:fragment slot="key"
 						><NetworkLogo {network} blackAndWhite size="xxs" />
 						<span class="ml-2 flex">{network.name}</span></svelte:fragment
@@ -101,10 +79,6 @@
 			{/each}
 		</SettingsList>
 	{/if}
-</div>
-<ContentWithToolbar>
-	<ButtonGroup slot="toolbar">
-		<ButtonCloseModal />
-		<Button on:click={save}>{$i18n.core.text.save}</Button>
-	</ButtonGroup>
+
+	<ButtonCloseModal slot="toolbar" />
 </ContentWithToolbar>

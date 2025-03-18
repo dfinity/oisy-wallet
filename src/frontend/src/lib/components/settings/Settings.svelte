@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { KeyValuePairInfo, Card } from '@dfinity/gix-components';
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
-	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
@@ -24,10 +21,11 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { modalStore } from '$lib/stores/modal.store';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
-	import { modalSettingsData, modalSettingsState } from '$lib/derived/modal.derived';
-	import type { SettingsModalType } from '$lib/types/settings';
+	import { modalSettingsState } from '$lib/derived/modal.derived';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import type { SettingsModalType } from '$lib/enums/settings-modal-types';
+	import { SettingsModalType as SettingsModalEnum } from '$lib/enums/settings-modal-types';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -75,7 +73,7 @@
 			{$i18n.settings.text.session}
 		</svelte:fragment>
 		<output slot="value" class="mr-1.5">
-			<Button link on:click={() => openSettingsModal('sessionDuration')} disabled>Edit ></Button>
+			<Button link disabled>Edit ></Button>
 		</output>
 
 		<svelte:fragment slot="info">
@@ -95,7 +93,8 @@
 	<SettingsCardItem>
 		<svelte:fragment slot="key"><span>{$i18n.settings.text.testnets}</span></svelte:fragment>
 		<svelte:fragment slot="value"
-			><Button link on:click={() => openSettingsModal('enabledNetworks')}>Edit ></Button
+			><Button link on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
+				>Edit ></Button
 			></svelte:fragment
 		>
 		<svelte:fragment slot="info">
