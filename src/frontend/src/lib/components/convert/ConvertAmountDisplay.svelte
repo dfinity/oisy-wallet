@@ -9,6 +9,7 @@
 	export let amount: OptionAmount = undefined;
 	export let symbol: string;
 	export let exchangeRate: number | undefined = undefined;
+	export let displayExchangeRate = true;
 	export let zeroAmountLabel: string | undefined = undefined;
 </script>
 
@@ -29,7 +30,7 @@
 		{/if}
 	</svelte:fragment>
 
-	<svelte:fragment slot="secondary-value">
-		<ConvertAmountExchange {amount} {exchangeRate} />
-	</svelte:fragment>
+	{#if displayExchangeRate}
+		<ConvertAmountExchange slot="secondary-value" {amount} {exchangeRate} />
+	{/if}
 </ModalValue>

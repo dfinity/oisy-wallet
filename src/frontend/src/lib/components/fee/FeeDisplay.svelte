@@ -7,6 +7,7 @@
 	export let symbol: string;
 	export let decimals: number;
 	export let exchangeRate: number | undefined = undefined;
+	export let displayExchangeRate = true;
 	export let zeroAmountLabel: string | undefined = undefined;
 
 	let formattedFeeAmount: number | undefined;
@@ -19,6 +20,11 @@
 		: undefined;
 </script>
 
-<ConvertAmountDisplay amount={formattedFeeAmount} {exchangeRate} {symbol} {zeroAmountLabel}
+<ConvertAmountDisplay
+	amount={formattedFeeAmount}
+	{exchangeRate}
+	{symbol}
+	{zeroAmountLabel}
+	{displayExchangeRate}
 	><slot slot="label" name="label" />
 </ConvertAmountDisplay>

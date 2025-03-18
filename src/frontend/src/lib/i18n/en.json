@@ -509,7 +509,10 @@
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
-			"swap_provider": "Swap provider"
+			"swap_provider": "Swap provider",
+			"swap_route": "Swap route",
+			"included_network_fees": "Included network fees",
+			"included_liquidity_fees": "Included liquidity pool fees"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
