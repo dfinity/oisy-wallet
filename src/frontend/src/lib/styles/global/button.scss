@@ -12,9 +12,9 @@ a.as-button {
 	border-radius: var(--button-border-radius);
 
 	transition:
-		color 0.25s ease-out,
-		background 0.25s ease-out,
-		opacity 0.25s ease-out;
+					color 0.25s ease-out,
+					background 0.25s ease-out,
+					opacity 0.25s ease-out;
 
 	border: 1px solid transparent;
 
@@ -58,6 +58,8 @@ a.as-button {
 
 		&[disabled],
 		&.disabled {
+			background: var(--color-background-disabled);
+			color: var(--color-foreground-disabled);
 			opacity: 1;
 			cursor: not-allowed;
 
@@ -89,7 +91,7 @@ a.as-button {
 	}
 
 	// PRIMARY
-	&.primary:not([disabled]):not(.disabled):not(.loading):not(.link) {
+	&.primary:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-primary-inverted;
 		@apply bg-brand-primary;
 
@@ -109,8 +111,8 @@ a.as-button {
 		}
 	}
 
-	&.primary.disabled:not(.loading):not(.link),
-	&.primary[disabled]:not(.loading):not(.link) {
+	&.primary.disabled:not(.loading),
+	&.primary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -121,7 +123,7 @@ a.as-button {
 	}
 
 	// SECONDARY
-	&.secondary:not([disabled]):not(.disabled):not(.loading):not(.link) {
+	&.secondary:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-primary-inverted-alt;
 		@apply bg-primary-inverted;
 
@@ -141,8 +143,8 @@ a.as-button {
 		}
 	}
 
-	&.secondary.disabled:not(.loading):not(.link),
-	&.secondary[disabled]:not(.loading):not(.link) {
+	&.secondary.disabled:not(.loading),
+	&.secondary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -153,7 +155,7 @@ a.as-button {
 	}
 
 	// SECONDARY LIGHT
-	&.secondary-light:not([disabled]):not(.disabled):not(.loading):not(.link) {
+	&.secondary-light:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-brand-primary-alt;
 		@apply bg-brand-subtle-10;
 
@@ -173,8 +175,8 @@ a.as-button {
 		}
 	}
 
-	&.secondary-light.disabled:not(.loading):not(.link),
-	&.secondary-light[disabled]:not(.loading):not(.link) {
+	&.secondary-light.disabled:not(.loading),
+	&.secondary-light[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -185,7 +187,7 @@ a.as-button {
 	}
 
 	// TERTIARY
-	&.tertiary:not([disabled]):not(.disabled):not(.loading):not(.link) {
+	&.tertiary:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-primary;
 		@apply bg-primary;
 
@@ -205,8 +207,8 @@ a.as-button {
 		}
 	}
 
-	&.tertiary.disabled:not(.loading):not(.link),
-	&.tertiary[disabled]:not(.loading):not(.link) {
+	&.tertiary.disabled:not(.loading),
+	&.tertiary[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -217,7 +219,7 @@ a.as-button {
 	}
 
 	// TERTIARY ALT
-	&.tertiary-alt:not([disabled]):not(.disabled):not(.loading):not(.link) {
+	&.tertiary-alt:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-brand-primary-alt;
 		@apply bg-primary;
 
@@ -237,8 +239,8 @@ a.as-button {
 		}
 	}
 
-	&.tertiary-alt.disabled:not(.loading):not(.link),
-	&.tertiary-alt[disabled]:not(.loading):not(.link) {
+	&.tertiary-alt.disabled:not(.loading),
+	&.tertiary-alt[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-disabled;
 	}
@@ -249,7 +251,7 @@ a.as-button {
 	}
 
 	// TERTIARY MAIN CARD
-	&.tertiary-main-card:not([disabled]):not(.disabled):not(.loading):not(.link) {
+	&.tertiary-main-card:not([disabled]):not(.disabled):not(.loading) {
 		@apply text-brand-primary-inverted;
 		@apply bg-primary-alt;
 
@@ -268,8 +270,8 @@ a.as-button {
 		}
 	}
 
-	&.tertiary-main-card.disabled:not(.loading):not(.link),
-	&.tertiary-main-card[disabled]:not(.loading):not(.link) {
+	&.tertiary-main-card.disabled:not(.loading),
+	&.tertiary-main-card[disabled]:not(.loading) {
 		@apply text-disabled;
 		@apply bg-primary-alt;
 	}
@@ -355,22 +357,7 @@ a.as-button {
 	&.icon {
 		@include button.icon;
 	}
-
-	// LINK
-	&.link {
-		@apply p-0;
-		@apply bg-transparent;
-		@apply text-brand-primary;
-
-		&.disabled, &[disabled] {
-			@apply p-0;
-			@apply bg-transparent;
-			@apply text-brand-disabled;
-		}
-	}
 }
-
-
 
 // DROPDOWN BUTTON
 .dropdown-button:not(.loading) {
