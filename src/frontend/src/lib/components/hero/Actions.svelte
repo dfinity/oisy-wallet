@@ -34,10 +34,10 @@
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
 	let convertEth = false;
-	$: convertEth = ($ethToCkETHEnabled && $erc20UserTokensInitialized) && false;
+	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized && false;
 
 	let convertErc20 = false;
-	$: convertErc20 = ($erc20ToCkErc20Enabled && $erc20UserTokensInitialized) && false;
+	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized && false;
 
 	let convertCkBtc = false;
 	$: convertCkBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
