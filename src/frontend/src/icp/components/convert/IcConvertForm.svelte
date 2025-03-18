@@ -16,6 +16,7 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -68,16 +69,17 @@
 	let totalDestinationTokenFee: bigint | undefined;
 	let ethereumEstimateFee: bigint | undefined;
 
+	let tokenForFee: Token;
+	$: tokenForFee = isCkBtc ? $sourceToken : ($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken);
+
 	let errorMessage: string | undefined;
 	$: errorMessage = insufficientFundsForFee
 		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
-				$symbol: isCkBtc
-					? $sourceToken.symbol
-					: ($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken).symbol,
+				$symbol: tokenForFee.symbol,
 				$balance: formatToken({
 					value: $balanceForFee ?? ZERO,
-					unitName: $sourceToken.decimals,
-					displayDecimals: $sourceToken.decimals
+					unitName: tokenForFee.decimals,
+					displayDecimals: tokenForFee.decimals
 				})
 			})
 		: unknownMinimumAmount
