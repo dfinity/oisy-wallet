@@ -1,8 +1,11 @@
 <script lang="ts">
-	const SLOTS = $$props.$$slots;
+	import { nonNullish } from '@dfinity/utils';
+
+	let hasTitleSlot: boolean;
+	$: hasTitleSlot = nonNullish($$slots['title']);
 </script>
 
-{#if SLOTS.title}
+{#if hasTitleSlot}
 	<div class="flex w-full flex-row justify-between">
 		<h5 class="mb-4 flex"><slot name="title" /></h5>
 		<div><slot name="title-action" /></div>

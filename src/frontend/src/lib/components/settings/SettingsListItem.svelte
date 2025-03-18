@@ -1,8 +1,7 @@
 <script lang="ts">
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
-
-	export let selectable: boolean = false;
-	export let selected: boolean = false;
+	export let selectable = false;
+	export let selected = false;
 </script>
 
 <div class="border-b-1 flex w-full items-center border-brand-subtle-20 last-of-type:border-b-0">

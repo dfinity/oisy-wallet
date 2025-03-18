@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconHelp from '$lib/components/icons/IconHelp.svelte';
-	import { nonNullish } from '@dfinity/utils';
 
 	let hasInfoSlot: boolean;
 	$: hasInfoSlot = nonNullish($$slots['info']);
 
-	export let permanentInfo: boolean = false;
+	export let permanentInfo = false;
 
 	let infoExpanded: boolean;
 	$: infoExpanded = permanentInfo;
