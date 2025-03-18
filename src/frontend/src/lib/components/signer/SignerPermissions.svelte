@@ -8,7 +8,7 @@
 		type PermissionsConfirmation
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Component, getContext } from 'svelte';
+	import { type ComponentType as Component, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
@@ -112,11 +112,11 @@
 
 				<div>
 					<label class="block text-sm font-bold" for="ic-wallet-address"
-						>{$i18n.signer.permissions.text.your_wallet_address}</label
+					>{$i18n.signer.permissions.text.your_wallet_address}</label
 					>
 
 					<output id="ic-wallet-address" class="break-all"
-						>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
+					>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
 					>
 				</div>
 			</div>
