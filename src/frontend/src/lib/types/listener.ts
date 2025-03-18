@@ -1,5 +1,5 @@
 import type { Token } from '$lib/types/token';
-import type { ComponentType } from 'svelte';
+import type { ComponentType as Component } from 'svelte';
 
 export interface WalletWorker {
 	start: () => void;
@@ -11,7 +11,7 @@ export type InitWalletWorkerFn = (params: { token: Token }) => Promise<WalletWor
 
 export interface TokenToListener {
 	token: Token;
-	listener: ComponentType;
+	listener: Component;
 }
 
 export interface WebSocketListener {
