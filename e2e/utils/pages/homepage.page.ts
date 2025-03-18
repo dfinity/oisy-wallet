@@ -7,6 +7,7 @@ import {
 	MANAGE_TOKENS_MODAL_BUTTON,
 	MANAGE_TOKENS_MODAL_SAVE,
 	MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
+	MOBILE_NAVIGATION_MENU,
 	NAVIGATION_ITEM_HOMEPAGE,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_MENU,
@@ -55,6 +56,7 @@ interface WaitForModalParams {
 }
 
 interface TakeScreenshotParams {
+	isMobile?: boolean;
 	freezeCarousel?: boolean;
 	centeredElementTestId?: string;
 	screenshotTarget?: Locator;
@@ -122,6 +124,12 @@ abstract class Homepage {
 	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
 		if (await this.isSelectorVisible({ selector })) {
 			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'none'));
+		}
+	}
+
+	private async showSelector({ selector }: SelectorOperationParams): Promise<void> {
+		if (await this.isSelectorVisible({ selector })) {
+			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'block'));
 		}
 	}
 
@@ -327,6 +335,14 @@ abstract class Homepage {
 		await locator.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
 	}
 
+	private async hideMobileNavigationMenu(): Promise<void> {
+		await this.hideSelector({ selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]` });
+	}
+
+	private async showMobileNavigationMenu(): Promise<void> {
+		await this.showSelector({ selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]` });
+	}
+
 	protected async waitForManageTokensModal(options?: WaitForLocatorOptions): Promise<void> {
 		await this.waitForByTestId({ testId: MANAGE_TOKENS_MODAL, options });
 	}
@@ -364,36 +380,14 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	private async viewportAdjuster(): Promise<void> {
-		const maxPageHeight = await this.#page.evaluate(() =>
-			Math.max(
-				document.body.scrollHeight,
-				document.documentElement.scrollHeight,
-				document.body.offsetHeight,
-				document.documentElement.offsetHeight,
-				document.body.clientHeight,
-				document.documentElement.clientHeight
-			)
-		);
-
-		const currentViewport = this.#page.viewportSize();
-		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
-
-		await this.#page.setViewportSize({ height: maxPageHeight, width });
-	}
-
-	async takeScreenshot(
-		{ freezeCarousel = false, centeredElementTestId, screenshotTarget }: TakeScreenshotParams = {
-			freezeCarousel: false
-		}
-	): Promise<void> {
+	async takeScreenshot({
+		isMobile,
+		freezeCarousel = false,
+		centeredElementTestId,
+		screenshotTarget
+	}: TakeScreenshotParams): Promise<void> {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
-		}
-
-		if (isNullish(screenshotTarget)) {
-			// Creates a snapshot as a fullPage and not just certain parts.
-			await this.viewportAdjuster();
 		}
 
 		const element = screenshotTarget ?? this.#page;
@@ -413,6 +407,13 @@ abstract class Homepage {
 
 			// Playwright can retry flaky tests in the amount of time set below.
 			await expect(element).toHaveScreenshot({ timeout: 5 * 60 * 1000 });
+
+			// If it's mobile, we want a full page screenshot, but without the navigation bar.
+			if (isMobile) {
+				await this.hideMobileNavigationMenu();
+				await expect(element).toHaveScreenshot({ fullPage: true, timeout: 5 * 60 * 1000 });
+				await this.showMobileNavigationMenu();
+			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
 
