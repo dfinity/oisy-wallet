@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import {
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
@@ -10,7 +10,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let request: Web3WalletTypes.SessionRequest;
+	export let request: WalletKitTypes.SessionRequest;
 
 	let message: string;
 	$: message = getSignParamsMessageHex(request.params.request.params);

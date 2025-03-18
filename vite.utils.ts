@@ -36,6 +36,7 @@ const readRemoteCanisterIds = ({ prefix }: { prefix?: string }): Record<string, 
 	try {
 		interface DetailsId {
 			ic: string;
+			beta?: string;
 			staging?: string;
 		}
 
