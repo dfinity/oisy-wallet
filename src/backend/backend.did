@@ -185,6 +185,10 @@ type Result_7 = variant { Ok : MigrationReport; Err : text };
 type Result_8 = variant { Ok; Err : text };
 type Result_9 = variant { Ok; Err : SaveTestnetsSettingsError };
 type SaveTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
+type SaveTestnetsToggleRequest = record {
+  current_user_version : opt nat64;
+  show_testnets : bool;
+};
 type SelectedUtxosFeeError = variant {
   PendingTransactions;
   InternalError : record { msg : text };
@@ -288,7 +292,7 @@ service : (Arg) -> {
   migration : () -> (opt MigrationReport) query;
   migration_stop_timer : () -> (Result_8);
   remove_user_token : (UserTokenId) -> ();
-  save_user_testnets_toggle : (TestnetsSettings) -> (Result_9);
+  save_user_testnets_toggle : (SaveTestnetsToggleRequest) -> (Result_9);
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
