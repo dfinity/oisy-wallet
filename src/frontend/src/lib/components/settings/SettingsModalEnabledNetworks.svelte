@@ -26,7 +26,7 @@
 	};
 </script>
 
-<div class="p-6">
+<ContentWithToolbar>
 	<SettingsList>
 		<svelte:fragment slot="title">Mainnets</svelte:fragment>
 		<svelte:fragment slot="title-action"
@@ -80,10 +80,6 @@
 			{/each}
 		</SettingsList>
 	{/if}
-</div>
 
-<ContentWithToolbar>
-	<ButtonGroup slot="toolbar">
-		<ButtonCloseModal />
-	</ButtonGroup>
+	<ButtonCloseModal slot="toolbar" />
 </ContentWithToolbar>
