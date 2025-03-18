@@ -90,4 +90,29 @@ describe('Transactions', () => {
 			{ timeout }
 		);
 	});
+
+	it('should not redirect the user if the modal gets closed and pageToken is nonNullish', async () => {
+		mockPage.mock({ token: 'WaterNeuron', network: ICP_NETWORK_SYMBOL });
+
+		const { container } = render(Transactions);
+
+		await waitFor(
+			() => {
+				expect(get(modalStore)).toBeDefined();
+				expect(get(modalStore)?.type).toBe('manage-tokens');
+
+				const button: HTMLButtonElement | null = container.querySelector(
+					`button[data-tid='${MANAGE_TOKENS_MODAL_CLOSE}']`
+				);
+
+				mockPage.mock({ token: ICP_TOKEN.name, network: ICP_NETWORK_SYMBOL });
+
+				button?.click();
+
+				expect(mockGoTo).not.toHaveBeenCalled();
+			},
+			{ timeout }
+		);
+	});
+
 }, 60000);
