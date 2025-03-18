@@ -31,7 +31,6 @@ describe('sol-instructions.utils', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.resetAllMocks();
 	});
 
 	describe('mapSolParsedInstruction', () => {
