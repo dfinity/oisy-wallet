@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { modalSettingsData } from '$lib/derived/modal.derived';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { ABOUT_WHY_OISY_MODAL } from '$lib/constants/test-ids.constants';
 	import SettingsModalEnabledNetworks from '$lib/components/settings/SettingsModalEnabledNetworks.svelte';
-	import type { SettingsModalType } from '$lib/enums/settings-modal-types';
-	import { SettingsModalType as SettingsModalEnum } from '$lib/enums/settings-modal-types';
-
+	import { ABOUT_WHY_OISY_MODAL } from '$lib/constants/test-ids.constants';
+	import { modalSettingsData } from '$lib/derived/modal.derived';
+	import { type SettingsModalType , SettingsModalType as SettingsModalEnum } from '$lib/enums/settings-modal-types';
+	import { modalStore } from '$lib/stores/modal.store';
+	
 	let settingsType: SettingsModalType;
 	$: settingsType = $modalSettingsData;
 </script>

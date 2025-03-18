@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { Checkbox, Toggle } from '@dfinity/gix-components';
-	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
-	import type { Network } from '$lib/types/network';
+	import SettingsList from '$lib/components/settings/SettingsList.svelte';
+	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { userSettings } from '$lib/derived/user-profile.derived';
-	import SettingsList from '$lib/components/settings/SettingsList.svelte';
-	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
+	import type { Network } from '$lib/types/network';
 
 	let testnetsEnabledChecked: boolean;
 	$: testnetsEnabledChecked = $userSettings?.settings?.testnetsEnabled ?? false;
