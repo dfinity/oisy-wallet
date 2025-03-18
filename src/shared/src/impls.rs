@@ -198,13 +198,11 @@ impl StoredUserProfile {
         }
 
         let mut new_profile = self.clone_with_incremented_version();
-        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
-        let mut new_networks_settings = new_settings.networks.clone();
-        let mut new_testnets_settings = new_networks_settings.testnets.clone();
-        new_testnets_settings.show_testnets = show_testnets;
-        new_networks_settings.testnets = new_testnets_settings;
-        new_settings.networks = new_networks_settings;
-        new_profile.settings = Some(new_settings);
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.testnets.show_testnets = show_testnets;
+            Some(settings)
+        };
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
