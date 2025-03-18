@@ -78,7 +78,7 @@ pub fn save_testnets_toggle(
     let user_profile = find_profile(principal, user_profile_model)
         .map_err(|_| SaveTestnetsSettingsError::UserNotFound)?;
     let now = time();
-    let new_profile = user_profile.save_testnets_toggle(profile_version, now, show_testnets)?;
+    let new_profile = user_profile.with_show_testnets(profile_version, now, show_testnets)?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }

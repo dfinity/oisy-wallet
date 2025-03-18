@@ -178,10 +178,12 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
+    /// Returns a copy with show_testnets set to the specified value.
+    ///
     /// # Errors
     ///
     /// Will return Err if there is a version mismatch.
-    pub fn save_testnets_toggle(
+    pub fn with_show_testnets(
         &self,
         profile_version: Option<Version>,
         now: Timestamp,
