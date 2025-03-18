@@ -11,12 +11,13 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userSettings } from '$lib/derived/user-profile.derived';
 
 	let testnetsEnabledChecked: boolean;
-	$: testnetsEnabledChecked = $testnetsEnabled;
+	$: testnetsEnabledChecked = $userSettings?.settings?.testnetsEnabled ?? false;
 
 	let enabledNetworksData: { [id: symbol]: boolean };
-	$: enabledNetworksData = { ...$enabledNetworks };
+	$: enabledNetworksData = { ...$userSettings?.settings?.enabledNetworks };
 
 	const toggleTestnets = async () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: !testnetsEnabledChecked } });
@@ -61,7 +62,7 @@
 					>
 					<span slot="value"
 						><Toggle
-							ariaLabel="Test"
+							ariaLabel="Enable/Disable"
 							checked={enabledNetworksData?.[network.id]}
 							on:nnsToggle={() => toggleNetwork(network)}
 						/></span

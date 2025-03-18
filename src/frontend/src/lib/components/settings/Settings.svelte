@@ -26,6 +26,8 @@
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import { modalSettingsData, modalSettingsState } from '$lib/derived/modal.derived';
 	import type { SettingsModalType } from '$lib/types/settings';
+	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
+	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -50,104 +52,88 @@
 	const openSettingsModal = (t: SettingsModalType) => modalStore.openSettings(t);
 </script>
 
-<div class="rounded-xl bg-primary p-5">
-	<h4 class="mb-5">General</h4>
+<SettingsCard>
+	<svelte:fragment slot="title">General</svelte:fragment>
 
-	<div class="my-3">
-		<KeyValuePairInfo>
-			<svelte:fragment slot="key">
-				<span>{$i18n.settings.text.principal}</span>
-			</svelte:fragment>
-			<svelte:fragment slot="value">
-				<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
-					{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
-				</output>
-				<Copy
-					inline
-					value={principal?.toText() ?? ''}
-					text={$i18n.settings.text.principal_copied}
-				/>
-			</svelte:fragment>
-			<svelte:fragment slot="info">
-				{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
-			</svelte:fragment>
-		</KeyValuePairInfo>
-	</div>
-
-	<div class="my-3">
-		<KeyValuePairInfo>
-			<span class="flex flex-col" slot="key">
-				<span>{$i18n.settings.text.session}</span>
-				{#if nonNullish(remainingTimeMilliseconds)}
-					<span class="text-sm text-tertiary">
-						{remainingTimeMilliseconds <= 0
-							? '0'
-							: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
-					</span>
-				{/if}
-			</span>
-			<output slot="value" class="mr-1.5">
-				<Button link on:click={() => openSettingsModal('sessionDuration')} disabled>Edit ></Button>
+	<SettingsCardItem>
+		<svelte:fragment slot="key">
+			{$i18n.settings.text.principal}
+		</svelte:fragment>
+		<svelte:fragment slot="value">
+			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
+				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
 			</output>
+			<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
+		</svelte:fragment>
+		<svelte:fragment slot="info">
+			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
+		</svelte:fragment>
+	</SettingsCardItem>
 
-			<svelte:fragment slot="info">
-				{$i18n.settings.text.session_description}
-			</svelte:fragment>
-		</KeyValuePairInfo>
-	</div>
-</div>
+	<SettingsCardItem>
+		<span class="flex flex-col" slot="key">
+			<span>{$i18n.settings.text.session}</span>
+			{#if nonNullish(remainingTimeMilliseconds)}
+				<span class="text-sm text-tertiary">
+					{remainingTimeMilliseconds <= 0
+						? '0'
+						: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
+				</span>
+			{/if}
+		</span>
+		<output slot="value" class="mr-1.5">
+			<Button link on:click={() => openSettingsModal('sessionDuration')} disabled>Edit ></Button>
+		</output>
+		<svelte:fragment slot="info">
+			{$i18n.settings.text.session_description}
+		</svelte:fragment>
+	</SettingsCardItem>
+</SettingsCard>
 
-<div class="mt-5 flex-col gap-4 rounded-xl bg-primary p-5">
-	<h4 class="mb-5">Networks</h4>
+<SettingsCard>
+	<svelte:fragment slot="title">Network</svelte:fragment>
 
-	<div class="my-3">
-		<KeyValuePairInfo>
-			<svelte:fragment slot="key"><span>{$i18n.settings.text.testnets}</span></svelte:fragment>
-
-			<svelte:fragment slot="value"
-				><Button link on:click={() => openSettingsModal('enabledNetworks')}>Edit ></Button
-				></svelte:fragment
-			>
-
-			<svelte:fragment slot="info">
-				{$i18n.settings.text.testnets_description}
-			</svelte:fragment>
-		</KeyValuePairInfo>
-	</div>
-</div>
+	<SettingsCardItem>
+		<svelte:fragment slot="key"><span>{$i18n.settings.text.testnets}</span></svelte:fragment>
+		<svelte:fragment slot="value"
+			><Button link on:click={() => openSettingsModal('enabledNetworks')}>Edit ></Button
+			></svelte:fragment
+		>
+		<svelte:fragment slot="info">
+			{$i18n.settings.text.testnets_description}
+		</svelte:fragment>
+	</SettingsCardItem>
+</SettingsCard>
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
-	<div class="mt-5 flex-col gap-4 rounded-xl bg-primary p-5" in:fade>
-		<h4 class="mb-5">{$i18n.settings.text.credentials_title}</h4>
+	<SettingsCard>
+		<svelte:fragment slot="title">{$i18n.settings.text.credentials_title}</svelte:fragment>
 
-		<div class="mt-4">
-			<KeyValuePairInfo>
-				<span slot="key">{$i18n.settings.text.pouh_credential}</span>
-				<svelte:fragment slot="value">
-					{#if $userHasPouhCredential}
-						<output in:fade class="mr-1.5">
-							{$i18n.settings.text.pouh_credential_verified}
-						</output>
-					{:else}
-						<Button type="button" on:click={getPouhCredential}>
-							{$i18n.settings.text.present_pouh_credential}
-						</Button>
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="info">
-					{$i18n.settings.text.pouh_credential_description}
-				</svelte:fragment>
-			</KeyValuePairInfo>
-		</div>
-	</div>
+		<SettingsCardItem>
+			<svelte:fragment slot="key">{$i18n.settings.text.pouh_credential}</svelte:fragment>
+			<svelte:fragment slot="value">
+				{#if $userHasPouhCredential}
+					<output in:fade class="mr-1.5">
+						{$i18n.settings.text.pouh_credential_verified}
+					</output>
+				{:else}
+					<Button link on:click={getPouhCredential}
+						>{$i18n.settings.text.present_pouh_credential} ></Button
+					>
+				{/if}
+			</svelte:fragment>
+			<svelte:fragment slot="info">
+				{$i18n.settings.text.pouh_credential_description}
+			</svelte:fragment>
+		</SettingsCardItem>
+	</SettingsCard>
 {/if}
 
-<div class="mt-5 flex-col gap-4 rounded-xl bg-primary p-5">
-	<h4 class="mb-5">{$i18n.settings.text.appearance}</h4>
+<SettingsCard>
+	<svelte:fragment slot="title">{$i18n.settings.text.appearance}</svelte:fragment>
 
 	<ThemeSelector />
-</div>
+</SettingsCard>
 
 <SettingsVersion />
 
