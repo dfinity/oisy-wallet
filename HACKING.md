@@ -105,8 +105,8 @@ A list of useful faucets and ERC20 tokens on Sepolia:
 
 - ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
 - ckERC20:
-    - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
-    - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
+  - USDC and EURC: [Circle faucet](https://faucet.circle.com/)
+  - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 - SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
@@ -152,11 +152,11 @@ The steps are as follows:
 3. Create a new source environment file in [src/frontend/src/env] by cloning [src/frontend/src/env/tokens.usdc.env.ts]
    and renaming `usdc` to the token's name.
 4. **Adapt the content of the tokens:**
-    1. Find the contract address on the ckETH
-       dashboard [production](https://sv3dd-oaaaa-aaaar-qacoa-cai.raw.icp0.io/dashboard)
-       or [testnet](https://jzenf-aiaaa-aaaar-qaa7q-cai.raw.icp0.io/dashboard) in the table "Supported ckERC20 tokens".
-    2. Obtain the token name, decimals, and symbol on Etherscan using the contract address (Select "Contract > Read
-       contract" to query various information from the ABI).
+   1. Find the contract address on the ckETH
+      dashboard [production](https://sv3dd-oaaaa-aaaar-qacoa-cai.raw.icp0.io/dashboard)
+      or [testnet](https://jzenf-aiaaa-aaaar-qaa7q-cai.raw.icp0.io/dashboard) in the table "Supported ckERC20 tokens".
+   2. Obtain the token name, decimals, and symbol on Etherscan using the contract address (Select "Contract > Read
+      contract" to query various information from the ABI).
 5. **Set up the token** for the Ethereum network by listing the new token in the twin tokens arrays
    of [src/frontend/src/env/tokens.erc20.env.ts].
 6. **Create the mapping for the new token** in [src/frontend/src/env/networks.icrc.env.ts]. This step sets up the token
@@ -198,13 +198,13 @@ VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
 There are some important notes related to the BTC development:
 
 1. Wallet workers:
-    - Locally, only the Regtest network wallet worker is launched
-    - On all other ens (staging, beta, prod), we launch Testnet and Mainnet workers
+   - Locally, only the Regtest network wallet worker is launched
+   - On all other ens (staging, beta, prod), we launch Testnet and Mainnet workers
 2. Transactions:
-    - To test them locally, you need to hardcode a mainnet BTC address with some txs inside. In the future, we plan to
-      create mocks and use them during the local development.
-    - Currently, only Mainnet transactions (uncertified) can be loaded on staging/beta/prod, since the Blockchain API
-      we're using to fetch this data doesn't provide txs for testnet.
+   - To test them locally, you need to hardcode a mainnet BTC address with some txs inside. In the future, we plan to
+     create mocks and use them during the local development.
+   - Currently, only Mainnet transactions (uncertified) can be loaded on staging/beta/prod, since the Blockchain API
+     we're using to fetch this data doesn't provide txs for testnet.
 
 ### Local Bitcoin Node (Or Regtest)
 
@@ -294,7 +294,7 @@ And in the CSS:
 
 ```css
 :root {
-    background: red;
+	background: red;
 }
 ```
 
