@@ -29,7 +29,7 @@ describe('ConvertAmountDestination', () => {
 
 	const balanceTestId = 'convert-amount-destination-balance';
 
-	it('should display values correctly', () => {
+	it('should display values correctly if destinationTokenFee is not provided', () => {
 		const { getByTestId } = render(ConvertAmountDestination, {
 			props,
 			context: mockContext
@@ -46,6 +46,18 @@ describe('ConvertAmountDestination', () => {
 		});
 
 		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBe(receiveAmount);
+	});
+
+	it('should calculate receiveAmount correctly if destinationTokenFee is provided', () => {
+		const { component } = render(ConvertAmountDestination, {
+			props: {
+				...props,
+				destinationTokenFee: 1000n
+			},
+			context: mockContext
+		});
+
+		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBe(19.99999);
 	});
 
 	it('should calculate receiveAmount correctly if sendAmount is not provided', () => {
