@@ -2,12 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { IcToken } from '$icp/types/ic-token';
+	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import {EIGHT_DECIMALS, ZERO} from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import type { AmountString } from '$lib/types/amount';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils.js';
-	import Sprinkles from "$lib/components/sprinkles/Sprinkles.svelte";
 
 	export let amount: BigNumber;
 	export let usdAmount: number;

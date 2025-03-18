@@ -36,15 +36,15 @@
 {:else}
 	<div class="box-confetti-container">
 		<Confetti
-				x={[-1, 1]}
-				y={[0, 0]}
-				iterationCount={5}
-				delay={[0, 1500]}
-				duration={1500}
-				amount={100}
-				fallDistance="300px"
-				{colorArray}
-				size={32}
+			x={[-1, 1]}
+			y={[0, 0]}
+			iterationCount={5}
+			delay={[0, 1500]}
+			duration={1500}
+			amount={100}
+			fallDistance="300px"
+			{colorArray}
+			size={32}
 		/>
 	</div>
 {/if}
@@ -73,6 +73,6 @@
 		justify-content: center;
 		overflow: hidden;
 		pointer-events: none;
-		clip-path: inset(50px 0 0 0)
+		clip-path: inset(50px 0 0 0);
 	}
 </style>
