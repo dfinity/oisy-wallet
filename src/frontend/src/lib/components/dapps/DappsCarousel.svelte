@@ -17,7 +17,7 @@
 	} from '$lib/types/dapp-description';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let styleClass: string | undefined = undefined;
 
