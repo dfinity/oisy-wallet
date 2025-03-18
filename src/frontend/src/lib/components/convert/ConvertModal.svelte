@@ -55,6 +55,13 @@
 
 			dispatch('nnsClose');
 		});
+
+	const goToStep = (stepName: WizardStepsConvert) =>
+		goToWizardSendStep({
+			modal,
+			steps,
+			stepName: stepName
+		});
 </script>
 
 <WizardModal
@@ -75,30 +82,10 @@
 		formCancelAction="close"
 		on:icBack={modal.back}
 		on:icNext={modal.next}
-		on:icDestination={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsConvert.DESTINATION
-			})}
-		on:icDestinationBack={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsConvert.CONVERT
-			})}
-		on:icQRCodeScan={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsConvert.QR_CODE_SCAN
-			})}
-		on:icQRCodeBack={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsConvert.DESTINATION
-			})}
+		on:icDestination={() => goToStep(WizardStepsConvert.DESTINATION)}
+		on:icDestinationBack={() => goToStep(WizardStepsConvert.CONVERT)}
+		on:icQRCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
+		on:icQRCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
 		on:icClose={close}
 	/>
 </WizardModal>
