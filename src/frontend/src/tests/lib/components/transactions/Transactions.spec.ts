@@ -114,5 +114,4 @@ describe('Transactions', () => {
 			{ timeout }
 		);
 	});
-
 }, 60000);
