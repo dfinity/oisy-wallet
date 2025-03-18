@@ -171,7 +171,16 @@ export interface MigrationReport {
 	to: Principal;
 	progress: MigrationProgress;
 }
+export interface NetworkSettings {
+	id: string;
+	enabled: boolean;
+	is_testnet: boolean;
+}
+export interface NetworkSettingsMap {
+	networks: Array<[string, NetworkSettings]>;
+}
 export interface NetworksSettings {
+	networks: NetworkSettingsMap;
 	testnets: TestnetsSettings;
 }
 export interface OisyUser {

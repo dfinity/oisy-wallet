@@ -154,8 +154,19 @@ export const idlFactory = ({ IDL }) => {
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
+	const NetworkSettings = IDL.Record({
+		id: IDL.Text,
+		enabled: IDL.Bool,
+		is_testnet: IDL.Bool
+	});
+	const NetworkSettingsMap = IDL.Record({
+		networks: IDL.Vec(IDL.Tuple(IDL.Text, NetworkSettings))
+	});
 	const TestnetsSettings = IDL.Record({ show_testnets: IDL.Bool });
-	const NetworksSettings = IDL.Record({ testnets: TestnetsSettings });
+	const NetworksSettings = IDL.Record({
+		networks: NetworkSettingsMap,
+		testnets: TestnetsSettings
+	});
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});

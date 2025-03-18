@@ -156,7 +156,14 @@ type MigrationProgress = variant {
   CheckingTarget;
 };
 type MigrationReport = record { to : principal; progress : MigrationProgress };
-type NetworksSettings = record { testnets : TestnetsSettings };
+type NetworkSettings = record { id : text; enabled : bool; is_testnet : bool };
+type NetworkSettingsMap = record {
+  networks : vec record { text; NetworkSettings };
+};
+type NetworksSettings = record {
+  networks : NetworkSettingsMap;
+  testnets : TestnetsSettings;
+};
 type OisyUser = record {
   "principal" : principal;
   pouh_verified : bool;
