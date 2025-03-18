@@ -1,6 +1,13 @@
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
+import {
+	BASE_NETWORK,
+	BASE_SEPOLIA_NETWORK
+} from '$env/networks/networks-evm/networks.evm.base.env';
+import {
+	EURC_TOKEN as ETH_EURC_TOKEN,
+	SEPOLIA_EURC_TOKEN as ETH_SEPOLIA_EURC_TOKEN
+} from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import eurc from '$eth/assets/eurc.svg';
-import type { RequiredErc20Token } from '$eth/types/erc20';
+import type { RequiredEvmErc20Token } from '$eth/evm/types/erc20';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -10,34 +17,34 @@ export const EURC_SYMBOL = 'EURC';
 
 export const EURC_TOKEN_ID: TokenId = parseTokenId(EURC_SYMBOL);
 
-export const EURC_TOKEN: RequiredErc20Token = {
+export const EURC_TOKEN: RequiredEvmErc20Token = {
 	id: EURC_TOKEN_ID,
-	network: ETHEREUM_NETWORK,
+	network: BASE_NETWORK,
 	standard: 'erc20',
 	category: 'default',
 	name: 'Euro Coin',
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
 	icon: eurc,
-	address: '0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c',
+	address: '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckEURC'
+	twinToken: ETH_EURC_TOKEN
 };
 
 export const SEPOLIA_EURC_SYMBOL = 'SepoliaEURC';
 
 export const SEPOLIA_EURC_TOKEN_ID: TokenId = parseTokenId(SEPOLIA_EURC_SYMBOL);
 
-export const SEPOLIA_EURC_TOKEN: RequiredErc20Token = {
+export const SEPOLIA_EURC_TOKEN: RequiredEvmErc20Token = {
 	id: SEPOLIA_EURC_TOKEN_ID,
-	network: SEPOLIA_NETWORK,
+	network: BASE_SEPOLIA_NETWORK,
 	standard: 'erc20',
 	category: 'default',
 	name: 'EURC',
 	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
 	icon: eurc,
-	address: '0x08210F9170F89Ab7658F0B5E3fF39b0E03C594D4',
+	address: '0x808456652fdb597867f38412077A9182bf77359F',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSepoliaEURC'
+	twinToken: ETH_SEPOLIA_EURC_TOKEN
 };
