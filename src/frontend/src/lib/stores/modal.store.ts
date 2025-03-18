@@ -1,9 +1,45 @@
-import type { SettingsModalType } from '$lib/types/settings';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
-	type: string;
+	type:
+		| 'eth-receive'
+		| 'icp-receive'
+		| 'icrc-receive'
+		| 'ckbtc-receive'
+		| 'cketh-receive'
+		| 'btc-receive'
+		| 'sol-receive'
+		| 'receive'
+		| 'send'
+		| 'swap'
+		| 'buy'
+		| 'convert-ckbtc-btc'
+		| 'convert-btc-ckbtc'
+		| 'convert-to-twin-token-cketh'
+		| 'convert-to-twin-token-eth'
+		| 'how-to-convert-to-twin-token-eth'
+		| 'wallet-connect-auth'
+		| 'wallet-connect-sign'
+		| 'wallet-connect-send'
+		| 'eth-transaction'
+		| 'ic-transaction'
+		| 'btc-transaction'
+		| 'sol-transaction'
+		| 'manage-tokens'
+		| 'hide-token'
+		| 'ic-hide-token'
+		| 'eth-token'
+		| 'btc-token'
+		| 'ic-token'
+		| 'sol-token'
+		| 'receive-bitcoin'
+		| 'about-why-oisy'
+		| 'vip-qr-code'
+		| 'dapp-details'
+		| 'vip-reward-state'
+		| 'reward-details'
+		| 'reward-state';
 	data?: T;
 	id?: symbol;
 }
@@ -48,7 +84,6 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipRewardState: <D extends T>(data: D) => void;
 	openRewardDetails: <D extends T>(data: D) => void;
 	openRewardState: <D extends T>(data: D) => void;
-	openSettings: (data: SettingsModalType) => void;
 	close: () => void;
 }
 
@@ -102,7 +137,6 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openVipRewardState: setTypeWithData('vip-reward-state'),
 		openRewardDetails: setTypeWithData('reward-details'),
 		openRewardState: setTypeWithData('reward-state'),
-		openSettings: <(data: SettingsModalType) => void>setTypeWithData('settings'),
 		close: () => set(null),
 		subscribe
 	};
