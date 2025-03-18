@@ -8,8 +8,8 @@
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { emit } from '$lib/utils/events.utils';
 	import { testnetsStore } from '$lib/stores/settings.store';
+	import { emit } from '$lib/utils/events.utils';
 
 	// TODO: create tests for this component once we have testId from GIX-CMP
 	// PR: https://github.com/dfinity/gix-components/pull/531
