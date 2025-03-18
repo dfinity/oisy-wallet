@@ -2,7 +2,7 @@
 	import { slide } from 'svelte/transition';
 	import IconHelp from '$lib/components/icons/IconHelp.svelte';
 	const SLOTS = $$props.$$slots;
-	export let permanentInfo: boolean = false;
+	export let permanentInfo = false;
 	let infoExpanded: boolean;
 	$: infoExpanded = permanentInfo;
 </script>
