@@ -7,12 +7,15 @@
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
+			"change": "Change",
+			"apply": "Apply",
 			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
+			"destination": "Destination",
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
@@ -437,6 +440,8 @@
 	"convert": {
 		"text": {
 			"converting": "Converting...",
+			"conversion_destination": "Conversion destination",
+			"default_destination": "Your OISY Wallet",
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
@@ -465,7 +470,9 @@
 			"initializing": "Initializing transaction...",
 			"refreshing_ui": "Refreshing UI",
 			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
-			"calculating_max_amount": "Calculating..."
+			"calculating_max_amount": "Calculating...",
+			"send_to": "Send converted assets to",
+			"custom_destination": "Another address"
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"

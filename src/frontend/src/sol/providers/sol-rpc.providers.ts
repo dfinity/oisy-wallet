@@ -20,7 +20,7 @@ import {
 	type RpcSubscriptions,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi
-} from '@solana/web3.js';
+} from '@solana/kit';
 
 const rpcs: Record<SolanaNetworkType, SolRpcConnectionConfig> = {
 	[SolanaNetworks.mainnet]: {
