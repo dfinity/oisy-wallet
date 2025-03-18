@@ -363,9 +363,21 @@ pub mod signer {
 }
 
 pub mod networks {
-    use candid::{CandidType, Deserialize};
-
     use crate::types::Version;
+    use candid::{CandidType, Deserialize};
+    use std::collections::BTreeMap;
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct NetworkSettings {
+        pub id: String,
+        pub enabled: bool,
+        pub is_testnet: bool,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct NetworkSettingsMap {
+        pub networks: BTreeMap<String, NetworkSettings>,
+    }
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct TestnetsSettings {
@@ -375,6 +387,7 @@ pub mod networks {
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct NetworksSettings {
         pub testnets: TestnetsSettings,
+        pub networks: NetworkSettingsMap,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
