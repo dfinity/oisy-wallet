@@ -2,6 +2,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
+	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
@@ -11,6 +12,10 @@
 
 	export let isSuccessful: boolean;
 </script>
+
+{#if isSuccessful}
+	<Sprinkles />
+{/if}
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">

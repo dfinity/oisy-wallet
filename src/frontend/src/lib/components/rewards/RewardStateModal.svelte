@@ -5,6 +5,7 @@
 	import type { RewardDescription } from '$env/types/env-reward';
 	import rewardJackpotReceived from '$lib/assets/reward-jackpot-received.svg';
 	import rewardReceived from '$lib/assets/reward-received.svg';
+	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -24,6 +25,8 @@
 	let reward: RewardDescription | undefined;
 	$: reward = rewardCampaigns.find((campaign) => campaign.id === 'OISY Airdrop #1');
 </script>
+
+<Sprinkles />
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
