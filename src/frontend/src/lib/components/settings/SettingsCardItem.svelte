@@ -4,14 +4,16 @@
 
 	const SLOTS = $$props.$$slots;
 
+	export let permanentInfo: boolean = false;
+
 	let infoExpanded: boolean;
-	$: infoExpanded = false;
+	$: infoExpanded = permanentInfo;
 </script>
 
 <div class="mt-3 flex w-full flex-row">
 	<span class="flex w-full flex-1 flex-row items-start">
 		<span class="flex"><slot name="key" /></span>
-		{#if SLOTS.info}
+		{#if SLOTS.info && !permanentInfo}
 			<button
 				class="ml-1 flex p-0.5 align-top text-tertiary"
 				on:click={() => (infoExpanded = !infoExpanded)}

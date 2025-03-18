@@ -70,22 +70,21 @@
 		</svelte:fragment>
 	</SettingsCardItem>
 
-	<SettingsCardItem>
-		<span class="flex flex-col" slot="key">
-			<span>{$i18n.settings.text.session}</span>
-			{#if nonNullish(remainingTimeMilliseconds)}
-				<span class="text-sm text-tertiary">
-					{remainingTimeMilliseconds <= 0
-						? '0'
-						: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
-				</span>
-			{/if}
-		</span>
+	<SettingsCardItem permanentInfo>
+		<svelte:fragment slot="key">
+			{$i18n.settings.text.session}
+		</svelte:fragment>
 		<output slot="value" class="mr-1.5">
 			<Button link on:click={() => openSettingsModal('sessionDuration')} disabled>Edit ></Button>
 		</output>
+
 		<svelte:fragment slot="info">
-			{$i18n.settings.text.session_description}
+			{#if nonNullish(remainingTimeMilliseconds)}
+				{$i18n.settings.text.session}
+				{remainingTimeMilliseconds <= 0
+					? '0'
+					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
+			{/if}
 		</svelte:fragment>
 	</SettingsCardItem>
 </SettingsCard>
@@ -118,7 +117,7 @@
 					</output>
 				{:else}
 					<Button link on:click={getPouhCredential}
-						>{$i18n.settings.text.present_pouh_credential} ></Button
+						>{$i18n.settings.text.present_pouh_credential}&hellip;</Button
 					>
 				{/if}
 			</svelte:fragment>
