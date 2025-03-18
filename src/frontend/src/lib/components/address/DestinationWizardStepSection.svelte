@@ -10,7 +10,7 @@
 		class:bg-off-white={isActive}
 		class:border-primary-inverted={!isActive}
 		class:bg-primary={!isActive}
-	/>
+	></span>
 
 	{label}
 </button>
