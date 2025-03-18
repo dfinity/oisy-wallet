@@ -31,6 +31,6 @@
 	</svelte:fragment>
 
 	{#if displayExchangeRate}
-		<ConvertAmountExchange slot="secondary-value" amount={amount} {exchangeRate} />
+		<ConvertAmountExchange slot="secondary-value" {amount} {exchangeRate} />
 	{/if}
 </ModalValue>
