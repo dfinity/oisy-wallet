@@ -276,85 +276,39 @@ const mapTokenParsedInstruction = async ({
 	}
 };
 
+// Solana program Token2022 provides exactly the same instructions as the legacy Token program plus a few more.
+// So the implementation of the mapping of the instructions is the same as the legacy Token program for the instructions that are common.
 const mapToken2022ParsedInstruction = async ({
 	type,
 	info,
 	network,
+	cumulativeBalances,
 	addressToToken
 }: {
 	type: string;
 	info: object;
 	network: SolanaNetworkType;
+	cumulativeBalances?: Record<SolAddress, SolMappedTransaction['value']>;
 	addressToToken?: Record<SolAddress, SplTokenAddress>;
 }): Promise<SolMappedTransaction | undefined> => {
-	if (type === 'transfer') {
-		// We need to cast the type since it is not implied
-		const {
-			destination: to,
-			amount: value,
-			source: from
-		} = info as {
-			destination: SolAddress;
-			amount: string;
-			source: SolAddress;
-		};
-
-		const tokenAddress = addressToToken?.[from] ?? addressToToken?.[to];
-
-		if (nonNullish(tokenAddress)) {
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
-
-		const { getAccountInfo } = solanaHttpRpc(network);
-
-		const { value: sourceResult } = await getAccountInfo(address(from), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (nonNullish(sourceResult) && 'parsed' in sourceResult.data) {
-			const {
-				data: {
-					parsed: { info: sourceInfo }
-				}
-			} = sourceResult;
-
-			const { mint: tokenAddress } = sourceInfo as { mint: SplTokenAddress };
-
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
-
-		const { value: destinationResult } = await getAccountInfo(address(to), {
-			encoding: 'jsonParsed'
-		}).send();
-
-		if (nonNullish(destinationResult) && 'parsed' in destinationResult.data) {
-			const {
-				data: {
-					parsed: { info: destinationInfo }
-				}
-			} = destinationResult;
-
-			const { mint: tokenAddress } = destinationInfo as { mint: SplTokenAddress };
-
-			return { value: BigInt(value), from, to, tokenAddress };
-		}
-	}
-
-	if (type === 'transferChecked') {
-		// We need to cast the type since it is not implied
-		const {
-			destination: to,
-			tokenAmount: { amount: value },
-			source: from,
-			mint: tokenAddress
-		} = info as {
-			destination: SolAddress;
-			tokenAmount: { amount: string };
-			source: SolAddress;
-			mint: SplTokenAddress;
-		};
-
-		return { value: BigInt(value), from, to, tokenAddress };
+	if (
+		[
+			'transfer',
+			'transferChecked',
+			'closeAccount',
+			'mintTo',
+			'burn',
+			'mintToChecked',
+			'burnChecked'
+		].includes(type)
+	) {
+		return await mapTokenParsedInstruction({
+			type,
+			info,
+			network,
+			cumulativeBalances,
+			addressToToken
+		});
 	}
 };
 
@@ -408,7 +362,13 @@ export const mapSolParsedInstruction = async ({
 	}
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
-		return mapToken2022ParsedInstruction({ type, info, network, addressToToken });
+		return mapToken2022ParsedInstruction({
+			type,
+			info,
+			network,
+			cumulativeBalances,
+			addressToToken
+		});
 	}
 
 	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
