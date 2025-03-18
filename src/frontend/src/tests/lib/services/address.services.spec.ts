@@ -32,11 +32,7 @@ describe('address.services', () => {
 	const mockIdentity = Ed25519KeyIdentity.generate();
 
 	beforeEach(() => {
-		vi.resetAllMocks();
 		vi.clearAllMocks();
-
-		// we mock console.error and console.warn just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 
 		authStore.setForTesting(mockIdentity);
 	});
