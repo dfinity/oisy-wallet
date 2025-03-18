@@ -1,7 +1,6 @@
 import type { Settings, UserProfile } from '$declarations/backend/backend.did';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { nonNullish } from '@dfinity/utils';
-import { fromNullishNullable } from '@dfinity/utils/dist/types/utils/did.utils';
+import { fromNullishNullable, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const userProfileLoaded: Readable<boolean> = derived([userProfileStore], ([$userProfile]) =>
