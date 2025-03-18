@@ -38,6 +38,5 @@
 			'url(/images/sprinkles/oisy-sprinkle-curved-06.svg)'
 		]}
 		size={32}
-		rotation={[-180, 180]}
 	/>
 </div>
