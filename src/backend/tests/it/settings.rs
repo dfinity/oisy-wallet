@@ -1,7 +1,7 @@
 use candid::Principal;
 use shared::types::{
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-    networks::{SaveTestnetsSettingsError, SaveTestnetsToggleRequest},
+    networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
     user_profile::{GetUserProfileError, UserProfile},
 };
 
@@ -11,7 +11,7 @@ use crate::utils::{
 };
 
 #[test]
-fn test_save_user_testnets_toggle_saves_the_toggle() {
+fn test_set_user_show_testnets_saves_the_toggle() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
@@ -25,19 +25,19 @@ fn test_save_user_testnets_toggle_saves_the_toggle() {
         false
     );
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
         current_user_version: profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
-    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+    assert_eq!(set_user_show_testnets_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -53,19 +53,19 @@ fn test_save_user_testnets_toggle_saves_the_toggle() {
 
     assert_eq!(settings.networks.testnets.show_testnets, true);
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: false,
         current_user_version: user_profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
-    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+    assert_eq!(set_user_show_testnets_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -83,7 +83,7 @@ fn test_save_user_testnets_toggle_saves_the_toggle() {
 }
 
 #[test]
-fn test_save_user_testnets_toggle_cannot_update_wrong_version() {
+fn test_set_user_show_testnets_cannot_update_wrong_version() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
@@ -97,34 +97,34 @@ fn test_save_user_testnets_toggle_cannot_update_wrong_version() {
         false
     );
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
         current_user_version: profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
-    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+    assert_eq!(set_user_show_testnets_response, Ok(Ok(())));
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: false,
         current_user_version: profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
     assert_eq!(
-        save_user_testnets_toggle_response,
+        set_user_show_testnets_response,
         Ok(Err(SaveTestnetsSettingsError::VersionMismatch))
     );
 
@@ -148,7 +148,7 @@ fn test_save_user_testnets_toggle_cannot_update_wrong_version() {
 }
 
 #[test]
-fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
+fn test_set_user_show_testnets_does_not_change_existing_value_if_same() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
@@ -163,19 +163,19 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
         false
     );
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: false,
         current_user_version: profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
-    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+    assert_eq!(set_user_show_testnets_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -191,19 +191,19 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
 
     assert_eq!(settings.networks.testnets.show_testnets, false);
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: false,
         current_user_version: user_profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
-    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+    assert_eq!(set_user_show_testnets_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -219,19 +219,19 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
 
     assert_eq!(settings.networks.testnets.show_testnets, false);
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
         current_user_version: user_profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
-    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+    assert_eq!(set_user_show_testnets_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -247,19 +247,19 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
 
     assert_eq!(settings.networks.testnets.show_testnets, true);
 
-    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+    let set_user_show_testnets_arg = SetShowTestnetsRequest {
         show_testnets: true,
         current_user_version: user_profile.version,
     };
 
-    let save_user_testnets_toggle_response = pic_setup
+    let set_user_show_testnets_response = pic_setup
         .update::<Result<(), SaveTestnetsSettingsError>>(
             caller,
-            "save_user_testnets_toggle",
-            save_user_testnets_toggle_arg,
+            "set_user_show_testnets",
+            set_user_show_testnets_arg,
         );
 
-    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+    assert_eq!(set_user_show_testnets_response, Ok(Ok(())));
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,

@@ -55,7 +55,7 @@ pub fn add_credential(
     }
 }
 
-/// Toggles the user's preference to show or hide testnets in the interface.
+/// Sets the user's preference to show (or hide) testnets in the interface.
 ///
 /// # Arguments
 /// * `principal` - The principal of the user.
@@ -69,7 +69,7 @@ pub fn add_credential(
 ///
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-pub fn save_testnets_toggle(
+pub fn set_show_testnets(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
     show_testnets: bool,

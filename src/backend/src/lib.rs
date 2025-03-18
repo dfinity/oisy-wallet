@@ -30,7 +30,7 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        networks::{SaveTestnetsSettingsError, SaveTestnetsToggleRequest},
+        networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         token::{UserToken, UserTokenId},
         user_profile::{
@@ -50,12 +50,13 @@ use types::{
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
+use crate::user_profile::set_show_testnets;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
-    user_profile::{add_hidden_dapp_id, save_testnets_toggle},
+    user_profile::add_hidden_dapp_id,
 };
 
 mod assertions;
@@ -531,7 +532,7 @@ pub fn add_user_credential(
     }
 }
 
-/// Toggles the user's preference to show or hide testnets in the interface.
+/// Sets the user's preference to show (or hide) testnets in the interface.
 ///
 /// # Returns
 /// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
@@ -540,8 +541,8 @@ pub fn add_user_credential(
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "may_write_user_data")]
-pub fn save_user_testnets_toggle(
-    request: SaveTestnetsToggleRequest,
+pub fn set_user_show_testnets(
+    request: SetShowTestnetsRequest,
 ) -> Result<(), SaveTestnetsSettingsError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
@@ -549,7 +550,7 @@ pub fn save_user_testnets_toggle(
     mutate_state(|s| {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        save_testnets_toggle(
+        set_show_testnets(
             stored_principal,
             request.current_user_version,
             request.show_testnets,

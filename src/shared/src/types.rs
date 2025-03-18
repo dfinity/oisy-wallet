@@ -384,7 +384,7 @@ pub mod networks {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct SaveTestnetsToggleRequest {
+    pub struct SetShowTestnetsRequest {
         pub show_testnets: bool,
         pub current_user_version: Option<Version>,
     }
