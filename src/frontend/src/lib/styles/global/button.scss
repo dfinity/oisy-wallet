@@ -12,9 +12,9 @@ a.as-button {
 	border-radius: var(--button-border-radius);
 
 	transition:
-					color 0.25s ease-out,
-					background 0.25s ease-out,
-					opacity 0.25s ease-out;
+		color 0.25s ease-out,
+		background 0.25s ease-out,
+		opacity 0.25s ease-out;
 
 	border: 1px solid transparent;
 
@@ -356,22 +356,20 @@ a.as-button {
 		@include button.icon;
 	}
 
-
 	// LINK
 	&.link {
 		@apply p-0;
 		@apply bg-transparent;
 		@apply text-brand-primary;
 
-		&.disabled, &[disabled] {
+		&.disabled,
+		&[disabled] {
 			@apply p-0;
 			@apply bg-transparent;
 			@apply text-brand-disabled;
 		}
 	}
 }
-
-
 
 // DROPDOWN BUTTON
 .dropdown-button:not(.loading) {
