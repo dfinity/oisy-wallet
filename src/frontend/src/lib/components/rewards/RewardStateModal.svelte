@@ -17,7 +17,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let jackpot = false;
 
@@ -38,9 +38,9 @@
 
 		<div class="flex flex-col items-center gap-4 text-center">
 			<h3 class="my-3"
-				>{jackpot
-					? replaceOisyPlaceholders($i18n.rewards.text.state_modal_title_jackpot)
-					: replaceOisyPlaceholders($i18n.rewards.text.state_modal_title)}</h3
+			>{jackpot
+				? replaceOisyPlaceholders($i18n.rewards.text.state_modal_title_jackpot)
+				: replaceOisyPlaceholders($i18n.rewards.text.state_modal_title)}</h3
 			>
 			<span class="block w-full">{$i18n.rewards.text.state_modal_content_text}</span>
 
@@ -55,7 +55,7 @@
 
 		<ButtonGroup slot="toolbar">
 			<Button on:click={modalStore.close} colorStyle="primary"
-				>{$i18n.rewards.text.open_wallet}</Button
+			>{$i18n.rewards.text.open_wallet}</Button
 			>
 		</ButtonGroup>
 	</ContentWithToolbar>
