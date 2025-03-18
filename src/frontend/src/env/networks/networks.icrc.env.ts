@@ -299,7 +299,6 @@ const CKPEPE_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 		}
 	: undefined;
 
-
 const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDC)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDC,
