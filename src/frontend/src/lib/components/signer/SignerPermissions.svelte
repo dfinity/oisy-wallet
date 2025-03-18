@@ -112,11 +112,11 @@
 
 				<div>
 					<label class="block text-sm font-bold" for="ic-wallet-address"
-					>{$i18n.signer.permissions.text.your_wallet_address}</label
+						>{$i18n.signer.permissions.text.your_wallet_address}</label
 					>
 
 					<output id="ic-wallet-address" class="break-all"
-					>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
+						>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
 					>
 				</div>
 			</div>
