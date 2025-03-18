@@ -8,9 +8,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import Sprinkles from "$lib/components/sprinkles/Sprinkles.svelte";
 
 	export let isSuccessful: boolean;
 </script>
+
+{#if isSuccessful}
+	<Sprinkles />
+{/if}
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">

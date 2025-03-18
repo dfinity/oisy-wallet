@@ -17,6 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import Sprinkles from "$lib/components/sprinkles/Sprinkles.svelte";
 
 	export let jackpot = false;
 
@@ -24,6 +25,8 @@
 	let reward: RewardDescription | undefined;
 	$: reward = rewardCampaigns.find((campaign) => campaign.id === 'OISY Airdrop #1');
 </script>
+
+<Sprinkles />
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
