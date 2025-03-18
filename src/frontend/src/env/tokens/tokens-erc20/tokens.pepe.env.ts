@@ -2,7 +2,6 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import pepe from '$icp-eth/assets/pepe.svg';
 import type { TokenId } from '$lib/types/token';
-
 import { parseTokenId } from '$lib/validation/token.validation';
 
 export const PEPE_DECIMALS = 18;

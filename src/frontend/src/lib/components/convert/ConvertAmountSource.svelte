@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
@@ -38,7 +37,7 @@
 	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate, balanceForFee, minterInfo } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
+	$: customValidate = (userAmount: bigint): ConvertAmountErrorType =>
 		validateUserAmount({
 			userAmount,
 			token: $sourceToken,
@@ -52,16 +51,16 @@
 		});
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === 0n;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
-				balance: $sourceTokenBalance,
-				fee: BigNumber.from(totalFee),
-				tokenDecimals: $sourceToken.decimals,
-				tokenStandard: $sourceToken.standard
-			})
+			balance: $sourceTokenBalance,
+			fee: totalFee,
+			tokenDecimals: $sourceToken.decimals,
+			tokenStandard: $sourceToken.standard
+		})
 		: undefined;
 
 	let amountSetToMax = false;

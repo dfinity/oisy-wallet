@@ -13,7 +13,6 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 import { get } from 'svelte/store';
@@ -33,7 +32,7 @@ export class AlchemyErc20Provider {
 	}: {
 		contract: Erc20Token;
 		address: EthAddress;
-		listener: (params: { hash: string; value: BigNumber }) => Promise<void>;
+		listener: (params: { hash: string; value: bigint }) => Promise<void>;
 	}): WebSocketListener => {
 		const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, this.provider);
 
@@ -41,7 +40,7 @@ export class AlchemyErc20Provider {
 		const filterListener = async (
 			_from: string,
 			_address: string,
-			_value: BigNumber,
+			_value: bigint,
 			transaction: Erc20Transaction
 		) => {
 			const { transactionHash: hash, args } = transaction;

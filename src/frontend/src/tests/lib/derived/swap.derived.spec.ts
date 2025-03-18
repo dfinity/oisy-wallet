@@ -1,9 +1,7 @@
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { ZERO } from '$lib/constants/app.constants';
 import { swappableTokens } from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
 describe('swap.derived', () => {
@@ -17,7 +15,7 @@ describe('swap.derived', () => {
 		it('should return selected token as sourceToken and undefined for destinationToken', () => {
 			mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 
-			const icpBalance = BigNumber.from(2n);
+			const icpBalance = 2n;
 			balancesStore.set({
 				tokenId: ICP_TOKEN_ID,
 				data: { data: icpBalance, certified: true }
@@ -33,7 +31,7 @@ describe('swap.derived', () => {
 
 			balancesStore.set({
 				tokenId: ICP_TOKEN_ID,
-				data: { data: ZERO, certified: true }
+				data: { data: 0n, certified: true }
 			});
 
 			const tokens = get(swappableTokens);

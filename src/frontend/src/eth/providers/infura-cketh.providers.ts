@@ -11,12 +11,11 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BlockTag } from '@ethersproject/abstract-provider';
-import type { BigNumber } from '@ethersproject/bignumber';
 import type { PopulatedTransaction } from '@ethersproject/contracts';
 import type { Networkish } from '@ethersproject/networks';
-import { InfuraProvider } from '@ethersproject/providers';
 import type { Log } from 'alchemy-sdk';
 import { ethers } from 'ethers';
+import { InfuraProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraCkETHProvider implements Erc20Provider {
@@ -34,8 +33,8 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		from: EthAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<BigNumber> => {
+		amount: bigint;
+	}): Promise<bigint> => {
 		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
 		return ckEthContract.estimateGas.deposit(to, { from });
 	};

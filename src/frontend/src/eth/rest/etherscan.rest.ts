@@ -12,7 +12,6 @@ import type { NetworkId } from '$lib/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 
 export class EtherscanRest {
@@ -71,9 +70,9 @@ export class EtherscanRest {
 				from,
 				to,
 				nonce: parseInt(nonce),
-				gasLimit: BigNumber.from(gas),
-				gasPrice: BigNumber.from(gasPrice),
-				value: BigNumber.from(value),
+				gasLimit: gas,
+				gasPrice: gasPrice,
+				value,
 				// Chain ID is not delivered by the Etherscan API so, we naively set 0
 				chainId: 0
 			})

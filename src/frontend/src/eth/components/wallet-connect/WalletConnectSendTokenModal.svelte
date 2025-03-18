@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -138,8 +137,8 @@
 
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
-	let amount: BigNumber;
-	$: amount = BigNumber.from(firstTransaction?.value ?? '0');
+	let amount: bigint;
+	$: amount = firstTransaction?.value ?? '0';
 
 	const send = async () => {
 		const { success } = await sendServices({

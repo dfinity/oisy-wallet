@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
@@ -108,7 +107,7 @@
 		switchTokens();
 	};
 
-	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
+	$: customValidate = (userAmount: bigint): ConvertAmountErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
 					userAmount,
@@ -159,7 +158,7 @@
 								error={nonNullish(errorType)}
 								balance={$sourceTokenBalance}
 								token={$sourceToken}
-								fee={BigNumber.from(totalFee)}
+								fee={totalFee}
 							/>
 						{/if}
 					</svelte:fragment>

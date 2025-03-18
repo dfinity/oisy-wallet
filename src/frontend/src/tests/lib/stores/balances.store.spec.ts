@@ -2,7 +2,6 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
-import { BigNumber } from 'alchemy-sdk';
 
 describe('balancesStore', () => {
 	beforeEach(() => {
@@ -13,7 +12,7 @@ describe('balancesStore', () => {
 		await testDerivedUpdates(() =>
 			balancesStore.set({
 				tokenId: ICP_TOKEN.id,
-				data: { data: BigNumber.from(1n), certified: true }
+				data: { data: 1n, certified: true }
 			})
 		);
 	});

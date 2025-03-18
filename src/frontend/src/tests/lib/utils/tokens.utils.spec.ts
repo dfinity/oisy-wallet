@@ -12,7 +12,6 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
-import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -198,9 +197,9 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should return the same array if all tokens have no balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
-			[ICP_TOKEN.id]: { data: ZERO, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
-			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
+			[ICP_TOKEN.id]: { data: 0n, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: 0n, certified },
+			[ETHEREUM_TOKEN.id]: { data: 0n, certified }
 		};
 
 		const result = pinTokensWithBalanceAtTop({
@@ -218,9 +217,9 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should sort only tokens with non-zero balances and leave untouched the rest', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
-			[ICP_TOKEN.id]: { data: ZERO, certified },
+			[ICP_TOKEN.id]: { data: 0n, certified },
 			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
-			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
+			[ETHEREUM_TOKEN.id]: { data: 0n, certified }
 		};
 
 		const result = pinTokensWithBalanceAtTop({
@@ -347,10 +346,10 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 
 	it('should return a dictionary with correct balances if all token balances are 0', () => {
 		const balances = {
-			[ICP_TOKEN.id]: { data: ZERO, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
-			[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
-			[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
+			[ICP_TOKEN.id]: { data: 0n, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: 0n, certified },
+			[ETHEREUM_TOKEN.id]: { data: 0n, certified },
+			[BTC_TESTNET_TOKEN.id]: { data: 0n, certified }
 		};
 		const tokens = [...mockTokens, BTC_TESTNET_TOKEN];
 
@@ -360,9 +359,9 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual({
-			[BTC_MAINNET_NETWORK_ID]: ZERO.toNumber(),
-			[ETHEREUM_NETWORK_ID]: ZERO.toNumber(),
-			[ICP_NETWORK_ID]: ZERO.toNumber()
+			[BTC_MAINNET_NETWORK_ID]: 0n.toNumber(),
+			[ETHEREUM_NETWORK_ID]: 0n.toNumber(),
+			[ICP_NETWORK_ID]: 0n.toNumber()
 		});
 	});
 

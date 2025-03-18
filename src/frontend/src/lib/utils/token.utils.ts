@@ -6,7 +6,6 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
-import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -17,34 +16,33 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Calculates the maximum amount for a transaction.
  *
  * @param {Object} params
- * @param {BigNumber | undefined} params.balance The balance of the account.
- * @param {BigNumber | undefined} params.fee The fee of the transaction.
+ * @param {bigint | undefined} params.balance The balance of the account.
+ * @param {bigint | undefined} params.fee The fee of the transaction.
  * @param {number} params.tokenDecimals The decimals of the token.
  * @param {string} params.tokenStandard The standard of the token.
  * @returns {number} The maximum amount for the transaction.
  */
 export const getMaxTransactionAmount = ({
-	balance = ZERO,
-	fee = ZERO,
+	balance = 0n,
+	fee = 0n,
 	tokenDecimals,
 	tokenStandard
 }: {
-	balance?: BigNumber;
-	fee?: BigNumber;
+	balance?: bigint;
+	fee?: bigint;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = balance.sub(tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
+	const value = balance - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
 
 	return Number(
-		value.isNegative()
-			? ZERO
+		value < 0n
+			? 0n
 			: formatToken({
 					value,
 					unitName: tokenDecimals,
@@ -135,7 +133,7 @@ export const calculateTokenUsdAmount = ({
 	token,
 	$exchanges
 }: {
-	amount: BigNumber | undefined;
+	amount: bigint | undefined;
 	token: Token;
 	$exchanges: ExchangesData;
 }): number | undefined => {
@@ -178,7 +176,7 @@ export const sumBalances = ([balance1, balance2]: [
 	TokenUi['balance']
 ]): TokenUi['balance'] =>
 	nonNullish(balance1) && nonNullish(balance2)
-		? balance1.add(balance2)
+		? balance1 + balance2
 		: balance1 === undefined || balance2 === undefined
 			? undefined
 			: (balance2 ?? balance1);

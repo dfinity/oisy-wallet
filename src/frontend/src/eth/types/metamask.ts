@@ -9,7 +9,7 @@ export interface MetamaskAccountsRequest {
 export interface MetamaskSendTransactionRequestParams {
 	from: string;
 	to: string;
-	value: string; // expected: BigNumber.toString() representation
+	value: string; // expected: bigint.toString() representation
 }
 
 export interface MetamaskSendTransactionRequest {

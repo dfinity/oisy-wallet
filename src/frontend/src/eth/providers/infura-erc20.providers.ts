@@ -9,11 +9,9 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { PopulatedTransaction } from '@ethersproject/contracts';
 import type { Networkish } from '@ethersproject/networks';
-import { InfuraProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { ethers, type ContractTransaction } from 'ethers';
+import { InfuraProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20Provider implements Erc20Provider {
@@ -45,7 +43,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		address: EthAddress;
-	}): Promise<BigNumber> => {
+	}): Promise<bigint> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.balanceOf(address);
 	};
@@ -59,10 +57,10 @@ export class InfuraErc20Provider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		from: EthAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<BigNumber> => {
+		amount: bigint;
+	}): Promise<bigint> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.estimateGas.approve(to, amount, { from });
+		return erc20Contract.approve.estimateGas(to, amount, { from });
 	};
 
 	// Transaction send: https://ethereum.stackexchange.com/a/131944
@@ -74,10 +72,10 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<PopulatedTransaction> => {
+		amount: bigint;
+	}): Promise<ContractTransaction> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.populateTransaction.transfer(to, amount);
+		return erc20Contract.transfer.populateTransaction(to, amount);
 	};
 
 	populateApprove = ({
@@ -87,10 +85,10 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		spender: EthAddress;
-		amount: BigNumber;
-	}): Promise<PopulatedTransaction> => {
+		amount: bigint;
+	}): Promise<ContractTransaction> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.populateTransaction.approve(spender, amount);
+		return erc20Contract.approve.populateTransaction(spender, amount);
 	};
 
 	allowance = ({
@@ -101,7 +99,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		owner: EthAddress;
 		spender: EthAddress;
-	}): Promise<BigNumber> => {
+	}): Promise<bigint> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.allowance(owner, spender);
 	};

@@ -9,9 +9,8 @@ import {
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { FeeData } from '@ethersproject/providers';
-import type { Transaction as EthTransaction } from '@ethersproject/transactions';
+import type { FeeData } from 'ethers/providers';
+import type { Transaction as EthTransaction } from 'ethers/transaction';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
@@ -23,7 +22,7 @@ export type Transaction = Omit<EthTransaction, 'data'> &
 	};
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
-	gas: BigNumber;
+	gas: bigint;
 };
 
 export type TransactionType = z.infer<typeof TransactionTypeSchema>;

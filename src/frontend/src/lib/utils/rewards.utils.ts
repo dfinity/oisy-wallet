@@ -1,9 +1,7 @@
-import { ZERO } from '$lib/constants/app.constants';
 import { getRewards } from '$lib/services/reward-code.services';
 import type { RewardResponseInfo, RewardResult } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -42,4 +40,4 @@ export const isUpcomingCampaign = (startDate: Date) => {
 };
 
 export const getRewardsBalance = (rewards: RewardResponseInfo[]) =>
-	rewards.reduce((total, { amount }) => total.add(BigNumber.from(amount)), ZERO);
+	rewards.reduce((total, { amount }) => total + amount, 0n);

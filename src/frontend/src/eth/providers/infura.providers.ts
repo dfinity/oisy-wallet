@@ -6,13 +6,12 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 import type { Networkish } from '@ethersproject/networks';
 import {
 	InfuraProvider as InfuraProviderLib,
 	type FeeData,
 	type TransactionResponse
-} from '@ethersproject/providers';
+} from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraProvider {
@@ -22,7 +21,7 @@ export class InfuraProvider {
 		this.provider = new InfuraProviderLib(this.network, INFURA_API_KEY);
 	}
 
-	balance = (address: EthAddress): Promise<BigNumber> => this.provider.getBalance(address);
+	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
 	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 

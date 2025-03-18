@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -23,12 +22,12 @@
 	let decimals: number;
 	$: ({ id: tokenId, network, decimals } = token);
 
-	let balance: BigNumber | undefined;
+	let balance: bigint | undefined;
 	$: balance = $balancesStore?.[tokenId]?.data;
 
 	let amountDisplay: OptionAmount;
 	$: amountDisplay = nonNullish(amount)
-		? formatToken({ value: BigNumber.from(amount), unitName: decimals })
+		? formatToken({ value: amount, unitName: decimals })
 		: undefined;
 </script>
 

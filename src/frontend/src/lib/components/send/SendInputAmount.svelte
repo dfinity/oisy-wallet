@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import MaxButton from '$lib/components/common/MaxButton.svelte';
@@ -15,7 +14,7 @@
 	export let amount: OptionAmount = undefined;
 	export let tokenDecimals: number | undefined = undefined;
 	export let placeholder: string = $i18n.core.text.amount;
-	export let customValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
+	export let customValidate: (userAmount: bigint) => Error | undefined = () => undefined;
 	export let calculateMax: (() => number | undefined) | undefined = undefined;
 	export let error: Error | undefined = undefined;
 	export let amountSetToMax = false;

@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let token: Token;
-	export let balance: BigNumber | undefined = undefined;
+	export let balance: bigint | undefined = undefined;
 	export let testId: string | undefined = undefined;
 </script>
 
@@ -15,7 +13,7 @@
 
 	<div class="ml-1 font-semibold">
 		{formatToken({
-			value: balance ?? ZERO,
+			value: balance ?? 0n,
 			unitName: token.decimals
 		})}
 		{token.symbol}

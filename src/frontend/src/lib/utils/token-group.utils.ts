@@ -1,4 +1,3 @@
-import { ZERO } from '$lib/constants/app.constants';
 import type { TokenId, TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
@@ -42,7 +41,7 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 
 			return (
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO)
+				+(b.balance ?? 0n).gt(a.balance ?? 0n) - +(b.balance ?? 0n).lt(a.balance ?? 0n)
 			);
 		});
 };

@@ -36,15 +36,15 @@
 	bind:receiveAmount
 	bind:insufficientFunds
 	bind:insufficientFundsForFee
-	totalFee={$maxGasFee?.toBigInt()}
-	minFee={$minGasFee?.toBigInt()}
+	totalFee={$maxGasFee}
+	minFee={$minGasFee}
 	disabled={invalid}
 >
 	<svelte:fragment slot="message">
 		{#if isTokenErc20($sourceToken) && insufficientFundsForFee}
 			<div in:fade>
 				<MessageBox level="error"
-					>{$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees}</MessageBox
+				>{$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees}</MessageBox
 				>
 			</div>
 		{/if}

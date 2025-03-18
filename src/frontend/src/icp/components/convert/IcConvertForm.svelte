@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fromNullable, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IcTokenFees from '$icp/components/fee/IcTokenFees.svelte';
@@ -12,7 +11,6 @@
 	import DestinationValue from '$lib/components/address/DestinationValue.svelte';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -54,13 +52,11 @@
 
 	let formattedMinterMinimumAmount: string | undefined;
 	$: formattedMinterMinimumAmount = formatToken({
-		value: BigNumber.from(
-			isCkBtc
-				? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? 0n)
-				: (fromNullable(
-						$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
-					) ?? 0n)
-		),
+		value: isCkBtc
+			? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? 0n)
+			: (fromNullable(
+					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
+				) ?? 0n),
 		unitName: $sourceToken.decimals,
 		displayDecimals: $sourceToken.decimals
 	});
@@ -77,7 +73,7 @@
 		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 				$symbol: tokenForFee.symbol,
 				$balance: formatToken({
-					value: $balanceForFee ?? ZERO,
+					value: $balanceForFee ?? 0n,
 					unitName: tokenForFee.decimals,
 					displayDecimals: tokenForFee.decimals
 				})

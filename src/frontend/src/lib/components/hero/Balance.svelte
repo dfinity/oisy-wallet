@@ -18,7 +18,7 @@
 		data-tid={AMOUNT_DATA}
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
 	>
-		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !token.balance.isZero()}
+		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !(token.balance === 0n)}
 			<Amount amount={token.balance} decimals={token.decimals} symbol={token.symbol} />
 		{:else}
 			<span class:animate-pulse={$loading}>0.00</span>

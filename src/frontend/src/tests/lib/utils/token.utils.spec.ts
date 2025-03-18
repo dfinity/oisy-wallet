@@ -27,7 +27,6 @@ import { bn1, bn2, bn3, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import { BigNumber } from 'alchemy-sdk';
 import type { MockedFunction } from 'vitest';
 
 const tokenDecimals = 8;
@@ -44,8 +43,8 @@ describe('getMaxTransactionAmount', () => {
 	it('should return the correct maximum amount for a transaction for each token standard', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			const result = getMaxTransactionAmount({
-				balance: BigNumber.from(balance),
-				fee: BigNumber.from(fee),
+				balance,
+				fee,
 				tokenDecimals,
 				tokenStandard
 			});
@@ -56,8 +55,8 @@ describe('getMaxTransactionAmount', () => {
 	it('should return 0 if balance is less than fee', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			const result = getMaxTransactionAmount({
-				fee: BigNumber.from(balance),
-				balance: BigNumber.from(fee),
+				fee: balance,
+				balance: fee,
 				tokenDecimals,
 				tokenStandard
 			});
@@ -81,14 +80,14 @@ describe('getMaxTransactionAmount', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			let result = getMaxTransactionAmount({
 				balance: undefined,
-				fee: BigNumber.from(fee),
+				fee,
 				tokenDecimals,
 				tokenStandard
 			});
 			expect(result).toBe(0);
 
 			result = getMaxTransactionAmount({
-				balance: BigNumber.from(balance),
+				balance,
 				fee: undefined,
 				tokenDecimals,
 				tokenStandard
@@ -99,8 +98,8 @@ describe('getMaxTransactionAmount', () => {
 
 	it('should return the untouched amount if the token is ERC20', () => {
 		const result = getMaxTransactionAmount({
-			balance: BigNumber.from(balance),
-			fee: BigNumber.from(fee),
+			balance,
+			fee,
 			tokenDecimals: tokenDecimals,
 			tokenStandard: 'erc20'
 		});
@@ -109,8 +108,8 @@ describe('getMaxTransactionAmount', () => {
 
 	it('should return the untouched amount if the token is SPL', () => {
 		const result = getMaxTransactionAmount({
-			balance: BigNumber.from(balance),
-			fee: BigNumber.from(fee),
+			balance,
+			fee,
 			tokenDecimals: tokenDecimals,
 			tokenStandard: 'spl'
 		});
@@ -135,7 +134,7 @@ describe('calculateTokenUsdBalance', () => {
 			$balances: mockBalances,
 			$exchanges: mockExchanges
 		});
-		expect(result).toEqual(bn3.toNumber());
+		expect(result).toEqual(Number(bn3));
 	});
 
 	it('should return undefined if exchange rate is not available', () => {
@@ -183,7 +182,7 @@ describe('calculateTokenUsdAmount', () => {
 			amount: bn3,
 			$exchanges: mockExchanges
 		});
-		expect(result).toEqual(bn3.toNumber());
+		expect(result).toEqual(Number(bn3));
 	});
 
 	it('should return undefined if exchange rate is not available', () => {
@@ -225,7 +224,7 @@ describe('mapTokenUi', () => {
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
 			balance: bn3,
-			usdBalance: bn3.toNumber()
+			usdBalance: Number(bn3)
 		});
 	});
 
@@ -282,7 +281,7 @@ describe('sumTokenBalances', () => {
 	it('should sum token balances when both balances are non-null and decimals match', () => {
 		const result = sumTokenBalances([token1, token2]);
 
-		expect(result).toStrictEqual(bn1.add(bn2));
+		expect(result).toStrictEqual(bn1 + bn2);
 	});
 
 	it('should return null when decimals do not match', () => {

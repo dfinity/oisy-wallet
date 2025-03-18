@@ -18,7 +18,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
-import { BigNumber } from 'alchemy-sdk';
 import { get, readable } from 'svelte/store';
 import { vi } from 'vitest';
 
@@ -60,8 +59,8 @@ describe('convertStore', () => {
 			destinationToken: ETHEREUM_TOKEN,
 			sourceToken: ICP_TOKEN
 		});
-		const ethBalance = BigNumber.from(1n);
-		const icpBalance = BigNumber.from(2n);
+		const ethBalance = 1n;
+		const icpBalance = 2n;
 
 		balancesStore.set({
 			tokenId: ETHEREUM_TOKEN.id,
@@ -86,7 +85,7 @@ describe('convertStore', () => {
 	});
 
 	it('should have balance for fee set if sourceToken is ERC20', () => {
-		const ethBalance = BigNumber.from(1n);
+		const ethBalance = 1n;
 		balancesStore.set({
 			tokenId: SEPOLIA_TOKEN_ID,
 			data: { data: ethBalance, certified: true }
@@ -101,7 +100,7 @@ describe('convertStore', () => {
 	});
 
 	it('should have balance for fee set if sourceToken is ckERC20', () => {
-		const ckEthBalance = BigNumber.from(1n);
+		const ckEthBalance = 1n;
 		balancesStore.set({
 			tokenId: parseTokenId('ckETH'),
 			data: { data: ckEthBalance, certified: true }
