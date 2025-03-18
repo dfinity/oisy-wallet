@@ -17,6 +17,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
+use shared::types::networks::{SaveTestnetsSettingsError, SaveTestnetsToggleRequest};
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -49,6 +50,7 @@ use types::{
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
+use crate::user_profile::save_testnets_toggle;
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
@@ -528,6 +530,32 @@ pub fn add_user_credential(
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
     }
+}
+
+/// Toggles the user's preference to show or hide testnets in the interface.
+///
+/// # Returns
+/// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn save_user_testnets_toggle(
+    request: SaveTestnetsToggleRequest,
+) -> Result<(), SaveTestnetsSettingsError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        save_testnets_toggle(
+            stored_principal,
+            None,
+            request.show_testnets,
+            &mut user_profile_model,
+        )
+    })
 }
 
 /// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.

@@ -362,6 +362,31 @@ pub mod signer {
     }
 }
 
+pub mod networks {
+    use candid::{CandidType, Deserialize};
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct TestnetsSettings {
+        pub show_testnets: bool,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct NetworksSettings {
+        pub testnets: TestnetsSettings,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum SaveTestnetsSettingsError {
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct SaveTestnetsToggleRequest {
+        pub show_testnets: bool,
+    }
+}
+
 pub mod dapp {
     use candid::{CandidType, Deserialize};
 
@@ -410,9 +435,11 @@ pub mod settings {
     use candid::{CandidType, Deserialize};
 
     use crate::types::dapp::DappSettings;
+    use crate::types::networks::NetworksSettings;
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct Settings {
+        pub networks: NetworksSettings,
         pub dapp: DappSettings,
     }
 }

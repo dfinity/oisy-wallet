@@ -6,6 +6,7 @@ use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
+use crate::types::networks::SaveTestnetsSettingsError;
 use crate::{
     types::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
@@ -172,6 +173,37 @@ impl StoredUserProfile {
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);
         new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn save_testnets_toggle(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        show_testnets: bool,
+    ) -> Result<StoredUserProfile, SaveTestnetsSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveTestnetsSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        if settings.networks.testnets.show_testnets == show_testnets {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_settings = new_profile.settings.clone().unwrap_or_default();
+        let mut new_networks_settings = new_settings.networks.clone();
+        let mut new_testnets_settings = new_networks_settings.testnets.clone();
+        new_testnets_settings.show_testnets = show_testnets;
+        new_networks_settings.testnets = new_testnets_settings;
+        new_settings.networks = new_networks_settings;
+        new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }

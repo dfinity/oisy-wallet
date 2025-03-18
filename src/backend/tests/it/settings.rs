@@ -1,13 +1,271 @@
+use crate::utils::{
+    mock::CALLER,
+    pocketic::{setup, PicCanisterTrait},
+};
 use candid::Principal;
+use shared::types::networks::{SaveTestnetsSettingsError, SaveTestnetsToggleRequest};
 use shared::types::{
     dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
     user_profile::{GetUserProfileError, UserProfile},
 };
 
-use crate::utils::{
-    mock::CALLER,
-    pocketic::{setup, PicCanisterTrait},
-};
+#[test]
+fn test_save_user_testnets_toggle_saves_the_toggle() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let create_profile_response =
+        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+
+    let profile = create_profile_response.expect("Create failed");
+    assert_eq!(
+        profile.settings.unwrap().networks.testnets.show_testnets,
+        false
+    );
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: true,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings.networks.testnets.show_testnets, true);
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: false,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings.networks.testnets.show_testnets, false);
+}
+
+#[test]
+fn test_save_user_testnets_toggle_cannot_update_wrong_version() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let create_profile_response =
+        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+
+    let profile = create_profile_response.expect("Create failed");
+    assert_eq!(
+        profile.settings.unwrap().networks.testnets.show_testnets,
+        false
+    );
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: true,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: false,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(
+        save_user_testnets_toggle_response,
+        Ok(Err(SaveTestnetsSettingsError::VersionMismatch))
+    );
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    assert_eq!(
+        get_profile_response
+            .expect("Call to get profile failed")
+            .expect("Get profile failed")
+            .settings
+            .unwrap()
+            .networks
+            .testnets
+            .show_testnets,
+        true
+    );
+}
+
+#[test]
+fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let create_profile_response =
+        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+
+    let profile = create_profile_response.expect("Create failed");
+
+    assert_eq!(
+        profile.settings.unwrap().networks.testnets.show_testnets,
+        false
+    );
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: false,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings.networks.testnets.show_testnets, false);
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: false,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings.networks.testnets.show_testnets, false);
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: true,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings.networks.testnets.show_testnets, true);
+
+    let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
+        show_testnets: true,
+    };
+
+    let save_user_testnets_toggle_response = pic_setup
+        .update::<Result<(), SaveTestnetsSettingsError>>(
+            caller,
+            "save_user_testnets_toggle",
+            save_user_testnets_toggle_arg,
+        );
+
+    assert_eq!(save_user_testnets_toggle_response, Ok(Ok(())));
+
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
+        caller,
+        "get_user_profile",
+        (),
+    );
+
+    let user_profile = get_profile_response
+        .expect("Call to get profile failed")
+        .expect("Get profile failed");
+
+    let settings = user_profile.settings.unwrap();
+
+    assert_eq!(settings.networks.testnets.show_testnets, true);
+}
 
 #[test]
 fn test_add_user_hidden_dapp_id_adds_a_single_dapp_id() {
