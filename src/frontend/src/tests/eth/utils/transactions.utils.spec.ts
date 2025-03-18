@@ -28,7 +28,7 @@ const transaction: Transaction = {
 	chainId: 1
 };
 
-const ckMinterInfoAddresses: OptionEthAddress[] = ['0xffff'];
+const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];
 
 const $ethAddress: OptionEthAddress = '0xffff';
 
@@ -156,7 +156,7 @@ describe('transactions.utils', () => {
 
 	describe('mapEthTransactionUi', () => {
 		it('should map to "withdraw" when the "from" address is in ckMinterInfoAddresses', () => {
-			const ckMinterInfoAddresses: OptionEthAddress[] = ['0x1234'];
+			const ckMinterInfoAddresses: EthAddress[] = ['0x1234'];
 
 			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
@@ -164,7 +164,7 @@ describe('transactions.utils', () => {
 		});
 
 		it('should map to "deposit" when the "to" address is in ckMinterInfoAddresses', () => {
-			const ckMinterInfoAddresses: OptionEthAddress[] = ['0xabcd'];
+			const ckMinterInfoAddresses: EthAddress[] = ['0xabcd'];
 
 			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
 
@@ -198,22 +198,9 @@ describe('transactions.utils', () => {
 		});
 
 		it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are empty', () => {
-			const ckMinterInfoAddresses: OptionEthAddress[] = [];
+			const ckMinterInfoAddresses: EthAddress[] = [];
 
 			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
-
-			expect(result.type).not.toBe('withdraw');
-			expect(result.type).not.toBe('deposit');
-		});
-
-		it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are undefined', () => {
-			const ckMinterInfoAddresses: OptionEthAddress[] = [undefined];
-
-			const result = mapEthTransactionUi({
-				transaction,
-				ckMinterInfoAddresses,
-				$ethAddress: undefined
-			});
 
 			expect(result.type).not.toBe('withdraw');
 			expect(result.type).not.toBe('deposit');
