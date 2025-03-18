@@ -39,8 +39,8 @@
 		modalStore.close();
 	};
 
-	let selected: number;
-	$: selected = 0;
+	let selected: any;
+	$: selected = null;
 </script>
 
 <div class="p-6">
@@ -81,7 +81,11 @@
 			<svelte:fragment slot="title">Testnets</svelte:fragment>
 
 			{#each $networksTestnets as network}
-				<SettingsListItem>
+				<SettingsListItem
+					selectable
+					selected={network.id === selected}
+					on:click={() => (selected = network.id)}
+				>
 					<svelte:fragment slot="key"
 						><NetworkLogo {network} blackAndWhite size="xxs" />
 						<span class="ml-2 flex">{network.name}</span></svelte:fragment
