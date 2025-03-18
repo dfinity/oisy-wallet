@@ -207,3 +207,17 @@ export const filterTokens = <T extends Token>({
 				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
 			});
 };
+
+/** Finds the token with the given symbol
+ *
+ * @param tokens - The list of tokens.
+ * @param symbol - symbol of the token to find.
+ * @returns Token with the given symbol or undefined.
+ */
+export const findToken = ({
+	tokens,
+	symbol
+}: {
+	tokens: Token[];
+	symbol: string;
+}): Token | undefined => tokens.find((token) => token.symbol === symbol);
