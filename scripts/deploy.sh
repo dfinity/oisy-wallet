@@ -14,8 +14,9 @@ dfx deploy icp_index
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh
 
-./scripts/download.cketh.sh
-./scripts/deploy.cketh.sh
+dfx deploy cketh_minter
+dfx deploy cketh_ledger
+dfx deploy cketh_index
 ./scripts/deploy.ckerc20.sh
 
 dfx deploy kong_backend

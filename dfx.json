@@ -306,6 +306,7 @@
 			}
 		},
 		"cketh_ledger": {
+			"dependencies": ["cketh_minter"],
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
 			"build": "scripts/build.cketh_ledger.sh",
@@ -326,6 +327,7 @@
 			}
 		},
 		"cketh_index": {
+			"dependencies": ["cketh_ledger"],
 			"type": "custom",
 			"build": "scripts/build.cketh_index.sh",
 			"init_arg_file": "target/ic/cketh_index.args.did",
