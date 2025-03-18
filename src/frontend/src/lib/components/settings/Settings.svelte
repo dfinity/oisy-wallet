@@ -14,7 +14,10 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 	import { modalSettingsState } from '$lib/derived/modal.derived';
-	import { type SettingsModalType , SettingsModalType as SettingsModalEnum } from '$lib/enums/settings-modal-types';
+	import {
+		type SettingsModalType,
+		SettingsModalType as SettingsModalEnum
+	} from '$lib/enums/settings-modal-types';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { busy } from '$lib/stores/busy.store';
@@ -25,7 +28,7 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	
+
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
 
