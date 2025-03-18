@@ -32,7 +32,6 @@ describe('address.services', () => {
 	const mockIdentity = Ed25519KeyIdentity.generate();
 
 	beforeEach(() => {
-		vi.resetAllMocks();
 		vi.clearAllMocks();
 
 		authStore.setForTesting(mockIdentity);

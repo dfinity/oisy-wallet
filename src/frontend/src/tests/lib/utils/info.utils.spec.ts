@@ -5,7 +5,7 @@ describe('info.utils', () => {
 		const key = 'someKey' as HideInfoKey;
 
 		beforeEach(() => {
-			vi.resetAllMocks();
+			vi.clearAllMocks();
 
 			sessionStorage.clear();
 		});

@@ -31,7 +31,7 @@ vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
 }));
 
-describe('sol-transactions.services', () => {
+describe('sol-signatures.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.resetAllMocks();

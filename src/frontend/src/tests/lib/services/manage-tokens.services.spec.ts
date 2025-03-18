@@ -35,7 +35,7 @@ describe('manage-tokens.services', () => {
 		};
 
 		beforeEach(() => {
-			vi.resetAllMocks();
+			vi.clearAllMocks();
 
 			vi.spyOn(toastsStore, 'toastsError');
 		});
