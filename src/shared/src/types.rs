@@ -434,8 +434,7 @@ pub mod dapp {
 pub mod settings {
     use candid::{CandidType, Deserialize};
 
-    use crate::types::dapp::DappSettings;
-    use crate::types::networks::NetworksSettings;
+    use crate::types::{dapp::DappSettings, networks::NetworksSettings};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct Settings {

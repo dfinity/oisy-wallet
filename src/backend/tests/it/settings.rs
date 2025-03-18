@@ -1,12 +1,13 @@
+use candid::Principal;
+use shared::types::{
+    dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+    networks::{SaveTestnetsSettingsError, SaveTestnetsToggleRequest},
+    user_profile::{GetUserProfileError, UserProfile},
+};
+
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicCanisterTrait},
-};
-use candid::Principal;
-use shared::types::networks::{SaveTestnetsSettingsError, SaveTestnetsToggleRequest};
-use shared::types::{
-    dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-    user_profile::{GetUserProfileError, UserProfile},
 };
 
 #[test]
