@@ -551,7 +551,7 @@ pub fn save_user_testnets_toggle(
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
         save_testnets_toggle(
             stored_principal,
-            None,
+            request.current_user_version,
             request.show_testnets,
             &mut user_profile_model,
         )

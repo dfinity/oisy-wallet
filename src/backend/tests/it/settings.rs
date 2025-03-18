@@ -27,6 +27,7 @@ fn test_save_user_testnets_toggle_saves_the_toggle() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: true,
+        current_user_version: profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup
@@ -54,6 +55,7 @@ fn test_save_user_testnets_toggle_saves_the_toggle() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: false,
+        current_user_version: user_profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup
@@ -97,6 +99,7 @@ fn test_save_user_testnets_toggle_cannot_update_wrong_version() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: true,
+        current_user_version: profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup
@@ -110,6 +113,7 @@ fn test_save_user_testnets_toggle_cannot_update_wrong_version() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: false,
+        current_user_version: profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup
@@ -161,6 +165,7 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: false,
+        current_user_version: profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup
@@ -188,6 +193,7 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: false,
+        current_user_version: user_profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup
@@ -215,6 +221,7 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: true,
+        current_user_version: user_profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup
@@ -242,6 +249,7 @@ fn test_save_user_testnets_toggle_does_not_change_existing_value_if_same() {
 
     let save_user_testnets_toggle_arg = SaveTestnetsToggleRequest {
         show_testnets: true,
+        current_user_version: user_profile.version,
     };
 
     let save_user_testnets_toggle_response = pic_setup

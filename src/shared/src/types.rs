@@ -363,6 +363,7 @@ pub mod signer {
 }
 
 pub mod networks {
+    use crate::types::Version;
     use candid::{CandidType, Deserialize};
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
@@ -384,6 +385,7 @@ pub mod networks {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct SaveTestnetsToggleRequest {
         pub show_testnets: bool,
+        pub current_user_version: Option<Version>,
     }
 }
 
