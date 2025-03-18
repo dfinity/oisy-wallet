@@ -26,6 +26,6 @@
 	{/each}
 
 	{#if nonNullish(altText) && rewards.length === 0}
-		<span class="text-misty-rose">{altText}</span>
+		<span>{altText}</span>
 	{/if}
 </div>
