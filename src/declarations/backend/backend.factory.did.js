@@ -295,7 +295,7 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
-	const SaveTestnetsToggleRequest = IDL.Record({
+	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
 	});
@@ -357,11 +357,11 @@ export const idlFactory = ({ IDL }) => {
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
 		migration_stop_timer: IDL.Func([], [Result_8], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
-		save_user_testnets_toggle: IDL.Func([SaveTestnetsToggleRequest], [Result_9], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
+		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_9], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		step_migration: IDL.Func([], [], []),

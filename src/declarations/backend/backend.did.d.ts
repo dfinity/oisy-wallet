@@ -201,10 +201,6 @@ export type Result_7 = { Ok: MigrationReport } | { Err: string };
 export type Result_8 = { Ok: null } | { Err: string };
 export type Result_9 = { Ok: null } | { Err: SaveTestnetsSettingsError };
 export type SaveTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
-export interface SaveTestnetsToggleRequest {
-	current_user_version: [] | [bigint];
-	show_testnets: boolean;
-}
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -216,6 +212,10 @@ export interface SelectedUtxosFeeRequest {
 export interface SelectedUtxosFeeResponse {
 	fee_satoshis: bigint;
 	utxos: Array<Utxo>;
+}
+export interface SetShowTestnetsRequest {
+	current_user_version: [] | [bigint];
+	show_testnets: boolean;
 }
 export interface Settings {
 	networks: NetworksSettings;
@@ -320,11 +320,11 @@ export interface _SERVICE {
 	migration: ActorMethod<[], [] | [MigrationReport]>;
 	migration_stop_timer: ActorMethod<[], Result_8>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
-	save_user_testnets_toggle: ActorMethod<[SaveTestnetsToggleRequest], Result_9>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
+	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], Result_9>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
