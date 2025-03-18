@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { formatTokenAmount } from '$lib/utils/format.utils';
 
 	export let feeAmount: bigint | undefined = undefined;
 	export let symbol: string;
@@ -10,13 +10,9 @@
 	export let displayExchangeRate = true;
 	export let zeroAmountLabel: string | undefined = undefined;
 
-	let formattedFeeAmount: number | undefined;
+	let formattedFeeAmount: string | undefined;
 	$: formattedFeeAmount = nonNullish(feeAmount)
-		? formatTokenBigintToNumber({
-				value: feeAmount,
-				unitName: decimals,
-				displayDecimals: decimals
-			})
+		? formatTokenAmount({ value: feeAmount, unitName: decimals, displayDecimals: decimals })
 		: undefined;
 </script>
 
