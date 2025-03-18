@@ -131,6 +131,44 @@ describe('IcConvertTokenWizard', () => {
 		);
 	});
 
+	it('should call send with custom destination if it is set', async () => {
+		const customDestination = 'customDestination';
+		mockAuthStore();
+		mockBtcAddressStore();
+		mockEthAddressStore();
+
+		const { container } = render(IcConvertTokenWizard, {
+			props: {
+				...props,
+				customDestination
+			},
+			context: mockContext()
+		});
+
+		await clickConvertButton(container);
+
+		const args = sendSpy.mock.calls[0][0];
+
+		expect(sendSpy).toHaveBeenCalledOnce();
+		expect(stringifyJson({ value: args })).toBe(
+			stringifyJson({
+				value: {
+					to: customDestination,
+					amount: parseToken({
+						value: `${sendAmount}`,
+						unitName: ckBtcToken.decimals
+					}),
+					identity: mockIdentity,
+					progress: () => {},
+					ckErc20ToErc20MaxCkEthFees: undefined,
+					token: ckBtcToken,
+					targetNetworkId: BTC_MAINNET_TOKEN.network.id,
+					sendCompleted: () => {}
+				}
+			})
+		);
+	});
+
 	it('should not call send if authIdentity is not defined', async () => {
 		mockBtcAddressStore();
 		mockEthAddressStore();
