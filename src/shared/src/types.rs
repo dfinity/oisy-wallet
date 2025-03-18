@@ -363,8 +363,9 @@ pub mod signer {
 }
 
 pub mod networks {
-    use crate::types::Version;
     use candid::{CandidType, Deserialize};
+
+    use crate::types::Version;
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct TestnetsSettings {
