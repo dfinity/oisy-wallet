@@ -54,15 +54,18 @@ describe('ConvertAmountDestination', () => {
 	});
 
 	it('should calculate receiveAmount correctly if destinationTokenFee is provided', () => {
-		const { component } = render(ConvertAmountDestination, {
-			props: {
-				...props,
-				destinationTokenFee: 1000n
-			},
+		const testProps = $state({
+			...props,
+			destinationTokenFee: 1000n,
+			receiveAmount: undefined
+		});
+
+		render(ConvertAmountDestination, {
+			props: testProps,
 			context: mockContext
 		});
 
-		expect(component.$$.ctx[component.$$.props['receiveAmount']]).toBe(19.99999);
+		expect(testProps.receiveAmount).toBe(19.99999);
 	});
 
 	it('should calculate receiveAmount correctly if sendAmount is not provided', () => {
