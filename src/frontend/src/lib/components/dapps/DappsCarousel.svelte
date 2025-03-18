@@ -7,7 +7,11 @@
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userProfileLoaded, userSettings } from '$lib/derived/user-profile.derived';
+	import {
+		userProfileLoaded,
+		userProfileVersion,
+		userSettings
+	} from '$lib/derived/user-profile.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -85,14 +89,14 @@
 			return;
 		}
 
-		if (isNullish($userProfileStore)) {
+		if (isNullish($userProfileVersion)) {
 			return;
 		}
 
 		await addUserHiddenDappId({
 			dappId,
 			identity: $authIdentity,
-			currentUserVersion: fromNullable($userProfileStore.profile.version)
+			currentUserVersion: $userProfileVersion
 		});
 
 		emit({ message: 'oisyRefreshUserProfile' });
