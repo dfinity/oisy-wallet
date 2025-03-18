@@ -615,9 +615,9 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        let mut user_profile_model =
+        let user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        match find_profile(stored_principal, &mut user_profile_model) {
+        match find_profile(stored_principal, &user_profile_model) {
             Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }

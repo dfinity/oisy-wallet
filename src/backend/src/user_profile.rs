@@ -10,7 +10,7 @@ use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
 
 pub fn find_profile(
     principal: StoredPrincipal,
-    user_profile_model: &mut UserProfileModel,
+    user_profile_model: &UserProfileModel,
 ) -> Result<StoredUserProfile, GetUserProfileError> {
     if let Some(profile) = user_profile_model.find_by_principal(principal) {
         Ok(profile)
