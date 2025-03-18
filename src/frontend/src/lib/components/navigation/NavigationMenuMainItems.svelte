@@ -62,7 +62,7 @@
 	selected={isRouteTokens(pageData) || isRouteTransactions(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
-	<IconWallet/>
+	<IconWallet />
 	{$i18n.navigation.text.tokens}
 </NavigationItem>
 
@@ -77,7 +77,7 @@
 	selected={isRouteActivity(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
-	<IconActivity/>
+	<IconActivity />
 	{$i18n.navigation.text.activity}
 </NavigationItem>
 
@@ -95,10 +95,10 @@
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 	>
-		<IconGift/>
+		<IconGift />
 		{$i18n.navigation.text.airdrops}
 	</NavigationItem>
-	{/if}
+{/if}
 
 <NavigationItem
 	href={networkUrl({
@@ -111,7 +111,7 @@
 	selected={isRouteDappExplorer(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
-	<IconlyUfo/>
+	<IconlyUfo />
 	{$i18n.navigation.text.dapp_explorer}
 </NavigationItem>
 
@@ -126,6 +126,6 @@
 	selected={isRouteSettings(pageData)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >
-	<IconlySettings/>
+	<IconlySettings />
 	{$i18n.navigation.text.settings}
 </NavigationItem>
