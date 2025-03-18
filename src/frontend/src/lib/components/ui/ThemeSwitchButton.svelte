@@ -16,6 +16,7 @@
 		`appearance_${$themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT}`
 	]}
 	on:click={handleClick}
+	link={false}
 >
 	<span slot="icon">
 		{#if $themeStore === Theme.DARK}
