@@ -32,7 +32,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	id: ETHEREUM_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Ethereum',
-	chainId: 1n,
+	chainId: 8453n,
 	icon: eth,
 	iconBW: ethereumBW,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
@@ -49,7 +49,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	id: SEPOLIA_NETWORK_ID,
 	env: 'testnet',
 	name: 'Sepolia',
-	chainId: 11155111n,
+	chainId: 84532n,
 	icon: sepolia,
 	iconBW: sepoliaBW,
 	explorerUrl: SEPOLIA_EXPLORER_URL

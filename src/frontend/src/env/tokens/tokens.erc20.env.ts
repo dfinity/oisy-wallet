@@ -1,16 +1,8 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
-import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
-import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
-import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
-import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import { SHIB_TOKEN } from '$env/tokens/tokens-erc20/tokens.shib.env';
-import { UNI_TOKEN } from '$env/tokens/tokens-erc20/tokens.uni.env';
+import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
-import { WBTC_TOKEN } from '$env/tokens/tokens-erc20/tokens.wbtc.env';
-import { WSTETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.wsteth.env';
-import { XAUT_TOKEN } from '$env/tokens/tokens-erc20/tokens.xaut.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { TokenId } from '$lib/types/token';
@@ -119,23 +111,10 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
 	SEPOLIA_USDC_TOKEN,
-	SEPOLIA_LINK_TOKEN,
-	SEPOLIA_PEPE_TOKEN
+	SEPOLIA_EURC_TOKEN
 ];
 
-export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
-	USDC_TOKEN,
-	LINK_TOKEN,
-	PEPE_TOKEN,
-	OCT_TOKEN,
-	SHIB_TOKEN,
-	WBTC_TOKEN,
-	USDT_TOKEN,
-	WSTETH_TOKEN,
-	UNI_TOKEN,
-	EURC_TOKEN,
-	XAUT_TOKEN
-];
+export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [USDC_TOKEN, EURC_TOKEN];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
 	...(ETH_MAINNET_ENABLED ? ERC20_TWIN_TOKENS_MAINNET : []),
