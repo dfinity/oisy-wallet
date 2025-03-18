@@ -365,16 +365,7 @@ abstract class Homepage {
 	}
 
 	private async viewportAdjuster(): Promise<void> {
-		const maxPageHeight = await this.#page.evaluate(() =>
-			Math.max(
-				document.body.scrollHeight,
-				document.documentElement.scrollHeight,
-				document.body.offsetHeight,
-				document.documentElement.offsetHeight,
-				document.body.clientHeight,
-				document.documentElement.clientHeight
-			)
-		);
+		const maxPageHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
 
 		const currentViewport = this.#page.viewportSize();
 		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
@@ -387,6 +378,8 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		await this.waitForLoadState();
+
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
