@@ -1,4 +1,4 @@
-import { ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { decode } from '$sol/services/wallet-connect.services';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
