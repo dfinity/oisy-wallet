@@ -1,10 +1,8 @@
-import { testnetsStore } from '$lib/stores/settings.store';
+import * as testnetsStore from '$lib/derived/testnets.derived';
+import { readable } from 'svelte/store';
 
 export const setupTestnetsStore = (value: 'enabled' | 'disabled' | 'reset') => {
-	if (value === 'reset') {
-		testnetsStore.reset({ key: 'testnets' });
-		return;
-	}
-
-	testnetsStore.set({ key: 'testnets', value: { enabled: value === 'enabled' } });
+	vi.spyOn(testnetsStore, 'testnets', 'get').mockImplementation(() =>
+		readable(value === 'enabled')
+	);
 };
