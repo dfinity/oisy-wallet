@@ -13,6 +13,7 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,7 +21,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
 
@@ -61,12 +61,12 @@
 
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
-			>{formatToken({
-				value: $ckEthereumNativeTokenBalance?.toBigInt() ?? ZERO_BI,
-				unitName: $ckEthereumNativeToken.decimals
-			})}
-				{$ckEthereumNativeToken.symbol}</output
-			>
+					>{formatToken({
+						value: $ckEthereumNativeTokenBalance?.toBigInt() ?? ZERO_BI,
+						unitName: $ckEthereumNativeToken.decimals
+					})}
+					{$ckEthereumNativeToken.symbol}</output
+				>
 			</p>
 		</div>
 	{/if}
@@ -75,7 +75,7 @@
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
 				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
-			>1</span
+				>1</span
 			>
 
 			<div class="h-full w-[1.5px] bg-tertiary"></div>
@@ -93,16 +93,16 @@
 			on:click={() => dispatch('icQRCode')}
 		>
 			<svelte:fragment slot="title"
-			>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
-				$token: $ckEthereumTwinToken.symbol
-			})}</svelte:fragment
+				>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
+					$token: $ckEthereumTwinToken.symbol
+				})}</svelte:fragment
 			>
 		</ReceiveAddress>
 
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
 				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
-			>2</span
+				>2</span
 			>
 
 			<div class="h-full w-[1.5px] bg-tertiary"></div>
@@ -111,9 +111,9 @@
 		<div>
 			<Value element="div">
 				<svelte:fragment slot="label"
-				>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
-					$token: $ckEthereumTwinToken.symbol
-				})}</svelte:fragment
+					>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
+						$token: $ckEthereumTwinToken.symbol
+					})}</svelte:fragment
 				>
 
 				<p class="mb-6">
@@ -130,17 +130,17 @@
 		<div class="flex justify-center">
 			<span
 				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
-			>3</span
+				>3</span
 			>
 		</div>
 
 		<div>
 			<Value element="div">
 				<svelte:fragment slot="label"
-				>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
-					$token: $ckEthereumTwinToken.symbol,
-					$ckToken: $tokenWithFallback.symbol
-				})}</svelte:fragment
+					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
+						$token: $ckEthereumTwinToken.symbol,
+						$ckToken: $tokenWithFallback.symbol
+					})}</svelte:fragment
 				>
 
 				<Button

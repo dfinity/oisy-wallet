@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { BigNumber } from '@ethersproject/bignumber';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let token: Token;
 	export let balance: BigNumber | undefined = undefined;

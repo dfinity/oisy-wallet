@@ -11,6 +11,7 @@
 	import DestinationValue from '$lib/components/address/DestinationValue.svelte';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -18,7 +19,6 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -56,8 +56,8 @@
 		value: isCkBtc
 			? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? ZERO_BI)
 			: (fromNullable(
-				$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
-			) ?? ZERO_BI),
+					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
+				) ?? ZERO_BI),
 		unitName: $sourceToken.decimals,
 		displayDecimals: $sourceToken.decimals
 	});
@@ -72,27 +72,27 @@
 	let errorMessage: string | undefined;
 	$: errorMessage = insufficientFundsForFee
 		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
-			$symbol: tokenForFee.symbol,
-			$balance: formatToken({
-				value: $balanceForFee?.toBigInt() ?? ZERO_BI,
-				unitName: tokenForFee.decimals,
-				displayDecimals: tokenForFee.decimals
+				$symbol: tokenForFee.symbol,
+				$balance: formatToken({
+					value: $balanceForFee?.toBigInt() ?? ZERO_BI,
+					unitName: tokenForFee.decimals,
+					displayDecimals: tokenForFee.decimals
+				})
 			})
-		})
 		: unknownMinimumAmount
 			? replacePlaceholders($i18n.send.assertion.unknown_minimum_ckbtc_amount, {
-				$sourceTokenSymbol: $sourceToken.symbol,
-				$destinationTokenSymbol: $destinationToken.symbol
-			})
+					$sourceTokenSymbol: $sourceToken.symbol,
+					$destinationTokenSymbol: $destinationToken.symbol
+				})
 			: amountLessThanLedgerFee
 				? replacePlaceholders($i18n.send.assertion.minimum_ledger_fees, {
-					$symbol: $sourceToken.symbol
-				})
+						$symbol: $sourceToken.symbol
+					})
 				: minimumAmountNotReached
 					? replacePlaceholders($i18n.send.assertion.minimum_amount, {
-						$symbol: $sourceToken.symbol,
-						$amount: formattedMinterMinimumAmount
-					})
+							$symbol: $sourceToken.symbol,
+							$amount: formattedMinterMinimumAmount
+						})
 					: undefined;
 
 	let infoMessage: string | undefined;
