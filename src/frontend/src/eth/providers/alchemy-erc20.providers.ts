@@ -1,7 +1,8 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import {
 	ALCHEMY_JSON_RPC_URL_MAINNET,
-	ALCHEMY_JSON_RPC_URL_SEPOLIA
+	ALCHEMY_JSON_RPC_URL_SEPOLIA,
+	ETHEREUM_NETWORK_ID,
+	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';

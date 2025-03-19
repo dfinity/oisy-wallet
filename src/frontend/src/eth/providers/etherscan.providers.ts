@@ -1,7 +1,8 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import {
+	ETHEREUM_NETWORK_ID,
 	ETHERSCAN_NETWORK_HOMESTEAD,
-	ETHERSCAN_NETWORK_SEPOLIA
+	ETHERSCAN_NETWORK_SEPOLIA,
+	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
 import { ETHERSCAN_API_KEY } from '$env/rest/etherscan.env';
 import { i18n } from '$lib/stores/i18n.store';

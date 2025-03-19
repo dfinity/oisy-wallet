@@ -1,4 +1,4 @@
-import { SEPOLIA_NETWORK } from '$env/networks/networks.env';
+import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import {
 	TokenAppearanceSchema,
 	TokenBuyableSchema,

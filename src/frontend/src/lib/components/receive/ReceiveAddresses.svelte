@@ -5,9 +5,9 @@
 		BTC_MAINNET_NETWORK,
 		BTC_REGTEST_NETWORK,
 		BTC_TESTNET_NETWORK,
-		ETHEREUM_NETWORK,
 		ICP_NETWORK
 	} from '$env/networks/networks.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import {
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK,

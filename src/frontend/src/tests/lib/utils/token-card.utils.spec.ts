@@ -1,4 +1,4 @@
-import { SEPOLIA_NETWORK } from '$env/networks/networks.env';
+import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { CardData } from '$lib/types/token-card';

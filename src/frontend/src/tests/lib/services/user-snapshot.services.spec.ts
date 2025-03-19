@@ -5,9 +5,8 @@ import type {
 	Transaction_Spl,
 	UserSnapshot
 } from '$declarations/rewards/rewards.did';
-import * as networkEnv from '$env/networks/networks.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import * as airdropEnv from '$env/reward-campaigns.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -203,7 +202,7 @@ describe('user-snapshot.services', () => {
 			);
 			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
 				ETHEREUM_NETWORK_ID,
 				SEPOLIA_NETWORK_ID
 			]);

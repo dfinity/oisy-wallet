@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import {
 	SOLANA_DEVNET_NETWORK_SYMBOL,
 	SOLANA_LOCAL_NETWORK_SYMBOL,
