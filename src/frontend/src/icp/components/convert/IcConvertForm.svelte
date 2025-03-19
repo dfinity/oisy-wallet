@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fromNullable, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IcTokenFees from '$icp/components/fee/IcTokenFees.svelte';
@@ -54,13 +53,11 @@
 
 	let formattedMinterMinimumAmount: string | undefined;
 	$: formattedMinterMinimumAmount = formatToken({
-		value: BigNumber.from(
-			isCkBtc
-				? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? 0n)
-				: (fromNullable(
-						$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
-					) ?? 0n)
-		),
+		value: isCkBtc
+			? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? 0n)
+			: (fromNullable(
+				$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
+			) ?? 0n),
 		unitName: $sourceToken.decimals,
 		displayDecimals: $sourceToken.decimals
 	});
@@ -75,27 +72,27 @@
 	let errorMessage: string | undefined;
 	$: errorMessage = insufficientFundsForFee
 		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
-				$symbol: tokenForFee.symbol,
-				$balance: formatToken({
-					value: $balanceForFee ?? ZERO,
-					unitName: tokenForFee.decimals,
-					displayDecimals: tokenForFee.decimals
-				})
+			$symbol: tokenForFee.symbol,
+			$balance: formatToken({
+				value: $balanceForFee ?? ZERO,
+				unitName: tokenForFee.decimals,
+				displayDecimals: tokenForFee.decimals
 			})
+		})
 		: unknownMinimumAmount
 			? replacePlaceholders($i18n.send.assertion.unknown_minimum_ckbtc_amount, {
-					$sourceTokenSymbol: $sourceToken.symbol,
-					$destinationTokenSymbol: $destinationToken.symbol
-				})
+				$sourceTokenSymbol: $sourceToken.symbol,
+				$destinationTokenSymbol: $destinationToken.symbol
+			})
 			: amountLessThanLedgerFee
 				? replacePlaceholders($i18n.send.assertion.minimum_ledger_fees, {
-						$symbol: $sourceToken.symbol
-					})
+					$symbol: $sourceToken.symbol
+				})
 				: minimumAmountNotReached
 					? replacePlaceholders($i18n.send.assertion.minimum_amount, {
-							$symbol: $sourceToken.symbol,
-							$amount: formattedMinterMinimumAmount
-						})
+						$symbol: $sourceToken.symbol,
+						$amount: formattedMinterMinimumAmount
+					})
 					: undefined;
 
 	let infoMessage: string | undefined;

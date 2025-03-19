@@ -13,7 +13,6 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -62,7 +61,7 @@
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? ZERO,
+						value: $ckEthereumNativeTokenBalance?.toBigInt() ?? 0n,
 						unitName: $ckEthereumNativeToken.decimals
 					})}
 					{$ckEthereumNativeToken.symbol}</output
@@ -118,7 +117,7 @@
 
 				<p class="mb-6">
 					{formatToken({
-						value: $sendBalance ?? ZERO,
+						value: $sendBalance?.toBigInt() ?? 0n,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					})}
