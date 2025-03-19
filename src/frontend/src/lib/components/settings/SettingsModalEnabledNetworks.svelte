@@ -9,6 +9,7 @@
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { userSettings } from '$lib/derived/user-profile.derived';
 	import type { Network } from '$lib/types/network';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let testnetsEnabledChecked: boolean;
 	$: testnetsEnabledChecked = $userSettings?.settings?.testnetsEnabled ?? false;
@@ -27,7 +28,7 @@
 
 <ContentWithToolbar>
 	<SettingsList>
-		<svelte:fragment slot="title">Mainnets</svelte:fragment>
+		<svelte:fragment slot="title">{$i18n.settings.text.mainnets}</svelte:fragment>
 		<svelte:fragment slot="title-action"
 			><div class="font-bold"
 				><Checkbox
@@ -36,7 +37,7 @@
 					checked={testnetsEnabledChecked}
 					on:nnsChange={toggleTestnets}
 				>
-					Enable Testnets
+					{$i18n.settings.text.enable_testnets}
 				</Checkbox>
 			</div></svelte:fragment
 		>
@@ -60,7 +61,7 @@
 
 	{#if $testnetsEnabled}
 		<SettingsList>
-			<svelte:fragment slot="title">Testnets</svelte:fragment>
+			<svelte:fragment slot="title">{$i18n.settings.text.testnets}</svelte:fragment>
 
 			{#each $networksTestnets as network}
 				<SettingsListItem>

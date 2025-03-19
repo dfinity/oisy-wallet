@@ -70,7 +70,7 @@
 
 	<SettingsCardItem permanentInfo>
 		<svelte:fragment slot="key">
-			{$i18n.settings.text.session}
+			{$i18n.settings.text.session_duration}
 		</svelte:fragment>
 		<output slot="value" class="mr-1.5">
 			<Button link disabled>Edit ></Button>
@@ -78,7 +78,7 @@
 
 		<svelte:fragment slot="info">
 			{#if nonNullish(remainingTimeMilliseconds)}
-				{$i18n.settings.text.session}
+				{$i18n.settings.text.session_expires_in}
 				{remainingTimeMilliseconds <= 0
 					? '0'
 					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
@@ -88,17 +88,17 @@
 </SettingsCard>
 
 <SettingsCard>
-	<svelte:fragment slot="title">Network</svelte:fragment>
+	<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
 
 	<SettingsCardItem>
-		<svelte:fragment slot="key"><span>{$i18n.settings.text.testnets}</span></svelte:fragment>
+		<svelte:fragment slot="key"><span>{$i18n.settings.text.active_networks}</span></svelte:fragment>
 		<svelte:fragment slot="value"
 			><Button link on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
 				>Edit ></Button
 			></svelte:fragment
 		>
 		<svelte:fragment slot="info">
-			{$i18n.settings.text.testnets_description}
+			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
 		</svelte:fragment>
 	</SettingsCardItem>
 </SettingsCard>

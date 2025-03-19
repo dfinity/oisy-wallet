@@ -8,13 +8,20 @@
 		SettingsModalType as SettingsModalEnum
 	} from '$lib/enums/settings-modal-types';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let settingsType: SettingsModalType;
 	$: settingsType = $modalSettingsData;
+
+	let modalTitle: string | undefined;
+	$: modalTitle =
+		settingsType === SettingsModalEnum.ENABLED_NETWORKS
+			? $i18n.settings.text.active_networks
+			: undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_WHY_OISY_MODAL}>
-	<svelte:fragment slot="title">{settingsType ?? ''}</svelte:fragment>
+	<svelte:fragment slot="title">{modalTitle ?? ''}</svelte:fragment>
 
 	<!-- we add an if here because theres plans to have multiple settings open as a modal -->
 	<!-- to add a new type, extend the SettingsModalType enum and add a condition below -->
