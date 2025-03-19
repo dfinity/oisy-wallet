@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.env';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';

@@ -1,5 +1,6 @@
-import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import {
 	BTC_MAINNET_SYMBOL,

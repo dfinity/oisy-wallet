@@ -1,6 +1,6 @@
 import * as appNavigation from '$app/navigation';
-import { ICP_NETWORK_ID } from '$env/networks/networks.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	AppPath,
 	NETWORK_PARAM,
