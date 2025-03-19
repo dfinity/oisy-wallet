@@ -27,9 +27,9 @@
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
@@ -52,7 +52,7 @@
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
-	let errorType: ConvertAmountErrorType = undefined;
+	let errorType: TokenActionErrorType = undefined;
 	let amountSetToMax = false;
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
@@ -108,7 +108,7 @@
 		switchTokens();
 	};
 
-	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
+	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
 					userAmount,

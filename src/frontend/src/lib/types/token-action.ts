@@ -1,5 +1,4 @@
-// TODO: rename the type as it will be reused in both convert and send flows
-export type ConvertAmountErrorType =
+export type TokenActionErrorType =
 	| 'insufficient-funds'
 	| 'insufficient-funds-for-fee'
 	| 'unknown-minimum-amount'
