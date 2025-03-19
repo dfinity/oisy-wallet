@@ -521,5 +521,20 @@
 			"alternativeName": "IC Explorer",
 			"url": "https://icexplorer.io"
 		}
+	},
+	{
+		"ledgerCanisterId": "ixqp7-kqaaa-aaaaq-aaetq-cai",
+		"rootCanisterId": "izscx-raaaa-aaaaq-aaesq-cai",
+		"indexCanisterId": "j57nf-iaaaa-aaaaq-aaeuq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "Personal DAO",
+			"symbol": "DAO",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "Personal DAO",
+			"url": "https://gsnnn-ziaaa-aaaag-acaaa-cai.icp0.io/"
+		}
 	}
 ]
