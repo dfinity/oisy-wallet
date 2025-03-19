@@ -127,9 +127,19 @@ abstract class Homepage {
 		}
 	}
 
-	private async showSelector({ selector }: SelectorOperationParams): Promise<void> {
+	private async showSelector({
+		selector,
+		display = 'block'
+	}: SelectorOperationParams & { display?: 'block' | 'flex' }): Promise<void> {
 		if (await this.isSelectorVisible({ selector })) {
-			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'block'));
+			const locator = this.#page.locator(selector);
+
+			if (display === 'flex') {
+				await locator.evaluate((element) => (element.style.display = 'flex'));
+				return;
+			}
+
+			await locator.evaluate((element) => (element.style.display = 'block'));
 		}
 	}
 
@@ -340,7 +350,10 @@ abstract class Homepage {
 	}
 
 	private async showMobileNavigationMenu(): Promise<void> {
-		await this.showSelector({ selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]` });
+		await this.showSelector({
+			selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]`,
+			display: 'flex'
+		});
 	}
 
 	protected async waitForManageTokensModal(options?: WaitForLocatorOptions): Promise<void> {
