@@ -28,7 +28,7 @@
 
 	let amountDisplay: OptionAmount;
 	$: amountDisplay = nonNullish(amount)
-		? formatToken({ value: BigNumber.from(amount), unitName: decimals })
+		? formatToken({ value: amount, unitName: decimals })
 		: undefined;
 </script>
 
