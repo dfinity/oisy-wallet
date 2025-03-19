@@ -6,12 +6,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolSignature } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import {
-	address as solAddress,
-	type Address,
-	type Lamports,
-	type Signature
-} from '@solana/web3.js';
+import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
 import type { Writeable } from 'zod';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport

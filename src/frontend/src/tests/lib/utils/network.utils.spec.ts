@@ -1,3 +1,4 @@
+import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import * as networkEnv from '$env/networks/networks.env';
 import {
 	BTC_MAINNET_NETWORK,
@@ -119,10 +120,9 @@ describe('network utils', () => {
 		});
 
 		it('should return false for Bitcoin regtest network ID when it is not LOCAL env', () => {
-			vi.spyOn(networkEnv, 'BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(() => [
-				BTC_MAINNET_NETWORK_ID,
-				BTC_TESTNET_NETWORK_ID
-			]);
+			vi.spyOn(btcNetworkEnv, 'SUPPORTED_BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(
+				() => [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID]
+			);
 
 			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBe(false);
 		});

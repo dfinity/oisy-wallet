@@ -40,7 +40,7 @@ import {
 	getBase64Decoder,
 	getTransactionEncoder,
 	type Base64EncodedWireTransaction
-} from '@solana/web3.js';
+} from '@solana/kit';
 import { get } from 'svelte/store';
 
 interface WalletConnectDecodeTransactionParams {

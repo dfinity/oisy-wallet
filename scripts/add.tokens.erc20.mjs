@@ -68,7 +68,7 @@ const updateListInContent = ({ content, regex, elements, addAtStartIfNotFound = 
 			});
 			return {
 				content: newContent,
-				hasChanged: acc.hasChanged || hasChanged
+				hasChanged: acc.hasChanged ?? hasChanged
 			};
 		},
 		{ content, hasChanged: false }

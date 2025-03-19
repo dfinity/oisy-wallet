@@ -13,6 +13,8 @@ export enum WizardStepsSign {
 
 export enum WizardStepsConvert {
 	CONVERT = 'Convert',
+	DESTINATION = 'Destination Address',
+	QR_CODE_SCAN = 'QR Code Scan',
 	REVIEW = 'Review',
 	CONVERTING = 'Converting'
 }

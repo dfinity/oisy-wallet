@@ -18,7 +18,7 @@ none | prebuilt)
   } >&2
   ;;
 args)
-  echo "In this mode, only the arguments are recreated.  AN existing Wasm is used."
+  echo "In this mode, only the arguments are recreated. An existing Wasm is used."
   BACKEND_WASM_FILE="$(jq -r .canisters.backend.wasm dfx.json)"
   test -e "$BACKEND_WASM_FILE" || {
     echo "ERROR with 'prebuilt' strategy: Wasm file not found at: '$BACKEND_WASM_FILE'"

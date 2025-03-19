@@ -80,6 +80,8 @@
 	];
 	let isRequirementsLoading = true;
 	$: isRequirementsLoading = areTransactionsStoresLoading(transactionsStores);
+
+	let amountOfRewards = 0;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -88,8 +90,8 @@
 	<ContentWithToolbar>
 		<RewardBanner />
 
-		<RewardEarnings {isEligible} />
-		{#if isEligible}
+		<RewardEarnings bind:amountOfRewards />
+		{#if amountOfRewards > 0}
 			<Hr spacing="md" />
 		{/if}
 

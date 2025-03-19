@@ -154,11 +154,16 @@ export const idlFactory = ({ IDL }) => {
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
+	const TestnetsSettings = IDL.Record({ show_testnets: IDL.Bool });
+	const NetworksSettings = IDL.Record({ testnets: TestnetsSettings });
 	const DappCarouselSettings = IDL.Record({
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
 	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
-	const Settings = IDL.Record({ dapp: DappSettings });
+	const Settings = IDL.Record({
+		networks: NetworksSettings,
+		dapp: DappSettings
+	});
 	const UserProfile = IDL.Record({
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
@@ -290,6 +295,18 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
+	const SetShowTestnetsRequest = IDL.Record({
+		current_user_version: IDL.Opt(IDL.Nat64),
+		show_testnets: IDL.Bool
+	});
+	const SaveTestnetsSettingsError = IDL.Variant({
+		VersionMismatch: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const Result_9 = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SaveTestnetsSettingsError
+	});
 	const TopUpCyclesLedgerRequest = IDL.Record({
 		threshold: IDL.Opt(IDL.Nat),
 		percentage: IDL.Opt(IDL.Nat8)
@@ -311,7 +328,7 @@ export const idlFactory = ({ IDL }) => {
 			available: IDL.Nat
 		})
 	});
-	const Result_9 = IDL.Variant({
+	const Result_10 = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
 	});
@@ -344,10 +361,11 @@ export const idlFactory = ({ IDL }) => {
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
+		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [Result_9], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		step_migration: IDL.Func([], [], []),
-		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_9], [])
+		top_up_cycles_ledger: IDL.Func([IDL.Opt(TopUpCyclesLedgerRequest)], [Result_10], [])
 	});
 };
 // @ts-ignore

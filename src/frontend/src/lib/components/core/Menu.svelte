@@ -12,7 +12,6 @@
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
-	import VipQrCodeModal from '$lib/components/qr/VipQrCodeModal.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -23,7 +22,6 @@
 		NAVIGATION_MENU_VIP_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalVipQrCode } from '$lib/derived/modal.derived';
 	import { isVipUser } from '$lib/services/reward-code.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -72,6 +70,7 @@
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
+	link={false}
 >
 	<IconUser size="24" slot="icon" />
 	{$i18n.navigation.alt.menu}
@@ -126,7 +125,3 @@
 		</span>
 	</div>
 </Popover>
-
-{#if $modalVipQrCode}
-	<VipQrCodeModal />
-{/if}

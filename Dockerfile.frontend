@@ -23,7 +23,8 @@ FROM deps AS build_frontend
 COPY package.json package-lock.json .
 RUN npm ci
 
-COPY . .
+COPY .env.* *.js *.cjs *.mjs *.ts *.json scripts .npmrc .nvmrc .
+COPY src/frontend/ src/frontend
 
 ARG network="staging"
 ENV ENV=$network

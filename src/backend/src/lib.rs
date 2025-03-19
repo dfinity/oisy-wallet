@@ -34,6 +34,7 @@ use shared::{
             CreateChallengeError, CreateChallengeResponse, TestAllowSigningError,
             TestAllowSigningRequest, TestAllowSigningResponse,
         },
+        networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         token::{UserToken, UserTokenId},
         user_profile::{
@@ -61,6 +62,7 @@ use crate::{
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
     user_profile::add_hidden_dapp_id,
+    user_profile::{add_hidden_dapp_id, set_show_testnets},
 };
 
 mod assertions;
@@ -538,6 +540,33 @@ pub fn add_user_credential(
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
     }
+}
+
+/// Sets the user's preference to show (or hide) testnets in the interface.
+///
+/// # Returns
+/// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
+///   the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "may_write_user_data")]
+pub fn set_user_show_testnets(
+    request: SetShowTestnetsRequest,
+) -> Result<(), SaveTestnetsSettingsError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        set_show_testnets(
+            stored_principal,
+            request.current_user_version,
+            request.show_testnets,
+            &mut user_profile_model,
+        )
+    })
 }
 
 /// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.

@@ -44,9 +44,11 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 
 			const { tokens: accTokens, icons: accIcons } = await acc;
 
-			const valueWithMetadata = await loadMetadata(token);
+			const { ledgerCanisterId, ...rest } = token;
 
-			if (isNullish(valueWithMetadata)) {
+			const metadataWithIcon = await loadMetadata(ledgerCanisterId);
+
+			if (isNullish(metadataWithIcon)) {
 				return {
 					tokens: {
 						...accTokens,
@@ -56,21 +58,15 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 				};
 			}
 
-			const { ledgerCanisterId, name, icon, ...rest } = valueWithMetadata;
-
-			if (ledgerCanisterId !== savedLedgerCanisterId) {
-				throw new Error(
-					`Ledger canister ID mismatch for token symbol ${key}. Expected ${savedLedgerCanisterId}, got ${ledgerCanisterId}.`
-				);
-			}
+			const { icon, ...metadata } = metadataWithIcon;
 
 			return {
 				tokens: {
 					...accTokens,
 					[key]: {
 						ledgerCanisterId,
-						name,
 						...rest,
+						...metadata,
 						// We override the metadata index canister ID with the one from the saved JSON, in case we want to use a particular one that is not the official one
 						indexCanisterId: savedIndexCanisterId
 					}

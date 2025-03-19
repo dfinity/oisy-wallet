@@ -23,8 +23,9 @@ describe('SwapForm', () => {
 		swapAmounts: {
 			slippage: 0,
 			receiveAmount: 2000000n,
-			liquidityProvidersFee: undefined,
-			gasFee: undefined
+			route: [],
+			liquidityFees: [],
+			networkFee: undefined
 		}
 	};
 

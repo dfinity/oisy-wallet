@@ -8,7 +8,7 @@ import {
 	btcAddressRegtestStore,
 	btcAddressTestnetStore
 } from '$lib/stores/address.store';
-import { testnetsStore } from '$lib/stores/settings.store';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { get } from 'svelte/store';
 
 const mockAddressMainnet = 'mainnet-address';
@@ -34,12 +34,12 @@ describe('initPendingSentTransactionsStatus', () => {
 		btcAddressTestnetStore.reset();
 		btcAddressRegtestStore.reset();
 		btcPendingSentTransactionsStore.reset();
-		testnetsStore.reset({ key: 'testnets' });
+		setupTestnetsStore('reset');
 	});
 
 	describe('testnets disabled', () => {
 		beforeEach(() => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: false } });
+			setupTestnetsStore('disabled');
 		});
 
 		it('should return "loading" if BTC address mainnet is not loaded', () => {
@@ -89,7 +89,7 @@ describe('initPendingSentTransactionsStatus', () => {
 
 	describe('testnets enabled', () => {
 		beforeEach(() => {
-			testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+			setupTestnetsStore('enabled');
 		});
 
 		const loadAllAddresses = () => {

@@ -11,6 +11,7 @@
 	export let sendAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
 	export let totalFee: bigint | undefined;
+	export let destinationTokenFee: bigint | undefined = undefined;
 	export let minFee: bigint | undefined = undefined;
 	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let disabled: boolean;
@@ -38,12 +39,15 @@
 		bind:minterInfoNotCertified
 		bind:exchangeValueUnit
 		{totalFee}
+		{destinationTokenFee}
 		{minFee}
 		{ethereumEstimateFee}
 	/>
 
 	<div class="mt-6">
 		<slot name="message" />
+
+		<slot name="destination" />
 
 		<slot name="fee" />
 	</div>
