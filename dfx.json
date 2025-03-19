@@ -354,14 +354,14 @@
 			"specified_id": "yfumr-cyaaa-aaaar-qaela-cai",
 			"remote": {
 				"id": {
-					"ic": "xevnm-gaaaa-aaaar-qafnq-cai",
-					"test_be_1": "xevnm-gaaaa-aaaar-qafnq-cai",
-					"test_fe_1": "xevnm-gaaaa-aaaar-qafnq-cai",
-					"test_fe_2": "xevnm-gaaaa-aaaar-qafnq-cai",
-					"test_fe_3": "xevnm-gaaaa-aaaar-qafnq-cai",
-					"test_fe_4": "xevnm-gaaaa-aaaar-qafnq-cai",
-					"audit": "xevnm-gaaaa-aaaar-qafnq-cai",
-					"staging": "xevnm-gaaaa-aaaar-qafnq-cai"
+					"ic": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_be_1": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_1": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_2": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_3": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_4": "yfumr-cyaaa-aaaar-qaela-cai",
+					"audit": "yfumr-cyaaa-aaaar-qaela-cai",
+					"staging": "yfumr-cyaaa-aaaar-qaela-cai"
 				}
 			}
 		},
@@ -372,14 +372,14 @@
 			"specified_id": "ycvkf-paaaa-aaaar-qaelq-cai",
 			"remote": {
 				"id": {
-					"ic": "xrs4b-hiaaa-aaaar-qafoa-cai",
-					"test_be_1": "xrs4b-hiaaa-aaaar-qafoa-cai",
-					"test_fe_1": "xrs4b-hiaaa-aaaar-qafoa-cai",
-					"test_fe_2": "xrs4b-hiaaa-aaaar-qafoa-cai",
-					"test_fe_3": "xrs4b-hiaaa-aaaar-qafoa-cai",
-					"test_fe_4": "xrs4b-hiaaa-aaaar-qafoa-cai",
-					"audit": "xrs4b-hiaaa-aaaar-qafoa-cai",
-					"staging": "xrs4b-hiaaa-aaaar-qafoa-cai"
+					"ic": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_be_1": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_1": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_2": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_3": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_4": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"audit": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"staging": "ycvkf-paaaa-aaaar-qaelq-cai"
 				}
 			}
 		},
