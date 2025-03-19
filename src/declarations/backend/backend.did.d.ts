@@ -172,12 +172,22 @@ export interface MigrationReport {
 	progress: MigrationProgress;
 }
 export interface NetworkSettings {
-	id: string;
 	enabled: boolean;
 	is_testnet: boolean;
 }
+export type NetworkSettingsFor =
+	| { Icp: null }
+	| { SolanaTestnet: null }
+	| { BitcoinRegtest: null }
+	| { SolanaDevnet: null }
+	| { EthereumSepolia: null }
+	| { BitcoinTestnet: null }
+	| { SolanaLocal: null }
+	| { EthereumMainnet: null }
+	| { SolanaMainnet: null }
+	| { BitcoinMainnet: null };
 export interface NetworksSettings {
-	networks: Array<[string, NetworkSettings]>;
+	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	testnets: TestnetsSettings;
 }
 export interface OisyUser {

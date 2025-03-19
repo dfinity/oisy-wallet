@@ -154,14 +154,25 @@ export const idlFactory = ({ IDL }) => {
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
+	const NetworkSettingsFor = IDL.Variant({
+		Icp: IDL.Null,
+		SolanaTestnet: IDL.Null,
+		BitcoinRegtest: IDL.Null,
+		SolanaDevnet: IDL.Null,
+		EthereumSepolia: IDL.Null,
+		BitcoinTestnet: IDL.Null,
+		SolanaLocal: IDL.Null,
+		EthereumMainnet: IDL.Null,
+		SolanaMainnet: IDL.Null,
+		BitcoinMainnet: IDL.Null
+	});
 	const NetworkSettings = IDL.Record({
-		id: IDL.Text,
 		enabled: IDL.Bool,
 		is_testnet: IDL.Bool
 	});
 	const TestnetsSettings = IDL.Record({ show_testnets: IDL.Bool });
 	const NetworksSettings = IDL.Record({
-		networks: IDL.Vec(IDL.Tuple(IDL.Text, NetworkSettings)),
+		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		testnets: TestnetsSettings
 	});
 	const DappCarouselSettings = IDL.Record({

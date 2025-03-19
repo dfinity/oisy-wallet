@@ -156,9 +156,21 @@ type MigrationProgress = variant {
   CheckingTarget;
 };
 type MigrationReport = record { to : principal; progress : MigrationProgress };
-type NetworkSettings = record { id : text; enabled : bool; is_testnet : bool };
+type NetworkSettings = record { enabled : bool; is_testnet : bool };
+type NetworkSettingsFor = variant {
+  Icp;
+  SolanaTestnet;
+  BitcoinRegtest;
+  SolanaDevnet;
+  EthereumSepolia;
+  BitcoinTestnet;
+  SolanaLocal;
+  EthereumMainnet;
+  SolanaMainnet;
+  BitcoinMainnet;
+};
 type NetworksSettings = record {
-  networks : vec record { text; NetworkSettings };
+  networks : vec record { NetworkSettingsFor; NetworkSettings };
   testnets : TestnetsSettings;
 };
 type OisyUser = record {
