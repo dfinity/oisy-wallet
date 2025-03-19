@@ -76,7 +76,7 @@ interface WaitForLocatorOptions {
 }
 
 interface ShowSelectorParams {
-	display?: string;
+	display?: 'block' | 'flex';
 }
 
 abstract class Homepage {
@@ -125,6 +125,12 @@ abstract class Homepage {
 		return await this.#page.isVisible(selector);
 	}
 
+	private async isSelectorNotVisible({ selector }: SelectorOperationParams): Promise<boolean> {
+		const isVisible = await this.isSelectorVisible({ selector });
+
+		return !isVisible;
+	}
+
 	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
 		if (await this.isSelectorVisible({ selector })) {
 			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'none'));
@@ -135,7 +141,7 @@ abstract class Homepage {
 		selector,
 		display = 'block'
 	}: SelectorOperationParams & ShowSelectorParams): Promise<void> {
-		if (await this.isSelectorVisible({ selector })) {
+		if (await this.isSelectorNotVisible({ selector })) {
 			const locator = this.#page.locator(selector);
 
 			if (display === 'flex') {
