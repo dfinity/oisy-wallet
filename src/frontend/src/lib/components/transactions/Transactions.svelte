@@ -21,10 +21,8 @@
 		(token) =>
 			token.name === $routeToken &&
 			$routeNetwork &&
-			token.network.id.toString().includes($routeNetwork)
+			token.network.id.description === $routeNetwork
 	);
-
-	let showTokenModal = false;
 
 	onMount(() => {
 		// Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
@@ -44,7 +42,7 @@
 	};
 </script>
 
-{#if $modalManageTokens && showTokenModal && nonNullish(token)}
+{#if $modalManageTokens}
 	<ManageTokensModal onClose={handleClose} />
 {:else if nonNullish($routeNetwork)}
 	{#if $networkICP}
