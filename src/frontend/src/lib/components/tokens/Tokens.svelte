@@ -5,13 +5,13 @@
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div>
 	<Header>
-		{#if $testnetsEnabled}
+		{#if $testnets}
 			<NetworksSwitcher />
 		{:else}
 			<h2 class="text-base">{$i18n.tokens.text.title}</h2>

@@ -10,7 +10,7 @@
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -54,7 +54,7 @@
 
 		<span class="mb-5 mt-8 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
 
-		{#if $testnetsEnabled}
+		{#if $testnets}
 			<ul class="mb-2 flex list-none flex-col font-normal" transition:slide={SLIDE_EASING}>
 				{#each $networksTestnets as network}
 					<li>
