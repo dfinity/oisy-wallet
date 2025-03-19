@@ -1,4 +1,5 @@
-import { BTC_MAINNET_NETWORK, ICP_NETWORK } from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
