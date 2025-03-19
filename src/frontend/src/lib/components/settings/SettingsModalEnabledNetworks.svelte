@@ -5,7 +5,6 @@
 	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { userProfileVersion, userSettings } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
