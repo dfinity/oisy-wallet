@@ -30,7 +30,6 @@
 		setTimeout(() => {
 			if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
 				modalStore.openManageTokens();
-				showTokenModal = true;
 			}
 		}, FALLBACK_TIMEOUT);
 	});
