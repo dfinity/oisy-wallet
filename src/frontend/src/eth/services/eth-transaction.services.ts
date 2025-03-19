@@ -94,7 +94,7 @@ const processPendingTransaction = async ({
 				...rest,
 				// For ERC20 pending transactions we noticed that the `to` field is not correct, since it shows the token address instead of the recipient address.
 				// To avoid confusions on the user side, we prefer not to display the `to` field for ERC20 pending transactions.
-				...(!isTokenErc20(token) && { to }),
+				to: !isTokenErc20(token) ? to : null,
 				pendingTimestamp: Date.now(),
 				...(nonNullish(value) && { value })
 			}

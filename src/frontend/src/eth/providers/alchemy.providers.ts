@@ -129,8 +129,7 @@ export class AlchemyProvider {
 			timestamp
 		} = transaction;
 
-		const possibleUndefinedToNull = <T>(value: T | undefined): T | null =>
-			isNullish(value) ? null : value;
+		const possibleUndefinedToNull = <T>(value: T | undefined): T | null => value ?? null;
 
 		return {
 			blockNumber: possibleUndefinedToNull(blockNumber),
@@ -143,8 +142,7 @@ export class AlchemyProvider {
 			nonce,
 			data,
 			chainId: BigInt(chainId),
-			confirmations: possibleUndefinedToNull(confirmations),
-			timestamp
+			confirmations: () => Promise.resolve(confirmations)
 		};
 	};
 }

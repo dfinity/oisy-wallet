@@ -5,9 +5,9 @@ export const maxGasFee = ({
 	maxFeePerGas,
 	gas: estimatedGasFee
 }: TransactionFeeData): bigint | undefined =>
-	isNullish(maxFeePerGas) ? undefined : maxFeePerGas.mul(estimatedGasFee);
+	isNullish(maxFeePerGas) ? undefined : maxFeePerGas * estimatedGasFee;
 
 export const minGasFee = ({
 	maxPriorityFeePerGas,
 	gas: estimatedGasFee
-}: TransactionFeeData): bigint => (maxPriorityFeePerGas ?? 0n).mul(estimatedGasFee);
+}: TransactionFeeData): bigint => (maxPriorityFeePerGas ?? 0n) * estimatedGasFee;

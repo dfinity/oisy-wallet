@@ -16,23 +16,26 @@ export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type LegacyEthersTransaction = Pick<
 	ethers.Transaction,
-	| 'hash'
-	| 'to'
-	| 'from'
-	| 'nonce'
-	| 'gasLimit'
-	| 'gasPrice'
-	| 'data'
-	| 'value'
-	| 'chainId'
-	| 'type'
-	| 'accessList'
-	| 'maxPriorityFeePerGas'
-	| 'maxFeePerGas'
->;
+	'nonce' | 'gasLimit' | 'data' | 'value' | 'chainId'
+> &
+	Partial<
+		Pick<
+			ethers.Transaction,
+			| 'hash'
+			| 'to'
+			| 'from'
+			| 'gasPrice'
+			| 'type'
+			| 'accessList'
+			| 'maxPriorityFeePerGas'
+			| 'maxFeePerGas'
+		>
+	>;
 
 export type Transaction = Omit<LegacyEthersTransaction, 'data'> &
-	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
+	Pick<TransactionResponse, 'from' | 'to'> &
+	Partial<Pick<TransactionResponse, 'blockNumber'>> & {
+		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
 	};
