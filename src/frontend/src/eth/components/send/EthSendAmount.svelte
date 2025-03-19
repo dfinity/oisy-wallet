@@ -39,13 +39,13 @@
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 		const parsedSendBalance = nonNullish($sendBalance)
 			? Utils.parseUnits(
-				formatToken({
-					value: $sendBalance,
-					unitName: $sendTokenDecimals,
-					displayDecimals: $sendTokenDecimals
-				}),
-				$sendTokenDecimals
-			)
+					formatToken({
+						value: $sendBalance,
+						unitName: $sendTokenDecimals,
+						displayDecimals: $sendTokenDecimals
+					}),
+					$sendTokenDecimals
+				)
 			: 0n;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee

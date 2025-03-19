@@ -41,7 +41,7 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 
 			return (
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+(b.balance ?? 0n).gt(a.balance ?? 0n) - +(b.balance ?? 0n).lt(a.balance ?? 0n)
+				+((b.balance ?? 0n) > (a.balance ?? 0n)) - +((b.balance ?? 0n) < (a.balance ?? 0n))
 			);
 		});
 };

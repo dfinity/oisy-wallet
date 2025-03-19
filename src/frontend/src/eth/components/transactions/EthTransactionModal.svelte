@@ -51,26 +51,26 @@
 	$: ckMinterInfo =
 		$ckEthMinterInfoStore?.[
 			isNetworkIdSepolia(token?.network.id) ? SEPOLIA_TOKEN_ID : ETHEREUM_TOKEN_ID
-			];
+		];
 
 	let fromDisplay: OptionString;
 	$: fromDisplay = nonNullish(token)
 		? (mapAddressToName({
-			address: from,
-			networkId: token.network.id,
-			erc20Tokens: $erc20Tokens,
-			ckMinterInfo
-		}) ?? from)
+				address: from,
+				networkId: token.network.id,
+				erc20Tokens: $erc20Tokens,
+				ckMinterInfo
+			}) ?? from)
 		: from;
 
 	let toDisplay: OptionString;
 	$: toDisplay = nonNullish(token)
 		? (mapAddressToName({
-			address: to,
-			networkId: token.network.id,
-			erc20Tokens: $erc20Tokens,
-			ckMinterInfo
-		}) ?? to)
+				address: to,
+				networkId: token.network.id,
+				erc20Tokens: $erc20Tokens,
+				ckMinterInfo
+			}) ?? to)
 		: to;
 </script>
 

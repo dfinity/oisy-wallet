@@ -13,8 +13,8 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import { JsonRpcProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
+import { JsonRpcProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class AlchemyErc20Provider {

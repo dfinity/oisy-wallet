@@ -56,11 +56,11 @@
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
-			balance: $sourceTokenBalance,
-			fee: totalFee,
-			tokenDecimals: $sourceToken.decimals,
-			tokenStandard: $sourceToken.standard
-		})
+				balance: $sourceTokenBalance,
+				fee: totalFee,
+				tokenDecimals: $sourceToken.decimals,
+				tokenStandard: $sourceToken.standard
+			})
 		: undefined;
 
 	let amountSetToMax = false;

@@ -6,9 +6,10 @@ import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
+import { type TransactionResponse } from 'ethers/providers';
+import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 const configs: Record<NetworkId, AlchemySettings> = {
@@ -22,7 +23,7 @@ const configs: Record<NetworkId, AlchemySettings> = {
 	}
 };
 
-const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
+const alchemyConfig = (networkId: NetworkId): Pick<AlchemySettings, 'apiKey' | 'network'> => {
 	const provider = configs[networkId];
 
 	assertNonNullish(
@@ -106,8 +107,46 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-		this.provider.core.getTransaction(hash);
+	getTransaction = async (hash: string): Promise<TransactionResponse | null> => {
+		const transaction = await this.provider.core.getTransaction(hash);
+
+		if (isNullish(transaction)) {
+			return transaction;
+		}
+
+		const {
+			blockNumber,
+			blockHash,
+			from,
+			to,
+			value,
+			gasPrice,
+			gasLimit,
+			nonce,
+			data,
+			chainId,
+			confirmations,
+			timestamp
+		} = transaction;
+
+		const possibleUndefinedToNull = <T>(value: T | undefined): T | null =>
+			isNullish(value) ? null : value;
+
+		return {
+			blockNumber: possibleUndefinedToNull(blockNumber),
+			blockHash: possibleUndefinedToNull(blockHash),
+			from,
+			to: possibleUndefinedToNull(to),
+			value: value.toBigInt(),
+			gasPrice: gasPrice?.toBigInt() ?? 0n,
+			gasLimit: gasLimit.toBigInt(),
+			nonce,
+			data,
+			chainId: BigInt(chainId),
+			confirmations: possibleUndefinedToNull(confirmations),
+			timestamp
+		};
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {

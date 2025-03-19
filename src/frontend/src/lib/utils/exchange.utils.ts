@@ -19,4 +19,4 @@ export const usdValue = ({
 					displayDecimals: decimals
 				})
 			) * exchangeRate
-		: 0n.toNumber();
+		: 0;

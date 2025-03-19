@@ -8,14 +8,30 @@ import {
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { FeeData } from 'ethers/providers';
-import type { Transaction as EthTransaction } from 'ethers/transaction';
+import { ethers } from 'ethers';
+import type { FeeData, TransactionResponse } from 'ethers/providers';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
-export type Transaction = Omit<EthTransaction, 'data'> &
+export type LegacyEthersTransaction = Pick<
+	ethers.Transaction,
+	| 'hash'
+	| 'to'
+	| 'from'
+	| 'nonce'
+	| 'gasLimit'
+	| 'gasPrice'
+	| 'data'
+	| 'value'
+	| 'chainId'
+	| 'type'
+	| 'accessList'
+	| 'maxPriorityFeePerGas'
+	| 'maxFeePerGas'
+>;
+
+export type Transaction = Omit<LegacyEthersTransaction, 'data'> &
 	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
 		pendingTimestamp?: number;
 		displayTimestamp?: number;

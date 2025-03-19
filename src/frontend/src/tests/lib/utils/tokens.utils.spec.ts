@@ -338,9 +338,9 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual({
-			[BTC_MAINNET_NETWORK_ID]: bn2.toNumber(),
-			[ETHEREUM_NETWORK_ID]: bn3.toNumber(),
-			[ICP_NETWORK_ID]: bn1.toNumber()
+			[BTC_MAINNET_NETWORK_ID]: bn2,
+			[ETHEREUM_NETWORK_ID]: bn3,
+			[ICP_NETWORK_ID]: bn1
 		});
 	});
 
@@ -359,9 +359,9 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual({
-			[BTC_MAINNET_NETWORK_ID]: 0n.toNumber(),
-			[ETHEREUM_NETWORK_ID]: 0n.toNumber(),
-			[ICP_NETWORK_ID]: 0n.toNumber()
+			[BTC_MAINNET_NETWORK_ID]: 0n,
+			[ETHEREUM_NETWORK_ID]: 0n,
+			[ICP_NETWORK_ID]: 0n
 		});
 	});
 

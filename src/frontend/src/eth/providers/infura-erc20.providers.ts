@@ -9,9 +9,8 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { Networkish } from '@ethersproject/networks';
 import { ethers, type ContractTransaction } from 'ethers';
-import { InfuraProvider } from 'ethers/providers';
+import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20Provider implements Erc20Provider {

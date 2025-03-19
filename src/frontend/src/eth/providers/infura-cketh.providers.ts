@@ -10,12 +10,8 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BlockTag } from '@ethersproject/abstract-provider';
-import type { PopulatedTransaction } from '@ethersproject/contracts';
-import type { Networkish } from '@ethersproject/networks';
-import type { Log } from 'alchemy-sdk';
-import { ethers } from 'ethers';
-import { InfuraProvider } from 'ethers/providers';
+import { ethers, type ContractTransaction } from 'ethers';
+import { InfuraProvider, type BlockTag, type Log, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraCkETHProvider implements Erc20Provider {
@@ -36,7 +32,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		amount: bigint;
 	}): Promise<bigint> => {
 		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
-		return ckEthContract.estimateGas.deposit(to, { from });
+		return ckEthContract.deposit.estimateGas(to, { from });
 	};
 
 	populateTransaction = ({
@@ -45,9 +41,9 @@ export class InfuraCkETHProvider implements Erc20Provider {
 	}: {
 		contract: ContractAddress;
 		to: EthAddress;
-	}): Promise<PopulatedTransaction> => {
+	}): Promise<ContractTransaction> => {
 		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
-		return ckEthContract.populateTransaction.deposit(to);
+		return ckEthContract.deposit.populateTransaction(to);
 	};
 
 	getLogs = ({

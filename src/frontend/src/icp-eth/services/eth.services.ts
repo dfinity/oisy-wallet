@@ -25,8 +25,7 @@ import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import type { Log } from 'alchemy-sdk';
+import type { Log, TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const loadCkEthereumPendingTransactions = async ({
