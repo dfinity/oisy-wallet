@@ -6,12 +6,14 @@
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 	import { networkBitcoin, networkICP, networkSolana } from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
@@ -40,7 +42,11 @@
 </script>
 
 {#if $modalManageTokens}
-	<ManageTokensModal onClose={handleClose} initialSearch={token?.name} />
+	<ManageTokensModal onClose={handleClose} initialSearch={token?.name}>
+		<MessageBox slot="info-element" level="info">
+			{$i18n.transactions.text.token_needs_enabling}
+		</MessageBox>
+	</ManageTokensModal>
 {:else if nonNullish($routeNetwork)}
 	{#if $networkICP}
 		<IcTransactions />

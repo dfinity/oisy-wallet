@@ -257,6 +257,8 @@
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
 			{initialSearch}
-		/>
+		>
+			<slot name="info-element" slot="info-element" />
+		</ManageTokens>
 	{/if}
 </WizardModal>
