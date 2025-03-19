@@ -29,5 +29,5 @@
 </div>
 
 {#if infoExpanded}
-	<span class="w-100 mt-1 flex text-sm text-tertiary" transition:slide><slot name="info" /></span>
+	<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide><slot name="info" /></span>
 {/if}
