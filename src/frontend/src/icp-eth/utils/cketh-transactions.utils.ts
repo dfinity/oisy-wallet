@@ -5,6 +5,7 @@ import { isNetworkIdETH, isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/u
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionToken } from '$lib/types/token';
+import type { EthersTransaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -13,7 +14,7 @@ import { ethers } from 'ethers';
 import { get } from 'svelte/store';
 
 export type MapCkEthereumPendingTransactionParams = {
-	transaction: Transaction;
+	transaction: EthersTransaction;
 	token: IcToken;
 } & IcCkLinkedAssets;
 
