@@ -6,28 +6,10 @@ import {
 } from '$env/explorers.env';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
-import icpLight from '$icp/assets/icp_light.svg';
 import bitcoinMainnetBW from '$lib/assets/networks/bitcoin-mainnet-bw.svg';
 import bitcoinTestnetBW from '$lib/assets/networks/bitcoin-testnet-bw.svg';
-import icpBW from '$lib/assets/networks/icp-bw.svg';
-import type { Network, NetworkId } from '$lib/types/network';
+import type { NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
-
-/**
- * ICP
- */
-export const ICP_NETWORK_SYMBOL = 'ICP';
-
-export const ICP_NETWORK_ID: NetworkId = parseNetworkId(ICP_NETWORK_SYMBOL);
-
-export const ICP_NETWORK: Network = {
-	id: ICP_NETWORK_ID,
-	env: 'mainnet',
-	name: 'Internet Computer',
-	icon: icpLight,
-	iconBW: icpBW,
-	buy: { onramperId: 'icp' }
-};
 
 /**
  * BTC
