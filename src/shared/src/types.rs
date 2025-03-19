@@ -375,14 +375,15 @@ pub mod networks {
         pub is_testnet: bool,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub enum NetworkSettingsFor {
+        #[default]
+        Icp,
         BitcoinMainnet,
         BitcoinTestnet,
         BitcoinRegtest,
         EthereumMainnet,
         EthereumSepolia,
-        Icp,
         SolanaMainnet,
         SolanaTestnet,
         SolanaDevnet,
