@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
@@ -14,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
