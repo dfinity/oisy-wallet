@@ -69,7 +69,9 @@
 		--window-fill-color: currentColor;
 	}
 
-	.window1, .window2, .window3 {
+	.window1,
+	.window2,
+	.window3 {
 		fill: var(--window-fill-color);
 	}
 
