@@ -1,17 +1,19 @@
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
-import * as networkEnv from '$env/networks/networks.env';
 import {
 	BTC_MAINNET_NETWORK,
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID,
+	ICP_NETWORK,
+	ICP_NETWORK_ID
+} from '$env/networks/networks.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
+import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK,
-	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.eth.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
 	SOLANA_DEVNET_NETWORK,
@@ -86,7 +88,7 @@ describe('network utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
 				() => allEthereumNetworkIds
 			);
 		});
