@@ -125,16 +125,9 @@ abstract class Homepage {
 		return await this.#page.isVisible(selector);
 	}
 
-	private async hideSelector({ selector }: SelectorOperationParams): Promise<string | undefined> {
+	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
 		if (await this.isSelectorVisible({ selector })) {
-			// get the original display prop
-			const display = await this.#page
-				.locator(selector)
-				.evaluate((element) => element.style.display);
-
 			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'none'));
-
-			return display;
 		}
 	}
 
@@ -356,13 +349,11 @@ abstract class Homepage {
 		await locator.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'center' }));
 	}
 
-	private async hideMobileNavigationMenu(): Promise<string | undefined> {
-		return await this.hideSelector({ selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]` });
+	private async hideMobileNavigationMenu(): Promise<void> {
+		await this.hideSelector({ selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]` });
 	}
 
-	private async showMobileNavigationMenu(
-		{ display = 'block' }: ShowSelectorParams = { display: 'block' }
-	): Promise<void> {
+	private async showMobileNavigationMenu(): Promise<void> {
 		await this.showSelector({
 			selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]`,
 			display: 'flex'
@@ -441,10 +432,9 @@ abstract class Homepage {
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (isMobile) {
-				const display = await this.hideMobileNavigationMenu();
-				console.log('Mobile navigation menu hidden', display);
+				await this.hideMobileNavigationMenu();
 				await expect(element).toHaveScreenshot({ fullPage: true, timeout: 5 * 60 * 1000 });
-				await this.showMobileNavigationMenu({ display });
+				await this.showMobileNavigationMenu();
 			}
 		}
 		await this.#page.emulateMedia({ colorScheme: null });
