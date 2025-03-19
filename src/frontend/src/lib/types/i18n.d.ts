@@ -229,8 +229,11 @@ interface I18nSettings {
 		principal_description: string;
 		session: string;
 		session_description: string;
+		enable_testnets: string;
+		mainnets: string;
 		testnets: string;
 		testnets_description: string;
+		active_networks: string;
 		hide_zero_balances_description: string;
 		credentials_title: string;
 		pouh_credential: string;
