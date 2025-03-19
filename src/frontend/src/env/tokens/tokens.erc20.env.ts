@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
-import { EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
+import { EURC_TOKEN, SEPOLIA_EURC_TOKEN } from '$env/tokens/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
@@ -119,6 +119,7 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 
 export const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
 	SEPOLIA_USDC_TOKEN,
+	SEPOLIA_EURC_TOKEN,
 	SEPOLIA_LINK_TOKEN,
 	SEPOLIA_PEPE_TOKEN
 ];
