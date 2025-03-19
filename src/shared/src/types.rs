@@ -375,7 +375,7 @@ pub mod networks {
         pub is_testnet: bool,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
     pub enum NetworkSettingsFor {
         #[default]
         Icp,
