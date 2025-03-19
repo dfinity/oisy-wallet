@@ -26,7 +26,7 @@
 	$: reward = rewardCampaigns.find((campaign) => campaign.id === 'OISY Airdrop #1');
 </script>
 
-<Sprinkles />
+<Sprinkles type={jackpot ? 'page-jackpot' : 'page'} />
 
 <Modal on:nnsClose={modalStore.close}>
 	<ContentWithToolbar>
