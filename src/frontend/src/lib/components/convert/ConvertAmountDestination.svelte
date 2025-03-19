@@ -20,12 +20,15 @@
 
 	$: receiveAmount = nonNullish(sendAmount)
 		? nonNullish(destinationTokenFee)
-			? Number(sendAmount) -
-				formatTokenBigintToNumber({
-					value: destinationTokenFee,
-					displayDecimals: $destinationToken.decimals,
-					unitName: $destinationToken.decimals
-				})
+			? Math.max(
+					Number(sendAmount) -
+						formatTokenBigintToNumber({
+							value: destinationTokenFee,
+							displayDecimals: $destinationToken.decimals,
+							unitName: $destinationToken.decimals
+						}),
+					0
+				)
 			: Number(sendAmount)
 		: undefined;
 </script>
