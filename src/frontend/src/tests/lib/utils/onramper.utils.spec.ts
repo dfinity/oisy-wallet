@@ -1,9 +1,10 @@
-import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.env';
 import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
 	SEPOLIA_NETWORK
 } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
 import type { OnramperNetworkWallet, OnramperWalletAddress } from '$lib/types/onramper';
 import type { Option } from '$lib/types/utils';

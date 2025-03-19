@@ -1,5 +1,5 @@
 import * as appNavigation from '$app/navigation';
-import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.env';
+import { ICP_NETWORK_SYMBOL } from '$env/networks/networks.icp.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transactions from '$lib/components/transactions/Transactions.svelte';
 import { MANAGE_TOKENS_MODAL_CLOSE } from '$lib/constants/test-ids.constants';

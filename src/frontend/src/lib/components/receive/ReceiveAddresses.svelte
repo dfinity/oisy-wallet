@@ -4,10 +4,10 @@
 	import {
 		BTC_MAINNET_NETWORK,
 		BTC_REGTEST_NETWORK,
-		BTC_TESTNET_NETWORK,
-		ICP_NETWORK
+		BTC_TESTNET_NETWORK
 	} from '$env/networks/networks.env';
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import {
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK,
