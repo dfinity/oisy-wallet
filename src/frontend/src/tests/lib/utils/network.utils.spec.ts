@@ -3,9 +3,7 @@ import {
 	BTC_MAINNET_NETWORK,
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID,
-	ICP_NETWORK,
-	ICP_NETWORK_ID
+	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import {
@@ -14,6 +12,7 @@ import {
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID
 } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
 	SOLANA_DEVNET_NETWORK,
