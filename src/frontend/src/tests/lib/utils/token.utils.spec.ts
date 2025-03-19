@@ -23,7 +23,7 @@ import {
 	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
-import { bn1, bn2, bn3, mockBalances } from '$tests/mocks/balances.mock';
+import { bn1, bn1Bi, bn2, bn2Bi, bn3, bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
@@ -180,7 +180,7 @@ describe('calculateTokenUsdAmount', () => {
 	it('should correctly calculate USD amount for the token and amount', () => {
 		const result = calculateTokenUsdAmount({
 			token: ICP_TOKEN,
-			amount: bn3,
+			amount: bn3Bi,
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual(bn3.toNumber());
@@ -189,7 +189,7 @@ describe('calculateTokenUsdAmount', () => {
 	it('should return undefined if exchange rate is not available', () => {
 		const result = calculateTokenUsdAmount({
 			token: ICP_TOKEN,
-			amount: bn3,
+			amount: bn3Bi,
 			$exchanges: {}
 		});
 		expect(result).toEqual(undefined);
@@ -276,8 +276,8 @@ describe('mapTokenUi', () => {
 
 describe('sumTokenBalances', () => {
 	// We mock ETH to be a twin of ICP
-	const token1: TokenUi = { ...ICP_TOKEN, balance: bn1, decimals: 18 };
-	const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2, decimals: 18 };
+	const token1: TokenUi = { ...ICP_TOKEN, balance: bn1Bi, decimals: 18 };
+	const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2Bi, decimals: 18 };
 
 	it('should sum token balances when both balances are non-null and decimals match', () => {
 		const result = sumTokenBalances([token1, token2]);
