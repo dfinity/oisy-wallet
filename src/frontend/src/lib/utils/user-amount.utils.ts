@@ -9,7 +9,9 @@ import {
 import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
 import type { ConvertAmountErrorType } from '$lib/types/convert';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
+import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
 import {
 	assertAmount,
@@ -40,7 +42,7 @@ export const validateUserAmount = ({
 	ethereumEstimateFee?: bigint;
 	minterInfo?: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
 	isSwapFlow?: boolean;
-}): ConvertAmountErrorType => {
+}): TokenActionErrorType => {
 	// We should align balance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 	const parsedSendBalance = nonNullish(balance)
 		? parseToken({
