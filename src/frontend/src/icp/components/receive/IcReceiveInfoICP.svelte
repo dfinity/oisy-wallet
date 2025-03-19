@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
@@ -18,7 +19,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
