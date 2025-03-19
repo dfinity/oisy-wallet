@@ -2,8 +2,8 @@ use std::fmt::Debug;
 
 use candid::{CandidType, Deserialize, Principal};
 use ic_cdk_timers::TimerId;
+use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
-
 pub type Timestamp = u64;
 
 #[cfg(test)]
@@ -108,6 +108,14 @@ pub mod transaction {
 }
 
 pub type Version = u64;
+
+/// Defines a trait that value types must implement to support expiration.
+///
+/// The value must have an associated timestamp.
+pub trait Expirable {
+    /// Returns the timestamp (in seconds since UNIX epoch) when the value was inserted.
+    fn get_expiry_timestamp(&self, ttl_seconds: u64) -> u64;
+}
 
 pub trait TokenVersion: Debug {
     #[must_use]
@@ -271,6 +279,70 @@ pub mod bitcoin {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum BtcGetPendingTransactionsError {
         InternalError { msg: String },
+    }
+}
+
+pub mod security_pow {
+    use std::hash::{Hash, Hasher};
+
+    use super::{CandidType, Debug, Deserialize};
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct StoredChallenge {
+        pub nonce: u64,
+        pub timestamp: u64,
+        pub difficulty: u32,
+    }
+
+    /// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
+    ///
+    /// # Type Parameters:
+    /// - `K`: Key type, must implement `Hash` and `Eq` (required by `HashMap`).
+    /// - `V`: Value type.
+    // TODO: since this type is implemented so it can be used by other modules
+    //       it makes sense to move it to a module containing collections
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum CreateChallengeError {
+        ChallengeInProgres(),
+        RandomnessError(String),
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct CreateChallengeResponse {
+        pub nonce: u64,
+        pub timestamp: u64,
+        pub difficulty: u32,
+    }
+
+    // -------------------------------------------------------------------------------------------------
+    // - TODO: Remove this tester structures and immplementations
+    // -------------------------------------------------------------------------------------------------
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum TestAllowSigningError {
+        PowMissingChallange,
+        PowInvalidNonce,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct TestAllowSigningRequest {
+        pub nonce: u64,
+    }
+
+    impl TestAllowSigningRequest {
+        /// Checks whether the request model is valid
+        ///
+        /// # Errors
+        /// - If the nonce is 0.
+        pub fn check(&self) -> Result<(), TestAllowSigningError> {
+            (self.nonce > 0)
+                .then_some(())
+                .ok_or(TestAllowSigningError::PowInvalidNonce)
+        }
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct TestAllowSigningResponse {
+        pub allowed_cycles: u64,
     }
 }
 
@@ -579,4 +651,25 @@ pub struct Stats {
     pub user_timestamps_count: u64,
     pub user_token_count: u64,
     pub custom_token_count: u64,
+}
+
+/// Generic wrapper around BTreeMap providing timestamp-based expiration functionality.
+///
+/// # Type Parameters:
+/// - `K`: Key type (must implement `Storable`, `Ord`, `Clone`).
+/// - `V`: Value type (must implement `Storable` and `Expirable`).
+/// - `M`: Memory type (must implement `Memory`).
+///
+/// # Features:
+/// - Stable, persistent, ordered key-value storage.
+/// - Each value must have a timestamp and can expire based on TTL.
+/// - Expired entries are ignored or removed during reads and iteration.
+pub struct ExpiryBTreeMapWrapper<K, V, M>
+where
+    K: Storable + Ord + Clone,
+    V: Storable + Expirable,
+    M: Memory,
+{
+    pub(crate) map: StableBTreeMap<K, V, M>,
+    pub(crate) ttl_seconds: u64,
 }

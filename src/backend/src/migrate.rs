@@ -1,7 +1,6 @@
 use std::ops::Bound;
 
 use candid::{decode_one, encode_one, CandidType, Principal};
-use ic_cdk::eprintln;
 use ic_cdk_timers::clear_timer;
 use serde::Deserialize;
 use shared::{

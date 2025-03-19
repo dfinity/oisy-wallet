@@ -1,7 +1,9 @@
-use std::{collections::BTreeMap, fmt};
+use std::{collections::BTreeMap, fmt, fmt::Debug};
 
 use candid::{Deserialize, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
+use ic_cdk::api::time;
+use ic_stable_structures::{Memory, StableBTreeMap, Storable};
 use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
@@ -10,13 +12,14 @@ use crate::{
     types::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        security_pow::StoredChallenge,
         settings::Settings,
         token::UserToken,
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
-        ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
-        Timestamp, TokenVersion, Version,
+        ApiEnabled, Config, CredentialType, Expirable, ExpiryBTreeMapWrapper, InitArg, Migration,
+        MigrationProgress, MigrationReport, Timestamp, TokenVersion, Version,
     },
     validate::{validate_on_deserialize, Validate},
 };
@@ -442,6 +445,96 @@ impl Validate for IcrcToken {
             }
         }
         Ok(())
+    }
+}
+impl StoredChallenge {}
+impl<K, V, M> ExpiryBTreeMapWrapper<K, V, M>
+where
+    K: Storable + Ord + Clone,
+    V: Storable + Expirable,
+    M: Memory,
+{
+    /// Creates a new `ExpiryBTreeMapWrapper` with the specified TTL.
+    pub fn init(memory: M, ttl_seconds: u64) -> Self {
+        Self {
+            map: StableBTreeMap::new(memory),
+            ttl_seconds,
+        }
+    }
+
+    /// Inserts a key-value pair into the StableBTreeMap.
+    pub fn insert(&mut self, key: K, value: V) {
+        // Optional Debug print
+        // self.debug_key_value("Inserting", &key, &value);
+
+        let _ = self.map.insert(key, value);
+    }
+
+    /// Retrieves the value associated with the specified key if not expired.
+    pub fn get(&self, key: &K) -> Option<V> {
+        let result: Option<V> = self.map.get(key);
+        if let Some(val) = result {
+            if self.is_expired(val.get_expiry_timestamp(self.ttl_seconds)) {
+                // self.debug_key("Key expired", key);
+                None
+            } else {
+                Some(val)
+            }
+        } else {
+            result
+        }
+    }
+
+    /// Removes a key-value pair.
+    pub fn remove(&mut self, key: &K) {
+        // self.debug_key("Removing key", key);
+        let _ = self.map.remove(key);
+    }
+
+    /// Iterates over all non-expired key-value pairs.
+    /// Expired entries are removed during iteration.
+    pub fn iter_all(&mut self) {
+        ic_cdk::println!("Iterating over all key-value pairs");
+
+        // Collect keys of expired entries
+        let mut keys_to_remove: Vec<K> = vec![];
+
+        let mut iter = self.map.iter();
+
+        while let Some((key, value)) = iter.next() {
+            if self.is_expired(value.get_expiry_timestamp(self.ttl_seconds)) {
+                // self.debug_key("Key expired, marking for removal", &key);
+                keys_to_remove.push(key.clone());
+            } else {
+                // self.debug_key_value("Active entry", &key, &value.data);
+            }
+        }
+
+        // Remove expired keys after iteration
+        for key in keys_to_remove {
+            let _ = self.map.remove(&key);
+        }
+    }
+
+    /// Checks if a timestamp is expired based on TTL.
+    fn is_expired(&self, timestamp: u64) -> bool {
+        time() > timestamp + self.ttl_seconds
+    }
+
+    // ========== Conditional Debug Helpers ===========
+    fn debug_key(&self, message: &str, key: &K)
+    where
+        K: Debug,
+    {
+        ic_cdk::println!("{}: {:?},", message, key);
+    }
+
+    fn debug_key_value(&self, message: &str, key: &K, value: &V)
+    where
+        K: Debug,
+        V: Debug,
+    {
+        ic_cdk::println!("{} - Key: {:?}, Value: {:?}", message, key, value);
     }
 }
 
