@@ -17,14 +17,26 @@
 	let checked: boolean;
 	$: checked = $testnets;
 
-	const toggleTestnets = async () => {
-		await setUserShowTestnets({
-			showTestnets: !checked,
-			identity: $authIdentity,
-			currentUserVersion: $userProfileVersion
-		});
+	const toggleShowTestnets = async () => {
+		try {
+			await setUserShowTestnets({
+				showTestnets: checked,
+				identity: $authIdentity,
+				currentUserVersion: $userProfileVersion
+			});
+		} catch (e: unknown) {
+			// We ignore any errors here since we do not care, but we want to emit the message to refresh the user profile anyway
+			console.error(e);
+		}
 
 		emit({ message: 'oisyRefreshUserProfile' });
+	};
+
+	const toggleTestnets = async () => {
+		checked = !checked;
+
+		// Do not wait for the backend to update the user profile since it can lead to unnecessary delays
+		toggleShowTestnets();
 
 		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
 
