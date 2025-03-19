@@ -1,5 +1,4 @@
 import * as btcNetworkEnv from '$env/networks/networks.btc.env';
-import * as networkEnv from '$env/networks/networks.env';
 import {
 	BTC_MAINNET_NETWORK,
 	BTC_MAINNET_NETWORK_ID,
@@ -8,6 +7,7 @@ import {
 	ICP_NETWORK,
 	ICP_NETWORK_ID
 } from '$env/networks/networks.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
 import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
@@ -88,7 +88,7 @@ describe('network utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
 				() => allEthereumNetworkIds
 			);
 		});
