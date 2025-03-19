@@ -1,4 +1,5 @@
 type AddDappSettingsError = variant {
+  MaxHiddenDappIds;
   VersionMismatch;
   DappIdTooLong;
   UserNotFound;
