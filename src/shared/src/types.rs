@@ -371,7 +371,6 @@ pub mod networks {
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct NetworkSettings {
-        pub id: String,
         pub enabled: bool,
         pub is_testnet: bool,
     }
