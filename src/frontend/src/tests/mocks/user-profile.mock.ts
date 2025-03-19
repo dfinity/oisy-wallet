@@ -15,9 +15,11 @@ export const mockUserSettings: Settings = {
 	dapp: mockDappSettings
 };
 
+export const mockUserProfileVersion = 1n;
+
 export const mockUserProfile: UserProfile = {
 	credentials: [],
-	version: [],
+	version: toNullable(mockUserProfileVersion),
 	settings: toNullable(mockUserSettings),
 	created_timestamp: 1234n,
 	updated_timestamp: 1234n
