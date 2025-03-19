@@ -42,7 +42,7 @@ const mapPendingTransaction = ({
 	token,
 	value
 }: {
-	transaction: Omit<LegacyEthersTransaction, 'value' | 'data'>;
+	transaction: Omit<EthersTransaction, 'value' | 'data'>;
 	token: IcToken;
 	value: bigint;
 } & IcCkLinkedAssets): IcTransactionUi => {
