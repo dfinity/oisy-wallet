@@ -37,8 +37,8 @@ export const isRouteTokens = ({ route: { id } }: Page): boolean =>
 	id === ROUTE_ID_GROUP_APP ||
 	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.WalletConnect}`;
 
-export const isRouteAirdrops = ({ route: { id } }: Page): boolean =>
-	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Airdrops}`;
+export const isRouteRewards = ({ route: { id } }: Page): boolean =>
+	normalizePath(id) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 
 const tokenUrl = ({
 	token: {

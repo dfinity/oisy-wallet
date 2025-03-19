@@ -47,7 +47,7 @@ import {
 	type TransactionPartialSigner,
 	type TransactionSigner,
 	type TransactionVersion
-} from '@solana/web3.js';
+} from '@solana/kit';
 import { get } from 'svelte/store';
 
 const setFeePayerToTransaction = ({
