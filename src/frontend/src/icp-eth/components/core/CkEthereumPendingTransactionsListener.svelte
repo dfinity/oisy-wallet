@@ -2,9 +2,7 @@
 	import { isNullish, nonNullish, isEmptyString, fromNullishNullable } from '@dfinity/utils';
 	import type { TransactionResponse } from 'ethers/providers';
 	import { onDestroy } from 'svelte';
-	import {
-		initPendingTransactionsListener as initEthPendingTransactionsListenerProvider
-	} from '$eth/providers/alchemy.providers';
+	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
@@ -78,9 +76,9 @@
 	};
 
 	const init = async ({
-												toAddress,
-												networkId
-											}: {
+		toAddress,
+		networkId
+	}: {
 		toAddress: OptionEthAddress;
 		networkId: NetworkId | undefined;
 	}) => {
