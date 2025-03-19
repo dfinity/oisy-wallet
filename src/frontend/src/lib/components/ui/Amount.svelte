@@ -10,14 +10,14 @@
 
 	let detailedValue: string;
 	$: detailedValue = formatToken({
-		value: amount,
+		value: amount.toBigInt(),
 		unitName: decimals,
 		displayDecimals: decimals
 	});
 
 	let displayValue: string;
 	$: displayValue = formatToken({
-		value: amount,
+		value: amount.toBigInt(),
 		unitName: decimals,
 		displayDecimals: EIGHT_DECIMALS,
 		showPlusSign: formatPositiveAmount

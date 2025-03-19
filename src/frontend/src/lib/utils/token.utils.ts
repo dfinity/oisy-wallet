@@ -46,7 +46,7 @@ export const getMaxTransactionAmount = ({
 		value.isNegative()
 			? ZERO
 			: formatToken({
-					value,
+					value: value.toBigInt(),
 					unitName: tokenDecimals,
 					displayDecimals: tokenDecimals
 				})

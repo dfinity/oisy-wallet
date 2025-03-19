@@ -45,7 +45,7 @@ export const validateUserAmount = ({
 	const parsedSendBalance = nonNullish(balance)
 		? parseToken({
 				value: formatToken({
-					value: balance,
+					value: balance.toBigInt(),
 					unitName: token.decimals,
 					displayDecimals: token.decimals
 				}),

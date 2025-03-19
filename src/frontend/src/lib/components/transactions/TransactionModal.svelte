@@ -43,19 +43,23 @@
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis({ text: hash })}</output><Copy
+				<output>{shortenWithMiddleEllipsis({ text: hash })}</output>
+				<Copy
 					value={hash}
 					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
 						$hash: hash
 					})}
 					inline
-				/>{#if nonNullish(txExplorerUrl)}<ExternalLink
+				/>
+				{#if nonNullish(txExplorerUrl)}
+					<ExternalLink
 						iconSize="18"
 						href={txExplorerUrl}
 						ariaLabel={$i18n.transaction.alt.open_block_explorer}
 						inline
 						color="blue"
-					/>{/if}
+					/>
+				{/if}
 			</Value>
 		{/if}
 
@@ -84,33 +88,33 @@
 
 		<Value ref="from">
 			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
-			<output>{from}</output><Copy
-				value={from}
-				text={$i18n.transaction.text.from_copied}
-				inline
-			/>{#if nonNullish(fromExplorerUrl)}<ExternalLink
+			<output>{from}</output>
+			<Copy value={from} text={$i18n.transaction.text.from_copied} inline />
+			{#if nonNullish(fromExplorerUrl)}
+				<ExternalLink
 					iconSize="18"
 					href={fromExplorerUrl}
 					ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
 					inline
 					color="blue"
-				/>{/if}
+				/>
+			{/if}
 		</Value>
 
 		{#if nonNullish(to)}
 			<Value ref="to">
 				<svelte:fragment slot="label">{sendToLabel}</svelte:fragment>
-				<output>{to}</output><Copy
-					value={to}
-					text={$i18n.transaction.text.to_copied}
-					inline
-				/>{#if nonNullish(toExplorerUrl)}<ExternalLink
+				<output>{to}</output>
+				<Copy value={to} text={$i18n.transaction.text.to_copied} inline />
+				{#if nonNullish(toExplorerUrl)}
+					<ExternalLink
 						iconSize="18"
 						href={toExplorerUrl}
 						ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						inline
 						color="blue"
-					/>{/if}
+					/>
+				{/if}
 			</Value>
 		{/if}
 
@@ -119,7 +123,7 @@
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 				<output>
 					{formatToken({
-						value,
+						value: value.toBigInt(),
 						unitName: token.decimals,
 						displayDecimals: token.decimals
 					})}

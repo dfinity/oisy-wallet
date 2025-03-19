@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
@@ -65,7 +64,7 @@
 				>{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
 						>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
 							$fee: formatToken({
-								value: BigNumber.from(kytFee),
+								value: kytFee,
 								unitName: BTC_DECIMALS,
 								displayDecimals: BTC_DECIMALS
 							})
