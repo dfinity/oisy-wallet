@@ -26,7 +26,7 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 export const BTC_MAINNET_ENABLED =
 	JSON.parse(import.meta.env.VITE_BITCOIN_MAINNET_DISABLED ?? false) === false;
 
-const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
+export const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = [
 	...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_NETWORK] : []),
 	BTC_TESTNET_NETWORK,
 	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])

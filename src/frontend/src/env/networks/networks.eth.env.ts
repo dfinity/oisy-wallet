@@ -1,6 +1,6 @@
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import sepolia from '$eth/assets/sepolia.svg';
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
 import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
 import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
@@ -62,3 +62,18 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 };
 
 export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
+
+/**
+ * Some functions, such as when we load the user's custom tokens, require knowing all the networks.
+ * However, from a UX perspective, we use a store to enable the list of networks based on the testnets flag.
+ * That's why those constants are prefixed with SUPPORTED_.
+ */
+export const SUPPORTED_ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
+	...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
+	SEPOLIA_NETWORK
+];
+export const SUPPORTED_ETHEREUM_NETWORKS_IDS: NetworkId[] = SUPPORTED_ETHEREUM_NETWORKS.map(
+	({ id }) => id
+);
+export const SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS: EthereumChainId[] =
+	SUPPORTED_ETHEREUM_NETWORKS.map(({ chainId }) => chainId);
