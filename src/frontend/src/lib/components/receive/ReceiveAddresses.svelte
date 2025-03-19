@@ -2,6 +2,13 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import {
+		BTC_MAINNET_NETWORK,
+		BTC_REGTEST_NETWORK,
+		BTC_TESTNET_NETWORK
+	} from '$env/networks/networks.btc.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+	import {
 		SOLANA_MAINNET_NETWORK,
 		SOLANA_TESTNET_NETWORK,
 		SOLANA_DEVNET_NETWORK,
@@ -56,13 +63,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-	import {
-		BTC_MAINNET_NETWORK,
-		BTC_REGTEST_NETWORK,
-		BTC_TESTNET_NETWORK
-	} from '$env/networks/networks.btc.env';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	const dispatch = createEventDispatcher();
 
