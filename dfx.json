@@ -306,6 +306,7 @@
 			}
 		},
 		"cketh_ledger": {
+			"description": "Sepoila testnet ckETH ledger canister",
 			"dependencies": ["cketh_minter"],
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
@@ -327,6 +328,7 @@
 			}
 		},
 		"cketh_index": {
+			"description": "Sepoila testnet ckETH index canister",
 			"dependencies": ["cketh_ledger"],
 			"type": "custom",
 			"build": "scripts/build.cketh_index.sh",
