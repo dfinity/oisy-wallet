@@ -34,8 +34,8 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
-    export let initialSearch: string | undefined = undefined;
-    export let onClose: () => void = () => {};
+	export let initialSearch: string | undefined = undefined;
+	export let onClose: () => void = () => {};
 
 	const steps: WizardSteps = [
 		{
