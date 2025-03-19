@@ -7,8 +7,8 @@
 		type SettingsModalType,
 		SettingsModalType as SettingsModalEnum
 	} from '$lib/enums/settings-modal-types';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	let settingsType: SettingsModalType;
 	$: settingsType = $modalSettingsData;
