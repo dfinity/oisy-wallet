@@ -109,7 +109,6 @@
 	}
 	.mobile-nav {
 		a.nav-item {
-			&:hover,
 			&.selected {
 				.ufo-wrapper {
 					.dome {
