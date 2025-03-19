@@ -12,6 +12,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let sendAmount: OptionAmount = undefined;
 	export let totalFee: bigint | undefined;
@@ -40,7 +41,7 @@
 
 	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
 		validateUserAmount({
-			userAmount,
+			userAmount: userAmount.toBigInt(),
 			token: $sourceToken,
 			balance: $sourceTokenBalance,
 			balanceForFee: $balanceForFee,
@@ -52,16 +53,16 @@
 		});
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO_BI;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
-				balance: $sourceTokenBalance,
-				fee: BigNumber.from(totalFee),
-				tokenDecimals: $sourceToken.decimals,
-				tokenStandard: $sourceToken.standard
-			})
+			balance: nonNullish($sourceTokenBalance) ? BigNumber.from($sourceTokenBalance) : undefined,
+			fee: BigNumber.from(totalFee),
+			tokenDecimals: $sourceToken.decimals,
+			tokenStandard: $sourceToken.standard
+		})
 		: undefined;
 
 	let amountSetToMax = false;

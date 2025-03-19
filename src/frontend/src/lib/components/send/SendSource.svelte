@@ -6,6 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
+	import { BigNumber } from 'alchemy-sdk';
 
 	export let token: OptionToken;
 	export let balance: OptionBalance;
@@ -22,7 +23,7 @@
 	<svelte:fragment slot="label">{$i18n.send.text.balance}</svelte:fragment>
 	{#if nonNullish(token)}
 		<ExchangeAmountDisplay
-			amount={balance ?? ZERO}
+			amount={BigNumber.from(balance ?? ZERO)}
 			decimals={token.decimals}
 			symbol={token.symbol}
 			{exchangeRate}
