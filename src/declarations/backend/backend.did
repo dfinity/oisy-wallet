@@ -157,11 +157,8 @@ type MigrationProgress = variant {
 };
 type MigrationReport = record { to : principal; progress : MigrationProgress };
 type NetworkSettings = record { id : text; enabled : bool; is_testnet : bool };
-type NetworkSettingsMap = record {
-  networks : vec record { text; NetworkSettings };
-};
 type NetworksSettings = record {
-  networks : NetworkSettingsMap;
+  networks : vec record { text; NetworkSettings };
   testnets : TestnetsSettings;
 };
 type OisyUser = record {

@@ -159,12 +159,9 @@ export const idlFactory = ({ IDL }) => {
 		enabled: IDL.Bool,
 		is_testnet: IDL.Bool
 	});
-	const NetworkSettingsMap = IDL.Record({
-		networks: IDL.Vec(IDL.Tuple(IDL.Text, NetworkSettings))
-	});
 	const TestnetsSettings = IDL.Record({ show_testnets: IDL.Bool });
 	const NetworksSettings = IDL.Record({
-		networks: NetworkSettingsMap,
+		networks: IDL.Vec(IDL.Tuple(IDL.Text, NetworkSettings)),
 		testnets: TestnetsSettings
 	});
 	const DappCarouselSettings = IDL.Record({

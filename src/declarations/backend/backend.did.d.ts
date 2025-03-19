@@ -176,11 +176,8 @@ export interface NetworkSettings {
 	enabled: boolean;
 	is_testnet: boolean;
 }
-export interface NetworkSettingsMap {
-	networks: Array<[string, NetworkSettings]>;
-}
 export interface NetworksSettings {
-	networks: NetworkSettingsMap;
+	networks: Array<[string, NetworkSettings]>;
 	testnets: TestnetsSettings;
 }
 export interface OisyUser {
