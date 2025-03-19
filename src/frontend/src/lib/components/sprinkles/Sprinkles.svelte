@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Confetti from 'svelte-confetti';
 
-	export let type: 'box' | 'page' = 'page';
+	export let type: 'box' | 'page' | 'page-jackpot' = 'page';
 
 	const colorArray = [
 		'url(/images/sprinkles/oisy-sprinkle-01.svg)',
@@ -17,9 +17,18 @@
 		'url(/images/sprinkles/oisy-sprinkle-curved-05.svg)',
 		'url(/images/sprinkles/oisy-sprinkle-curved-06.svg)'
 	];
+
+	const colorArrayJackpot = [
+		'url(/images/sprinkles/oisy-sprinkle-gold-01.svg)',
+		'url(/images/sprinkles/oisy-sprinkle-gold-02.svg)',
+		'url(/images/sprinkles/oisy-sprinkle-gold-03.svg)',
+		'url(/images/sprinkles/oisy-sprinkle-curved-gold-01.svg)',
+		'url(/images/sprinkles/oisy-sprinkle-curved-gold-02.svg)',
+		'url(/images/sprinkles/oisy-sprinkle-curved-gold-03.svg)'
+	];
 </script>
 
-{#if type === 'page'}
+{#if type === 'page' || type === 'page-jackpot'}
 	<div class="box-confetti-page">
 		<Confetti
 			x={[-5, 5]}
@@ -29,7 +38,7 @@
 			duration={2500}
 			amount={300}
 			fallDistance="100vh"
-			{colorArray}
+			colorArray={type === 'page-jackpot' ? colorArrayJackpot : colorArray}
 			size={32}
 		/>
 	</div>
