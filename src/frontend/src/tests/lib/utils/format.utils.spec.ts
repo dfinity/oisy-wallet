@@ -1,18 +1,17 @@
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import {
 	formatSecondsToNormalizedDate,
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
-import { BigNumber } from 'ethers';
 
 describe('format.utils', () => {
 	describe('formatToken', () => {
-		const value = BigNumber.from('1000000000000000000');
-		const valueD1 = BigNumber.from('1200000000000000000');
-		const valueD2 = BigNumber.from('1234000000000000000');
-		const valueD3 = BigNumber.from('1234567000000000000');
-		const negativeValue = BigNumber.from('-1000000000000000000');
+		const value = 1000000000000000000n;
+		const valueD1 = 1200000000000000000n;
+		const valueD2 = 1234000000000000000n;
+		const valueD3 = 1234567000000000000n;
+		const negativeValue = -1000000000000000000n;
 
 		it('should format value with default parameters', () => {
 			expect(formatToken({ value })).toBe('1');
@@ -69,19 +68,19 @@ describe('format.utils', () => {
 		});
 
 		it('should format zero with default parameters', () => {
-			expect(formatToken({ value: ZERO })).toBe('0');
+			expect(formatToken({ value: ZERO_BI })).toBe('0');
 		});
 
 		it('should format zero with specified displayDecimals', () => {
-			expect(formatToken({ value: ZERO, displayDecimals: 2 })).toBe('0');
+			expect(formatToken({ value: ZERO_BI, displayDecimals: 2 })).toBe('0');
 		});
 
 		it('should format zero with trailing zeros', () => {
-			expect(formatToken({ value: ZERO, trailingZeros: true })).toBe('0.0000');
+			expect(formatToken({ value: ZERO_BI, trailingZeros: true })).toBe('0.0000');
 		});
 
 		it('should format zero with specified displayDecimals and trailing zeros', () => {
-			expect(formatToken({ value: ZERO, displayDecimals: 2, trailingZeros: true })).toBe('0.00');
+			expect(formatToken({ value: ZERO_BI, displayDecimals: 2, trailingZeros: true })).toBe('0.00');
 		});
 
 		it('should format value with different unitName', () => {
