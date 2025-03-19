@@ -100,7 +100,6 @@ jobs:
   may-merge-e2e:
     if: always()
     needs: ['check-e2e-changes', 'e2e']
-    if: ${{ always() }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
