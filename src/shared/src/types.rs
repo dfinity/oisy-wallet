@@ -375,6 +375,20 @@ pub mod networks {
         pub is_testnet: bool,
     }
 
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+    pub enum NetworkSettingsFor {
+        BitcoinMainnet,
+        BitcoinTestnet,
+        BitcoinRegtest,
+        EthereumMainnet,
+        EthereumSepolia,
+        Icp,
+        SolanaMainnet,
+        SolanaTestnet,
+        SolanaDevnet,
+        SolanaLocal,
+    }
+
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct TestnetsSettings {
         pub show_testnets: bool,
@@ -382,7 +396,7 @@ pub mod networks {
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct NetworksSettings {
-        pub networks: BTreeMap<String, NetworkSettings>,
+        pub networks: BTreeMap<NetworkSettingsFor, NetworkSettings>,
         pub testnets: TestnetsSettings,
     }
 
