@@ -4,8 +4,7 @@
 	import {
 		BTC_MAINNET_NETWORK,
 		BTC_REGTEST_NETWORK,
-		BTC_TESTNET_NETWORK,
-		ICP_NETWORK
+		BTC_TESTNET_NETWORK
 	} from '$env/networks/networks.env';
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import {
@@ -63,6 +62,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	const dispatch = createEventDispatcher();
 

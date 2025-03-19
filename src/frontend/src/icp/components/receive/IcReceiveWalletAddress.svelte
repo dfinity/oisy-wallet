@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -9,6 +8,7 @@
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 

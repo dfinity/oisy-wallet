@@ -3,13 +3,13 @@ import { SUPPORTED_BITCOIN_NETWORKS_IDS } from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID,
-	ICP_NETWORK_ID
+	BTC_TESTNET_NETWORK_ID
 } from '$env/networks/networks.env';
 import {
 	SEPOLIA_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
 } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,

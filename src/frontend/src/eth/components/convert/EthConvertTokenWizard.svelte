@@ -3,7 +3,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
@@ -46,6 +45,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	export let currentStep: WizardStep | undefined;
 	export let sendAmount: OptionAmount;
