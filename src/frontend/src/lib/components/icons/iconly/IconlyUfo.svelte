@@ -63,16 +63,15 @@
 
 <style lang="scss">
 	a.nav-item {
-		&:hover,
-		&.selected {
+		&:hover {
 			.ufo-wrapper {
 				.dome {
-					animation: dome-animation 0.5s ease-in-out infinite alternate;
+					animation: dome-animation 0.75s ease-in-out infinite alternate;
 				}
 
 				.bottom-lines {
 					transform-origin: 10px 10px;
-					animation: speed-lines 0.5s ease-in-out infinite alternate;
+					animation: speed-lines 0.75s ease-in-out infinite alternate;
 				}
 
 				.window1 {
@@ -92,22 +91,22 @@
 			&.selected {
 				.ufo-wrapper {
 					.dome {
-						animation: dome-animation 0.5s ease-in-out 3 alternate;
+						animation: dome-animation 0.75s ease-in-out 5 alternate;
 					}
 
 					.bottom-lines {
 						transform-origin: 10px 10px;
-						animation: speed-lines 0.5s ease-in-out 3 alternate;
+						animation: speed-lines 0.75s ease-in-out 5 alternate;
 					}
 
 					.window1 {
-						animation: blink-window1 0.75s linear 3;
+						animation: blink-window1 0.75s linear 5;
 					}
 					.window2 {
-						animation: blink-window2 0.75s linear 3;
+						animation: blink-window2 0.75s linear 5;
 					}
 					.window3 {
-						animation: blink-window3 0.75s linear 3;
+						animation: blink-window3 0.75s linear 5;
 					}
 				}
 			}
