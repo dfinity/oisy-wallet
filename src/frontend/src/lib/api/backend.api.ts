@@ -14,7 +14,8 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	GetUserProfileResponse
+	GetUserProfileResponse,
+	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
@@ -141,6 +142,24 @@ export const allowSigning = async ({ identity }: CanisterApiFunctionParams): Pro
 	return allowSigning();
 };
 
+export const addUserHiddenDappId = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<AddUserHiddenDappIdParams>): Promise<void> => {
+	const { addUserHiddenDappId } = await backendCanister({ identity });
+
+	return addUserHiddenDappId(params);
+};
+
+export const setUserShowTestnets = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SetUserShowTestnetsParams>): Promise<void> => {
+	const { setUserShowTestnets } = await backendCanister({ identity });
+
+	return setUserShowTestnets(params);
+};
+
 const backendCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
@@ -156,13 +175,4 @@ const backendCanister = async ({
 	}
 
 	return canister;
-};
-
-export const addUserHiddenDappId = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<AddUserHiddenDappIdParams>): Promise<void> => {
-	const { addUserHiddenDappId } = await backendCanister({ identity });
-
-	return addUserHiddenDappId(params);
 };

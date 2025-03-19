@@ -23,6 +23,7 @@ export interface AddUserCredentialParams {
 	currentUserVersion?: bigint;
 	credentialSpec: CredentialSpec;
 }
+
 export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
@@ -61,6 +62,11 @@ export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
 
 export interface AddUserHiddenDappIdParams {
 	dappId: string;
+	currentUserVersion?: bigint;
+}
+
+export interface SetUserShowTestnetsParams {
+	showTestnets: boolean;
 	currentUserVersion?: bigint;
 }
 
