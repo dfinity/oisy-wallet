@@ -1,7 +1,6 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { Balance } from '$lib/types/balance';
-import type { ConvertAmountErrorType } from '$lib/types/convert';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';

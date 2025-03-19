@@ -61,10 +61,10 @@
 	$: receiveAmount =
 		nonNullish($destinationToken) && $swapAmountsStore?.swapAmounts?.receiveAmount
 			? formatTokenBigintToNumber({
-				value: $swapAmountsStore?.swapAmounts.receiveAmount,
-				unitName: $destinationToken.decimals,
-				displayDecimals: $destinationToken.decimals
-			})
+					value: $swapAmountsStore?.swapAmounts.receiveAmount,
+					unitName: $destinationToken.decimals,
+					displayDecimals: $destinationToken.decimals
+				})
 			: undefined;
 
 	let sourceTokenFee: bigint | undefined;
@@ -111,12 +111,12 @@
 	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
-				userAmount: userAmount.toBigInt(),
-				token: $sourceToken,
-				balance: $sourceTokenBalance,
-				fee: totalFee,
-				isSwapFlow: true
-			})
+					userAmount: userAmount.toBigInt(),
+					token: $sourceToken,
+					balance: $sourceTokenBalance,
+					fee: totalFee,
+					isSwapFlow: true
+				})
 			: undefined;
 </script>
 
@@ -185,7 +185,7 @@
 					{#if nonNullish($destinationToken)}
 						{#if $swapAmountsStore?.swapAmounts === null}
 							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
-							>{$i18n.swap.text.swap_is_not_offered}</div
+								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
 							<div class="flex gap-3 text-tertiary">

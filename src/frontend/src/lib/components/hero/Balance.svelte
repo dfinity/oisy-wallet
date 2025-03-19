@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
-	import { ZERO_BI } from '$lib/constants/app.constants';
-	import { BigNumber } from 'alchemy-sdk';
 
 	export let token: OptionTokenUi;
 
@@ -21,7 +21,11 @@
 		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol) && !(token.balance === ZERO_BI)}
-			<Amount amount={BigNumber.from(token.balance)} decimals={token.decimals} symbol={token.symbol} />
+			<Amount
+				amount={BigNumber.from(token.balance)}
+				decimals={token.decimals}
+				symbol={token.symbol}
+			/>
 		{:else}
 			<span class:animate-pulse={$loading}>0.00</span>
 		{/if}

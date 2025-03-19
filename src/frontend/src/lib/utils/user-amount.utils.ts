@@ -8,8 +8,6 @@ import {
 } from '$icp/utils/ic-send.utils';
 import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
-import type { ConvertAmountErrorType } from '$lib/types/convert';
-import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
