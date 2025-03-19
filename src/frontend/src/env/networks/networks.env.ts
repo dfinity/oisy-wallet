@@ -7,6 +7,7 @@ import {
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks/networks.eth.env';
+import { SUPPORTED_SOLANA_NETWORKS } from '$env/networks/networks.sol.env';
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
@@ -130,3 +131,9 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin (Regtest)',
 	explorerUrl: BTC_REGTEST_EXPLORER_URL
 };
+export const SUPPORTED_NETWORKS = [
+	ICP_NETWORK,
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_BITCOIN_NETWORKS,
+	...SUPPORTED_SOLANA_NETWORKS
+];

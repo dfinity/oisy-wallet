@@ -5,24 +5,65 @@
 	import SettingsListItem from '$lib/components/settings/SettingsListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
-	import { userSettings } from '$lib/derived/user-profile.derived';
+	import { userProfileVersion, userSettings } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import { testnets } from '$lib/derived/testnets.derived';
+	import { setUserShowTestnets } from '$lib/api/backend.api';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { emit } from '$lib/utils/events.utils';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { onMount } from 'svelte';
+	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import { modalStore } from '$lib/stores/modal.store';
 
-	let testnetsEnabledChecked: boolean;
-	$: testnetsEnabledChecked = $userSettings?.settings?.testnetsEnabled ?? false;
+	onMount(() => {
+		emit({ message: 'oisyRefreshUserProfile' });
+	});
 
 	let enabledNetworksData: { [id: symbol]: boolean };
 	$: enabledNetworksData = { ...$userSettings?.settings?.enabledNetworks };
 
+	let enabledTestnet: boolean;
+	$: enabledTestnet = $testnets;
+	const enabledTestnetInitial = $testnets;
+
+	let isModified: boolean;
+	$: isModified = (() => {
+		if (enabledTestnet !== enabledTestnetInitial) {
+			return true;
+		}
+
+		return false;
+	})();
+
+	let mainnetsList: Network[];
+	$: mainnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'mainnet');
+	let testnetsList: Network[];
+	$: testnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'testnet');
+
 	const toggleTestnets = async () => {
-		// todo: call service to enable testnets
+		enabledTestnet = !enabledTestnet;
 	};
 
 	const toggleNetwork = (network: Network) => {
 		// todo: call service to toggle network
+	};
+
+	let saveLoading: boolean;
+	$: saveLoading = false;
+	const save = async () => {
+		saveLoading = true;
+		await setUserShowTestnets({
+			showTestnets: enabledTestnet,
+			identity: $authIdentity,
+			currentUserVersion: $userProfileVersion
+		});
+
+		emit({ message: 'oisyRefreshUserProfile' });
+
+		modalStore.close();
 	};
 </script>
 
@@ -34,7 +75,7 @@
 				><Checkbox
 					text="inline"
 					inputId="smth"
-					checked={testnetsEnabledChecked}
+					bind:checked={enabledTestnet}
 					on:nnsChange={toggleTestnets}
 				>
 					{$i18n.settings.text.enable_testnets}
@@ -42,7 +83,7 @@
 			</div></svelte:fragment
 		>
 
-		{#each $networksMainnets as network}
+		{#each mainnetsList as network}
 			<SettingsListItem>
 				<svelte:fragment slot="key"
 					><span><NetworkLogo {network} blackAndWhite size="xxs" /></span>
@@ -59,11 +100,11 @@
 		{/each}
 	</SettingsList>
 
-	{#if $testnetsEnabled}
+	{#if enabledTestnet}
 		<SettingsList>
 			<svelte:fragment slot="title">{$i18n.settings.text.testnets}</svelte:fragment>
 
-			{#each $networksTestnets as network}
+			{#each testnetsList as network}
 				<SettingsListItem>
 					<svelte:fragment slot="key"
 						><NetworkLogo {network} blackAndWhite size="xxs" />
@@ -81,5 +122,10 @@
 		</SettingsList>
 	{/if}
 
-	<ButtonCloseModal slot="toolbar" />
+	<ButtonGroup slot="toolbar">
+		<ButtonCloseModal />
+		<Button loading={saveLoading} colorStyle="primary" on:click={save} disabled={!isModified}
+			>{$i18n.core.text.save}</Button
+		>
+	</ButtonGroup>
 </ContentWithToolbar>
