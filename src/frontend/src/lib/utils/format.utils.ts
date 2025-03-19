@@ -2,6 +2,7 @@ import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { AmountString } from '$lib/types/amount';
 import { nonNullish } from '@dfinity/utils';
+import { type BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 import { type BigNumberish } from 'ethers/utils';
 
@@ -40,7 +41,8 @@ export const formatToken = ({
 	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
 
-// TODO: check why this function exists
+
+// TODO: remove this function since it is duplicated of formatToken
 export const formatTokenAmount = ({ value, ...restParams }: FormatTokenAmountParams): string =>
 	formatToken({
 		value,

@@ -11,6 +11,7 @@
 	import DestinationValue from '$lib/components/address/DestinationValue.svelte';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -53,10 +54,10 @@
 	let formattedMinterMinimumAmount: string | undefined;
 	$: formattedMinterMinimumAmount = formatToken({
 		value: isCkBtc
-			? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? 0n)
+			? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? ZERO_BI)
 			: (fromNullable(
 					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.minimum_withdrawal_amount ?? []
-				) ?? 0n),
+				) ?? ZERO_BI),
 		unitName: $sourceToken.decimals,
 		displayDecimals: $sourceToken.decimals
 	});
@@ -73,7 +74,7 @@
 		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 				$symbol: tokenForFee.symbol,
 				$balance: formatToken({
-					value: $balanceForFee ?? 0n,
+					value: $balanceForFee ?? ZERO_BI,
 					unitName: tokenForFee.decimals,
 					displayDecimals: tokenForFee.decimals
 				})

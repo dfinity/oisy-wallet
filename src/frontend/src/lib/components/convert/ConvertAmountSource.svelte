@@ -6,9 +6,9 @@
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
@@ -25,7 +25,7 @@
 	export let exchangeValueUnit: DisplayUnit = 'usd';
 	export let inputUnit: DisplayUnit = 'token';
 
-	let errorType: ConvertAmountErrorType = undefined;
+	let errorType: TokenActionErrorType = undefined;
 
 	$: insufficientFunds = nonNullish(errorType) && errorType === 'insufficient-funds';
 	$: insufficientFundsForFee = nonNullish(errorType) && errorType === 'insufficient-funds-for-fee';
@@ -37,7 +37,7 @@
 	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate, balanceForFee, minterInfo } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: bigint): ConvertAmountErrorType =>
+	$: customValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
 			userAmount,
 			token: $sourceToken,

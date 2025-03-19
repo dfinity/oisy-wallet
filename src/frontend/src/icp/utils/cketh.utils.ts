@@ -117,7 +117,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_balance, {
 				$amount: formatToken({
-					value: estimatedFee,
+					value: estimatedFee.toBigInt(),
 					unitName: decimals,
 					displayDecimals: decimals
 				}),

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
@@ -13,6 +13,7 @@
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -61,7 +62,7 @@
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? 0n,
+						value: $ckEthereumNativeTokenBalance ?? ZERO_BI,
 						unitName: $ckEthereumNativeToken.decimals
 					})}
 					{$ckEthereumNativeToken.symbol}</output
@@ -117,7 +118,7 @@
 
 				<p class="mb-6">
 					{formatToken({
-						value: $sendBalance ?? 0n,
+						value: $sendBalance ?? ZERO_BI,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					})}

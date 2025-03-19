@@ -1,6 +1,6 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
-import type { ConvertAmountErrorType } from '$lib/types/convert';
+import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 
@@ -18,7 +18,7 @@ interface CommonParamsWithBalanceForFee extends CommonParams {
 	balanceForFee: bigint;
 }
 
-const assertBalance = ({ userAmount, balance }: CommonParams): ConvertAmountErrorType => {
+const assertBalance = ({ userAmount, balance }: CommonParams): TokenActionErrorType => {
 	if (userAmount > balance) {
 		return 'insufficient-funds';
 	}
@@ -28,7 +28,7 @@ const assertUserAmountWithFee = ({
 	userAmount,
 	balance,
 	fee
-}: CommonParams): ConvertAmountErrorType => {
+}: CommonParams): TokenActionErrorType => {
 	if (nonNullish(fee) && userAmount + fee > balance) {
 		return 'insufficient-funds-for-fee';
 	}
@@ -40,7 +40,7 @@ const assertMinterInfo = ({
 }: {
 	userAmount: bigint;
 	minterInfo: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
-}): ConvertAmountErrorType => {
+}): TokenActionErrorType => {
 	if (isNullish(minterInfo)) {
 		return 'unknown-minimum-amount';
 	}
@@ -68,7 +68,7 @@ export const assertErc20Amount = ({
 	balance,
 	balanceForFee,
 	fee
-}: CommonParamsWithBalanceForFee): ConvertAmountErrorType => {
+}: CommonParamsWithBalanceForFee): TokenActionErrorType => {
 	const assertBalanceError = assertBalance({ userAmount, balance });
 	if (nonNullish(assertBalanceError)) {
 		return assertBalanceError;
@@ -94,7 +94,7 @@ export const assertCkEthAmount = ({
 	balance,
 	minterInfo,
 	fee
-}: CommonParamsWithMinter): ConvertAmountErrorType => {
+}: CommonParamsWithMinter): TokenActionErrorType => {
 	const assertBalanceError = assertBalance({ userAmount, balance });
 	if (nonNullish(assertBalanceError)) {
 		return assertBalanceError;
@@ -120,7 +120,7 @@ export const assertCkErc20Amount = ({
 	ethereumEstimateFee
 }: CommonParamsWithBalanceForFee & {
 	ethereumEstimateFee?: bigint;
-}): ConvertAmountErrorType => {
+}): TokenActionErrorType => {
 	const assertBalanceError = assertBalance({ userAmount, balance });
 	if (nonNullish(assertBalanceError)) {
 		return assertBalanceError;
@@ -137,5 +137,5 @@ export const assertCkErc20Amount = ({
 	return assertUserAmountWithFee({ userAmount, balance, fee });
 };
 
-export const assertAmount = ({ userAmount, balance, fee }: CommonParams): ConvertAmountErrorType =>
+export const assertAmount = ({ userAmount, balance, fee }: CommonParams): TokenActionErrorType =>
 	assertBalance({ userAmount, balance }) ?? assertUserAmountWithFee({ userAmount, balance, fee });

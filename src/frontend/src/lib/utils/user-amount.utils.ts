@@ -7,7 +7,9 @@ import {
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
 import type { ConvertAmountErrorType } from '$lib/types/convert';
+import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
+import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
 import {
 	assertAmount,
@@ -38,12 +40,12 @@ export const validateUserAmount = ({
 	ethereumEstimateFee?: bigint;
 	minterInfo?: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
 	isSwapFlow?: boolean;
-}): ConvertAmountErrorType => {
+}): TokenActionErrorType => {
 	// We should align balance and userAmount to avoid issues caused by comparing formatted and unformatted BN
 	const parsedSendBalance = nonNullish(balance)
 		? parseToken({
 				value: formatToken({
-					value: balance,
+					value: balance.toBigInt(),
 					unitName: token.decimals,
 					displayDecimals: token.decimals
 				}),

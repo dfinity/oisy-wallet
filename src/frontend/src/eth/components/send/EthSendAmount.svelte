@@ -40,7 +40,7 @@
 		const parsedSendBalance = nonNullish($sendBalance)
 			? Utils.parseUnits(
 					formatToken({
-						value: $sendBalance,
+						value: $sendBalance.toBigInt(),
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					}),
