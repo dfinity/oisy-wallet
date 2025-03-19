@@ -5,7 +5,6 @@
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
@@ -17,6 +16,8 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
     import {modalManageTokens} from "$lib/derived/modal.derived";
+    import {modalStore} from "$lib/stores/modal.store";
+    import {onMount} from "svelte";
 
     let token: OptionToken;
     $: token = $allTokens.find(
@@ -26,26 +27,22 @@
 
     onMount(() => {
         // Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
-        // After the timeout, we assume that the fetch has failed and open the token modal.
-        setTimeout(() => {
+        // After the timeout, we assume that the fetch has failed and open the token modal or redirect the user to the activity page.
+        setTimeout(async () => {
             if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
                 modalStore.openManageTokens();
+            } else if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
+                toastsShow({
+                    text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
+                        $token: $routeToken,
+                        $network: $routeNetwork
+                    }),
+                    level: 'warn'
+                });
+                await goto('/');
             }
         }, FALLBACK_TIMEOUT);
     });
-
-    $: if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
-        setTimeout(async () => {
-            toastsShow({
-                text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
-                    $token: $routeToken,
-                    $network: $routeNetwork
-                }),
-                level: 'warn'
-            });
-            await goto('/');
-        }, FALLBACK_TIMEOUT);
-    }
 
     const handleClose = async () => {
         if (isNullish($pageToken)) {
