@@ -19,9 +19,7 @@
 	let token: OptionToken;
 	$: token = $allTokens.find(
 		(token) =>
-			token.name === $routeToken &&
-			$routeNetwork &&
-			token.network.id.description === $routeNetwork
+			token.name === $routeToken && $routeNetwork && token.network.id.description === $routeNetwork
 	);
 
 	onMount(() => {
