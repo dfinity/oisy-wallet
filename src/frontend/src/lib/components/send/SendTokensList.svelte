@@ -14,8 +14,8 @@
 	const dispatch = createEventDispatcher();
 
 	let tokens: TokenUi[];
-	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(({ balance }) =>
-		(balance ?? ZERO_BI) > (ZERO_BI)
+	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(
+		({ balance }) => (balance ?? ZERO_BI) > ZERO_BI
 	);
 
 	let loading: boolean;

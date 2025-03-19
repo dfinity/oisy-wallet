@@ -15,10 +15,10 @@
 	let usdAmount: number | undefined;
 	$: usdAmount = nonNullish(exchangeRate)
 		? usdValue({
-			decimals,
-			balance: amount.toBigInt(),
-			exchangeRate
-		})
+				decimals,
+				balance: amount.toBigInt(),
+				exchangeRate
+			})
 		: undefined;
 
 	let displayAmount: string;
