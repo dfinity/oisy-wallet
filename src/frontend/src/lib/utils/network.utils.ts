@@ -1,10 +1,10 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
-import { SUPPORTED_BITCOIN_NETWORKS_IDS } from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.env';
+	BTC_TESTNET_NETWORK_ID,
+	SUPPORTED_BITCOIN_NETWORKS_IDS
+} from '$env/networks/networks.btc.env';
 import {
 	SEPOLIA_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS

@@ -4,7 +4,7 @@ import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import {
 	ETHEREUM_NETWORK,

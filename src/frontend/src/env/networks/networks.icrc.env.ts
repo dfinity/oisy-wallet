@@ -21,7 +21,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { LedgerCanisterIdText, MinterCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
 import { mapIcrcData } from '$icp/utils/map-icrc-data';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
@@ -559,3 +559,12 @@ export const ICRC_CHAIN_FUSION_SUGGESTED_LEDGER_CANISTER_IDS = [
 		? [CKERC20_PRODUCTION_DATA.ckUSDT.ledgerCanisterId]
 		: [])
 ];
+
+export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> = {
+	...(nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID) && {
+		[STAGING_CKBTC_MINTER_CANISTER_ID]: 'g4xu7-jiaaa-aaaan-aaaaq-cai'
+	}),
+	...(nonNullish(IC_CKBTC_MINTER_CANISTER_ID) && {
+		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
+	})
+};

@@ -1,5 +1,5 @@
 import * as btcEnv from '$env/networks/networks.btc.env';
-import { BTC_MAINNET_NETWORK } from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';

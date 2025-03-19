@@ -1,9 +1,9 @@
 <script lang="ts">
 	import {
+		BTC_MAINNET_NETWORK,
 		BTC_REGTEST_NETWORK,
-		BTC_TESTNET_NETWORK,
-		BTC_MAINNET_NETWORK
-	} from '$env/networks/networks.env';
+		BTC_TESTNET_NETWORK
+	} from '$env/networks/networks.btc.env';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';

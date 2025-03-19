@@ -1,4 +1,4 @@
-import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,

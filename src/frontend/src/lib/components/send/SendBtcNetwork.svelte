@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.env';
+	import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import {
 		BTC_MAINNET_TOKEN,
 		BTC_REGTEST_TOKEN,
