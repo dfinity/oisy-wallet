@@ -13,7 +13,7 @@
 	<output class="break-all" data-tid={`${TOKEN_BALANCE}-${data.symbol}`}>
 		{#if nonNullish(data.balance)}
 			{formatToken({
-				value: data.balance,
+				value: data.balance.toBigInt(),
 				unitName: data.decimals
 			})}
 		{:else}
