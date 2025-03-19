@@ -8,8 +8,23 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
-import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
+import {
+	AlchemyProvider as AlchemyProviderLib,
+	AlchemyWebSocketProvider
+} from '@ethersproject/providers';
+import {
+	AlchemySubscription,
+	type AlchemyMinedTransactionsAddress,
+	type AlchemyMinedTransactionsEventFilter,
+	type AlchemyPendingTransactionsEventFilter,
+	type Network
+} from 'alchemy-sdk';
 import { get } from 'svelte/store';
+
+interface AlchemySettings {
+	apiKey: string;
+	network: Network;
+}
 
 const configs: Record<NetworkId, AlchemySettings> = {
 	[ETHEREUM_NETWORK_ID]: {
@@ -35,6 +50,51 @@ const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
 	return provider;
 };
 
+const serializeBooleanField = (field: boolean | undefined): string | undefined => {
+	if (field === undefined) {
+		return '*';
+	}
+	return field.toString();
+};
+
+const serializeAddressField = (field: string | Array<string> | undefined): string => {
+	if (field === undefined) {
+		return '*';
+	}
+	if (Array.isArray(field)) {
+		return field.join('|');
+	}
+	return field;
+};
+
+const serializeAddressesField = (
+	addresses: AlchemyMinedTransactionsAddress[] | undefined
+): string => {
+	if (addresses === undefined) {
+		return '*';
+	}
+
+	return addresses
+		.map((filter) => `${serializeAddressField(filter.to)},${serializeAddressField(filter.from)}`)
+		.join('|');
+};
+
+const serializeMinedTransactionsEvent = (event: AlchemyMinedTransactionsEventFilter): string => {
+	const addresses = serializeAddressesField(event.addresses);
+	const includeRemoved = serializeBooleanField(event.includeRemoved);
+	const hashesOnly = serializeBooleanField(event.hashesOnly);
+	return `alchemy-mined-transactions` + `:${addresses}:${includeRemoved}:${hashesOnly}`;
+};
+
+const serializePendingTransactionsEvent = (
+	event: AlchemyPendingTransactionsEventFilter
+): string => {
+	const fromAddress = serializeAddressField(event.fromAddress);
+	const toAddress = serializeAddressField(event.toAddress);
+	const hashesOnly = serializeBooleanField(event.hashesOnly);
+	return `alchemy-pending-transactions` + `:${fromAddress}:${toAddress}:${hashesOnly}`;
+};
+
 export const initMinedTransactionsListener = ({
 	listener,
 	networkId,
@@ -44,21 +104,23 @@ export const initMinedTransactionsListener = ({
 	networkId: NetworkId;
 	toAddress?: EthAddress;
 }): WebSocketListener => {
-	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
+	const { apiKey, network } = alchemyConfig(networkId);
 
-	provider.ws.on(
-		{
+	let provider: AlchemyWebSocketProvider | null = new AlchemyWebSocketProvider(network, apiKey);
+
+	provider.on(
+		serializeMinedTransactionsEvent({
 			method: AlchemySubscription.MINED_TRANSACTIONS,
 			hashesOnly: true,
 			addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
-		},
+		}),
 		listener
 	);
 
 	return {
 		// eslint-disable-next-line require-await
 		disconnect: async () => {
-			provider?.ws.removeAllListeners();
+			provider?.removeAllListeners();
 			provider = null;
 		}
 	};
@@ -75,14 +137,16 @@ export const initPendingTransactionsListener = ({
 	networkId: NetworkId;
 	hashesOnly?: boolean;
 }): WebSocketListener => {
-	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
+	const { apiKey, network } = alchemyConfig(networkId);
 
-	provider.ws.on(
-		{
+	let provider: AlchemyWebSocketProvider | null = new AlchemyWebSocketProvider(network, apiKey);
+
+	provider.on(
+		serializePendingTransactionsEvent({
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
 			toAddress: toAddress,
 			hashesOnly
-		},
+		}),
 		listener
 	);
 
@@ -90,24 +154,21 @@ export const initPendingTransactionsListener = ({
 		// eslint-disable-next-line require-await
 		disconnect: async () => {
 			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have for effect to double the triggers. That's why we reset it to null.
-			provider?.ws.removeAllListeners();
+			provider?.removeAllListeners();
 			provider = null;
 		}
 	};
 };
 
 export class AlchemyProvider {
-	private readonly provider: Alchemy;
+	private readonly provider: AlchemyProviderLib;
 
 	constructor(private readonly network: Network) {
-		this.provider = new Alchemy({
-			apiKey: ALCHEMY_API_KEY,
-			network: this.network
-		});
+		this.provider = new AlchemyProviderLib(this.network, ALCHEMY_API_KEY);
 	}
 
 	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-		this.provider.core.getTransaction(hash);
+		this.provider.getTransaction(hash);
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {
