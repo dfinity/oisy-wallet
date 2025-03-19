@@ -45,7 +45,7 @@
 		{#each $networksMainnets as network}
 			<SettingsListItem>
 				<svelte:fragment slot="key"
-					><NetworkLogo {network} blackAndWhite size="xxs" />
+					><span><NetworkLogo {network} blackAndWhite size="xxs" /></span>
 					<span class="ml-2 flex">{network.name}</span></svelte:fragment
 				>
 				<svelte:fragment slot="value"
