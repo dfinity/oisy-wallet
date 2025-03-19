@@ -4,7 +4,7 @@
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 </script>
 
-<div class="pb-15 box-content flex w-full flex-col gap-1 pt-3">
+<div class="pb-18 box-content flex w-full flex-col gap-1 pt-3">
 	<AboutWhyOisy asMenuItem />
 
 	<DocumentationLink asMenuItem />
