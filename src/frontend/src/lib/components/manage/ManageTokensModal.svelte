@@ -34,6 +34,7 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import type { SaveSplUserToken } from '$sol/types/spl-user-token';
 
+	export let initialSearch: string | undefined = undefined;
 	export let onClose: () => void = () => {};
 
 	const steps: WizardSteps = [
@@ -251,6 +252,11 @@
 	{:else if currentStep?.name === 'Import'}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
-		<ManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
+		<ManageTokens
+			on:icClose={close}
+			on:icAddToken={modal.next}
+			on:icSave={saveTokens}
+			{initialSearch}
+		/>
 	{/if}
 </WizardModal>
