@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens/tokens.erc20.env';
 	import icpDark from '$eth/assets/icp_dark.svg';
 	import type { Erc20Token } from '$eth/types/erc20';
@@ -13,7 +14,6 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;

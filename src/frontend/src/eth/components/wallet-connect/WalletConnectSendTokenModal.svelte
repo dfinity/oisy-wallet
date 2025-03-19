@@ -4,6 +4,7 @@
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
@@ -36,7 +37,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
