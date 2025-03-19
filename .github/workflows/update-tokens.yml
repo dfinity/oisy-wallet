@@ -84,4 +84,3 @@ jobs:
           title: 'feat(frontend): Update additional ICRC Tokens'
           body: |
             Modifications have been made to the icons and metadata of the additional ICRC tokens.
-
