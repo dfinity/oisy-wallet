@@ -413,7 +413,7 @@ abstract class Homepage {
 			// Playwright can retry flaky tests in the amount of time set below.
 			await expect(element).toHaveScreenshot({ timeout: 5 * 60 * 1000 });
 
-			// If it's mobile, we want a full page screenshot, but without the navigation bar.
+			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (isMobile) {
 				await this.hideMobileNavigationMenu();
 				await expect(element).toHaveScreenshot({ fullPage: true, timeout: 5 * 60 * 1000 });
