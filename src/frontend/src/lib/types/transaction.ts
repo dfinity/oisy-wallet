@@ -10,11 +10,15 @@ import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { ethers } from 'ethers';
 import type { FeeData, TransactionResponse } from 'ethers/providers';
+import type { TransactionResponse } from '@ethersproject/abstract-provider';
+import type { BigNumber } from '@ethersproject/bignumber';
+import type { FeeData } from '@ethersproject/providers';
+import { ethers } from 'ethers';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
-export type LegacyEthersTransaction = Pick<
+export type EthersTransaction = Pick<
 	ethers.Transaction,
 	'nonce' | 'gasLimit' | 'data' | 'value' | 'chainId'
 > &
@@ -32,7 +36,7 @@ export type LegacyEthersTransaction = Pick<
 		>
 	>;
 
-export type Transaction = Omit<LegacyEthersTransaction, 'data'> &
+export type Transaction = Omit<EthersTransaction, 'data'> &
 	Pick<TransactionResponse, 'from' | 'to'> &
 	Partial<Pick<TransactionResponse, 'blockNumber'>> & {
 		timestamp?: number;
