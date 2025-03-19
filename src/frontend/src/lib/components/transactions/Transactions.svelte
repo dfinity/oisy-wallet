@@ -42,7 +42,7 @@
 </script>
 
 {#if $modalManageTokens}
-	<ManageTokensModal onClose={handleClose}>
+	<ManageTokensModal onClose={handleClose} initialSearch={token?.name}>
 		<MessageBox slot="info-element" level="info">
 			{$i18n.transactions.text.token_needs_enabling}
 		</MessageBox>
