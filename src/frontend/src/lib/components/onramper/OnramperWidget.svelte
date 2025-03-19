@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks/networks.env';
 	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -17,6 +16,8 @@
 	import type { OnramperId, OnramperNetworkId, OnramperNetworkWallet } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
