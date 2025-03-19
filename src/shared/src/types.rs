@@ -377,19 +377,14 @@ pub mod networks {
     }
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
-    pub struct NetworkSettingsMap {
-        pub networks: BTreeMap<String, NetworkSettings>,
-    }
-
-    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct TestnetsSettings {
         pub show_testnets: bool,
     }
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct NetworksSettings {
+        pub networks: BTreeMap<String, NetworkSettings>,
         pub testnets: TestnetsSettings,
-        pub networks: NetworkSettingsMap,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
