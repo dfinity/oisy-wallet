@@ -255,7 +255,7 @@
 			"mainnets": "Mainnets",
 			"testnets": "Testnets",
 			"active_networks": "Active networks ",
-			"active_networks_description": "Select the networks you want to show in $oisy_name. Unselected ones will not be displayed.",
+			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions of inactive networks will not show or be included in your available balance.",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
 			"credentials_title": "Credentials",
 			"pouh_credential": "Humanity Credential",
