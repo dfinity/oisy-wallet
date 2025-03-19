@@ -5,7 +5,6 @@
 	import { NETWORK_PARAM } from '$lib/constants/routes.constants';
 	import { TESTNET_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
