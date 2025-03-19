@@ -1,4 +1,4 @@
-<script lang="ts">=
+<script lang="ts">
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { ZERO_BI } from '$lib/constants/app.constants';
 	import type { Token } from '$lib/types/token';
