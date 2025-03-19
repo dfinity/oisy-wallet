@@ -8,8 +8,8 @@
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { userSettings } from '$lib/derived/user-profile.derived';
-	import type { Network } from '$lib/types/network';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
 
 	let testnetsEnabledChecked: boolean;
 	$: testnetsEnabledChecked = $userSettings?.settings?.testnetsEnabled ?? false;
