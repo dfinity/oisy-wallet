@@ -3,6 +3,7 @@
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let token: Token;
 	export let balance: BigNumber | undefined = undefined;
@@ -14,7 +15,7 @@
 
 	<div class="ml-1 font-semibold">
 		{formatToken({
-			value: balance?.toBigInt() ?? 0n,
+			value: balance?.toBigInt() ?? ZERO_BI,
 			unitName: token.decimals
 		})}
 		{token.symbol}
