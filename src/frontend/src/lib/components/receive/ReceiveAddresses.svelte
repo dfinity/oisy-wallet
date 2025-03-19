@@ -1,11 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import {
-		BTC_MAINNET_NETWORK,
-		BTC_REGTEST_NETWORK,
-		BTC_TESTNET_NETWORK
-	} from '$env/networks/networks.env';
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import {
 		SOLANA_MAINNET_NETWORK,
@@ -63,6 +58,11 @@
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
+	import {
+		BTC_MAINNET_NETWORK,
+		BTC_REGTEST_NETWORK,
+		BTC_TESTNET_NETWORK
+	} from '$env/networks/networks.btc.env';
 
 	const dispatch = createEventDispatcher();
 
