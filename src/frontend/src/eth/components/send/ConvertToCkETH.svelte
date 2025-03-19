@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
@@ -8,7 +9,6 @@
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 
 	/**
 	 * Send modal context store
