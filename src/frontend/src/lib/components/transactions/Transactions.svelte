@@ -40,7 +40,7 @@
 </script>
 
 {#if $modalManageTokens}
-	<ManageTokensModal onClose={handleClose} />
+	<ManageTokensModal onClose={handleClose} initialSearch={token?.name} />
 {:else if nonNullish($routeNetwork)}
 	{#if $networkICP}
 		<IcTransactions />
