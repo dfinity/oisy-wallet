@@ -15,6 +15,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
+	import {i18n} from "$lib/stores/i18n.store";
+	import MessageBox from "$lib/components/ui/MessageBox.svelte";
 
 	let token: OptionToken;
 	$: token = $allTokens.find(
@@ -40,7 +42,11 @@
 </script>
 
 {#if $modalManageTokens}
-	<ManageTokensModal onClose={handleClose} />
+	<ManageTokensModal onClose={handleClose}>
+		<MessageBox slot="info-element" level="info">
+			{$i18n.transactions.text.token_needs_enabling}
+		</MessageBox>
+	</ManageTokensModal>
 {:else if nonNullish($routeNetwork)}
 	{#if $networkICP}
 		<IcTransactions />
