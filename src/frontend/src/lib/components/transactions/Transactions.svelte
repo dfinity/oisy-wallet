@@ -16,51 +16,54 @@
 	import type { OptionToken } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
+    import {modalManageTokens} from "$lib/derived/modal.derived";
 
-	let token: OptionToken;
-	$: token = $allTokens.find((token) => token.name === $routeToken);
-	let showTokenModal = false;
+    let token: OptionToken;
+    $: token = $allTokens.find(
+        (token) =>
+            token.name === $routeToken && $routeNetwork && token.network.id.description === $routeNetwork
+    );
 
-	$: if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
-		setTimeout(() => {
-			showTokenModal = true;
-		}, FALLBACK_TIMEOUT);
-	}
+    onMount(() => {
+        // Since we do not have the change to check whether the data fetching is completed or not, we need to use this fallback timeout.
+        // After the timeout, we assume that the fetch has failed and open the token modal.
+        setTimeout(() => {
+            if (isNullish($pageToken) && nonNullish($routeToken) && nonNullish(token)) {
+                modalStore.openManageTokens();
+            }
+        }, FALLBACK_TIMEOUT);
+    });
 
-	$: if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
-		setTimeout(async () => {
-			toastsShow({
-				text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
-					$token: $routeToken,
-					$network: $routeNetwork
-				}),
-				level: 'warn'
-			});
-			await goto('/');
-		}, FALLBACK_TIMEOUT);
-	}
+    $: if (nonNullish($routeNetwork) && nonNullish($routeToken) && isNullish(token)) {
+        setTimeout(async () => {
+            toastsShow({
+                text: replacePlaceholders($i18n.transactions.error.loading_token_with_network, {
+                    $token: $routeToken,
+                    $network: $routeNetwork
+                }),
+                level: 'warn'
+            });
+            await goto('/');
+        }, FALLBACK_TIMEOUT);
+    }
 
-	const handleClose = async () => {
-		if (isNullish($pageToken)) {
-			await goto('/');
-		}
-	};
+    const handleClose = async () => {
+        if (isNullish($pageToken)) {
+            await goto('/');
+        }
+    };
 </script>
 
-{#if showTokenModal && nonNullish(token)}
-	<ManageTokensModal onClose={handleClose} initialSearch={token.name}>
-		<MessageBox slot="info-element" level="info">
-			{$i18n.transactions.text.token_needs_enabling}
-		</MessageBox>
-	</ManageTokensModal>
+{#if $modalManageTokens}
+    <ManageTokensModal onClose={handleClose} />
 {:else if nonNullish($routeNetwork)}
-	{#if $networkICP}
-		<IcTransactions />
-	{:else if $networkBitcoin}
-		<BtcTransactions />
-	{:else if $networkSolana}
-		<SolTransactions />
-	{:else if nonNullish($routeToken)}
-		<EthTransactions />
-	{/if}
+    {#if $networkICP}
+        <IcTransactions />
+    {:else if $networkBitcoin}
+        <BtcTransactions />
+    {:else if $networkSolana}
+        <SolTransactions />
+    {:else if nonNullish($routeToken)}
+        <EthTransactions />
+    {/if}
 {/if}

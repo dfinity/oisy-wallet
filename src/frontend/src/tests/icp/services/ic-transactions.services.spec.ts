@@ -18,10 +18,6 @@ describe('ic-transactions.services', () => {
 			certified: false
 		}));
 
-		// we mock console just to avoid unnecessary logs while running the tests
-		vi.spyOn(console, 'error').mockImplementation(() => {});
-		vi.spyOn(console, 'warn').mockImplementation(() => {});
-
 		let spyToastsError: MockInstance;
 
 		beforeEach(() => {
