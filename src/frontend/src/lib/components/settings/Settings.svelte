@@ -2,6 +2,9 @@
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
+	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -10,22 +13,21 @@
 	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import { modalSettingsState } from '$lib/derived/modal.derived';
+	import {
+		type SettingsModalType,
+		SettingsModalType as SettingsModalEnum
+	} from '$lib/enums/settings-modal-types';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import type { OptionIdentity } from '$lib/types/identity';
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { modalStore } from '$lib/stores/modal.store';
-	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
-	import { modalSettingsState } from '$lib/derived/modal.derived';
-	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
-	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
-	import type { SettingsModalType } from '$lib/enums/settings-modal-types';
-	import { SettingsModalType as SettingsModalEnum } from '$lib/enums/settings-modal-types';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
