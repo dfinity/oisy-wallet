@@ -61,15 +61,15 @@
 		>
 			<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
 			<svelte:fragment slot="text"
-			>{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
-			>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
-				$fee: formatToken({
-					value: kytFee,
-					unitName: BTC_DECIMALS,
-					displayDecimals: BTC_DECIMALS
-				})
-			})}</span
-			>{/if}
+				>{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
+						>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
+							$fee: formatToken({
+								value: kytFee,
+								unitName: BTC_DECIMALS,
+								displayDecimals: BTC_DECIMALS
+							})
+						})}</span
+					>{/if}
 			</svelte:fragment>
 		</ReceiveAddress>
 	{/if}
