@@ -8,7 +8,6 @@ import type { NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { Networkish } from '@ethersproject/networks';
 import { Network } from 'alchemy-sdk';
-import type { Networkish } from 'ethers/providers';
 
 export const ETH_MAINNET_ENABLED =
 	JSON.parse(import.meta.env.VITE_ETHEREUM_MAINNET_DISABLED ?? false) === false;

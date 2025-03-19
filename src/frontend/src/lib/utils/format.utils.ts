@@ -4,7 +4,6 @@ import type { AmountString } from '$lib/types/amount';
 import { nonNullish } from '@dfinity/utils';
 import { type BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
-import { type BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
 
@@ -40,7 +39,6 @@ export const formatToken = ({
 
 	return `${showPlusSign && +res > 0 ? '+' : ''}${formatted}`;
 };
-
 
 // TODO: remove this function since it is duplicated of formatToken
 export const formatTokenAmount = ({ value, ...restParams }: FormatTokenAmountParams): string =>

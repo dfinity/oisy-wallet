@@ -6,8 +6,6 @@ import {
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
-import type { ConvertAmountErrorType } from '$lib/types/convert';
-import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
