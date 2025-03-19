@@ -9,18 +9,14 @@ export default {
 			sans: ['CircularXX', 'sans-serif', ...defaultTheme.fontFamily.sans]
 		},
 		screens: {
-			// default viewports
-			sm: '640px',
-			md: '768px',
-			lg: '1024px',
-			xl: '1280px',
-			'2xl': '1536px',
-			// custom viewports
-			'1.5md': '896px',
-			'1.5lg': '1152px',
-			'1.5xl': '1408px',
-			'2.5xl': '1728px',
-			'h-md': { raw: '(max-height: 1090px)' }
+			...defaultTheme.screens,
+			// we need to use rem instead of px because the default tailwind values changed to rem,
+			// and mixing units breaks custom screen definitions
+			'1.5md': '56rem', // 896px
+			'1.5lg': '72rem', // 1152px
+			'1.5xl': '88rem', // 1408px
+			'2.5xl': '108rem', // 1728px
+			'h-md': { raw: '(max-height: 68rem)' } // ~1090px
 		},
 		colors: {
 			// base colors, can be left in
@@ -30,7 +26,7 @@ export default {
 			black: 'rgb(0, 0, 0)',
 			white: 'rgb(255 255 255)',
 
-			// keeping off-white since theres currently no matching color var in figma even though its used
+			// keeping off-white since there's currently no matching color var in figma even though its used
 			'off-white': '#fcfaf6',
 
 			// custom hero gradient colors

@@ -7,12 +7,15 @@
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
+			"change": "Change",
+			"apply": "Apply",
 			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
+			"destination": "Destination",
 			"reject": "Reject",
 			"approve": "Approve",
 			"view": "View",
@@ -120,7 +123,7 @@
 			"website": "Image of $dAppName"
 		}
 	},
-	"airdrops": {
+	"rewards": {
 		"text": {
 			"title": "Rewards",
 			"active_campaigns": "Active Opportunities",
@@ -386,8 +389,7 @@
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
-			"no_available_utxos": "You won't have available utxos to perform this transaction.",
-			"ata_will_be_calculated": "You provided a non-ATA address. The ATA address will be calculated automatically based on your input."
+			"no_available_utxos": "You won't have available utxos to perform this transaction."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -438,6 +440,8 @@
 	"convert": {
 		"text": {
 			"converting": "Converting...",
+			"conversion_destination": "Conversion destination",
+			"default_destination": "Your OISY Wallet",
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_ckbtc": "Convert to ckBTC",
 			"convert_to_token": "Convert to $token",
@@ -446,7 +450,7 @@
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
 			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
 			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
-			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
+			"how_to_convert_eth_to_cketh": "Here is how you can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",
@@ -466,7 +470,9 @@
 			"initializing": "Initializing transaction...",
 			"refreshing_ui": "Refreshing UI",
 			"unsupported_token_conversion": "Conversion for the selected token is not supported.",
-			"calculating_max_amount": "Calculating..."
+			"calculating_max_amount": "Calculating...",
+			"send_to": "Send converted assets to",
+			"custom_destination": "Another address"
 		},
 		"assertion": {
 			"insufficient_funds": "Insufficient balance"
@@ -503,7 +509,10 @@
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
-			"swap_provider": "Swap provider"
+			"swap_provider": "Swap provider",
+			"swap_route": "Swap route",
+			"included_network_fees": "Included network fees",
+			"included_liquidity_fees": "Included liquidity pool fees"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -795,8 +804,7 @@
 		},
 		"error": {
 			"get_block_number": "Cannot get block number.",
-			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp.",
-			"failed_get_mined_transaction": "Failed to get the mined transaction (hash: $hash). Please reload the wallet dapp."
+			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp."
 		}
 	},
 	"transactions": {

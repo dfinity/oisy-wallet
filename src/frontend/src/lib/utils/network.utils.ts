@@ -1,6 +1,6 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
+import { SUPPORTED_BITCOIN_NETWORKS_IDS } from '$env/networks/networks.btc.env';
 import {
-	BITCOIN_NETWORKS_IDS,
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID,
@@ -12,8 +12,8 @@ import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
-	SOLANA_NETWORKS_IDS,
-	SOLANA_TESTNET_NETWORK_ID
+	SOLANA_TESTNET_NETWORK_ID,
+	SUPPORTED_SOLANA_NETWORKS_IDS
 } from '$env/networks/networks.sol.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -35,7 +35,7 @@ export const isNetworkIdEthereum: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && SUPPORTED_ETHEREUM_NETWORKS_IDS.includes(id);
 
 export const isNetworkIdBitcoin: IsNetworkIdUtil = (id) =>
-	nonNullish(id) && BITCOIN_NETWORKS_IDS.includes(id);
+	nonNullish(id) && SUPPORTED_BITCOIN_NETWORKS_IDS.includes(id);
 
 export const isNetworkIdBTCMainnet: IsNetworkIdUtil = (networkId) =>
 	BTC_MAINNET_NETWORK_ID === networkId;
@@ -49,7 +49,7 @@ export const isNetworkIdBTCRegtest: IsNetworkIdUtil = (networkId) =>
 export const isNetworkIdSepolia: IsNetworkIdUtil = (networkId) => SEPOLIA_NETWORK_ID === networkId;
 
 export const isNetworkIdSolana: IsNetworkIdUtil = (networkId) =>
-	nonNullish(networkId) && SOLANA_NETWORKS_IDS.includes(networkId);
+	nonNullish(networkId) && SUPPORTED_SOLANA_NETWORKS_IDS.includes(networkId);
 
 export const isNetworkIdSOLMainnet: IsNetworkIdUtil = (networkId) =>
 	SOLANA_MAINNET_NETWORK_ID === networkId;
