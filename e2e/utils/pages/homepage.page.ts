@@ -365,7 +365,7 @@ abstract class Homepage {
 	): Promise<void> {
 		await this.showSelector({
 			selector: `[data-tid="${MOBILE_NAVIGATION_MENU}"]`,
-			display
+			display: 'flex'
 		});
 	}
 
@@ -442,6 +442,7 @@ abstract class Homepage {
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (isMobile) {
 				const display = await this.hideMobileNavigationMenu();
+				console.log('Mobile navigation menu hidden', display);
 				await expect(element).toHaveScreenshot({ fullPage: true, timeout: 5 * 60 * 1000 });
 				await this.showMobileNavigationMenu({ display });
 			}
