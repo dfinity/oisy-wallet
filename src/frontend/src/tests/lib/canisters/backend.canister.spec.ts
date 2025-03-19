@@ -727,4 +727,43 @@ describe('backend.canister', () => {
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
+
+	describe('setUserShowTestnets', () => {
+		it('should set user show testnets', async () => {
+			const response = { Ok: null };
+
+			service.set_user_show_testnets.mockResolvedValue(response);
+
+			const { setUserShowTestnets } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await setUserShowTestnets({
+				showTestnets: true
+			});
+
+			expect(service.set_user_show_testnets).toHaveBeenCalledWith({
+				show_testnets: true,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if set_user_show_testnets throws', async () => {
+			service.set_user_show_testnets.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { setUserShowTestnets } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = setUserShowTestnets({
+				showTestnets: true
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
 });
