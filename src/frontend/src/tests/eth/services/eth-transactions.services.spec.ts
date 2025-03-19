@@ -34,7 +34,7 @@ describe('eth-transactions.services', () => {
 	}));
 
 	beforeEach(() => {
-		vi.resetAllMocks();
+		vi.clearAllMocks();
 
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 		spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');
