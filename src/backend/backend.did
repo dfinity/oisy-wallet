@@ -156,6 +156,7 @@ type MigrationProgress = variant {
   CheckingTarget;
 };
 type MigrationReport = record { to : principal; progress : MigrationProgress };
+type NetworksSettings = record { testnets : TestnetsSettings };
 type OisyUser = record {
   "principal" : principal;
   pouh_verified : bool;
@@ -165,6 +166,10 @@ type Outpoint = record { txid : blob; vout : nat32 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AddDappSettingsError };
+type Result_10 = variant {
+  Ok : TopUpCyclesLedgerResponse;
+  Err : TopUpCyclesLedgerError;
+};
 type Result_2 = variant { Ok; Err : AllowSigningError };
 type Result_3 = variant { Ok; Err : BtcAddPendingTransactionError };
 type Result_4 = variant {
@@ -178,10 +183,8 @@ type Result_5 = variant {
 type Result_6 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_7 = variant { Ok : MigrationReport; Err : text };
 type Result_8 = variant { Ok; Err : text };
-type Result_9 = variant {
-  Ok : TopUpCyclesLedgerResponse;
-  Err : TopUpCyclesLedgerError;
-};
+type Result_9 = variant { Ok; Err : SaveTestnetsSettingsError };
+type SaveTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SelectedUtxosFeeError = variant {
   PendingTransactions;
   InternalError : record { msg : text };
@@ -195,7 +198,11 @@ type SelectedUtxosFeeResponse = record {
   fee_satoshis : nat64;
   utxos : vec Utxo;
 };
-type Settings = record { dapp : DappSettings };
+type SetShowTestnetsRequest = record {
+  current_user_version : opt nat64;
+  show_testnets : bool;
+};
+type Settings = record { networks : NetworksSettings; dapp : DappSettings };
 type SplToken = record {
   decimals : opt nat8;
   token_address : text;
@@ -214,6 +221,7 @@ type SupportedCredential = record {
   ii_origin : text;
   credential_type : CredentialType;
 };
+type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
   Icrc : IcrcToken;
   SplDevnet : SplToken;
@@ -288,8 +296,9 @@ service : (Arg) -> {
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
+  set_user_show_testnets : (SetShowTestnetsRequest) -> (Result_9);
   set_user_token : (UserToken) -> ();
   stats : () -> (Stats) query;
   step_migration : () -> ();
-  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_9);
+  top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (Result_10);
 }

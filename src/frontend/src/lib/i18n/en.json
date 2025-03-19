@@ -450,7 +450,7 @@
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
 			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes",
 			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes",
-			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
+			"how_to_convert_eth_to_cketh": "Here is how you can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",

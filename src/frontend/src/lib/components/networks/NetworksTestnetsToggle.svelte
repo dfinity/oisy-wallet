@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { NETWORK_PARAM } from '$lib/constants/routes.constants';
 	import { TESTNET_TOGGLE } from '$lib/constants/test-ids.constants';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { testnetsStore } from '$lib/stores/settings.store';
 
@@ -11,7 +11,7 @@
 	// PR: https://github.com/dfinity/gix-components/pull/531
 
 	let checked: boolean;
-	$: checked = $testnetsEnabled;
+	$: checked = $testnets;
 
 	const toggleTestnets = async () => {
 		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
