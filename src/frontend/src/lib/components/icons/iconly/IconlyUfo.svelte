@@ -107,6 +107,33 @@
 			}
 		}
 	}
+	.mobile-nav {
+		a.nav-item {
+			&:hover,
+			&.selected {
+				.ufo-wrapper {
+					.dome {
+						animation: dome-animation 0.5s ease-in-out 3 alternate;
+					}
+
+					.bottom-lines {
+						transform-origin: 10px 10px;
+						animation: speed-lines 0.5s ease-in-out 3 alternate;
+					}
+
+					.window1 {
+						animation: blink-window1 0.75s linear 3;
+					}
+					.window2 {
+						animation: blink-window2 0.75s linear 3;
+					}
+					.window3 {
+						animation: blink-window3 0.75s linear 3;
+					}
+				}
+			}
+		}
+	}
 
 	@keyframes dome-animation {
 		0% {
