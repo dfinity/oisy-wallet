@@ -3,10 +3,11 @@
 	import { goto } from '$app/navigation';
 	import { setUserShowTestnets } from '$lib/api/backend.api';
 	import { NETWORK_PARAM } from '$lib/constants/routes.constants';
-	import { TESTNET_TOGGLE } from '$lib/constants/test-ids.constants';
+	import { TESTNET_TOGGLE } from '$lib/constants/test-ids.constants'
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { testnetsStore } from '$lib/stores/settings.store';
 	import { emit } from '$lib/utils/events.utils';
@@ -15,7 +16,7 @@
 	// PR: https://github.com/dfinity/gix-components/pull/531
 
 	let checked: boolean;
-	$: checked = $testnetsEnabled;
+	$: checked = $testnets;
 
 	const toggleTestnets = async () => {
 		await setUserShowTestnets({
