@@ -370,7 +370,7 @@ abstract class Homepage {
 
 		do {
 			previousHeight = currentHeight;
-			await this.#page.waitForTimeout(100);
+			await this.#page.waitForTimeout(1000);
 			currentHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
 		} while (currentHeight !== previousHeight);
 
