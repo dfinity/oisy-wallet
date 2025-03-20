@@ -21,6 +21,7 @@
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 
 	export let styleClass: string | undefined = undefined;
 
@@ -41,14 +42,14 @@
 	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
 	$: featureAirdropSlide = nonNullish(featuredAirdrop)
 		? ({
-				id: featuredAirdrop.id,
-				carousel: {
-					text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
-					callToAction: $i18n.rewards.text.carousel_slide_cta
-				},
-				logo: featuredAirdrop.logo,
-				name: featuredAirdrop.title
-			} as CarouselSlideOisyDappDescription)
+			id: featuredAirdrop.id,
+			carousel: {
+				text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
+				callToAction: $i18n.rewards.text.carousel_slide_cta
+			},
+			logo: featuredAirdrop.logo,
+			name: featuredAirdrop.title
+		} as CarouselSlideOisyDappDescription)
 		: undefined;
 
 	/*
@@ -70,8 +71,8 @@
 	let carousel: Carousel;
 
 	const closeSlide = async ({
-		detail: dappId
-	}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
+															detail: dappId
+														}: CustomEvent<CarouselSlideOisyDappDescription['id']>) => {
 		const idx = dappsCarouselSlides.findIndex(({ id }) => id === dappId);
 
 		temporaryHiddenDappsIds = [...temporaryHiddenDappsIds, dappId];
@@ -88,7 +89,7 @@
 			return;
 		}
 
-		if (isNullish($userProfileVersion)) {
+		if (isNullish($userProfileStore)) {
 			return;
 		}
 
