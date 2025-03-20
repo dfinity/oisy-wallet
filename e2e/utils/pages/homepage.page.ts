@@ -351,11 +351,13 @@ abstract class Homepage {
 	}
 
 	private async scrollToTop(testId: string): Promise<void> {
-		const selector = `[data-tid="${testId}"]`;
-		const locator = this.#page.locator(selector);
-		await locator.evaluate((element) => {
-			element.scrollTop = 0;
-		});
+		if (await this.isVisibleByTestId(testId)) {
+			const selector = `[data-tid="${testId}"]`;
+			const locator = this.#page.locator(selector);
+			await locator.evaluate((element) => {
+				element.scrollTop = 0;
+			});
+		}
 	}
 
 	private async scrollIntoViewCentered(testId: string): Promise<void> {
