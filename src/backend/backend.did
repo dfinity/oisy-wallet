@@ -158,7 +158,7 @@ type MigrationProgress = variant {
 type MigrationReport = record { to : principal; progress : MigrationProgress };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
-  Icp;
+  InternetComputer;
   SolanaTestnet;
   BitcoinRegtest;
   SolanaDevnet;

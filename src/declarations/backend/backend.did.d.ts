@@ -176,7 +176,7 @@ export interface NetworkSettings {
 	is_testnet: boolean;
 }
 export type NetworkSettingsFor =
-	| { Icp: null }
+	| { InternetComputer: null }
 	| { SolanaTestnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }

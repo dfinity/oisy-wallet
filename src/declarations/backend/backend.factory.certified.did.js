@@ -155,7 +155,7 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const NetworkSettingsFor = IDL.Variant({
-		Icp: IDL.Null,
+		InternetComputer: IDL.Null,
 		SolanaTestnet: IDL.Null,
 		BitcoinRegtest: IDL.Null,
 		SolanaDevnet: IDL.Null,
