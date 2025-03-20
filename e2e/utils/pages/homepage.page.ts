@@ -366,7 +366,9 @@ abstract class Homepage {
 
 	async getStableViewportHeight(): Promise<number> {
 		let previousHeight: number;
-		let currentHeight: number = await this.#page.evaluate(() => document.documentElement.scrollHeight);
+		let currentHeight: number = await this.#page.evaluate(
+			() => document.documentElement.scrollHeight
+		);
 
 		do {
 			previousHeight = currentHeight;
