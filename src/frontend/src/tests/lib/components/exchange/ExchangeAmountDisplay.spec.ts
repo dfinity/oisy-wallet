@@ -1,4 +1,3 @@
-import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 import { formatUSD } from '$lib/utils/format.utils';
@@ -7,7 +6,7 @@ import { render } from '@testing-library/svelte';
 describe('ExchangeAmountDisplay', () => {
 	const mockAmount = 123456789123n;
 	const mockDecimals = 3;
-	const mockSymbol = SOLANA_TOKEN.symbol;
+	const mockSymbol = 'MOCK';
 
 	const mockProps = {
 		amount: mockAmount,
@@ -18,7 +17,7 @@ describe('ExchangeAmountDisplay', () => {
 
 	const mockAmountNumber = Number(mockAmount) / 10 ** mockDecimals;
 
-	const expectedAmount = `${mockAmountNumber} ${mockSymbol}`;
+	const expectedAmount = '123456789.123 MOCK';
 
 	it('should render the amount', () => {
 		const { getByText } = render(ExchangeAmountDisplay, { props: mockProps });
