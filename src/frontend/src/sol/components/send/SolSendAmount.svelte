@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -25,7 +26,6 @@
 	} from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
-	import { BigNumber } from '@ethersproject/bignumber';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
