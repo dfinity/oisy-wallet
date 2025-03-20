@@ -6,7 +6,7 @@ import { SolanaNetworks } from '$sol/types/network';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { notEmptyString } from '@dfinity/utils';
 
-describe('sol-signatures.services', () => {
+describe('sol-signatures.services integration', () => {
 	describe('getSolTransactions', () => {
 		it('should match the total balance of an account', async () => {
 			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
