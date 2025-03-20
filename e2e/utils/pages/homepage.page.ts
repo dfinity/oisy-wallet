@@ -450,7 +450,9 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
+		if (!isMobile) {
+			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
+		}
 
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
