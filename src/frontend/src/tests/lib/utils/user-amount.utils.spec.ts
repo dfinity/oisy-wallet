@@ -12,12 +12,11 @@ import { mockCkBtcMinterInfo as mockCkBtcMinterInfoData } from '$tests/mocks/ckb
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh/dist/candid/minter';
-import { BigNumber } from 'alchemy-sdk';
 import { vi, type MockInstance } from 'vitest';
 
 describe('validateUserAmount', () => {
-	const userAmount = BigNumber.from(200000n);
-	const balance = BigNumber.from(9000000n);
+	const userAmount = 200000n;
+	const balance = 9000000n;
 	const fee = 10000n;
 	const mockCkEthMinterInfo = {
 		data: { minimum_withdrawal_amount: [500n] } as CkEthMinterInfo,

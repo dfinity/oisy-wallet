@@ -25,7 +25,7 @@
 	import { networkUrl } from '$lib/utils/nav.utils';
 	import { calculateTokenUsdAmount, findTwinToken } from '$lib/utils/token.utils';
 
-	export let isEligible = false;
+	export let amountOfRewards = 0;
 
 	let ckBtcToken: IcToken | undefined;
 	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
@@ -34,7 +34,7 @@
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckBtcReward,
+				amount: ckBtcReward.toBigInt(),
 				token: ckBtcToken,
 				$exchanges: $exchanges
 			}) ?? 0)
@@ -47,7 +47,7 @@
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckUsdcReward,
+				amount: ckUsdcReward.toBigInt(),
 				token: ckUsdcToken,
 				$exchanges: $exchanges
 			}) ?? 0)
@@ -59,14 +59,15 @@
 	$: icpReward = ZERO;
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
-		? (calculateTokenUsdAmount({ amount: icpReward, token: icpToken, $exchanges: $exchanges }) ?? 0)
+		? (calculateTokenUsdAmount({
+				amount: icpReward.toBigInt(),
+				token: icpToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let totalRewardUsd: number;
 	$: totalRewardUsd = ckBtcRewardUsd + ckUsdcRewardUsd + icpRewardUsd;
-
-	let amountOfRewards: number;
-	$: amountOfRewards = 0;
 
 	let loading: boolean;
 	$: loading = true;
@@ -112,7 +113,7 @@
 	};
 </script>
 
-{#if isEligible}
+{#if amountOfRewards > 0}
 	<div transition:fade={SLIDE_DURATION}>
 		<div
 			class="mb-5 mt-2 w-full text-center text-xl font-bold text-success-primary"

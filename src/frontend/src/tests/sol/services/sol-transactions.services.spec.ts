@@ -50,8 +50,6 @@ describe('sol-transactions.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.resetAllMocks();
-		vi.resetAllMocks();
 
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
 		spyGetTransactions = vi.spyOn(solSignaturesServices, 'getSolTransactions');
@@ -423,7 +421,6 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should handle errors and reset store', async () => {
-			vi.spyOn(console, 'error').mockImplementationOnce(() => {});
 			const error = new Error('Failed to load transactions');
 			spyGetTransactions.mockRejectedValue(error);
 

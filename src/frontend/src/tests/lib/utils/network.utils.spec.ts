@@ -1,16 +1,18 @@
-import * as networkEnv from '$env/networks/networks.env';
+import * as btcNetworkEnv from '$env/networks/networks.btc.env';
 import {
 	BTC_MAINNET_NETWORK,
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import * as ethEnv from '$env/networks/networks.eth.env';
+import {
 	ETHEREUM_NETWORK,
 	ETHEREUM_NETWORK_ID,
-	ICP_NETWORK,
-	ICP_NETWORK_ID,
 	SEPOLIA_NETWORK,
 	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.env';
+} from '$env/networks/networks.eth.env';
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import {
 	SOLANA_DEVNET_NETWORK,
@@ -85,7 +87,7 @@ describe('network utils', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(
 				() => allEthereumNetworkIds
 			);
 		});
@@ -119,10 +121,9 @@ describe('network utils', () => {
 		});
 
 		it('should return false for Bitcoin regtest network ID when it is not LOCAL env', () => {
-			vi.spyOn(networkEnv, 'BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(() => [
-				BTC_MAINNET_NETWORK_ID,
-				BTC_TESTNET_NETWORK_ID
-			]);
+			vi.spyOn(btcNetworkEnv, 'SUPPORTED_BITCOIN_NETWORKS_IDS', 'get').mockImplementationOnce(
+				() => [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID]
+			);
 
 			expect(isNetworkIdBitcoin(BTC_REGTEST_NETWORK_ID)).toBe(false);
 		});
