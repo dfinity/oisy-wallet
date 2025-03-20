@@ -407,7 +407,7 @@ pub mod networks {
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
     pub enum NetworkSettingsFor {
         #[default]
-        Icp,
+        InternetComputer,
         BitcoinMainnet,
         BitcoinTestnet,
         BitcoinRegtest,
