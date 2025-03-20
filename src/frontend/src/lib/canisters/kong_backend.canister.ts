@@ -9,6 +9,7 @@ import { getAgent } from '$lib/actors/agents.ic';
 import { mapKongBackendCanisterError } from '$lib/canisters/kong_backend.errors';
 import type { KongSwapAmountsParams, KongSwapParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { getKongIcTokenIdentifier } from '$lib/utils/swap.utils';
 import { Canister, createServices, toNullable } from '@dfinity/utils';
 
 export class KongBackendCanister extends Canister<KongBackendService> {
@@ -39,7 +40,11 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 			certified: false
 		});
 
-		const response = await swap_amounts(sourceToken.symbol, sourceAmount, destinationToken.symbol);
+		const response = await swap_amounts(
+			getKongIcTokenIdentifier(sourceToken),
+			sourceAmount,
+			getKongIcTokenIdentifier(destinationToken)
+		);
 
 		if ('Ok' in response) {
 			return response.Ok;
@@ -63,8 +68,8 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 		});
 
 		const response = await swap_async({
-			pay_token: sourceToken.symbol,
-			receive_token: destinationToken.symbol,
+			pay_token: getKongIcTokenIdentifier(sourceToken),
+			receive_token: getKongIcTokenIdentifier(destinationToken),
 			pay_amount: sendAmount,
 			max_slippage: toNullable(maxSlippage),
 			receive_address: toNullable(receiveAddress),

@@ -70,6 +70,7 @@
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
+	link={false}
 >
 	<IconUser size="24" slot="icon" />
 	{$i18n.navigation.alt.menu}
