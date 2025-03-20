@@ -1,12 +1,7 @@
-use std::collections::BTreeMap;
-
 use ic_cdk::api::time;
 use shared::types::{
     dapp::AddDappSettingsError,
-    networks::{
-        NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsError,
-        SaveTestnetsSettingsError,
-    },
+    networks::{NetworkSettingsMap, SaveNetworksSettingsError, SaveTestnetsSettingsError},
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     CredentialType, Version,
 };

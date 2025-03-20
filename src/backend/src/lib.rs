@@ -32,7 +32,7 @@ use shared::{
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
         networks::{
             SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
-            SetNetworksSettingsRequest, SetShowTestnetsRequest, UpdateNetworksSettingsRequest,
+            SetShowTestnetsRequest,
         },
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         token::{UserToken, UserTokenId},
