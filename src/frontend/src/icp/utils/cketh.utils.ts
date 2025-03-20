@@ -2,13 +2,12 @@ import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
-import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option } from '$lib/types/utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { fromNullable, isNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const assertCkETHMinWithdrawalAmount = ({
 	amount,
@@ -17,7 +16,7 @@ export const assertCkETHMinWithdrawalAmount = ({
 	minterInfo,
 	i18n
 }: {
-	amount: BigNumber;
+	amount: bigint;
 	tokenDecimals: number;
 	tokenSymbol: string;
 	minterInfo: Option<CkEthMinterInfoData>;
@@ -25,7 +24,7 @@ export const assertCkETHMinWithdrawalAmount = ({
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount.isZero()) {
+	if (amount === ZERO_BI) {
 		return undefined;
 	}
 
@@ -41,7 +40,7 @@ export const assertCkETHMinWithdrawalAmount = ({
 	// The `minimum_withdrawal_amount` is optional in the minter info because the team decided to make all fields optional for maintainability reasons. That's why we assume that it is most likely set.
 	const minWithdrawalAmount = fromNullable(minimum_withdrawal_amount) ?? 0n;
 
-	if ((amount?.toBigInt() ?? 0n) < minWithdrawalAmount) {
+	if ((amount ?? 0n) < minWithdrawalAmount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_amount, {
 				$amount: formatToken({
@@ -67,18 +66,18 @@ export const assertCkETHMinFee = ({
 	tokenSymbol,
 	i18n
 }: {
-	amount: BigNumber;
+	amount: bigint;
 	fee: bigint;
 	tokenSymbol: string;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount.isZero()) {
+	if (amount === ZERO_BI) {
 		return undefined;
 	}
 
-	if (BigNumber.from(fee).gt(amount)) {
+	if (fee > amount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_ledger_fees, {
 				$symbol: tokenSymbol
@@ -100,7 +99,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 	feeStoreData: EthereumFeeStoreData;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {
-	const ethBalance = balance ?? ZERO;
+	const ethBalance = balance ?? ZERO_BI;
 
 	// We skip validation checks here for zero balance because it makes the UI/UX ungraceful if the balance is just not yet loaded.
 	if (ethBalance === ZERO_BI) {
@@ -113,13 +112,13 @@ export const assertCkETHBalanceEstimatedFee = ({
 
 	const { decimals, symbol } = tokenCkEth;
 
-	const estimatedFee = BigNumber.from(feeStoreData?.maxTransactionFee ?? 0n);
+	const estimatedFee = feeStoreData?.maxTransactionFee ?? ZERO_BI;
 
-	if (estimatedFee.gt(ethBalance)) {
+	if (estimatedFee > ethBalance) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_balance, {
 				$amount: formatToken({
-					value: estimatedFee.toBigInt(),
+					value: estimatedFee,
 					unitName: decimals,
 					displayDecimals: decimals
 				}),
