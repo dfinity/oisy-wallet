@@ -55,7 +55,7 @@
 
 		if (isNetworkIdBitcoin(networkId)) {
 			const error = assertCkBTCUserInputAmount({
-				amount: userAmount,
+				amount: userAmount.toBigInt(),
 				minterInfo: $ckBtcMinterInfoStore?.[$sendToken.id],
 				tokenDecimals: $sendToken.decimals,
 				i18n: $i18n
@@ -69,7 +69,7 @@
 		// if CkEth, asset the minimal withdrawal amount is met and the amount should at least be bigger than the fee.
 		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
 			const error = assertCkETHMinWithdrawalAmount({
-				amount: userAmount,
+				amount: userAmount.toBigInt(),
 				tokenDecimals: $sendToken.decimals,
 				tokenSymbol: $sendToken.symbol,
 				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
@@ -81,7 +81,7 @@
 			}
 
 			return assertCkETHMinFee({
-				amount: userAmount,
+				amount: userAmount.toBigInt(),
 				tokenSymbol: $sendToken.symbol,
 				fee,
 				i18n: $i18n
