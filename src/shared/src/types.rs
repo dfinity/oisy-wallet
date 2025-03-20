@@ -113,11 +113,11 @@ pub trait TokenVersion: Debug {
     #[must_use]
     fn get_version(&self) -> Option<Version>;
     #[must_use]
-    fn clone_with_incremented_version(&self) -> Self
+    fn with_incremented_version(&self) -> Self
     where
         Self: Sized + Clone;
     #[must_use]
-    fn clone_with_initial_version(&self) -> Self
+    fn with_initial_version(&self) -> Self
     where
         Self: Sized + Clone;
 }
@@ -363,9 +363,32 @@ pub mod signer {
 }
 
 pub mod networks {
+    use std::collections::BTreeMap;
+
     use candid::{CandidType, Deserialize};
 
     use crate::types::Version;
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+    pub struct NetworkSettings {
+        pub enabled: bool,
+        pub is_testnet: bool,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
+    pub enum NetworkSettingsFor {
+        #[default]
+        Icp,
+        BitcoinMainnet,
+        BitcoinTestnet,
+        BitcoinRegtest,
+        EthereumMainnet,
+        EthereumSepolia,
+        SolanaMainnet,
+        SolanaTestnet,
+        SolanaDevnet,
+        SolanaLocal,
+    }
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct TestnetsSettings {
@@ -374,6 +397,7 @@ pub mod networks {
 
     #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
     pub struct NetworksSettings {
+        pub networks: BTreeMap<NetworkSettingsFor, NetworkSettings>,
         pub testnets: TestnetsSettings,
     }
 
