@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {

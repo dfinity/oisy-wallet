@@ -8,7 +8,6 @@
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { testnetsStore } from '$lib/stores/settings.store';
 	import { emit } from '$lib/utils/events.utils';
 
 	// TODO: create tests for this component once we have testId from GIX-CMP
@@ -17,16 +16,26 @@
 	let checked: boolean;
 	$: checked = $testnets;
 
-	const toggleTestnets = async () => {
-		await setUserShowTestnets({
-			showTestnets: !checked,
-			identity: $authIdentity,
-			currentUserVersion: $userProfileVersion
-		});
+	const toggleShowTestnets = async () => {
+		try {
+			await setUserShowTestnets({
+				showTestnets: checked,
+				identity: $authIdentity,
+				currentUserVersion: $userProfileVersion
+			});
+		} catch (e: unknown) {
+			// We ignore any errors here since we do not care, but we want to emit the message to refresh the user profile anyway
+			console.error(e);
+		}
 
 		emit({ message: 'oisyRefreshUserProfile' });
+	};
 
-		testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
+	const toggleTestnets = async () => {
+		checked = !checked;
+
+		// Do not wait for the backend to update the user profile since it can lead to unnecessary delays
+		toggleShowTestnets();
 
 		// Reset network param, since the network is selectable only when testnets are enabled
 		if (checked) {
