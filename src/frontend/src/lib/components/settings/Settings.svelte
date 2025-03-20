@@ -28,9 +28,9 @@
 	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { enabledNetworksStore } from '$lib/stores/settings.store';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
-	import * as ne from '$lib/derived/network.derived';
+	import type { NetworksSettings } from '$declarations/backend/backend.did';
+	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -98,9 +98,7 @@
 	<SettingsCardItem>
 		<svelte:fragment slot="key"><span>{$i18n.settings.text.active_networks}</span></svelte:fragment>
 		<svelte:fragment slot="value">
-			{#each Object.entries($enabledNetworksStore ?? {}) as [networkId, enabled]}
-				{SUPPORTED_NETWORKS.find((net) => net.id.toString() === networkId.toString())?.iconBW}
-			{/each}
+			<EnabledNetworksPreviewIcons />
 
 			<Button link on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
 				>Edit ></Button

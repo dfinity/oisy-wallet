@@ -17,14 +17,13 @@
 	import { onMount } from 'svelte';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { enabledNetworksStore } from '$lib/stores/settings.store';
 
 	onMount(() => {
 		emit({ message: 'oisyRefreshUserProfile' });
 	});
 
 	let enabledNetworksData: { [p: symbol]: boolean } | null | undefined;
-	$: enabledNetworksData = $enabledNetworksStore;
+	$: enabledNetworksData = {};
 
 	let enabledTestnet: boolean;
 	$: enabledTestnet = $testnets;
