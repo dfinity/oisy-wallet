@@ -377,14 +377,12 @@ a.as-button {
 	@apply bg-primary;
 	@apply rounded-xl;
 	@apply px-4;
-	@apply py-3;
-	@apply min-w-72;
+	@apply py-1;
 	@apply justify-between;
 	@apply gap-2;
 	@apply text-left;
 	@apply font-medium;
 	@apply leading-5;
-	@apply border-primary;
 
 	transition: border 0.25s ease-out;
 
@@ -395,7 +393,6 @@ a.as-button {
 	&:hover:not(.disabled):not([disabled]),
 	&.opened {
 		@apply bg-primary;
-		@apply border-brand-primary;
 	}
 }
 
@@ -419,7 +416,7 @@ a.as-button {
 	}
 
 	&.selected {
-		@apply bg-brand-subtle-10;
+		//@apply bg-brand-subtle-10;
 
 		& > span > svg {
 			color: var(--color-foreground-brand-primary-alt);

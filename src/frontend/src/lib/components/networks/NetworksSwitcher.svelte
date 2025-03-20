@@ -13,6 +13,9 @@
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
 
 	export let disabled = false;
 
@@ -31,6 +34,11 @@
 	testId={NETWORKS_SWITCHER_DROPDOWN}
 	{disabled}
 >
+	{#if nonNullish($selectedNetwork)}
+		<NetworkLogo network={$selectedNetwork} size="xs" />
+	{:else}
+		<Logo src={chainFusion} />
+	{/if}
 	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
 
 	<div slot="items">
