@@ -24,7 +24,7 @@
 		<OisyWalletLogoLink />
 	</div>
 
-	<div class="pointer-events-auto flex justify-end gap-5">
+	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
 		{#if $authSignedIn}
 			<NetworksSwitcher />
 			<ThemeSwitchButton />
