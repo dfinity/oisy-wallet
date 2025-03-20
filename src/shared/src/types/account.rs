@@ -136,6 +136,21 @@ pub enum BtcAddress {
     /// - <https://en.bitcoin.it/wiki/BIP_0173>
     /// - <https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki>
     P2WPKH(String),
+    /// Pay-to-Witness-Script-Hash (P2WSH)
+    ///
+    /// Pay-to-Witness-Script-Hash (P2WSH) is the segwit variant of P2SH. The main advantage to
+    /// using P2WSH over P2SH is that it can help lower transaction fees, and the primary reason to
+    /// use a script hash instead of a public key hash is to accommodate multisig arrangements.
+    ///
+    /// ## Format
+    /// P2WSH addresses are exactly 62 characters in length, starting with `bc1p`.
+    ///
+    /// ## Example
+    /// - `bc1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqgf6hak`
+    ///
+    /// ## Reference
+    /// - <https://en.bitcoin.it/wiki/BIP_0173>
+    P2WSH(String),
     /// Segwit format
     ///
     /// The Bitcoin network’s scalability problems were addressed with the
