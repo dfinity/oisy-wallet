@@ -772,11 +772,13 @@ pub async fn step_migration() {
     };
 }
 
-/// Saves a user snapshot.
+/// Saves a snapshot of the user's account.
+#[update(guard = "may_write_user_data")]
 pub fn set_snapshot(_snapshot: UserSnapshot) {
     todo!()
 }
-/// Saves a user snapshot.
+/// Gets the caller's last snapshot.
+#[query(guard = "may_read_user_data")]
 pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
 }
