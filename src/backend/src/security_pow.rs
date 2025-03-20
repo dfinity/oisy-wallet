@@ -77,8 +77,8 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 
     // we reject any request from a principle without a user profile
     if !exists_profile(stored_principal) {
-        ic_cdk::println!("No user profile exists for {} found", principal.to_text());
-        // TODO uncomment this: return Err(CreateChallengeError::MissingUserProfile);
+        ic_cdk::println!("No user profile exists for {}", principal.to_text());
+        return Err(CreateChallengeError::MissingUserProfile);
     }
 
     let difficulty: u32;
@@ -131,6 +131,12 @@ pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
     let principal = caller();
     let stored_principal = StoredPrincipal(principal);
 
+    // we reject any request from a principle without a user profile
+    if !exists_profile(stored_principal) {
+        ic_cdk::println!("No user profile exists for {}", principal.to_text());
+        return Err(TestAllowSigningError::MissingUserProfile);
+    }
+
     let stored_challenge = get_pow_challenge().ok_or_else(|| {
         ic_cdk::println!("No stored challenge found for {}", principal);
         TestAllowSigningError::PowMissingChallange
@@ -145,7 +151,7 @@ pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
         stored_challenge.start_timestamp_ns,
     ) {
         ic_cdk::println!(
-            "The provided nonce is valid MIAU (solve_duration={}ms)",
+            "The provided nonce is valid (solve_duration={}ms)",
             Duration::from_nanos(solve_duration_ns).as_millis()
         );
     } else {

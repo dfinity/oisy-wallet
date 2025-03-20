@@ -2,9 +2,12 @@
 
 use candid::Principal;
 use sha2::{Digest, Sha256};
-use shared::types::security_pow::{
-    CreateChallengeError, CreateChallengeResponse, TestAllowSigningError, TestAllowSigningRequest,
-    TestAllowSigningResponse,
+use shared::types::{
+    security_pow::{
+        CreateChallengeError, CreateChallengeResponse, TestAllowSigningError,
+        TestAllowSigningRequest, TestAllowSigningResponse,
+    },
+    user_profile::UserProfile,
 };
 
 use crate::utils::{
@@ -78,22 +81,46 @@ pub fn call_test_allow_signing(
     return wrapped_result.expect("that create_pow_challenge exists");
 }
 
+pub fn call_create_user_profile(
+    pic_setup: &PicBackend,
+    caller: Principal,
+) -> Result<UserProfile, String> {
+    let result = pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
+    assert!(result.is_ok());
+    result
+}
+
 // -------------------------------------------------------------------------------------------------
 // - The integration tests for testing correct behaviour of the PoW  Protection
 // -------------------------------------------------------------------------------------------------
+
 #[test]
-fn test_pow_challenge_should_succeed() {
+fn test_pow_challenge_should_succeed_with_user_profile() {
     let pic_setup = setup();
-    // A random unauthorized user.
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
+
     let result = call_create_pow_challenge(&pic_setup, caller);
     assert!(result.is_ok());
 }
-
 #[test]
-fn test_pow_challenge_should_succeed_if_not_expired() {
+fn test_pow_challenge_should_fail_without_user_profile() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let result = call_create_pow_challenge(&pic_setup, caller);
+
+    assert_eq!(
+        result.unwrap_err(),
+        CreateChallengeError::MissingUserProfile
+    );
+}
+
+#[test]
+fn test_pow_challenge_should_succeed_if_expired() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
 
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
@@ -106,9 +133,10 @@ fn test_pow_challenge_should_succeed_if_not_expired() {
 }
 
 #[test]
-fn test_pow_challenge_should_fail_if_expired() {
+fn test_pow_challenge_should_fail_if_not_expired() {
     let pic_setup = setup();
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
 
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
@@ -120,9 +148,8 @@ fn test_pow_challenge_should_fail_if_expired() {
 #[test]
 fn test_allow_signing_should_succeed_with_valid_nonce() {
     let pic_setup = setup();
-
-    // A random unauthorized user.
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
 
     let result = call_create_pow_challenge(&pic_setup, caller);
 
@@ -140,9 +167,8 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
 #[test]
 fn test_allow_signing_should_fail_with_invalid_nonce() {
     let pic_setup = setup();
-
-    // A random unauthorized user.
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
 
     let result = call_create_pow_challenge(&pic_setup, caller);
 
@@ -165,9 +191,8 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
 #[test]
 fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     let pic_setup = setup();
-
-    // A random unauthorized user.
     let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
 
     let result = call_create_pow_challenge(&pic_setup, caller);
 

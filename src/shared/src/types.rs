@@ -323,6 +323,7 @@ pub mod security_pow {
     pub enum TestAllowSigningError {
         PowMissingChallange,
         PowInvalidNonce,
+        MissingUserProfile,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
