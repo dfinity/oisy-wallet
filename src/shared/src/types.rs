@@ -313,6 +313,7 @@ pub mod security_pow {
         pub nonce: u64,
         pub difficulty: u32,
         pub start_timestamp_ns: u64,
+        pub expiry_timestamp_ns: u64,
     }
 
     // -------------------------------------------------------------------------------------------------

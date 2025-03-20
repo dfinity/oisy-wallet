@@ -15,10 +15,11 @@ pub const START_DIFFICULTY: u32 = 800_000;
 // Cycles per difficulty unit a principle will receive
 pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 100;
 
+use std::time::Duration;
+
 use ic_cdk::api::{caller, time};
 use sha2::{Digest, Sha256};
 use shared::types::security_pow::{CreateChallengeError, StoredChallenge, TestAllowSigningError};
-use std::time::Duration;
 
 use crate::{
     mutate_state, read_state,
@@ -172,8 +173,6 @@ pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
 
     #[allow(clippy::cast_lossless)]
     // Grant cycles proportional to difficulty
-    let granted_cycles = (stored_challenge.difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
-
     let granted_cycles = (stored_challenge.difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
 
     // Here we would proceed with granting signer permissions and record the granted cycles for

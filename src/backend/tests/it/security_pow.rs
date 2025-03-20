@@ -98,7 +98,8 @@ fn test_pow_challenge_should_succeed_if_not_expired() {
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
 
-    // TODO add time machine here
+    // TODO add time machine here to jump to the challenge expiration_date
+    // you can use err_1th_call.unwrap().expiry_timestamp_ns to get the expiry timestamp
 
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_2th_call.is_ok());
@@ -151,7 +152,7 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
     // emulates the javascript function running in the browser to create a valid nonce
     let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
-    // we can always assume the previously iterated nonce was invalid
+    // we can always assume the previously iterated nonce is invalid
     let invalid_nonce = nonce - 1;
 
     let result_allow_signing = call_test_allow_signing(&pic_setup, caller, invalid_nonce);
