@@ -12,7 +12,6 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
@@ -117,11 +116,6 @@ const emptyIdbEthAddress = (): Promise<void> => emptyIdbAddress(deleteIdbEthAddr
 const emptyIdbSolAddress = (): Promise<void> => emptyIdbAddress(deleteIdbSolAddressMainnet);
 
 // eslint-disable-next-line require-await
-const clearTestnetsOption = async () => {
-	testnetsStore.reset({ key: 'testnets' });
-};
-
-// eslint-disable-next-line require-await
 const clearSessionStorage = async () => {
 	sessionStorage.clear();
 };
@@ -139,12 +133,7 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([
-			emptyIdbBtcAddressMainnet(),
-			emptyIdbEthAddress(),
-			emptyIdbSolAddress(),
-			clearTestnetsOption()
-		]);
+		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), emptyIdbSolAddress()]);
 	}
 
 	await clearSessionStorage();
