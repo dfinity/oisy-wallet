@@ -1,18 +1,17 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { readable } from 'svelte/store';
 
 describe('ConvertAmountSource', () => {
 	const sendAmount = 20;
 	const totalFee = 10000n;
 	const exchangeRate = 0.01;
-	const defaultBalance = BigNumber.from(5000000n);
+	const defaultBalance = 5000000n;
 	const insufficientFunds = false;
 	const insufficientFundsForFee = false;
 	// balance - total fee
@@ -26,7 +25,7 @@ describe('ConvertAmountSource', () => {
 		totalFee
 	};
 
-	const mockContext = (balance: BigNumber = defaultBalance) =>
+	const mockContext = (balance: bigint = defaultBalance) =>
 		new Map([
 			[
 				CONVERT_CONTEXT_KEY,
@@ -136,7 +135,7 @@ describe('ConvertAmountSource', () => {
 	it('should not change sendAmount on max button click if balance is zero', async () => {
 		const { getByTestId, component } = render(ConvertAmountSource, {
 			props,
-			context: mockContext(ZERO)
+			context: mockContext(ZERO_BI)
 		});
 
 		await fireEvent.click(getByTestId(balanceTestId));
@@ -147,7 +146,7 @@ describe('ConvertAmountSource', () => {
 	it('should display max button value in a correct format', () => {
 		const { getByTestId } = render(ConvertAmountSource, {
 			props,
-			context: mockContext(BigNumber.from(50000438709n))
+			context: mockContext(50000438709n)
 		});
 
 		// balance - total fee

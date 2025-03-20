@@ -1,3 +1,4 @@
+import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import { derived, type Readable } from 'svelte/store';
 
@@ -154,4 +155,13 @@ export const modalWalletConnect: Readable<boolean> = derived(
 	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],
 	([$modalWalletConnectAuth, $modalWalletConnectSign, $modalWalletConnectSend]) =>
 		$modalWalletConnectAuth || $modalWalletConnectSign || $modalWalletConnectSend
+);
+
+export const modalSettingsState: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'settings'
+);
+export const modalSettingsData: Readable<SettingsModalType> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.data as SettingsModalType
 );
