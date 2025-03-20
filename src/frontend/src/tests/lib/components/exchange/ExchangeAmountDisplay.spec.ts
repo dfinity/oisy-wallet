@@ -1,0 +1,61 @@
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
+import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
+import { formatUSD } from '$lib/utils/format.utils';
+import { render } from '@testing-library/svelte';
+
+describe('ExchangeAmountDisplay', () => {
+	const mockAmount = 123456789123n;
+	const mockDecimals = 3;
+	const mockSymbol = SOLANA_TOKEN.symbol;
+
+	const mockProps = {
+		amount: mockAmount,
+		decimals: mockDecimals,
+		symbol: mockSymbol,
+		exchangeRate: undefined
+	};
+
+	const mockAmountNumber = Number(mockAmount) / 10 ** mockDecimals;
+
+	const mockExchangeRateBigAmount = (EXCHANGE_USD_AMOUNT_THRESHOLD * 2) / mockAmountNumber;
+	const mockExchangeRateSmallAmount = EXCHANGE_USD_AMOUNT_THRESHOLD / 2 / mockAmountNumber;
+
+	const expectedAmount = `${mockAmountNumber} ${mockSymbol}`;
+
+	it('should render the amount', () => {
+		const { getByText } = render(ExchangeAmountDisplay, { props: mockProps });
+
+		expect(getByText(expectedAmount)).toBeInTheDocument();
+	});
+
+	it('should not render the USD amount if the exchange rate is not given', () => {
+		const { queryByText } = render(ExchangeAmountDisplay, { props: mockProps });
+
+		expect(queryByText('( ')).not.toBeInTheDocument();
+		expect(queryByText('( < ')).not.toBeInTheDocument();
+		expect(queryByText(' )')).not.toBeInTheDocument();
+	});
+
+	describe('with exchange rate', () => {
+		it('should correctly render the USD amount if it is greater or equal than the threshold', () => {
+			const expectedUsdAmount = `( ${formatUSD({ value: mockAmountNumber * mockExchangeRateBigAmount })} )`;
+
+			const { getByText } = render(ExchangeAmountDisplay, {
+				props: { ...mockProps, exchangeRate: mockExchangeRateBigAmount }
+			});
+
+			expect(getByText(expectedUsdAmount)).toBeInTheDocument();
+		});
+
+		it('should render the threshold if the USD amount is less the threshold', () => {
+			const expectedUsdAmount = `( < ${formatUSD({ value: EXCHANGE_USD_AMOUNT_THRESHOLD })} )`;
+
+			const { getByText } = render(ExchangeAmountDisplay, {
+				props: { ...mockProps, exchangeRate: mockExchangeRateSmallAmount }
+			});
+
+			expect(getByText(expectedUsdAmount)).toBeInTheDocument();
+		});
+	});
+});
