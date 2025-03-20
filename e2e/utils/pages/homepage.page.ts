@@ -365,6 +365,7 @@ abstract class Homepage {
 	}
 
 	private async viewportAdjuster(): Promise<void> {
+		await this.waitForLoadState();
 		const maxPageHeight = await this.#page.evaluate(() =>
 			Math.max(
 				document.body.scrollHeight,
