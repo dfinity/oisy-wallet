@@ -1,4 +1,5 @@
 import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend.did';
+import type { IcToken } from '$icp/types/ic-token';
 import type { ProviderFee } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
@@ -46,3 +47,6 @@ export const getNetworkFee = ({
 		token
 	};
 };
+
+export const getKongIcTokenIdentifier = (token: Token) =>
+	`IC.${(token as IcToken).ledgerCanisterId}`;
