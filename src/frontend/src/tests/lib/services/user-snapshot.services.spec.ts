@@ -5,9 +5,8 @@ import type {
 	Transaction_Spl,
 	UserSnapshot
 } from '$declarations/rewards/rewards.did';
-import * as networkEnv from '$env/networks/networks.env';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
 import * as airdropEnv from '$env/reward-campaigns.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -17,7 +16,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND, ZERO } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, ZERO_BI } from '$lib/constants/app.constants';
 import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
@@ -44,7 +43,6 @@ import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
-import { BigNumber } from 'ethers';
 import { readable } from 'svelte/store';
 
 vi.mock('$lib/api/reward.api', () => ({
@@ -203,7 +201,7 @@ describe('user-snapshot.services', () => {
 			);
 			// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 			vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-			vi.spyOn(networkEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+			vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
 				ETHEREUM_NETWORK_ID,
 				SEPOLIA_NETWORK_ID
 			]);
@@ -219,23 +217,23 @@ describe('user-snapshot.services', () => {
 
 			balancesStore.set({
 				tokenId: ICP_TOKEN.id,
-				data: { data: BigNumber.from(mockIcAmount * 2n), certified }
+				data: { data: mockIcAmount * 2n, certified }
 			});
 			balancesStore.set({
 				tokenId: ETHEREUM_TOKEN.id,
-				data: { data: BigNumber.from(mockIcAmount + mockSplAmount), certified }
+				data: { data: mockIcAmount + mockSplAmount, certified }
 			});
 			balancesStore.set({
 				tokenId: SOLANA_TOKEN.id,
-				data: { data: BigNumber.from(mockSplAmount * 5n), certified }
+				data: { data: mockSplAmount * 5n, certified }
 			});
 			balancesStore.set({
 				tokenId: mockValidIcToken.id,
-				data: { data: BigNumber.from(mockIcAmount), certified }
+				data: { data: mockIcAmount, certified }
 			});
 			balancesStore.set({
 				tokenId: mockValidSplToken.id,
-				data: { data: BigNumber.from(mockSplAmount), certified }
+				data: { data: mockSplAmount, certified }
 			});
 
 			icTransactionsStore.prepend({
@@ -312,7 +310,7 @@ describe('user-snapshot.services', () => {
 		it('should not include ICRC testnet tokens', async () => {
 			balancesStore.set({
 				tokenId: mockIcrcTestnetToken.id,
-				data: { data: BigNumber.from(987n), certified }
+				data: { data: 987n, certified }
 			});
 
 			await registerUserSnapshot();
@@ -326,11 +324,11 @@ describe('user-snapshot.services', () => {
 		it('should not include tokens with zero balance', async () => {
 			balancesStore.set({
 				tokenId: mockValidIcToken.id,
-				data: { data: ZERO, certified }
+				data: { data: ZERO_BI, certified }
 			});
 			balancesStore.set({
 				tokenId: ETHEREUM_TOKEN.id,
-				data: { data: ZERO, certified }
+				data: { data: ZERO_BI, certified }
 			});
 
 			await registerUserSnapshot();

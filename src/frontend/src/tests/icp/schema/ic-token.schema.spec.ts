@@ -1,4 +1,4 @@
-import { SEPOLIA_NETWORK } from '$env/networks/networks.env';
+import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID,
