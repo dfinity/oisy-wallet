@@ -5,6 +5,7 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 
 	export let token: Token;
+	export let disabled = false;
 	export let disableTabSelector = false;
 	export let styleClass = '';
 
@@ -15,11 +16,12 @@
 <div class={`group flex gap-3 sm:gap-8 ${styleClass}`}>
 	<a
 		class="unstyled flex-1 no-underline"
-		href={url}
+		href={disabled ? undefined : url}
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol
 		})}
-		tabindex={disableTabSelector ? -1 : 0}
+		tabindex={disabled ? -1 : 0}
+		on:click
 	>
 		<slot />
 	</a>
