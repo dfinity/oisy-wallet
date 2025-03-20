@@ -403,6 +403,24 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
+	private async viewportAdjuster(): Promise<void> {
+		const maxPageHeight = await this.#page.evaluate(() =>
+			Math.max(
+				document.body.scrollHeight,
+				document.documentElement.scrollHeight,
+				document.body.offsetHeight,
+				document.documentElement.offsetHeight,
+				document.body.clientHeight,
+				document.documentElement.clientHeight
+			)
+		);
+
+		const currentViewport = this.#page.viewportSize();
+		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
+
+		await this.#page.setViewportSize({ height: maxPageHeight, width });
+	}
+
 	async takeScreenshot(
 		{
 			isMobile = false,
@@ -416,6 +434,11 @@ abstract class Homepage {
 	): Promise<void> {
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
+		}
+
+		if (isNullish(screenshotTarget) && !isMobile) {
+			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
+			await this.viewportAdjuster();
 		}
 
 		const element = screenshotTarget ?? this.#page;
