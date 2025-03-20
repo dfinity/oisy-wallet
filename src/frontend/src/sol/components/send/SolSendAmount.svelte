@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -11,7 +10,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -26,6 +25,7 @@
 	} from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: SolAmountAssertionError | undefined;
@@ -48,22 +48,22 @@
 				? SOLANA_LOCAL_TOKEN
 				: SOLANA_TOKEN;
 
-	$: customValidate = (userAmount: BigNumber): Error | undefined => {
-		if (invalidAmount(userAmount.toNumber()) || userAmount.isZero()) {
+	$: customValidate = (userAmount: bigint): Error | undefined => {
+		if (invalidAmount(Number(userAmount)) || userAmount === ZERO_BI) {
 			return new SolAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
 		if (nonNullish($sendBalance) && $sendTokenStandard === 'solana') {
-			const total = userAmount.add($fee ?? ZERO);
+			const total = userAmount + ($fee ?? ZERO_BI);
 
-			if (total.gt($sendBalance)) {
+			if (total > $sendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
 			}
 
 			return;
 		}
 
-		if (userAmount.gt($sendBalance ?? ZERO)) {
+		if (userAmount > ($sendBalance ?? ZERO_BI)) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds);
 		}
 
