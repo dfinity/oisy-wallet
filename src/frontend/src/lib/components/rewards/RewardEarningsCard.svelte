@@ -19,7 +19,7 @@
 		value: amount.toBigInt(),
 		unitName: token?.decimals,
 		displayDecimals: EIGHT_DECIMALS,
-		showPlusSign: true
+		showPlusSign: false
 	});
 
 	let displayUsdAmount: string;
@@ -46,7 +46,7 @@
 				{#if loading}
 					<div class="relative mb-3"><SkeletonText /></div>
 				{:else}
-					{`${displayAmount}${token.symbol}`}
+					{`${displayAmount} ${token.symbol}`}
 				{/if}
 			</span>
 			<span class="w-full">
