@@ -6,6 +6,7 @@ use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
+use crate::types::networks::{NetworkSettings, NetworkSettingsFor, SaveNetworksSettingsError};
 use crate::{
     types::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
@@ -174,6 +175,49 @@ impl StoredUserProfile {
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);
         new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with networks map set to the specified value.
+    ///
+    /// If overwrite is true, the networks map will be replaced with the new value.
+    /// If overwrite is false, the new value will be merged with the existing networks map.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_networks(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        networks: NetworkSettingsMap,
+        overwrite: bool,
+    ) -> Result<StoredUserProfile, SaveNetworksSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveNetworksSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        let new_networks = if overwrite {
+            networks // Directly assign if overwrite is true
+        } else {
+            let mut merged = settings.networks.networks.clone();
+            merged.extend(networks); // Updates existing keys and inserts new ones
+            merged
+        };
+
+        if settings.networks.networks == new_networks {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.clone_with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.networks = new_networks;
+            Some(settings)
+        };
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
