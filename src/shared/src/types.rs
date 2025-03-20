@@ -10,6 +10,7 @@ pub mod account;
 pub mod network;
 pub mod number;
 pub mod snapshot;
+pub mod token_id;
 
 #[cfg(test)]
 mod tests;

@@ -1,6 +1,6 @@
 //! A moment-in-time summary of an account.
 
-use candid::{CandidType, Deserialize, Principal};
+use candid::{CandidType, Deserialize};
 use serde::Serialize;
 
 use crate::types::{
@@ -10,6 +10,7 @@ use crate::types::{
         InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet, SolanaTestnet,
     },
     number::ComparableFloat,
+    token_id::{BtcTokenId, EthTokenId, IcrcTokenId, SolTokenId, TokenId},
     transaction::Transaction,
 };
 
@@ -24,6 +25,7 @@ pub struct AccountSnapshot<N, A, T>
 where
     N: Network,
     A: AccountId<N>,
+    T: TokenId<N>,
 {
     pub timestamp: u64,
     pub network: N,
@@ -37,22 +39,22 @@ where
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum AccountSnapshotFor {
-    Icrcv2(AccountSnapshot<InternetComputer, Icrcv2AccountId, Principal>),
-    SolDevnet(AccountSnapshot<SolanaDevnet, SolPrincipal, Principal>),
-    SolMainnet(AccountSnapshot<SolanaMainnet, SolPrincipal, Principal>),
-    SolTestnet(AccountSnapshot<SolanaTestnet, SolPrincipal, Principal>),
-    SolLocal(AccountSnapshot<SolanaLocal, SolPrincipal, Principal>),
-    SplMainnet(AccountSnapshot<SolanaMainnet, SolPrincipal, SolPrincipal>),
-    SplDevnet(AccountSnapshot<SolanaDevnet, SolPrincipal, SolPrincipal>),
-    SplTestnet(AccountSnapshot<SolanaTestnet, SolPrincipal, SolPrincipal>),
-    SplLocal(AccountSnapshot<SolanaLocal, SolPrincipal, SolPrincipal>),
-    BtcMainnet(AccountSnapshot<BitcoinMainnet, BtcAddress, Principal>),
-    BtcTestnet(AccountSnapshot<BitcoinTestnet, BtcAddress, Principal>),
-    BtcRegtest(AccountSnapshot<BitcoinRegtest, BtcAddress, Principal>),
-    EthMainnet(AccountSnapshot<EthereumMainnet, EthAddress, Principal>),
-    EthSepolia(AccountSnapshot<EthereumSepolia, EthAddress, Principal>),
-    Erc20Mainnet(AccountSnapshot<EthereumMainnet, EthAddress, Principal>),
-    Erc20Sepolia(AccountSnapshot<EthereumSepolia, EthAddress, Principal>),
+    Icrcv2(AccountSnapshot<InternetComputer, Icrcv2AccountId, IcrcTokenId>),
+    SolDevnet(AccountSnapshot<SolanaDevnet, SolPrincipal, SolTokenId>),
+    SolMainnet(AccountSnapshot<SolanaMainnet, SolPrincipal, SolTokenId>),
+    SolTestnet(AccountSnapshot<SolanaTestnet, SolPrincipal, SolTokenId>),
+    SolLocal(AccountSnapshot<SolanaLocal, SolPrincipal, SolTokenId>),
+    SplMainnet(AccountSnapshot<SolanaMainnet, SolPrincipal, SolTokenId>),
+    SplDevnet(AccountSnapshot<SolanaDevnet, SolPrincipal, SolTokenId>),
+    SplTestnet(AccountSnapshot<SolanaTestnet, SolPrincipal, SolTokenId>),
+    SplLocal(AccountSnapshot<SolanaLocal, SolPrincipal, SolTokenId>),
+    BtcMainnet(AccountSnapshot<BitcoinMainnet, BtcAddress, BtcTokenId>),
+    BtcTestnet(AccountSnapshot<BitcoinTestnet, BtcAddress, BtcTokenId>),
+    BtcRegtest(AccountSnapshot<BitcoinRegtest, BtcAddress, BtcTokenId>),
+    EthMainnet(AccountSnapshot<EthereumMainnet, EthAddress, EthTokenId>),
+    EthSepolia(AccountSnapshot<EthereumSepolia, EthAddress, EthTokenId>),
+    Erc20Mainnet(AccountSnapshot<EthereumMainnet, EthAddress, EthTokenId>),
+    Erc20Sepolia(AccountSnapshot<EthereumSepolia, EthAddress, EthTokenId>),
 }
 
 // Accessors for fields common to all variants:

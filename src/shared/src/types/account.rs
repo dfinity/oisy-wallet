@@ -10,6 +10,7 @@
 use candid::{CandidType, Deserialize, Principal};
 use serde::Serialize;
 
+use super::token_id::TokenId;
 use crate::types::network::marker_trait::{
     BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
     InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet, SolanaTestnet,
@@ -50,6 +51,10 @@ impl AccountId<SolanaMainnet> for SolPrincipal {}
 impl AccountId<SolanaDevnet> for SolPrincipal {}
 impl AccountId<SolanaTestnet> for SolPrincipal {}
 impl AccountId<SolanaLocal> for SolPrincipal {}
+impl TokenId<SolanaMainnet> for SolPrincipal {}
+impl TokenId<SolanaDevnet> for SolPrincipal {}
+impl TokenId<SolanaTestnet> for SolPrincipal {}
+impl TokenId<SolanaLocal> for SolPrincipal {}
 
 /// A bitcoin address
 ///
@@ -195,3 +200,5 @@ pub enum EthAddress {
 }
 impl AccountId<EthereumMainnet> for EthAddress {}
 impl AccountId<EthereumSepolia> for EthAddress {}
+impl TokenId<EthereumMainnet> for EthAddress {}
+impl TokenId<EthereumSepolia> for EthAddress {}
