@@ -1,13 +1,13 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
+import type { Balance } from '$lib/types/balance';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 interface CommonParams {
-	userAmount: BigNumber;
-	balance: BigNumber;
+	userAmount: bigint;
+	balance: Balance;
 	fee?: bigint;
 }
 
@@ -16,11 +16,11 @@ interface CommonParamsWithMinter extends CommonParams {
 }
 
 interface CommonParamsWithBalanceForFee extends CommonParams {
-	balanceForFee: BigNumber;
+	balanceForFee: Balance;
 }
 
 const assertBalance = ({ userAmount, balance }: CommonParams): TokenActionErrorType => {
-	if (userAmount.gt(balance)) {
+	if (userAmount > balance) {
 		return 'insufficient-funds';
 	}
 };
@@ -30,7 +30,7 @@ const assertUserAmountWithFee = ({
 	balance,
 	fee
 }: CommonParams): TokenActionErrorType => {
-	if (nonNullish(fee) && userAmount.add(fee).gt(balance)) {
+	if (nonNullish(fee) && userAmount + fee > balance) {
 		return 'insufficient-funds-for-fee';
 	}
 };
@@ -39,7 +39,7 @@ const assertMinterInfo = ({
 	minterInfo,
 	userAmount
 }: {
-	userAmount: BigNumber;
+	userAmount: bigint;
 	minterInfo: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
 }): TokenActionErrorType => {
 	if (isNullish(minterInfo)) {
@@ -55,7 +55,7 @@ const assertMinterInfo = ({
 				? (fromNullable(data.minimum_withdrawal_amount) ?? 0n)
 				: undefined;
 
-	if (nonNullish(minimumAmount) && userAmount.toBigInt() < minimumAmount) {
+	if (nonNullish(minimumAmount) && userAmount < minimumAmount) {
 		return 'minimum-amount-not-reached';
 	}
 
@@ -75,7 +75,7 @@ export const assertErc20Amount = ({
 		return assertBalanceError;
 	}
 
-	if (nonNullish(fee) && balanceForFee.lt(fee)) {
+	if (nonNullish(fee) && balanceForFee < fee) {
 		return 'insufficient-funds-for-fee';
 	}
 };
@@ -106,7 +106,7 @@ export const assertCkEthAmount = ({
 		return assertMinterInfoError;
 	}
 
-	if (nonNullish(fee) && userAmount.lt(fee)) {
+	if (nonNullish(fee) && userAmount < fee) {
 		return 'amount-less-than-ledger-fee';
 	}
 
@@ -119,7 +119,9 @@ export const assertCkErc20Amount = ({
 	balanceForFee,
 	fee,
 	ethereumEstimateFee
-}: CommonParamsWithBalanceForFee & { ethereumEstimateFee?: bigint }): TokenActionErrorType => {
+}: CommonParamsWithBalanceForFee & {
+	ethereumEstimateFee?: bigint;
+}): TokenActionErrorType => {
 	const assertBalanceError = assertBalance({ userAmount, balance });
 	if (nonNullish(assertBalanceError)) {
 		return assertBalanceError;
@@ -128,7 +130,7 @@ export const assertCkErc20Amount = ({
 	if (
 		nonNullish(balanceForFee) &&
 		nonNullish(ethereumEstimateFee) &&
-		balanceForFee.lt(ethereumEstimateFee)
+		balanceForFee < ethereumEstimateFee
 	) {
 		return 'insufficient-funds-for-fee';
 	}
