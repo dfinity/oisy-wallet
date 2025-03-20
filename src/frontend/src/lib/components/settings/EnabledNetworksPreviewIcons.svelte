@@ -11,6 +11,9 @@
 	import type { Network } from '$lib/types/network';
 	import { logoSizes } from '$lib/constants/components.constants';
 
+	export let numberOfIcons: number = 4;
+
+	// todo: take from store
 	const networks = {
 		[ETHEREUM_NETWORK_ID]: {
 			enabled: true,
@@ -33,13 +36,13 @@
 			isTestnet: false
 		},
 		[BTC_TESTNET_NETWORK_ID]: {
-			enabled: false,
+			enabled: true,
 			isTestnet: true
 		}
 	};
 
-	let enabledList: Network[];
-	$: enabledList = (() => {
+	// todo: type networks correcty
+	const getEnabledList = (networks: any) => {
 		const enabled = Object.getOwnPropertySymbols(networks ?? {})
 			.map((k) => ({ key: k, value: networks[k] }))
 			.filter(({ value }) => value.enabled);
@@ -48,14 +51,17 @@
 			const { key: netId } = n;
 			return SUPPORTED_NETWORKS.find((sn) => sn.id.toString() === netId.toString());
 		}) as Network[];
-	})();
+	};
+
+	let enabledList: Network[];
+	$: enabledList = getEnabledList(networks);
 
 	let previewList: Network[];
-	$: previewList = enabledList.slice(0, 4);
+	$: previewList = enabledList.slice(0, numberOfIcons);
 </script>
 
 <div class="mr-2 mt-1 flex flex-row">
-	{#each enabledList.slice(0, 4) as network}
+	{#each previewList as network}
 		<div class="-ml-1 flex">
 			<NetworkLogo size="xxs" {network} blackAndWhite />
 		</div>

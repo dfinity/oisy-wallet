@@ -102,8 +102,8 @@
 
 			<Button link on:click={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
 				>Edit ></Button
-			></svelte:fragment
-		>
+			>
+		</svelte:fragment>
 		<svelte:fragment slot="info">
 			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
 		</svelte:fragment>

@@ -101,7 +101,7 @@
 				<svelte:fragment slot="value"
 					><Toggle
 						ariaLabel="Enable/Disable"
-						checked={enabledNetworks?.[network.id].enabled ?? false}
+						checked={enabledNetworks?.[network.id]?.enabled ?? false}
 						on:nnsToggle={() => toggleNetwork(network)}
 					/></svelte:fragment
 				>
@@ -122,7 +122,7 @@
 					<svelte:fragment slot="value"
 						><Toggle
 							ariaLabel="Enable/Disable"
-							checked={enabledNetworks?.[network.id].enabled ?? false}
+							checked={enabledNetworks?.[network.id]?.enabled ?? false}
 							on:nnsToggle={() => toggleNetwork(network)}
 						/></svelte:fragment
 					>
