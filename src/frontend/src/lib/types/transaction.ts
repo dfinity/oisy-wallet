@@ -42,6 +42,11 @@ export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeeP
 	gas: BigNumber;
 };
 
+export type RequiredTransactionFeeData = Pick<TransactionFeeData, 'gas'> & {
+	maxFeePerGas: BigNumber;
+	maxPriorityFeePerGas: BigNumber;
+};
+
 export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
