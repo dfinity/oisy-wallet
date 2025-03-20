@@ -74,8 +74,6 @@ const fetchCoingecko = async <T extends CoingeckoSimplePrice | CoingeckoSimpleTo
 		throw new Error('Goincecko API response not ok.');
 	}
 
-	console.log( await response.json());
-
 	return response.json();
 };
 
