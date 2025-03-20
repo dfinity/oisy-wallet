@@ -222,7 +222,7 @@ describe('sol-signatures.services', () => {
 			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
 			assert(
 				notEmptyString(ALCHEMY_API_KEY),
-				'`ALCHEMY_API_KEY` is empty, please provide a valid key in the env file as `VITE_ALCHEMY_API_KEY`'
+				'`ALCHEMY_API_KEY` is empty, please provide a valid key in the `.env` file as `VITE_ALCHEMY_API_KEY`'
 			);
 
 			// We use a real address to test the function. Ideally, the address is a very active one.
