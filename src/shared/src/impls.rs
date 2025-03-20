@@ -211,7 +211,7 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         new_profile.settings = {
             let mut settings = new_profile.settings.unwrap_or_default();
             settings.networks.networks = new_networks;
