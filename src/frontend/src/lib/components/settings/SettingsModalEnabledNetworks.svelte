@@ -17,13 +17,14 @@
 	import { onMount } from 'svelte';
 	import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { enabledNetworksStore } from '$lib/stores/settings.store';
 
 	onMount(() => {
 		emit({ message: 'oisyRefreshUserProfile' });
 	});
 
-	let enabledNetworksData: { [id: symbol]: boolean };
-	$: enabledNetworksData = { ...$userSettings?.settings?.enabledNetworks };
+	let enabledNetworksData: { [p: symbol]: boolean } | null | undefined;
+	$: enabledNetworksData = $enabledNetworksStore;
 
 	let enabledTestnet: boolean;
 	$: enabledTestnet = $testnets;
@@ -61,7 +62,7 @@
 			currentUserVersion: $userProfileVersion
 		});
 
-		emit({ message: 'oisyRefreshUserProfile' });
+		await emit({ message: 'oisyRefreshUserProfile' });
 
 		modalStore.close();
 	};
@@ -113,7 +114,7 @@
 					<svelte:fragment slot="value"
 						><Toggle
 							ariaLabel="Enable/Disable"
-							checked={enabledNetworksData?.[network.id]}
+							checked={enabledNetworksData?.[network.id] ?? false}
 							on:nnsToggle={() => toggleNetwork(network)}
 						/></svelte:fragment
 					>
