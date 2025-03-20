@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
-	import { ETHEREUM_NETWORK } from '$env/networks/networks.env';
+	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';

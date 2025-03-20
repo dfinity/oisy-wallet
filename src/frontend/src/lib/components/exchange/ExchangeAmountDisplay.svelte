@@ -16,19 +16,21 @@
 	$: usdAmount = nonNullish(exchangeRate)
 		? usdValue({
 				decimals,
-				balance: amount,
+				balance: amount.toBigInt(),
 				exchangeRate
 			})
 		: undefined;
+
+	let displayAmount: string;
+	$: displayAmount = `${formatToken({
+		value: amount.toBigInt(),
+		unitName: decimals,
+		displayDecimals: EIGHT_DECIMALS
+	})} ${symbol}`;
 </script>
 
 <div transition:fade class="flex gap-4">
-	{formatToken({
-		value: amount,
-		unitName: decimals,
-		displayDecimals: EIGHT_DECIMALS
-	})}
-	{symbol}
+	{displayAmount}
 
 	{#if nonNullish(usdAmount)}
 		<div class="text-tertiary">

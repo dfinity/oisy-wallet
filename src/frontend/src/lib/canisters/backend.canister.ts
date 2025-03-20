@@ -21,7 +21,8 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
 	BtcSelectUserUtxosFeeParams,
-	GetUserProfileResponse
+	GetUserProfileResponse,
+	SetUserShowTestnetsParams
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
@@ -188,6 +189,18 @@ export class BackendCanister extends Canister<BackendService> {
 
 		await add_user_hidden_dapp_id({
 			dapp_id: dappId,
+			current_user_version: toNullable(currentUserVersion)
+		});
+	};
+
+	setUserShowTestnets = async ({
+		showTestnets,
+		currentUserVersion
+	}: SetUserShowTestnetsParams): Promise<void> => {
+		const { set_user_show_testnets } = this.caller({ certified: true });
+
+		await set_user_show_testnets({
+			show_testnets: showTestnets,
 			current_user_version: toNullable(currentUserVersion)
 		});
 	};
