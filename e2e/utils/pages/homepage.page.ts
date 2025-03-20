@@ -375,10 +375,8 @@ abstract class Homepage {
 				document.documentElement.clientHeight
 			)
 		);
-
 		const currentViewport = this.#page.viewportSize();
 		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
-
 		await this.#page.setViewportSize({ height: maxPageHeight, width });
 	}
 
