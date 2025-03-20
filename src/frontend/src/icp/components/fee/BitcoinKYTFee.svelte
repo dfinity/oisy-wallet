@@ -1,7 +1,6 @@
 <script lang="ts">
 	// TODO: component will be removed within migration to the new Send flow
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';

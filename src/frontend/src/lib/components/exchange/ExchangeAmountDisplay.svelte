@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
@@ -15,10 +14,10 @@
 	let usdAmount: number | undefined;
 	$: usdAmount = nonNullish(exchangeRate)
 		? usdValue({
-				decimals,
-				balance: amount,
-				exchangeRate
-			})
+			decimals,
+			balance: amount,
+			exchangeRate
+		})
 		: undefined;
 
 	let displayAmount: string;
