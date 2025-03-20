@@ -355,7 +355,7 @@ abstract class Homepage {
 			const selector = `[data-tid="${testId}"]`;
 			const locator = this.#page.locator(selector);
 			await locator.evaluate((element) => {
-				element.scrollTop = 0;
+				element.scrollTo(0, 0);
 			});
 		}
 	}
