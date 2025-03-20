@@ -6,7 +6,7 @@ use ic_stable_structures::{
 };
 use shared::types::{
     custom_token::CustomToken, security_pow::StoredChallenge, token::UserToken,
-    user_profile::StoredUserProfile, Config, Expirable, ExpiryBTreeMapWrapper, Timestamp,
+    user_profile::StoredUserProfile, Config, Expirable, Timestamp,
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -18,7 +18,7 @@ pub type UserProfileMap =
     StableBTreeMap<(Timestamp, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 pub type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
-pub type PowChallengeMap = ExpiryBTreeMapWrapper<StoredPrincipal, Candid<StoredChallenge>, VMem>;
+pub type PowChallengeMap = StableBTreeMap<StoredPrincipal, Candid<StoredChallenge>, VMem>;
 
 #[derive(Default, Debug)]
 pub struct Candid<T>(pub T)
@@ -29,7 +29,7 @@ where
 pub struct StoredPrincipal(pub Principal);
 
 impl Expirable for Candid<StoredChallenge> {
-    fn get_expiry_timestamp(&self, ttl_seconds: u64) -> u64 {
-        self.timestamp + ttl_seconds * 1_000_000_000
+    fn get_expiry_timestamp(&self, ttl_sec: u64) -> u64 {
+        self.start_timestamp_ns + ttl_sec * 1_000_000_000
     }
 }

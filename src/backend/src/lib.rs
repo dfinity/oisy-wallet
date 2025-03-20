@@ -30,11 +30,11 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+        networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         security_pow::{
             CreateChallengeError, CreateChallengeResponse, TestAllowSigningError,
             TestAllowSigningRequest, TestAllowSigningResponse,
         },
-        networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         token::{UserToken, UserTokenId},
         user_profile::{
@@ -58,10 +58,8 @@ use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
-    security_pow::TARGET_DURATION_MS,
     token::{add_to_user_token, remove_from_user_token},
     types::PowChallengeMap,
-    user_profile::add_hidden_dapp_id,
     user_profile::{add_hidden_dapp_id, set_show_testnets},
 };
 
@@ -102,7 +100,7 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
-            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID), TARGET_DURATION_MS),
+            pow_challenge: PowChallengeMap::init(mm.borrow().get(POW_CHALLENGE_MEMORY_ID)),
             migration: None,
         })
     );
@@ -647,13 +645,11 @@ pub fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 ///   internal errors.
 #[update(guard = "may_write_user_data")]
 pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateChallengeError> {
-    ic_cdk::println!("Test Marco 1");
-
     let challenge = security_pow::create_pow_challenge().await?;
 
     Ok(CreateChallengeResponse {
         nonce: challenge.nonce, //challenge.nonce,
-        timestamp: challenge.timestamp,
+        start_timestamp_ns: challenge.start_timestamp_ns,
         difficulty: challenge.difficulty,
     })
 }
@@ -673,12 +669,9 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 pub fn test_allow_signing(
     request: TestAllowSigningRequest,
 ) -> Result<TestAllowSigningResponse, TestAllowSigningError> {
-    ic_cdk::println!("Test Marco 2");
-
+    ic_cdk::println!("update:test_allow_signing -> Start");
     let granted_cycles: u64 = security_pow::test_allow_signing(request.nonce)?;
-
-    ic_cdk::println!("Nonce was correct");
-
+    ic_cdk::println!("update:test_allow_signing -> End");
     Ok(TestAllowSigningResponse {
         allowed_cycles: granted_cycles,
     })

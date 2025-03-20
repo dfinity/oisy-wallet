@@ -114,7 +114,7 @@ pub type Version = u64;
 /// The value must have an associated timestamp.
 pub trait Expirable {
     /// Returns the timestamp (in seconds since UNIX epoch) when the value was inserted.
-    fn get_expiry_timestamp(&self, ttl_seconds: u64) -> u64;
+    fn get_expiry_timestamp(&self, ttl_sec: u64) -> u64;
 }
 
 pub trait TokenVersion: Debug {
@@ -283,14 +283,14 @@ pub mod bitcoin {
 }
 
 pub mod security_pow {
-    use std::hash::{Hash, Hasher};
-
     use super::{CandidType, Debug, Deserialize};
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredChallenge {
         pub nonce: u64,
-        pub timestamp: u64,
+        pub start_timestamp_ns: u64,
+        pub expiry_timestamp_ns: u64,
         pub difficulty: u32,
+        pub solved: bool,
     }
 
     /// A simple key-value store where each entry expires after a fixed TTL (Time To Live).
@@ -305,13 +305,14 @@ pub mod security_pow {
     pub enum CreateChallengeError {
         ChallengeInProgres(),
         RandomnessError(String),
+        MissingUserProfile,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct CreateChallengeResponse {
         pub nonce: u64,
-        pub timestamp: u64,
         pub difficulty: u32,
+        pub start_timestamp_ns: u64,
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -700,5 +701,5 @@ where
     M: Memory,
 {
     pub(crate) map: StableBTreeMap<K, V, M>,
-    pub(crate) ttl_seconds: u64,
+    pub(crate) ttl_ns: u64,
 }
