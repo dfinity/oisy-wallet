@@ -6,12 +6,11 @@ use serde::{de, Deserializer};
 #[cfg(test)]
 use strum::IntoEnumIterator;
 
-use crate::types::networks::NetworkSettingsMap;
 use crate::{
     types::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
-        networks::{SaveNetworksSettingsError, SaveTestnetsSettingsError},
+        networks::{NetworkSettingsMap, SaveNetworksSettingsError, SaveTestnetsSettingsError},
         settings::Settings,
         token::UserToken,
         user_profile::{
