@@ -162,7 +162,7 @@
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				}),
+				}).toBigInt(),
 				prioritizationFee: $prioritizationFeeStore ?? 0n,
 				destination,
 				source
