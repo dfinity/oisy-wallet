@@ -16,7 +16,7 @@
 	$: usdAmount = nonNullish(exchangeRate)
 		? usdValue({
 				decimals,
-				balance: amount,
+				balance: amount.toBigInt(),
 				exchangeRate
 			})
 		: undefined;
