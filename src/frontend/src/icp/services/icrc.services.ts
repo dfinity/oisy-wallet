@@ -194,6 +194,9 @@ const loadIcrcCustomData = ({
 	certified: boolean;
 	response: IcrcCustomTokenWithoutId[];
 }) => {
+
+	console.log({icrcTokens: tokens});
+	
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
@@ -227,6 +230,9 @@ export const loadDisabledIcrcTokensExchanges = async ({
 }: {
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
+
+	console.log({disabledIcrcTokens});
+	
 	const [currentErc20Prices, currentIcrcPrices] = await Promise.all([
 		exchangeRateERC20ToUsd(
 			disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
@@ -253,6 +259,9 @@ export const loadDisabledIcrcTokensExchanges = async ({
 			)
 		)
 	]);
+
+	console.log({currentErc20Prices});
+	
 
 	exchangeStore.set([
 		...(nonNullish(currentErc20Prices) ? [currentErc20Prices] : []),
