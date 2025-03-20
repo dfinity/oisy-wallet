@@ -1,4 +1,5 @@
 import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend.did';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
@@ -113,10 +114,14 @@ describe('swap utils', () => {
 	});
 
 	describe('getKongIcTokenIdentifier', () => {
-		it('returns correct kong token identifier', () => {
+		it('returns correct kong token identifier for IC token', () => {
 			expect(getKongIcTokenIdentifier(mockValidIcToken)).toBe(
 				`IC.${mockValidIcToken.ledgerCanisterId}`
 			);
+		});
+
+		it('returns empty string for non-IC token', () => {
+			expect(getKongIcTokenIdentifier(BTC_MAINNET_TOKEN)).toBe('');
 		});
 	});
 });
