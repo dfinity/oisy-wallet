@@ -34,10 +34,10 @@
 
 			utxosFee = nonNullish(network)
 				? await selectUtxosFeeApi({
-					amount,
-					network,
-					identity: $authIdentity
-				})
+						amount,
+						network,
+						identity: $authIdentity
+					})
 				: undefined;
 		} catch (err: unknown) {
 			toastsError({
