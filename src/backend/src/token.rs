@@ -18,7 +18,7 @@ pub fn add_to_user_token<T>(
 
     if let Some(existing_token) = tokens.iter_mut().find(|token| find(*token)) {
         if token.get_version() == existing_token.get_version() {
-            *existing_token = token.clone_with_incremented_version();
+            *existing_token = token.with_incremented_version();
         } else {
             ic_cdk::trap("Version mismatch, token update not allowed");
         }
@@ -29,7 +29,7 @@ pub fn add_to_user_token<T>(
             ));
         }
 
-        tokens.push(token.clone_with_initial_version());
+        tokens.push(token.with_initial_version());
     }
 
     user_token.insert(stored_principal, Candid(tokens));

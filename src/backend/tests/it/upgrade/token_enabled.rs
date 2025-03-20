@@ -96,7 +96,7 @@ fn test_update_user_token_after_upgrade() {
 
     let updated_results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(updated_results.is_ok());
 

@@ -63,7 +63,7 @@ fn test_update_user_token() {
 
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -109,8 +109,8 @@ fn test_list_user_tokens() {
     let results = pic_setup.query::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![
-        MOCK_TOKEN.clone_with_incremented_version(),
-        another_token.clone_with_incremented_version(),
+        MOCK_TOKEN.with_incremented_version(),
+        another_token.with_incremented_version(),
     ];
 
     assert!(results.is_ok());

@@ -41,13 +41,13 @@ impl TokenVersion for UserToken {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -92,13 +92,13 @@ impl TokenVersion for CustomToken {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -118,13 +118,13 @@ impl TokenVersion for StoredUserProfile {
         self.version
     }
 
-    fn clone_with_incremented_version(&self) -> Self {
+    fn with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(cloned.version.unwrap_or_default().wrapping_add(1));
         cloned
     }
 
-    fn clone_with_initial_version(&self) -> Self {
+    fn with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
@@ -165,7 +165,7 @@ impl StoredUserProfile {
         if profile_version != self.version {
             return Err(AddUserCredentialError::VersionMismatch);
         }
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         let user_credential = UserCredential {
             credential_type: credential_type.clone(),
             verified_date_timestamp: Some(now),
@@ -199,7 +199,7 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         new_profile.settings = {
             let mut settings = new_profile.settings.unwrap_or_default();
             settings.networks.testnets.show_testnets = show_testnets;
@@ -233,7 +233,7 @@ impl StoredUserProfile {
             return Ok(self.clone());
         }
 
-        let mut new_profile = self.clone_with_incremented_version();
+        let mut new_profile = self.with_incremented_version();
         let mut new_settings = new_profile.settings.clone().unwrap_or_default();
         let mut new_dapp_settings = new_settings.dapp.clone();
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
