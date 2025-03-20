@@ -414,22 +414,29 @@ abstract class Homepage {
 		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
 	}
 
-	private async viewportAdjuster(): Promise<void> {
-		const maxPageHeight = await this.#page.evaluate(() =>
-			Math.max(
-				document.body.scrollHeight,
-				document.documentElement.scrollHeight,
-				document.body.offsetHeight,
-				document.documentElement.offsetHeight,
-				document.body.clientHeight,
-				document.documentElement.clientHeight
-			)
+	async getStableViewportHeight(): Promise<number> {
+		let previousHeight: number;
+		let currentHeight: number = await this.#page.evaluate(
+			() => document.documentElement.scrollHeight
 		);
+
+		do {
+			previousHeight = currentHeight;
+			await this.#page.waitForTimeout(100);
+			currentHeight = await this.#page.evaluate(() => document.documentElement.scrollHeight);
+		} while (currentHeight !== previousHeight);
+
+		return currentHeight;
+	}
+
+	private async viewportAdjuster(): Promise<void> {
+		await this.waitForLoadState();
+		const stablePageHeight = await this.getStableViewportHeight();
 
 		const currentViewport = this.#page.viewportSize();
 		const width = currentViewport?.width ?? (await this.#page.evaluate(() => window.innerWidth));
 
-		await this.#page.setViewportSize({ height: maxPageHeight, width });
+		await this.#page.setViewportSize({ height: stablePageHeight, width });
 	}
 
 	async takeScreenshot(
