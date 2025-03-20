@@ -30,6 +30,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -158,7 +159,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					fee={fee ?? ZERO_BI}
+					fee={BigNumber.from(fee ?? 0)}
 				/>
 			{/if}
 		</svelte:fragment>
