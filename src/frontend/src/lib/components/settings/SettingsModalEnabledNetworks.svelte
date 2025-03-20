@@ -22,17 +22,26 @@
 		emit({ message: 'oisyRefreshUserProfile' });
 	});
 
-	let enabledNetworksData: { [p: symbol]: boolean } | null | undefined;
-	$: enabledNetworksData = {};
-
 	let enabledTestnet: boolean;
 	$: enabledTestnet = $testnets;
 	const enabledTestnetInitial = $testnets;
+
+	let enabledNetworks: { [p: symbol]: { enabled: boolean } } | null | undefined;
+	$: enabledNetworks = {};
+	const enabledNetworksInitial: { [p: symbol]: { enabled: boolean } } | null | undefined = {};
 
 	let isModified: boolean;
 	$: isModified = (() => {
 		if (enabledTestnet !== enabledTestnetInitial) {
 			return true;
+		}
+
+		const symbols = Object.getOwnPropertySymbols(enabledNetworks ?? {});
+		for (const k of symbols) {
+			const value = enabledNetworks?.[k];
+			if (value?.enabled !== enabledNetworksInitial?.[k]?.enabled) {
+				return true;
+			}
 		}
 
 		return false;
@@ -61,7 +70,7 @@
 			currentUserVersion: $userProfileVersion
 		});
 
-		await emit({ message: 'oisyRefreshUserProfile' });
+		emit({ message: 'oisyRefreshUserProfile' });
 
 		modalStore.close();
 	};
@@ -92,7 +101,7 @@
 				<svelte:fragment slot="value"
 					><Toggle
 						ariaLabel="Enable/Disable"
-						checked={enabledNetworksData?.[network.id]}
+						checked={enabledNetworks?.[network.id].enabled ?? false}
 						on:nnsToggle={() => toggleNetwork(network)}
 					/></svelte:fragment
 				>
@@ -113,7 +122,7 @@
 					<svelte:fragment slot="value"
 						><Toggle
 							ariaLabel="Enable/Disable"
-							checked={enabledNetworksData?.[network.id] ?? false}
+							checked={enabledNetworks?.[network.id].enabled ?? false}
 							on:nnsToggle={() => toggleNetwork(network)}
 						/></svelte:fragment
 					>
