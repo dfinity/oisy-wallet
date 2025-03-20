@@ -26,12 +26,20 @@
 	$: enabledTestnet = $testnets;
 	const enabledTestnetInitial = $testnets;
 
-	let enabledNetworks: { [p: symbol]: { enabled: boolean } } | null | undefined;
-	$: enabledNetworks = {};
-	const enabledNetworksInitial: { [p: symbol]: { enabled: boolean } } | null | undefined = {};
+	// todo: type correctly
+	type TempNetworksType = { [p: symbol]: { enabled: boolean } } | null | undefined;
 
-	let isModified: boolean;
-	$: isModified = (() => {
+	let enabledNetworks: TempNetworksType;
+	$: enabledNetworks = {};
+	const enabledNetworksInitial: TempNetworksType = {};
+
+	const checkModified = ({
+		enabledTestnet,
+		enabledNetworks
+	}: {
+		enabledTestnet: boolean;
+		enabledNetworks: TempNetworksType;
+	}) => {
 		if (enabledTestnet !== enabledTestnetInitial) {
 			return true;
 		}
@@ -45,7 +53,10 @@
 		}
 
 		return false;
-	})();
+	};
+
+	let isModified: boolean;
+	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
 
 	let mainnetsList: Network[];
 	$: mainnetsList = SUPPORTED_NETWORKS.filter((n) => n.env === 'mainnet');
