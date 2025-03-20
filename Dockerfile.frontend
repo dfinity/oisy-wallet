@@ -25,6 +25,7 @@ RUN npm ci
 
 COPY .env.* *.js *.cjs *.mjs *.ts *.json scripts .npmrc .nvmrc .
 COPY src/frontend/ src/frontend
+COPY src/declarations/ src/declarations
 
 ARG network="staging"
 ENV ENV=$network
