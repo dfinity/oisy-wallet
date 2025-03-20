@@ -63,14 +63,6 @@ impl TokenId<SolanaLocal> for SolPrincipal {}
 /// - <https://www.unchained.com/blog/bitcoin-address-types-compared>
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum BtcAddress {
-    /// A raw public key.  Obsolete.
-    ///
-    /// ## Format
-    /// A string, 130 characters long.
-    ///
-    /// ## Example
-    /// - `0496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858ee`
-    P2PK(String),
     /// Legacy format.
     ///
     /// This is the widely used original format encoded using Base58, which
@@ -151,52 +143,32 @@ pub enum BtcAddress {
     /// ## Reference
     /// - <https://en.bitcoin.it/wiki/BIP_0173>
     P2WSH(String),
-    /// Segwit format
+
+    /// Pay-to-Taproot (P2TR)
     ///
-    /// The Bitcoin network’s scalability problems were addressed with the
-    /// introduction of SegWit. Addresses starting with “3” use Base58 encoding,
-    /// are based on the Pay-to-Script-Hash (P2SH) script type and are
-    /// case-sensitive like legacy addresses.
+    /// Pay-to-Taproot (P2TR) is the newest address type, made available by the Taproot soft-fork
+    /// in November 2021. P2TR adoption remains quite low at the time of writing, and many bitcoin
+    /// softwares and services are still working on integration.
     ///
-    /// In the context of P2SH, “Pay-to” indicates the recipient’s capability to
-    /// access the funds, “Script” represents a complex set of instructions
-    /// defining conditions to spend the funds, and “Hash” refers to the
-    /// cryptographic hash of the script, allowing for secure transactions to
-    /// addresses derived from these hashes.
+    /// While P2WPKH and P2WSH are known as Segwit V0, P2TR is considered Segwit V1. Notably, P2TR
+    /// utilizes a digital signature algorithm called Schnorr, which differs from the ECDSA format
+    /// used in earlier bitcoin transaction types. Schnorr signatures have several advantages,
+    /// including additional transaction fee reductions and increased privacy.
     ///
-    /// By separating signature data from transaction data, SegWit addresses
-    /// offer many benefits, including higher transaction throughput and lower
-    /// fees. This format increases the overall effectiveness of the Bitcoin
-    /// network and makes it possible to integrate advanced features like the
-    /// Lightning Network.
-    ///
-    /// ## Format
-    /// A string, 34-35 alphanumeric characters in length, starting with the
-    /// digit "3".
-    ///
-    /// The string is a base58 encoded [u8;25] where the first byte is 0x05 and
-    /// the last 4 bytes are a checksum.
-    ///
-    /// ## Example
-    /// - `3GTCwPn2EqSsAb3JDBo4WuwceVqkZjb83y`
-    SegWit(String),
-    /// Bech32 format
-    ///
-    /// Bech32 addresses are a newer format that uses a different encoding
-    /// scheme and are based on the SegWit address format. They are
-    /// case-sensitive and use a different character set than legacy
-    /// addresses.
+    /// Regarding privacy, the key and signature aggregations made possible by Schnorr allow
+    /// multisig addresses to be indistinguishable from singlesig, and the full spending conditions
+    /// for a P2TR address are not necessarily revealed publicly. The creator of the address can
+    /// even include multiple customized redeem scripts to choose from in order to spend the
+    /// bitcoin later.
     ///
     /// ## Format
-    /// Starts with `bc1`, and at most 90 characters long.
+    /// P2TR addresses are 62 characters long, and they use Bech32m encoding, a slightly modified
+    /// version of Bech32, as described in BIP 350. P2TR addresses can be identified by their
+    /// unique bc1p prefix.
     ///
     /// ## Example
-    /// - `bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq`
-    /// - `bc1qc7slrfxkknqcq2jevvvkdgvrt8080852dfjewde450xdlk4ugp7szw5tk9`
-    ///
-    /// ## Reference
-    /// <https://en.bitcoin.it/wiki/Bech32>
-    Bech32(String),
+    /// - `bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k`
+    P2TR(String),
 }
 impl AccountId<BitcoinMainnet> for BtcAddress {}
 impl AccountId<BitcoinTestnet> for BtcAddress {}
