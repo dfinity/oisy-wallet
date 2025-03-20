@@ -118,6 +118,7 @@ jobs:
 
   binding-checks-pass:
     needs: ['generate']
+    if: ${{ always() }}
     runs-on: ubuntu-24.04
     steps:
       - name: Cleared for merging

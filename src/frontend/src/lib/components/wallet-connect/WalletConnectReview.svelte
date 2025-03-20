@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { WalletKitTypes } from '@reown/walletkit';
 	import type { ProposalTypes } from '@walletconnect/types';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -18,7 +18,7 @@
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let proposal: Option<Web3WalletTypes.SessionProposal>;
+	export let proposal: Option<WalletKitTypes.SessionProposal>;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;

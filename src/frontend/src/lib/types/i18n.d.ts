@@ -10,12 +10,15 @@ interface I18nCore {
 		back: string;
 		done: string;
 		close: string;
+		change: string;
+		apply: string;
 		refresh: string;
 		name: string;
 		symbol: string;
 		decimals: string;
 		amount: string;
 		max: string;
+		destination: string;
 		reject: string;
 		approve: string;
 		view: string;
@@ -112,7 +115,7 @@ interface I18nDapps {
 	};
 }
 
-interface I18nAirdrops {
+interface I18nRewards {
 	text: {
 		title: string;
 		active_campaigns: string;
@@ -229,6 +232,7 @@ interface I18nSettings {
 		testnets: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
+		active_networks: string;
 		credentials_title: string;
 		pouh_credential: string;
 		pouh_credential_description: string;
@@ -409,6 +413,8 @@ interface I18nSend {
 interface I18nConvert {
 	text: {
 		converting: string;
+		conversion_destination: string;
+		default_destination: string;
 		convert_to_btc: string;
 		convert_to_ckbtc: string;
 		convert_to_token: string;
@@ -438,6 +444,8 @@ interface I18nConvert {
 		refreshing_ui: string;
 		unsupported_token_conversion: string;
 		calculating_max_amount: string;
+		send_to: string;
+		custom_destination: string;
 	};
 	assertion: { insufficient_funds: string };
 	error: { loading_cketh_helper: string; unexpected: string; unexpected_missing_data: string };
@@ -470,6 +478,9 @@ interface I18nSwap {
 		swapping: string;
 		refreshing_ui: string;
 		swap_provider: string;
+		swap_route: string;
+		included_network_fees: string;
+		included_liquidity_fees: string;
 	};
 	error: {
 		kong_not_available: string;
@@ -728,11 +739,7 @@ interface I18nTransaction {
 		open_from_block_explorer: string;
 		open_to_block_explorer: string;
 	};
-	error: {
-		get_block_number: string;
-		failed_get_transaction: string;
-		failed_get_mined_transaction: string;
-	};
+	error: { get_block_number: string; failed_get_transaction: string };
 }
 
 interface I18nTransactions {
@@ -745,6 +752,7 @@ interface I18nTransactions {
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;
 		index_canister_not_working_explanation: string;
+		token_needs_enabling: string;
 	};
 	error: {
 		loading_transactions: string;
@@ -868,7 +876,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	dapps: I18nDapps;
-	airdrops: I18nAirdrops;
+	rewards: I18nRewards;
 	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
