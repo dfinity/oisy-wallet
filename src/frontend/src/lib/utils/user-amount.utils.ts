@@ -6,7 +6,7 @@ import {
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
-import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
@@ -50,15 +50,15 @@ export const validateUserAmount = ({
 					displayDecimals: token.decimals
 				}),
 				unitName: token.decimals
-			})
-		: ZERO;
+			}).toBigInt()
+		: ZERO_BI;
 
 	// if the function called in the swap flow, we only need to check the basic assertAmount condition
 	// if convert or send - we identify token type and check some network-specific conditions
 	if (isSwapFlow) {
 		return assertAmount({
 			userAmount,
-			balance: parsedSendBalance.toBigInt(),
+			balance: parsedSendBalance,
 			fee
 		});
 	}
@@ -66,7 +66,7 @@ export const validateUserAmount = ({
 	if (isTokenErc20(token)) {
 		return assertErc20Amount({
 			userAmount,
-			balance: parsedSendBalance.toBigInt(),
+			balance: parsedSendBalance,
 			balanceForFee: balanceForFee ?? ZERO_BI,
 			fee
 		});
@@ -75,7 +75,7 @@ export const validateUserAmount = ({
 	if (isTokenCkBtcLedger(token)) {
 		return assertCkBtcAmount({
 			userAmount,
-			balance: parsedSendBalance.toBigInt(),
+			balance: parsedSendBalance,
 			minterInfo,
 			fee
 		});
@@ -84,7 +84,7 @@ export const validateUserAmount = ({
 	if (isTokenCkEthLedger(token)) {
 		return assertCkEthAmount({
 			userAmount,
-			balance: parsedSendBalance.toBigInt(),
+			balance: parsedSendBalance,
 			minterInfo,
 			fee
 		});
@@ -93,7 +93,7 @@ export const validateUserAmount = ({
 	if (isTokenCkErc20Ledger(token)) {
 		return assertCkErc20Amount({
 			userAmount,
-			balance: parsedSendBalance.toBigInt(),
+			balance: parsedSendBalance,
 			balanceForFee: balanceForFee ?? ZERO_BI,
 			ethereumEstimateFee,
 			fee
@@ -102,7 +102,7 @@ export const validateUserAmount = ({
 
 	return assertAmount({
 		userAmount,
-		balance: parsedSendBalance.toBigInt(),
+		balance: parsedSendBalance,
 		fee
 	});
 };
