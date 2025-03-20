@@ -7,7 +7,6 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
-import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
 describe('btc-listener', () => {
@@ -53,7 +52,7 @@ describe('btc-listener', () => {
 			const balance = get(balancesStore);
 
 			expect(balance?.[tokenId]).toEqual({
-				data: BigNumber.from(mockBalance),
+				data: mockBalance,
 				certified: true
 			});
 		});
