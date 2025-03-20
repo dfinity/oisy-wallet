@@ -773,7 +773,11 @@ pub async fn step_migration() {
 }
 
 /// Saves a user snapshot.
-pub fn save_snapshot(_snapshot: UserSnapshot) {
+pub fn set_snapshot(_snapshot: UserSnapshot) {
+    todo!()
+}
+/// Saves a user snapshot.
+pub fn get_snapshot() -> Option<UserSnapshot> {
     todo!()
 }
 
