@@ -10,6 +10,7 @@ use crate::{
     types::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
+        networks::SaveTestnetsSettingsError,
         settings::Settings,
         token::UserToken,
         user_profile::{
@@ -134,6 +135,7 @@ impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
         let settings = Settings {
+            networks: Default::default(),
             dapp: DappSettings {
                 dapp_carousel: DappCarouselSettings {
                     hidden_dapp_ids: Vec::new(),
@@ -172,6 +174,37 @@ impl StoredUserProfile {
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);
         new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with show_testnets set to the specified value.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_show_testnets(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        show_testnets: bool,
+    ) -> Result<StoredUserProfile, SaveTestnetsSettingsError> {
+        if profile_version != self.version {
+            return Err(SaveTestnetsSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        if settings.networks.testnets.show_testnets == show_testnets {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.clone_with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.networks.testnets.show_testnets = show_testnets;
+            Some(settings)
+        };
         new_profile.updated_timestamp = now;
         Ok(new_profile)
     }

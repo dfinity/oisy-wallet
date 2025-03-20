@@ -4,7 +4,7 @@
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import { ICP_NETWORK } from '$env/networks/networks.env';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
