@@ -13,15 +13,13 @@
 	let settingsType: SettingsModalType;
 	$: settingsType = $modalSettingsData;
 
-	let modalTitle: string | undefined;
+	let modalTitle: string;
 	$: modalTitle =
-		settingsType === SettingsModalEnum.ENABLED_NETWORKS
-			? $i18n.settings.text.active_networks
-			: undefined;
+		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : '';
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_WHY_OISY_MODAL}>
-	<svelte:fragment slot="title">{modalTitle ?? ''}</svelte:fragment>
+	<svelte:fragment slot="title">{modalTitle}</svelte:fragment>
 
 	<!-- we add an if here because theres plans to have multiple settings open as a modal -->
 	<!-- to add a new type, extend the SettingsModalType enum and add a condition below -->
