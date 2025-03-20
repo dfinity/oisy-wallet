@@ -7,7 +7,7 @@
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
-	export let amount: BigNumber;
+	export let amount: bigint;
 	export let decimals: number;
 	export let symbol: string;
 	export let exchangeRate: number | undefined;
@@ -15,15 +15,15 @@
 	let usdAmount: number | undefined;
 	$: usdAmount = nonNullish(exchangeRate)
 		? usdValue({
-				decimals,
-				balance: amount.toBigInt(),
-				exchangeRate
-			})
+			decimals,
+			balance: amount,
+			exchangeRate
+		})
 		: undefined;
 
 	let displayAmount: string;
 	$: displayAmount = `${formatToken({
-		value: amount.toBigInt(),
+		value: amount,
 		unitName: decimals,
 		displayDecimals: EIGHT_DECIMALS
 	})} ${symbol}`;
