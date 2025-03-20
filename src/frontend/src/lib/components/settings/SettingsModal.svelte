@@ -13,7 +13,7 @@
 	let settingsType: SettingsModalType;
 	$: settingsType = $modalSettingsData;
 
-	let modalTitle: string | undefined;
+	let modalTitle: string;
 	$: modalTitle =
 		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : '';
 </script>
