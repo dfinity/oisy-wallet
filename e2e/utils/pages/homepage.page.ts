@@ -17,6 +17,7 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	SIDEBAR_NAVIGATION_MENU,
 	TESTNET_TOGGLE,
 	TOKEN_BALANCE,
 	TOKEN_CARD
@@ -349,6 +350,14 @@ abstract class Homepage {
 		await this.clickByTestId({ testId: NAVIGATION_ITEM_HOMEPAGE });
 	}
 
+	private async scrollToTop(testId: string): Promise<void> {
+		const selector = `[data-tid="${testId}"]`;
+		const locator = this.#page.locator(selector);
+		await locator.evaluate((element) => {
+			element.scrollTop = 0;
+		});
+	}
+
 	private async scrollIntoViewCentered(testId: string): Promise<void> {
 		const selector = `[data-tid="${testId}"]`;
 		const locator = this.#page.locator(selector);
@@ -432,6 +441,8 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
+
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
