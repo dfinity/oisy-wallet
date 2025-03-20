@@ -17,7 +17,10 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
+	import {
+		MANAGE_TOKENS_MODAL_CLOSE,
+		MANAGE_TOKENS_MODAL_SAVE
+	} from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
@@ -34,6 +37,8 @@
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 	import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 	import { isSolanaToken } from '$sol/utils/token.utils';
+
+	export let initialSearch: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -68,7 +73,7 @@
 	const updateFilter = () => (tokensFilter = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
-	let filter = '';
+	let filter = initialSearch ?? '';
 	$: filter, debounceUpdateFilter();
 
 	let filteredTokens: Token[] = [];
@@ -157,6 +162,8 @@
 	</p>
 {/if}
 
+<slot name="info-element" />
+
 {#if noTokensMatch}
 	<button
 		class="flex w-full flex-col items-center justify-center py-16"
@@ -204,7 +211,7 @@
 	>
 
 	<ButtonGroup>
-		<ButtonCancel on:click={() => dispatch('icClose')} />
+		<ButtonCancel testId={MANAGE_TOKENS_MODAL_CLOSE} on:click={() => dispatch('icClose')} />
 		<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
 		</Button>

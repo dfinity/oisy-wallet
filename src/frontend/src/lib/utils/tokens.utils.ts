@@ -1,6 +1,6 @@
 import { icTokenIcrcCustomToken, isDeprecatedSns } from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -100,7 +100,7 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 				$exchanges
 			});
 
-			return (tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO).gt(0)
+			return (tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO_BI) > 0
 				? [[...acc[0], tokenUI], acc[1]]
 				: [acc[0], [...acc[1], tokenUI]];
 		},
@@ -111,7 +111,8 @@ export const pinTokensWithBalanceAtTop = <T extends Token>({
 		...positiveBalances.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO) ||
+				+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
+					+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI)) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		),

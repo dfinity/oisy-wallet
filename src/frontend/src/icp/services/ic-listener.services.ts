@@ -3,7 +3,6 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import { isNullish, jsonReviver } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const syncWallet = ({
 	data,
@@ -22,7 +21,7 @@ export const syncWallet = ({
 	balancesStore.set({
 		tokenId,
 		data: {
-			data: BigNumber.from(balance),
+			data: balance,
 			certified
 		}
 	});

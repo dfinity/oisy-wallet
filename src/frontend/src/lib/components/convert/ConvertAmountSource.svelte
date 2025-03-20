@@ -5,11 +5,12 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ConvertAmountErrorType } from '$lib/types/convert';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
@@ -26,7 +27,7 @@
 	export let exchangeValueUnit: DisplayUnit = 'usd';
 	export let inputUnit: DisplayUnit = 'token';
 
-	let errorType: ConvertAmountErrorType = undefined;
+	let errorType: TokenActionErrorType = undefined;
 
 	$: insufficientFunds = nonNullish(errorType) && errorType === 'insufficient-funds';
 	$: insufficientFundsForFee = nonNullish(errorType) && errorType === 'insufficient-funds-for-fee';
@@ -38,9 +39,9 @@
 	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate, balanceForFee, minterInfo } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): ConvertAmountErrorType =>
+	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
 		validateUserAmount({
-			userAmount,
+			userAmount: userAmount.toBigInt(),
 			token: $sourceToken,
 			balance: $sourceTokenBalance,
 			balanceForFee: $balanceForFee,
@@ -52,12 +53,12 @@
 		});
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO_BI;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
-				balance: $sourceTokenBalance,
+				balance: nonNullish($sourceTokenBalance) ? BigNumber.from($sourceTokenBalance) : undefined,
 				fee: BigNumber.from(totalFee),
 				tokenDecimals: $sourceToken.decimals,
 				tokenStandard: $sourceToken.standard

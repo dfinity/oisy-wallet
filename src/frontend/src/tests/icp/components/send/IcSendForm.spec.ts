@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 import { BITCOIN_FEE_CONTEXT_KEY, initBitcoinFeeStore } from '$icp/stores/bitcoin-fee.store';

@@ -8,7 +8,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -47,7 +47,7 @@
 <div class="flex flex-col gap-5">
 	<PageTitle>{$i18n.activity.text.title}</PageTitle>
 
-	{#if $testnetsEnabled}
+	{#if $testnets}
 		<div>
 			<NetworksSwitcher />
 		</div>

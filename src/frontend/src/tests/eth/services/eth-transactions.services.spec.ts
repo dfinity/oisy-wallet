@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
@@ -34,7 +34,7 @@ describe('eth-transactions.services', () => {
 	}));
 
 	beforeEach(() => {
-		vi.resetAllMocks();
+		vi.clearAllMocks();
 
 		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 		spyToastsErrorNoTrace = vi.spyOn(toastsStore, 'toastsErrorNoTrace');

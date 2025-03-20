@@ -11,9 +11,9 @@ import {
 } from '$icp/utils/ic-send.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface ConvertData {
@@ -86,9 +86,9 @@ export const initConvertContext = (convertData: ConvertData): ConvertContext => 
 export interface ConvertContext {
 	sourceToken: Readable<Token>;
 	destinationToken: Readable<Token>;
-	sourceTokenBalance: Readable<BigNumber | undefined>;
-	destinationTokenBalance: Readable<BigNumber | undefined>;
-	balanceForFee: Readable<BigNumber | undefined>;
+	sourceTokenBalance: Readable<Balance | undefined>;
+	destinationTokenBalance: Readable<Balance | undefined>;
+	balanceForFee: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	minterInfo: Readable<Option<CkBtcMinterInfoData | CkEthMinterInfoData>>;

@@ -751,6 +751,7 @@ interface I18nTransactions {
 		transaction_history_unavailable: string;
 		missing_index_canister_explanation: string;
 		index_canister_not_working_explanation: string;
+		token_needs_enabling: string;
 	};
 	error: {
 		loading_transactions: string;

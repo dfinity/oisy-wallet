@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	CKBTC_LEDGER_CANISTER_IDS,
 	CKERC20_LEDGER_CANISTER_IDS,

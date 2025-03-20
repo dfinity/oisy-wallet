@@ -22,7 +22,11 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+import {
+	NANO_SECONDS_IN_MILLISECOND,
+	NANO_SECONDS_IN_SECOND,
+	ZERO_BI
+} from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
 	btcAddressTestnet,
@@ -35,6 +39,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
+import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TransactionType } from '$lib/types/transaction';
 import {
@@ -62,7 +67,7 @@ import { get } from 'svelte/store';
 
 interface ToSnapshotParams<T extends Token> {
 	token: T;
-	balance: BigNumber;
+	balance: Balance;
 	exchangeRate: number;
 	timestamp: bigint;
 }
@@ -142,7 +147,7 @@ const toBaseSnapshot = ({
 > => ({
 	decimals,
 	approx_usd_per_token: exchangeRate,
-	amount: balance.toBigInt(),
+	amount: balance,
 	timestamp,
 	network: {}
 });
@@ -282,7 +287,7 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 	return allTokens.reduce<AccountSnapshotFor[]>((acc, token) => {
 		const balance = balances[token.id]?.data;
 
-		if (isNullish(balance) || balance.isZero()) {
+		if (isNullish(balance) || balance === ZERO_BI) {
 			return acc;
 		}
 
