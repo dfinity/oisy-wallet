@@ -109,10 +109,9 @@ type BtcAddPendingTransactionRequest = record {
 type BtcAddress = variant {
   P2WPKH : text;
   P2PKH : text;
-  P2PK : text;
+  P2WSH : text;
   P2SH : text;
-  SegWit : text;
-  Bech32 : text;
+  P2TR : text;
 };
 type BtcGetPendingTransactionsReponse = record {
   transactions : vec PendingTransaction;
