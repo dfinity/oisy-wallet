@@ -1,15 +1,17 @@
-use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
+use std::collections::BTreeMap;
+
 use ic_cdk::api::time;
-use shared::types::networks::{
-    NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsError,
-};
 use shared::types::{
     dapp::AddDappSettingsError,
-    networks::SaveTestnetsSettingsError,
+    networks::{
+        NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsError,
+        SaveTestnetsSettingsError,
+    },
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     CredentialType, Version,
 };
-use std::collections::BTreeMap;
+
+use crate::{user_profile_model::UserProfileModel, StoredPrincipal};
 
 pub fn find_profile(
     principal: StoredPrincipal,

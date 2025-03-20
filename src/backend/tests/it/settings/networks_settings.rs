@@ -1,15 +1,19 @@
+use std::collections::BTreeMap;
+
+use candid::Principal;
+use lazy_static::lazy_static;
+use shared::types::{
+    networks::{
+        NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsError,
+        SaveNetworksSettingsRequest,
+    },
+    user_profile::{GetUserProfileError, UserProfile},
+};
+
 use crate::utils::{
     mock::CALLER,
     pocketic::{setup, PicCanisterTrait},
 };
-use candid::Principal;
-use lazy_static::lazy_static;
-use shared::types::networks::{
-    NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsError,
-    SaveNetworksSettingsRequest,
-};
-use shared::types::user_profile::{GetUserProfileError, UserProfile};
-use std::collections::BTreeMap;
 
 lazy_static! {
     pub static ref INITIAL_NETWORKS: NetworkSettingsMap = {
@@ -343,8 +347,6 @@ fn test_set_user_network_settings_does_not_change_existing_value_if_same() {
 
     assert_eq!(settings.networks.networks, INITIAL_NETWORKS.clone());
 }
-
-
 
 #[test]
 fn test_update_user_network_settings_saves_settings() {

@@ -17,10 +17,6 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
-use shared::types::networks::{
-    SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetNetworksSettingsRequest,
-    UpdateNetworksSettingsRequest,
-};
 use shared::{
     http::{HttpRequest, HttpResponse},
     metrics::get_metrics,
@@ -34,7 +30,10 @@ use shared::{
         },
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        networks::{SaveTestnetsSettingsError, SetShowTestnetsRequest},
+        networks::{
+            SaveNetworksSettingsError, SaveNetworksSettingsRequest, SaveTestnetsSettingsError,
+            SetNetworksSettingsRequest, SetShowTestnetsRequest, UpdateNetworksSettingsRequest,
+        },
         signer::topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
         token::{UserToken, UserTokenId},
         user_profile::{
@@ -54,13 +53,14 @@ use types::{
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
-use crate::user_profile::{set_network_settings, update_network_settings};
 use crate::{
     assertions::{assert_token_enabled_is_some, assert_token_symbol_length},
     guards::{caller_is_allowed, caller_is_controller, may_read_user_data, may_write_user_data},
     oisy_user::oisy_user_creation_timestamps,
     token::{add_to_user_token, remove_from_user_token},
-    user_profile::{add_hidden_dapp_id, set_show_testnets},
+    user_profile::{
+        add_hidden_dapp_id, set_network_settings, set_show_testnets, update_network_settings,
+    },
 };
 
 mod assertions;
@@ -568,7 +568,8 @@ pub fn set_user_network_settings(
 /// existing settings.
 ///
 /// # Returns
-/// - Returns `Ok(())` if the network settings were updated successfully, or if they were already set
+/// - Returns `Ok(())` if the network settings were updated successfully, or if they were already
+///   set
 ///  to the same value.
 ///
 /// # Errors
