@@ -1,8 +1,5 @@
+import { ABOUT_WHY_OISY_BUTTON, ABOUT_WHY_OISY_MODAL } from '$lib/constants/test-ids.constants';
 import { test } from '@playwright/test';
-import {
-	ABOUT_WHY_OISY_BUTTON,
-	ABOUT_WHY_OISY_MODAL
-} from '../src/frontend/src/lib/constants/test-ids.constants';
 import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
 

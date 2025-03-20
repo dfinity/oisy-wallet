@@ -14,10 +14,10 @@ testWithII.beforeEach(async ({ page }) => {
 	await page.clock.install();
 });
 
-testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
+testWithII('should display homepage in logged in state', async ({ page, iiPage, isMobile }) => {
 	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
 
 	await homepageLoggedIn.waitForReady();
 
-	await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+	await homepageLoggedIn.takeScreenshot({ isMobile, freezeCarousel: true });
 });
