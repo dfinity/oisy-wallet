@@ -179,7 +179,6 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
     assert!(result_allow_signing.is_ok());
 
     // let reponse = result_allow_signing.unwrap();
-
     // assert_eq!(reponse.status, AllowSigningStatus.EXECUTED)
 }
 
