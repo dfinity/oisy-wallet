@@ -62,6 +62,22 @@ pub fn call_create_pow_challenge(
     let result = wrapped_result.expect("that create_pow_challenge succeeds");
     result
 }
+
+pub fn call_test_allow_signing(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    nonce: u64,
+) -> Result<TestAllowSigningResponse, TestAllowSigningError> {
+    let wrapped_result = pic_setup
+        .update::<Result<TestAllowSigningResponse, TestAllowSigningError>>(
+            caller,
+            "test_allow_signing",
+            TestAllowSigningRequest { nonce: nonce },
+        );
+
+    return wrapped_result.expect("that create_pow_challenge exists");
+}
+
 // -------------------------------------------------------------------------------------------------
 // - The integration tests for testing correct behaviour of the PoW  Protection
 // -------------------------------------------------------------------------------------------------
@@ -82,6 +98,8 @@ fn test_pow_challenge_should_succeed_if_not_expired() {
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
 
+    // TODO add time machine here
+
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_2th_call.is_ok());
 }
@@ -95,7 +113,7 @@ fn test_pow_challenge_should_fail_if_expired() {
     assert!(err_1th_call.is_ok());
 
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller).unwrap_err();
-    assert_eq!(err_2th_call, CreateChallengeError::ChallengeInProgres());
+    assert_eq!(err_2th_call, CreateChallengeError::ChallengeInProgres);
 }
 
 #[test]
@@ -113,12 +131,9 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
     // emulates the javascript function running in the browser to create a valid nonce
     let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
-    let result = pic_setup.update::<Result<TestAllowSigningResponse, TestAllowSigningError>>(
-        caller,
-        "test_allow_signing",
-        TestAllowSigningRequest { nonce: nonce },
-    );
-    assert!(result.is_ok());
+    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
+
+    assert!(result_allow_signing.is_ok());
 }
 
 #[test]
@@ -136,19 +151,18 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
     // emulates the javascript function running in the browser to create a valid nonce
     let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
-    let result = pic_setup.update::<Result<TestAllowSigningResponse, TestAllowSigningError>>(
-        caller,
-        "test_allow_signing",
-        TestAllowSigningRequest { nonce: nonce - 1 },
-    );
+    // we can always assume the previously iterated nonce was invalid
+    let invalid_nonce = nonce - 1;
 
-    assert!(result.is_err());
-    let result_error = call_create_pow_challenge(&pic_setup, caller).unwrap_err();
-    assert_eq!(result_error, CreateChallengeError::ChallengeInProgres());
+    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, invalid_nonce);
+    assert_eq!(
+        result_allow_signing.unwrap_err(),
+        TestAllowSigningError::PowInvalidNonce
+    );
 }
 
 #[test]
-fn test_flow_pow() {
+fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     let pic_setup = setup();
 
     // A random unauthorized user.
@@ -162,17 +176,9 @@ fn test_flow_pow() {
     // emulates the javascript function running in the browser to create a valid nonce
     let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
 
-    let result = pic_setup.update::<Result<TestAllowSigningResponse, TestAllowSigningError>>(
-        caller,
-        "test_allow_signing",
-        TestAllowSigningRequest { nonce: nonce },
-    );
+    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
 
-    let response: TestAllowSigningResponse = result.expect("Failed to get the value").unwrap();
-
-    assert_eq!(response.allowed_cycles, 100000)
+    assert!(result_allow_signing.is_ok());
+    let response: TestAllowSigningResponse = result_allow_signing.unwrap();
+    assert_eq!(response.allowed_cycles, 80000000)
 }
-
-#[test]
-// The expiration time for a challenge
-fn test_allow_signing_with_expired_challenge_should_fail() {}

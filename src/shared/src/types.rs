@@ -303,7 +303,7 @@ pub mod security_pow {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum CreateChallengeError {
-        ChallengeInProgres(),
+        ChallengeInProgres,
         RandomnessError(String),
         MissingUserProfile,
     }

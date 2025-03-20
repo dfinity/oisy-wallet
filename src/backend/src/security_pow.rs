@@ -95,7 +95,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
             );
         } else {
             ic_cdk::println!("The challenge which has started at {} has not expired yet. The next challenge can be requested at {}", stored_challenge.start_timestamp_ns, stored_challenge.expiry_timestamp_ns);
-            return Err(CreateChallengeError::ChallengeInProgres());
+            return Err(CreateChallengeError::ChallengeInProgres);
         }
     } else {
         // if the challenge is requested the first time we use the start difficulty
@@ -130,60 +130,60 @@ pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
     let principal = caller();
     let stored_principal = StoredPrincipal(principal);
 
-    if let Some(stored_challenge) = get_pow_challenge() {
-        let solve_duration_ns: u64 = time() - stored_challenge.start_timestamp_ns;
+    let stored_challenge = get_pow_challenge().ok_or_else(|| {
+        ic_cdk::println!("No stored challenge found for {}", principal);
+        TestAllowSigningError::PowMissingChallange
+    })?;
 
-        // Adjust difficulty to meet target_duration
-        // TODO remove clippy ignore statement
-        #[allow(clippy::cast_possible_truncation, clippy::cast_lossless)]
-        if verify_solution(
-            nonce,
-            stored_challenge.difficulty,
-            stored_challenge.start_timestamp_ns,
-        ) {
-            ic_cdk::println!(
-                "The provided nonce is valid (solve_duration={}ms)",
-                Duration::from_nanos(solve_duration_ns).as_millis()
-            );
-        } else {
-            ic_cdk::println!(
-                "The provided nonce is invalid (solve_duration={}ms)",
-                Duration::from_nanos(solve_duration_ns).as_millis()
-            );
-            return Err(TestAllowSigningError::PowInvalidNonce);
-        }
+    let solve_duration_ns: u64 = time() - stored_challenge.start_timestamp_ns;
 
-        let new_difficulty = adapt_difficulty(stored_challenge.difficulty, solve_duration_ns);
+    #[allow(clippy::cast_possible_truncation, clippy::cast_lossless)]
+    if verify_solution(
+        nonce,
+        stored_challenge.difficulty,
+        stored_challenge.start_timestamp_ns,
+    ) {
+        ic_cdk::println!(
+            "The provided nonce is valid MIAU (solve_duration={}ms)",
+            Duration::from_nanos(solve_duration_ns).as_millis()
+        );
+    } else {
+        ic_cdk::println!(
+            "The provided nonce is invalid (solve_duration={}ms)",
+            Duration::from_nanos(solve_duration_ns).as_millis()
+        );
+        return Err(TestAllowSigningError::PowInvalidNonce);
+    }
 
-        let _stored_challange = mutate_state(|state| {
-            let pow_challenge_map = &mut state.pow_challenge;
+    let new_difficulty = adapt_difficulty(stored_challenge.difficulty, solve_duration_ns);
 
-            // since we want to keep track of the difficulty overtime (multiple challenges solved by
-            // a principle) we can not delete an expired challenge but clear the fields instead
-            let stored_challange = StoredChallenge {
+    mutate_state(|state| {
+        state.pow_challenge.insert(
+            stored_principal,
+            Candid(StoredChallenge {
                 nonce: 0,
                 difficulty: new_difficulty,
                 start_timestamp_ns: 0,
                 expiry_timestamp_ns: 0,
                 solved: true,
-            };
-            pow_challenge_map.insert(stored_principal, Candid(stored_challange.clone()));
-            stored_challange
-        });
-        // Calculate granted cycles proportional to difficulty
-        // TODO remove clippy ignore statement
-        #[allow(clippy::cast_lossless)]
-        let granted_cycles = (stored_challenge.difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
-        // Here we would proceed with granting signer permissions and record the granted cycles for
-        ic_cdk::println!(
-            "Allowing principle {} to spend {} on signer operations",
-            principal.to_string(),
-            granted_cycles,
+            }),
         );
-        Ok(granted_cycles)
-    } else {
-        Err(TestAllowSigningError::PowMissingChallange)
-    }
+    });
+
+    #[allow(clippy::cast_lossless)]
+    // Grant cycles proportional to difficulty
+    let granted_cycles = (stored_challenge.difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
+
+    let granted_cycles = (stored_challenge.difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
+
+    // Here we would proceed with granting signer permissions and record the granted cycles for
+    ic_cdk::println!(
+        "Allowing principle {} to spend {} on signer operations",
+        principal.to_string(),
+        granted_cycles,
+    );
+
+    Ok(granted_cycles)
 }
 
 // Calculate the new difficulty:
