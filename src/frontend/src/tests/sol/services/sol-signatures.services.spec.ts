@@ -1,11 +1,10 @@
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
-import { last } from '$lib/utils/array.utils';
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
+import { last } from '$lib/utils/array.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
@@ -21,14 +20,13 @@ import {
 	mockSolSignatureResponses
 } from '$tests/mocks/sol-signatures.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
-import { mockSolAddress, mockSplAddress } from '$tests/mocks/sol.mock';
-import { notEmptyString } from '@dfinity/utils';
 import {
 	mockAtaAddress,
 	mockAtaAddress2,
 	mockSolAddress,
 	mockSplAddress
 } from '$tests/mocks/sol.mock';
+import { notEmptyString } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
 import { address, type Address } from '@solana/kit';
 import { type MockInstance } from 'vitest';
