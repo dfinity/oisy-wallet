@@ -112,7 +112,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 
 	const { decimals, symbol } = tokenCkEth;
 
-	const estimatedFee = feeStoreData?.maxTransactionFee ?? 0n;
+	const estimatedFee = feeStoreData?.maxTransactionFee ?? ZERO_BI;
 
 	if (estimatedFee > ethBalance) {
 		return new IcAmountAssertionError(
