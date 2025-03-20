@@ -6,7 +6,6 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { jsonReplacer } from '@dfinity/utils';
-import { BigNumber } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
 describe('ic-listener', () => {
@@ -48,7 +47,7 @@ describe('ic-listener', () => {
 			const balance = get(balancesStore);
 
 			expect(balance?.[tokenId]).toEqual({
-				data: BigNumber.from(mockBalance),
+				data: mockBalance,
 				certified: true
 			});
 		});

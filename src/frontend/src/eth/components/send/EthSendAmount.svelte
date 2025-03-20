@@ -42,7 +42,7 @@
 		const parsedSendBalance = nonNullish($sendBalance)
 			? Utils.parseUnits(
 					formatToken({
-						value: $sendBalance.toBigInt(),
+						value: $sendBalance,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					}),
@@ -68,7 +68,7 @@
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
-		if (nonNullish($maxGasFee) && ethBalance.lt($maxGasFee)) {
+		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
 			);

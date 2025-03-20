@@ -5,6 +5,7 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -40,7 +41,7 @@
 
 	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
 		validateUserAmount({
-			userAmount,
+			userAmount: userAmount.toBigInt(),
 			token: $sourceToken,
 			balance: $sourceTokenBalance,
 			balanceForFee: $balanceForFee,
@@ -52,12 +53,12 @@
 		});
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance.isZero();
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO_BI;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)
 		? getMaxTransactionAmount({
-				balance: $sourceTokenBalance,
+				balance: nonNullish($sourceTokenBalance) ? BigNumber.from($sourceTokenBalance) : undefined,
 				fee: BigNumber.from(totalFee),
 				tokenDecimals: $sourceToken.decimals,
 				tokenStandard: $sourceToken.standard

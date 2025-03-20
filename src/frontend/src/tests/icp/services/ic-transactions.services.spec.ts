@@ -4,7 +4,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { bn1 } from '$tests/mocks/balances.mock';
+import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -26,7 +26,7 @@ describe('ic-transactions.services', () => {
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
-			balancesStore.set({ tokenId, data: { data: bn1, certified: false } });
+			balancesStore.set({ tokenId, data: { data: bn1Bi, certified: false } });
 		});
 
 		it('should reset transactions store and balances store', () => {

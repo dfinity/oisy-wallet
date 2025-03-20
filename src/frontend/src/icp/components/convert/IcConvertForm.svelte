@@ -74,7 +74,7 @@
 		? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 				$symbol: tokenForFee.symbol,
 				$balance: formatToken({
-					value: $balanceForFee?.toBigInt() ?? ZERO_BI,
+					value: $balanceForFee ?? ZERO_BI,
 					unitName: tokenForFee.decimals,
 					displayDecimals: tokenForFee.decimals
 				})

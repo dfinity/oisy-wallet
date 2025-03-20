@@ -135,7 +135,7 @@ export const calculateTokenUsdAmount = ({
 	token,
 	$exchanges
 }: {
-	amount: BigNumber | undefined;
+	amount: bigint | undefined;
 	token: Token;
 	$exchanges: ExchangesData;
 }): number | undefined => {
@@ -178,7 +178,7 @@ export const sumBalances = ([balance1, balance2]: [
 	TokenUi['balance']
 ]): TokenUi['balance'] =>
 	nonNullish(balance1) && nonNullish(balance2)
-		? balance1.add(balance2)
+		? balance1 + balance2
 		: balance1 === undefined || balance2 === undefined
 			? undefined
 			: (balance2 ?? balance1);

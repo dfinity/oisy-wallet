@@ -6,7 +6,8 @@ import {
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
+import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
@@ -20,7 +21,6 @@ import {
 import { formatToken } from '$lib/utils/format.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const validateUserAmount = ({
 	userAmount,
@@ -32,10 +32,10 @@ export const validateUserAmount = ({
 	minterInfo,
 	isSwapFlow = false
 }: {
-	userAmount: BigNumber;
+	userAmount: bigint;
 	token: Token;
-	balance?: BigNumber;
-	balanceForFee?: BigNumber;
+	balance?: Balance;
+	balanceForFee?: Balance;
 	fee?: bigint;
 	ethereumEstimateFee?: bigint;
 	minterInfo?: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
@@ -45,7 +45,7 @@ export const validateUserAmount = ({
 	const parsedSendBalance = nonNullish(balance)
 		? parseToken({
 				value: formatToken({
-					value: balance.toBigInt(),
+					value: balance,
 					unitName: token.decimals,
 					displayDecimals: token.decimals
 				}),
@@ -58,7 +58,7 @@ export const validateUserAmount = ({
 	if (isSwapFlow) {
 		return assertAmount({
 			userAmount,
-			balance: parsedSendBalance,
+			balance: parsedSendBalance.toBigInt(),
 			fee
 		});
 	}
@@ -66,8 +66,8 @@ export const validateUserAmount = ({
 	if (isTokenErc20(token)) {
 		return assertErc20Amount({
 			userAmount,
-			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO,
+			balance: parsedSendBalance.toBigInt(),
+			balanceForFee: balanceForFee ?? ZERO_BI,
 			fee
 		});
 	}
@@ -75,7 +75,7 @@ export const validateUserAmount = ({
 	if (isTokenCkBtcLedger(token)) {
 		return assertCkBtcAmount({
 			userAmount,
-			balance: parsedSendBalance,
+			balance: parsedSendBalance.toBigInt(),
 			minterInfo,
 			fee
 		});
@@ -84,7 +84,7 @@ export const validateUserAmount = ({
 	if (isTokenCkEthLedger(token)) {
 		return assertCkEthAmount({
 			userAmount,
-			balance: parsedSendBalance,
+			balance: parsedSendBalance.toBigInt(),
 			minterInfo,
 			fee
 		});
@@ -93,8 +93,8 @@ export const validateUserAmount = ({
 	if (isTokenCkErc20Ledger(token)) {
 		return assertCkErc20Amount({
 			userAmount,
-			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? ZERO,
+			balance: parsedSendBalance.toBigInt(),
+			balanceForFee: balanceForFee ?? ZERO_BI,
 			ethereumEstimateFee,
 			fee
 		});
@@ -102,7 +102,7 @@ export const validateUserAmount = ({
 
 	return assertAmount({
 		userAmount,
-		balance: parsedSendBalance,
+		balance: parsedSendBalance.toBigInt(),
 		fee
 	});
 };

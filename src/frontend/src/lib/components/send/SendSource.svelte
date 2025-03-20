@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from 'alchemy-sdk';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -22,7 +23,7 @@
 	<svelte:fragment slot="label">{$i18n.send.text.balance}</svelte:fragment>
 	{#if nonNullish(token)}
 		<ExchangeAmountDisplay
-			amount={balance ?? ZERO}
+			amount={BigNumber.from(balance ?? ZERO)}
 			decimals={token.decimals}
 			symbol={token.symbol}
 			{exchangeRate}

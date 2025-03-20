@@ -111,7 +111,7 @@
 	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
-					userAmount,
+					userAmount: userAmount.toBigInt(),
 					token: $sourceToken,
 					balance: $sourceTokenBalance,
 					fee: totalFee,

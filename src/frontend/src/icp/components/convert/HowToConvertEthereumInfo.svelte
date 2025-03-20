@@ -62,7 +62,7 @@
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance?.toBigInt() ?? ZERO_BI,
+						value: $ckEthereumNativeTokenBalance ?? ZERO_BI,
 						unitName: $ckEthereumNativeToken.decimals
 					})}
 					{$ckEthereumNativeToken.symbol}</output
@@ -118,7 +118,7 @@
 
 				<p class="mb-6">
 					{formatToken({
-						value: $sendBalance?.toBigInt() ?? ZERO_BI,
+						value: $sendBalance ?? ZERO_BI,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					})}

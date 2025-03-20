@@ -15,7 +15,7 @@ export const usdValue = ({
 	nonNullish(balance)
 		? Number(
 				formatToken({
-					value: balance.toBigInt(),
+					value: balance,
 					unitName: decimals,
 					displayDecimals: decimals
 				})
