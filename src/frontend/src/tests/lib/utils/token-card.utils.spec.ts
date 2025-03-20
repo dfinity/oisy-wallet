@@ -4,7 +4,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { CardData } from '$lib/types/token-card';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import { mapHeaderData } from '$lib/utils/token-card.utils';
-import { bn1 } from '$tests/mocks/balances.mock';
+import { bn1Bi } from '$tests/mocks/balances.mock';
 
 describe('mapHeaderData', () => {
 	// We mock the token group with a mix of data just to verify that the function works correctly
@@ -12,7 +12,7 @@ describe('mapHeaderData', () => {
 		id: SEPOLIA_TOKEN.id,
 		nativeToken: SEPOLIA_TOKEN,
 		tokens: [SEPOLIA_TOKEN, ICP_TOKEN],
-		balance: bn1,
+		balance: bn1Bi,
 		usdBalance: 300
 	};
 
@@ -25,7 +25,7 @@ describe('mapHeaderData', () => {
 			network: SEPOLIA_NETWORK,
 			oisyName: { oisyName: `${SEPOLIA_TOKEN.symbol}, ${ICP_TOKEN.symbol}` },
 			oisySymbol: { oisySymbol: SEPOLIA_TOKEN.name },
-			balance: bn1,
+			balance: bn1Bi,
 			usdBalance: 300,
 			tokenCount: 2
 		};
