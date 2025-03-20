@@ -303,7 +303,7 @@ pub mod security_pow {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum CreateChallengeError {
-        ChallengeInProgres,
+        ChallengeInProgress,
         RandomnessError(String),
         MissingUserProfile,
     }
@@ -317,7 +317,7 @@ pub mod security_pow {
     }
 
     // -------------------------------------------------------------------------------------------------
-    // - TODO: Remove this tester structures and immplementations
+    // - TODO: Remove this testing structures and implementations
     // -------------------------------------------------------------------------------------------------
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum TestAllowSigningError {
@@ -343,9 +343,29 @@ pub mod security_pow {
         }
     }
 
+    impl TestAllowSigningResponse {}
+
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct TestAllowSigningResponse {
+        pub status: AllowSigningStatus,
         pub allowed_cycles: u64,
+        pub challenge_completion: ChallengeCompletion,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AllowSigningStatus {
+        EXECUTED,
+        SKIPPED,
+        FAILED,
+    }
+
+    impl ChallengeCompletion {}
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct ChallengeCompletion {
+        pub next_allowance_ns: u64,
+        pub solved_duration_ns: u64,
+        pub current_difficulty: u32,
+        pub next_difficulty: u32,
     }
 }
 

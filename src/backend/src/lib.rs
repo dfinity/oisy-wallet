@@ -670,12 +670,8 @@ pub async fn create_pow_challenge() -> Result<CreateChallengeResponse, CreateCha
 pub fn test_allow_signing(
     request: TestAllowSigningRequest,
 ) -> Result<TestAllowSigningResponse, TestAllowSigningError> {
-    ic_cdk::println!("update:test_allow_signing -> Start");
-    let granted_cycles: u64 = security_pow::test_allow_signing(request.nonce)?;
-    ic_cdk::println!("update:test_allow_signing -> End");
-    Ok(TestAllowSigningResponse {
-        allowed_cycles: granted_cycles,
-    })
+    let response: TestAllowSigningResponse = security_pow::test_allow_signing(request.nonce)?;
+    Ok(response)
 }
 
 /// An endpoint to be called by users on first login, to enable them to

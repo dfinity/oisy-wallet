@@ -1,7 +1,7 @@
 // PoW Challenge Constants
 // The time it takes in average to solve the challenge in milliseconds
 // Difficulty adapts aiming towards this value
-pub const TARGET_DURATION_MS: u64 = 5000;
+pub const TARGET_DURATION_NS: u64 = 5000 * 1_000_000;
 
 // The minimum difficulty allowed
 pub const MIN_DIFFICULTY: u32 = 100_000;
@@ -10,16 +10,17 @@ pub const MIN_DIFFICULTY: u32 = 100_000;
 pub const MAX_DIFFICULTY: u32 = 5_000_000;
 
 // The difficulty used if no PoW challenge has been solved
-pub const START_DIFFICULTY: u32 = 800_000;
+pub const START_DIFFICULTY: u32 = 2_800_000;
 
 // Cycles per difficulty unit a principle will receive
 pub const DIFFICULTY_TO_CYCLE_FACTOR: u64 = 100;
 
-use std::time::Duration;
-
 use ic_cdk::api::{caller, time};
 use sha2::{Digest, Sha256};
-use shared::types::security_pow::{CreateChallengeError, StoredChallenge, TestAllowSigningError};
+use shared::types::security_pow::{
+    AllowSigningStatus, ChallengeCompletion, CreateChallengeError, StoredChallenge,
+    TestAllowSigningError, TestAllowSigningResponse,
+};
 
 use crate::{
     mutate_state, read_state,
@@ -27,10 +28,6 @@ use crate::{
     user_profile::exists_profile,
     State,
 };
-// -------------------------------------------------------------------------------------------------
-// - Errors
-// -------------------------------------------------------------------------------------------------
-
 // -------------------------------------------------------------------------------------------------
 // - General Utility methods
 // -------------------------------------------------------------------------------------------------
@@ -71,7 +68,17 @@ fn get_pow_challenge() -> Option<Candid<StoredChallenge>> {
     read_state(|s: &State| s.pow_challenge.get(&stored_principal))
 }
 
+// -------------------------------------------------------------------------------------------------
+// - Service models
+// -------------------------------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------------------------------
+// - Service functions
+// -------------------------------------------------------------------------------------------------
+
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
+    ic_cdk::println!("update:create_pow_challenge -> Start");
+
     let principal = caller();
     let stored_principal = StoredPrincipal(principal);
 
@@ -83,6 +90,11 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 
     let difficulty: u32;
     if let Some(stored_challenge) = get_pow_challenge() {
+        ic_cdk::println!(
+            "Retrieved existing StoredChallenge:  {:?}",
+            stored_challenge
+        );
+
         // we re-use the previous challenge so we can dynamically adapt the difficulty
         difficulty = stored_challenge.difficulty;
 
@@ -96,9 +108,11 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
             );
         } else {
             ic_cdk::println!("The challenge which has started at {} has not expired yet. The next challenge can be requested at {}", stored_challenge.start_timestamp_ns, stored_challenge.expiry_timestamp_ns);
-            return Err(CreateChallengeError::ChallengeInProgres);
+            return Err(CreateChallengeError::ChallengeInProgress);
         }
     } else {
+        ic_cdk::println!("No ChallengeStore found");
+
         // if the challenge is requested the first time we use the start difficulty
         difficulty = START_DIFFICULTY;
     }
@@ -110,24 +124,52 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
         .map_err(CreateChallengeError::RandomnessError)?;
 
     let current_time_ns: u64 = time();
+    let stored_challenge = StoredChallenge {
+        nonce: random_nonce,
+        difficulty: difficulty,
+        start_timestamp_ns: current_time_ns,
+        expiry_timestamp_ns: current_time_ns + TARGET_DURATION_NS,
+        solved: false,
+    };
 
-    let stored_challange = mutate_state(|state| {
+    mutate_state(|state| {
         let pow_challenge_map = &mut state.pow_challenge;
-        let stored_challange = StoredChallenge {
-            nonce: random_nonce,
-            difficulty: difficulty,
-            start_timestamp_ns: current_time_ns,
-            expiry_timestamp_ns: current_time_ns + TARGET_DURATION_MS * 1_000_000,
-            solved: false,
-        };
-
-        pow_challenge_map.insert(stored_principal, Candid(stored_challange.clone()));
-        stored_challange
+        pow_challenge_map.insert(stored_principal, Candid(stored_challenge.clone()));
     });
-    Ok(stored_challange)
+
+    ic_cdk::println!("update:create_pow_challenge -> End: {:?}", stored_challenge);
+
+    Ok(stored_challenge)
 }
 
-pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
+pub fn test_allow_signing(nonce: u64) -> Result<TestAllowSigningResponse, TestAllowSigningError> {
+    let principal = caller();
+
+    let challenge_completion: ChallengeCompletion = complete_challenge(nonce)?;
+
+    // Grant cycles proportional to difficulty
+    let granted_cycles =
+        (challenge_completion.current_difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
+
+    // Here we would proceed with granting signer permissions and record the granted cycles for
+    ic_cdk::println!(
+        "Allowing principle {} to spend {} on signer operations",
+        principal.to_string(),
+        granted_cycles,
+    );
+
+    Ok(TestAllowSigningResponse {
+        status: AllowSigningStatus::EXECUTED,
+        allowed_cycles: granted_cycles,
+        challenge_completion: challenge_completion,
+    })
+}
+// -------------------------------------------------------------------------------------------------
+// - Internal functions
+// -------------------------------------------------------------------------------------------------
+
+/// Internal function which can be integrated to any service function that requires PoW protection
+fn complete_challenge(nonce: u64) -> Result<ChallengeCompletion, TestAllowSigningError> {
     let principal = caller();
     let stored_principal = StoredPrincipal(principal);
 
@@ -142,9 +184,10 @@ pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
         TestAllowSigningError::PowMissingChallange
     })?;
 
-    let solve_duration_ns: u64 = time() - stored_challenge.start_timestamp_ns;
+    ic_cdk::println!("StoredChallenge {:?}", stored_challenge);
+    let end_timestamp_ns = time();
+    let solve_duration_ns: u64 = end_timestamp_ns - stored_challenge.start_timestamp_ns;
 
-    #[allow(clippy::cast_possible_truncation, clippy::cast_lossless)]
     if verify_solution(
         nonce,
         stored_challenge.difficulty,
@@ -152,12 +195,12 @@ pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
     ) {
         ic_cdk::println!(
             "The provided nonce is valid (solve_duration={}ms)",
-            Duration::from_nanos(solve_duration_ns).as_millis()
+            solve_duration_ns
         );
     } else {
         ic_cdk::println!(
             "The provided nonce is invalid (solve_duration={}ms)",
-            Duration::from_nanos(solve_duration_ns).as_millis()
+            solve_duration_ns
         );
         return Err(TestAllowSigningError::PowInvalidNonce);
     }
@@ -168,48 +211,40 @@ pub fn test_allow_signing(nonce: u64) -> Result<u64, TestAllowSigningError> {
         state.pow_challenge.insert(
             stored_principal,
             Candid(StoredChallenge {
-                nonce: 0,
+                nonce: nonce,
                 difficulty: new_difficulty,
-                start_timestamp_ns: 0,
-                expiry_timestamp_ns: 0,
+                start_timestamp_ns: stored_challenge.start_timestamp_ns,
+                expiry_timestamp_ns: stored_challenge.expiry_timestamp_ns,
                 solved: true,
             }),
         );
     });
 
-    #[allow(clippy::cast_lossless)]
-    // Grant cycles proportional to difficulty
-    let granted_cycles = (stored_challenge.difficulty as u64) * DIFFICULTY_TO_CYCLE_FACTOR;
-
-    // Here we would proceed with granting signer permissions and record the granted cycles for
-    ic_cdk::println!(
-        "Allowing principle {} to spend {} on signer operations",
-        principal.to_string(),
-        granted_cycles,
-    );
-
-    Ok(granted_cycles)
+    Ok(ChallengeCompletion {
+        next_allowance_ns: 0,
+        solved_duration_ns: solve_duration_ns,
+        current_difficulty: stored_challenge.difficulty,
+        next_difficulty: new_difficulty,
+    })
 }
 
-// Calculate the new difficulty:
+// Calculate the new difficulty for a PoW Challenge:
 //
 // Adjust the current difficulty proportionally based on how long the client took
-// to solve the previous challenge (`solve_duration_ns`) compared to the
-// target solving duration (`TARGET_DURATION_MS`).
+// to solve the previous challenge (`solve_duration_ns`) compared to the solving duration
+// (`TARGET_DURATION_MS`).
 //
 // Formula:
-//   new_difficulty = (current_difficulty * TARGET_DURATION_MS * ) / solve_duration_ns
+// new_difficulty = (current_difficulty * TARGET_DURATION_MS * ) / solve_duration_ns
 //
 // This ensures:
 // - If the client solved too quickly (duration < target), difficulty increases.
-// - If the client solved too slowly (duration > target), difficulty decreases.
-//
-// `.max(1)` ensures no division by zero occurs if the client mistakenly reports 0 ms.
+// - If the client solved too slowly (duration > target), difficulty decreases. .
 fn adapt_difficulty(difficulty: u32, solve_duration_ns: u64) -> u32 {
-    let new_difficulty = ((difficulty as u128 * (TARGET_DURATION_MS * 1_000_000) as u128)
-        / solve_duration_ns.max(1) as u128)
-        // make sure the difficulty is always between the defined min. and the max. difficulty
-        .clamp(MIN_DIFFICULTY as u128, MAX_DIFFICULTY as u128) as u32;
+    let new_difficulty = ((difficulty as u64 * TARGET_DURATION_NS as u64)
+        / solve_duration_ns.max(1))
+    // make sure the difficulty is always between the defined min. and the max. difficulty
+    .clamp(MIN_DIFFICULTY as u64, MAX_DIFFICULTY as u64) as u32;
 
     ic_cdk::println!(
         "Adjusted difficulty from {} to {}",
@@ -219,7 +254,6 @@ fn adapt_difficulty(difficulty: u32, solve_duration_ns: u64) -> u32 {
 
     new_difficulty
 }
-
 fn verify_solution(nonce: u64, difficulty: u32, timestamp: u64) -> bool {
     let hash = Sha256::digest((timestamp.to_string() + "." + &*nonce.to_string()).as_bytes());
     let hash_prefix = u32::from_be_bytes([hash[0], hash[1], hash[2], hash[3]]);

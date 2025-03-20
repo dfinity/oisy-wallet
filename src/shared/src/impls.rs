@@ -480,6 +480,7 @@ impl Validate for IcrcToken {
         Ok(())
     }
 }
+
 impl StoredChallenge {
     #[allow(clippy::must_use_candidate)]
     pub fn is_expired(&self) -> bool {
@@ -539,9 +540,9 @@ where
         // Collect keys of expired entries
         let mut keys_to_remove: Vec<K> = vec![];
 
-        let mut iter = self.map.iter();
+        let iter = self.map.iter();
 
-        while let Some((key, value)) = iter.next() {
+        for (key, value) in iter {
             if self.is_expired(value.get_expiry_timestamp(self.ttl_ns)) {
                 self.debug_key("Key expired, marking for removal", &key);
                 keys_to_remove.push(key.clone());

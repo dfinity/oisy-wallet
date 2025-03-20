@@ -1,5 +1,7 @@
 //! Tests the ledger account logic.
 
+use std::time::Duration;
+
 use candid::Principal;
 use sha2::{Digest, Sha256};
 use shared::types::{
@@ -20,17 +22,26 @@ use crate::utils::{
 
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
 // frontend.
-// It can be used as a blueprint for implementing the javascript function used in OISY frontend to
-// solve the PoW challenge.
+fn get_timestamp_ns() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos() as u64
+}
+
+// This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
+// frontend. It can be used as a blueprint for implementing the javascript function used in OISY
+// frontend to solve the PoW challenge.
 // For a better understanding how this PoW algorithm works :
 // Higher difficulty ⇒ smaller target ⇒ harder challenge (fewer valid hashes).
 // Lower difficulty ⇒ larger target ⇒ easier challenge (more valid hashes).
-pub fn helper_solve_challenge(timestamp: u64, difficulty: u32) -> u64 {
+pub fn helper_solve_challenge(pic_setup: &PicBackend, timestamp: u64, difficulty: u32) -> u64 {
     assert!(difficulty > 0, "Difficulty must be greater than zero");
 
     let mut nonce: u64 = 0;
     let target: u32 = (0xFFFFFFFFu32) / difficulty;
 
+    let start_timestamp = get_timestamp_ns();
     loop {
         // Serialize challenge object + nonce
         let challenge_str = timestamp.to_string() + "." + &nonce.to_string();
@@ -49,6 +60,10 @@ pub fn helper_solve_challenge(timestamp: u64, difficulty: u32) -> u64 {
         }
         nonce += 1;
     }
+    let solve_timestamp_ns = get_timestamp_ns() - start_timestamp;
+    pic_setup
+        .pic
+        .advance_time(Duration::from_nanos(solve_timestamp_ns));
     nonce
 }
 
@@ -62,8 +77,7 @@ pub fn call_create_pow_challenge(
         (),
     );
 
-    let result = wrapped_result.expect("that create_pow_challenge succeeds");
-    result
+    wrapped_result.expect("that create_pow_challenge succeeds")
 }
 
 pub fn call_test_allow_signing(
@@ -125,8 +139,8 @@ fn test_pow_challenge_should_succeed_if_expired() {
     let err_1th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_1th_call.is_ok());
 
-    // TODO add time machine here to jump to the challenge expiration_date
-    // you can use err_1th_call.unwrap().expiry_timestamp_ns to get the expiry timestamp
+    // TODO use err_1th_call.unwrap().expiry_timestamp_ns to get the expiry timestamp
+    pic_setup.pic.advance_time(Duration::from_secs(6));
 
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller);
     assert!(err_2th_call.is_ok());
@@ -142,7 +156,7 @@ fn test_pow_challenge_should_fail_if_not_expired() {
     assert!(err_1th_call.is_ok());
 
     let err_2th_call = call_create_pow_challenge(&pic_setup, caller).unwrap_err();
-    assert_eq!(err_2th_call, CreateChallengeError::ChallengeInProgres);
+    assert_eq!(err_2th_call, CreateChallengeError::ChallengeInProgress);
 }
 
 #[test]
@@ -157,11 +171,16 @@ fn test_allow_signing_should_succeed_with_valid_nonce() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
+    let nonce =
+        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
 
     let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
 
     assert!(result_allow_signing.is_ok());
+
+    // let reponse = result_allow_signing.unwrap();
+
+    // assert_eq!(reponse.status, AllowSigningStatus.EXECUTED)
 }
 
 #[test]
@@ -176,7 +195,8 @@ fn test_allow_signing_should_fail_with_invalid_nonce() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
+    let nonce =
+        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
 
     // we can always assume the previously iterated nonce is invalid
     let invalid_nonce = nonce - 1;
@@ -200,11 +220,40 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
         result.expect("Failed to retrieve CreateChallengeResponse");
 
     // emulates the javascript function running in the browser to create a valid nonce
-    let nonce = helper_solve_challenge(response.start_timestamp_ns, response.difficulty);
+    let nonce =
+        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
 
     let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
 
     assert!(result_allow_signing.is_ok());
     let response: TestAllowSigningResponse = result_allow_signing.unwrap();
-    assert_eq!(response.allowed_cycles, 80000000)
+    assert_eq!(response.allowed_cycles, 280000000)
+}
+
+#[test]
+fn test_pow_challenge_should_approach_target_duration_after_first_challenge() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+    let _ = call_create_user_profile(&pic_setup, caller);
+    // ---------------------------------------------------------------------------------------------
+    // - Solve the first challenge and call allow_signing (using the START_DIFFICULTY)
+    // ---------------------------------------------------------------------------------------------
+    let result = call_create_pow_challenge(&pic_setup, caller);
+    let response: CreateChallengeResponse =
+        result.expect("Failed to retrieve CreateChallengeResponse");
+    let nonce =
+        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
+    assert!(result_allow_signing.is_ok());
+
+    // ---------------------------------------------------------------------------------------------
+    // - Solve the second challenge and call allow_signing (using the adjusted difficulty)
+    // ---------------------------------------------------------------------------------------------
+    let result = call_create_pow_challenge(&pic_setup, caller);
+    let response: CreateChallengeResponse =
+        result.expect("Failed to retrieve CreateChallengeResponse");
+    let nonce =
+        helper_solve_challenge(&pic_setup, response.start_timestamp_ns, response.difficulty);
+    let result_allow_signing = call_test_allow_signing(&pic_setup, caller, nonce);
+    assert!(result_allow_signing.is_ok());
 }
