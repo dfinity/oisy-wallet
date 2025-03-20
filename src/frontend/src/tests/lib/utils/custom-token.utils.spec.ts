@@ -113,5 +113,47 @@ describe('custom-token.utils', () => {
 				}
 			});
 		});
+
+		it('should convert to CustomToken with nullish version', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'SplMainnet',
+					address: 'mock-token-address',
+					decimals: 8,
+					symbol: 'mock-symbol'
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					SplMainnet: {
+						token_address: 'mock-token-address',
+						decimals: [8],
+						symbol: ['mock-symbol']
+					}
+				}
+			});
+		});
+
+		it('should return correct type for SplDevnet network', () => {
+			expect(
+				toCustomToken({
+					...mockParams,
+					networkKey: 'SplDevnet',
+					address: 'mock-token-address',
+					decimals: 8,
+					symbol: 'mock-symbol'
+				})
+			).toEqual({
+				...partialExpected,
+				token: {
+					SplDevnet: {
+						token_address: 'mock-token-address',
+						decimals: [8],
+						symbol: ['mock-symbol']
+					}
+				}
+			});
+		});
 	});
 });
