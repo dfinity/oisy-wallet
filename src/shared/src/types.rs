@@ -6,6 +6,8 @@ use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
+pub mod network;
+
 #[cfg(test)]
 mod tests;
 
