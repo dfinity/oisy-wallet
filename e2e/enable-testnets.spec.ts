@@ -6,10 +6,10 @@ TestnetCases.forEach(({ networkSymbol, tokenSymbol }) => {
 		await page.clock.install();
 	});
 
-	testWithII(`should enable ${networkSymbol} network`, async ({ page, iiPage }) => {
+	testWithII(`should enable ${networkSymbol} network`, async ({ page, iiPage, isMobile }) => {
 		const testnetsPage = new TestnetsPage({ page, iiPage });
 		await testnetsPage.waitForReady();
 		await testnetsPage.enableTestnets({ networkSymbol, tokenSymbol });
-		await testnetsPage.takeScreenshot({ freezeCarousel: true });
+		await testnetsPage.takeScreenshot({ isMobile, freezeCarousel: true });
 	});
 });

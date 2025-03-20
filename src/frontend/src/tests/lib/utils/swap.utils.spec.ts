@@ -1,7 +1,14 @@
 import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend.did';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
+import {
+	getKongIcTokenIdentifier,
+	getLiquidityFees,
+	getNetworkFee,
+	getSwapRoute
+} from '$lib/utils/swap.utils';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 
 describe('swap utils', () => {
@@ -103,6 +110,18 @@ describe('swap utils', () => {
 			const networkFee = getNetworkFee({ transactions, tokens: [] });
 
 			expect(networkFee).toBeUndefined();
+		});
+	});
+
+	describe('getKongIcTokenIdentifier', () => {
+		it('returns correct kong token identifier for IC token', () => {
+			expect(getKongIcTokenIdentifier(mockValidIcToken)).toBe(
+				`IC.${mockValidIcToken.ledgerCanisterId}`
+			);
+		});
+
+		it('returns empty string for non-IC token', () => {
+			expect(getKongIcTokenIdentifier(BTC_MAINNET_TOKEN)).toBe('');
 		});
 	});
 });

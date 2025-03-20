@@ -45,10 +45,12 @@ export class ManageTokensPage extends HomepageLoggedIn {
 
 	enableAndDisableToken = async ({
 		tokenSymbol,
-		networkSymbol
+		networkSymbol,
+		isMobile
 	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
+		isMobile?: boolean;
 	}) => {
 		await this.activateTestnetSettings();
 		await this.toggleTokenInList({
@@ -63,6 +65,7 @@ export class ManageTokensPage extends HomepageLoggedIn {
 		).toBeVisible();
 		await this.waitForLoadState();
 		await this.takeScreenshot({
+			isMobile,
 			freezeCarousel: true,
 			centeredElementTestId: `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`
 		});
