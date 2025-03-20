@@ -20,6 +20,6 @@ ManageTokensCases.forEach(({ type, tokenSymbol, networkSymbol }) => {
 				: undefined
 		});
 		await manageTokensPage.waitForReady();
-		await manageTokensPage.enableAndDisableToken({ tokenSymbol, networkSymbol });
+		await manageTokensPage.enableAndDisableToken({ tokenSymbol, networkSymbol, isMobile });
 	});
 });
