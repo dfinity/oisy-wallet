@@ -18,8 +18,7 @@
 	$: displayAmount = formatToken({
 		value: amount.toBigInt(),
 		unitName: token?.decimals,
-		displayDecimals: EIGHT_DECIMALS,
-		showPlusSign: false
+		displayDecimals: EIGHT_DECIMALS
 	});
 
 	let displayUsdAmount: string;
