@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
@@ -30,7 +31,6 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 
 	export let amount: OptionAmount = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
