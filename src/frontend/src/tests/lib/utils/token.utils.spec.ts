@@ -23,7 +23,7 @@ import {
 	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
-import { bn1, bn2, bn3, mockBalances } from '$tests/mocks/balances.mock';
+import { bn1Bi, bn2Bi, bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
@@ -135,7 +135,7 @@ describe('calculateTokenUsdBalance', () => {
 			$balances: mockBalances,
 			$exchanges: mockExchanges
 		});
-		expect(result).toEqual(bn3.toNumber());
+		expect(result).toEqual(Number(bn3Bi));
 	});
 
 	it('should return undefined if exchange rate is not available', () => {
@@ -180,16 +180,16 @@ describe('calculateTokenUsdAmount', () => {
 	it('should correctly calculate USD amount for the token and amount', () => {
 		const result = calculateTokenUsdAmount({
 			token: ICP_TOKEN,
-			amount: bn3,
+			amount: bn3Bi,
 			$exchanges: mockExchanges
 		});
-		expect(result).toEqual(bn3.toNumber());
+		expect(result).toEqual(Number(bn3Bi));
 	});
 
 	it('should return undefined if exchange rate is not available', () => {
 		const result = calculateTokenUsdAmount({
 			token: ICP_TOKEN,
-			amount: bn3,
+			amount: bn3Bi,
 			$exchanges: {}
 		});
 		expect(result).toEqual(undefined);
@@ -224,8 +224,8 @@ describe('mapTokenUi', () => {
 		});
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
-			balance: bn3,
-			usdBalance: bn3.toNumber()
+			balance: bn3Bi,
+			usdBalance: Number(bn3Bi)
 		});
 	});
 
@@ -233,7 +233,7 @@ describe('mapTokenUi', () => {
 		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: mockBalances, $exchanges: {} });
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
-			balance: bn3,
+			balance: bn3Bi,
 			usdBalance: undefined
 		});
 	});
@@ -276,13 +276,13 @@ describe('mapTokenUi', () => {
 
 describe('sumTokenBalances', () => {
 	// We mock ETH to be a twin of ICP
-	const token1: TokenUi = { ...ICP_TOKEN, balance: bn1, decimals: 18 };
-	const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2, decimals: 18 };
+	const token1: TokenUi = { ...ICP_TOKEN, balance: bn1Bi, decimals: 18 };
+	const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2Bi, decimals: 18 };
 
 	it('should sum token balances when both balances are non-null and decimals match', () => {
 		const result = sumTokenBalances([token1, token2]);
 
-		expect(result).toStrictEqual(bn1.add(bn2));
+		expect(result).toStrictEqual(bn1Bi + bn2Bi);
 	});
 
 	it('should return null when decimals do not match', () => {
@@ -290,11 +290,11 @@ describe('sumTokenBalances', () => {
 	});
 
 	it('should return the first balance when the second balance is nullish', () => {
-		expect(sumTokenBalances([token1, { ...token2, balance: null }])).toBe(bn1);
+		expect(sumTokenBalances([token1, { ...token2, balance: null }])).toBe(bn1Bi);
 	});
 
 	it('should return the second balance when the first balance is nullish', () => {
-		expect(sumTokenBalances([{ ...token1, balance: null }, token2])).toBe(bn2);
+		expect(sumTokenBalances([{ ...token1, balance: null }, token2])).toBe(bn2Bi);
 	});
 
 	it('should return the first balance nullish value when both balances are nullish but not undefined', () => {

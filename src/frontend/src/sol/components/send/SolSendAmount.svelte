@@ -11,7 +11,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -67,8 +67,8 @@
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds);
 		}
 
-		const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO;
-		if (nonNullish($fee) && solBalance.lt($fee)) {
+		const solBalance = $balancesStore?.[solanaNativeToken.id]?.data ?? ZERO_BI;
+		if (nonNullish($fee) && solBalance < $fee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_solana_funds_to_cover_the_fees
 			);
