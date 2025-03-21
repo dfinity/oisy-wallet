@@ -443,6 +443,22 @@ abstract class Homepage {
 		await this.#page.setViewportSize({ height: stablePageHeight, width });
 	}
 
+	private async expectToHaveScreenshot({
+		element,
+		centeredElementTestId,
+		fullPage = false
+	}: {
+		element: Page | Locator;
+		centeredElementTestId?: string;
+		fullPage?: boolean;
+	}): Promise<void> {
+		if (nonNullish(centeredElementTestId)) {
+			await this.scrollIntoViewCentered(centeredElementTestId);
+		}
+
+		await expect(element).toHaveScreenshot({ fullPage });
+	}
+
 	async takeScreenshot(
 		{
 			isMobile = false,
@@ -484,23 +500,12 @@ abstract class Homepage {
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 
-			if (nonNullish(centeredElementTestId)) {
-				await this.scrollIntoViewCentered(centeredElementTestId);
-			}
-
-			// Playwright can retry flaky tests in the amount of time set below.
-			await expect(element).toHaveScreenshot();
+			await this.expectToHaveScreenshot({ element, centeredElementTestId });
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (isMobile) {
 				await this.hideMobileNavigationMenu();
-
-				if (nonNullish(centeredElementTestId)) {
-					await this.scrollIntoViewCentered(centeredElementTestId);
-				}
-
-				await expect(element).toHaveScreenshot({ fullPage: true });
-
+				await this.expectToHaveScreenshot({ element, centeredElementTestId, fullPage: true });
 				await this.showMobileNavigationMenu();
 			}
 		}
