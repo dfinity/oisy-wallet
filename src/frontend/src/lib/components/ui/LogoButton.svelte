@@ -44,9 +44,10 @@
 							<span class="float-left font-bold"><slot name="title" /></span>
 						{/if}
 						{#if hasSubtitleSlot}
-							<span class="float-left text-tertiary">
-								&nbsp;&middot;&nbsp;<slot name="subtitle" /></span
-							>
+							{#if dividers}
+								<span class="float-left text-tertiary"> &nbsp;&middot;&nbsp; </span>
+							{/if}
+							<span class="float-left text-tertiary"> <slot name="subtitle" /></span>
 						{/if}
 					</span>
 					{#if hasDescriptionSlot}
