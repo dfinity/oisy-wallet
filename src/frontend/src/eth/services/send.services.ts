@@ -21,13 +21,13 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/signer.api';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
-import type { TransactionFeeData } from '$lib/types/transaction';
+import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
@@ -90,7 +90,7 @@ const erc20PrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -166,7 +166,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -225,7 +225,7 @@ const erc20ContractPrepareApprove = async ({
 	return prepare({
 		data,
 		to,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -274,10 +274,7 @@ export const send = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-	}): Promise<{ hash: string }> => {
+	RequiredTransactionFeeData): Promise<{ hash: string }> => {
 	progress(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
@@ -320,11 +317,7 @@ const sendTransaction = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	Omit<SendParams, 'lastProgressStep'> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-		nonce: number;
-	}): Promise<TransactionResponse> => {
+	RequiredTransactionFeeData & { nonce: number }): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction } = infuraProviders(networkId);

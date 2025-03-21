@@ -49,7 +49,7 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 };
 
 const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
-	Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
+	Number(token.balance ?? ZERO_BI) || Number(token.usdBalance ?? ZERO_BI) || showZeroBalances;
 
 /**
  * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least
