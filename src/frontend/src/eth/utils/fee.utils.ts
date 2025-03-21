@@ -10,4 +10,4 @@ export const maxGasFee = ({
 export const minGasFee = ({
 	maxPriorityFeePerGas,
 	gas: estimatedGasFee
-}: TransactionFeeData): bigint => (maxPriorityFeePerGas ?? 0n) * estimatedGasFee;
+}: TransactionFeeData): bigint => (maxPriorityFeePerGas ?? ZERO_BI) * estimatedGasFee;

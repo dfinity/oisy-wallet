@@ -120,7 +120,7 @@ describe('custom-token.services', () => {
 
 					await assertSetCustomToken({
 						customTokens,
-						expectedVersion: [customTokens[0].version ?? 0n],
+						expectedVersion: [customTokens[0].version ?? ZERO_BI],
 						indexCanisterId
 					});
 				}

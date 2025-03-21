@@ -21,6 +21,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -87,9 +88,9 @@
 		}
 
 		const assertBalance = (): IcAmountAssertionError | undefined => {
-			const total = userAmount + (fee ?? 0n);
+			const total = userAmount + (fee ?? ZERO_BI);
 
-			if (total.gt($balance ?? 0n)) {
+			if (total > ($balance ?? ZERO_BI)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 
@@ -157,7 +158,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					fee={fee ?? 0}
+					{fee}
 				/>
 			{/if}
 		</svelte:fragment>

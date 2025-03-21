@@ -65,7 +65,7 @@ export const validateUserAmount = ({
 		return assertErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? 0n,
+			balanceForFee: balanceForFee ?? ZERO_BI,
 			fee
 		});
 	}
@@ -92,7 +92,7 @@ export const validateUserAmount = ({
 		return assertCkErc20Amount({
 			userAmount,
 			balance: parsedSendBalance,
-			balanceForFee: balanceForFee ?? 0n,
+			balanceForFee: balanceForFee ?? ZERO_BI,
 			ethereumEstimateFee,
 			fee
 		});

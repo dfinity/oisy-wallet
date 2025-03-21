@@ -84,8 +84,8 @@ const toBaseTransaction = ({
 	'value' | 'timestamp'
 >): Omit<Transaction_Icrc | Transaction_Spl, 'counterparty'> => ({
 	transaction_type: toTransactionType(type),
-	timestamp: (timestamp ?? 0n) * NANO_SECONDS_IN_SECOND,
-	amount: value ?? 0n,
+	timestamp: (timestamp ?? ZERO_BI) * NANO_SECONDS_IN_SECOND,
+	amount: value ?? ZERO_BI,
 	network: {}
 });
 
@@ -100,7 +100,7 @@ const toIcrcTransaction = ({
 
 	return {
 		...toBaseTransaction({ type, value, timestamp }),
-		timestamp: timestamp ?? 0n,
+		timestamp: timestamp ?? ZERO_BI,
 		// TODO: use correct value when the Rewards canister is updated to accept account identifiers
 		counterparty: Principal.anonymous()
 	};
@@ -123,8 +123,8 @@ const toSplTransaction = ({
 		// TODO: this is a temporary hack to release v1. Adjust as soon as the rewards canister has more tokens.
 		...toBaseTransaction({
 			type: type === 'deposit' ? 'send' : type === 'withdraw' ? 'receive' : type,
-			value: value ?? 0n,
-			timestamp: BigInt(timestamp ?? 0n)
+			value: value ?? ZERO_BI,
+			timestamp: BigInt(timestamp ?? ZERO_BI)
 		}),
 		counterparty: address === from ? to : from
 	};

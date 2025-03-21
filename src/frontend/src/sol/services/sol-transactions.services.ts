@@ -132,8 +132,8 @@ export const fetchSolTransactionsForSignature = async ({
 				...accCumulativeBalances,
 				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
 				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
-					[from]: (accCumulativeBalances[from] ?? 0n) - value,
-					[to]: (accCumulativeBalances[to] ?? 0n) + value
+					[from]: (accCumulativeBalances[from] ?? ZERO_BI) - value,
+					[to]: (accCumulativeBalances[to] ?? ZERO_BI) + value
 				})
 			};
 
@@ -151,7 +151,7 @@ export const fetchSolTransactionsForSignature = async ({
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
-				timestamp: blockTime ?? 0n,
+				timestamp: blockTime ?? ZERO_BI,
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,

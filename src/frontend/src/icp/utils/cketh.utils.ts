@@ -37,9 +37,9 @@ export const assertCkETHMinWithdrawalAmount = ({
 	} = minterInfo;
 
 	// The `minimum_withdrawal_amount` is optional in the minter info because the team decided to make all fields optional for maintainability reasons. That's why we assume that it is most likely set.
-	const minWithdrawalAmount = fromNullable(minimum_withdrawal_amount) ?? 0n;
+	const minWithdrawalAmount = fromNullable(minimum_withdrawal_amount) ?? ZERO_BI;
 
-	if ((amount ?? 0n) < minWithdrawalAmount) {
+	if ((amount ?? ZERO_BI) < minWithdrawalAmount) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_amount, {
 				$amount: formatToken({
@@ -98,7 +98,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 	feeStoreData: EthereumFeeStoreData;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {
-	const ethBalance = balance ?? 0n;
+	const ethBalance = balance ?? ZERO_BI;
 
 	// We skip validation checks here for zero balance because it makes the UI/UX ungraceful if the balance is just not yet loaded.
 	if (ethBalance === 0n) {
@@ -111,7 +111,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 
 	const { decimals, symbol } = tokenCkEth;
 
-	const estimatedFee = feeStoreData?.maxTransactionFee ?? 0n;
+	const estimatedFee = feeStoreData?.maxTransactionFee ?? ZERO_BI;
 
 	if (estimatedFee > ethBalance) {
 		return new IcAmountAssertionError(

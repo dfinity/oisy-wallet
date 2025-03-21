@@ -141,7 +141,7 @@ export class AlchemyProvider {
 			from,
 			to: possibleUndefinedToNull(to),
 			value: value.toBigInt(),
-			gasPrice: gasPrice?.toBigInt() ?? 0n,
+			gasPrice: gasPrice?.toBigInt() ?? ZERO_BI,
 			gasLimit: gasLimit.toBigInt(),
 			nonce,
 			data,

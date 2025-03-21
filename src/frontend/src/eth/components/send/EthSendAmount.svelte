@@ -7,6 +7,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -40,19 +41,19 @@
 		const parsedSendBalance = nonNullish($sendBalance)
 			? Utils.parseUnits(
 					formatToken({
-						value: $sendBalance.toBigInt(),
+						value: $sendBalance,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					}),
 					$sendTokenDecimals
-				)
+				).toBigInt()
 			: 0n;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
-			const total = userAmount + ($minGasFee ?? 0n);
+			const total = userAmount + ($minGasFee ?? ZERO_BI);
 
-			if (total.gt(parsedSendBalance)) {
+			if (total > parsedSendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
 			}
 
@@ -60,13 +61,13 @@
 		}
 
 		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
-		if (userAmount.gt(parsedSendBalance)) {
+		if (userAmount > parsedSendBalance) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount);
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? 0n;
-		if (nonNullish($maxGasFee) && ethBalance.lt($maxGasFee)) {
+		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO_BI;
+		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
 			);

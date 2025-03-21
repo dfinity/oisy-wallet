@@ -41,13 +41,14 @@ export const groupTokensByTwin = (tokens: TokenUi[]): TokenUiOrGroupUi[] => {
 
 			return (
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+((b.balance ?? 0n) > (a.balance ?? 0n)) - +((b.balance ?? 0n) < (a.balance ?? 0n))
+				+((b.balance ?? ZERO_BI) > (a.balance ?? ZERO_BI)) -
+					+((b.balance ?? ZERO_BI) < (a.balance ?? ZERO_BI))
 			);
 		});
 };
 
 const hasBalance = ({ token, showZeroBalances }: { token: TokenUi; showZeroBalances: boolean }) =>
-	Number(token.balance ?? 0n) || Number(token.usdBalance ?? 0n) || showZeroBalances;
+	Number(token.balance ?? ZERO_BI) || Number(token.usdBalance ?? ZERO_BI) || showZeroBalances;
 
 /**
  * Function to create a list of TokenUiOrGroupUi, filtering out all groups that do not have at least

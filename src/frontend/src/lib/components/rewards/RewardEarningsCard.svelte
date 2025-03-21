@@ -4,7 +4,7 @@
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS, ZERO_BI } from '$lib/constants/app.constants';
 	import type { AmountString } from '$lib/types/amount';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
@@ -15,7 +15,7 @@
 
 	let displayAmount: AmountString;
 	$: displayAmount = formatToken({
-		value: amount.toBigInt(),
+		value: amount,
 		unitName: token?.decimals,
 		displayDecimals: EIGHT_DECIMALS,
 		showPlusSign: true
@@ -33,7 +33,7 @@
 		class:ease-in-out={loading}
 		class:animate-pulse={loading}
 	>
-		{#if amount.gt(0n)}
+		{#if amount > ZERO_BI}
 			<Sprinkles type="box" />
 		{/if}
 
