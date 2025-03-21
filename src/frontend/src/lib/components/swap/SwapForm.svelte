@@ -108,10 +108,10 @@
 		switchTokens();
 	};
 
-	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
+	$: customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
 			? validateUserAmount({
-					userAmount: userAmount.toBigInt(),
+					userAmount,
 					token: $sourceToken,
 					balance: $sourceTokenBalance,
 					fee: totalFee,
