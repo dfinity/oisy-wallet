@@ -80,7 +80,7 @@ const tokensWithMismatchedDecimals = [
 			env: 'mainnet'
 		},
 		twinTokenSymbol: 'ckFOO',
-		balance: 100,
+		balance: 100n,
 		usdBalance: 1000,
 		standard: 'ethereum',
 		category: 'default',
@@ -93,7 +93,7 @@ const tokensWithMismatchedDecimals = [
 		id: parseTokenId('ckFOO'),
 		symbol: 'ckFOO',
 		network: ICP_NETWORK,
-		balance: 200,
+		balance: 200n,
 		usdBalance: 2000,
 		standard: 'icrc',
 		category: 'default',
