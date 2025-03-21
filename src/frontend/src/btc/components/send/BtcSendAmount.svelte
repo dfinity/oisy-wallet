@@ -26,7 +26,7 @@
 
 	$: customValidate = (userAmount: bigint): Error | undefined => {
 		// calculate-UTXOs-fee endpoint only accepts "userAmount > 0"
-		if (invalidAmount(Number(userAmount)) || userAmount === 0n) {
+		if (invalidAmount(Number(userAmount)) || userAmount === ZERO_BI) {
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 

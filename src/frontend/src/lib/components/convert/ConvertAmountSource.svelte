@@ -11,6 +11,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let sendAmount: OptionAmount = undefined;
 	export let totalFee: bigint | undefined;
@@ -51,7 +52,7 @@
 		});
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === 0n;
+	$: isZeroBalance = isNullish($sourceTokenBalance) || $sourceTokenBalance === ZERO_BI;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(totalFee)

@@ -22,7 +22,7 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
+import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND, ZERO_BI } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
 	btcAddressTestnet,
@@ -281,7 +281,7 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 	return allTokens.reduce<AccountSnapshotFor[]>((acc, token) => {
 		const balance = balances[token.id]?.data;
 
-		if (isNullish(balance) || balance === 0n) {
+		if (isNullish(balance) || balance === ZERO_BI) {
 			return acc;
 		}
 

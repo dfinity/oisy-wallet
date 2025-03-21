@@ -2,6 +2,7 @@ import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Option } from '$lib/types/utils';
 import { formatToken } from '$lib/utils/format.utils';
@@ -23,7 +24,7 @@ export const assertCkETHMinWithdrawalAmount = ({
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount === 0n) {
+	if (amount === ZERO_BI) {
 		return undefined;
 	}
 
@@ -72,7 +73,7 @@ export const assertCkETHMinFee = ({
 }): IcAmountAssertionError | undefined => {
 	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
 	// e.g. user enters 0. and an error gets displayed.
-	if (amount === 0n) {
+	if (amount === ZERO_BI) {
 		return undefined;
 	}
 
@@ -101,7 +102,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 	const ethBalance = balance ?? ZERO_BI;
 
 	// We skip validation checks here for zero balance because it makes the UI/UX ungraceful if the balance is just not yet loaded.
-	if (ethBalance === 0n) {
+	if (ethBalance === ZERO_BI) {
 		return undefined;
 	}
 
@@ -117,7 +118,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_cketh_balance, {
 				$amount: formatToken({
-					value: estimatedFee.toBigInt(),
+					value: estimatedFee,
 					unitName: decimals,
 					displayDecimals: decimals
 				}),

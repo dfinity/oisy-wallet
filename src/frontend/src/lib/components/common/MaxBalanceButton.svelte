@@ -6,6 +6,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let amount: OptionAmount;
 	export let amountSetToMax = false;
@@ -15,7 +16,7 @@
 	export let fee: bigint | undefined = undefined;
 
 	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish(balance) || balance === 0n;
+	$: isZeroBalance = isNullish(balance) || balance === ZERO_BI;
 
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(token)
