@@ -22,7 +22,7 @@
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -48,14 +48,14 @@
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): Error | undefined => {
+	$: customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish(fee) || isNullish($sendToken)) {
 			return;
 		}
 
 		if (isNetworkIdBitcoin(networkId)) {
 			const error = assertCkBTCUserInputAmount({
-				amount: userAmount.toBigInt(),
+				amount: userAmount,
 				minterInfo: $ckBtcMinterInfoStore?.[$sendToken.id],
 				tokenDecimals: $sendToken.decimals,
 				i18n: $i18n
@@ -69,7 +69,7 @@
 		// if CkEth, asset the minimal withdrawal amount is met and the amount should at least be bigger than the fee.
 		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
 			const error = assertCkETHMinWithdrawalAmount({
-				amount: userAmount.toBigInt(),
+				amount: userAmount,
 				tokenDecimals: $sendToken.decimals,
 				tokenSymbol: $sendToken.symbol,
 				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
@@ -81,7 +81,7 @@
 			}
 
 			return assertCkETHMinFee({
-				amount: userAmount.toBigInt(),
+				amount: userAmount,
 				tokenSymbol: $sendToken.symbol,
 				fee,
 				i18n: $i18n
@@ -89,9 +89,9 @@
 		}
 
 		const assertBalance = (): IcAmountAssertionError | undefined => {
-			const total = userAmount.add(fee ?? ZERO);
+			const total = userAmount + (fee ?? ZERO_BI);
 
-			if (total.gt($balance ?? ZERO)) {
+			if (total > ($balance ?? ZERO_BI)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 
