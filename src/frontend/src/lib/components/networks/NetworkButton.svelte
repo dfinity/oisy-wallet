@@ -9,6 +9,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
@@ -36,14 +37,27 @@
 	class:selected={id === $networkId}
 	on:click={onClick}
 >
+	<!--
 	<TextWithLogo
 		{name}
 		{icon}
 		logo="start"
 		description={nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : undefined}
 	/>
+	-->
 
-	{#if id === $networkId}
-		<span in:fade><IconCheck size="20px" /></span>
-	{/if}
+	<span class="flex flex-row text-left"
+		><Logo src={icon} />
+		<span class="ml-2">{name}</span></span
+	>
+
+	<span class="flex flex-row">
+		<span class="text-tertiary"
+			>{nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : ''}</span
+		>
+
+		{#if id === $networkId}
+			<span class="ml-2 pt-0.5 text-brand-primary" in:fade><IconCheck size="20px" /></span>
+		{/if}
+	</span>
 </button>

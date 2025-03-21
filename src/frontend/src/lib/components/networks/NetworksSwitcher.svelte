@@ -16,6 +16,11 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { IconSettings } from '@dfinity/gix-components';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { SettingsModalType } from '$lib/enums/settings-modal-types';
+	import { goto } from '$app/navigation';
 
 	export let disabled = false;
 
@@ -43,7 +48,7 @@
 
 	<div slot="items">
 		<ul class="flex list-none flex-col font-normal">
-			<li>
+			<li class="border-brand-subtle-20">
 				<NetworkButton
 					id={undefined}
 					name={$i18n.networks.chain_fusion}
@@ -54,33 +59,28 @@
 			</li>
 
 			{#each $networksMainnets as network}
-				<li>
+				<li class="border-brand-subtle-20">
 					<MainnetNetwork {network} on:icSelected={dropdown.close} />
 				</li>
 			{/each}
-		</ul>
 
-		<span class="mb-5 mt-8 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
-
-		{#if $testnets}
-			<ul class="mb-2 flex list-none flex-col font-normal" transition:slide={SLIDE_EASING}>
+			{#if $testnets}
 				{#each $networksTestnets as network}
-					<li>
+					<li class="border-brand-subtle-20">
 						<Network {network} on:icSelected={dropdown.close} />
 					</li>
 				{/each}
-			</ul>
-		{/if}
-
-		<hr class="mx-3 w-11/12 opacity-10" style="border: 0.05rem solid" />
-
-		<ul class="flex list-none flex-col gap-4 font-normal">
-			<li class="flex items-center justify-between">
-				<div class="dropdown-item disabled flex items-center gap-2">
-					<IconMorePlain />
-					<span>{$i18n.networks.more}</span>
-				</div>
-			</li>
+			{/if}
 		</ul>
+
+		<Button
+			link
+			styleClass="mt-5 ml-2 mb-2"
+			on:click={() => {
+				goto('/settings');
+				// a small delay is enough for the opening of the modal to happen after page switching
+				setTimeout(() => modalStore.openSettings(SettingsModalType.ENABLED_NETWORKS), 1);
+			}}><IconSettings /><span class="-mt-1">{$i18n.tokens.manage.text.manage_list}</span></Button
+		>
 	</div>
 </Dropdown>

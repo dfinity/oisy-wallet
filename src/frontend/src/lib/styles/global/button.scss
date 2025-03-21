@@ -412,15 +412,14 @@ a.as-button {
 
 // DROPDOWN ITEM
 .dropdown-item:not(.loading) {
+	@apply relative;
 	@apply text-primary;
-	@apply rounded-xl;
-	@apply px-3;
+	@apply rounded-lg;
+	@apply px-2;
 	@apply py-2;
 
-	margin-bottom: 1px;
-
 	&:hover:not(.disabled):not([disabled]) {
-		@apply bg-secondary;
+		@apply bg-brand-subtle-10;
 	}
 
 	&.selected {
@@ -429,6 +428,15 @@ a.as-button {
 		& > span > svg {
 			color: var(--color-foreground-brand-primary-alt);
 		}
+	}
+
+	&:after {
+		content: "";
+		height: 1px;
+		@apply bg-brand-subtle-20;
+		@apply inset-2;
+		@apply absolute;
+		@apply top-full;
 	}
 }
 
