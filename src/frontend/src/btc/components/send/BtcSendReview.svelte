@@ -34,12 +34,12 @@
 	let insufficientFundsForFee: boolean;
 	$: insufficientFundsForFee =
 		nonNullish(utxosFee) && nonNullish($sendBalance) && nonNullish(amount)
-			? (parseToken({
+			? parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				})
-				+ (utxosFee.feeSatoshis))
-			> ($sendBalance)
+				}) +
+					utxosFee.feeSatoshis >
+				$sendBalance
 			: false;
 
 	let disableSend: boolean;
