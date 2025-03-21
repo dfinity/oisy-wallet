@@ -27,7 +27,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
-	import type { TransactionFeeData } from '$lib/types/transaction';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -109,8 +108,8 @@
 					...erc20GasFeeParams,
 					targetNetwork,
 					to:
-						// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
-						// Therefore, it should not be prefixed with 0x.
+					// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
+					// Therefore, it should not be prefixed with 0x.
 						isNetworkICP(targetNetwork) ? destination : erc20GasFeeParams.to
 				})
 			});
