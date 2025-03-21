@@ -1,7 +1,6 @@
 <script lang="ts">
 	// TODO: component will be removed within migration to the new Send flow
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import type { OptionIcToken } from '$icp/types/ic-token';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
@@ -21,7 +20,7 @@
 
 	{#if nonNullish(fee)}
 		<ExchangeAmountDisplay
-			amount={BigNumber.from(fee)}
+			amount={fee}
 			decimals={$sendTokenDecimals}
 			symbol={$sendTokenSymbol}
 			exchangeRate={$sendTokenExchangeRate}

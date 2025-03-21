@@ -25,7 +25,7 @@
 		{$i18n.send.error.unable_to_retrieve_amount}
 	{:else}
 		<ExchangeAmountDisplay
-			amount={bigNumberAmount}
+			amount={bigNumberAmount.toBigInt()}
 			decimals={token.decimals}
 			symbol={token.symbol}
 			{exchangeRate}
