@@ -21,7 +21,7 @@ describe('rewards utils', () => {
 		const lastTimestamp = BigInt(Date.now());
 		const mockedReward: RewardInfo = {
 			timestamp: lastTimestamp,
-			amount: BigInt(1000000),
+			amount: 1000000n,
 			ledger: mockIdentity.getPrincipal(),
 			name: ['airdrop']
 		};
@@ -169,7 +169,7 @@ describe('rewards utils', () => {
 		const lastTimestamp = BigInt(Date.now());
 
 		const mockedReward: RewardResponseInfo = {
-			amount: BigInt(100),
+			amount: 100n,
 			timestamp: lastTimestamp,
 			name: 'airdrop',
 			ledger: mockIdentity.getPrincipal()
@@ -178,8 +178,8 @@ describe('rewards utils', () => {
 		it('should return the correct rewards balance of multiple rewards', () => {
 			const mockedRewards: RewardResponseInfo[] = [
 				mockedReward,
-				{ ...mockedReward, amount: BigInt(200) },
-				{ ...mockedReward, amount: BigInt(300) }
+				{ ...mockedReward, amount: 200n },
+				{ ...mockedReward, amount: 300n }
 			];
 
 			const result = getRewardsBalance(mockedRewards);
