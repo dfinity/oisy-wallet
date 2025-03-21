@@ -27,6 +27,8 @@ export interface SolTransactionUi extends TransactionUiCommon {
 
 export type SolRpcTransactionRaw = NonNullable<Awaited<ReturnType<typeof getRpcTransaction>>>;
 
+export type ParsedAccount = SolRpcTransactionRaw['transaction']['message']['accountKeys'][number];
+
 export type SolRpcTransaction = SolRpcTransactionRaw & {
 	id: string;
 	signature: Signature;
