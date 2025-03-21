@@ -184,7 +184,7 @@
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				}).toBigInt(),
+				}),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,

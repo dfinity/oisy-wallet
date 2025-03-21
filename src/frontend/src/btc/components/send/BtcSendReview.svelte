@@ -37,9 +37,9 @@
 			? parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				})
-					.add(utxosFee.feeSatoshis)
-					.gt($sendBalance)
+				}) +
+					utxosFee.feeSatoshis >
+				$sendBalance
 			: false;
 
 	let disableSend: boolean;

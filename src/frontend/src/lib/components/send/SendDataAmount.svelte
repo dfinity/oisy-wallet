@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import ExchangeAmountDisplay from '$lib/components/exchange/ExchangeAmountDisplay.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,7 +11,7 @@
 	export let exchangeRate: number | undefined = undefined;
 	export let showNullishLabel = false;
 
-	let bigNumberAmount: BigNumber;
+	let bigNumberAmount: bigint;
 	$: bigNumberAmount = parseToken({
 		value: `${amount ?? 0}`,
 		unitName: token.decimals
@@ -25,7 +24,7 @@
 		{$i18n.send.error.unable_to_retrieve_amount}
 	{:else}
 		<ExchangeAmountDisplay
-			amount={bigNumberAmount.toBigInt()}
+			amount={bigNumberAmount}
 			decimals={token.decimals}
 			symbol={token.symbol}
 			{exchangeRate}

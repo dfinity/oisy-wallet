@@ -13,6 +13,7 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { getLiquidityFees, getNetworkFee, getSwapRoute } from '$lib/utils/swap.utils';
+
 	export let amount: OptionAmount = undefined;
 	export let sourceToken: Token | undefined;
 	export let destinationToken: Token | undefined;
@@ -47,7 +48,7 @@
 				sourceAmount: parseToken({
 					value: `${amount}`,
 					unitName: sourceToken.decimals
-				}).toBigInt()
+				})
 			});
 
 			if (isNullish(swapAmounts)) {
