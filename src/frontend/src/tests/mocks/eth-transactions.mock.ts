@@ -1,6 +1,6 @@
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mocks';
-import { bn1, bn1Bi, bn3, bn3Bi } from './balances.mock';
+import { bn1Bi, bn3Bi } from './balances.mock';
 
 export const mockEthTransactionUi: Transaction = {
 	blockNumber: 123213,
