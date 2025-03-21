@@ -10,7 +10,7 @@ import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import type {
 	SolMappedTransaction,
-	SolRpcTransactionRaw,
+	SolRpcTransaction,
 	SolSignature,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
@@ -60,15 +60,15 @@ describe('sol-transactions.services', () => {
 	describe('fetchSolTransactionsForSignature', () => {
 		const network: SolanaNetworkType = 'mainnet';
 
-		const mockTransactionDetail: SolRpcTransactionRaw = mockSolTransactionDetail;
+		const mockTransactionDetail: SolRpcTransaction = mockSolTransactionDetail;
 
-		const mockTransactionDetailOnlyInnerInstructions: SolRpcTransactionRaw = {
+		const mockTransactionDetailOnlyInnerInstructions: SolRpcTransaction = {
 			...mockTransactionDetail,
 			transaction: {
 				...mockTransactionDetail.transaction,
 				message: { ...mockTransactionDetail.transaction.message, instructions: [] }
 			}
-		};
+		} as SolRpcTransaction;
 
 		const mockSignature: SolSignature = {
 			...mockSolSignatureResponse(),
