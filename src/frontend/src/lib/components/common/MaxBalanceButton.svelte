@@ -14,7 +14,7 @@
 	export let error = false;
 	export let balance: OptionBalance;
 	export let token: Token | undefined = undefined;
-	export let fee: BigNumber | undefined = undefined;
+	export let fee: bigint | undefined = undefined;
 
 	let isZeroBalance: boolean;
 	$: isZeroBalance = isNullish(balance) || balance === ZERO_BI;
@@ -22,11 +22,11 @@
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
-				balance,
-				fee: fee?.toBigInt(),
-				tokenDecimals: token.decimals,
-				tokenStandard: token.standard
-			})
+			balance,
+			fee,
+			tokenDecimals: token.decimals,
+			tokenStandard: token.standard
+		})
 		: undefined;
 
 	const setMax = () => {
