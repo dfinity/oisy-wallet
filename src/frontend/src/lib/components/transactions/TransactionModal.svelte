@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -20,7 +19,7 @@
 
 	export let commonData: TransactionUiCommon;
 	export let hash: string | undefined;
-	export let value: BigNumber | undefined;
+	export let value: bigint | undefined;
 	export let token: OptionToken;
 	export let typeLabel: string;
 	export let sendToLabel: string | undefined;
@@ -123,7 +122,7 @@
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 				<output>
 					{formatToken({
-						value: value.toBigInt(),
+						value,
 						unitName: token.decimals,
 						displayDecimals: token.decimals
 					})}
