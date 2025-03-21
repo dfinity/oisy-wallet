@@ -149,7 +149,7 @@ export const send = ({
 					progress,
 					lastProgressStep: ProgressStepsSend.APPROVE,
 					token,
-					amount: amount.toBigInt(),
+					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
 					gas: gasWC ?? gas,

@@ -3,6 +3,7 @@ import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import { mapAddressToName, mapEthTransactionUi } from '$eth/utils/transactions.utils';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
@@ -24,7 +25,7 @@ const transaction: Transaction = {
 	nonce: 1,
 	gasLimit: ZERO_BI,
 	value: ZERO_BI,
-	chainId: 1
+	chainId: 1n
 };
 
 const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];
