@@ -377,14 +377,14 @@ a.as-button {
 	@apply bg-primary;
 	@apply rounded-xl;
 	@apply px-4;
-	@apply py-3;
-	@apply min-w-72;
+	@apply py-1;
 	@apply justify-between;
 	@apply gap-2;
 	@apply text-left;
 	@apply font-medium;
 	@apply leading-5;
-	@apply border-primary;
+
+
 
 	transition: border 0.25s ease-out;
 
@@ -395,7 +395,6 @@ a.as-button {
 	&:hover:not(.disabled):not([disabled]),
 	&.opened {
 		@apply bg-primary;
-		@apply border-brand-primary;
 	}
 }
 
@@ -405,25 +404,39 @@ a.as-button {
 	@apply bg-disabled;
 }
 
+@media (width <= theme(--breakpoint-sm)) {
+	.dropdown-button:not(.loading) {
+		@apply px-2;
+	}
+}
+
 // DROPDOWN ITEM
 .dropdown-item:not(.loading) {
+	@apply relative;
 	@apply text-primary;
-	@apply rounded-xl;
-	@apply px-3;
+	@apply rounded-lg;
+	@apply px-2;
 	@apply py-2;
 
-	margin-bottom: 1px;
-
 	&:hover:not(.disabled):not([disabled]) {
-		@apply bg-secondary;
+		@apply bg-brand-subtle-10;
 	}
 
 	&.selected {
-		@apply bg-brand-subtle-10;
+		//@apply bg-brand-subtle-10;
 
 		& > span > svg {
 			color: var(--color-foreground-brand-primary-alt);
 		}
+	}
+
+	&:after {
+		content: "";
+		height: 1px;
+		@apply bg-brand-subtle-20;
+		@apply inset-2;
+		@apply absolute;
+		@apply top-full;
 	}
 }
 
