@@ -7,7 +7,7 @@
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { SWAP_TOTAL_FEE_THRESHOLD } from '$lib/constants/swap.constants';
+	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { formatTokenAmount, formatUSD } from '$lib/utils/format.utils';
@@ -54,9 +54,9 @@
 					</div>
 				{:else if isNullish($sourceTokenExchangeRate)}
 					{sourceTokenTransferFee + sourceTokenApproveFee} {$sourceToken.symbol}
-				{:else if sourceTokenTotalFeeUSD < SWAP_TOTAL_FEE_THRESHOLD}
+				{:else if sourceTokenTotalFeeUSD < EXCHANGE_USD_AMOUNT_THRESHOLD}
 					{`< ${formatUSD({
-						value: SWAP_TOTAL_FEE_THRESHOLD
+						value: EXCHANGE_USD_AMOUNT_THRESHOLD
 					})}`}
 				{:else}
 					{formatUSD({
