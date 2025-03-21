@@ -6,9 +6,10 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
-import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { OptionBalance } from '$lib/types/balance';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard, TokenUi } from '$lib/types/token';
@@ -17,36 +18,36 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Calculates the maximum amount for a transaction.
  *
  * @param {Object} params
- * @param {BigNumber | undefined} params.balance The balance of the account.
- * @param {BigNumber | undefined} params.fee The fee of the transaction.
+ * @param {bigint | undefined} params.balance The balance of the account.
+ * @param {bigint | undefined} params.fee The fee of the transaction.
  * @param {number} params.tokenDecimals The decimals of the token.
  * @param {string} params.tokenStandard The standard of the token.
  * @returns {number} The maximum amount for the transaction.
  */
 export const getMaxTransactionAmount = ({
-	balance = ZERO,
-	fee = ZERO,
+	balance,
+	fee = ZERO_BI,
 	tokenDecimals,
 	tokenStandard
 }: {
-	balance?: BigNumber;
-	fee?: BigNumber;
+	balance: OptionBalance;
+	fee?: bigint;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = balance.sub(tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO_BI);
+	const value =
+		(balance ?? ZERO_BI) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO_BI);
 
 	return Number(
-		value.isNegative()
-			? ZERO
+		value <= ZERO_BI
+			? ZERO_BI
 			: formatToken({
-					value: value.toBigInt(),
+					value,
 					unitName: tokenDecimals,
 					displayDecimals: tokenDecimals
 				})
