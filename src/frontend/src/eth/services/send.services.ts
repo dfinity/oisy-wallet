@@ -21,18 +21,18 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/signer.api';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
-import type { TransactionFeeData } from '$lib/types/transaction';
+import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import type { TransactionResponse } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 
@@ -48,7 +48,7 @@ const ethPrepareTransaction = ({
 }: TransferParams &
 	NetworkChainId & { nonce: number; gas: bigint | undefined }): EthSignTransactionRequest => ({
 	to,
-	value: amount.toBigInt(),
+	value: amount,
 	chain_id,
 	nonce: BigInt(nonce),
 	gas: gas ?? ETH_BASE_FEE,
@@ -72,7 +72,7 @@ const erc20PrepareTransaction = async ({
 	const { data } = await populate({
 		contract: token as Erc20Token,
 		to,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	if (isNullish(data)) {
@@ -90,7 +90,7 @@ const erc20PrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -128,7 +128,7 @@ const ethHelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: amount.toBigInt(),
+		amount,
 		...rest
 	});
 };
@@ -158,7 +158,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		contract,
 		erc20Contract: { address: erc20ContractAddress },
 		to,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	const { address: contractAddress } = contract;
@@ -166,7 +166,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -217,7 +217,7 @@ const erc20ContractPrepareApprove = async ({
 	const { data } = await populateApprove({
 		contract: token as Erc20Token,
 		spender,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	const { address: to } = token as Erc20Token;
@@ -225,7 +225,7 @@ const erc20ContractPrepareApprove = async ({
 	return prepare({
 		data,
 		to,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -274,10 +274,7 @@ export const send = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-	}): Promise<{ hash: string }> => {
+	RequiredTransactionFeeData): Promise<{ hash: string }> => {
 	progress(ProgressStepsSend.INITIALIZATION);
 
 	const { transactionNeededApproval, nonce } = await approve({
@@ -320,11 +317,7 @@ const sendTransaction = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	Omit<SendParams, 'lastProgressStep'> &
-	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
-		nonce: number;
-	}): Promise<TransactionResponse> => {
+	RequiredTransactionFeeData & { nonce: number }): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction } = infuraProviders(networkId);
@@ -475,7 +468,7 @@ const resetExistingApprovalToZero = async (
 > =>
 	await prepareAndSignApproval({
 		...params,
-		amount: ZERO
+		amount: ZERO_BI
 	});
 
 const checkExistingApproval = async ({
