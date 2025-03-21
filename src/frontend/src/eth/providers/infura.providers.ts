@@ -30,7 +30,7 @@ export class InfuraProvider {
 	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
-		this.provider.sendTransaction(signedTransaction);
+		this.provider.send("eth_sendTransaction", [ signedTransaction ]);
 
 	getTransactionCount = (address: EthAddress): Promise<number> =>
 		this.provider.getTransactionCount(address, 'pending');
