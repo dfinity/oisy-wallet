@@ -450,6 +450,8 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
+		await this.#page.waitForTimeout(1000);
+
 		if (!isMobile) {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
 		}
@@ -458,10 +460,10 @@ abstract class Homepage {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
-		if (isNullish(screenshotTarget) && !isMobile) {
-			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
-			await this.viewportAdjuster();
-		}
+		// if (isNullish(screenshotTarget) && !isMobile) {
+		// 	// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
+		// 	await this.viewportAdjuster();
+		// }
 
 		const element = screenshotTarget ?? this.#page;
 
