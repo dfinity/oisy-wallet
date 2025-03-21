@@ -11,6 +11,7 @@
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
+	import { BTC_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
 	import {
 		TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
 		type TokenActionValidationErrorsContext
@@ -48,7 +49,14 @@
 	let totalFee: bigint | undefined;
 </script>
 
-<ConvertForm on:icNext bind:sendAmount bind:receiveAmount {totalFee} disabled={invalid}>
+<ConvertForm
+	on:icNext
+	bind:sendAmount
+	bind:receiveAmount
+	{totalFee}
+	disabled={invalid}
+	testId={BTC_CONVERT_FORM_TEST_ID}
+>
 	<svelte:fragment slot="message">
 		{#if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
