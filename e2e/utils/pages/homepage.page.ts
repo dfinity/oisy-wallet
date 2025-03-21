@@ -456,7 +456,7 @@ abstract class Homepage {
 			await this.scrollIntoViewCentered(centeredElementTestId);
 		}
 
-		if (isNullish(screenshotTarget) && !isMobile) {
+		if (isNullish(screenshotTarget)) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
 			await this.viewportAdjuster();
 		}
@@ -464,6 +464,8 @@ abstract class Homepage {
 		const element = screenshotTarget ?? this.#page;
 
 		await this.#page.mouse.move(0, 0);
+
+		if(isNullish(centeredElementTestId)) {  await this.#page.evaluate(() => window.scrollTo(0,0))}
 
 		if (freezeCarousel) {
 			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
