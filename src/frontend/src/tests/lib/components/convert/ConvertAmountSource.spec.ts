@@ -3,6 +3,7 @@ import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.sve
 import { ZERO_BI } from '$lib/constants/app.constants';
 import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
+import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-action-validation-errors.store';
 import en from '$tests/mocks/i18n.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -34,7 +35,8 @@ describe('ConvertAmountSource', () => {
 					sourceTokenBalance: readable(balance),
 					sourceTokenExchangeRate: readable(exchangeRate)
 				}
-			]
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, { setErrorType: () => {} }]
 		]);
 
 	const balanceTestId = 'convert-amount-source-balance';
