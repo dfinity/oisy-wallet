@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -59,9 +59,19 @@
 
 			const { getFeeData } = infuraProviders(sendToken.network.id);
 
+			const { gasPrice, maxPriorityFeePerGas, maxFeePerGas } = await getFeeData();
+
+			const feeDataBigInt = {
+				gasPrice: nonNullish(gasPrice) ? gasPrice.toBigInt() : gasPrice,
+				maxPriorityFeePerGas: nonNullish(maxPriorityFeePerGas)
+					? maxPriorityFeePerGas.toBigInt()
+					: maxPriorityFeePerGas,
+				maxFeePerGas: nonNullish(maxFeePerGas) ? maxFeePerGas.toBigInt() : maxFeePerGas
+			};
+
 			if (isSupportedEthTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...(await getFeeData()),
+					...feeDataBigInt,
 					gas: getEthFeeData({
 						...params,
 						helperContractAddress: toCkEthHelperContractAddress(
@@ -81,7 +91,7 @@
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
 				feeStore.setFee({
-					...(await getFeeData()),
+					...feeDataBigInt,
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
 						erc20HelperContractAddress: toCkErc20HelperContractAddress(
@@ -93,7 +103,7 @@
 			}
 
 			feeStore.setFee({
-				...(await getFeeData()),
+				...feeDataBigInt,
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
 					targetNetwork,

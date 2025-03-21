@@ -39,8 +39,8 @@
 	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
-	totalFee={$maxGasFee?.toBigInt()}
-	minFee={$minGasFee?.toBigInt()}
+	totalFee={$maxGasFee}
+	minFee={$minGasFee}
 	disabled={invalid}
 	testId={ETH_CONVERT_FORM_TEST_ID}
 >

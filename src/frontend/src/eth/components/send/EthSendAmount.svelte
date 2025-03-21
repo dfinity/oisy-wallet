@@ -51,7 +51,7 @@
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
-			const total = userAmount + ($minGasFee?.toBigInt() ?? ZERO_BI);
+			const total = userAmount + ($minGasFee ?? ZERO_BI);
 
 			if (total > parsedSendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
@@ -67,7 +67,7 @@
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO_BI;
-		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee.toBigInt()) {
+		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
 			);

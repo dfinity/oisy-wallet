@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -109,7 +108,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					fee={BigNumber.from($fee ?? 0)}
+					fee={$fee ?? ZERO_BI}
 				/>
 			{/if}
 		</svelte:fragment>

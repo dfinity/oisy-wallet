@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -14,7 +13,7 @@
 	export let error = false;
 	export let balance: OptionBalance;
 	export let token: Token | undefined = undefined;
-	export let fee: BigNumber | undefined = undefined;
+	export let fee: bigint | undefined = undefined;
 
 	let isZeroBalance: boolean;
 	$: isZeroBalance = isNullish(balance) || balance === ZERO_BI;
@@ -23,7 +22,7 @@
 	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
 				balance,
-				fee: fee?.toBigInt(),
+				fee,
 				tokenDecimals: token.decimals,
 				tokenStandard: token.standard
 			})

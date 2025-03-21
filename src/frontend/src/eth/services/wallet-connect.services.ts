@@ -153,7 +153,7 @@ export const send = ({
 					amount: amount.toBigInt(),
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
+					gas: nonNullish(gasWC) ? gasWC : gas,
 					data,
 					identity,
 					minterInfo,

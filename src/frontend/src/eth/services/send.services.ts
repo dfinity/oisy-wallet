@@ -367,9 +367,9 @@ const sendTransaction = async ({
 		} & Pick<TransferParams, 'maxFeePerGas' | 'maxPriorityFeePerGas'> = {
 		from,
 		nonce,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId
 	};
 
@@ -439,9 +439,9 @@ const prepareAndSignApproval = async ({
 
 	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId,
 		networkId
 	});
