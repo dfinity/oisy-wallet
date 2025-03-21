@@ -55,7 +55,7 @@
 		const parsedValue = parseToken({
 			value: `${amount}`,
 			unitName: token.decimals
-		}).toBigInt();
+		});
 
 		errorType = customValidate(parsedValue);
 		error = customErrorValidate(parsedValue);
