@@ -35,7 +35,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { get, readable, writable } from 'svelte/store';
 import { type MockInstance } from 'vitest';
 
@@ -71,9 +70,9 @@ describe('EthConvertTokenWizard', () => {
 		]);
 	const mockMinterInfo = mockCkMinterInfo;
 	const mockFees = {
-		gas: BigNumber.from(100n),
-		maxFeePerGas: BigNumber.from(100n),
-		maxPriorityFeePerGas: BigNumber.from(100n)
+		gas: 100n,
+		maxFeePerGas: 100n,
+		maxPriorityFeePerGas: 100n
 	};
 	const props = {
 		currentStep: {
