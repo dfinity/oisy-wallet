@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
@@ -9,7 +8,7 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -29,12 +28,12 @@
 
 	let ckBtcToken: IcToken | undefined;
 	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
-	let ckBtcReward: BigNumber;
-	$: ckBtcReward = ZERO;
+	let ckBtcReward: bigint;
+	$: ckBtcReward = ZERO_BI;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckBtcReward.toBigInt(),
+				amount: ckBtcReward,
 				token: ckBtcToken,
 				$exchanges: $exchanges
 			}) ?? 0)
@@ -42,12 +41,12 @@
 
 	let ckUsdcToken: IcToken | undefined;
 	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
-	let ckUsdcReward: BigNumber;
-	$: ckUsdcReward = ZERO;
+	let ckUsdcReward: bigint;
+	$: ckUsdcReward = ZERO_BI;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckUsdcReward.toBigInt(),
+				amount: ckUsdcReward,
 				token: ckUsdcToken,
 				$exchanges: $exchanges
 			}) ?? 0)
@@ -55,12 +54,12 @@
 
 	let icpToken: IcToken | undefined;
 	$: icpToken = ICP_TOKEN;
-	let icpReward: BigNumber;
-	$: icpReward = ZERO;
+	let icpReward: bigint;
+	$: icpReward = ZERO_BI;
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
 		? (calculateTokenUsdAmount({
-				amount: icpReward.toBigInt(),
+				amount: icpReward,
 				token: icpToken,
 				$exchanges: $exchanges
 			}) ?? 0)
