@@ -252,7 +252,11 @@ describe('token.utils', () => {
 		});
 
 		it('should return an object TokenUi with undefined balance if balances store is not available', () => {
-			const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges: mockExchanges });
+			const result = mapTokenUi({
+				token: ETHEREUM_TOKEN,
+				$balances: {},
+				$exchanges: mockExchanges
+			});
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: undefined,
@@ -272,6 +276,7 @@ describe('token.utils', () => {
 				usdBalance: 0
 			});
 		});
+	});
 
 	describe('sumTokenBalances', () => {
 		// We mock ETH to be a twin of ICP
@@ -519,4 +524,4 @@ describe('token.utils', () => {
 			});
 		});
 	});
-})
+});
