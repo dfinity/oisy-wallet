@@ -55,7 +55,7 @@
 		const parsedValue = parseToken({
 			value: `${amount}`,
 			unitName: token.decimals
-		}).toBigInt();
+		});
 
 		errorType = customValidate(parsedValue);
 		error = customErrorValidate(parsedValue);
@@ -115,7 +115,7 @@
 				{/if}
 			{:else}
 				<button on:click class="h-full w-full pl-3 text-base"
-					>{$i18n.tokens.text.select_token}</button
+				>{$i18n.tokens.text.select_token}</button
 				>
 			{/if}
 		</div>

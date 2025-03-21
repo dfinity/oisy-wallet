@@ -184,7 +184,7 @@
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				}).toBigInt(),
+				}),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
@@ -223,10 +223,10 @@
 	const back = () => dispatch('icSendBack');
 
 	$: onDecodeQrCode = ({
-		status,
-		code,
-		expectedToken
-	}: {
+												 status,
+												 code,
+												 expectedToken
+											 }: {
 		status: QrStatus;
 		code?: string;
 		expectedToken: OptionToken;
