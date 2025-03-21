@@ -1,8 +1,9 @@
 <script lang="ts">
 	export let styleClass: string | undefined = undefined;
+	export let testId: string | undefined = undefined;
 </script>
 
-<div class={`stretch ${styleClass ?? ''}`}>
+<div class={`stretch ${styleClass ?? ''}`} data-tid={testId}>
 	<slot />
 </div>
 
