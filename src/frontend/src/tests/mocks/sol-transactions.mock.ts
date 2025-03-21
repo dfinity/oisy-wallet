@@ -35,7 +35,7 @@ export const createMockSolTransactionsUi = (n: number): SolTransactionUi[] =>
 export const createMockSolTransactionUi = (id: string): SolTransactionUi => ({
 	id,
 	signature: signature(mockSignature),
-	timestamp: 0n,
+	timestamp: ZERO_BI,
 	type: 'send',
 	value: BigInt(100),
 	from: 'sender',

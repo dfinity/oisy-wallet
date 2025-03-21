@@ -101,7 +101,7 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 		});
 	}
 
-	return { rewards: [], lastTimestamp: 0n };
+	return { rewards: [], lastTimestamp: ZERO_BI };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {
@@ -240,9 +240,9 @@ export const getUserRewardsTokenAmounts = async ({
 	amountOfRewards: number;
 }> => {
 	const initialRewards = {
-		ckBtcReward: 0n,
-		ckUsdcReward: 0n,
-		icpReward: 0n,
+		ckBtcReward: ZERO_BI,
+		ckUsdcReward: ZERO_BI,
+		icpReward: ZERO_BI,
 		amountOfRewards: 0
 	};
 

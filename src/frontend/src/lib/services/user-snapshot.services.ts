@@ -29,7 +29,8 @@ import {
 } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
-	btcAddressTestnet, ethAddress,
+	btcAddressTestnet,
+	ethAddress,
 	solAddressDevnet,
 	solAddressMainnet
 } from '$lib/derived/address.derived';
@@ -78,9 +79,6 @@ const filterTransactions = <T extends Transaction_Icrc | Transaction_Spl>(
 
 const toTransactionType = (type: Exclude<TransactionType, 'approve'>): RcTransactionType =>
 	type === 'send' || type === 'deposit' || type === 'burn' ? { Send: null } : { Receive: null };
-
-
-
 
 const toBaseTransaction = ({
 	type,

@@ -10,7 +10,7 @@ import {
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
-import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -367,9 +367,9 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$exchanges: mockExchanges
 		});
 		expect(result).toEqual({
-			[BTC_MAINNET_NETWORK_ID]: 0n,
-			[ETHEREUM_NETWORK_ID]: 0n,
-			[ICP_NETWORK_ID]: 0n
+			[BTC_MAINNET_NETWORK_ID]: ZERO_BI,
+			[ETHEREUM_NETWORK_ID]: ZERO_BI,
+			[ICP_NETWORK_ID]: ZERO_BI
 		});
 	});
 

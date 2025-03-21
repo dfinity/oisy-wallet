@@ -8,7 +8,6 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let token: OptionTokenUi;
 

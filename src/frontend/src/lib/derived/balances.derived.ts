@@ -6,7 +6,6 @@ import type { OptionBalance } from '$lib/types/balance';
 import { checkAllBalancesZero, checkAnyNonZeroBalance } from '$lib/utils/balances.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-import { ZERO_BI } from '$lib/constants/app.constants';
 
 // TODO: Create tests for this store
 export const balance: Readable<OptionBalance> = derived(

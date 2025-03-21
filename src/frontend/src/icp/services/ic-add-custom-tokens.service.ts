@@ -184,7 +184,7 @@ const loadIndexBalance = async ({
 			indexCanisterId,
 			identity,
 			owner: identity.getPrincipal(),
-			maxResults: 0n,
+			maxResults: ZERO_BI,
 			certified: true
 		});
 

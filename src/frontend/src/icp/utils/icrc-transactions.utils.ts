@@ -122,7 +122,7 @@ export const mapIcrcTransaction = ({
 			? data.amount +
 				(isTransfer && source.incoming === false
 					? (fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO_BI)
-					: 0n)
+					: ZERO_BI)
 			: undefined;
 
 	return {

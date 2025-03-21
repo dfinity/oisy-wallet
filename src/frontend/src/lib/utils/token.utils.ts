@@ -6,8 +6,10 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
+import type { OptionBalance } from '$lib/types/balance';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { RequiredTokenWithLinkedData, Token, TokenStandard, TokenUi } from '$lib/types/token';
@@ -16,8 +18,6 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { OptionBalance } from '$lib/types/balance';
-import { ZERO_BI } from '$lib/constants/app.constants';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -40,7 +40,8 @@ export const getMaxTransactionAmount = ({
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = (balance ?? ZERO_BI) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
+	const value =
+		(balance ?? ZERO_BI) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO_BI);
 
 	return Number(
 		value < 0n

@@ -374,7 +374,7 @@ describe('ic-add-custom-tokens.service', () => {
 					expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 						account: getIcrcAccount(mockIdentity.getPrincipal()),
 						certified: true,
-						max_results: 0n,
+						max_results: ZERO_BI,
 						start: undefined
 					});
 				});

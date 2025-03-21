@@ -92,7 +92,7 @@ export const mapIcpTransaction = ({
 		incoming: boolean | undefined;
 		fee: Tokens;
 		amount: Tokens;
-	}): bigint => amount.e8s + (incoming === false ? fee.e8s : 0n);
+	}): bigint => amount.e8s + (incoming === false ? fee.e8s : ZERO_BI);
 
 	if ('Approve' in operation) {
 		return {

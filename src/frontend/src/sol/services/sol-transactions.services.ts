@@ -172,7 +172,8 @@ export const fetchSolTransactionsForSignature = async ({
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
 				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : 0n })
+				...(nonNullish(fee) &&
+					nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO_BI })
 			};
 
 			return {

@@ -7,7 +7,6 @@ import { BigNumber } from 'alchemy-sdk';
 
 export const certified = true;
 
-
 export const bn1Bi = 1n;
 export const bn2Bi = 2n;
 export const bn3Bi = 3n;

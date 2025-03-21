@@ -305,7 +305,7 @@ describe('sol-instructions.utils', () => {
 						network
 					})
 				).resolves.toEqual({
-					value: 0n,
+					value: ZERO_BI,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -329,7 +329,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: 0n,
+					value: ZERO_BI,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -605,7 +605,7 @@ describe('sol-instructions.utils', () => {
 						network
 					})
 				).resolves.toEqual({
-					value: 0n,
+					value: ZERO_BI,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -629,7 +629,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: 0n,
+					value: ZERO_BI,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});

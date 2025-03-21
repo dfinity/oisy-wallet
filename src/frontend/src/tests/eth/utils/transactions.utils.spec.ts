@@ -22,8 +22,8 @@ const transaction: Transaction = {
 	to: '0xabcd',
 	timestamp: 1670000000,
 	nonce: 1,
-	gasLimit: 0n,
-	value: 0n,
+	gasLimit: ZERO_BI,
+	value: ZERO_BI,
 	chainId: 1
 };
 
