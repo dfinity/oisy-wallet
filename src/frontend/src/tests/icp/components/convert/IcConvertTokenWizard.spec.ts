@@ -20,6 +20,11 @@ import {
 	initConvertContext,
 	type ConvertContext
 } from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -45,7 +50,10 @@ describe('IcConvertTokenWizard', () => {
 	} as IcCkToken;
 
 	const mockContext = () =>
-		new Map<symbol, ConvertContext | BitcoinFeeContext | EthereumFeeContext>([
+		new Map<
+			symbol,
+			ConvertContext | BitcoinFeeContext | EthereumFeeContext | TokenActionValidationErrorsContext
+		>([
 			[ETHEREUM_FEE_CONTEXT_KEY, { store: initEthereumFeeStore() }],
 			[BITCOIN_FEE_CONTEXT_KEY, { store: initBitcoinFeeStore() }],
 			[
@@ -54,7 +62,8 @@ describe('IcConvertTokenWizard', () => {
 					sourceToken: ckBtcToken,
 					destinationToken: BTC_MAINNET_TOKEN
 				})
-			]
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
 	const props = {
