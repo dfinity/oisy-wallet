@@ -39,7 +39,7 @@
 	{:else}
 		<Logo src={chainFusion} />
 	{/if}
-	{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
+	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
 	<div slot="items">
 		<ul class="flex list-none flex-col font-normal">

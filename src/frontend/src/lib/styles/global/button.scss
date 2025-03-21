@@ -384,6 +384,8 @@ a.as-button {
 	@apply font-medium;
 	@apply leading-5;
 
+
+
 	transition: border 0.25s ease-out;
 
 	&::placeholder {
@@ -400,6 +402,12 @@ a.as-button {
 .dropdown-button[disabled]:not(.loading) {
 	@apply text-disabled;
 	@apply bg-disabled;
+}
+
+@media (width <= theme(--breakpoint-sm)) {
+	.dropdown-button:not(.loading) {
+		@apply px-2;
+	}
 }
 
 // DROPDOWN ITEM
