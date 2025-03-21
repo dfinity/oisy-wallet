@@ -118,7 +118,7 @@
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				}),
+				}).toBigInt(),
 				identity: $authIdentity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
 				ckErc20ToErc20MaxCkEthFees

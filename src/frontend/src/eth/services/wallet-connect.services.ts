@@ -150,7 +150,7 @@ export const send = ({
 					progress,
 					lastProgressStep: ProgressStepsSend.APPROVE,
 					token,
-					amount,
+					amount: amount.toBigInt(),
 					maxFeePerGas,
 					maxPriorityFeePerGas,
 					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
