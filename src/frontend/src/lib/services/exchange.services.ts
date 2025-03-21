@@ -37,7 +37,7 @@ export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse | n
 
 export const exchangeRateERC20ToUsd = (
 	contractAddresses: Erc20ContractAddress[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
+): Promise<CoingeckoSimplePriceResponse | null> =>
 	simpleTokenPrice({
 		id: 'ethereum',
 		vs_currencies: 'usd',
@@ -47,7 +47,7 @@ export const exchangeRateERC20ToUsd = (
 
 export const exchangeRateICRCToUsd = async (
 	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+): Promise<Record<LedgerCanisterIdText, number> | null> => {
 	const results = await Promise.all(
 		ledgerCanisterIds.map((ledgerCanisterId) =>
 			kongSwapTokenPrice({
@@ -56,16 +56,14 @@ export const exchangeRateICRCToUsd = async (
 		)
 	);
 
-	const tokenPrices: CoingeckoSimpleTokenPriceResponse = {};
+	const tokenPrices: Record<LedgerCanisterIdText, number> = {};
 
 	results.forEach((response) => {
-		if (response?.token?.name && response.metrics?.price) {
-			const { price, market_cap } = response.metrics;
+		const canisterId = response?.token?.canister_id;
+		const price = response?.metrics?.price;
 
-			tokenPrices[response.token.name.toLowerCase()] = {
-				usd: Number(price),
-				usd_market_cap: Number(market_cap)
-			};
+		if (canisterId && price) {
+			tokenPrices[canisterId] = Number(price);
 		}
 	});
 
