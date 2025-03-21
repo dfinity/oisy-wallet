@@ -452,9 +452,9 @@ abstract class Homepage {
 		centeredElementTestId?: string;
 		fullPage?: boolean;
 	}): Promise<void> {
-		if (nonNullish(centeredElementTestId)) {
-			await this.scrollIntoViewCentered(centeredElementTestId);
-		}
+		// if (nonNullish(centeredElementTestId)) {
+		// 	await this.scrollIntoViewCentered(centeredElementTestId);
+		// }
 
 		await expect(element).toHaveScreenshot({ fullPage });
 	}
@@ -496,9 +496,14 @@ abstract class Homepage {
 			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
 		}
 
+		if (nonNullish(centeredElementTestId)) {
+			await this.scrollIntoViewCentered(centeredElementTestId);
+		}
+
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
+			await this.#page.waitForTimeout(1000);
 
 			await this.expectToHaveScreenshot({ element, centeredElementTestId });
 
