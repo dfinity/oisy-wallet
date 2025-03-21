@@ -33,6 +33,7 @@ export const getErc20FeeData = async ({
 	targetNetwork,
 	sourceNetwork: { id: sourceNetworkId },
 	contract,
+	amount,
 	...rest
 }: GetFeeData & {
 	contract: Erc20Token;
@@ -46,7 +47,7 @@ export const getErc20FeeData = async ({
 		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
 			? infuraErc20IcpProviders(targetNetworkId as NetworkId)
 			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
-		const fee = await fn({ ...rest, contract });
+		const fee = await fn({ ...rest, contract, amount: BigNumber.from(amount) });
 
 		const isResearchCoin = contract.symbol === 'RSC' && contract.name === 'ResearchCoin';
 

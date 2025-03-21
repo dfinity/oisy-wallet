@@ -158,7 +158,7 @@
 					error={nonNullish(amountError)}
 					balance={$sendBalance}
 					token={$sendToken}
-					{fee}
+					fee={fee ?? ZERO_BI}
 				/>
 			{/if}
 		</svelte:fragment>

@@ -1,3 +1,4 @@
+import type { BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 import type { BigNumberish } from 'ethers/utils';
 

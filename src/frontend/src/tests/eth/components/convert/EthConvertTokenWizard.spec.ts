@@ -182,7 +182,7 @@ describe('EthConvertTokenWizard', () => {
 					amount: parseToken({
 						value: `${sendAmount}`,
 						unitName: ETHEREUM_TOKEN.decimals
-					}).toBigInt(),
+					}),
 					maxFeePerGas: get(feeStore)?.maxFeePerGas,
 					maxPriorityFeePerGas: get(feeStore)?.maxPriorityFeePerGas,
 					gas: get(feeStore)?.gas,

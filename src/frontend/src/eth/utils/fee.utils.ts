@@ -1,3 +1,4 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
 

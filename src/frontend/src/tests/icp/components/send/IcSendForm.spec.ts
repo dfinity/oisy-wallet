@@ -9,7 +9,7 @@ import { render } from '@testing-library/svelte';
 
 describe('IcSendForm', () => {
 	const ethereumFeeStore = initEthereumFeeStore();
-	ethereumFeeStore.setFee({ maxTransactionFee: BigInt(300) });
+	ethereumFeeStore.setFee({ maxTransactionFee: 300n });
 
 	const mockContext = new Map([]);
 	mockContext.set(
