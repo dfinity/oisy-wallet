@@ -32,9 +32,8 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import type { TransactionResponse } from 'ethers/providers';
 import { BigNumber } from '@ethersproject/bignumber';
-import type { TransactionResponse } from '@ethersproject/providers';
+import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 const ethPrepareTransaction = ({

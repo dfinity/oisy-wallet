@@ -10,7 +10,7 @@ import type { Token } from '$lib/types/token';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import { ethers } from 'ethers';
-import type { FeeData, TransactionResponse } from 'ethers/providers';
+import type { FeeData } from 'ethers/providers';
 import * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
