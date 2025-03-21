@@ -45,30 +45,36 @@ export const exchangeRateERC20ToUsd = (
 		include_market_cap: true
 	});
 
-export const exchangeRateICRCToUsd = async (
-	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<Record<LedgerCanisterIdText, number> | null> => {
-	const results = await Promise.all(
-		ledgerCanisterIds.map((ledgerCanisterId) =>
-			kongSwapTokenPrice({
-				id: ledgerCanisterId.toLowerCase()
-			})
-		)
-	);
-
-	const tokenPrices: Record<LedgerCanisterIdText, number> = {};
-
-	results.forEach((response) => {
-		const canisterId = response?.token?.canister_id;
-		const price = response?.metrics?.price;
-
-		if (canisterId && price) {
-			tokenPrices[canisterId] = Number(price);
-		}
-	});
-
-	return Object.keys(tokenPrices).length > 0 ? tokenPrices : null;
-};
+	export const exchangeRateICRCToUsd = async (
+		ledgerCanisterIds: LedgerCanisterIdText[]
+	): Promise<CoingeckoSimpleTokenPriceResponse | null> => {
+		const results = await Promise.all(
+			ledgerCanisterIds.map((ledgerCanisterId) =>
+				kongSwapTokenPrice({
+					id: ledgerCanisterId.toLowerCase()
+				})
+			)
+		);
+	
+		const tokenPrices: CoingeckoSimpleTokenPriceResponse = {};
+	
+		results.forEach((response) => {
+			const canisterId = response?.token?.canister_id;
+			const metrics = response?.metrics;
+	
+			if (canisterId && metrics?.price) {
+				tokenPrices[canisterId] = {
+					usd: Number(metrics.price),
+					usd_market_cap: Number(metrics.market_cap),
+					usd_24h_vol: Number(metrics.volume_24h),
+					usd_24h_change: Number(metrics.price_change_24h),
+					last_updated_at: new Date(metrics.updated_at).getTime()
+				};
+			}
+		});
+	
+		return Object.keys(tokenPrices).length > 0 ? tokenPrices : null;
+	};
 
 export const exchangeRateSPLToUsd = (
 	tokenAddresses: SplTokenAddress[]
