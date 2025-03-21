@@ -54,7 +54,7 @@ describe('etherscan.providers', () => {
 				action: 'txlist',
 				address,
 				startblock: 0,
-				endblock:  99999999,
+				endblock: 99999999,
 				sort: 'asc'
 			});
 			expect(result).toStrictEqual([]);
