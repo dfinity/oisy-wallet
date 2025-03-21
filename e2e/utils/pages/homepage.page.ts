@@ -443,7 +443,7 @@ abstract class Homepage {
 		{
 			isMobile = false,
 			freezeCarousel = false,
-			centeredElementTestId,
+			// centeredElementTestId,
 			screenshotTarget
 		}: TakeScreenshotParams = {
 			isMobile: false,
