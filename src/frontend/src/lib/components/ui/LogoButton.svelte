@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { IconCheck, Toggle } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
 
 	export let title: string;
 	export let subtitle: string | undefined = undefined;
@@ -9,11 +9,11 @@
 	export let description: string | undefined = undefined;
 	export let descriptionEnd: string | undefined = undefined;
 
-	export let selectable: boolean = false;
-	export let selected: boolean = false;
+	export let selectable = false;
+	export let selected = false;
 
-	export let dividers: boolean = true;
-	export let hover: boolean = true;
+	export let dividers = true;
+	export let hover = true;
 
 	let hasActionSlot: boolean;
 	$: hasActionSlot = nonNullish($$slots['action']);
