@@ -465,7 +465,9 @@ abstract class Homepage {
 
 		await this.#page.mouse.move(0, 0);
 
-		if(isNullish(centeredElementTestId)) {  await this.#page.evaluate(() => window.scrollTo(0,0))}
+		if (isNullish(centeredElementTestId)) {
+			await this.#page.evaluate(() => window.scrollTo(0, 0));
+		}
 
 		if (freezeCarousel) {
 			// Freezing the time because the carousel has a timer that resets the animations and the transitions.
