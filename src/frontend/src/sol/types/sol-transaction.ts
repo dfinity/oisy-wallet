@@ -1,13 +1,12 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
-import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type {
-	Address,
 	Commitment,
 	FullySignedTransaction,
 	GetSignaturesForAddressApi,
+	GetTransactionApi,
 	Signature,
 	TransactionWithBlockhashLifetime
 } from '@solana/kit';
@@ -26,25 +25,22 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	fee?: bigint;
 }
 
-type SolRpcTransactionRawWithBug = NonNullable<
-	Awaited<ReturnType<typeof fetchTransactionDetailForSignature>>
->;
+const getTransactionApi = null as unknown as GetTransactionApi;
 
-// This is a temporary type that we are using to cast the parsed account keys of an RPC Solana Transaction.
-// We need to do this, because in the current version of @solana/kit (v2.0.0) there is a bug: https://github.com/anza-xyz/solana-web3.js/issues/80
-// TODO: Remove this type and its usage when the bug is fixed and released.
-type ParsedAccounts = {
-	pubkey: Address;
-	signer: boolean;
-	source: string;
-	writable: boolean;
-}[];
-export type SolRpcTransactionRaw = Omit<SolRpcTransactionRawWithBug, 'transaction'> & {
-	transaction: Omit<SolRpcTransactionRawWithBug['transaction'], 'message'> & {
-		message: Omit<SolRpcTransactionRawWithBug['transaction']['message'], 'accountKeys'> & {
-			accountKeys: ParsedAccounts;
-		};
-	};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function jsonParsedResultProducer() {
+	return getTransactionApi.getTransaction('' as Signature, {
+		encoding: 'jsonParsed',
+		maxSupportedTransactionVersion: 0
+	});
+}
+
+export type SolRpcTransactionRaw = ReturnType<typeof jsonParsedResultProducer>;
+
+export type SolRpcTransactionDetail = NonNullable<SolRpcTransactionRaw> & {
+	confirmationStatus: Commitment | null;
+	id: string;
+	signature: Signature;
 };
 
 export type SolRpcTransaction = SolRpcTransactionRaw & {
