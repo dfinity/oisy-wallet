@@ -81,6 +81,9 @@ describe('etherscan.rest', () => {
 					nonce: 1,
 					gasLimit: '21000',
 					gasPrice: '20000000000',
+					maxFeePerGas: null,
+					maxPriorityFeePerGas: null,
+					type: null,
 					value: '1000000000000000000',
 					chainId: 0
 				}
