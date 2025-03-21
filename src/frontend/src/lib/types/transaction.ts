@@ -33,7 +33,6 @@ export type EthersTransaction = Pick<
 	>;
 
 export type Transaction = Omit<EthersTransaction, 'data'> &
-	Pick<TransactionResponse, 'from' | 'to'> &
 	Partial<Pick<TransactionResponse, 'blockNumber'>> & {
 		timestamp?: number;
 		pendingTimestamp?: number;
