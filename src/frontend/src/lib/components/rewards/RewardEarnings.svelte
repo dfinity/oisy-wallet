@@ -33,10 +33,10 @@
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
-			amount: ckBtcReward,
-			token: ckBtcToken,
-			$exchanges: $exchanges
-		}) ?? 0)
+				amount: ckBtcReward,
+				token: ckBtcToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let ckUsdcToken: IcToken | undefined;
@@ -46,10 +46,10 @@
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
-			amount: ckUsdcReward,
-			token: ckUsdcToken,
-			$exchanges: $exchanges
-		}) ?? 0)
+				amount: ckUsdcReward,
+				token: ckUsdcToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let icpToken: IcToken | undefined;
@@ -59,10 +59,10 @@
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
 		? (calculateTokenUsdAmount({
-			amount: icpReward,
-			token: icpToken,
-			$exchanges: $exchanges
-		}) ?? 0)
+				amount: icpReward,
+				token: icpToken,
+				$exchanges: $exchanges
+			}) ?? 0)
 		: 0;
 
 	let totalRewardUsd: number;
@@ -72,10 +72,10 @@
 	$: loading = true;
 
 	const loadRewards = async ({
-															 ckBtcToken,
-															 ckUsdcToken,
-															 icpToken
-														 }: {
+		ckBtcToken,
+		ckUsdcToken,
+		icpToken
+	}: {
 		ckBtcToken: IcToken | undefined;
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
@@ -120,10 +120,10 @@
 			class:duration-500={loading}
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
-		>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
-			$noOfSprinkles: amountOfRewards.toString(),
-			$amount: formatUSD({ value: totalRewardUsd })
-		})}
+			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
+				$noOfSprinkles: amountOfRewards.toString(),
+				$amount: formatUSD({ value: totalRewardUsd })
+			})}
 		</div>
 
 		<div class="flex w-full gap-2">
