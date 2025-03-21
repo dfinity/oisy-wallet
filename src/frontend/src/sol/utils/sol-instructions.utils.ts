@@ -1,3 +1,4 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
@@ -206,7 +207,7 @@ const mapTokenParsedInstruction = async ({
 
 		// In case of `closeAccount` transaction we take the accumulated balance of SOL (or WSOL) of the Associated Token Account (this is the `from` address).
 		// We do this because the entire amount of SOL (or WSOL) is redeemed by the owner of the ATA.
-		const value = cumulativeBalances?.[from] ?? 0n;
+		const value = cumulativeBalances?.[from] ?? ZERO_BI;
 
 		return { value, from, to };
 	}
