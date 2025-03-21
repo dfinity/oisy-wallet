@@ -31,7 +31,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  */
 export const getMaxTransactionAmount = ({
 	balance,
-	fee = 0n,
+	fee = ZERO_BI,
 	tokenDecimals,
 	tokenStandard
 }: {
@@ -44,8 +44,8 @@ export const getMaxTransactionAmount = ({
 		(balance ?? ZERO_BI) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO_BI);
 
 	return Number(
-		value < 0n
-			? 0n
+		value <= ZERO_BI
+			? ZERO_BI
 			: formatToken({
 					value,
 					unitName: tokenDecimals,

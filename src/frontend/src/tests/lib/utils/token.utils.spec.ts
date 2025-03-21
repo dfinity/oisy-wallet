@@ -272,7 +272,6 @@ describe('token.utils', () => {
 				usdBalance: 0
 			});
 		});
-	});
 
 	describe('sumTokenBalances', () => {
 		// We mock ETH to be a twin of ICP

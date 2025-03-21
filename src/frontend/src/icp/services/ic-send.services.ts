@@ -115,7 +115,7 @@ export const sendIcrc = ({
 		identity,
 		ledgerCanisterId,
 		to: decodeIcrcAccount(to),
-		amount: amount
+		amount
 	});
 };
 

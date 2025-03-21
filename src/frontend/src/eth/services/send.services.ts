@@ -33,6 +33,8 @@ import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { TransactionResponse } from 'ethers/providers';
+import { BigNumber } from '@ethersproject/bignumber';
+import type { TransactionResponse } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 
 const ethPrepareTransaction = ({
@@ -71,7 +73,7 @@ const erc20PrepareTransaction = async ({
 	const { data } = await populate({
 		contract: token as Erc20Token,
 		to,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	if (isNullish(data)) {
@@ -157,7 +159,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		contract,
 		erc20Contract: { address: erc20ContractAddress },
 		to,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	const { address: contractAddress } = contract;
@@ -216,7 +218,7 @@ const erc20ContractPrepareApprove = async ({
 	const { data } = await populateApprove({
 		contract: token as Erc20Token,
 		spender,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	const { address: to } = token as Erc20Token;
