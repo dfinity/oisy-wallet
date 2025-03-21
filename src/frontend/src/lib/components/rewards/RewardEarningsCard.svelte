@@ -9,14 +9,14 @@
 	import type { AmountString } from '$lib/types/amount';
 	import { formatToken, formatUSD } from '$lib/utils/format.utils';
 
-	export let amount: BigNumber;
+	export let amount: bigint;
 	export let usdAmount: number;
 	export let token: IcToken | undefined;
 	export let loading = true;
 
 	let displayAmount: AmountString;
 	$: displayAmount = formatToken({
-		value: amount.toBigInt(),
+		value: amount,
 		unitName: token?.decimals,
 		displayDecimals: EIGHT_DECIMALS
 	});

@@ -9,7 +9,7 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import RewardEarningsCard from '$lib/components/rewards/RewardEarningsCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -29,41 +29,41 @@
 
 	let ckBtcToken: IcToken | undefined;
 	$: ckBtcToken = findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens: $tokens });
-	let ckBtcReward: BigNumber;
-	$: ckBtcReward = ZERO;
+	let ckBtcReward: bigint;
+	$: ckBtcReward = ZERO_BI;
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckBtcReward.toBigInt(),
-				token: ckBtcToken,
-				$exchanges: $exchanges
-			}) ?? 0)
+			amount: ckBtcReward,
+			token: ckBtcToken,
+			$exchanges: $exchanges
+		}) ?? 0)
 		: 0;
 
 	let ckUsdcToken: IcToken | undefined;
 	$: ckUsdcToken = findTwinToken({ tokenToPair: USDC_TOKEN, tokens: $tokens });
-	let ckUsdcReward: BigNumber;
-	$: ckUsdcReward = ZERO;
+	let ckUsdcReward: bigint;
+	$: ckUsdcReward = ZERO_BI;
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckUsdcReward.toBigInt(),
-				token: ckUsdcToken,
-				$exchanges: $exchanges
-			}) ?? 0)
+			amount: ckUsdcReward,
+			token: ckUsdcToken,
+			$exchanges: $exchanges
+		}) ?? 0)
 		: 0;
 
 	let icpToken: IcToken | undefined;
 	$: icpToken = ICP_TOKEN;
-	let icpReward: BigNumber;
-	$: icpReward = ZERO;
+	let icpReward: bigint;
+	$: icpReward = ZERO_BI;
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
 		? (calculateTokenUsdAmount({
-				amount: icpReward.toBigInt(),
-				token: icpToken,
-				$exchanges: $exchanges
-			}) ?? 0)
+			amount: icpReward,
+			token: icpToken,
+			$exchanges: $exchanges
+		}) ?? 0)
 		: 0;
 
 	let totalRewardUsd: number;
@@ -73,10 +73,10 @@
 	$: loading = true;
 
 	const loadRewards = async ({
-		ckBtcToken,
-		ckUsdcToken,
-		icpToken
-	}: {
+															 ckBtcToken,
+															 ckUsdcToken,
+															 icpToken
+														 }: {
 		ckBtcToken: IcToken | undefined;
 		ckUsdcToken: IcToken | undefined;
 		icpToken: IcToken | undefined;
@@ -121,10 +121,10 @@
 			class:duration-500={loading}
 			class:ease-in-out={loading}
 			class:animate-pulse={loading}
-			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
-				$noOfSprinkles: amountOfRewards.toString(),
-				$amount: formatUSD({ value: totalRewardUsd })
-			})}
+		>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
+			$noOfSprinkles: amountOfRewards.toString(),
+			$amount: formatUSD({ value: totalRewardUsd })
+		})}
 		</div>
 
 		<div class="flex w-full gap-2">
