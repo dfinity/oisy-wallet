@@ -3,6 +3,7 @@
 	import { getContext } from 'svelte';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';

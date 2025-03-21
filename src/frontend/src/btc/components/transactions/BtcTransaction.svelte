@@ -22,7 +22,7 @@
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
 	let amount: bigint | undefined;
-	$: amount = nonNullish(value) ? (type === 'send' ? value * BigInt(-1) : value) : undefined;
+	$: amount = nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined;
 </script>
 
 <Transaction

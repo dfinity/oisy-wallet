@@ -1,12 +1,14 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
+import type { Balance } from '$lib/types/balance';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+import { ZERO_BI } from '$lib/constants/app.constants';
 
 interface CommonParams {
 	userAmount: bigint;
-	balance: bigint;
+	balance: Balance;
 	fee?: bigint;
 }
 
@@ -15,7 +17,7 @@ interface CommonParamsWithMinter extends CommonParams {
 }
 
 interface CommonParamsWithBalanceForFee extends CommonParams {
-	balanceForFee: bigint;
+	balanceForFee: Balance;
 }
 
 const assertBalance = ({ userAmount, balance }: CommonParams): TokenActionErrorType => {

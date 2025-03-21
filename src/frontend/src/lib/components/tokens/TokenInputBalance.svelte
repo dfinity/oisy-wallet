@@ -1,11 +1,12 @@
 <script lang="ts">
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { ZERO_BI } from '$lib/constants/app.constants';
+	import type { Balance } from '$lib/types/balance';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let token: Token;
-	export let balance: bigint | undefined = undefined;
+	export let balance: Balance | undefined = undefined;
 	export let testId: string | undefined = undefined;
 </script>
 

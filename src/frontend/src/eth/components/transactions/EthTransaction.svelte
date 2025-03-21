@@ -60,7 +60,7 @@
 					: $i18n.receive.text.receive;
 
 	let amount: bigint;
-	$: amount = type === 'send' || type === 'deposit' ? value.mul(-1) : value;
+	$: amount = value * (type === 'send' || type === 'deposit' ? -1n : 1n);
 
 	let transactionDate: number | undefined;
 	$: transactionDate = timestamp ?? displayTimestamp;

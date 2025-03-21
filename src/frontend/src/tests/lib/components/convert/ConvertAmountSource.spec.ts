@@ -1,5 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import en from '$tests/mocks/i18n.mock';
@@ -134,7 +135,7 @@ describe('ConvertAmountSource', () => {
 	it('should not change sendAmount on max button click if balance is zero', async () => {
 		const { getByTestId, component } = render(ConvertAmountSource, {
 			props,
-			context: mockContext(0n)
+			context: mockContext(ZERO_BI)
 		});
 
 		await fireEvent.click(getByTestId(balanceTestId));

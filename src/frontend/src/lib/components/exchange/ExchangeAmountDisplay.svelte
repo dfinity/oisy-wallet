@@ -22,7 +22,7 @@
 
 	let displayAmount: string;
 	$: displayAmount = `${formatToken({
-		value: amount.toBigInt(),
+		value: amount,
 		unitName: decimals,
 		displayDecimals: EIGHT_DECIMALS
 	})} ${symbol}`;

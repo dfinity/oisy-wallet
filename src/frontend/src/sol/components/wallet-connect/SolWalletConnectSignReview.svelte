@@ -8,6 +8,7 @@
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Balance } from '$lib/types/balance';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -22,7 +23,7 @@
 	let decimals: number;
 	$: ({ id: tokenId, network, decimals } = token);
 
-	let balance: bigint | undefined;
+	let balance: Balance | undefined;
 	$: balance = $balancesStore?.[tokenId]?.data;
 
 	let amountDisplay: OptionAmount;

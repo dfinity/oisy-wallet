@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS, ZERO_BI } from '$lib/constants/app.constants';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	export let amount: bigint;
@@ -9,21 +9,21 @@
 
 	let detailedValue: string;
 	$: detailedValue = formatToken({
-		value: amount.toBigInt(),
+		value: amount,
 		unitName: decimals,
 		displayDecimals: decimals
 	});
 
 	let displayValue: string;
 	$: displayValue = formatToken({
-		value: amount.toBigInt(),
+		value: amount,
 		unitName: decimals,
 		displayDecimals: EIGHT_DECIMALS,
 		showPlusSign: formatPositiveAmount
 	});
 </script>
 
-<span class:text-success-primary={formatPositiveAmount && amount > 0}>
+<span class:text-success-primary={formatPositiveAmount && amount > ZERO_BI}>
 	<data value={detailedValue}>
 		{displayValue}
 	</data>

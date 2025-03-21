@@ -6,6 +6,8 @@ import {
 	isTokenCkErc20Ledger,
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
+import { ZERO_BI } from '$lib/constants/app.constants';
+import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TokenActionErrorType } from '$lib/types/token-action';
 import type { Option } from '$lib/types/utils';
@@ -32,8 +34,8 @@ export const validateUserAmount = ({
 }: {
 	userAmount: bigint;
 	token: Token;
-	balance?: bigint;
-	balanceForFee?: bigint;
+	balance?: Balance;
+	balanceForFee?: Balance;
 	fee?: bigint;
 	ethereumEstimateFee?: bigint;
 	minterInfo?: Option<CkBtcMinterInfoData | CkEthMinterInfoData>;
@@ -43,13 +45,13 @@ export const validateUserAmount = ({
 	const parsedSendBalance = nonNullish(balance)
 		? parseToken({
 				value: formatToken({
-					value: balance.toBigInt(),
+					value: balance,
 					unitName: token.decimals,
 					displayDecimals: token.decimals
 				}),
 				unitName: token.decimals
 			})
-		: 0n;
+		: ZERO_BI;
 
 	// if the function called in the swap flow, we only need to check the basic assertAmount condition
 	// if convert or send - we identify token type and check some network-specific conditions

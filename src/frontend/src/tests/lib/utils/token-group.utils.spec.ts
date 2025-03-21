@@ -6,6 +6,7 @@ import {
 } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { TokenUi } from '$lib/types/token';
 import type { TokenUiGroup } from '$lib/types/token-group';
 import {
@@ -17,21 +18,21 @@ import {
 	updateTokenGroup
 } from '$lib/utils/token-group.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { bn1, bn2, bn3 } from '$tests/mocks/balances.mock';
+import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 
 const tokens = [
 	{
 		...BTC_MAINNET_TOKEN,
-		balance: 1n,
+		balance: bn1Bi,
 		usdBalance: 50000
 	},
 	{
 		...mockValidIcCkToken,
 		symbol: 'ckBTC',
 		network: ICP_NETWORK,
-		balance: 2n,
+		balance: bn2Bi,
 		usdBalance: 100000,
 		standard: 'icrc',
 		category: 'default',
@@ -240,10 +241,10 @@ describe('token-group.utils', () => {
 
 		it('should re-sort groups if their total balance made them out of order', () => {
 			const reorderedTokens = [
-				{ ...tokens[0], balance: bn2, usdBalance: 0 }, // BTC
-				{ ...tokens[2], balance: bn2, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: bn1, usdBalance: 0 }, // ckETH
-				{ ...tokens[1], balance: 0n, usdBalance: 0 } // ckBTC
+				{ ...tokens[0], balance: bn2Bi, usdBalance: 0 }, // BTC
+				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: bn1Bi, usdBalance: 0 }, // ckETH
+				{ ...tokens[1], balance: ZERO_BI, usdBalance: 0 } // ckBTC
 			];
 
 			const groupedTokens = groupTokensByTwin(reorderedTokens as TokenUi[]);
@@ -266,9 +267,9 @@ describe('token-group.utils', () => {
 
 	describe('filterTokenGroups', () => {
 		const reorderedTokens = [
-			{ ...tokens[0], balance: 0n, usdBalance: 0 }, // BTC
-			{ ...tokens[4], balance: 0n, usdBalance: 0 }, // ICP
-			{ ...tokens[1], balance: 0n, usdBalance: 0 } // ckBTC
+			{ ...tokens[0], balance: ZERO_BI, usdBalance: 0 }, // BTC
+			{ ...tokens[4], balance: ZERO_BI, usdBalance: 0 }, // ICP
+			{ ...tokens[1], balance: ZERO_BI, usdBalance: 0 } // ckBTC
 		];
 
 		it('should give me all token groups', () => {
@@ -282,8 +283,8 @@ describe('token-group.utils', () => {
 		it('should give me only token groups where at least one token has a balance', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
-				{ ...tokens[2], balance: bn2, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: 0n, usdBalance: 0 } // ckETH
+				{ ...tokens[2], balance: bn2Bi, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: ZERO_BI, usdBalance: 0 } // ckETH
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 
@@ -300,8 +301,8 @@ describe('token-group.utils', () => {
 		it('should give me only token groups where at least one token has a usd balance', () => {
 			const customReorderedTokens = [
 				...reorderedTokens,
-				{ ...tokens[2], balance: 0n, usdBalance: 0 }, // ETH
-				{ ...tokens[3], balance: 0n, usdBalance: 1 } // ckETH
+				{ ...tokens[2], balance: ZERO_BI, usdBalance: 0 }, // ETH
+				{ ...tokens[3], balance: ZERO_BI, usdBalance: 1 } // ckETH
 			];
 			const groupedTokens = groupTokensByTwin(customReorderedTokens as TokenUi[]);
 
@@ -317,8 +318,8 @@ describe('token-group.utils', () => {
 	});
 
 	describe('updateTokenGroup', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		const tokenGroup: TokenUiGroup = {
 			id: anotherToken.id,
@@ -340,7 +341,7 @@ describe('token-group.utils', () => {
 		});
 
 		it('should add a token to a token group with multiple tokens successfully', () => {
-			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 };
+			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
 
 			const initialGroup = updateTokenGroup({ token: thirdToken, tokenGroup });
 
@@ -414,13 +415,13 @@ describe('token-group.utils', () => {
 	});
 
 	describe('groupMainToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -441,7 +442,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -458,7 +459,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -475,7 +476,7 @@ describe('token-group.utils', () => {
 				id: twinToken.id,
 				nativeToken: twinToken,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -491,13 +492,13 @@ describe('token-group.utils', () => {
 	});
 
 	describe('groupSecondaryToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -518,7 +519,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -535,7 +536,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -549,8 +550,8 @@ describe('token-group.utils', () => {
 	});
 
 	describe('updateTokenGroup', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...SEPOLIA_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		const tokenGroup: TokenUiGroup = {
 			id: anotherToken.id,
@@ -572,7 +573,7 @@ describe('token-group.utils', () => {
 		});
 
 		it('should add a token to a token group with multiple tokens successfully', () => {
-			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 };
+			const thirdToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
 
 			const initialGroup = updateTokenGroup({ token: thirdToken, tokenGroup });
 
@@ -646,13 +647,13 @@ describe('token-group.utils', () => {
 	});
 
 	describe('groupMainToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -673,7 +674,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -690,7 +691,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [twinToken, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -707,7 +708,7 @@ describe('token-group.utils', () => {
 				id: twinToken.id,
 				nativeToken: twinToken,
 				tokens: [twinToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -723,13 +724,13 @@ describe('token-group.utils', () => {
 	});
 
 	describe('groupSecondaryToken', () => {
-		const token = { ...ICP_TOKEN, balance: bn1, usdBalance: 100 };
-		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2, usdBalance: 200 };
+		const token = { ...ICP_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const anotherToken = { ...BTC_REGTEST_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const twinToken = {
 			...SEPOLIA_TOKEN,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: ICP_TOKEN,
 			decimals: ICP_TOKEN.decimals
@@ -750,7 +751,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -767,7 +768,7 @@ describe('token-group.utils', () => {
 				id: token.id,
 				nativeToken: token,
 				tokens: [token, anotherToken],
-				balance: bn3,
+				balance: bn3Bi,
 				usdBalance: 300
 			};
 
@@ -781,21 +782,21 @@ describe('token-group.utils', () => {
 	});
 
 	describe('groupTokens', () => {
-		const mockToken = { ...SEPOLIA_TOKEN, balance: bn1, usdBalance: 100 };
-		const mockSecondToken = { ...BTC_TESTNET_TOKEN, balance: bn3, usdBalance: 300 };
-		const mockThirdToken = { ...ICP_TOKEN, balance: bn2, usdBalance: 200 };
+		const mockToken = { ...SEPOLIA_TOKEN, balance: bn1Bi, usdBalance: 100 };
+		const mockSecondToken = { ...BTC_TESTNET_TOKEN, balance: bn3Bi, usdBalance: 300 };
+		const mockThirdToken = { ...ICP_TOKEN, balance: bn2Bi, usdBalance: 200 };
 
 		// We mock the tokens to have the same "main token"
 		const mockTwinToken1 = {
 			...mockValidIcToken,
-			balance: bn2,
+			balance: bn2Bi,
 			usdBalance: 250,
 			twinToken: mockToken,
 			decimals: mockToken.decimals
 		};
 		const mockTwinToken2 = {
 			...mockValidIcToken,
-			balance: bn1,
+			balance: bn1Bi,
 			usdBalance: 450,
 			twinToken: mockToken,
 			decimals: mockToken.decimals

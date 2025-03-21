@@ -47,7 +47,7 @@
 					}),
 					$sendTokenDecimals
 				).toBigInt()
-			: 0n;
+			: ZERO_BI;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {

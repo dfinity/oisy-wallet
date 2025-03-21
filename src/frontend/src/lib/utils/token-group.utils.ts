@@ -1,3 +1,4 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { TokenId, TokenUi } from '$lib/types/token';
 import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';

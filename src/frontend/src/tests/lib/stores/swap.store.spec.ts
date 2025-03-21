@@ -4,6 +4,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import * as exchanges from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
+import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
@@ -52,8 +53,8 @@ describe('swapStore', () => {
 			destinationToken: mockToken1,
 			sourceToken: mockToken2
 		});
-		const ckBtcBalance = 1n;
-		const icpBalance = 2n;
+		const ckBtcBalance = bn1Bi;
+		const icpBalance = bn2Bi;
 
 		balancesStore.set({
 			tokenId: mockToken1.id,

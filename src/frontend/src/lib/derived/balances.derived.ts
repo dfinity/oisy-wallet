@@ -1,3 +1,4 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { token } from '$lib/stores/token.store';

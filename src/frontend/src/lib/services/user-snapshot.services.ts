@@ -22,11 +22,14 @@ import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { registerAirdropRecipient } from '$lib/api/reward.api';
-import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND, ZERO_BI } from '$lib/constants/app.constants';
+import {
+	NANO_SECONDS_IN_MILLISECOND,
+	NANO_SECONDS_IN_SECOND,
+	ZERO_BI
+} from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
-	btcAddressTestnet,
-	ethAddress,
+	btcAddressTestnet, ethAddress,
 	solAddressDevnet,
 	solAddressMainnet
 } from '$lib/derived/address.derived';
@@ -35,6 +38,7 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { SolAddress } from '$lib/types/address';
+import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import type { TransactionType } from '$lib/types/transaction';
 import {
@@ -61,7 +65,7 @@ import { get } from 'svelte/store';
 
 interface ToSnapshotParams<T extends Token> {
 	token: T;
-	balance: bigint;
+	balance: Balance;
 	exchangeRate: number;
 	timestamp: bigint;
 }
@@ -74,6 +78,9 @@ const filterTransactions = <T extends Transaction_Icrc | Transaction_Spl>(
 
 const toTransactionType = (type: Exclude<TransactionType, 'approve'>): RcTransactionType =>
 	type === 'send' || type === 'deposit' || type === 'burn' ? { Send: null } : { Receive: null };
+
+
+
 
 const toBaseTransaction = ({
 	type,

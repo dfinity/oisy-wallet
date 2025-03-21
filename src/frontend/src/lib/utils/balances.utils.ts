@@ -1,9 +1,9 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { type BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TokenId } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { ZERO_BI } from '$lib/constants/app.constants';
 
 export const checkAnyNonZeroBalance = ($balancesStore: CertifiedStoreData<BalancesData>): boolean =>
 	nonNullish($balancesStore) &&

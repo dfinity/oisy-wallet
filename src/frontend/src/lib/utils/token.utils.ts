@@ -16,6 +16,8 @@ import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { OptionBalance } from '$lib/types/balance';
+import { ZERO_BI } from '$lib/constants/app.constants';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -28,23 +30,23 @@ import { isNullish, nonNullish } from '@dfinity/utils';
  * @returns {number} The maximum amount for the transaction.
  */
 export const getMaxTransactionAmount = ({
-	balance = 0n,
+	balance,
 	fee = 0n,
 	tokenDecimals,
 	tokenStandard
 }: {
-	balance?: bigint;
+	balance: OptionBalance;
 	fee?: bigint;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = balance - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
+	const value = (balance ?? ZERO_BI) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
 
 	return Number(
 		value < 0n
 			? 0n
 			: formatToken({
-					value: value.toBigInt(),
+					value,
 					unitName: tokenDecimals,
 					displayDecimals: tokenDecimals
 				})

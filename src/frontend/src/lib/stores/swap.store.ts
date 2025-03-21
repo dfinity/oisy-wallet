@@ -2,6 +2,7 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+import type { Balance } from '$lib/types/balance';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
@@ -76,8 +77,8 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 export interface SwapContext {
 	sourceToken: Readable<IcTokenToggleable | undefined>;
 	destinationToken: Readable<IcTokenToggleable | undefined>;
-	sourceTokenBalance: Readable<bigint | undefined>;
-	destinationTokenBalance: Readable<bigint | undefined>;
+	sourceTokenBalance: Readable<Balance | undefined>;
+	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean>;

@@ -1,9 +1,11 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { Balance } from '$lib/types/balance';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -43,12 +45,12 @@ export const swappableTokens: Readable<SwappableTokens> = derived(
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
-		const balance: bigint | undefined = $balancesStore?.[selectedToken.id]?.data;
+		const balance: Balance | undefined = $balancesStore?.[selectedToken.id]?.data;
 		if (isNullish(balance)) {
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
 
-		if (balance > 0n) {
+		if (balance > ZERO_BI) {
 			return { sourceToken: selectedToken, destinationToken: undefined };
 		}
 		return { sourceToken: undefined, destinationToken: selectedToken };
