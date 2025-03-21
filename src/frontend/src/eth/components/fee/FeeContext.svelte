@@ -108,8 +108,8 @@
 					...erc20GasFeeParams,
 					targetNetwork,
 					to:
-					// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
-					// Therefore, it should not be prefixed with 0x.
+						// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
+						// Therefore, it should not be prefixed with 0x.
 						isNetworkICP(targetNetwork) ? destination : erc20GasFeeParams.to
 				})
 			});
