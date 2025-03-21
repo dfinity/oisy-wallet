@@ -6,7 +6,7 @@ import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
 import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
 import type { NetworkId } from '$lib/types/network';
 import { parseNetworkId } from '$lib/validation/network.validation';
-import type { Networkish } from '@ethersproject/networks';
+import type { Networkish } from 'ethers/providers';
 import { Network } from 'alchemy-sdk';
 
 export const ETH_MAINNET_ENABLED =
