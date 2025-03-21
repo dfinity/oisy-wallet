@@ -100,8 +100,7 @@ const syncExchange = async ({
 			exchangeRateBTCToUsd(),
 			exchangeRateERC20ToUsd(erc20ContractAddresses),
 			exchangeRateICPToUsd(),
-			exchangeRateICPToUsd(),
-			// exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
 			exchangeRateSPLToUsd(splTokenAddresses)
 		]);
