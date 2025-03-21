@@ -81,7 +81,7 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
@@ -106,7 +106,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
+    let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -124,8 +124,7 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     let updated_results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
-    let expected_updated_tokens: Vec<CustomToken> =
-        vec![update_token.clone_with_incremented_version()];
+    let expected_updated_tokens: Vec<CustomToken> = vec![update_token.with_incremented_version()];
 
     assert!(updated_results.is_ok());
 
@@ -163,8 +162,8 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
     let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
-        user_token.clone_with_incremented_version(),
-        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+        user_token.with_incremented_version(),
+        ANOTHER_USER_TOKEN.with_incremented_version(),
     ];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
@@ -195,8 +194,8 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
     assert!(results.is_ok());
 
     let expected_tokens: Vec<CustomToken> = vec![
-        user_token.clone_with_incremented_version(),
-        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+        user_token.with_incremented_version(),
+        ANOTHER_USER_TOKEN.with_incremented_version(),
     ];
 
     assert_custom_tokens_eq(results.clone().unwrap(), expected_tokens);
@@ -225,8 +224,8 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
     assert!(updated_results.is_ok());
 
     let expected_update_tokens: Vec<CustomToken> = vec![
-        update_token.clone_with_incremented_version(),
-        update_another_token.clone_with_incremented_version(),
+        update_token.with_incremented_version(),
+        update_another_token.with_incremented_version(),
     ];
 
     let updated_tokens = updated_results.unwrap();
@@ -247,8 +246,8 @@ fn test_list_custom_tokens() {
     let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
-        USER_TOKEN.clone_with_incremented_version(),
-        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+        USER_TOKEN.with_incremented_version(),
+        ANOTHER_USER_TOKEN.with_incremented_version(),
     ];
 
     assert!(results.is_ok());
