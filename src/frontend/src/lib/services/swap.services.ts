@@ -48,7 +48,7 @@ export const swap = async ({
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
-	}).toBigInt();
+	});
 	const { standard, ledgerCanisterId } = sourceToken;
 	const transferParams = {
 		identity,

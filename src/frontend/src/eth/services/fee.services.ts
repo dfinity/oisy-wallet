@@ -34,10 +34,11 @@ export const getErc20FeeData = async ({
 	targetNetwork,
 	sourceNetwork: { id: sourceNetworkId },
 	contract,
+	amount,
 	...rest
 }: GetFeeData & {
 	contract: Erc20Token;
-	amount: BigNumber;
+	amount: bigint;
 	sourceNetwork: EthereumNetwork;
 	targetNetwork: Network | undefined;
 }): Promise<bigint> => {
@@ -47,7 +48,7 @@ export const getErc20FeeData = async ({
 		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
 			? infuraErc20IcpProviders(targetNetworkId as NetworkId)
 			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
-		const fee = await fn({ ...rest, contract });
+		const fee = await fn({ ...rest, contract, amount: BigNumber.from(amount) });
 
 		const isResearchCoin = contract.symbol === 'RSC' && contract.name === 'ResearchCoin';
 
@@ -77,7 +78,7 @@ export const getCkErc20FeeData = async ({
 	...rest
 }: GetFeeData & {
 	contract: Erc20Token;
-	amount: BigNumber;
+	amount: bigint;
 	sourceNetwork: EthereumNetwork;
 	erc20HelperContractAddress: OptionEthAddress;
 }): Promise<bigint> => {
