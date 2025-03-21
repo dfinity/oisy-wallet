@@ -13,6 +13,11 @@ import {
 	initConvertContext,
 	type ConvertContext
 } from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { BigNumber } from 'alchemy-sdk';
@@ -21,7 +26,7 @@ import { writable } from 'svelte/store';
 describe('EthConvertForm', () => {
 	let store: FeeStore;
 	const mockContext = ({ feeStore }: { feeStore: FeeStore }) =>
-		new Map<symbol, ConvertContext | FeeContext>([
+		new Map<symbol, ConvertContext | FeeContext | TokenActionValidationErrorsContext>([
 			[
 				FEE_CONTEXT_KEY,
 				initFeeContext({
@@ -38,7 +43,8 @@ describe('EthConvertForm', () => {
 					sourceToken: ETHEREUM_TOKEN,
 					destinationToken: ICP_TOKEN
 				})
-			]
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
 	const props = {

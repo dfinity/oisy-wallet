@@ -13,7 +13,16 @@ import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
-import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
+import {
+	CONVERT_CONTEXT_KEY,
+	initConvertContext,
+	type ConvertContext
+} from '$lib/stores/convert.store';
+import {
+	TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY,
+	initTokenActionValidationErrorsContext,
+	type TokenActionValidationErrorsContext
+} from '$lib/stores/token-action-validation-errors.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -53,14 +62,12 @@ describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
 	const mockContext = () =>
-		new Map([
+		new Map<symbol, ConvertContext | TokenActionValidationErrorsContext>([
 			[
 				CONVERT_CONTEXT_KEY,
-				{
-					sourceToken: readable(ETHEREUM_TOKEN),
-					destinationToken: readable(SEPOLIA_TOKEN)
-				}
-			]
+				initConvertContext({ sourceToken: ETHEREUM_TOKEN, destinationToken: SEPOLIA_TOKEN })
+			],
+			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 	const mockMinterInfo = mockCkMinterInfo;
 	const mockFees = {
