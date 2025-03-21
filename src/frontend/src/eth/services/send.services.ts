@@ -275,8 +275,8 @@ export const send = async ({
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
 	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
+		maxFeePerGas: bigint;
+		maxPriorityFeePerGas: bigint;
 	}): Promise<{ hash: string }> => {
 	progress(ProgressStepsSend.INITIALIZATION);
 
@@ -321,8 +321,8 @@ const sendTransaction = async ({
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	Omit<SendParams, 'lastProgressStep'> &
 	Pick<TransactionFeeData, 'gas'> & {
-		maxFeePerGas: BigNumber;
-		maxPriorityFeePerGas: BigNumber;
+		maxFeePerGas: bigint;
+		maxPriorityFeePerGas: bigint;
 		nonce: number;
 	}): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
@@ -374,9 +374,9 @@ const sendTransaction = async ({
 		} & Pick<TransferParams, 'maxFeePerGas' | 'maxPriorityFeePerGas'> = {
 		from,
 		nonce,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId
 	};
 
@@ -446,9 +446,9 @@ const prepareAndSignApproval = async ({
 
 	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas,
 		chainId,
 		networkId
 	});

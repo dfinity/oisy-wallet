@@ -36,8 +36,8 @@
 	bind:receiveAmount
 	bind:insufficientFunds
 	bind:insufficientFundsForFee
-	totalFee={$maxGasFee?.toBigInt()}
-	minFee={$minGasFee?.toBigInt()}
+	totalFee={$maxGasFee}
+	minFee={$minGasFee}
 	disabled={invalid}
 >
 	<svelte:fragment slot="message">
