@@ -4,6 +4,7 @@ import type {
 	IcrcTransaction
 } from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import {
@@ -117,7 +118,7 @@ export const mapIcrcTransaction = ({
 					: 'receive';
 
 	const value = isApprove
-		? 0n
+		? ZERO_BI
 		: nonNullish(data?.amount)
 			? data.amount +
 				(isTransfer && source.incoming === false

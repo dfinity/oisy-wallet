@@ -1,4 +1,5 @@
 import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,

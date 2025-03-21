@@ -6,7 +6,11 @@ import type {
 } from '$declarations/rewards/rewards.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import {
+	MILLISECONDS_IN_DAY,
+	NANO_SECONDS_IN_MILLISECOND,
+	ZERO_BI
+} from '$lib/constants/app.constants';
 import {
 	claimVipReward,
 	getNewReward,
