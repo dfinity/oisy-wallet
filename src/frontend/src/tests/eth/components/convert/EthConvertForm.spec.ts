@@ -20,7 +20,6 @@ import {
 } from '$lib/stores/token-action-validation-errors.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
-import { BigNumber } from 'alchemy-sdk';
 import { writable } from 'svelte/store';
 
 describe('EthConvertForm', () => {
@@ -53,10 +52,10 @@ describe('EthConvertForm', () => {
 		destination: 'address'
 	};
 	const mockFeeStore = {
-		maxFeePerGas: BigNumber.from(1000n),
-		gas: BigNumber.from(1000n),
-		maxPriorityFeePerGas: BigNumber.from(1000n),
-		maxGasFee: BigNumber.from(1000n)
+		maxFeePerGas: 1000n,
+		gas: 1000n,
+		maxPriorityFeePerGas: 1000n,
+		maxGasFee: 1000n
 	};
 
 	const buttonTestId = 'convert-form-button-next';
