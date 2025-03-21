@@ -90,7 +90,7 @@ export const fetchSignatures = async ({
 	return await fetchSignaturesBatch(before);
 };
 
-export const getTransactionFromSolanaRpc = async ({
+export const getRpcTransaction = async ({
 	signature: { signature },
 	network
 }: {
@@ -114,7 +114,7 @@ export const fetchTransactionDetailForSignature = async ({
 }): Promise<SolRpcTransaction | null> => {
 	const { confirmationStatus } = signature;
 
-	const rpcTransaction: SolRpcTransactionRaw | null = await getTransactionFromSolanaRpc({
+	const rpcTransaction: SolRpcTransactionRaw | null = await getRpcTransaction({
 		signature,
 		network
 	});

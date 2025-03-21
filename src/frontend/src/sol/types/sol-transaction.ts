@@ -1,7 +1,7 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
-import type { getTransactionFromSolanaRpc } from '$sol/api/solana.api';
+import type { getRpcTransaction } from '$sol/api/solana.api';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type {
 	Commitment,
@@ -25,9 +25,7 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	fee?: bigint;
 }
 
-export type SolRpcTransactionRaw = NonNullable<
-	Awaited<ReturnType<typeof getTransactionFromSolanaRpc>>
->;
+export type SolRpcTransactionRaw = NonNullable<Awaited<ReturnType<typeof getRpcTransaction>>>;
 
 export type SolRpcTransaction = SolRpcTransactionRaw & {
 	id: string;
