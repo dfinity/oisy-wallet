@@ -22,8 +22,8 @@
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
-				balance: nonNullish(balance) ? BigNumber.from(balance) : undefined,
-				fee,
+				balance,
+				fee: fee?.toBigInt(),
 				tokenDecimals: token.decimals,
 				tokenStandard: token.standard
 			})
