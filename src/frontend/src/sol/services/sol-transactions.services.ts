@@ -17,6 +17,7 @@ import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
+	SolRpcTransaction,
 	SolSignature,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
@@ -48,7 +49,10 @@ export const fetchSolTransactionsForSignature = async ({
 	tokenAddress?: SplTokenAddress;
 	tokenOwnerAddress?: SolAddress;
 }): Promise<SolTransactionUi[]> => {
-	const transactionDetail = await fetchTransactionDetailForSignature({ signature, network });
+	const transactionDetail: SolRpcTransaction | null = await fetchTransactionDetailForSignature({
+		signature,
+		network
+	});
 
 	if (isNullish(transactionDetail)) {
 		return [];
