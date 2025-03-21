@@ -2,10 +2,10 @@
 	"production": {
 		"ckEURC": {
 			"ledgerCanisterId": "pe5t5-diaaa-aaaar-qahwa-cai",
-			"name": "ckEURC",
 			"indexCanisterId": "pd4vj-oqaaa-aaaar-qahwq-cai",
 			"erc20ContractAddress": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
 			"decimals": 6,
+			"name": "ckEURC",
 			"symbol": "ckEURC",
 			"fee": {
 				"__bigint__": "10000"
@@ -13,10 +13,10 @@
 		},
 		"ckUNI": {
 			"ledgerCanisterId": "ilzky-ayaaa-aaaar-qahha-cai",
-			"name": "ckUNI",
 			"indexCanisterId": "imymm-naaaa-aaaar-qahhq-cai",
 			"erc20ContractAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
 			"decimals": 18,
+			"name": "ckUNI",
 			"symbol": "ckUNI",
 			"fee": {
 				"__bigint__": "1000000000000000"
@@ -24,10 +24,10 @@
 		},
 		"ckWBTC": {
 			"ledgerCanisterId": "bptq2-faaaa-aaaar-qagxq-cai",
-			"name": "ckWBTC",
 			"indexCanisterId": "dso6s-wiaaa-aaaar-qagya-cai",
 			"erc20ContractAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 			"decimals": 8,
+			"name": "ckWBTC",
 			"symbol": "ckWBTC",
 			"fee": {
 				"__bigint__": "10"
@@ -35,10 +35,10 @@
 		},
 		"ckLINK": {
 			"ledgerCanisterId": "g4tto-rqaaa-aaaar-qageq-cai",
-			"name": "ckLINK",
 			"indexCanisterId": "gvqys-hyaaa-aaaar-qagfa-cai",
 			"erc20ContractAddress": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
 			"decimals": 18,
+			"name": "ckLINK",
 			"symbol": "ckLINK",
 			"fee": {
 				"__bigint__": "100000000000000"
@@ -46,10 +46,10 @@
 		},
 		"ckXAUT": {
 			"ledgerCanisterId": "nza5v-qaaaa-aaaar-qahzq-cai",
-			"name": "ckXAUT",
 			"indexCanisterId": "nmhmy-riaaa-aaaar-qah2a-cai",
 			"erc20ContractAddress": "0x68749665FF8D2d112Fa859AA293F07A622782F38",
 			"decimals": 6,
+			"name": "ckXAUT",
 			"symbol": "ckXAUT",
 			"fee": {
 				"__bigint__": "1"
@@ -57,10 +57,10 @@
 		},
 		"ckPEPE": {
 			"ledgerCanisterId": "etik7-oiaaa-aaaar-qagia-cai",
-			"name": "ckPEPE",
 			"indexCanisterId": "eujml-dqaaa-aaaar-qagiq-cai",
 			"erc20ContractAddress": "0x6982508145454Ce325dDbE47a25d4ec3d2311933",
 			"decimals": 18,
+			"name": "ckPEPE",
 			"symbol": "ckPEPE",
 			"fee": {
 				"__bigint__": "1000000000000000000000"
@@ -68,10 +68,10 @@
 		},
 		"ckWSTETH": {
 			"ledgerCanisterId": "j2tuh-yqaaa-aaaar-qahcq-cai",
-			"name": "ckWSTETH",
 			"indexCanisterId": "jtq73-oyaaa-aaaar-qahda-cai",
 			"erc20ContractAddress": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
 			"decimals": 18,
+			"name": "ckWSTETH",
 			"symbol": "ckWSTETH",
 			"fee": {
 				"__bigint__": "1000000000000"
@@ -79,10 +79,10 @@
 		},
 		"ckSHIB": {
 			"ledgerCanisterId": "fxffn-xiaaa-aaaar-qagoa-cai",
-			"name": "ckSHIB",
 			"indexCanisterId": "fqedz-2qaaa-aaaar-qagoq-cai",
 			"erc20ContractAddress": "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
 			"decimals": 18,
+			"name": "ckSHIB",
 			"symbol": "ckSHIB",
 			"fee": {
 				"__bigint__": "100000000000000000000"
@@ -90,10 +90,10 @@
 		},
 		"ckUSDC": {
 			"ledgerCanisterId": "xevnm-gaaaa-aaaar-qafnq-cai",
-			"name": "ckUSDC",
 			"indexCanisterId": "xrs4b-hiaaa-aaaar-qafoa-cai",
 			"erc20ContractAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
 			"decimals": 6,
+			"name": "ckUSDC",
 			"symbol": "ckUSDC",
 			"fee": {
 				"__bigint__": "10000"
@@ -101,10 +101,10 @@
 		},
 		"ckUSDT": {
 			"ledgerCanisterId": "cngnf-vqaaa-aaaar-qag4q-cai",
-			"name": "ckUSDT",
 			"indexCanisterId": "cefgz-dyaaa-aaaar-qag5a-cai",
 			"erc20ContractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
 			"decimals": 6,
+			"name": "ckUSDT",
 			"symbol": "ckUSDT",
 			"fee": {
 				"__bigint__": "10000"
@@ -112,10 +112,10 @@
 		},
 		"ckOCT": {
 			"ledgerCanisterId": "ebo5g-cyaaa-aaaar-qagla-cai",
-			"name": "ckOCT",
 			"indexCanisterId": "egp3s-paaaa-aaaar-qaglq-cai",
 			"erc20ContractAddress": "0xF5cFBC74057C610c8EF151A439252680AC68c6DC",
 			"decimals": 18,
+			"name": "ckOCT",
 			"symbol": "ckOCT",
 			"fee": {
 				"__bigint__": "34000000000000000"
@@ -125,10 +125,10 @@
 	"staging": {
 		"ckSepoliaUSDC": {
 			"ledgerCanisterId": "yfumr-cyaaa-aaaar-qaela-cai",
-			"name": "Chain key Sepolia USDC",
 			"indexCanisterId": "ycvkf-paaaa-aaaar-qaelq-cai",
 			"erc20ContractAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
 			"decimals": 6,
+			"name": "Chain key Sepolia USDC",
 			"symbol": "ckSepoliaUSDC",
 			"fee": {
 				"__bigint__": "4000"
@@ -136,10 +136,10 @@
 		},
 		"ckSepoliaPEPE": {
 			"ledgerCanisterId": "hw4ru-taaaa-aaaar-qagdq-cai",
-			"name": "Chain key Sepolia PEPE",
 			"indexCanisterId": "g3sv2-4iaaa-aaaar-qagea-cai",
 			"erc20ContractAddress": "0x560eF9F39E4B08f9693987cad307f6FBfd97B2F6",
 			"decimals": 18,
+			"name": "Chain key Sepolia PEPE",
 			"symbol": "ckSepoliaPEPE",
 			"fee": {
 				"__bigint__": "100000000000000000000"
@@ -147,10 +147,10 @@
 		},
 		"ckSepoliaLINK": {
 			"ledgerCanisterId": "r52mc-qaaaa-aaaar-qafzq-cai",
-			"name": "Chain key Sepolia LINK",
 			"indexCanisterId": "ri55p-riaaa-aaaar-qaf2a-cai",
 			"erc20ContractAddress": "0x779877A7B0D9E8603169DdbD7836e478b4624789",
 			"decimals": 18,
+			"name": "Chain key Sepolia LINK",
 			"symbol": "ckSepoliaLINK",
 			"fee": {
 				"__bigint__": "200000000000000"

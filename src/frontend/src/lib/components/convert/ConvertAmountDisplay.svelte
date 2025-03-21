@@ -19,7 +19,7 @@
 	<svelte:fragment slot="main-value">
 		{#if nonNullish(amount)}
 			<div in:fade data-tid="convert-amount-display-value">
-				{nonNullish(amount) && amount === 0 && nonNullish(zeroAmountLabel)
+				{nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
 					? zeroAmountLabel
 					: `${amount} ${symbol}`}
 			</div>
@@ -30,7 +30,9 @@
 		{/if}
 	</svelte:fragment>
 
-	{#if displayExchangeRate}
-		<ConvertAmountExchange slot="secondary-value" {amount} {exchangeRate} />
-	{/if}
+	<svelte:fragment slot="secondary-value">
+		{#if displayExchangeRate}
+			<ConvertAmountExchange {amount} {exchangeRate} />
+		{/if}
+	</svelte:fragment>
 </ModalValue>

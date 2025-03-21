@@ -1,12 +1,12 @@
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.env';
 import * as ethEnv from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 import { loadEthereumTransactions } from '$eth/services/eth-transactions.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import * as appContants from '$lib/constants/app.constants';
-import { testnetsStore } from '$lib/stores/settings.store';
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
+import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockedFunction } from 'vitest';
 
@@ -32,7 +32,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		testnetsStore.reset({ key: 'testnets' });
+		setupTestnetsStore('reset');
 
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
@@ -43,7 +43,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions for all Ethereum and Sepolia tokens (native and ERC20) when testnets flag is enabled', async () => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 
 		render(LoaderMultipleEthTransactions);
 
@@ -89,7 +89,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should not load transactions for native Ethereum token when Ethereum mainnet is disabled', async () => {
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => false);
 
 		render(LoaderMultipleEthTransactions);
@@ -175,7 +175,7 @@ describe('LoaderMultipleEthTransactions', () => {
 			{ timeout }
 		);
 
-		testnetsStore.set({ key: 'testnets', value: { enabled: true } });
+		setupTestnetsStore('enabled');
 
 		await waitFor(
 			() => {

@@ -22,32 +22,33 @@ export const getEthFeeData = ({
 	helperContractAddress
 }: GetFeeData & {
 	helperContractAddress: OptionEthAddress;
-}): BigNumber => {
+}): bigint => {
 	if (isDestinationContractAddress({ destination: to, contractAddress: helperContractAddress })) {
-		return BigNumber.from(CKETH_FEE);
+		return CKETH_FEE;
 	}
 
-	return BigNumber.from(ETH_BASE_FEE);
+	return ETH_BASE_FEE;
 };
 
 export const getErc20FeeData = async ({
 	targetNetwork,
 	sourceNetwork: { id: sourceNetworkId },
 	contract,
+	amount,
 	...rest
 }: GetFeeData & {
 	contract: Erc20Token;
-	amount: BigNumber;
+	amount: bigint;
 	sourceNetwork: EthereumNetwork;
 	targetNetwork: Network | undefined;
-}): Promise<BigNumber> => {
+}): Promise<bigint> => {
 	try {
 		const targetNetworkId: NetworkId | undefined = targetNetwork?.id;
 
 		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
 			? infuraErc20IcpProviders(targetNetworkId as NetworkId)
 			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
-		const fee = await fn({ ...rest, contract });
+		const fee = await fn({ ...rest, contract, amount: BigNumber.from(amount) });
 
 		const isResearchCoin = contract.symbol === 'RSC' && contract.name === 'ResearchCoin';
 
@@ -60,14 +61,14 @@ export const getErc20FeeData = async ({
 			isResearchCoin ? (fee.toBigInt() * 15n) / 10n : fee.toBigInt() / 2n
 		);
 
-		return fee.add(feeBuffer);
+		return fee.add(feeBuffer).toBigInt();
 	} catch (err: unknown) {
 		// We silence the error on purpose.
 		// The queries above often produce errors on mainnet, even when all parameters are correctly set.
 		// Additionally, it's possible that the queries are executed with inaccurate parameters, such as when a user enters an incorrect address or an address that is not supported by the selected function (e.g., an ICP account identifier on the Ethereum network rather than for the burn contract).
 		console.warn(err);
 
-		return BigNumber.from(ERC20_FALLBACK_FEE);
+		return ERC20_FALLBACK_FEE;
 	}
 };
 
@@ -77,10 +78,10 @@ export const getCkErc20FeeData = async ({
 	...rest
 }: GetFeeData & {
 	contract: Erc20Token;
-	amount: BigNumber;
+	amount: bigint;
 	sourceNetwork: EthereumNetwork;
 	erc20HelperContractAddress: OptionEthAddress;
-}): Promise<BigNumber> => {
+}): Promise<bigint> => {
 	const estimateGasForApprove = await getErc20FeeData({
 		to,
 		targetNetwork: undefined,
@@ -93,7 +94,7 @@ export const getCkErc20FeeData = async ({
 	});
 
 	if (targetCkErc20Helper) {
-		return estimateGasForApprove.add(CKERC20_FEE);
+		return estimateGasForApprove + CKERC20_FEE;
 	}
 
 	return estimateGasForApprove;

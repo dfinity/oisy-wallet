@@ -8,6 +8,7 @@ import type {
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -45,7 +46,7 @@ describe('backend.canister', () => {
 	const addUserCredentialParams = {
 		credentialJwt: 'test-credential-jwt',
 		issuerCanisterId: mockPrincipal,
-		currentUserVersion: 0n,
+		currentUserVersion: ZERO_BI,
 		credentialSpec: {
 			arguments: [],
 			credential_type: ''
@@ -723,6 +724,45 @@ describe('backend.canister', () => {
 			});
 
 			const res = addUserHiddenDappId({ dappId: 'test-dapp-id' });
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('setUserShowTestnets', () => {
+		it('should set user show testnets', async () => {
+			const response = { Ok: null };
+
+			service.set_user_show_testnets.mockResolvedValue(response);
+
+			const { setUserShowTestnets } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await setUserShowTestnets({
+				showTestnets: true
+			});
+
+			expect(service.set_user_show_testnets).toHaveBeenCalledWith({
+				show_testnets: true,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if set_user_show_testnets throws', async () => {
+			service.set_user_show_testnets.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { setUserShowTestnets } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = setUserShowTestnets({
+				showTestnets: true
+			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
