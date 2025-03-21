@@ -22,11 +22,11 @@
 	let maxAmount: number | undefined;
 	$: maxAmount = nonNullish(token)
 		? getMaxTransactionAmount({
-			balance,
-			fee,
-			tokenDecimals: token.decimals,
-			tokenStandard: token.standard
-		})
+				balance,
+				fee,
+				tokenDecimals: token.decimals,
+				tokenStandard: token.standard
+			})
 		: undefined;
 
 	const setMax = () => {
