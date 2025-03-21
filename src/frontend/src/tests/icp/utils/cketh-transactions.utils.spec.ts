@@ -9,7 +9,7 @@ import { Principal } from '@dfinity/principal';
 
 describe('mapCkEthereumTransaction', () => {
 	const mockTransaction: IcrcTransaction = {
-		id: BigInt(123456),
+		id: 123456n,
 		transaction: {
 			kind: 'send',
 			burn: [],
@@ -17,9 +17,9 @@ describe('mapCkEthereumTransaction', () => {
 			approve: [],
 			transfer: [
 				{
-					amount: BigInt('100000000'),
-					fee: [BigInt('10000')],
-					created_at_time: [BigInt('1730723519954194000')],
+					amount: 100000000n,
+					fee: [10000n],
+					created_at_time: [1730723519954194000n],
 					from: {
 						owner: Principal.fromText(
 							'e4cfm-h7z2r-dwrg2-bjuni-h2bxf-73kfn-kf3lo-cxfz4-fnknl-ii2co-qqe'

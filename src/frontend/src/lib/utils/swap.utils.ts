@@ -1,5 +1,6 @@
 import type { SwapAmountsTxReply } from '$declarations/kong_backend/kong_backend.did';
 import { isIcToken } from '$icp/validation/ic-token.validation';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { ProviderFee } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { findToken } from '$lib/utils/tokens.utils';
@@ -43,7 +44,7 @@ export const getNetworkFee = ({
 	}
 
 	return {
-		fee: transactions.reduce((acc, { gas_fee }) => acc + gas_fee, BigInt(0)),
+		fee: transactions.reduce((acc, { gas_fee }) => acc + gas_fee, ZERO_BI),
 		token
 	};
 };
