@@ -78,5 +78,5 @@ export const loadSplTokenBalance = async ({
 		network
 	});
 
-	return balance ?? 0n;
+	return balance ?? ZERO_BI;
 };

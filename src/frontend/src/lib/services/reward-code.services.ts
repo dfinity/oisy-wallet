@@ -70,7 +70,7 @@ const queryRewards = async (params: {
 
 	return {
 		rewards: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
-		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? 0n
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? ZERO_BI
 	};
 };
 
@@ -102,7 +102,7 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 		});
 	}
 
-	return { rewards: [], lastTimestamp: 0n };
+	return { rewards: [], lastTimestamp: ZERO_BI };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {

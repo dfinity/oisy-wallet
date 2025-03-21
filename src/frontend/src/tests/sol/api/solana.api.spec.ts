@@ -179,7 +179,7 @@ describe('solana.api', () => {
 
 		it('should handle zero balance', async () => {
 			mockGetTokenAccountBalance.mockReturnValueOnce({
-				send: () => Promise.resolve({ value: { amount: 0n } })
+				send: () => Promise.resolve({ value: { amount: ZERO_BI } })
 			});
 
 			const balance = await loadTokenBalance({

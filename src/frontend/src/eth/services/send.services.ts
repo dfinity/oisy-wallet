@@ -90,7 +90,7 @@ const erc20PrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -166,7 +166,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };
@@ -225,7 +225,7 @@ const erc20ContractPrepareApprove = async ({
 	return prepare({
 		data,
 		to,
-		amount: 0n,
+		amount: ZERO_BI,
 		...rest
 	});
 };

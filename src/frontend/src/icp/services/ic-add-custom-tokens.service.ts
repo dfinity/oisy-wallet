@@ -19,7 +19,10 @@ export const loadAndAssertAddCustomToken = async ({
 	icrcTokens,
 	ledgerCanisterId,
 	indexCanisterId
-}: Partial<IcCanisters> & { identity: OptionIdentity; icrcTokens: IcToken[] }): Promise<{
+}: Partial<IcCanisters> & {
+	identity: OptionIdentity;
+	icrcTokens: IcToken[];
+}): Promise<{
 	result: 'success' | 'error';
 	data?: {
 		token: IcTokenWithoutId;
@@ -178,13 +181,15 @@ const loadLedgerBalance = async ({
 const loadIndexBalance = async ({
 	identity,
 	indexCanisterId
-}: Required<Pick<IcCanisters, 'indexCanisterId'>> & { identity: Identity }): Promise<bigint> => {
+}: Required<Pick<IcCanisters, 'indexCanisterId'>> & {
+	identity: Identity;
+}): Promise<bigint> => {
 	try {
 		const { balance } = await getTransactionsIcrc({
 			indexCanisterId,
 			identity,
 			owner: identity.getPrincipal(),
-			maxResults: 0n,
+			maxResults: ZERO_BI,
 			certified: true
 		});
 

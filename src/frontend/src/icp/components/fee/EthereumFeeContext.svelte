@@ -19,6 +19,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -52,7 +53,7 @@
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
 	let maxTransactionFeePlusLedgerApproveCkEth: bigint | undefined = undefined;
 	$: maxTransactionFeePlusLedgerApproveCkEth = nonNullish(maxTransactionFeeCkEth)
-		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? 0n)
+		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO_BI)
 		: undefined;
 
 	let maxTransactionFee: bigint | undefined = undefined;

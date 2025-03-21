@@ -313,7 +313,7 @@ describe('ic-wallet-transactions.worker', () => {
 		const mockTransaction: TransactionWithIdIcp = {
 			id: 123n,
 			transaction: {
-				memo: 0n,
+				memo: ZERO_BI,
 				icrc1_memo: [],
 				operation: {
 					Transfer: {

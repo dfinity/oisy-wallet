@@ -45,7 +45,7 @@ describe('backend.canister', () => {
 	const addUserCredentialParams = {
 		credentialJwt: 'test-credential-jwt',
 		issuerCanisterId: mockPrincipal,
-		currentUserVersion: 0n,
+		currentUserVersion: ZERO_BI,
 		credentialSpec: {
 			arguments: [],
 			credential_type: ''

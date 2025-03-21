@@ -32,6 +32,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let swapAmount: OptionAmount;
 	export let receiveAmount: number | undefined;
@@ -74,7 +75,7 @@
 
 	let totalFee: bigint | undefined;
 	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-	$: totalFee = (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n);
+	$: totalFee = (sourceTokenFee ?? ZERO_BI) * (isSourceTokenIcrc2 ? 2n : 1n);
 
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =

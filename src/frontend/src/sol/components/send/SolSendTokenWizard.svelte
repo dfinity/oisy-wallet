@@ -56,6 +56,7 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';
@@ -163,7 +164,7 @@
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
 				}).toBigInt(),
-				prioritizationFee: $prioritizationFeeStore ?? 0n,
+				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
 				destination,
 				source
 			});
