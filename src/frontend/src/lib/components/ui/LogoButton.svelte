@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconCheck, Toggle } from '@dfinity/gix-components';
+	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 
