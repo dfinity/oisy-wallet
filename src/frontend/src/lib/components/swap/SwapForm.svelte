@@ -19,6 +19,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -74,7 +75,7 @@
 
 	let totalFee: bigint | undefined;
 	// multiply sourceTokenFee by two if it's an icrc2 token to cover transfer and approval fees
-	$: totalFee = (sourceTokenFee ?? 0n) * (isSourceTokenIcrc2 ? 2n : 1n);
+	$: totalFee = (sourceTokenFee ?? ZERO_BI) * (isSourceTokenIcrc2 ? 2n : 1n);
 
 	let swapAmountsLoading = false;
 	$: swapAmountsLoading =
