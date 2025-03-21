@@ -39,9 +39,9 @@
 	const { sourceToken, sourceTokenBalance, sourceTokenExchangeRate, balanceForFee, minterInfo } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber): TokenActionErrorType =>
+	$: customValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
-			userAmount: userAmount.toBigInt(),
+			userAmount,
 			token: $sourceToken,
 			balance: $sourceTokenBalance,
 			balanceForFee: $balanceForFee,

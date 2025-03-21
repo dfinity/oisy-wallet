@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -33,8 +32,8 @@
 	export let loading = false;
 	export let isSelectable = true;
 	export let autofocus = false;
-	export let customValidate: (userAmount: BigNumber) => TokenActionErrorType = () => undefined;
-	export let customErrorValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
+	export let customValidate: (userAmount: bigint) => TokenActionErrorType = () => undefined;
+	export let customErrorValidate: (userAmount: bigint) => Error | undefined = () => undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -56,7 +55,7 @@
 		const parsedValue = parseToken({
 			value: `${amount}`,
 			unitName: token.decimals
-		});
+		}).toBigInt();
 
 		errorType = customValidate(parsedValue);
 		error = customErrorValidate(parsedValue);
@@ -73,7 +72,9 @@
 	class:bg-secondary={!focused}
 	class:border-secondary={!focused}
 >
-	<div class="mb-2 text-sm font-bold"><slot name="title" /></div>
+	<div class="mb-2 text-sm font-bold">
+		<slot name="title" />
+	</div>
 
 	<TokenInputContainer
 		{focused}
