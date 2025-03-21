@@ -10,6 +10,11 @@ TestnetCases.forEach(({ networkSymbol, tokenSymbol }) => {
 		const testnetsPage = new TestnetsPage({ page, iiPage });
 		await testnetsPage.waitForReady();
 		await testnetsPage.enableTestnets({ networkSymbol, tokenSymbol });
-		await testnetsPage.takeScreenshot({ isMobile, freezeCarousel: true });
+		const tokenCardTestId = testnetsPage.getTokenCardTestId({ tokenSymbol, networkSymbol });
+		await testnetsPage.takeScreenshot({
+			isMobile,
+			freezeCarousel: true,
+			centeredElementTestId: tokenCardTestId
+		});
 	});
 });

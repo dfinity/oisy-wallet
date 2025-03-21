@@ -404,14 +404,18 @@ abstract class Homepage {
 		await this.waitForManageTokensModal({ state: 'hidden', timeout: 60000 });
 	}
 
-	getTokenCardLocator({
+	getTokenCardTestId({
 		tokenSymbol,
 		networkSymbol
 	}: {
 		tokenSymbol: string;
 		networkSymbol: string;
-	}): Locator {
-		return this.#page.locator(`[data-tid="${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}"]`);
+	}): string {
+		return `${TOKEN_CARD}-${tokenSymbol}-${networkSymbol}`;
+	}
+
+	getTokenCardLocator(params: { tokenSymbol: string; networkSymbol: string }): Locator {
+		return this.#page.locator(`[data-tid="${this.getTokenCardTestId(params)}"]`);
 	}
 
 	async getStableViewportHeight(): Promise<number> {
@@ -452,9 +456,9 @@ abstract class Homepage {
 	): Promise<void> {
 		// await this.#page.waitForTimeout(1000);
 
-		if (nonNullish(centeredElementTestId)) {
-			await this.scrollIntoViewCentered(centeredElementTestId);
-		}
+		// if (nonNullish(centeredElementTestId)) {
+		// 	await this.scrollIntoViewCentered(centeredElementTestId);
+		// }
 
 		// if (isNullish(screenshotTarget) && !isMobile) {
 		// 	// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
@@ -480,13 +484,23 @@ abstract class Homepage {
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
 
+			if (nonNullish(centeredElementTestId)) {
+				await this.scrollIntoViewCentered(centeredElementTestId);
+			}
+
 			// Playwright can retry flaky tests in the amount of time set below.
-			await expect(element).toHaveScreenshot({ timeout: 5 * 60 * 1000 });
+			await expect(element).toHaveScreenshot();
 
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (isMobile) {
 				await this.hideMobileNavigationMenu();
+
+				if (nonNullish(centeredElementTestId)) {
+					await this.scrollIntoViewCentered(centeredElementTestId);
+				}
+
 				await expect(element).toHaveScreenshot({ fullPage: true });
+
 				await this.showMobileNavigationMenu();
 			}
 		}
