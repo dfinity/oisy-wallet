@@ -39,7 +39,7 @@ export interface CoingeckoSimpleParams {
 
 export interface CoingeckoSimplePriceParams extends CoingeckoSimpleParams {
 	// id of coins, comma-separated if querying more than 1 coin (therefore an array join(","))
-	ids: CoingeckoCoinsId | CoingeckoCoinsId[];
+	ids: CoingeckoCoinsId | CoingeckoCoinsId[] | any;
 }
 
 export interface CoingeckoSimpleTokenPriceParams extends CoingeckoSimpleParams {

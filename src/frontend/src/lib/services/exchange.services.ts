@@ -46,12 +46,10 @@ export const exchangeRateERC20ToUsd = (
 
 export const exchangeRateICRCToUsd = (
 	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
-	simpleTokenPrice({
-		id: 'internet-computer',
+): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: ledgerCanisterIds.map((ledgerCanisterId) => ledgerCanisterId.toLowerCase()),
 		vs_currencies: 'usd',
-		contract_addresses: ledgerCanisterIds.map((ledgerCanisterId) => ledgerCanisterId.toLowerCase()),
-		include_market_cap: true
 	});
 
 export const exchangeRateSPLToUsd = (

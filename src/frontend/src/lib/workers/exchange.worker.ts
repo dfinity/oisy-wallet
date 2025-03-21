@@ -102,6 +102,9 @@ const syncExchange = async ({
 			exchangeRateSPLToUsd(splTokenAddresses)
 		]);
 
+		console.log({currentIcrcPrices});
+		
+
 		postMessage({
 			msg: 'syncExchange',
 			data: {
