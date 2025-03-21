@@ -18,13 +18,13 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	network: ETHEREUM_NETWORK,
 	standard: 'ethereum',
 	category: 'default',
-	name: 'Ethereum',
+	name: 'Base',
 	symbol: ETHEREUM_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth,
 	twinTokenSymbol: 'ckETH',
 	buy: {
-		onramperId: 'eth'
+		onramperId: 'eth_base'
 	}
 };
 
@@ -37,7 +37,7 @@ export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 	network: SEPOLIA_NETWORK,
 	standard: 'ethereum',
 	category: 'default',
-	name: 'SepoliaETH',
+	name: 'BaseSepoliaETH',
 	symbol: SEPOLIA_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth,
