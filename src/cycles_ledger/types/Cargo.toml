@@ -8,3 +8,6 @@ candid = { workspace = true }
 ic-cdk = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
+
+[lints]
+workspace = true

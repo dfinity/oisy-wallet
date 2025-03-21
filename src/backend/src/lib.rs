@@ -540,6 +540,7 @@ pub fn add_user_credential(
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "may_write_user_data")]
+#[allow(clippy::needless_pass_by_value)] // canister methods are necessary
 pub fn set_user_show_testnets(
     request: SetShowTestnetsRequest,
 ) -> Result<(), SaveTestnetsSettingsError> {

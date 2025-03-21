@@ -10,7 +10,7 @@ use crate::{
     types::{
         custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
-        networks::SaveTestnetsSettingsError,
+        networks::{NetworksSettings, SaveTestnetsSettingsError},
         settings::Settings,
         token::UserToken,
         user_profile::{
@@ -135,7 +135,7 @@ impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
         let settings = Settings {
-            networks: Default::default(),
+            networks: NetworksSettings::default(),
             dapp: DappSettings {
                 dapp_carousel: DappCarouselSettings {
                     hidden_dapp_ids: Vec::new(),
@@ -178,7 +178,7 @@ impl StoredUserProfile {
         Ok(new_profile)
     }
 
-    /// Returns a copy with show_testnets set to the specified value.
+    /// Returns a copy with `show_testnets` set to the specified value.
     ///
     /// # Errors
     ///
