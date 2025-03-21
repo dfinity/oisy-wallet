@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { ComponentType } from 'svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
@@ -12,7 +11,7 @@
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 
-	export let amount: BigNumber | undefined;
+	export let amount: bigint | undefined;
 	export let type: TransactionType;
 	export let status: TransactionStatus;
 	export let timestamp: number | undefined;
