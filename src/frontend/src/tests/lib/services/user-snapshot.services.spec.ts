@@ -92,8 +92,8 @@ describe('user-snapshot.services', () => {
 					last_transactions: mockIcTransactions.slice(0, 5).map(
 						({ value, timestamp }: IcTransactionUi): Transaction_Icrc => ({
 							transaction_type: { Send: null },
-							timestamp: timestamp ?? 0n,
-							amount: value ?? 0n,
+							timestamp: timestamp ?? ZERO_BI,
+							amount: value ?? ZERO_BI,
 							network: {},
 							counterparty: Principal.anonymous()
 						})
@@ -157,8 +157,8 @@ describe('user-snapshot.services', () => {
 					last_transactions: mockSolTransactions.slice(0, 5).map(
 						({ value, timestamp, to }: SolTransactionUi): Transaction_Spl => ({
 							transaction_type: { Send: null },
-							timestamp: (timestamp ?? 0n) * NANO_SECONDS_IN_MILLISECOND,
-							amount: value ?? 0n,
+							timestamp: (timestamp ?? ZERO_BI) * NANO_SECONDS_IN_MILLISECOND,
+							amount: value ?? ZERO_BI,
 							network: {},
 							counterparty: to ?? ''
 						})

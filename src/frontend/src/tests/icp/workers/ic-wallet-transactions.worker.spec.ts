@@ -4,7 +4,7 @@ import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { WALLET_TIMER_INTERVAL_MILLIS, ZERO_BI } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
@@ -313,7 +313,7 @@ describe('ic-wallet-transactions.worker', () => {
 		const mockTransaction: TransactionWithIdIcp = {
 			id: 123n,
 			transaction: {
-				memo: 0n,
+				memo: ZERO_BI,
 				icrc1_memo: [],
 				operation: {
 					Transfer: {

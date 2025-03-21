@@ -5,6 +5,7 @@ import {
 	SOLANA_TESTNET_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
@@ -144,8 +145,8 @@ export const fetchSolTransactionsForSignature = async ({
 				...accCumulativeBalances,
 				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
 				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
-					[from]: (accCumulativeBalances[from] ?? 0n) - value,
-					[to]: (accCumulativeBalances[to] ?? 0n) + value
+					[from]: (accCumulativeBalances[from] ?? ZERO_BI) - value,
+					[to]: (accCumulativeBalances[to] ?? ZERO_BI) + value
 				})
 			};
 
@@ -163,7 +164,7 @@ export const fetchSolTransactionsForSignature = async ({
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
-				timestamp: blockTime ?? 0n,
+				timestamp: blockTime ?? ZERO_BI,
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
@@ -172,7 +173,8 @@ export const fetchSolTransactionsForSignature = async ({
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
 				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : 0n })
+				...(nonNullish(fee) &&
+					nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO_BI })
 			};
 
 			return {

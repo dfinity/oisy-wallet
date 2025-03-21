@@ -6,7 +6,7 @@ import {
 	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
@@ -70,7 +70,7 @@ const queryRewards = async (params: {
 
 	return {
 		rewards: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
-		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? 0n
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? ZERO_BI
 	};
 };
 
@@ -102,7 +102,7 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 		});
 	}
 
-	return { rewards: [], lastTimestamp: 0n };
+	return { rewards: [], lastTimestamp: ZERO_BI };
 };
 
 const updateReward = async (identity: Identity): Promise<VipReward> => {

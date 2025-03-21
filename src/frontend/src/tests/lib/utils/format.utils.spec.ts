@@ -298,7 +298,7 @@ describe('format.utils', () => {
 
 			expect(
 				formatTokenBigintToNumber({
-					value: 0n
+					value: ZERO_BI
 				})
 			).toBe(0);
 		});

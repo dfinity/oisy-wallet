@@ -6,7 +6,7 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { ContractAddressText } from '$eth/types/address';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken } from '$icp/validation/ic-token.validation';
-import { ZERO } from '$lib/constants/app.constants';
+import { ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -40,7 +40,7 @@ export const getMaxTransactionAmount = ({
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number => {
-	const value = balance.sub(tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : 0n);
+	const value = balance.sub(tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO_BI);
 
 	return Number(
 		value.isNegative()
