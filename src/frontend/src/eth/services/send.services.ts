@@ -32,7 +32,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 import type { TransactionResponse } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 
@@ -48,7 +48,7 @@ const ethPrepareTransaction = ({
 }: TransferParams &
 	NetworkChainId & { nonce: number; gas: bigint | undefined }): EthSignTransactionRequest => ({
 	to,
-	value: amount.toBigInt(),
+	value: amount,
 	chain_id,
 	nonce: BigInt(nonce),
 	gas: gas ?? ETH_BASE_FEE,
@@ -72,7 +72,7 @@ const erc20PrepareTransaction = async ({
 	const { data } = await populate({
 		contract: token as Erc20Token,
 		to,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	if (isNullish(data)) {
@@ -128,7 +128,7 @@ const ethHelperContractPrepareTransaction = async ({
 	return prepare({
 		data,
 		to: contractAddress,
-		amount: amount.toBigInt(),
+		amount,
 		...rest
 	});
 };
@@ -158,7 +158,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		contract,
 		erc20Contract: { address: erc20ContractAddress },
 		to,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	const { address: contractAddress } = contract;
@@ -217,7 +217,7 @@ const erc20ContractPrepareApprove = async ({
 	const { data } = await populateApprove({
 		contract: token as Erc20Token,
 		spender,
-		amount
+		amount: BigNumber.from(amount)
 	});
 
 	const { address: to } = token as Erc20Token;
@@ -468,7 +468,7 @@ const resetExistingApprovalToZero = async (
 > =>
 	await prepareAndSignApproval({
 		...params,
-		amount: ZERO
+		amount: ZERO_BI
 	});
 
 const checkExistingApproval = async ({

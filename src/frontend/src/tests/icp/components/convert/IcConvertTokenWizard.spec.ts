@@ -135,7 +135,7 @@ describe('IcConvertTokenWizard', () => {
 					amount: parseToken({
 						value: `${sendAmount}`,
 						unitName: ckBtcToken.decimals
-					}),
+					}).toBigInt(),
 					identity: mockIdentity,
 					progress: () => {},
 					ckErc20ToErc20MaxCkEthFees: undefined,
@@ -170,7 +170,7 @@ describe('IcConvertTokenWizard', () => {
 					amount: parseToken({
 						value: `${sendAmount}`,
 						unitName: ckBtcToken.decimals
-					}),
+					}).toBigInt(),
 					identity: mockIdentity,
 					progress: () => {},
 					ckErc20ToErc20MaxCkEthFees: undefined,

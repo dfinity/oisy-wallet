@@ -48,7 +48,7 @@ export const swap = async ({
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
-	});
+	}).toBigInt();
 	const { standard, ledgerCanisterId } = sourceToken;
 	const transferParams = {
 		identity,
@@ -71,7 +71,7 @@ export const swap = async ({
 			identity,
 			ledgerCanisterId,
 			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-			amount: parsedSwapAmount.toBigInt() + sourceTokenFee * 2n,
+			amount: parsedSwapAmount + sourceTokenFee * 2n,
 			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 			spender: {
 				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
@@ -82,7 +82,7 @@ export const swap = async ({
 		identity,
 		sourceToken: sourceToken,
 		destinationToken: destinationToken,
-		sendAmount: parsedSwapAmount.toBigInt(),
+		sendAmount: parsedSwapAmount,
 		receiveAmount,
 		maxSlippage: Number(slippageValue),
 		...(nonNullish(txBlockIndex) ? { payTransactionId: { BlockIndex: txBlockIndex } } : {})
