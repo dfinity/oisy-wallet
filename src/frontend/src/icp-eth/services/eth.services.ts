@@ -25,7 +25,7 @@ import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Log, TransactionResponse } from 'ethers/providers';
+import type { Log } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const loadCkEthereumPendingTransactions = async ({
@@ -152,8 +152,7 @@ const loadPendingTransactions = async ({
 		}
 
 		const { getTransaction } = alchemyProviders(twinTokenNetworkId);
-		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> =>
-			getTransaction(transactionHash);
+		const loadTransaction = ({ transactionHash }: Log) => getTransaction(transactionHash);
 
 		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
 

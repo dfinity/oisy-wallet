@@ -13,7 +13,6 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
-import { type TransactionResponse } from 'ethers/providers';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -112,7 +111,7 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction = async (hash: string): Promise<TransactionResponse | null> => {
+	getTransaction = async (hash: string) => {
 		const transaction = await this.provider.core.getTransaction(hash);
 
 		if (isNullish(transaction)) {
@@ -125,8 +124,11 @@ export class AlchemyProvider {
 			from,
 			to,
 			value,
+			type,
 			gasPrice,
 			gasLimit,
+			maxPriorityFeePerGas,
+			maxFeePerGas,
 			nonce,
 			data,
 			chainId,
@@ -137,13 +139,17 @@ export class AlchemyProvider {
 		const possibleUndefinedToNull = <T>(value: T | undefined): T | null => value ?? null;
 
 		return {
+			hash,
 			blockNumber: possibleUndefinedToNull(blockNumber),
 			blockHash: possibleUndefinedToNull(blockHash),
 			from,
 			to: possibleUndefinedToNull(to),
 			value: value.toBigInt(),
+			type: possibleUndefinedToNull(type),
 			gasPrice: gasPrice?.toBigInt() ?? ZERO_BI,
 			gasLimit: gasLimit.toBigInt(),
+			maxPriorityFeePerGas: possibleUndefinedToNull(maxPriorityFeePerGas?.toBigInt()),
+			maxFeePerGas: possibleUndefinedToNull(maxFeePerGas?.toBigInt()),
 			nonce,
 			data,
 			chainId: BigInt(chainId),

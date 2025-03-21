@@ -16,23 +16,22 @@ export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type EthersTransaction = Pick<
 	ethers.Transaction,
-	'nonce' | 'gasLimit' | 'data' | 'value' | 'chainId'
-> &
-	Partial<
-		Pick<
-			ethers.Transaction,
-			| 'hash'
-			| 'to'
-			| 'from'
-			| 'gasPrice'
-			| 'type'
-			| 'accessList'
-			| 'maxPriorityFeePerGas'
-			| 'maxFeePerGas'
-		>
-	>;
+	| 'hash'
+	| 'to'
+	| 'from'
+	| 'nonce'
+	| 'gasLimit'
+	| 'gasPrice'
+	| 'data'
+	| 'value'
+	| 'chainId'
+	| 'type'
+	| 'maxPriorityFeePerGas'
+	| 'maxFeePerGas'
+>;
 
 export type Transaction = Omit<EthersTransaction, 'data'> &
+	Pick<TransactionResponse, 'from' | 'to'> &
 	Partial<Pick<TransactionResponse, 'blockNumber'>> & {
 		timestamp?: number;
 		pendingTimestamp?: number;
@@ -54,7 +53,7 @@ export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
-export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to'> & {
+export type TransactionUiCommon = Pick<Transaction, 'from' | 'to'> & {
 	timestamp?: bigint;
 	txExplorerUrl?: string;
 	toExplorerUrl?: string;

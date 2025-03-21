@@ -19,11 +19,16 @@ import type { MinterInfo } from '@dfinity/cketh';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
+	hash: '0x123456789',
 	from: '0x1234',
 	to: '0xabcd',
 	timestamp: 1670000000,
 	nonce: 1,
+	type: 1,
+	gasPrice: ZERO_BI,
 	gasLimit: ZERO_BI,
+	maxPriorityFeePerGas: null,
+	maxFeePerGas: null,
 	value: ZERO_BI,
 	chainId: 1n
 };
