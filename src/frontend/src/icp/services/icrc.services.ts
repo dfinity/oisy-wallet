@@ -260,7 +260,7 @@ export const loadDisabledIcrcTokensExchanges = async ({
 		)
 	]);
 
-	console.log({currentErc20Prices});
+	console.log({currentIcrcPrices});
 	
 
 	exchangeStore.set([

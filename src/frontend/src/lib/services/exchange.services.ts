@@ -58,18 +58,13 @@ export const exchangeRateICRCToUsd = async (
 
 	const tokenPrices: CoingeckoSimpleTokenPriceResponse = {};
 
-	results.forEach((token) => {
-		if (token && token.metrics?.price) {
-			const { price, market_cap, volume_24h, price_change_24h, updated_at } = token.metrics;
+	results.forEach((response) => {
+		if (response?.token?.name && response.metrics?.price) {
+			const { price, market_cap } = response.metrics;
 
-			tokenPrices[token?.token?.name.toLowerCase()] = {
-				usd: parseFloat(price),
-				usd_market_cap: market_cap ? parseFloat(market_cap) : 0,
-				usd_24h_vol: volume_24h ? parseFloat(volume_24h) : 0,
-				usd_24h_change: price_change_24h ? parseFloat(price_change_24h) : 0,
-				last_updated_at: updated_at
-					? Math.floor(new Date(updated_at).getTime() / 1000)
-					: Math.floor(Date.now() / 1000)
+			tokenPrices[response.token.name.toLowerCase()] = {
+				usd: Number(price),
+				usd_market_cap: Number(market_cap)
 			};
 		}
 	});

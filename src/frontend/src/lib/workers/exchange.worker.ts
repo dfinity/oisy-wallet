@@ -40,6 +40,9 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 		return;
 	}
 
+	console.log({data});
+	
+
 	const sync = async () =>
 		await syncExchange({
 			erc20ContractAddresses: data?.erc20Addresses ?? [],
@@ -97,7 +100,8 @@ const syncExchange = async ({
 			exchangeRateBTCToUsd(),
 			exchangeRateERC20ToUsd(erc20ContractAddresses),
 			exchangeRateICPToUsd(),
-			exchangeRateICRCToUsd(icrcLedgerCanisterIds),
+			exchangeRateICPToUsd(),
+			// exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 			exchangeRateSOLToUsd(),
 			exchangeRateSPLToUsd(splTokenAddresses)
 		]);
@@ -112,7 +116,7 @@ const syncExchange = async ({
 				currentBtcPrice,
 				currentErc20Prices,
 				currentIcpPrice,
-				currentIcrcPrices,
+				// currentIcrcPrices,
 				currentSolPrice,
 				currentSplPrices
 			}
