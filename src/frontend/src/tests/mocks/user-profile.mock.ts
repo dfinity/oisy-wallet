@@ -6,7 +6,10 @@ import type {
 } from '$declarations/backend/backend.did';
 import { toNullable } from '@dfinity/utils';
 
-export const mockNetworksSettings: NetworksSettings = { testnets: { show_testnets: false } };
+export const mockNetworksSettings: NetworksSettings = {
+	networks: [],
+	testnets: { show_testnets: false }
+};
 
 export const mockDappSettings: DappSettings = { dapp_carousel: { hidden_dapp_ids: [] } };
 
@@ -15,9 +18,11 @@ export const mockUserSettings: Settings = {
 	dapp: mockDappSettings
 };
 
+export const mockUserProfileVersion = 1n;
+
 export const mockUserProfile: UserProfile = {
 	credentials: [],
-	version: [],
+	version: toNullable(mockUserProfileVersion),
 	settings: toNullable(mockUserSettings),
 	created_timestamp: 1234n,
 	updated_timestamp: 1234n

@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$env/networks/networks.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
