@@ -18,6 +18,7 @@
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -56,7 +57,6 @@
 		initFeeContext,
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let currentStep: WizardStep | undefined;
 	export let destination = '';

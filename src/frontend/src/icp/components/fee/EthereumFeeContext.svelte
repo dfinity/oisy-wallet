@@ -16,10 +16,10 @@
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
-	import { ZERO_BI } from '$lib/constants/app.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
 
