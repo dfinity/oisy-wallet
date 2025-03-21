@@ -33,7 +33,7 @@
 </script>
 
 <ExchangeAmountDisplay
-	amount={fee}
+	amount={fee.toBigInt()}
 	decimals={feeDecimals}
 	symbol={feeSymbol}
 	exchangeRate={feeExchangeRate}
