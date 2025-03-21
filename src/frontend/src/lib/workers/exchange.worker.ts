@@ -20,6 +20,8 @@ export const onExchangeMessage = async ({
 }: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>>) => {
 	const { msg, data: payload } = data;
 
+	console.log({payload});
+	
 	switch (msg) {
 		case 'stopExchangeTimer':
 			stopTimer();
@@ -75,6 +77,9 @@ const syncExchange = async ({
 	if (syncInProgress) {
 		return;
 	}
+
+	console.log({icrcLedgerCanisterIds});
+	
 
 	syncInProgress = true;
 
