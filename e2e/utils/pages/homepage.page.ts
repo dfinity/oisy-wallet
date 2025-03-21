@@ -452,9 +452,9 @@ abstract class Homepage {
 	): Promise<void> {
 		await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
 
-//		if (nonNullish(centeredElementTestId)) {
-//			await this.scrollIntoViewCentered(centeredElementTestId);
-//		}
+		//		if (nonNullish(centeredElementTestId)) {
+		//			await this.scrollIntoViewCentered(centeredElementTestId);
+		//		}
 
 		if (isNullish(screenshotTarget) && !isMobile) {
 			// Creates a snapshot as a fullPage and not just certain parts (if not a mobile).
