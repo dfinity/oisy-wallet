@@ -1,3 +1,4 @@
+import { ZERO_BI } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { checkIfAccountExists, loadTokenBalance } from '$sol/api/solana.api';
 import type { SolanaNetworkType } from '$sol/types/network';

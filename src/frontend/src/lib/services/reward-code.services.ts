@@ -6,7 +6,7 @@ import {
 	getUserInfo,
 	getUserInfo as getUserInfoApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, ZERO } from '$lib/constants/app.constants';
+import { MILLISECONDS_IN_DAY, ZERO, ZERO_BI } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
