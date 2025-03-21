@@ -32,7 +32,7 @@
 	let ckBtcRewardUsd: number;
 	$: ckBtcRewardUsd = nonNullish(ckBtcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckBtcReward.toBigInt(),
+				amount: ckBtcReward,
 				token: ckBtcToken,
 				$exchanges: $exchanges
 			}) ?? 0)
@@ -45,7 +45,7 @@
 	let ckUsdcRewardUsd: number;
 	$: ckUsdcRewardUsd = nonNullish(ckUsdcToken)
 		? (calculateTokenUsdAmount({
-				amount: ckUsdcReward.toBigInt(),
+				amount: ckUsdcReward,
 				token: ckUsdcToken,
 				$exchanges: $exchanges
 			}) ?? 0)
@@ -58,7 +58,7 @@
 	let icpRewardUsd: number;
 	$: icpRewardUsd = nonNullish(icpToken)
 		? (calculateTokenUsdAmount({
-				amount: icpReward.toBigInt(),
+				amount: icpReward,
 				token: icpToken,
 				$exchanges: $exchanges
 			}) ?? 0)

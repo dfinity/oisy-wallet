@@ -31,7 +31,7 @@
 
 <ContentWithToolbar>
 	<SendData
-		amount={formatToken({ value: amountDisplay.toBigInt() })}
+		amount={formatToken({ value: amountDisplay })}
 		{destination}
 		token={$sendToken}
 		balance={$balance}
