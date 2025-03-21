@@ -450,11 +450,7 @@ abstract class Homepage {
 			freezeCarousel: false
 		}
 	): Promise<void> {
-		await this.#page.waitForTimeout(1000);
-
-		if (!isMobile) {
-			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
-		}
+		// await this.#page.waitForTimeout(1000);
 
 		if (nonNullish(centeredElementTestId)) {
 			await this.scrollIntoViewCentered(centeredElementTestId);
@@ -476,6 +472,10 @@ abstract class Homepage {
 			await this.#page.clock.pauseAt(Date.now());
 		}
 
+		if (!isMobile) {
+			await this.scrollToTop(SIDEBAR_NAVIGATION_MENU);
+		}
+
 		const colorSchemes = ['light', 'dark'] as const;
 		for (const scheme of colorSchemes) {
 			await this.#page.emulateMedia({ colorScheme: scheme });
@@ -486,7 +486,7 @@ abstract class Homepage {
 			// If it's mobile, we want a full page screenshot too, but without the navigation bar.
 			if (isMobile) {
 				await this.hideMobileNavigationMenu();
-				await expect(element).toHaveScreenshot({ fullPage: true, timeout: 5 * 60 * 1000 });
+				await expect(element).toHaveScreenshot({ fullPage: true });
 				await this.showMobileNavigationMenu();
 			}
 		}
