@@ -15,13 +15,14 @@
 	export let minFee: bigint | undefined = undefined;
 	export let ethereumEstimateFee: bigint | undefined = undefined;
 	export let disabled: boolean;
+	export let testId: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
 	let exchangeValueUnit: DisplayUnit = 'usd';
 </script>
 
-<ContentWithToolbar>
+<ContentWithToolbar {testId}>
 	<ConvertAmount
 		bind:sendAmount
 		bind:receiveAmount

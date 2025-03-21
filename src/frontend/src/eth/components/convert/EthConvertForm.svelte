@@ -6,6 +6,7 @@
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { ETH_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -41,6 +42,7 @@
 	totalFee={$maxGasFee?.toBigInt()}
 	minFee={$minGasFee?.toBigInt()}
 	disabled={invalid}
+	testId={ETH_CONVERT_FORM_TEST_ID}
 >
 	<svelte:fragment slot="message">
 		{#if isTokenErc20($sourceToken) && insufficientFundsForFee}
