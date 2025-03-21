@@ -18,6 +18,7 @@
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { ZERO_BI } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
 		solAddressLocal,
@@ -162,8 +163,8 @@
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $sendTokenDecimals
-				}),
-				prioritizationFee: $prioritizationFeeStore ?? 0n,
+				}).toBigInt(),
+				prioritizationFee: $prioritizationFeeStore ?? ZERO_BI,
 				destination,
 				source
 			});
