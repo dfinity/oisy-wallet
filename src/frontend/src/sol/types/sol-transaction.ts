@@ -1,8 +1,10 @@
 import { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
+import type { getTransactionFromSolanaRpc } from '$sol/api/solana.api';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type {
+	Address,
 	Commitment,
 	FullySignedTransaction,
 	GetSignaturesForAddressApi,
@@ -35,12 +37,27 @@ function jsonParsedResultProducer() {
 	});
 }
 
-export type SolRpcTransactionRaw = ReturnType<typeof jsonParsedResultProducer>;
+type SolRpcTransactionRawWithBug = NonNullable<ReturnType<typeof jsonParsedResultProducer>>;
 
-export type SolRpcTransactionDetail = NonNullable<SolRpcTransactionRaw> & {
-	confirmationStatus: Commitment | null;
-	id: string;
-	signature: Signature;
+export type SolRpcTransactionRaw = NonNullable<
+	Awaited<ReturnType<typeof getTransactionFromSolanaRpc>>
+>;
+
+// This is a temporary type that we are using to cast the parsed account keys of an RPC Solana Transaction.
+// We need to do this, because in the current version of @solana/kit (v2.0.0) there is a bug: https://github.com/anza-xyz/solana-web3.js/issues/80
+// TODO: Remove this type and its usage when the bug is fixed and released.
+type ParsedAccounts = {
+	pubkey: Address;
+	signer: boolean;
+	source: string;
+	writable: boolean;
+}[];
+export type SolRpcTransactionRawOld = Omit<SolRpcTransactionRawWithBug, 'transaction'> & {
+	transaction: Omit<SolRpcTransactionRawWithBug['transaction'], 'message'> & {
+		message: Omit<SolRpcTransactionRawWithBug['transaction']['message'], 'accountKeys'> & {
+			accountKeys: ParsedAccounts;
+		};
+	};
 };
 
 export type SolRpcTransaction = SolRpcTransactionRaw & {

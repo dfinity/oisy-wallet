@@ -3,7 +3,11 @@ import { last } from '$lib/utils/array.utils';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolRpcTransactionDetail, SolSignature } from '$sol/types/sol-transaction';
+import type {
+	SolRpcTransaction,
+	SolRpcTransactionRaw,
+	SolSignature
+} from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
@@ -86,16 +90,31 @@ export const fetchSignatures = async ({
 	return await fetchSignaturesBatch(before);
 };
 
+export const getTransactionFromSolanaRpc = async ({
+	signature: { signature },
+	network
+}: {
+	signature: SolSignature;
+	network: SolanaNetworkType;
+}) => {
+	const { getTransaction } = solanaHttpRpc(network);
+
+	return await getTransaction(signature, {
+		maxSupportedTransactionVersion: 0,
+		encoding: 'jsonParsed'
+	}).send();
+};
+
 export const fetchTransactionDetailForSignature = async ({
 	signature: { signature, confirmationStatus },
 	network
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
-}): Promise<SolRpcTransactionDetail | null> => {
+}): Promise<SolRpcTransaction | null> => {
 	const { getTransaction } = solanaHttpRpc(network);
 
-	const rpcTransaction = await getTransaction(signature, {
+	const rpcTransaction: SolRpcTransactionRaw | null = await getTransaction(signature, {
 		maxSupportedTransactionVersion: 0,
 		encoding: 'jsonParsed'
 	}).send();
@@ -106,6 +125,7 @@ export const fetchTransactionDetailForSignature = async ({
 
 	return {
 		...rpcTransaction,
+		version: rpcTransaction.version,
 		confirmationStatus,
 		id: signature.toString(),
 		signature

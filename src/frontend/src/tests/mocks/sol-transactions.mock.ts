@@ -7,7 +7,6 @@ import type { SolCertifiedTransaction } from '$sol/stores/sol-transactions.store
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type {
 	SolRpcTransaction,
-	SolRpcTransactionDetail,
 	SolSignedTransaction,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
@@ -218,7 +217,7 @@ export const mockSolRpcSendTransaction: SolRpcTransaction = {
 	version: 'legacy'
 };
 
-export const mockSolTransactionDetail: SolRpcTransactionDetail = {
+export const mockSolTransactionDetail: SolRpcTransaction = {
 	blockTime: 1740654097n as UnixTimestamp,
 	meta: {
 		computeUnitsConsumed: 208718n,
