@@ -115,7 +115,7 @@ export const sendIcrc = ({
 		identity,
 		ledgerCanisterId,
 		to: decodeIcrcAccount(to),
-		amount: amount.toBigInt()
+		amount
 	});
 };
 
@@ -139,11 +139,11 @@ export const sendIcp = ({
 		? icrc1TransferIcp({
 				identity,
 				to: decodeIcrcAccount(to),
-				amount: amount.toBigInt()
+				amount
 			})
 		: transferIcp({
 				identity,
 				to,
-				amount: amount.toBigInt()
+				amount
 			});
 };
