@@ -3,23 +3,33 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 
-	export let title: string;
-	export let subtitle: string | undefined = undefined;
-	export let titleEnd: string | undefined = undefined;
-	export let description: string | undefined = undefined;
-	export let descriptionEnd: string | undefined = undefined;
-
 	export let selectable = false;
 	export let selected = false;
 
-	export let dividers = true;
+	export let dividers = false;
 	export let hover = true;
+	export let rounded = true;
+
+	let hasTitleSlot: boolean;
+	$: hasTitleSlot = nonNullish($$slots['title']);
+
+	let hasSubtitleSlot: boolean;
+	$: hasSubtitleSlot = nonNullish($$slots['subtitle']);
+
+	let hasTitleEndSlot: boolean;
+	$: hasTitleEndSlot = nonNullish($$slots['titleEnd']);
+
+	let hasDescriptionSlot: boolean;
+	$: hasDescriptionSlot = nonNullish($$slots['description']);
+
+	let hasDescriptionEndSlot: boolean;
+	$: hasDescriptionEndSlot = nonNullish($$slots['descriptionEnd']);
 
 	let hasActionSlot: boolean;
 	$: hasActionSlot = nonNullish($$slots['action']);
 </script>
 
-<div class="rounded-lg" class:hover:bg-brand-subtle-10={hover}>
+<div class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded}>
 	<button on:click class="flex w-full border-0 px-2">
 		<span
 			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0 py-2"
@@ -30,14 +40,18 @@
 				<span class="pr-2"><slot name="logo" /></span>
 				<span class="flex flex-col text-left">
 					<span class="text-md">
-						<span class="float-left font-bold">{title}</span>
-						{#if nonNullish(subtitle)}<span class="float-left text-tertiary">
-								&nbsp;&middot;&nbsp;{subtitle}</span
-							>{/if}
+						{#if hasTitleSlot}
+							<span class="float-left font-bold"><slot name="title" /></span>
+						{/if}
+						{#if hasSubtitleSlot}
+							<span class="float-left text-tertiary">
+								&nbsp;&middot;&nbsp;<slot name="subtitle" /></span
+							>
+						{/if}
 					</span>
-					{#if nonNullish(description)}
+					{#if hasDescriptionSlot}
 						<span class="text-sm text-tertiary">
-							{description}
+							<slot name="description" />
 						</span>
 					{/if}
 				</span>
@@ -45,14 +59,14 @@
 
 			<span class="flex items-center">
 				<span class="flex flex-col text-right">
-					{#if nonNullish(titleEnd)}
+					{#if hasTitleEndSlot}
 						<span class="text-md font-bold">
-							{titleEnd}
+							<slot name="titleEnd" />
 						</span>
 					{/if}
-					{#if nonNullish(descriptionEnd)}
+					{#if hasDescriptionEndSlot}
 						<span class="text-sm text-tertiary">
-							{descriptionEnd}
+							<slot name="descriptionEnd" />
 						</span>
 					{/if}
 				</span>
