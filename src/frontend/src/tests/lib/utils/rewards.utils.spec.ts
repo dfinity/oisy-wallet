@@ -182,7 +182,7 @@ describe('rewards utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(600);
+			expect(result).toEqual(600n);
 		});
 
 		it('should return the correct rewards balance of a single airdrop', () => {
@@ -190,7 +190,7 @@ describe('rewards utils', () => {
 
 			const result = getRewardsBalance(mockedRewards);
 
-			expect(result).toEqual(100);
+			expect(result).toEqual(100n);
 		});
 
 		it('should return zero for an empty list of rewards', () => {
