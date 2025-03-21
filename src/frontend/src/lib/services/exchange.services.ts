@@ -62,7 +62,7 @@ export const exchangeRateICRCToUsd = async (
 		if (token && token.metrics?.price) {
 			const { price, market_cap, volume_24h, price_change_24h, updated_at } = token.metrics;
 
-			tokenPrices[token.name.toLowerCase()] = {
+			tokenPrices[token?.token?.name.toLowerCase()] = {
 				usd: parseFloat(price),
 				usd_market_cap: market_cap ? parseFloat(market_cap) : 0,
 				usd_24h_vol: volume_24h ? parseFloat(volume_24h) : 0,
